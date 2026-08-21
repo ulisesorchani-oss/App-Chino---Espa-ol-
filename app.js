@@ -618,7 +618,8 @@ let state = {
     newWords: new Set(),
     score: 0,
     activeModule: 'todas',
-    translationRevealed: false
+    translationRevealed: false,
+    showPinyin: true
 };
 
 // ===== Persistencia localStorage =====
@@ -631,7 +632,8 @@ function saveProgress() {
             mode: state.mode,
             charType: state.charType,
             currentIndex: state.currentIndex,
-            activeModule: state.activeModule
+            activeModule: state.activeModule,
+            showPinyin: state.showPinyin
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -649,6 +651,7 @@ function loadProgress() {
         if (data.charType) state.charType = data.charType;
         if (typeof data.currentIndex === 'number') state.currentIndex = data.currentIndex;
         if (data.activeModule) state.activeModule = data.activeModule;
+        if (data.showPinyin !== undefined) state.showPinyin = data.showPinyin;
     } catch (e) { /* silencioso */ }
 }
 
@@ -682,6 +685,10 @@ function applySavedUI() {
     document.querySelectorAll('.cat-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.module === state.activeModule);
     });
+    // Pinyin toggle
+    var pinyinBtn = document.getElementById('btn-pinyin');
+    pinyinBtn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+    pinyinBtn.classList.toggle('active', state.showPinyin);
 }
 
 // ===== Carga de datos =====
@@ -717,6 +724,7 @@ function setupEventListeners() {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
+    document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
 }
 
 // ===== Modo ES<->CN =====
@@ -747,6 +755,16 @@ function setModule(mod) {
     renderCurrentSentence();
 }
 
+// ===== Toggle Pinyin =====
+function togglePinyin() {
+    state.showPinyin = !state.showPinyin;
+    var btn = document.getElementById('btn-pinyin');
+    btn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+    btn.classList.toggle('active', state.showPinyin);
+    saveProgress();
+    renderCurrentSentence();
+}
+
 // ===== Renderizado (SIN SPOILER) =====
 // LÓGICA CLAVE: el hueco va en el IDIOMA QUE SE ESTÁ APRENDIENDO
 // "es-cn" = Hispanohablante aprendiendo Chino  → hueco en CHINO
@@ -773,6 +791,15 @@ function renderCurrentSentence() {
         clozeText = s.spanish_cloze;
     }
     document.getElementById('sentence-text').textContent = clozeText || 'Error en datos';
+
+    // Pinyin: solo cuando se aprende chino Y toggle activado
+    var pinyinEl = document.getElementById('pinyin-display');
+    if (learningChinese && state.showPinyin && s.pinyin) {
+        pinyinEl.textContent = s.pinyin;
+        pinyinEl.classList.remove('hidden');
+    } else {
+        pinyinEl.classList.add('hidden');
+    }
 
     // Ocultar traducción (spoiler protection)
     state.translationRevealed = false;
