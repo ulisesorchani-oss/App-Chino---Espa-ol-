@@ -118,6 +118,36 @@ body {
     opacity: 0.8;
 }
 
+/* ===== Toggle Pinyin ===== */
+.pinyin-btn {
+    padding: 8px 16px;
+    border: 2px solid white;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.85rem;
+}
+
+.pinyin-btn.active {
+    background: white;
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+.pinyin-btn:hover {
+    transform: translateY(-2px);
+}
+
+.pinyin-text {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 8px;
+    font-style: italic;
+    transition: opacity 0.3s;
+}
+
 /* ===== Filtro por Categoría ===== */
 .category-filter {
     display: flex;
