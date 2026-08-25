@@ -751,6 +751,10 @@ function setupEventListeners() {
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
+   // Evento para cambiar nivel HSK
+document.getElementById('select-hsk-level').addEventListener('change', (e) => {
+    setModule(e.target.value); // Reutiliza tu función existente
+});
     
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
