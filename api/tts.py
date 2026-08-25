@@ -1,11 +1,12 @@
 import json
+import base64
+import io
 from piper import PiperVoice
 import numpy as np
 import soundfile as sf
-import io
 from huggingface_hub import hf_hub_download
 
-# Caché global para evitar recargar modelos
+# Caché global (Vercel mantiene la función caliente entre peticiones)
 voice_cache = {}
 
 def get_voice(lang_code):
@@ -19,6 +20,7 @@ def get_voice(lang_code):
     
     repo_id = "rhasspy/piper-voices"
     info = VOICES[lang_code]
+    print(f"Descargando voz {lang_code}...") # Visible en logs de Vercel
     model_path = hf_hub_download(repo_id=repo_id, filename=info["model"])
     config_path = hf_hub_download(repo_id=repo_id, filename=info["config"])
     
@@ -27,19 +29,20 @@ def get_voice(lang_code):
     return voice
 
 def handler(request):
-    # 1. Manejar preflight OPTIONS (CRUCIAL PARA CORS)
+    # 1. RESPONDER AL PREFLIGHT DE CORS (OPTIONS)
     if request.method == 'OPTIONS':
         return {
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Max-Age': '86400'
             },
             'body': ''
         }
 
-    # 2. Manejar POST normal
+    # 2. PROCESAR LA PETICIÓN DE AUDIO (POST)
     if request.method == 'POST':
         try:
             body = json.loads(request.body or '{}')
@@ -47,17 +50,17 @@ def handler(request):
             lang = body.get("lang", "es-ES")
             
             if not text:
-                return {'statusCode': 400, 'body': json.dumps({"error": "Texto vacío"})}
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({"error": "Texto vacío"})}
             
             voice = get_voice(lang)
             audio_data = voice.synthesize(text)
             
+            # Convertir a WAV
             buffer = io.BytesIO()
             sf.write(buffer, audio_data, voice.config.sample_rate, format='WAV')
             wav_bytes = buffer.getvalue()
             
-            # Convertir bytes a base64 para respuesta JSON (más seguro en serverless)
-            import base64
+            # Codificar a Base64 para envío seguro via JSON
             audio_b64 = base64.b64encode(wav_bytes).decode('utf-8')
             
             return {
@@ -70,13 +73,14 @@ def handler(request):
             }
             
         except Exception as e:
+            print(f"ERROR TTS: {str(e)}")
             return {
                 'statusCode': 500,
                 'headers': {'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({"error": str(e)})
             }
 
-    # 3. Rechazar otros métodos
+    # 3. RECHAZAR OTROS MÉTODOS
     return {
         'statusCode': 405,
         'headers': {'Access-Control-Allow-Origin': '*'},
