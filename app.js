@@ -622,14 +622,6 @@ const DATA_SOURCES = {
     'TOCFL': 'data/exams/tocfl.json',
     'DELE': 'data/exams/dele.json'
 };
-// 👆 FIN DEL DATA SOURCE 👆
-
-// ===== Estado =====
-let state = {
-    sentences: [],
-    currentIndex: 0,
-    // ... resto de tu estado ...
-};
 
 // ===== Estado =====
 let state = {
