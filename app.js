@@ -605,14 +605,9 @@ const EMBEDDED_SENTENCES = [
   }
 ];
 
-// ===== Constantes y Mapa de Datos =====
-const STORAGE_KEY = 'chino-espanol-app-v2';
-
-// NUEVO: Conecta cada botón con su archivo JSON correspondiente
 // ===== Constantes =====
 const STORAGE_KEY = 'chino-espanol-app-v2';
 
-// 👇 PEGA EL DATA_SOURCE AQUÍ MISMO 👇
 const DATA_SOURCES = {
     'todas': 'data/sentences.json',
     'Saludos': 'data/sentences.json',
