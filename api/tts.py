@@ -43,37 +43,38 @@ def handler(request, response):
     # 2. Manejar Petición de Audio (POST)
     if request.method == 'POST':
         try:
-            # Leer body
+            # Leer body manualmente
             content_length = int(request.headers.get('Content-Length', 0))
             body_raw = request.rfile.read(content_length).decode('utf-8')
             body = json.loads(body_raw) if body_raw else {}
             
             text = body.get("text", "")
             lang = body.get("lang", "es-ES")
-            
+
             if not text:
                 response.status_code = 400
                 response.headers['Access-Control-Allow-Origin'] = '*'
                 return response.send(json.dumps({"error": "Texto vacío"}))
-            
+
             # Generar audio
             voice = get_voice(lang)
             audio_data = voice.synthesize(text)
-            
+
+            # Convertir a WAV
             buffer = io.BytesIO()
             sf.write(buffer, audio_data, voice.config.sample_rate, format='WAV')
             wav_bytes = buffer.getvalue()
-            
+
             # Codificar a Base64
             audio_b64 = base64.b64encode(wav_bytes).decode('utf-8')
-            
+
             response.status_code = 200
             response.headers['Access-Control-Allow-Origin'] = '*'
             response.headers['Content-Type'] = 'application/json'
             return response.send(json.dumps({"audio": audio_b64}))
-            
+
         except Exception as e:
-            print(f"❌ ERROR TTS: {str(e)}")
+            print(f" ERROR TTS: {str(e)}")
             response.status_code = 500
             response.headers['Access-Control-Allow-Origin'] = '*'
             return response.send(json.dumps({"error": str(e)}))
@@ -81,4 +82,3 @@ def handler(request, response):
     # 3. Rechazar otros métodos
     response.status_code = 405
     response.headers['Access-Control-Allow-Origin'] = '*'
-    return response.send(json.dumps({"error": "Método no permitido"}))
