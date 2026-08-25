@@ -59,48 +59,33 @@ async def generate_tts(request: Request):
 
         voice = get_voice(lang)
         
-        # Obtener resultado de synthesize
-        result = voice.synthesize(text)
+        # Piper.synthesize devuelve un generador de AudioChunk
+        # Debemos extraer los bytes crudos de cada chunk
+        all_audio_bytes = b""
+        sample_rate = voice.config.sample_rate
         
-        # Manejar diferentes formatos de retorno de Piper
-        audio_data = None
-        
-        if isinstance(result, np.ndarray):
-            # Caso 1: Devuelve array numpy directo
-            audio_data = result
-        elif isinstance(result, tuple):
-            # Caso 2: Devuelve tupla (sample_rate, audio) o (audio,)
-            if len(result) == 2:
-                audio_data = result[1]
-            elif len(result) == 1:
-                audio_data = result[0]
+        for chunk in voice.synthesize(text):
+            # AudioChunk tiene un atributo .audio_int16_bytes con los datos crudos
+            if hasattr(chunk, 'audio_int16_bytes'):
+                all_audio_bytes += chunk.audio_int16_bytes
+            elif hasattr(chunk, '__bytes__'):
+                all_audio_bytes += bytes(chunk)
             else:
-                raise ValueError(f"Tupla inesperada con {len(result)} elementos")
-        elif hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
-            # Caso 3: Es un generador/iterable de chunks
-            chunks = []
-            for chunk in result:
-                if isinstance(chunk, tuple) and len(chunk) >= 2:
-                    chunks.append(chunk[1])
-                elif isinstance(chunk, np.ndarray):
-                    chunks.append(chunk)
-                else:
-                    chunks.append(chunk)
-            
-            if len(chunks) == 1:
-                audio_data = chunks[0]
-            else:
-                audio_data = np.concatenate(chunks)
-        else:
-            raise ValueError(f"Tipo de retorno desconocido: {type(result)}")
+                # Fallback: intentar convertir a bytes directamente
+                try:
+                    all_audio_bytes += bytes(chunk)
+                except:
+                    raise ValueError(f"No se pudo extraer audio de chunk: {type(chunk)}")
         
-        # Asegurar que sea array numpy 1D
-        if not isinstance(audio_data, np.ndarray):
-            audio_data = np.array(audio_data, dtype=np.int16)
+        if not all_audio_bytes:
+            raise ValueError("No se generó audio")
         
-        # Convertir a WAV
+        # Convertir bytes int16 raw a array numpy
+        audio_data = np.frombuffer(all_audio_bytes, dtype=np.int16)
+        
+        # Escribir a WAV
         buf = io.BytesIO()
-        sf.write(buf, audio_data, voice.config.sample_rate, format="WAV")
+        sf.write(buf, audio_data, sample_rate, format="WAV")
         b64_audio = base64.b64encode(buf.getvalue()).decode("utf-8")
         
         return JSONResponse(content={"audio": b64_audio})
