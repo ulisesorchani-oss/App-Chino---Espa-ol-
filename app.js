@@ -609,14 +609,31 @@ const EMBEDDED_SENTENCES = [
 const STORAGE_KEY = 'chino-espanol-app-v2';
 
 // NUEVO: Conecta cada botón con su archivo JSON correspondiente
+// ===== Constantes =====
+const STORAGE_KEY = 'chino-espanol-app-v2';
+
+// 👇 PEGA EL DATA_SOURCE AQUÍ MISMO 👇
 const DATA_SOURCES = {
     'todas': 'data/sentences.json',
     'Saludos': 'data/sentences.json',
     'Migraciones': 'data/sentences.json',
     'Supermercado': 'data/sentences.json',
-    'HSK': 'data/exams/hsk.json',         // ← NUEVO
-    'TOCFL': 'data/exams/tocfl.json',     // ← Para cuando lo crees
-    'DELE': 'data/exams/dele.json'        // ← Para cuando lo crees
+    'HSK1': 'data/exams/hsk1.json',
+    'HSK2': 'data/exams/hsk2.json',
+    'HSK3': 'data/exams/hsk3.json',
+    'HSK4': 'data/exams/hsk4.json',
+    'HSK5': 'data/exams/hsk5.json',
+    'HSK6': 'data/exams/hsk6.json',
+    'TOCFL': 'data/exams/tocfl.json',
+    'DELE': 'data/exams/dele.json'
+};
+// 👆 FIN DEL DATA SOURCE 👆
+
+// ===== Estado =====
+let state = {
+    sentences: [],
+    currentIndex: 0,
+    // ... resto de tu estado ...
 };
 
 // ===== Estado =====
