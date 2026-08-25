@@ -5,7 +5,6 @@ from piper import PiperVoice
 import soundfile as sf
 from huggingface_hub import hf_hub_download
 
-# Caché global
 voice_cache = {}
 
 def get_voice(lang_code):
@@ -28,7 +27,7 @@ def get_voice(lang_code):
     return voice
 
 def handler(req, res):
-    # Manejo de CORS Preflight
+    # CORS Preflight
     if req.method == "OPTIONS":
         res.status_code = 200
         res.headers["Access-Control-Allow-Origin"] = "*"
@@ -36,12 +35,13 @@ def handler(req, res):
         res.headers["Access-Control-Allow-Headers"] = "Content-Type"
         return res.send("")
 
-    # Manejo de POST
+    # POST Request
     if req.method == "POST":
         try:
+            # Leer body de forma segura
             length = int(req.headers.get("Content-Length", 0))
-            raw = req.rfile.read(length).decode("utf-8")
-            data = json.loads(raw) if raw else {}
+            raw_body = req.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+            data = json.loads(raw_body)
             
             text = data.get("text", "")
             lang = data.get("lang", "es-ES")
@@ -56,20 +56,20 @@ def handler(req, res):
             
             buf = io.BytesIO()
             sf.write(buf, audio, voice.config.sample_rate, format="WAV")
-            b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+            b64_audio = base64.b64encode(buf.getvalue()).decode("utf-8")
             
             res.status_code = 200
             res.headers["Access-Control-Allow-Origin"] = "*"
             res.headers["Content-Type"] = "application/json"
-            return res.send(json.dumps({"audio": b64}))
+            return res.send(json.dumps({"audio": b64_audio}))
             
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error TTS: {e}")
             res.status_code = 500
             res.headers["Access-Control-Allow-Origin"] = "*"
             return res.send(json.dumps({"error": str(e)}))
 
-    # Método no permitido
+    # Method Not Allowed
     res.status_code = 405
     res.headers["Access-Control-Allow-Origin"] = "*"
     return res.send(json.dumps({"error": "Solo POST"}))
