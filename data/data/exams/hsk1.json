@@ -1,0 +1,112 @@
+[
+  {
+    "id": "hsk1_01",
+    "chinese_simp_full": "你好，我叫李明，我是中国人。",
+    "chinese_trad_full": "你好，我叫李明，我是中國人。",
+    "pinyin": "Nǐ hǎo, wǒ jiào Lǐ Míng, wǒ shì Zhōngguó rén.",
+    "spanish_full": "Hola, me llamo Li Ming, soy chino.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["你好", "叫", "是", "中国人"],
+    "context": "Presentación básica - primera interacción social"
+  },
+  {
+    "id": "hsk1_02",
+    "chinese_simp_full": "请问，去火车站怎么走？",
+    "chinese_trad_full": "請問，去火車站怎麼走？",
+    "pinyin": "Qǐngwèn, qù huǒchēzhàn zěnme zǒu?",
+    "spanish_full": "Disculpe, ¿cómo se va a la estación de tren?",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["请问", "去", "怎么走"],
+    "context": "Pedir direcciones - supervivencia urbana"
+  },
+  {
+    "id": "hsk1_03",
+    "chinese_simp_full": "这个苹果多少钱？太贵了，便宜一点儿吧。",
+    "chinese_trad_full": "這個蘋果多少錢？太貴了，便宜一點兒吧。",
+    "pinyin": "Zhège píngguǒ duōshao qián? Tài guì le, piányi yīdiǎnr ba.",
+    "spanish_full": "¿Cuánto cuesta esta manzana? Es muy cara, baje un poco el precio.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["多少", "钱", "太", "一点儿"],
+    "context": "Regateo en mercados - esencial en Argentina"
+  },
+  {
+    "id": "hsk1_04",
+    "chinese_simp_full": "我想买一张去北京的机票，明天上午的。",
+    "chinese_trad_full": "我想買一張去北京的機票，明天上午的。",
+    "pinyin": "Wǒ xiǎng mǎi yī zhāng qù Běijīng de jīpiào, míngtiān shàngwǔ de.",
+    "spanish_full": "Quiero comprar un boleto de avión a Beijing para mañana por la mañana.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["想", "买", "明天", "上午"],
+    "context": "Comprar boletos - viajes internos"
+  },
+  {
+    "id": "hsk1_05",
+    "chinese_simp_full": "对不起，我没有带钱，可以打电话给我朋友吗？",
+    "chinese_trad_full": "對不起，我沒有帶錢，可以打電話給我朋友嗎？",
+    "pinyin": "Duìbuqǐ, wǒ méiyǒu dài qián, kěyǐ dǎ diànhuà gěi wǒ péngyou ma?",
+    "spanish_full": "Lo siento, no traje dinero, ¿puedo llamar a mi amigo?",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["对不起", "没有", "打电话", "朋友"],
+    "context": "Emergencia sin efectivo - pedir ayuda"
+  },
+  {
+    "id": "hsk1_06",
+    "chinese_simp_full": "今天天气很冷，我想喝热茶，不想吃冷的东西。",
+    "chinese_trad_full": "今天天氣很冷，我想喝熱茶，不想吃冷的東西。",
+    "pinyin": "Jīntiān tiānqì hěn lěng, wǒ xiǎng hē rè chá, bù xiǎng chī lěng de dōngxi.",
+    "spanish_full": "Hoy hace mucho frío, quiero tomar té caliente, no quiero comer cosas frías.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["天气", "冷", "喝", "吃"],
+    "context": "Expresar preferencias climáticas - adaptación cultural"
+  },
+  {
+    "id": "hsk1_07",
+    "chinese_simp_full": "我女儿在学校学习汉语，她很喜欢她的老师。",
+    "chinese_trad_full": "我女兒在學校學習漢語，她很喜歡她的老師。",
+    "pinyin": "Wǒ nǚ'ér zài xuéxiào xuéxí Hànyǔ, tā hěn xǐhuan tā de lǎoshī.",
+    "spanish_full": "Mi hija estudia chino en la escuela, le gusta mucho su profesora.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["女儿", "学校", "学习", "喜欢"],
+    "context": "Hablar de familia y educación - integración social"
+  },
+  {
+    "id": "hsk1_08",
+    "chinese_simp_full": "现在几点？我们下午三点去看电影，然后去饭店吃饭。",
+    "chinese_trad_full": "現在幾點？我們下午三點去看電影，然後去飯店吃飯。",
+    "pinyin": "Xiànzài jǐ diǎn? Wǒmen xiàwǔ sān diǎn qù kàn diànyǐng, ránhòu qù fàndiàn chīfàn.",
+    "spanish_full": "¿Qué hora es? Vamos al cine a las tres de la tarde, luego iremos al restaurante a cenar.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["现在", "点", "下午", "然后"],
+    "context": "Planificar actividades sociales - vida cotidiana"
+  },
+  {
+    "id": "hsk1_09",
+    "chinese_simp_full": "这本书是我的，那本是你的，它们都在桌子上面。",
+    "chinese_trad_full": "這本書是我的，那本是你的，它們都在桌子上面。",
+    "pinyin": "Zhè běn shū shì wǒ de, nà běn shì nǐ de, tāmen dōu zài zhuōzi shàngmiàn.",
+    "spanish_full": "Este libro es mío, ese es tuyo, ambos están encima de la mesa.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["这", "那", "都", "上面"],
+    "context": "Posesión y ubicación - organización espacial"
+  },
+  {
+    "id": "hsk1_10",
+    "chinese_simp_full": "谢谢你帮我，没关系，我们都是好朋友。",
+    "chinese_trad_full": "謝謝你幫我，沒關係，我們都是好朋友。",
+    "pinyin": "Xièxie nǐ bāng wǒ, méiguānxi, wǒmen dōu shì hǎo péngyou.",
+    "spanish_full": "Gracias por ayudarme, no hay problema, todos somos buenos amigos.",
+    "module": "HSK",
+    "level": 1,
+    "keywords": ["谢谢", "帮忙", "没关系", "朋友"],
+    "context": "Cortesía y gratitud - construcción de relaciones"
+  }
+]
