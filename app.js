@@ -1110,6 +1110,22 @@ async function playAudio(lang) {
     } finally {
         if (btn) {
             btn.innerText = originalText || '🔊';
+           // ===== MODO OSCURO =====
+const themeBtn = document.getElementById('btn-theme');
+const savedTheme = localStorage.getItem('theme');
+
+// Aplicar tema guardado al iniciar
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeBtn.textContent = '☀️';
+}
+
+themeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    themeBtn.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
             btn.disabled = false;
         }
     }
