@@ -518,3 +518,32 @@ body.dark-mode .btn-secondary {
 .theme-toggle:hover {
     transform: scale(1.1);
 }
+/* Selector de nivel HSK */
+.hsk-level-selector {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.level-dropdown {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.level-dropdown option {
+    background: #1e293b;
+    color: white;
+}
+
+.level-dropdown:focus {
+    border-color: var(--amber);
+}
