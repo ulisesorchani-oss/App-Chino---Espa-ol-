@@ -1,5 +1,4 @@
 import os
-# Variables de entorno ANTES de imports
 os.environ["HF_HOME"] = "/tmp/hf_cache"
 os.environ["TRANSFORMERS_CACHE"] = "/tmp/hf_cache"
 
@@ -60,21 +59,44 @@ async def generate_tts(request: Request):
 
         voice = get_voice(lang)
         
-        # Piper.synthesize devuelve un generador de chunks (tuplas)
-        # Debemos concatenarlos todos para obtener el audio completo
-        audio_chunks = []
-        for chunk in voice.synthesize(text):
-            # chunk es una tupla (sample_rate, audio_data) o solo audio_data según versión
-            if isinstance(chunk, tuple):
-                audio_chunks.append(chunk[1])  # Tomar solo los datos de audio
-            else:
-                audio_chunks.append(chunk)
+        # Obtener resultado de synthesize
+        result = voice.synthesize(text)
         
-        # Concatenar todos los chunks en un solo array numpy
-        if len(audio_chunks) == 1:
-            audio_data = audio_chunks[0]
+        # Manejar diferentes formatos de retorno de Piper
+        audio_data = None
+        
+        if isinstance(result, np.ndarray):
+            # Caso 1: Devuelve array numpy directo
+            audio_data = result
+        elif isinstance(result, tuple):
+            # Caso 2: Devuelve tupla (sample_rate, audio) o (audio,)
+            if len(result) == 2:
+                audio_data = result[1]
+            elif len(result) == 1:
+                audio_data = result[0]
+            else:
+                raise ValueError(f"Tupla inesperada con {len(result)} elementos")
+        elif hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
+            # Caso 3: Es un generador/iterable de chunks
+            chunks = []
+            for chunk in result:
+                if isinstance(chunk, tuple) and len(chunk) >= 2:
+                    chunks.append(chunk[1])
+                elif isinstance(chunk, np.ndarray):
+                    chunks.append(chunk)
+                else:
+                    chunks.append(chunk)
+            
+            if len(chunks) == 1:
+                audio_data = chunks[0]
+            else:
+                audio_data = np.concatenate(chunks)
         else:
-            audio_data = np.concatenate(audio_chunks)
+            raise ValueError(f"Tipo de retorno desconocido: {type(result)}")
+        
+        # Asegurar que sea array numpy 1D
+        if not isinstance(audio_data, np.ndarray):
+            audio_data = np.array(audio_data, dtype=np.int16)
         
         # Convertir a WAV
         buf = io.BytesIO()
