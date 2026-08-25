@@ -1,13 +1,11 @@
-from http.server import BaseHTTPRequestHandler
 import json
 from piper import PiperVoice
 import numpy as np
 import soundfile as sf
 import io
 from huggingface_hub import hf_hub_download
-import os
 
-# Caché global para evitar recargar modelos en cada petición (Vercel mantiene caliente la función)
+# Caché global para evitar recargar modelos
 voice_cache = {}
 
 def get_voice(lang_code):
@@ -28,37 +26,59 @@ def get_voice(lang_code):
     voice_cache[lang_code] = voice
     return voice
 
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
+def handler(request):
+    # 1. Manejar preflight OPTIONS (CRUCIAL PARA CORS)
+    if request.method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+            'body': ''
+        }
+
+    # 2. Manejar POST normal
+    if request.method == 'POST':
         try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            body = json.loads(post_data.decode('utf-8'))
-            
+            body = json.loads(request.body or '{}')
             text = body.get("text", "")
             lang = body.get("lang", "es-ES")
             
             if not text:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Texto vacío"}).encode())
-                return
+                return {'statusCode': 400, 'body': json.dumps({"error": "Texto vacío"})}
             
             voice = get_voice(lang)
             audio_data = voice.synthesize(text)
             
-            # Convertir a WAV bytes
             buffer = io.BytesIO()
             sf.write(buffer, audio_data, voice.config.sample_rate, format='WAV')
             wav_bytes = buffer.getvalue()
             
-            self.send_response(200)
-            self.send_header('Content-Type', 'audio/wav')
-            self.send_header('Content-Length', str(len(wav_bytes)))
-            self.end_headers()
-            self.wfile.write(wav_bytes)
+            # Convertir bytes a base64 para respuesta JSON (más seguro en serverless)
+            import base64
+            audio_b64 = base64.b64encode(wav_bytes).decode('utf-8')
+            
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                },
+                'body': json.dumps({"audio": audio_b64})
+            }
             
         except Exception as e:
-            self.send_response(500)
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode())
+            return {
+                'statusCode': 500,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({"error": str(e)})
+            }
+
+    # 3. Rechazar otros métodos
+    return {
+        'statusCode': 405,
+        'headers': {'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps({"error": "Método no permitido"})
+    }
