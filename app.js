@@ -1022,8 +1022,10 @@ function resetProgress() {
     renderCurrentSentence();
 }
 
-// ===== Audio TTS =====
-function playAudio(lang) {
+// ===== Audio TTS Nativo (Vercel + Piper) =====
+const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
+
+async function playAudio(lang) {
     const filtered = getFiltered();
     const s = filtered[state.currentIndex];
     const k = ck();
@@ -1031,16 +1033,65 @@ function playAudio(lang) {
     let text, langCode;
     if (lang === 'es') {
         text = s.spanish_full;
-        langCode = 'es-AR';
+        langCode = 'es-ES'; // Usamos español de España para Piper (más neutro/claro)
     } else {
         text = s['chinese_' + k + '_full'];
-        langCode = k === 'trad' ? 'zh-TW' : 'zh-CN';
+        // Mantenemos tu lógica de tradicional/simplificado
+        langCode = k === 'trad' ? 'zh-TW' : 'zh-CN'; 
     }
 
-    if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = langCode;
-        u.rate = 0.8;
-        speechSynthesis.speak(u);
+    // Referencia al botón actual para dar feedback visual
+    const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
+    const originalText = btn ? btn.innerText : '';
+    
+    if (btn) {
+        btn.innerText = '⏳ Cargando...';
+        btn.disabled = true;
+    }
+
+    try {
+        // 1. Intentar usar Vercel/Piper (Voz Nativa)
+        const response = await fetch(TTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, lang: langCode })
+        });
+
+        if (!response.ok) throw new Error('Error en servidor');
+
+        const data = await response.json();
+        
+        if (data.audio) {
+            // Decodificar Base64 a WAV
+            const binaryString = atob(data.audio);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const blob = new Blob([bytes], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            
+            const audio = new Audio(url);
+            await audio.play();
+            
+            // Limpiar memoria al terminar
+            audio.onended = () => URL.revokeObjectURL(url);
+        }
+    } catch (error) {
+        console.warn('Vercel falló, usando voz del sistema:', error);
+        
+        // 2. FALLBACK: Voz del navegador (tu código original)
+        if ('speechSynthesis' in window) {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = langCode;
+            u.rate = 0.8; // Mantenemos tu velocidad lenta para principiantes
+            speechSynthesis.speak(u);
+        }
+    } finally {
+        // Restaurar botón
+        if (btn) {
+            btn.innerText = originalText || '🔊';
+            btn.disabled = false;
+        }
     }
 }
