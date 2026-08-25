@@ -27,7 +27,6 @@ def get_voice(lang_code):
     return voice
 
 def handler(req, res):
-    # CORS Preflight
     if req.method == "OPTIONS":
         res.status_code = 200
         res.headers["Access-Control-Allow-Origin"] = "*"
@@ -35,10 +34,8 @@ def handler(req, res):
         res.headers["Access-Control-Allow-Headers"] = "Content-Type"
         return res.send("")
 
-    # POST Request
     if req.method == "POST":
         try:
-            # Leer body de forma segura
             length = int(req.headers.get("Content-Length", 0))
             raw_body = req.rfile.read(length).decode("utf-8") if length > 0 else "{}"
             data = json.loads(raw_body)
@@ -69,7 +66,6 @@ def handler(req, res):
             res.headers["Access-Control-Allow-Origin"] = "*"
             return res.send(json.dumps({"error": str(e)}))
 
-    # Method Not Allowed
     res.status_code = 405
     res.headers["Access-Control-Allow-Origin"] = "*"
     return res.send(json.dumps({"error": "Solo POST"}))
