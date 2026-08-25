@@ -1,3 +1,9 @@
+import os
+# FORZAR todas las cachés a /tmp ANTES de cualquier import
+os.environ["HF_HOME"] = "/tmp/hf_cache"
+os.environ["TRANSFORMERS_CACHE"] = "/tmp/hf_cache"
+os.environ["ONNX_PROVIDERS"] = "CPUExecutionProvider"
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -5,12 +11,10 @@ from piper import PiperVoice
 import soundfile as sf
 import io
 import base64
-import os
 from huggingface_hub import hf_hub_download
 
 app = FastAPI()
 
-# Middleware CORS Global
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,9 +24,9 @@ app.add_middleware(
 )
 
 voice_cache = {}
-# Carpeta segura para Vercel
 CACHE_DIR = "/tmp/piper_voices"
 os.makedirs(CACHE_DIR, exist_ok=True)
+os.makedirs("/tmp/hf_cache", exist_ok=True)
 
 def get_voice(lang_code: str):
     if lang_code in voice_cache:
@@ -35,13 +39,19 @@ def get_voice(lang_code: str):
     
     repo_id = "rhasspy/piper-voices"
     info = VOICES.get(lang_code, VOICES["es-ES"])
-    print(f"Cargando voz {lang_code} en {CACHE_DIR}...")
+    print(f"Cargando voz {lang_code}...")
     
-    # FORZAR cache_dir="/tmp/piper_voices" para evitar Read-only file system
     model_path = hf_hub_download(repo_id=repo_id, filename=info["model"], cache_dir=CACHE_DIR)
     config_path = hf_hub_download(repo_id=repo_id, filename=info["config"], cache_dir=CACHE_DIR)
     
-    voice = PiperVoice.load(model_path, config_path=config_path)
+    # PiperVoice.load a veces falla en serverless. Usamos try/except específico.
+    try:
+        voice = PiperVoice.load(model_path, config_path=config_path)
+    except Exception as e:
+        print(f"Error cargando Piper: {e}")
+        # Intento alternativo: pasar ruta absoluta explícita
+        voice = PiperVoice.load(str(model_path), config_path=str(config_path))
+        
     voice_cache[lang_code] = voice
     return voice
 
