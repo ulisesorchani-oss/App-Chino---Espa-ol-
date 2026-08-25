@@ -10,15 +10,15 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>0️⁃️ Chino-Español</h1>
+            <h1>🇦🇷 Chino-Español</h1>
             <p class="subtitle">Aprende con contexto, paso a paso</p>
         </header>
 
         <!-- Panel de Control -->
         <div class="control-panel">
             <div class="mode-selector">
-                <button id="btn-es-cn" class="mode-btn active">🇪🇸→🇨🇳 Aprendo Chino</button>
-                <button id="btn-cn-es" class="mode-btn">🇨🇳→🇪🇸 Aprendo Español</button>
+                <button id="btn-es-cn" class="mode-btn active">ES→CN Aprendo Chino</button>
+                <button id="btn-cn-es" class="mode-btn">CN→ES Aprendo Español</button>
             </div>
             <div class="script-toggle">
                 <button id="btn-simplified" class="script-btn active">简 简体</button>
@@ -32,13 +32,26 @@
             </div>
         </div>
 
-        <!-- Filtro por Categoría -->
-        <div class="category-filter">
-            <button class="cat-btn active" data-module="todas">Todas</button>
-            <button class="cat-btn" data-module="Saludos">Saludos</button>
-            <button class="cat-btn" data-module="Migraciones">Migraciones</button>
-            <button class="cat-btn" data-module="Supermercado">Supermercado</button>
-            <button id="btn-reset" class="btn-reset">Borrar progreso</button>
+        <!-- SECCIÓN 1: PRÁCTICA DIARIA -->
+        <div class="section-daily">
+            <h3 class="section-title"> PRÁCTICA DIARIA</h3>
+            <div class="category-filter">
+                <button class="cat-btn active" data-module="todas">Todas</button>
+                <button class="cat-btn" data-module="Saludos">Saludos</button>
+                <button class="cat-btn" data-module="Migraciones">Migraciones</button>
+                <button class="cat-btn" data-module="Supermercado">Supermercado</button>
+                <button id="btn-reset" class="btn-reset">Borrar progreso</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: EXÁMENES INTERNACIONALES -->
+        <div class="section-exams">
+            <h3 class="section-title">🎓 EXÁMENES INTERNACIONALES</h3>
+            <div class="category-filter exams-filters">
+                <button class="btn-exam" data-module="HSK">HSK 🇨🇳</button>
+                <button class="btn-exam" data-module="TOCFL">TOCFL 🇹</button>
+                <button class="btn-exam" data-module="DELE">DELE 🇸</button>
+            </div>
         </div>
 
         <!-- Tarjeta de Oración -->
