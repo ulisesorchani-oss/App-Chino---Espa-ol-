@@ -1,6 +1,6 @@
 // ===== Datos embebidos (fallback sin servidor) =====
 const EMBEDDED_SENTENCES = [
-  {
+   {
     "id": 1,
     "level": 1,
     "module": "Saludos",
@@ -605,8 +605,19 @@ const EMBEDDED_SENTENCES = [
   }
 ];
 
-// ===== Constantes =====
+// ===== Constantes y Mapa de Datos =====
 const STORAGE_KEY = 'chino-espanol-app-v2';
+
+// NUEVO: Conecta cada botón con su archivo JSON correspondiente
+const DATA_SOURCES = {
+    'todas': 'data/sentences.json',
+    'Saludos': 'data/sentences.json',
+    'Migraciones': 'data/sentences.json',
+    'Supermercado': 'data/sentences.json',
+    'HSK': 'data/exams/hsk.json',         // ← NUEVO
+    'TOCFL': 'data/exams/tocfl.json',     // ← Para cuando lo crees
+    'DELE': 'data/exams/dele.json'        // ← Para cuando lo crees
+};
 
 // ===== Estado =====
 let state = {
@@ -682,30 +693,45 @@ function applySavedUI() {
     document.getElementById('btn-simplified').classList.toggle('active', state.charType === 'simp');
     document.getElementById('btn-traditional').classList.toggle('active', state.charType === 'trad');
     document.getElementById('script-label').textContent = state.charType === 'simp' ? '简体' : '繁體';
-    document.querySelectorAll('.cat-btn').forEach(b => {
+    
+    // Actualizar botones diarios Y de exámenes
+    document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
         b.classList.toggle('active', b.dataset.module === state.activeModule);
     });
-    // Pinyin toggle
+    
     var pinyinBtn = document.getElementById('btn-pinyin');
-    pinyinBtn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+    pinyinBtn.textContent = state.showPinyin ? ' Pinyin: ON' : '📖 Pinyin: OFF';
     pinyinBtn.classList.toggle('active', state.showPinyin);
 }
 
-// ===== Carga de datos =====
+// ===== Carga de datos (INTEGRADA CON EXÁMENES) =====
 async function loadSentences() {
     try {
-        const r = await fetch('data/sentences.json');
+        // Determinar qué archivo cargar según el módulo activo
+        const sourceFile = DATA_SOURCES[state.activeModule] || DATA_SOURCES['todas'];
+        
+        const r = await fetch(sourceFile);
+        if (!r.ok) throw new Error('Archivo no encontrado');
+        
         const d = await r.json();
-        state.sentences = d.sentences;
-        console.log(state.sentences.length + ' oraciones cargadas desde JSON (servidor)');
+        
+        // Manejar tanto formato array directo como objeto {sentences: []}
+        state.sentences = Array.isArray(d) ? d : (d.sentences || []);
+        
+        console.log(`✅ ${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
     } catch (e) {
-        // Fallback: usar datos embebidos
-        state.sentences = EMBEDDED_SENTENCES;
-        console.log(state.sentences.length + ' oraciones cargadas desde datos embebidos (sin servidor)');
+        console.warn('️ Falló carga externa, usando datos embebidos:', e.message);
+        // Fallback: usar datos embebidos solo para módulos diarios
+        if (['todas', 'Saludos', 'Migraciones', 'Supermercado'].includes(state.activeModule)) {
+            state.sentences = EMBEDDED_SENTENCES;
+        } else {
+            state.sentences = [];
+            alert(`No se pudieron cargar las oraciones de ${state.activeModule}. Verifica que el archivo exista.`);
+        }
     }
 }
 
-// ===== Eventos =====
+// ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
 function setupEventListeners() {
     document.getElementById('btn-es-cn').addEventListener('click', () => setMode('es-cn'));
     document.getElementById('btn-cn-es').addEventListener('click', () => setMode('cn-es'));
@@ -720,9 +746,12 @@ function setupEventListeners() {
     });
     document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
     document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
-    document.querySelectorAll('.cat-btn').forEach(btn => {
+    
+    // NUEVO: Selecciona TODOS los botones de filtro (diarios + exámenes)
+    document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
+    
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
 }
@@ -746,13 +775,24 @@ function setCharType(ct) {
     renderCurrentSentence();
 }
 
-// ===== Filtro módulo =====
+// ===== Filtro módulo (AHORA RECARGA DATOS) =====
 function setModule(mod) {
     state.activeModule = mod;
     state.currentIndex = 0;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.module === mod));
+    state.translationRevealed = false;
+    
+    // Actualizar UI de TODOS los botones (diarios y exámenes)
+    document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
+        b.classList.toggle('active', b.dataset.module === mod);
+    });
+    
     saveProgress();
-    renderCurrentSentence();
+    
+    // Recargar oraciones del nuevo módulo
+    loadSentences().then(() => {
+        renderCurrentSentence();
+        updateStats();
+    });
 }
 
 // ===== Toggle Pinyin =====
@@ -766,9 +806,6 @@ function togglePinyin() {
 }
 
 // ===== Renderizado (SIN SPOILER) =====
-// LÓGICA CLAVE: el hueco va en el IDIOMA QUE SE ESTÁ APRENDIENDO
-// "es-cn" = Hispanohablante aprendiendo Chino  → hueco en CHINO
-// "cn-es" = Sinohablante aprendiendo Español → hueco en ESPAÑOL
 function renderCurrentSentence() {
     const filtered = getFiltered();
     if (!filtered.length) return;
@@ -822,7 +859,6 @@ function renderCurrentSentence() {
 }
 
 // ===== Revelar traducción completa =====
-// Muestra la traducción en el IDIOMA NATIVO del alumno
 function showFullTranslation() {
     if (state.translationRevealed) return;
     state.translationRevealed = true;
@@ -834,10 +870,8 @@ function showFullTranslation() {
 
     let translationText;
     if (learningChinese) {
-        // Aprendiendo chino → mostrar traducción en español (idioma nativo)
         translationText = s.spanish_full;
     } else {
-        // Aprendiendo español → mostrar traducción en chino (idioma nativo)
         translationText = s['chinese_' + k + '_full'];
     }
 
@@ -851,13 +885,11 @@ function showFullTranslation() {
 function getValidAnswers(s, learningChinese, k) {
     const answers = [];
     if (learningChinese) {
-        // Aceptar simp y trad
         const simpAns = s.chinese_simp_answer;
         const tradAns = s.chinese_trad_answer;
         if (simpAns) answers.push(simpAns);
         if (tradAns && tradAns !== simpAns) answers.push(tradAns);
     } else {
-        // Respuesta principal + alternativas del JSON
         answers.push(s.spanish_answer);
         if (s.spanish_alternatives) {
             s.spanish_alternatives.forEach(function(alt) {
@@ -882,12 +914,11 @@ function checkAnswer() {
     }
 
     const validAnswers = getValidAnswers(s, learningChinese, k);
-    const correctAnswer = validAnswers[0]; // la principal
+    const correctAnswer = validAnswers[0];
     const inputLower = input.toLowerCase();
 
     showFullTranslation();
 
-    // Verificar: exacta o contiene/esta contenida (flexible)
     const isCorrect = validAnswers.some(function(ans) {
         const a = ans.toLowerCase();
         return input === ans || inputLower === a || inputLower.includes(a) || a.includes(inputLower);
@@ -897,7 +928,6 @@ function checkAnswer() {
 
     if (isCorrect) {
         showFeedback('\u2705 \u00a1Correcto! "' + allOptions + '"', 'correct');
-        // Marcar todas las variantes como conocidas
         validAnswers.forEach(function(a) {
             state.knownWords.add(a);
             state.newWords.delete(a);
@@ -928,7 +958,6 @@ function revealAnswer() {
     showFullTranslation();
     showFeedback('💡 Respuestas válidas: "' + allOptions + '"', 'correct');
 
-    // Marcar todas como nuevas para repasar
     validAnswers.forEach(function(a) { state.newWords.add(a); });
     saveProgress();
     updateStats();
@@ -943,7 +972,6 @@ function markWord(known) {
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
 
-    // La palabra en el idioma que se está APRENDIENDO
     let answer;
     if (learningChinese) {
         answer = s['chinese_' + k + '_answer'];
@@ -1033,15 +1061,12 @@ async function playAudio(lang) {
     let text, langCode;
     if (lang === 'es') {
         text = s.spanish_full;
-        langCode = 'es-ES'; // Usamos español de España para Piper (más neutro/claro)
+        langCode = 'es-ES';
     } else {
         text = s['chinese_' + k + '_full'];
-        // Usamos zh-CN para ambos porque la pronunciación es idéntica
-// y así evitamos que lea "símbolo chino" con voz española
-langCode = 'zh-CN'; 
+        langCode = 'zh-CN'; 
     }
 
-    // Referencia al botón actual para dar feedback visual
     const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
     const originalText = btn ? btn.innerText : '';
     
@@ -1051,7 +1076,6 @@ langCode = 'zh-CN';
     }
 
     try {
-        // 1. Intentar usar Vercel/Piper (Voz Nativa)
         const response = await fetch(TTS_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1063,7 +1087,6 @@ langCode = 'zh-CN';
         const data = await response.json();
         
         if (data.audio) {
-            // Decodificar Base64 a WAV
             const binaryString = atob(data.audio);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
@@ -1074,22 +1097,17 @@ langCode = 'zh-CN';
             
             const audio = new Audio(url);
             await audio.play();
-            
-            // Limpiar memoria al terminar
             audio.onended = () => URL.revokeObjectURL(url);
         }
     } catch (error) {
         console.warn('Vercel falló, usando voz del sistema:', error);
-        
-        // 2. FALLBACK: Voz del navegador (tu código original)
         if ('speechSynthesis' in window) {
             const u = new SpeechSynthesisUtterance(text);
             u.lang = langCode;
-            u.rate = 0.8; // Mantenemos tu velocidad lenta para principiantes
+            u.rate = 0.8;
             speechSynthesis.speak(u);
         }
     } finally {
-        // Restaurar botón
         if (btn) {
             btn.innerText = originalText || '🔊';
             btn.disabled = false;
