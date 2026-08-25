@@ -1036,8 +1036,9 @@ async function playAudio(lang) {
         langCode = 'es-ES'; // Usamos español de España para Piper (más neutro/claro)
     } else {
         text = s['chinese_' + k + '_full'];
-        // Mantenemos tu lógica de tradicional/simplificado
-        langCode = k === 'trad' ? 'zh-TW' : 'zh-CN'; 
+        // Usamos zh-CN para ambos porque la pronunciación es idéntica
+// y así evitamos que lea "símbolo chino" con voz española
+langCode = 'zh-CN'; 
     }
 
     // Referencia al botón actual para dar feedback visual
