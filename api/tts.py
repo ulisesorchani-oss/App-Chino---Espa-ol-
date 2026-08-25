@@ -5,20 +5,24 @@ from piper import PiperVoice
 import soundfile as sf
 import io
 import base64
+import os
 from huggingface_hub import hf_hub_download
 
 app = FastAPI()
 
-# 🔥 Middleware CORS GLOBAL (resuelve el error definitivamente)
+# Middleware CORS Global
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],           # Permite cualquier origen
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],           # Permite GET, POST, OPTIONS, etc.
-    allow_headers=["*"],           # Permite cualquier header
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 voice_cache = {}
+# Carpeta segura para Vercel
+CACHE_DIR = "/tmp/piper_voices"
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 def get_voice(lang_code: str):
     if lang_code in voice_cache:
@@ -31,10 +35,11 @@ def get_voice(lang_code: str):
     
     repo_id = "rhasspy/piper-voices"
     info = VOICES.get(lang_code, VOICES["es-ES"])
-    print(f"Cargando voz {lang_code}...")
+    print(f"Cargando voz {lang_code} en {CACHE_DIR}...")
     
-    model_path = hf_hub_download(repo_id=repo_id, filename=info["model"])
-    config_path = hf_hub_download(repo_id=repo_id, filename=info["config"])
+    # FORZAR cache_dir="/tmp/piper_voices" para evitar Read-only file system
+    model_path = hf_hub_download(repo_id=repo_id, filename=info["model"], cache_dir=CACHE_DIR)
+    config_path = hf_hub_download(repo_id=repo_id, filename=info["config"], cache_dir=CACHE_DIR)
     
     voice = PiperVoice.load(model_path, config_path=config_path)
     voice_cache[lang_code] = voice
