@@ -1,31 +1,9 @@
 import json
 import base64
 import io
-from piper import PiperVoice
-import soundfile as sf
-from huggingface_hub import hf_hub_download
 
-# Caché global (Vercel mantiene esto vivo entre peticiones)
+# Caché global
 voice_cache = {}
-
-def get_voice(lang_code):
-    if lang_code in voice_cache:
-        return voice_cache[lang_code]
-    
-    VOICES = {
-        "zh-CN": {"model": "zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx", "config": "zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx.json"},
-        "es-ES": {"model": "es/es_ES/davefx/medium/es_ES-davefx-medium.onnx", "config": "es/es_ES/davefx/medium/es_ES-davefx-medium.onnx.json"}
-    }
-    
-    repo_id = "rhasspy/piper-voices"
-    info = VOICES[lang_code]
-    print(f"Cargando voz {lang_code}...")
-    model_path = hf_hub_download(repo_id=repo_id, filename=info["model"])
-    config_path = hf_hub_download(repo_id=repo_id, filename=info["config"])
-    
-    voice = PiperVoice.load(model_path, config_path=config_path)
-    voice_cache[lang_code] = voice
-    return voice
 
 def handler(req, res):
     # CORS Preflight
@@ -39,6 +17,12 @@ def handler(req, res):
     # POST Request
     if req.method == "POST":
         try:
+            # Importar Piper AQUÍ (carga diferida para evitar fallos de módulo)
+            from piper import PiperVoice
+            import soundfile as sf
+            from huggingface_hub import hf_hub_download
+            
+            # Leer body
             length = int(req.headers.get("Content-Length", 0))
             raw_body = req.rfile.read(length).decode("utf-8") if length > 0 else "{}"
             data = json.loads(raw_body)
@@ -51,8 +35,25 @@ def handler(req, res):
                 res.headers["Access-Control-Allow-Origin"] = "*"
                 return res.send(json.dumps({"error": "Falta texto"}))
 
-            # Generar audio con Piper
-            voice = get_voice(lang)
+            # Obtener voz (con caché)
+            if lang not in voice_cache:
+                VOICES = {
+                    "zh-CN": {"model": "zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx", "config": "zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx.json"},
+                    "es-ES": {"model": "es/es_ES/davefx/medium/es_ES-davefx-medium.onnx", "config": "es/es_ES/davefx/medium/es_ES-davefx-medium.onnx.json"}
+                }
+                
+                repo_id = "rhasspy/piper-voices"
+                info = VOICES[lang]
+                print(f"Cargando voz {lang}...")
+                model_path = hf_hub_download(repo_id=repo_id, filename=info["model"])
+                config_path = hf_hub_download(repo_id=repo_id, filename=info["config"])
+                
+                voice = PiperVoice.load(model_path, config_path=config_path)
+                voice_cache[lang] = voice
+            else:
+                voice = voice_cache[lang]
+
+            # Generar audio
             audio = voice.synthesize(text)
             
             buf = io.BytesIO()
