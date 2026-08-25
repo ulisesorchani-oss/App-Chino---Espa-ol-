@@ -1,4 +1,3 @@
-piper-tts
 numpy
 soundfile
 huggingface_hub
