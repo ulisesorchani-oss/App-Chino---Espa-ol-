@@ -1137,3 +1137,4 @@ if (themeBtn) { // Protección por si el botón no existe aún
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 }
+}
