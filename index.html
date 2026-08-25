@@ -45,14 +45,28 @@
         </div>
 
         <!-- SECCIÓN 2: EXÁMENES INTERNACIONALES -->
-        <div class="section-exams">
-            <h3 class="section-title">🎓 EXÁMENES INTERNACIONALES</h3>
-            <div class="category-filter exams-filters">
-                <button class="btn-exam" data-module="HSK">HSK 🇨🇳</button>
-                <button class="btn-exam" data-module="TOCFL">TOCFL 🇹</button>
-                <button class="btn-exam" data-module="DELE">DELE 🇸</button>
-            </div>
-        </div>
+       <div class="section-exams">
+    <h3 class="section-title">🎓 EXÁMENES INTERNACIONALES</h3>
+    
+    <!-- Selector de Nivel HSK -->
+    <div class="hsk-level-selector">
+        <label for="select-hsk-level">Nivel HSK:</label>
+        <select id="select-hsk-level" class="level-dropdown">
+            <option value="HSK1">HSK 1 (Básico)</option>
+            <option value="HSK2">HSK 2 (Elemental)</option>
+            <option value="HSK3">HSK 3 (Intermedio Bajo)</option>
+            <option value="HSK4">HSK 4 (Intermedio Alto)</option>
+            <option value="HSK5">HSK 5 (Avanzado Bajo)</option>
+            <option value="HSK6">HSK 6 (Avanzado)</option>
+        </select>
+    </div>
+
+    <!-- Botones otros exámenes -->
+    <div class="category-filter exams-filters">
+        <button class="btn-exam" data-module="TOCFL">TOCFL 🇹</button>
+        <button class="btn-exam" data-module="DELE">DELE 🇸</button>
+    </div>
+</div>
 
         <!-- Tarjeta de Oración -->
         <div class="card" id="sentence-card">
