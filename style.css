@@ -470,3 +470,51 @@ body {
         margin-top: 8px;
     }
 }
+/* ===== MODO OSCURO ===== */
+body.dark-mode {
+    --bg-light: #1e293b;       /* Fondo de tarjetas oscuro */
+    --bg-card: #0f172a;        /* Fondo principal más oscuro */
+    --text-primary: #f1f5f9;   /* Texto claro */
+    --text-secondary: #94a3b8; /* Texto secundario gris claro */
+    --border: #334155;         /* Bordes sutiles */
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); /* Fondo morado oscuro */
+}
+
+body.dark-mode .card,
+body.dark-mode .vocabulary-panel {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+}
+
+body.dark-mode #answer-input {
+    background-color: #1e293b;
+    color: white;
+    border-color: #475569;
+}
+
+body.dark-mode .btn-secondary {
+    background: #334155;
+    color: white;
+}
+
+/* Botón toggle modo oscuro */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.3s;
+    z-index: 1000;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
