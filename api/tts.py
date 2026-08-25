@@ -1,8 +1,7 @@
 import os
-# FORZAR todas las cachés a /tmp ANTES de cualquier import
+# Variables de entorno ANTES de imports
 os.environ["HF_HOME"] = "/tmp/hf_cache"
 os.environ["TRANSFORMERS_CACHE"] = "/tmp/hf_cache"
-os.environ["ONNX_PROVIDERS"] = "CPUExecutionProvider"
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +10,7 @@ from piper import PiperVoice
 import soundfile as sf
 import io
 import base64
+import numpy as np
 from huggingface_hub import hf_hub_download
 
 app = FastAPI()
@@ -44,14 +44,7 @@ def get_voice(lang_code: str):
     model_path = hf_hub_download(repo_id=repo_id, filename=info["model"], cache_dir=CACHE_DIR)
     config_path = hf_hub_download(repo_id=repo_id, filename=info["config"], cache_dir=CACHE_DIR)
     
-    # PiperVoice.load a veces falla en serverless. Usamos try/except específico.
-    try:
-        voice = PiperVoice.load(model_path, config_path=config_path)
-    except Exception as e:
-        print(f"Error cargando Piper: {e}")
-        # Intento alternativo: pasar ruta absoluta explícita
-        voice = PiperVoice.load(str(model_path), config_path=str(config_path))
-        
+    voice = PiperVoice.load(model_path, config_path=config_path)
     voice_cache[lang_code] = voice
     return voice
 
@@ -66,14 +59,32 @@ async def generate_tts(request: Request):
             return JSONResponse(status_code=400, content={"error": "Falta texto"})
 
         voice = get_voice(lang)
-        audio = voice.synthesize(text)
         
+        # Piper.synthesize devuelve un generador de chunks (tuplas)
+        # Debemos concatenarlos todos para obtener el audio completo
+        audio_chunks = []
+        for chunk in voice.synthesize(text):
+            # chunk es una tupla (sample_rate, audio_data) o solo audio_data según versión
+            if isinstance(chunk, tuple):
+                audio_chunks.append(chunk[1])  # Tomar solo los datos de audio
+            else:
+                audio_chunks.append(chunk)
+        
+        # Concatenar todos los chunks en un solo array numpy
+        if len(audio_chunks) == 1:
+            audio_data = audio_chunks[0]
+        else:
+            audio_data = np.concatenate(audio_chunks)
+        
+        # Convertir a WAV
         buf = io.BytesIO()
-        sf.write(buf, audio, voice.config.sample_rate, format="WAV")
+        sf.write(buf, audio_data, voice.config.sample_rate, format="WAV")
         b64_audio = base64.b64encode(buf.getvalue()).decode("utf-8")
         
         return JSONResponse(content={"audio": b64_audio})
         
     except Exception as e:
         print(f"Error TTS: {e}")
+        import traceback
+        traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
