@@ -265,16 +265,22 @@ body {
 .card-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
     font-size: 0.85rem;
     color: var(--text-secondary);
+    gap: 10px; /* Espacio entre los 3 grupos */
 }
 
+/* El nivel a la izquierda, el contador a la derecha, el audio en el medio */
 .card-level {
-    background: var(--primary);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
+    flex-shrink: 0; /* No se aplasta */
+}
+
+.card-number {
+    flex-shrink: 0; /* No se aplasta */
+    text-align: right;
+}
 }
 
 .sentence-container {
