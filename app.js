@@ -4,16 +4,16 @@ const EMBEDDED_SENTENCES = [
     "id": 1,
     "level": 1,
     "module": "Saludos",
-    "spanish_full": "Hola, ¿cómo estás?",
-    "spanish_cloze": "___, ¿cómo estás?",
+    "spanish_full": "Hola, 聶c籀mo est獺s?",
+    "spanish_cloze": "___, 聶c籀mo est獺s?",
     "spanish_answer": "Hola",
-    "chinese_simp_full": "你好，你好吗？",
-    "chinese_simp_cloze": "___，你好吗？",
-    "chinese_simp_answer": "你好",
-    "chinese_trad_full": "你好，你好嗎？",
-    "chinese_trad_cloze": "___，你好嗎？",
-    "chinese_trad_answer": "你好",
-    "pinyin": "Nǐ hǎo, nǐ hǎo ma?"
+    "chinese_simp_full": "雿末嚗?憟賢?嚗?,
+    "chinese_simp_cloze": "___嚗?憟賢?嚗?,
+    "chinese_simp_answer": "雿末",
+    "chinese_trad_full": "雿末嚗?憟賢?嚗?,
+    "chinese_trad_cloze": "___嚗?憟賢?嚗?,
+    "chinese_trad_answer": "雿末",
+    "pinyin": "N? h?o, n? h?o ma?"
   },
   {
     "id": 2,
@@ -22,13 +22,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Me llamo Carlos.",
     "spanish_cloze": "Me ___ Carlos.",
     "spanish_answer": "llamo",
-    "chinese_simp_full": "我叫卡洛斯。",
-    "chinese_simp_cloze": "我___卡洛斯。",
-    "chinese_simp_answer": "叫",
-    "chinese_trad_full": "我叫卡洛斯。",
-    "chinese_trad_cloze": "我___卡洛斯。",
-    "chinese_trad_answer": "叫",
-    "pinyin": "Wǒ jiào Kǎluòsī."
+    "chinese_simp_full": "??⊥??胯?,
+    "chinese_simp_cloze": "?__?⊥??胯?,
+    "chinese_simp_answer": "??,
+    "chinese_trad_full": "??⊥??胯?,
+    "chinese_trad_cloze": "?__?⊥??胯?,
+    "chinese_trad_answer": "??,
+    "pinyin": "W? ji?o K?lu簷s蘋."
   },
   {
     "id": 3,
@@ -37,13 +37,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Gracias por tu ayuda.",
     "spanish_cloze": "___ por tu ayuda.",
     "spanish_answer": "Gracias",
-    "chinese_simp_full": "谢谢你的帮助。",
-    "chinese_simp_cloze": "___你的帮助。",
-    "chinese_simp_answer": "谢谢",
-    "chinese_trad_full": "謝謝你的幫助。",
-    "chinese_trad_cloze": "___你的幫助。",
-    "chinese_trad_answer": "謝謝",
-    "pinyin": "Xièxie nǐ de bāngzhù."
+    "chinese_simp_full": "靚Ｚ陝雿?撣桀??,
+    "chinese_simp_cloze": "___雿?撣桀??,
+    "chinese_simp_answer": "靚Ｚ陝",
+    "chinese_trad_full": "雓?雿?撟怠??,
+    "chinese_trad_cloze": "___雿?撟怠??,
+    "chinese_trad_answer": "雓?",
+    "pinyin": "Xi癡xie n? de b?ngzh羅."
   },
   {
     "id": 4,
@@ -52,43 +52,43 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Vivo en Buenos Aires.",
     "spanish_cloze": "___ en Buenos Aires.",
     "spanish_answer": "Vivo",
-    "chinese_simp_full": "我住在布宜诺斯艾利斯。",
-    "chinese_simp_cloze": "我___在布宜诺斯艾利斯。",
-    "chinese_simp_answer": "住",
-    "chinese_trad_full": "我住在布宜諾斯艾利斯。",
-    "chinese_trad_cloze": "我___在布宜諾斯艾利斯。",
-    "chinese_trad_answer": "住",
-    "pinyin": "Wǒ zhù zài Bùyínuòsī'àilìsī."
+    "chinese_simp_full": "???典?摰笑?航?拇??,
+    "chinese_simp_cloze": "?__?典?摰笑?航?拇??,
+    "chinese_simp_answer": "雿?,
+    "chinese_trad_full": "???典?摰姥?航?拇??,
+    "chinese_trad_cloze": "?__?典?摰姥?航?拇??,
+    "chinese_trad_answer": "雿?,
+    "pinyin": "W? zh羅 z?i B羅y穩nu簷s蘋'?il穫s蘋."
   },
   {
     "id": 5,
     "level": 2,
     "module": "Saludos",
-    "spanish_full": "¿Dónde está el baño?",
-    "spanish_cloze": "¿___ el baño?",
-    "spanish_answer": "Dónde está",
-    "chinese_simp_full": "洗手间在哪里？",
-    "chinese_simp_cloze": "洗手间___？",
-    "chinese_simp_answer": "在哪里",
-    "chinese_trad_full": "洗手間在哪裡？",
-    "chinese_trad_cloze": "洗手間___？",
-    "chinese_trad_answer": "在哪裡",
-    "pinyin": "Xǐshǒujiān zài nǎlǐ?"
+    "spanish_full": "聶D籀nde est獺 el ba簽o?",
+    "spanish_cloze": "聶___ el ba簽o?",
+    "spanish_answer": "D籀nde est獺",
+    "chinese_simp_full": "瘣??游?芷?嚗?,
+    "chinese_simp_cloze": "瘣??復__嚗?,
+    "chinese_simp_answer": "?典??,
+    "chinese_trad_full": "瘣???芾ㄐ嚗?,
+    "chinese_trad_cloze": "瘣??__嚗?,
+    "chinese_trad_answer": "?典鋆?,
+    "pinyin": "X?sh?uji?n z?i n?l??"
   },
   {
     "id": 6,
     "level": 1,
     "module": "Saludos",
-    "spanish_full": "Buen día, ¿cómo andás?",
-    "spanish_cloze": "Buen día, ¿___?",
-    "spanish_answer": "cómo andás",
-    "chinese_simp_full": "早上好，你怎么样？",
-    "chinese_simp_cloze": "早上好，你___？",
-    "chinese_simp_answer": "怎么样",
-    "chinese_trad_full": "早上好，你怎麼樣？",
-    "chinese_trad_cloze": "早上好，你___？",
-    "chinese_trad_answer": "怎麼樣",
-    "pinyin": "Zǎoshang hǎo, nǐ zěnmeyàng?"
+    "spanish_full": "Buen d穩a, 聶c籀mo and獺s?",
+    "spanish_cloze": "Buen d穩a, 聶___?",
+    "spanish_answer": "c籀mo and獺s",
+    "chinese_simp_full": "?拐?憟踝?雿??瘀?",
+    "chinese_simp_cloze": "?拐?憟踝?雿__嚗?,
+    "chinese_simp_answer": "????,
+    "chinese_trad_full": "?拐?憟踝?雿獐璅??",
+    "chinese_trad_cloze": "?拐?憟踝?雿__嚗?,
+    "chinese_trad_answer": "?獐璅?,
+    "pinyin": "Z?oshang h?o, n? z?nmey?ng?"
   },
   {
     "id": 7,
@@ -97,61 +97,61 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Mucho gusto, soy de China.",
     "spanish_cloze": "Mucho gusto, ___ de China.",
     "spanish_answer": "soy",
-    "chinese_simp_full": "很高兴认识你，我是中国人。",
-    "chinese_simp_cloze": "很高兴___你，我是中国人。",
-    "chinese_simp_answer": "认识",
-    "chinese_trad_full": "很高興認識你，我是中國人。",
-    "chinese_trad_cloze": "很高興___你，我是中國人。",
-    "chinese_trad_answer": "認識",
-    "pinyin": "Hěn gāoxìng rènshi nǐ, wǒ shì Zhōngguó rén."
+    "chinese_simp_full": "敺??渲恕霂?嚗??臭葉?賭犖??,
+    "chinese_simp_cloze": "敺??復__雿??銝剖鈭箝?,
+    "chinese_simp_answer": "霈方?",
+    "chinese_trad_full": "敺???霅?嚗??臭葉?犖??,
+    "chinese_trad_cloze": "敺??__雿??銝剖?鈭箝?,
+    "chinese_trad_answer": "隤?",
+    "pinyin": "H?n g?ox穫ng r癡nshi n?, w? sh穫 Zh?nggu籀 r矇n."
   },
   {
     "id": 8,
     "level": 1,
     "module": "Saludos",
-    "spanish_full": "Hasta mañana, descansa.",
-    "spanish_cloze": "Hasta mañana, ___.",
+    "spanish_full": "Hasta ma簽ana, descansa.",
+    "spanish_cloze": "Hasta ma簽ana, ___.",
     "spanish_answer": "descansa",
-    "chinese_simp_full": "明天见，好好休息。",
-    "chinese_simp_cloze": "明天见，好好___.",
-    "chinese_simp_answer": "休息",
-    "chinese_trad_full": "明天見，好好休息。",
-    "chinese_trad_cloze": "明天見，好好___.",
-    "chinese_trad_answer": "休息",
-    "pinyin": "Míngtiān jiàn, hǎohǎo xiūxi."
+    "chinese_simp_full": "?予閫?憟賢末隡??,
+    "chinese_simp_cloze": "?予閫?憟賢末___.",
+    "chinese_simp_answer": "隡",
+    "chinese_trad_full": "?予閬?憟賢末隡??,
+    "chinese_trad_cloze": "?予閬?憟賢末___.",
+    "chinese_trad_answer": "隡",
+    "pinyin": "M穩ngti?n ji?n, h?oh?o xi贖xi."
   },
   {
     "id": 9,
     "level": 1,
     "module": "Saludos",
-    "spanish_full": "¿Todo bien? Sí, todo bien.",
-    "spanish_cloze": "¿___ bien? Sí, todo bien.",
+    "spanish_full": "聶Todo bien? S穩, todo bien.",
+    "spanish_cloze": "聶___ bien? S穩, todo bien.",
     "spanish_answer": "Todo",
-    "chinese_simp_full": "一切都好吗？是的，一切都好。",
-    "chinese_simp_cloze": "___都好吗？是的，一切都好。",
-    "chinese_simp_answer": "一切",
-    "chinese_trad_full": "一切都好嗎？是的，一切都好。",
-    "chinese_trad_cloze": "___都好嗎？是的，一切都好。",
-    "chinese_trad_answer": "一切",
-    "pinyin": "Yíqiè dōu hǎo ma? Shì de, yíqiè dōu hǎo."
+    "chinese_simp_full": "銝?憟賢?嚗??銝?憟賬?,
+    "chinese_simp_cloze": "___?賢末???舐?嚗??憟賬?,
+    "chinese_simp_answer": "銝??,
+    "chinese_trad_full": "銝?憟賢?嚗??銝?憟賬?,
+    "chinese_trad_cloze": "___?賢末???舐?嚗??憟賬?,
+    "chinese_trad_answer": "銝??,
+    "pinyin": "Y穩qi癡 d?u h?o ma? Sh穫 de, y穩qi癡 d?u h?o."
   },
   {
     "id": 10,
     "level": 1,
     "module": "Saludos",
-    "spanish_full": "Chau, nos vemos después.",
-    "spanish_cloze": "___, nos vemos después.",
+    "spanish_full": "Chau, nos vemos despu矇s.",
+    "spanish_cloze": "___, nos vemos despu矇s.",
     "spanish_answer": "Chau",
-    "chinese_simp_full": "再见，一会儿见。",
-    "chinese_simp_cloze": "___，一会儿见。",
-    "chinese_simp_answer": "再见",
-    "chinese_trad_full": "再見，一會兒見。",
-    "chinese_trad_cloze": "___，一會兒見。",
-    "chinese_trad_answer": "再見",
-    "pinyin": "Zàijiàn, yíhuìr jiàn.",
+    "chinese_simp_full": "??嚗?隡閫?,
+    "chinese_simp_cloze": "___嚗?隡閫?,
+    "chinese_simp_answer": "??",
+    "chinese_trad_full": "??嚗???閬?,
+    "chinese_trad_cloze": "___嚗???閬?,
+    "chinese_trad_answer": "??",
+    "pinyin": "Z?iji?n, y穩hu穫r ji?n.",
     "spanish_alternatives": [
       "Chao",
-      "Adiós",
+      "Adi籀s",
       "Hasta luego"
     ]
   },
@@ -162,13 +162,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Bienvenidos a mi casa.",
     "spanish_cloze": "___ a mi casa.",
     "spanish_answer": "Bienvenidos",
-    "chinese_simp_full": "欢迎来我家。",
-    "chinese_simp_cloze": "___来我家。",
-    "chinese_simp_answer": "欢迎",
-    "chinese_trad_full": "歡迎來我家。",
-    "chinese_trad_cloze": "___來我家。",
-    "chinese_trad_answer": "歡迎",
-    "pinyin": "Huānyíng lái wǒ jiā."
+    "chinese_simp_full": "甈Ｚ??交?摰嗚?,
+    "chinese_simp_cloze": "___?交?摰嗚?,
+    "chinese_simp_answer": "甈Ｚ?",
+    "chinese_trad_full": "甇∟?靘?摰嗚?,
+    "chinese_trad_cloze": "___靘?摰嗚?,
+    "chinese_trad_answer": "甇∟?",
+    "pinyin": "Hu?ny穩ng l獺i w? ji?."
   },
   {
     "id": 12,
@@ -177,13 +177,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Necesito renovar mi visa.",
     "spanish_cloze": "Necesito ___ mi visa.",
     "spanish_answer": "renovar",
-    "chinese_simp_full": "我需要续签我的签证。",
-    "chinese_simp_cloze": "我需要___我的签证。",
-    "chinese_simp_answer": "续签",
-    "chinese_trad_full": "我需要續簽我的簽證。",
-    "chinese_trad_cloze": "我需要___我的簽證。",
-    "chinese_trad_answer": "續簽",
-    "pinyin": "Wǒ xūyào xùqiān qiānzhèng.",
+    "chinese_simp_full": "??閬賒蝑暹??倌霂?,
+    "chinese_simp_cloze": "??閬__??蝑曇???,
+    "chinese_simp_answer": "蝏剔倌",
+    "chinese_trad_full": "??閬?蝪賣??偷霅?,
+    "chinese_trad_cloze": "??閬__??蝪質???,
+    "chinese_trad_answer": "蝥偷",
+    "pinyin": "W? x贖y?o x羅qi?n qi?nzh癡ng.",
     "spanish_alternatives": [
       "tramitar",
       "extender",
@@ -194,16 +194,16 @@ const EMBEDDED_SENTENCES = [
     "id": 13,
     "level": 2,
     "module": "Migraciones",
-    "spanish_full": "¿Dónde puedo sacar el turno?",
-    "spanish_cloze": "¿Dónde puedo ___ el turno?",
+    "spanish_full": "聶D籀nde puedo sacar el turno?",
+    "spanish_cloze": "聶D籀nde puedo ___ el turno?",
     "spanish_answer": "sacar",
-    "chinese_simp_full": "我在哪里可以预约？",
-    "chinese_simp_cloze": "我在哪里可以___？",
-    "chinese_simp_answer": "预约",
-    "chinese_trad_full": "我在哪裡可以預約？",
-    "chinese_trad_cloze": "我在哪裡可以___？",
-    "chinese_trad_answer": "預約",
-    "pinyin": "Wǒ zài nǎlǐ kěyǐ yùyuē?",
+    "chinese_simp_full": "??芷??臭誑憸漲嚗?,
+    "chinese_simp_cloze": "??芷??臭誑___嚗?,
+    "chinese_simp_answer": "憸漲",
+    "chinese_trad_full": "??芾ㄐ?臭誑??嚗?,
+    "chinese_trad_cloze": "??芾ㄐ?臭誑___嚗?,
+    "chinese_trad_answer": "??",
+    "pinyin": "W? z?i n?l? k?y? y羅yu??",
     "spanish_alternatives": [
       "obtener",
       "conseguir",
@@ -217,13 +217,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Mi pasaporte vence en marzo.",
     "spanish_cloze": "Mi ___ vence en marzo.",
     "spanish_answer": "pasaporte",
-    "chinese_simp_full": "我的护照三月份到期。",
-    "chinese_simp_cloze": "我的___三月份到期。",
-    "chinese_simp_answer": "护照",
-    "chinese_trad_full": "我的護照三月份到期。",
-    "chinese_trad_cloze": "我的___三月份到期。",
-    "chinese_trad_answer": "護照",
-    "pinyin": "Wǒ de hùzhào sān yuèfèn dàoqī."
+    "chinese_simp_full": "???斤銝?隞賢??,
+    "chinese_simp_cloze": "??___銝?隞賢??,
+    "chinese_simp_answer": "?斤",
+    "chinese_trad_full": "??霅瑞銝?隞賢??,
+    "chinese_trad_cloze": "??___銝?隞賢??,
+    "chinese_trad_answer": "霅瑞",
+    "pinyin": "W? de h羅zh?o s?n yu癡f癡n d?oq蘋."
   },
   {
     "id": 15,
@@ -232,13 +232,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Tengo que tramitar el DNI.",
     "spanish_cloze": "Tengo que ___ el DNI.",
     "spanish_answer": "tramitar",
-    "chinese_simp_full": "我需要办理身份证。",
-    "chinese_simp_cloze": "我需要___身份证。",
-    "chinese_simp_answer": "办理",
-    "chinese_trad_full": "我需要辦理身份證。",
-    "chinese_trad_cloze": "我需要___身份證。",
-    "chinese_trad_answer": "辦理",
-    "pinyin": "Wǒ xūyào bànlǐ shēnfènzhèng.",
+    "chinese_simp_full": "??閬??澈隞質???,
+    "chinese_simp_cloze": "??閬__頨思遢霂?,
+    "chinese_simp_answer": "??",
+    "chinese_trad_full": "??閬齒?澈隞質???,
+    "chinese_trad_cloze": "??閬__頨思遢霅?,
+    "chinese_trad_answer": "颲衣?",
+    "pinyin": "W? x贖y?o b?nl? sh?nf癡nzh癡ng.",
     "spanish_alternatives": [
       "hacer",
       "gestionar",
@@ -249,34 +249,34 @@ const EMBEDDED_SENTENCES = [
     "id": 16,
     "level": 2,
     "module": "Migraciones",
-    "spanish_full": "¿Cuánto sale la gestión?",
-    "spanish_cloze": "¿Cuánto sale la ___?",
-    "spanish_answer": "gestión",
-    "chinese_simp_full": "办理费用是多少？",
-    "chinese_simp_cloze": "办理___是多少？",
-    "chinese_simp_answer": "费用",
-    "chinese_trad_full": "辦理費用是多少？",
-    "chinese_trad_cloze": "辦理___是多少？",
-    "chinese_trad_answer": "費用",
-    "pinyin": "Bànlǐ fèiyòng shì duōshǎo?",
+    "spanish_full": "聶Cu獺nto sale la gesti籀n?",
+    "spanish_cloze": "聶Cu獺nto sale la ___?",
+    "spanish_answer": "gesti籀n",
+    "chinese_simp_full": "??韐寧?臬?撠?",
+    "chinese_simp_cloze": "??___?臬?撠?",
+    "chinese_simp_answer": "韐寧",
+    "chinese_trad_full": "颲衣?鞎餌?臬?撠?",
+    "chinese_trad_cloze": "颲衣?___?臬?撠?",
+    "chinese_trad_answer": "鞎餌",
+    "pinyin": "B?nl? f癡iy簷ng sh穫 du?sh?o?",
     "spanish_alternatives": [
-      "trámite"
+      "tr獺mite"
     ]
   },
   {
     "id": 17,
     "level": 3,
     "module": "Migraciones",
-    "spanish_full": "Necesito una certificación de domicilio.",
+    "spanish_full": "Necesito una certificaci籀n de domicilio.",
     "spanish_cloze": "Necesito una ___ de domicilio.",
-    "spanish_answer": "certificación",
-    "chinese_simp_full": "我需要住址证明。",
-    "chinese_simp_cloze": "我需要住址___。",
-    "chinese_simp_answer": "证明",
-    "chinese_trad_full": "我需要住址證明。",
-    "chinese_trad_cloze": "我需要住址___。",
-    "chinese_trad_answer": "證明",
-    "pinyin": "Wǒ xūyào zhùzhǐ zhèngmíng.",
+    "spanish_answer": "certificaci籀n",
+    "chinese_simp_full": "??閬??霂???,
+    "chinese_simp_cloze": "??閬??___??,
+    "chinese_simp_answer": "霂?",
+    "chinese_trad_full": "??閬??霅???,
+    "chinese_trad_cloze": "??閬??___??,
+    "chinese_trad_answer": "霅?",
+    "pinyin": "W? x贖y?o zh羅zh? zh癡ngm穩ng.",
     "spanish_alternatives": [
       "constancia",
       "comprobante"
@@ -286,16 +286,16 @@ const EMBEDDED_SENTENCES = [
     "id": 18,
     "level": 3,
     "module": "Migraciones",
-    "spanish_full": "¿Esta documentación es válida?",
-    "spanish_cloze": "¿Esta documentación es ___?",
-    "spanish_answer": "válida",
-    "chinese_simp_full": "这个文件有效吗？",
-    "chinese_simp_cloze": "这个文件___吗？",
-    "chinese_simp_answer": "有效",
-    "chinese_trad_full": "這個文件有效嗎？",
-    "chinese_trad_cloze": "這個文件___嗎？",
-    "chinese_trad_answer": "有效",
-    "pinyin": "Zhège wénjiàn yǒuxiào ma?",
+    "spanish_full": "聶Esta documentaci籀n es v獺lida?",
+    "spanish_cloze": "聶Esta documentaci籀n es ___?",
+    "spanish_answer": "v獺lida",
+    "chinese_simp_full": "餈葵?辣????",
+    "chinese_simp_cloze": "餈葵?辣___??",
+    "chinese_simp_answer": "??",
+    "chinese_trad_full": "??隞嗆???嚗?,
+    "chinese_trad_cloze": "??隞跛__??",
+    "chinese_trad_answer": "??",
+    "pinyin": "Zh癡ge w矇nji?n y?uxi?o ma?",
     "spanish_alternatives": [
       "vigente"
     ]
@@ -304,33 +304,33 @@ const EMBEDDED_SENTENCES = [
     "id": 19,
     "level": 2,
     "module": "Migraciones",
-    "spanish_full": "Fui a la Dirección Nacional de Migraciones.",
-    "spanish_cloze": "Fui a la Dirección Nacional de ___.",
+    "spanish_full": "Fui a la Direcci籀n Nacional de Migraciones.",
+    "spanish_cloze": "Fui a la Direcci籀n Nacional de ___.",
     "spanish_answer": "Migraciones",
-    "chinese_simp_full": "我今天去了移民局。",
-    "chinese_simp_cloze": "我今天去了___。",
-    "chinese_simp_answer": "移民局",
-    "chinese_trad_full": "我今天去了移民局。",
-    "chinese_trad_cloze": "我今天去了___。",
-    "chinese_trad_answer": "移民局",
-    "pinyin": "Wǒ jīntiān qùle yímínjú."
+    "chinese_simp_full": "??憭拙鈭宏瘞???,
+    "chinese_simp_cloze": "??憭拙鈭__??,
+    "chinese_simp_answer": "蝘餅?撅",
+    "chinese_trad_full": "??憭拙鈭宏瘞???,
+    "chinese_trad_cloze": "??憭拙鈭__??,
+    "chinese_trad_answer": "蝘餅?撅",
+    "pinyin": "W? j蘋nti?n q羅le y穩m穩nj繳."
   },
   {
     "id": 20,
     "level": 3,
     "module": "Migraciones",
-    "spanish_full": "El trámite demora dos semanas.",
+    "spanish_full": "El tr獺mite demora dos semanas.",
     "spanish_cloze": "El ___ demora dos semanas.",
-    "spanish_answer": "trámite",
-    "chinese_simp_full": "这个手续需要两周时间。",
-    "chinese_simp_cloze": "这个___需要两周时间。",
-    "chinese_simp_answer": "手续",
-    "chinese_trad_full": "這個手續需要兩週時間。",
-    "chinese_trad_cloze": "這個___需要兩週時間。",
-    "chinese_trad_answer": "手續",
-    "pinyin": "Zhège shǒuxù xūyào liǎng zhōu shíjiān.",
+    "spanish_answer": "tr獺mite",
+    "chinese_simp_full": "餈葵?賒?閬舅?冽?氬?,
+    "chinese_simp_cloze": "餈葵___?閬舅?冽?氬?,
+    "chinese_simp_answer": "?賒",
+    "chinese_trad_full": "??蝥?閬?望???,
+    "chinese_trad_cloze": "?__?閬?望???,
+    "chinese_trad_answer": "??",
+    "pinyin": "Zh癡ge sh?ux羅 x贖y?o li?ng zh?u sh穩ji?n.",
     "spanish_alternatives": [
-      "gestión",
+      "gesti籀n",
       "proceso"
     ]
   },
@@ -338,16 +338,16 @@ const EMBEDDED_SENTENCES = [
     "id": 21,
     "level": 3,
     "module": "Migraciones",
-    "spanish_full": "¿Me pueden dar un comprobante?",
-    "spanish_cloze": "¿Me pueden dar un ___?",
+    "spanish_full": "聶Me pueden dar un comprobante?",
+    "spanish_cloze": "聶Me pueden dar un ___?",
     "spanish_answer": "comprobante",
-    "chinese_simp_full": "能给我一张收据吗？",
-    "chinese_simp_cloze": "能给我一张___吗？",
-    "chinese_simp_answer": "收据",
-    "chinese_trad_full": "能給我一張收據嗎？",
-    "chinese_trad_cloze": "能給我一張___嗎？",
-    "chinese_trad_answer": "收據",
-    "pinyin": "Néng gěi wǒ yì zhāng shōujù ma?",
+    "chinese_simp_full": "?賜???撘?桀?嚗?,
+    "chinese_simp_cloze": "?賜???撘__??",
+    "chinese_simp_answer": "?嗆",
+    "chinese_trad_full": "?賜策??撘菜??嚗?,
+    "chinese_trad_cloze": "?賜策??撘琯__??",
+    "chinese_trad_answer": "?嗆?",
+    "pinyin": "N矇ng g?i w? y穫 zh?ng sh?uj羅 ma?",
     "spanish_alternatives": [
       "recibo",
       "constancia"
@@ -357,16 +357,16 @@ const EMBEDDED_SENTENCES = [
     "id": 22,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Dónde están los fideos?",
-    "spanish_cloze": "¿Dónde están los ___?",
+    "spanish_full": "聶D籀nde est獺n los fideos?",
+    "spanish_cloze": "聶D籀nde est獺n los ___?",
     "spanish_answer": "fideos",
-    "chinese_simp_full": "面条在哪里？",
-    "chinese_simp_cloze": "___在哪里？",
-    "chinese_simp_answer": "面条",
-    "chinese_trad_full": "麵條在哪裡？",
-    "chinese_trad_cloze": "___在哪裡？",
-    "chinese_trad_answer": "麵條",
-    "pinyin": "Miàntiáo zài nǎlǐ?",
+    "chinese_simp_full": "?Ｘ?典??",
+    "chinese_simp_cloze": "___?典??",
+    "chinese_simp_answer": "?Ｘ",
+    "chinese_trad_full": "暻菜??典鋆∴?",
+    "chinese_trad_cloze": "___?典鋆∴?",
+    "chinese_trad_answer": "暻菜?",
+    "pinyin": "Mi?nti獺o z?i n?l??",
     "spanish_alternatives": [
       "pastas"
     ]
@@ -375,16 +375,16 @@ const EMBEDDED_SENTENCES = [
     "id": 23,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Tienen facturas de manteca?",
-    "spanish_cloze": "¿Tienen ___ de manteca?",
+    "spanish_full": "聶Tienen facturas de manteca?",
+    "spanish_cloze": "聶Tienen ___ de manteca?",
     "spanish_answer": "facturas",
-    "chinese_simp_full": "你们有黄油饼干吗？",
-    "chinese_simp_cloze": "你们有黄油___吗？",
-    "chinese_simp_answer": "饼干",
-    "chinese_trad_full": "你們有黃油餅乾嗎？",
-    "chinese_trad_cloze": "你們有黃油___嗎？",
-    "chinese_trad_answer": "餅乾",
-    "pinyin": "Nǐmen yǒu huángyóu bǐnggān ma?"
+    "chinese_simp_full": "雿賑??瘝寥未撟脣?嚗?,
+    "chinese_simp_cloze": "雿賑??瘝鉤__??",
+    "chinese_simp_answer": "擖澆僕",
+    "chinese_trad_full": "雿?暺硃擗嗾??",
+    "chinese_trad_cloze": "雿?暺硃___??",
+    "chinese_trad_answer": "擗嗾",
+    "pinyin": "N?men y?u hu獺ngy籀u b?ngg?n ma?"
   },
   {
     "id": 24,
@@ -393,32 +393,32 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Quiero medio kilo de yerba mate.",
     "spanish_cloze": "Quiero ___ de yerba mate.",
     "spanish_answer": "medio kilo",
-    "chinese_simp_full": "我要半公斤马黛茶。",
-    "chinese_simp_cloze": "我要___马黛茶。",
-    "chinese_simp_answer": "半公斤",
-    "chinese_trad_full": "我要半公斤馬黛茶。",
-    "chinese_trad_cloze": "我要___馬黛茶。",
-    "chinese_trad_answer": "半公斤",
-    "pinyin": "Wǒ yào bàn gōngjīn mǎdàichá."
+    "chinese_simp_full": "????日帕暺??,
+    "chinese_simp_cloze": "??___撽祇??嗚?,
+    "chinese_simp_answer": "???,
+    "chinese_trad_full": "????日收暺??,
+    "chinese_trad_cloze": "??___擐祇??嗚?,
+    "chinese_trad_answer": "???,
+    "pinyin": "W? y?o b?n g?ngj蘋n m?d?ich獺."
   },
   {
     "id": 25,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Cuánto sale el pan francés?",
-    "spanish_cloze": "¿___ el pan francés?",
-    "spanish_answer": "Cuánto sale",
-    "chinese_simp_full": "法棍面包多少钱？",
-    "chinese_simp_cloze": "法棍面包___？",
-    "chinese_simp_answer": "多少钱",
-    "chinese_trad_full": "法棍麵包多少錢？",
-    "chinese_trad_cloze": "法棍麵包___？",
-    "chinese_trad_answer": "多少錢",
-    "pinyin": "Fǎgùn miànbāo duōshǎo qián?",
+    "spanish_full": "聶Cu獺nto sale el pan franc矇s?",
+    "spanish_cloze": "聶___ el pan franc矇s?",
+    "spanish_answer": "Cu獺nto sale",
+    "chinese_simp_full": "瘜??Ｗ?憭??梧?",
+    "chinese_simp_cloze": "瘜??Ｗ?___嚗?,
+    "chinese_simp_answer": "憭???,
+    "chinese_trad_full": "瘜?暻萄?憭??ｇ?",
+    "chinese_trad_cloze": "瘜?暻萄?___嚗?,
+    "chinese_trad_answer": "憭???,
+    "pinyin": "F?g羅n mi?nb?o du?sh?o qi獺n?",
     "spanish_alternatives": [
-      "Cuánto cuesta",
-      "Cuánto es",
-      "Cuánto vale"
+      "Cu獺nto cuesta",
+      "Cu獺nto es",
+      "Cu獺nto vale"
     ]
   },
   {
@@ -428,13 +428,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Pago con tarjeta o en efectivo.",
     "spanish_cloze": "Pago con tarjeta o en ___.",
     "spanish_answer": "efectivo",
-    "chinese_simp_full": "我用卡或者现金付。",
-    "chinese_simp_cloze": "我用卡或者___付。",
-    "chinese_simp_answer": "现金",
-    "chinese_trad_full": "我用卡或者現金付。",
-    "chinese_trad_cloze": "我用卡或者___付。",
-    "chinese_trad_answer": "現金",
-    "pinyin": "Wǒ yòng kǎ huòzhě xiànjīn fù.",
+    "chinese_simp_full": "??⊥??????,
+    "chinese_simp_cloze": "??⊥??__隞?,
+    "chinese_simp_answer": "?圈?",
+    "chinese_trad_full": "??⊥??????,
+    "chinese_trad_cloze": "??⊥??__隞?,
+    "chinese_trad_answer": "?暸?",
+    "pinyin": "W? y簷ng k? hu簷zh? xi?nj蘋n f羅.",
     "spanish_alternatives": [
       "dinero",
       "billetes"
@@ -444,18 +444,18 @@ const EMBEDDED_SENTENCES = [
     "id": 27,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Hay descuento con la tarjeta?",
-    "spanish_cloze": "¿Hay ___ con la tarjeta?",
+    "spanish_full": "聶Hay descuento con la tarjeta?",
+    "spanish_cloze": "聶Hay ___ con la tarjeta?",
     "spanish_answer": "descuento",
-    "chinese_simp_full": "刷卡有折扣吗？",
-    "chinese_simp_cloze": "刷卡有___吗？",
-    "chinese_simp_answer": "折扣",
-    "chinese_trad_full": "刷卡有折扣嗎？",
-    "chinese_trad_cloze": "刷卡有___嗎？",
-    "chinese_trad_answer": "折扣",
-    "pinyin": "Shuākǎ yǒu zhékòu ma?",
+    "chinese_simp_full": "?瑕?????嚗?,
+    "chinese_simp_cloze": "?瑕?__??",
+    "chinese_simp_answer": "?",
+    "chinese_trad_full": "?瑕?????嚗?,
+    "chinese_trad_cloze": "?瑕?__??",
+    "chinese_trad_answer": "?",
+    "pinyin": "Shu?k? y?u zh矇k簷u ma?",
     "spanish_alternatives": [
-      "promoción",
+      "promoci籀n",
       "rebaja",
       "oferta"
     ]
@@ -464,16 +464,16 @@ const EMBEDDED_SENTENCES = [
     "id": 28,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Dónde está la caja?",
-    "spanish_cloze": "¿Dónde está la ___?",
+    "spanish_full": "聶D籀nde est獺 la caja?",
+    "spanish_cloze": "聶D籀nde est獺 la ___?",
     "spanish_answer": "caja",
-    "chinese_simp_full": "收银台在哪里？",
-    "chinese_simp_cloze": "___在哪里？",
-    "chinese_simp_answer": "收银台",
-    "chinese_trad_full": "收銀台在哪裡？",
-    "chinese_trad_cloze": "___在哪裡？",
-    "chinese_trad_answer": "收銀台",
-    "pinyin": "Shōuyíntái zài nǎlǐ?"
+    "chinese_simp_full": "?園?啣?芷?嚗?,
+    "chinese_simp_cloze": "___?典??",
+    "chinese_simp_answer": "?園??,
+    "chinese_trad_full": "?園??啣?芾ㄐ嚗?,
+    "chinese_trad_cloze": "___?典鋆∴?",
+    "chinese_trad_answer": "?園???,
+    "pinyin": "Sh?uy穩nt獺i z?i n?l??"
   },
   {
     "id": 29,
@@ -482,65 +482,65 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Necesito una bolsa, por favor.",
     "spanish_cloze": "Necesito una bolsa, ___.",
     "spanish_answer": "por favor",
-    "chinese_simp_full": "请给我一个袋子。",
-    "chinese_simp_cloze": "___给我一个袋子。",
-    "chinese_simp_answer": "请",
-    "chinese_trad_full": "請給我一個袋子。",
-    "chinese_trad_cloze": "___給我一個袋子。",
-    "chinese_trad_answer": "請",
-    "pinyin": "Qǐng gěi wǒ yí ge dàizi."
+    "chinese_simp_full": "霂瑞???銝芾?摮?,
+    "chinese_simp_cloze": "___蝏?銝銝芾?摮?,
+    "chinese_simp_answer": "霂?,
+    "chinese_trad_full": "隢策????摮?,
+    "chinese_trad_cloze": "___蝯行?銝??摮?,
+    "chinese_trad_answer": "隢?,
+    "pinyin": "Q?ng g?i w? y穩 ge d?izi."
   },
   {
     "id": 30,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Tienen delivery a domicilio?",
-    "spanish_cloze": "¿Tienen ___ a domicilio?",
+    "spanish_full": "聶Tienen delivery a domicilio?",
+    "spanish_cloze": "聶Tienen ___ a domicilio?",
     "spanish_answer": "delivery",
-    "chinese_simp_full": "你们有送货上门服务吗？",
-    "chinese_simp_cloze": "你们有送货上门___吗？",
-    "chinese_simp_answer": "服务",
-    "chinese_trad_full": "你們有送貨上門服務嗎？",
-    "chinese_trad_cloze": "你們有送貨上門___嗎？",
-    "chinese_trad_answer": "服務",
-    "pinyin": "Nǐmen yǒu sònghuò shàngmén fúwù ma?",
+    "chinese_simp_full": "雿賑?揮銝???",
+    "chinese_simp_cloze": "雿賑?揮銝___??",
+    "chinese_simp_answer": "?",
+    "chinese_trad_full": "雿??疏銝?????",
+    "chinese_trad_cloze": "雿??疏銝?___??",
+    "chinese_trad_answer": "??",
+    "pinyin": "N?men y?u s簷nghu簷 sh?ngm矇n f繳w羅 ma?",
     "spanish_alternatives": [
-      "envío"
+      "env穩o"
     ]
   },
   {
     "id": 31,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "El precio subió otra vez.",
+    "spanish_full": "El precio subi籀 otra vez.",
     "spanish_cloze": "El precio ___ otra vez.",
-    "spanish_answer": "subió",
-    "chinese_simp_full": "价格又涨了。",
-    "chinese_simp_cloze": "价格又___了。",
-    "chinese_simp_answer": "涨",
-    "chinese_trad_full": "價格又漲了。",
-    "chinese_trad_cloze": "價格又___了。",
-    "chinese_trad_answer": "漲",
-    "pinyin": "Jiàgé yòu zhǎng le.",
+    "spanish_answer": "subi籀",
+    "chinese_simp_full": "隞瑟?隅鈭?,
+    "chinese_simp_cloze": "隞瑟?__鈭?,
+    "chinese_simp_answer": "瘨?,
+    "chinese_trad_full": "?寞?撞鈭?,
+    "chinese_trad_cloze": "?寞?__鈭?,
+    "chinese_trad_answer": "瞍?,
+    "pinyin": "Ji?g矇 y簷u zh?ng le.",
     "spanish_alternatives": [
-      "aumentó",
-      "creció"
+      "aument籀",
+      "creci籀"
     ]
   },
   {
     "id": 32,
     "level": 2,
     "module": "Supermercado",
-    "spanish_full": "¿Dónde puedo encontrar leche de almendras?",
-    "spanish_cloze": "¿Dónde puedo ___ leche de almendras?",
+    "spanish_full": "聶D籀nde puedo encontrar leche de almendras?",
+    "spanish_cloze": "聶D籀nde puedo ___ leche de almendras?",
     "spanish_answer": "encontrar",
-    "chinese_simp_full": "在哪里可以找到杏仁奶？",
-    "chinese_simp_cloze": "在哪里可以___杏仁奶？",
-    "chinese_simp_answer": "找到",
-    "chinese_trad_full": "在哪裡可以找到杏仁奶？",
-    "chinese_trad_cloze": "在哪裡可以___杏仁奶？",
-    "chinese_trad_answer": "找到",
-    "pinyin": "Zài nǎlǐ kěyǐ zhǎodào xīngrén nǎi?",
+    "chinese_simp_full": "?典?隞交?唳?隞扒嚗?,
+    "chinese_simp_cloze": "?典?隞北__??憟塚?",
+    "chinese_simp_answer": "?曉",
+    "chinese_trad_full": "?典鋆∪隞交?唳?隞扒嚗?,
+    "chinese_trad_cloze": "?典鋆∪隞北__??憟塚?",
+    "chinese_trad_answer": "?曉",
+    "pinyin": "Z?i n?l? k?y? zh?od?o x蘋ngr矇n n?i?",
     "spanish_alternatives": [
       "hallar",
       "conseguir",
@@ -551,18 +551,18 @@ const EMBEDDED_SENTENCES = [
     "id": 33,
     "level": 1,
     "module": "Supermercado",
-    "spanish_full": "¿Me hacés un favor?",
-    "spanish_cloze": "¿Me ___ un favor?",
-    "spanish_answer": "hacés",
-    "chinese_simp_full": "你能帮我一个忙吗？",
-    "chinese_simp_cloze": "你能___我一个忙吗？",
-    "chinese_simp_answer": "帮",
-    "chinese_trad_full": "你能幫我一個忙嗎？",
-    "chinese_trad_cloze": "你能___我一個忙嗎？",
-    "chinese_trad_answer": "幫",
-    "pinyin": "Nǐ néng bāng wǒ yí ge máng ma?",
+    "spanish_full": "聶Me hac矇s un favor?",
+    "spanish_cloze": "聶Me ___ un favor?",
+    "spanish_answer": "hac矇s",
+    "chinese_simp_full": "雿撣格?銝銝芸???",
+    "chinese_simp_cloze": "雿___??銝芸???",
+    "chinese_simp_answer": "撣?,
+    "chinese_trad_full": "雿撟急?銝????",
+    "chinese_trad_cloze": "雿___??????",
+    "chinese_trad_answer": "撟?,
+    "pinyin": "N? n矇ng b?ng w? y穩 ge m獺ng ma?",
     "spanish_alternatives": [
-      "podés",
+      "pod矇s",
       "puedes"
     ]
   },
@@ -573,13 +573,13 @@ const EMBEDDED_SENTENCES = [
     "spanish_full": "Me dieron el certificado de antecedentes.",
     "spanish_cloze": "Me dieron el certificado de ___.",
     "spanish_answer": "antecedentes",
-    "chinese_simp_full": "我拿到了无犯罪记录证明。",
-    "chinese_simp_cloze": "我拿到了无犯罪___证明。",
-    "chinese_simp_answer": "记录",
-    "chinese_trad_full": "我拿到了無犯罪記錄證明。",
-    "chinese_trad_cloze": "我拿到了無犯罪___證明。",
-    "chinese_trad_answer": "記錄",
-    "pinyin": "Wǒ ná dào le wú fànzuì jìlù zhèngmíng.",
+    "chinese_simp_full": "??唬??蝵芾扇敶???,
+    "chinese_simp_cloze": "??唬??蝵泣__霂???,
+    "chinese_simp_answer": "霈啣?",
+    "chinese_trad_full": "??唬??∠蝵芾?????,
+    "chinese_trad_cloze": "??唬??∠蝵泣__霅???,
+    "chinese_trad_answer": "閮?",
+    "pinyin": "W? n獺 d?o le w繳 f?nzu穫 j穫l羅 zh癡ngm穩ng.",
     "spanish_alternatives": [
       "certificado"
     ]
@@ -588,16 +588,16 @@ const EMBEDDED_SENTENCES = [
     "id": 35,
     "level": 3,
     "module": "Supermercado",
-    "spanish_full": "¿Aceptan Mercado Pago?",
-    "spanish_cloze": "¿___ Mercado Pago?",
+    "spanish_full": "聶Aceptan Mercado Pago?",
+    "spanish_cloze": "聶___ Mercado Pago?",
     "spanish_answer": "Aceptan",
-    "chinese_simp_full": "可以用Mercado Pago付吗？",
-    "chinese_simp_cloze": "___用Mercado Pago付吗？",
-    "chinese_simp_answer": "可以",
-    "chinese_trad_full": "可以用Mercado Pago付嗎？",
-    "chinese_trad_cloze": "___用Mercado Pago付嗎？",
-    "chinese_trad_answer": "可以",
-    "pinyin": "Kěyǐ yòng Mercado Pago fù ma?",
+    "chinese_simp_full": "?臭誑?決ercado Pago隞?嚗?,
+    "chinese_simp_cloze": "___?決ercado Pago隞?嚗?,
+    "chinese_simp_answer": "?臭誑",
+    "chinese_trad_full": "?臭誑?決ercado Pago隞?嚗?,
+    "chinese_trad_cloze": "___?決ercado Pago隞?嚗?,
+    "chinese_trad_answer": "?臭誑",
+    "pinyin": "K?y? y簷ng Mercado Pago f羅 ma?",
     "spanish_alternatives": [
       "Toman",
       "Reciben"
@@ -696,22 +696,22 @@ function applySavedUI() {
     document.getElementById('btn-cn-es').classList.toggle('active', state.mode === 'cn-es');
     document.getElementById('btn-simplified').classList.toggle('active', state.charType === 'simp');
     document.getElementById('btn-traditional').classList.toggle('active', state.charType === 'trad');
-    document.getElementById('script-label').textContent = state.charType === 'simp' ? '简体' : '繁體';
+    document.getElementById('script-label').textContent = state.charType === 'simp' ? '蝞雿? : '蝜?';
     
-    // Actualizar botones diarios Y de exámenes
+    // Actualizar botones diarios Y de ex獺menes
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
         b.classList.toggle('active', b.dataset.module === state.activeModule);
     });
     
     var pinyinBtn = document.getElementById('btn-pinyin');
-    pinyinBtn.textContent = state.showPinyin ? ' Pinyin: ON' : '📖 Pinyin: OFF';
+    pinyinBtn.textContent = state.showPinyin ? '?? Pinyin: ON' : '?? Pinyin: OFF';
     pinyinBtn.classList.toggle('active', state.showPinyin);
 }
 
-// ===== Carga de datos (INTEGRADA CON EXÁMENES) =====
+// ===== Carga de datos (INTEGRADA CON EX?MENES) =====
 async function loadSentences() {
     try {
-        // Determinar qué archivo cargar según el módulo activo
+        // Determinar qu矇 archivo cargar seg繳n el m籀dulo activo
         const sourceFile = DATA_SOURCES[state.activeModule] || DATA_SOURCES['todas'];
         
         const r = await fetch(sourceFile);
@@ -722,10 +722,10 @@ async function loadSentences() {
         // Manejar tanto formato array directo como objeto {sentences: []}
         state.sentences = Array.isArray(d) ? d : (d.sentences || []);
         
-        console.log(`✅ ${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
+        console.log(`??${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
     } catch (e) {
-        console.warn('️ Falló carga externa, usando datos embebidos:', e.message);
-        // Fallback: usar datos embebidos solo para módulos diarios
+        console.warn('?? Fall籀 carga externa, usando datos embebidos:', e.message);
+        // Fallback: usar datos embebidos solo para m籀dulos diarios
         if (['todas', 'Saludos', 'Migraciones', 'Supermercado'].includes(state.activeModule)) {
             state.sentences = EMBEDDED_SENTENCES;
         } else {
@@ -751,13 +751,13 @@ function setupEventListeners() {
     document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
     document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
     
-    // NUEVO: Selecciona TODOS los botones de filtro (diarios + exámenes)
+    // NUEVO: Selecciona TODOS los botones de filtro (diarios + ex獺menes)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
    // Evento para cambiar nivel HSK
 document.getElementById('select-hsk-level').addEventListener('change', (e) => {
-    setModule(e.target.value); // Reutiliza tu función existente
+    setModule(e.target.value); // Reutiliza tu funci籀n existente
 });
     
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
@@ -773,30 +773,30 @@ function setMode(mode) {
     renderCurrentSentence();
 }
 
-// ===== Tipo de carácter simp/trad =====
+// ===== Tipo de car獺cter simp/trad =====
 function setCharType(ct) {
     state.charType = ct;
     document.getElementById('btn-simplified').classList.toggle('active', ct === 'simp');
     document.getElementById('btn-traditional').classList.toggle('active', ct === 'trad');
-    document.getElementById('script-label').textContent = ct === 'simp' ? '简体' : '繁體';
+    document.getElementById('script-label').textContent = ct === 'simp' ? '蝞雿? : '蝜?';
     saveProgress();
     renderCurrentSentence();
 }
 
-// ===== Filtro módulo (AHORA RECARGA DATOS) =====
+// ===== Filtro m籀dulo (AHORA RECARGA DATOS) =====
 function setModule(mod) {
     state.activeModule = mod;
     state.currentIndex = 0;
     state.translationRevealed = false;
     
-    // Actualizar UI de TODOS los botones (diarios y exámenes)
+    // Actualizar UI de TODOS los botones (diarios y ex獺menes)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
         b.classList.toggle('active', b.dataset.module === mod);
     });
     
     saveProgress();
     
-    // Recargar oraciones del nuevo módulo
+    // Recargar oraciones del nuevo m籀dulo
     loadSentences().then(() => {
         renderCurrentSentence();
         updateStats();
@@ -807,7 +807,7 @@ function setModule(mod) {
 function togglePinyin() {
     state.showPinyin = !state.showPinyin;
     var btn = document.getElementById('btn-pinyin');
-    btn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+    btn.textContent = state.showPinyin ? '?? Pinyin: ON' : '?? Pinyin: OFF';
     btn.classList.toggle('active', state.showPinyin);
     saveProgress();
     renderCurrentSentence();
@@ -828,7 +828,7 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-    // Mostrar el CLOZE en el idioma que se está APRENDIENDO
+    // Mostrar el CLOZE en el idioma que se est獺 APRENDIENDO
     let clozeText;
     if (learningChinese) {
         clozeText = s['chinese_' + k + '_cloze'];
@@ -846,7 +846,7 @@ function renderCurrentSentence() {
         pinyinEl.classList.add('hidden');
     }
 
-    // Ocultar traducción (spoiler protection)
+    // Ocultar traducci籀n (spoiler protection)
     state.translationRevealed = false;
     const transEl = document.getElementById('translation-text');
     transEl.textContent = '\ud83d\udca1 La traducci\u00f3n aparecer\u00e1 al verificar...';
@@ -857,7 +857,7 @@ function renderCurrentSentence() {
     document.getElementById('answer-input').value = '';
     hideFeedback();
 
-    // Placeholder en el idioma que se está APRENDIENDO
+    // Placeholder en el idioma que se est獺 APRENDIENDO
     if (learningChinese) {
         const charLabel = state.charType === 'trad' ? 'tradicional' : 'simplificado';
         document.getElementById('answer-input').placeholder = 'Escribe en chino (' + charLabel + ')...';
@@ -866,7 +866,7 @@ function renderCurrentSentence() {
     }
 }
 
-// ===== Revelar traducción completa =====
+// ===== Revelar traducci籀n completa =====
 function showFullTranslation() {
     if (state.translationRevealed) return;
     state.translationRevealed = true;
@@ -889,7 +889,7 @@ function showFullTranslation() {
     el.style.fontStyle = 'normal';
 }
 
-// ===== Verificación con sinónimos =====
+// ===== Verificaci籀n con sin籀nimos =====
 function getValidAnswers(s, learningChinese, k) {
     const answers = [];
     if (learningChinese) {
@@ -964,7 +964,7 @@ function revealAnswer() {
     const allOptions = validAnswers.join(' / ');
 
     showFullTranslation();
-    showFeedback('💡 Respuestas válidas: "' + allOptions + '"', 'correct');
+    showFeedback('? Respuestas v獺lidas: "' + allOptions + '"', 'correct');
 
     validAnswers.forEach(function(a) { state.newWords.add(a); });
     saveProgress();
@@ -1001,7 +1001,7 @@ function markWord(known) {
     nextSentence();
 }
 
-// ===== Navegación =====
+// ===== Navegaci籀n =====
 function nextSentence() {
     const filtered = getFiltered();
     state.currentIndex = (state.currentIndex + 1) % filtered.length;
@@ -1021,7 +1021,7 @@ function hideFeedback() {
     document.getElementById('feedback').classList.add('hidden');
 }
 
-// ===== Estadísticas =====
+// ===== Estad穩sticas =====
 function updateStats() {
     document.getElementById('stats-known').textContent = 'Conocidas: ' + state.knownWords.size;
     document.getElementById('stats-new').textContent = 'Nuevas: ' + state.newWords.size;
@@ -1079,7 +1079,7 @@ async function playAudio(lang) {
     const originalText = btn ? btn.innerText : '';
     
     if (btn) {
-        btn.innerText = '⏳ Cargando...';
+        btn.innerText = '??Cargando...';
         btn.disabled = true;
     }
 
@@ -1108,7 +1108,7 @@ async function playAudio(lang) {
             audio.onended = () => URL.revokeObjectURL(url);
         }
     } catch (error) {
-        console.warn('Vercel falló, usando voz del sistema:', error);
+        console.warn('Vercel fall籀, usando voz del sistema:', error);
         if ('speechSynthesis' in window) {
             const u = new SpeechSynthesisUtterance(text);
             u.lang = langCode;
@@ -1117,24 +1117,24 @@ async function playAudio(lang) {
         }
     } finally {
         if (btn) {
-            btn.innerText = originalText || '🔊';
-                  }
+            btn.innerText = originalText || '??';
+        }
     }
+}
 
 // ===== MODO OSCURO =====
 const themeBtn = document.getElementById('btn-theme');
-if (themeBtn) { // Protección por si el botón no existe aún
+if (themeBtn) { // Protecci籀n por si el bot籀n no existe a繳n
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        themeBtn.textContent = '☀️';
+        themeBtn.textContent = '?儭?;
     }
 
     themeBtn.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
-        themeBtn.textContent = isDark ? '☀️' : '🌙';
+        themeBtn.textContent = isDark ? '?儭? : '??';
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
-}
 }
