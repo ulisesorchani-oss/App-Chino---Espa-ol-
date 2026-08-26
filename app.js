@@ -1059,6 +1059,9 @@ function resetProgress() {
 }
 
 // ===== REPRODUCTOR DE AUDIO GLOBAL BLINDADO =====
+const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
+
+// Reproductor de audio global
 const globalAudioPlayer = new Audio();
 let activeBtn = null;
 let originalBtnText = '';
