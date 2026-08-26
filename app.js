@@ -736,11 +736,17 @@ async function loadSentences() {
 }
 
 // ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
+// ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
 function setupEventListeners() {
+    // Modos de aprendizaje
     document.getElementById('btn-es-cn').addEventListener('click', () => setMode('es-cn'));
     document.getElementById('btn-cn-es').addEventListener('click', () => setMode('cn-es'));
+    
+    // Tipo de carácter
     document.getElementById('btn-simplified').addEventListener('click', () => setCharType('simp'));
     document.getElementById('btn-traditional').addEventListener('click', () => setCharType('trad'));
+    
+    // Acciones de tarjeta
     document.getElementById('btn-check').addEventListener('click', checkAnswer);
     document.getElementById('btn-reveal').addEventListener('click', revealAnswer);
     document.getElementById('btn-know').addEventListener('click', () => markWord(true));
@@ -748,18 +754,27 @@ function setupEventListeners() {
     document.getElementById('answer-input').addEventListener('keypress', e => {
         if (e.key === 'Enter') checkAnswer();
     });
+    
+    // Audio
     document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
     document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
     
-    // NUEVO: Selecciona TODOS los botones de filtro (diarios + exámenes)
+    // Filtros diarios y botones de examen (TOCFL/DELE)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
-   // Evento para cambiar nivel HSK
-document.getElementById('select-hsk-level').addEventListener('change', (e) => {
-    setModule(e.target.value); // Reutiliza tu función existente
-});
     
+    // 👇 DROPDOWN HSK (CON PROTECCIÓN Y DEBUG) 👇
+    const hskSelect = document.getElementById('select-hsk-level');
+    if (hskSelect) {
+        hskSelect.addEventListener('change', (e) => {
+            console.log('🎯 Nivel HSK seleccionado:', e.target.value);
+            setModule(e.target.value);
+        });
+    }
+    // 👆 FIN DROPDOWN HSK 👆
+    
+    // Reset y Pinyin
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
 }
