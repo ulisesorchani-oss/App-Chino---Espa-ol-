@@ -736,17 +736,11 @@ async function loadSentences() {
 }
 
 // ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
-// ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
 function setupEventListeners() {
-    // Modos de aprendizaje
     document.getElementById('btn-es-cn').addEventListener('click', () => setMode('es-cn'));
     document.getElementById('btn-cn-es').addEventListener('click', () => setMode('cn-es'));
-    
-    // Tipo de carácter
     document.getElementById('btn-simplified').addEventListener('click', () => setCharType('simp'));
     document.getElementById('btn-traditional').addEventListener('click', () => setCharType('trad'));
-    
-    // Acciones de tarjeta
     document.getElementById('btn-check').addEventListener('click', checkAnswer);
     document.getElementById('btn-reveal').addEventListener('click', revealAnswer);
     document.getElementById('btn-know').addEventListener('click', () => markWord(true));
@@ -754,27 +748,18 @@ function setupEventListeners() {
     document.getElementById('answer-input').addEventListener('keypress', e => {
         if (e.key === 'Enter') checkAnswer();
     });
-    
-    // Audio
     document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
     document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
     
-    // Filtros diarios y botones de examen (TOCFL/DELE)
+    // NUEVO: Selecciona TODOS los botones de filtro (diarios + exámenes)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
+   // Evento para cambiar nivel HSK
+document.getElementById('select-hsk-level').addEventListener('change', (e) => {
+    setModule(e.target.value); // Reutiliza tu función existente
+});
     
-    // 👇 DROPDOWN HSK (CON PROTECCIÓN Y DEBUG) 👇
-    const hskSelect = document.getElementById('select-hsk-level');
-    if (hskSelect) {
-        hskSelect.addEventListener('change', (e) => {
-            console.log('🎯 Nivel HSK seleccionado:', e.target.value);
-            setModule(e.target.value);
-        });
-    }
-    // 👆 FIN DROPDOWN HSK 👆
-    
-    // Reset y Pinyin
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
 }
@@ -1073,10 +1058,33 @@ function resetProgress() {
     renderCurrentSentence();
 }
 
-// ===== Audio TTS Nativo (Vercel + Piper) =====
-const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
+// ===== REPRODUCTOR DE AUDIO GLOBAL BLINDADO =====
+const globalAudioPlayer = new Audio();
+let activeBtn = null;
+let originalBtnText = '';
+let isPlaying = false;
 
 async function playAudio(lang) {
+    // Pausa: si ya está sonando y tocan el mismo botón, pausar
+    const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
+    if (isPlaying && btn && btn.innerText.includes('⏳')) {
+        globalAudioPlayer.pause();
+        isPlaying = false;
+        restoreButton();
+        return;
+    }
+
+    // Detener cualquier reproducción previa limpiamente
+    if (globalAudioPlayer.src) {
+        globalAudioPlayer.onended = null;
+        globalAudioPlayer.onerror = null;
+        globalAudioPlayer.pause();
+        globalAudioPlayer.currentTime = 0;
+        if (globalAudioPlayer.src.startsWith('blob:')) {
+            URL.revokeObjectURL(globalAudioPlayer.src);
+        }
+    }
+
     const filtered = getFiltered();
     const s = filtered[state.currentIndex];
     const k = ck();
@@ -1087,15 +1095,17 @@ async function playAudio(lang) {
         langCode = 'es-ES';
     } else {
         text = s['chinese_' + k + '_full'];
-        langCode = 'zh-CN'; 
+        langCode = 'zh-CN';
     }
 
-    const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
-    const originalText = btn ? btn.innerText : '';
-    
-    if (btn) {
-        btn.innerText = '⏳ Cargando...';
-        btn.disabled = true;
+    // Capturar referencia del botón ACTUAL
+    activeBtn = btn;
+    originalBtnText = activeBtn ? activeBtn.innerText : '';
+
+    // Feedback visual inmediato
+    if (activeBtn) {
+        activeBtn.innerText = '⏳...';
+        activeBtn.disabled = true;
     }
 
     try {
@@ -1108,32 +1118,66 @@ async function playAudio(lang) {
         if (!response.ok) throw new Error('Error en servidor');
 
         const data = await response.json();
-        
-        if (data.audio) {
-            const binaryString = atob(data.audio);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            const blob = new Blob([bytes], { type: 'audio/wav' });
-            const url = URL.createObjectURL(blob);
-            
-            const audio = new Audio(url);
-            await audio.play();
-            audio.onended = () => URL.revokeObjectURL(url);
+
+        if (!data.audio) {
+            console.warn('API respondió sin datos de audio');
+            restoreButton();
+            return;
         }
+
+        // Decodificar Base64 a Blob
+        const binaryString = atob(data.audio);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+        globalAudioPlayer.src = url;
+
+        try {
+            isPlaying = true;
+            await globalAudioPlayer.play();
+        } catch (playErr) {
+            console.warn('Autoplay bloqueado o error de reproducción:', playErr);
+            restoreButton();
+            return;
+        }
+
+        globalAudioPlayer.onended = () => {
+            isPlaying = false;
+            restoreButton();
+            URL.revokeObjectURL(url);
+        };
+
+        globalAudioPlayer.onerror = () => {
+            console.error('Error reproduciendo audio blob');
+            restoreButton();
+        };
+
     } catch (error) {
         console.warn('Vercel falló, usando voz del sistema:', error);
+
         if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.lang = langCode;
             u.rate = 0.8;
+            u.onend = restoreButton;
+            u.onerror = restoreButton;
             speechSynthesis.speak(u);
+        } else {
+            restoreButton();
         }
-    } finally {
-        if (btn) {
-            btn.innerText = originalText || '🔊';
-        }
+    }
+}
+
+function restoreButton() {
+    if (activeBtn) {
+        activeBtn.innerText = originalBtnText || '🔊';
+        activeBtn.disabled = false;
+        activeBtn = null;
+        originalBtnText = '';
     }
 }
 
