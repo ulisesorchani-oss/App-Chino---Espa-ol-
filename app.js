@@ -692,20 +692,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function applySavedUI() {
-    document.getElementById('btn-es-cn').classList.toggle('active', state.mode === 'es-cn');
-    document.getElementById('btn-cn-es').classList.toggle('active', state.mode === 'cn-es');
-    document.getElementById('btn-simplified').classList.toggle('active', state.charType === 'simp');
-    document.getElementById('btn-traditional').classList.toggle('active', state.charType === 'trad');
-    document.getElementById('script-label').textContent = state.charType === 'simp' ? '简体' : '繁體';
-    
+    const btnEsCn = document.getElementById('btn-es-cn');
+    if (btnEsCn) btnEsCn.classList.toggle('active', state.mode === 'es-cn');
+
+    const btnCnEs = document.getElementById('btn-cn-es');
+    if (btnCnEs) btnCnEs.classList.toggle('active', state.mode === 'cn-es');
+
+    const btnSimp = document.getElementById('btn-simplified');
+    if (btnSimp) btnSimp.classList.toggle('active', state.charType === 'simp');
+
+    const btnTrad = document.getElementById('btn-traditional');
+    if (btnTrad) btnTrad.classList.toggle('active', state.charType === 'trad');
+
+    const scriptLabel = document.getElementById('script-label');
+    if (scriptLabel) scriptLabel.textContent = state.charType === 'simp' ? '简体' : '繁體';
+
     // Actualizar botones diarios Y de exámenes
-    document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
+    const cats = document.querySelectorAll('.cat-btn, .btn-exam');
+    cats.forEach(b => {
         b.classList.toggle('active', b.dataset.module === state.activeModule);
     });
-    
-    var pinyinBtn = document.getElementById('btn-pinyin');
-    pinyinBtn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
-    pinyinBtn.classList.toggle('active', state.showPinyin);
+
+    const pinyinBtn = document.getElementById('btn-pinyin');
+    if (pinyinBtn) {
+        pinyinBtn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+        pinyinBtn.classList.toggle('active', state.showPinyin);
+    }
 }
 
 // ===== Carga de datos (INTEGRADA CON EXÁMENES) =====
@@ -1059,7 +1071,7 @@ function resetProgress() {
 }
 
 // ===== REPRODUCTOR DE AUDIO GLOBAL BLINDADO =====
-const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
+const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts'; // <--
 
 // Reproductor de audio global
 const globalAudioPlayer = new Audio();
@@ -1083,9 +1095,13 @@ async function playAudio(lang) {
         globalAudioPlayer.onerror = null;
         globalAudioPlayer.pause();
         globalAudioPlayer.currentTime = 0;
+        // Guardar y revocar URL vieja DESPUÉS de pausar
         if (globalAudioPlayer.src.startsWith('blob:')) {
-            URL.revokeObjectURL(globalAudioPlayer.src);
+            const oldUrl = globalAudioPlayer.src;
+            URL.revokeObjectURL(oldUrl);
         }
+        globalAudioPlayer.removeAttribute('src');
+        globalAudioPlayer.load(); // Liberar recurso interno
     }
 
     const filtered = getFiltered();
