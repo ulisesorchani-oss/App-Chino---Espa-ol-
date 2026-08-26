@@ -2,7 +2,7 @@
   {
     "id": "hsk1_01",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "你好，我叫李明，我是中国人。",
     "chinese_simp_cloze": "___，我叫李明，我是中国人。",
     "chinese_simp_answer": "你好",
@@ -17,7 +17,7 @@
   {
     "id": "hsk1_02",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "请问，去火车站怎么走？",
     "chinese_simp_cloze": "___，去火车站怎么走？",
     "chinese_simp_answer": "请问",
@@ -32,7 +32,7 @@
   {
     "id": "hsk1_03",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "这个苹果多少钱？太贵了，便宜一点儿吧。",
     "chinese_simp_cloze": "这个苹果___？太贵了，便宜一点儿吧。",
     "chinese_simp_answer": "多少钱",
@@ -47,7 +47,7 @@
   {
     "id": "hsk1_04",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "我想买一张去北京的机票，明天上午的。",
     "chinese_simp_cloze": "我想___一张去北京的机票，明天上午的。",
     "chinese_simp_answer": "买",
@@ -62,7 +62,7 @@
   {
     "id": "hsk1_05",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "对不起，我没有带钱，可以打电话给我朋友吗？",
     "chinese_simp_cloze": "___，我没有带钱，可以打电话给我朋友吗？",
     "chinese_simp_answer": "对不起",
@@ -77,7 +77,7 @@
   {
     "id": "hsk1_06",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "今天天气很冷，我想喝热茶，不想吃冷的东西。",
     "chinese_simp_cloze": "今天天气很___，我想喝热茶，不想吃冷的东西。",
     "chinese_simp_answer": "冷",
@@ -92,7 +92,7 @@
   {
     "id": "hsk1_07",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "我女儿在学校学习汉语，她很喜欢她的老师。",
     "chinese_simp_cloze": "我女儿在学校___汉语，她很喜欢她的老师。",
     "chinese_simp_answer": "学习",
@@ -107,7 +107,7 @@
   {
     "id": "hsk1_08",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "现在几点？我们下午三点去看电影，然后去饭店吃饭。",
     "chinese_simp_cloze": "现在___？我们下午三点去看电影，然后去饭店吃饭。",
     "chinese_simp_answer": "几点",
@@ -122,7 +122,7 @@
   {
     "id": "hsk1_09",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "这本书是我的，那本是你的，它们都在桌子上面。",
     "chinese_simp_cloze": "这本书是___，那本是你的，它们都在桌子上面。",
     "chinese_simp_answer": "我的",
@@ -137,7 +137,7 @@
   {
     "id": "hsk1_10",
     "level": 1,
-    "module": "HSK",
+    "module": "HSK1",
     "chinese_simp_full": "谢谢你帮我，没关系，我们都是好朋友。",
     "chinese_simp_cloze": "谢谢你帮我，___，我们都是好朋友。",
     "chinese_simp_answer": "没关系",
