@@ -430,24 +430,48 @@ body {
 }
 
 /* ===== Controles de Audio ===== */
-.audio-controls {
+/* Contenedor inline dentro del header */
+.audio-controls-inline {
     display: flex;
-    gap: 12px;
-    justify-content: center;
+    gap: 6px;
+    align-items: center;
 }
 
-.btn-audio {
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+.btn-audio-mini {
+    padding: 4px 10px;
+    background: rgba(37, 99, 235, 0.1); /* Azul muy suave */
+    color: var(--primary);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.btn-audio:hover {
-    background: rgba(255, 255, 255, 0.3);
+.btn-audio-mini:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-audio-mini:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Ajuste para modo oscuro */
+body.dark-mode .btn-audio-mini {
+    background: rgba(255, 255, 255, 0.1);
+    color: #93c5fd;
+    border-color: rgba(147, 197, 253, 0.3);
+}
+
+body.dark-mode .btn-audio-mini:hover {
+    background: #2563eb;
+    color: white;
 }
 
 /* ===== Responsive ===== */
