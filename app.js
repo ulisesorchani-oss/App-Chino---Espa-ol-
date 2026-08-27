@@ -896,52 +896,42 @@ function renderCurrentSentence() {
         let coloredHtml = '';
         let pyIndex = 0;
 
+                // ===== BUCLE DE COLORES CORREGIDO =====
+        
+        // 1. Expandir pinyin agrupado a sílabas individuales
+        const expandedPinyins = [];
+        for (const pyWord of s.pinyin.split(/\s+/)) {
+            if (typeof splitGroupedPinyin === 'function') {
+                expandedPinyins.push(...splitGroupedPinyin(pyWord));
+            } else {
+                expandedPinyins.push(pyWord); 
+            }
+        }
+
+        let coloredHtml = '';
+        let pyIndex = 0;
+
+        // 2. Recorrer carácter por carácter
         for (let i = 0; i < chars.length; i++) {
             const char = chars[i];
-
-            // Si es hueco, espacio o puntuación -> sin color, tal cual
+            
+            // Si es hueco, espacio o puntuación -> tal cual
             if (char === '_' || /[\s\p{P}]/u.test(char)) {
                 coloredHtml += char;
                 continue;
             }
 
-            // Es un carácter chino. Intentamos colorearlo.
-            // ESTRATEGIA SEGURA: Solo colorear si el índice de pinyin existe.
-            // Si el pinyin está agrupado (ej: "xuyao" para 2 chars), 
-            // el segundo carácter no tendrá pinyin propio en el array split por espacios.
-            // Para evitar errores, SOLO coloreamos si hay una correspondencia directa 
-            // o usamos un tono neutro para los "sobrantes" de palabras agrupadas.
-            
-            // Detectamos si es parte de una palabra multicanrácter comparando con el siguiente char
-            // (Lógica simplificada: si el siguiente char NO es espacio/puntuación/hueco, es palabra larga)
-            const nextChar = chars[i+1];
-            const isPartOfLongWord = nextChar && nextChar !== '_' && !/[\s\p{P}]/u.test(nextChar);
-
-            if (pyIndex < pinyins.length) {
-                const syllable = pinyins[pyIndex];
-                
-                // TRUCO VISUAL: Si es palabra larga y NO es el primer carácter,
-                // usamos tono neutro para no confundir. 
-                // Opcional: Puedes quitar esta condición si prefieres repetir el color.
-                const safeSyllable = (isPartOfLongWord && i > 0 && chars[i-1] !== '_' && !/[\s\p{P}]/u.test(chars[i-1])) 
-                                     ? '' : syllable; 
-                
-                coloredHtml += getColoredChar(char, safeSyllable);
-                
-                // AVANZAMOS ÍNDICE DE PINYIN SOLO SI NO ES PARTE DE PALABRA LARGA
-                // O SI ES EL PRIMER CARÁCTER DE ESA PALABRA
-                if (!isPartOfLongWord || (i === 0 || chars[i-1] === '_' || /[\s\p{P}]/u.test(chars[i-1]))) {
-                    pyIndex++;
-                }
+            // Es un carácter chino. Asignar color SIEMPRE que haya sílaba disponible
+            if (pyIndex < expandedPinyins.length) {
+                coloredHtml += getColoredChar(char, expandedPinyins[pyIndex]);
+                pyIndex++; 
             } else {
-                // Se acabó el pinyin -> Neutro
+                // Se acabó el pinyin -> Neutro (pero el carácter SE MUESTRA)
                 coloredHtml += `<span class="tone-0">${char}</span>`;
             }
         }
+        
         sentenceTextEl.innerHTML = coloredHtml;
-    } else {
-        // Sin colores: texto plano seguro
-        sentenceTextEl.textContent = displayText || 'Error en datos';
     }
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
@@ -1311,3 +1301,14 @@ if (themeBtn) { // Protección por si el botón no existe aún
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 }
+/**
+ * Divide pinyin agrupado en sílabas individuales
+ * Ej: "qǐngwèn" -> ["qǐng", "wèn"]
+ */
+function splitGroupedPinyin(word) {
+    if (!word) return [];
+    // Busca vocales con tono o mayúsculas para separar sílabas
+    const syllables = word.match(/[A-ZÀ-Ÿa-z]+?[āáàēéěèīíìōóǒòūúùǖǘǚǜ]*(?=[A-ZÀ-Ÿa-zāáǎàēéěèīíǐìōóòūúǔùǖǘǜ]|$)/g);
+    return syllables || [word];
+}
+
