@@ -743,7 +743,9 @@ function applySavedUI() {
         btnTones.textContent = showToneColors ? '🎨 Tonos: ON' : '🎨 Tonos: OFF';
         btnTones.classList.toggle('active', showToneColors);
         btnTones.classList.remove('hidden'); // ← Siempre visible
-        }
+    }
+}
+
 // ===== Carga de datos =====
 async function loadSentences() {
     try {
