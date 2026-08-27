@@ -927,7 +927,6 @@ function renderCurrentSentence() {
         sentenceTextEl.textContent = displayText || 'Error en datos';
     }
     // ===== FIN DEL RENDERIZADO =====
-}
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
     var pinyinEl = document.getElementById('pinyin-display');
