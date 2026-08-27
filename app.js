@@ -858,89 +858,79 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-       // ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
-    const sentenceTextEl = document.getElementById('sentence-text');
+      // ===== FUNCIÓN AUXILIAR PARA COLORES (Versión 2.0 - Infalible) =====
+function getColoredCharV2(char, fullPinyinString, charIndex) {
+    if (!fullPinyinString) return `<span class="tone-0">${char}</span>`;
     
-    // 1. Determinar qué texto base usar (Full o Cloze)
-    let displayText = '';
-
-    if (learningChinese) {
-        // Usamos el texto COMPLETO para garantizar que no falten caracteres
-        displayText = s['chinese_' + k + '_full']; 
-        
-        // Verificamos si debemos mostrar huecos
-        if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
-            // Usamos el cloze original si tiene la misma longitud (más seguro)
-            if (s['chinese_' + k + '_cloze'].length === displayText.length) {
-                displayText = s['chinese_' + k + '_cloze'];
-            } else {
-                // Fallback: reemplazo simple de la respuesta por ___
-                const answer = s['chinese_' + k + '_answer'];
-                displayText = displayText.replace(answer, '___');
-            }
-        }
-    } else {
-        displayText = s.spanish_cloze || s.spanish_full;
+    // Buscar TODAS las marcas de tono en el string completo de pinyin
+    const tonedVowels = fullPinyinString.match(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g);
+    
+    let toneClass = 'tone-0';
+    
+    // Si encontramos tonos y el índice del carácter chino es válido
+    if (tonedVowels && charIndex < tonedVowels.length) {
+        const mark = tonedVowels[charIndex];
+        if (/[āēīōūǖ]/.test(mark)) toneClass = 'tone-1';
+        else if (/[áéíóúǘ]/.test(mark)) toneClass = 'tone-2';
+        else if (/[ǎěǐǒǔǚ]/.test(mark)) toneClass = 'tone-3';
+        else if (/[àèìòùǜ]/.test(mark)) toneClass = 'tone-4';
     }
+    
+    return `<span class="${toneClass}">${char}</span>`;
+}
 
-       // 2. Renderizar con colores (SOLO si hay pinyin y es chino)
-    if (learningChinese && s.pinyin && state.showPinyin) {
-        const chars = Array.from(displayText);
-        
-        // ESTRATEGIA ROBUSTA: Asegurar 1 sílaba por carácter
-        let syllables = [];
-        const rawWords = s.pinyin.split(/\s+/);
-        
-        for (const word of rawWords) {
-            // Intentar dividir con la función auxiliar
-            if (typeof splitGroupedPinyin === 'function') {
-                const parts = splitGroupedPinyin(word);
-                syllables.push(...parts);
-            } else {
-                // Fallback: si no hay función, asumimos que está separado por espacios
-                syllables.push(word);
-            }
+// ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
+const sentenceTextEl = document.getElementById('sentence-text');
+
+// 1. Determinar qué texto base usar (Full o Cloze)
+let displayText = '';
+
+if (learningChinese) {
+    // Usamos el texto COMPLETO para garantizar que no falten caracteres
+    displayText = s['chinese_' + k + '_full']; 
+    
+    // Verificamos si debemos mostrar huecos
+    if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
+        // Usamos el cloze original si tiene la misma longitud (más seguro)
+        if (s['chinese_' + k + '_cloze'].length === displayText.length) {
+            displayText = s['chinese_' + k + '_cloze'];
+        } else {
+            // Fallback: reemplazo simple de la respuesta por ___
+            const answer = s['chinese_' + k + '_answer'];
+            displayText = displayText.replace(answer, '___');
         }
-
-        // DEBUG: Verificar longitudes (Borrar esto cuando funcione)
-        console.log(`Chars: ${chars.length} | Syllables: ${syllables.length}`);
-        console.log("Syllables:", syllables);
-
-        let coloredHtml = '';
-        let pyIndex = 0;
-
-        for (let i = 0; i < chars.length; i++) {
-            const char = chars[i];
-            
-            // Espacios, huecos y puntuación van tal cual
-            if (char === '_' || /[\s\p{P}]/u.test(char)) {
-                coloredHtml += char;
-                continue;
-            }
-
-            // Asignar color SIEMPRE que haya sílaba disponible
-            if (pyIndex < syllables.length) {
-                const currentSyllable = syllables[pyIndex];
-                
-                // VERIFICACIÓN EXTRA: Si la sílaba parece estar agrupada (tiene >1 vocal con tono),
-                // intentamos extraer solo el primer tono para este carácter.
-                // Esto es un parche de emergencia si splitGroupedPinyin falla.
-                let safeTonePy = currentSyllable;
-                
-                coloredHtml += getColoredChar(char, safeTonePy);
-                pyIndex++; 
-            } else {
-                // Se acabó el pinyin -> Neutro (pero el carácter SE MUESTRA)
-                coloredHtml += `<span class="tone-0">${char}</span>`;
-            }
-        }
-        
-        sentenceTextEl.innerHTML = coloredHtml;
-    } else {
-        sentenceTextEl.textContent = displayText || 'Error en datos';
-
     }
-    // ===== FIN DEL RENDERIZADO =====
+} else {
+    displayText = s.spanish_cloze || s.spanish_full;
+}
+
+// 2. Renderizar con colores (SOLO si hay pinyin y es chino)
+if (learningChinese && s.pinyin && state.showPinyin) {
+    const chars = Array.from(displayText);
+    
+    let coloredHtml = '';
+    let chineseCharIndex = 0; // Contador SOLO de caracteres chinos
+
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+        
+        // Espacios, huecos y puntuación van tal cual
+        if (char === '_' || /[\s\p{P}]/u.test(char)) {
+            coloredHtml += char;
+            continue;
+        }
+
+        // Es un carácter chino. Usar la función V2 que mapea por índice global
+        coloredHtml += getColoredCharV2(char, s.pinyin, chineseCharIndex);
+        chineseCharIndex++; 
+    }
+    
+    sentenceTextEl.innerHTML = coloredHtml;
+} else {
+    // Sin colores: texto plano seguro
+    sentenceTextEl.textContent = displayText || 'Error en datos';
+}
+// ===== FIN DEL RENDERIZADO =====
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
     var pinyinEl = document.getElementById('pinyin-display');
