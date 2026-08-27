@@ -1187,6 +1187,19 @@ function resetProgress() {
     renderCurrentSentence();
 }
 
+function toggleToneColors() {
+    showToneColors = !showToneColors;
+    const btn = document.getElementById('btn-tones');
+    
+    if (btn) {
+        btn.textContent = showToneColors ? '🎨 Tonos: ON' : '🎨 Tonos: OFF';
+        btn.classList.toggle('active', showToneColors);
+    }
+    
+    saveProgress();
+    renderCurrentSentence();
+}
+
 // ===== REPRODUCTOR DE AUDIO GLOBAL BLINDADO =====
 const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts'; // <--
 
@@ -1195,6 +1208,8 @@ const globalAudioPlayer = new Audio();
 let activeBtn = null;
 let originalBtnText = '';
 let isPlaying = false;
+// NUEVA VARIABLE PARA EL BOTÓN DE COLORES
+let showToneColors = false; // Empieza apagado
 
 async function playAudio(lang) {
     // Pausa: si ya está sonando y tocan el mismo botón, pausar
