@@ -745,8 +745,6 @@ function applySavedUI() {
         btnTones.classList.remove('hidden'); // ← Siempre visible
         }
     }
-}
-
 // ===== Carga de datos =====
 async function loadSentences() {
     try {
