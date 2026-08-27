@@ -149,6 +149,21 @@ body {
     font-style: italic;
     transition: opacity 0.3s;
 }
+/* Estilo para el botón de tonos */
+#btn-tones {
+    border-color: var(--warning);
+    color: var(--text-primary);
+}
+
+#btn-tones.active {
+    background-color: var(--warning);
+    color: white;
+    border-color: var(--warning);
+}
+
+body.dark-mode #btn-tones.active {
+    color: #000;
+}
 
 /* ===== SECCIONES DE FILTROS (NUEVO) ===== */
 .section-daily, .section-exams {
