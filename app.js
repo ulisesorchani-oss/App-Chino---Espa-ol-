@@ -858,85 +858,90 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-             // Renderizar caracteres chinos CON COLORES DE TONO (VERSIÓN SEGURA PARA PINYIN AGRUPADO)
+                 // ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
     const sentenceTextEl = document.getElementById('sentence-text');
     
-    if (learningChinese && s.pinyin) {
-        const fullText = s['chinese_' + k + '_full'];
-        const clozeText = s['chinese_' + k + '_cloze'];
+    // 1. Determinar qué texto base usar (Full o Cloze)
+    let displayText = '';
+    let isClozeMode = false;
+
+    if (learningChinese) {
+        // Usamos el texto COMPLETO para garantizar que no falten caracteres
+        // Luego reemplazamos la respuesta correcta por ___ visualmente si es modo cloze
+        displayText = s['chinese_' + k + '_full']; 
         
-        // Dividimos el pinyin por espacios para obtener las "palabras"
-        const pinyinWords = s.pinyin.split(/\s+/); 
+        // Verificamos si debemos mostrar huecos
+        if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
+            isClozeMode = true;
+            // Reemplazamos la respuesta en el texto completo por ___
+            // Nota: Esto asume que la respuesta aparece una sola vez. 
+            // Para mayor seguridad, usamos el cloze original si existe y tiene la misma longitud
+            if (s['chinese_' + k + '_cloze'].length === displayText.length) {
+                displayText = s['chinese_' + k + '_cloze'];
+            } else {
+                // Fallback seguro: reemplazo simple
+                const answer = s['chinese_' + k + '_answer'];
+                displayText = displayText.replace(answer, '___');
+            }
+        }
+    } else {
+        displayText = s.spanish_cloze || s.spanish_full;
+    }
+
+    // 2. Renderizar con colores (SOLO si hay pinyin y es chino)
+    if (learningChinese && s.pinyin && state.showPinyin) {
+        const chars = Array.from(displayText);
+        const pinyins = s.pinyin.split(/\s+/);
         
         let coloredHtml = '';
-        let wordIndex = 0;
-        let charInWordIndex = 0;
-        
-        // Reconstruimos la oración usando el CLOZE como plantilla de estructura
-        for (let i = 0; i < clozeText.length; i++) {
-            const char = clozeText[i];
-            
-            // Si es parte del hueco, espacio o puntuación, lo respetamos
+        let pyIndex = 0;
+
+        for (let i = 0; i < chars.length; i++) {
+            const char = chars[i];
+
+            // Si es hueco, espacio o puntuación -> sin color, tal cual
             if (char === '_' || /[\s\p{P}]/u.test(char)) {
                 coloredHtml += char;
-                // Resetear índice de carácter dentro de la palabra si encontramos espacio/puntuación
-                if (/[\s\p{P}]/u.test(char)) {
-                    charInWordIndex = 0; 
+                continue;
+            }
+
+            // Es un carácter chino. Intentamos colorearlo.
+            // ESTRATEGIA SEGURA: Solo colorear si el índice de pinyin existe.
+            // Si el pinyin está agrupado (ej: "xuyao" para 2 chars), 
+            // el segundo carácter no tendrá pinyin propio en el array split por espacios.
+            // Para evitar errores, SOLO coloreamos si hay una correspondencia directa 
+            // o usamos un tono neutro para los "sobrantes" de palabras agrupadas.
+            
+            // Detectamos si es parte de una palabra multicanrácter comparando con el siguiente char
+            // (Lógica simplificada: si el siguiente char NO es espacio/puntuación/hueco, es palabra larga)
+            const nextChar = chars[i+1];
+            const isPartOfLongWord = nextChar && nextChar !== '_' && !/[\s\p{P}]/u.test(nextChar);
+
+            if (pyIndex < pinyins.length) {
+                const syllable = pinyins[pyIndex];
+                
+                // TRUCO VISUAL: Si es palabra larga y NO es el primer carácter,
+                // usamos tono neutro para no confundir. 
+                // Opcional: Puedes quitar esta condición si prefieres repetir el color.
+                const safeSyllable = (isPartOfLongWord && i > 0 && chars[i-1] !== '_' && !/[\s\p{P}]/u.test(chars[i-1])) 
+                                     ? '' : syllable; 
+                
+                coloredHtml += getColoredChar(char, safeSyllable);
+                
+                // AVANZAMOS ÍNDICE DE PINYIN SOLO SI NO ES PARTE DE PALABRA LARGA
+                // O SI ES EL PRIMER CARÁCTER DE ESA PALABRA
+                if (!isPartOfLongWord || (i === 0 || chars[i-1] === '_' || /[\s\p{P}]/u.test(chars[i-1]))) {
+                    pyIndex++;
                 }
             } else {
-                // Es un carácter chino. Intentamos asignarle color.
-                // ADVERTENCIA: Con pinyin agrupado, esto es una aproximación.
-                // Para palabras de 1 carácter funciona perfecto. 
-                // Para palabras largas, todos los caracteres recibirán el color de la primera sílaba
-                // o el del último disponible, lo cual puede ser impreciso visualmente.
-                
-                const currentWordPy = pinyinWords[wordIndex] || '';
-                
-                // TRUCO: Solo aplicamos color si la "palabra" pinyin tiene la misma longitud 
-                // que los caracteres restantes antes del próximo espacio/hueco.
-                // Si no coincide, usamos tono neutro para evitar errores visuales graves.
-                
-                // Contamos cuántos caracteres chinos seguidos hay desde aquí
-                let consecutiveChars = 0;
-                for(let j=i; j<clozeText.length && clozeText[j] !== '_' && !/[\s\p{P}]/u.test(clozeText[j]); j++) {
-                    consecutiveChars++;
-                }
-                
-                // Si la longitud coincide, podemos colorear con confianza
-                // (Esto asume que tu pinyin agrupado respeta los límites de palabras chinas)
-                if (currentWordPy && consecutiveChars > 0) {
-                     // Para simplificar y evitar errores graves con pinyin agrupado,
-                     // aplicaremos el color basado en la PRIMERA sílaba de la palabra
-                     // o dejaremos neutro si es ambiguo.
-                     
-                     // OPCIÓN A (Más segura): Colorear solo si es palabra de 1 carácter
-                     if (consecutiveChars === 1) {
-                         coloredHtml += getColoredChar(char, currentWordPy);
-                     } else {
-                         // OPCIÓN B (Visual): Colorear todo con el tono de la primera sílaba
-                         // (No es lingüísticamente perfecto, pero visualmente ayuda a agrupar)
-                         const firstSyllableTone = currentWordPy.charAt(0); // Simplificación
-                         coloredHtml += getColoredChar(char, currentWordPy); 
-                     }
-                     
-                     charInWordIndex++;
-                     
-                     // Si terminamos la palabra china, avanzamos al siguiente pinyin
-                     if (charInWordIndex >= consecutiveChars) {
-                         wordIndex++;
-                         charInWordIndex = 0;
-                         i += (consecutiveChars - 1); // Saltar los caracteres ya procesados
-                     }
-                } else {
-                    coloredHtml += `<span class="tone-0">${char}</span>`;
-                }
+                // Se acabó el pinyin -> Neutro
+                coloredHtml += `<span class="tone-0">${char}</span>`;
             }
         }
         sentenceTextEl.innerHTML = coloredHtml;
     } else {
-        // Fallback original
-        const clozeText = learningChinese ? s['chinese_' + k + '_cloze'] : s.spanish_cloze;
-        sentenceTextEl.textContent = clozeText || 'Error en datos';
+        // Sin colores: texto plano seguro
+        sentenceTextEl.textContent = displayText || 'Error en datos';
     }
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
