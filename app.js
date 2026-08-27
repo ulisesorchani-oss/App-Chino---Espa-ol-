@@ -858,28 +858,23 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-                 // ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
+       // ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
     const sentenceTextEl = document.getElementById('sentence-text');
     
     // 1. Determinar qué texto base usar (Full o Cloze)
     let displayText = '';
-    let isClozeMode = false;
 
     if (learningChinese) {
         // Usamos el texto COMPLETO para garantizar que no falten caracteres
-        // Luego reemplazamos la respuesta correcta por ___ visualmente si es modo cloze
         displayText = s['chinese_' + k + '_full']; 
         
         // Verificamos si debemos mostrar huecos
         if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
-            isClozeMode = true;
-            // Reemplazamos la respuesta en el texto completo por ___
-            // Nota: Esto asume que la respuesta aparece una sola vez. 
-            // Para mayor seguridad, usamos el cloze original si existe y tiene la misma longitud
+            // Usamos el cloze original si tiene la misma longitud (más seguro)
             if (s['chinese_' + k + '_cloze'].length === displayText.length) {
                 displayText = s['chinese_' + k + '_cloze'];
             } else {
-                // Fallback seguro: reemplazo simple
+                // Fallback: reemplazo simple de la respuesta por ___
                 const answer = s['chinese_' + k + '_answer'];
                 displayText = displayText.replace(answer, '___');
             }
@@ -891,14 +886,8 @@ function renderCurrentSentence() {
     // 2. Renderizar con colores (SOLO si hay pinyin y es chino)
     if (learningChinese && s.pinyin && state.showPinyin) {
         const chars = Array.from(displayText);
-        const pinyins = s.pinyin.split(/\s+/);
         
-        let coloredHtml = '';
-        let pyIndex = 0;
-
-                // ===== BUCLE DE COLORES CORREGIDO =====
-        
-        // 1. Expandir pinyin agrupado a sílabas individuales
+        // Expandir pinyin agrupado a sílabas individuales
         const expandedPinyins = [];
         for (const pyWord of s.pinyin.split(/\s+/)) {
             if (typeof splitGroupedPinyin === 'function') {
@@ -908,10 +897,11 @@ function renderCurrentSentence() {
             }
         }
 
+        // Inicializar variables (UNA SOLA VEZ)
         let coloredHtml = '';
         let pyIndex = 0;
 
-        // 2. Recorrer carácter por carácter
+        // Recorrer carácter por carácter
         for (let i = 0; i < chars.length; i++) {
             const char = chars[i];
             
@@ -932,7 +922,12 @@ function renderCurrentSentence() {
         }
         
         sentenceTextEl.innerHTML = coloredHtml;
+    } else {
+        // Sin colores: texto plano seguro
+        sentenceTextEl.textContent = displayText || 'Error en datos';
     }
+    // ===== FIN DEL RENDERIZADO =====
+}
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
     var pinyinEl = document.getElementById('pinyin-display');
