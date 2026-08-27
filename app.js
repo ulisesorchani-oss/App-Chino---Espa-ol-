@@ -769,20 +769,42 @@ async function loadSentences() {
 
 // ===== Eventos =====
 function setupEventListeners() {
-    document.getElementById('btn-es-cn').addEventListener('click', () => setMode('es-cn'));
-    document.getElementById('btn-cn-es').addEventListener('click', () => setMode('cn-es'));
-    document.getElementById('btn-simplified').addEventListener('click', () => setCharType('simp'));
-    document.getElementById('btn-traditional').addEventListener('click', () => setCharType('trad'));
-    document.getElementById('btn-check').addEventListener('click', checkAnswer);
-    document.getElementById('btn-reveal').addEventListener('click', revealAnswer);
-    document.getElementById('btn-know').addEventListener('click', () => markWord(true));
-    document.getElementById('btn-not-know').addEventListener('click', () => markWord(false));
-    document.getElementById('answer-input').addEventListener('keypress', e => {
-        if (e.key === 'Enter') checkAnswer();
-    });
-    document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
-    document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
+    // Función auxiliar para evitar errores si falta algún botón
+    const safeAdd = (id, callback) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', callback);
+    };
+
+    // Modo ES/CN
+    safeAdd('btn-es-cn', () => setMode('es-cn'));
+    safeAdd('btn-cn-es', () => setMode('cn-es'));
     
+    // Tipo de carácter (Simplificado/Tradicional)
+    safeAdd('btn-simplified', () => setCharType('simp'));
+    safeAdd('btn-traditional', () => setCharType('trad'));
+    
+    // Acciones principales
+    safeAdd('btn-check', checkAnswer);
+    safeAdd('btn-reveal', revealAnswer);
+    safeAdd('btn-know', () => markWord(true));
+    safeAdd('btn-not-know', () => markWord(false));
+    safeAdd('btn-reset', resetProgress);
+    safeAdd('btn-pinyin', togglePinyin);
+    safeAdd('btn-tones', toggleToneColors);
+    
+    // Input Enter
+    const input = document.getElementById('answer-input');
+    if (input) {
+        input.addEventListener('keypress', e => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+    }
+    
+    // Audio
+    safeAdd('btn-play-es', () => playAudio('es'));
+    safeAdd('btn-play-cn', () => playAudio('cn'));
+    
+    // Filtros y Selects
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
@@ -790,14 +812,6 @@ function setupEventListeners() {
     const hskSelect = document.getElementById('select-hsk-level');
     if (hskSelect) {
         hskSelect.addEventListener('change', (e) => setModule(e.target.value));
-    }
-    
-    document.getElementById('btn-reset').addEventListener('click', resetProgress);
-    document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
-    
-    const btnTones = document.getElementById('btn-tones');
-    if (btnTones) {
-        btnTones.addEventListener('click', toggleToneColors);
     }
 }
 
