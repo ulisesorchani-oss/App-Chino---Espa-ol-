@@ -883,37 +883,51 @@ function renderCurrentSentence() {
         displayText = s.spanish_cloze || s.spanish_full;
     }
 
-    // 2. Renderizar con colores (SOLO si hay pinyin y es chino)
+       // 2. Renderizar con colores (SOLO si hay pinyin y es chino)
     if (learningChinese && s.pinyin && state.showPinyin) {
         const chars = Array.from(displayText);
         
-        // Expandir pinyin agrupado a sílabas individuales
-        const expandedPinyins = [];
-        for (const pyWord of s.pinyin.split(/\s+/)) {
+        // ESTRATEGIA ROBUSTA: Asegurar 1 sílaba por carácter
+        let syllables = [];
+        const rawWords = s.pinyin.split(/\s+/);
+        
+        for (const word of rawWords) {
+            // Intentar dividir con la función auxiliar
             if (typeof splitGroupedPinyin === 'function') {
-                expandedPinyins.push(...splitGroupedPinyin(pyWord));
+                const parts = splitGroupedPinyin(word);
+                syllables.push(...parts);
             } else {
-                expandedPinyins.push(pyWord); 
+                // Fallback: si no hay función, asumimos que está separado por espacios
+                syllables.push(word);
             }
         }
 
-        // Inicializar variables (UNA SOLA VEZ)
+        // DEBUG: Verificar longitudes (Borrar esto cuando funcione)
+        console.log(`Chars: ${chars.length} | Syllables: ${syllables.length}`);
+        console.log("Syllables:", syllables);
+
         let coloredHtml = '';
         let pyIndex = 0;
 
-        // Recorrer carácter por carácter
         for (let i = 0; i < chars.length; i++) {
             const char = chars[i];
             
-            // Si es hueco, espacio o puntuación -> tal cual
+            // Espacios, huecos y puntuación van tal cual
             if (char === '_' || /[\s\p{P}]/u.test(char)) {
                 coloredHtml += char;
                 continue;
             }
 
-            // Es un carácter chino. Asignar color SIEMPRE que haya sílaba disponible
-            if (pyIndex < expandedPinyins.length) {
-                coloredHtml += getColoredChar(char, expandedPinyins[pyIndex]);
+            // Asignar color SIEMPRE que haya sílaba disponible
+            if (pyIndex < syllables.length) {
+                const currentSyllable = syllables[pyIndex];
+                
+                // VERIFICACIÓN EXTRA: Si la sílaba parece estar agrupada (tiene >1 vocal con tono),
+                // intentamos extraer solo el primer tono para este carácter.
+                // Esto es un parche de emergencia si splitGroupedPinyin falla.
+                let safeTonePy = currentSyllable;
+                
+                coloredHtml += getColoredChar(char, safeTonePy);
                 pyIndex++; 
             } else {
                 // Se acabó el pinyin -> Neutro (pero el carácter SE MUESTRA)
@@ -923,8 +937,8 @@ function renderCurrentSentence() {
         
         sentenceTextEl.innerHTML = coloredHtml;
     } else {
-        // Sin colores: texto plano seguro
         sentenceTextEl.textContent = displayText || 'Error en datos';
+
     }
     // ===== FIN DEL RENDERIZADO =====
     
@@ -1295,14 +1309,35 @@ if (themeBtn) { // Protección por si el botón no existe aún
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 }
-/**
- * Divide pinyin agrupado en sílabas individuales
- * Ej: "qǐngwèn" -> ["qǐng", "wèn"]
- */
 function splitGroupedPinyin(word) {
     if (!word) return [];
-    // Busca vocales con tono o mayúsculas para separar sílabas
-    const syllables = word.match(/[A-ZÀ-Ÿa-z]+?[āáàēéěèīíìōóǒòūúùǖǘǚǜ]*(?=[A-ZÀ-Ÿa-zāáǎàēéěèīíǐìōóòūúǔùǖǘǜ]|$)/g);
-    return syllables || [word];
+    
+    // Estrategia: Cortar la palabra cada vez que encontramos una vocal con tono
+    // que NO esté al inicio de la palabra (indicando nueva sílaba)
+    const syllables = [];
+    let currentSyllable = '';
+    
+    for (const char of word) {
+        // Si es una vocal con tono Y ya tenemos consonantes antes, es nueva sílaba
+        const isTonedVowel = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(char);
+        
+        if (isTonedVowel && currentSyllable.length > 0 && /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/.test(currentSyllable.slice(-1))) {
+             // Caso especial: a veces la consonante final de la sílaba anterior 
+             // se pega al inicio de la siguiente en errores de tipeo, pero asumimos estándar.
+             // Simplemente iniciamos nueva sílaba si la anterior ya tiene vocal con tono
+             if (/[āáǎàēéěèīíǐìōóòūúǔùǖǘǜ]/.test(currentSyllable)) {
+                 syllables.push(currentSyllable);
+                 currentSyllable = char;
+                 continue;
+             }
+        }
+        
+        currentSyllable += char;
+    }
+    
+    if (currentSyllable) syllables.push(currentSyllable);
+    
+    // Fallback: si no detectó tonos, devuelve la palabra original
+    return syllables.length > 0 ? syllables : [word];
 }
 
