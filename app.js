@@ -1400,4 +1400,3 @@ function splitGroupedPinyin(word) {
     // Fallback: si no detectó tonos, devuelve la palabra original
     return syllables.length > 0 ? syllables : [word];
 }
-
