@@ -879,23 +879,28 @@ function getColoredCharV2(char, fullPinyinString, charIndex) {
     return `<span class="${toneClass}">${char}</span>`;
 }
 
+// ===== FUNCIÓN AUXILIAR PARA COLORES (Versión 3.0 - Mapeo Directo) =====
+function getToneClass(syllable) {
+    if (!syllable) return 'tone-0';
+    const py = syllable.toLowerCase();
+    if (/[āēīōūǖ]/.test(py)) return 'tone-1';
+    if (/[áéíóúǘ]/.test(py)) return 'tone-2';
+    if (/[ǎěǐǒǔǚ]/.test(py)) return 'tone-3';
+    if (/[àèìòùǜ]/.test(py)) return 'tone-4';
+    return 'tone-0';
+}
+
 // ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
 const sentenceTextEl = document.getElementById('sentence-text');
 
-// 1. Determinar qué texto base usar (Full o Cloze)
+// 1. Determinar texto base
 let displayText = '';
-
 if (learningChinese) {
-    // Usamos el texto COMPLETO para garantizar que no falten caracteres
     displayText = s['chinese_' + k + '_full']; 
-    
-    // Verificamos si debemos mostrar huecos
     if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
-        // Usamos el cloze original si tiene la misma longitud (más seguro)
         if (s['chinese_' + k + '_cloze'].length === displayText.length) {
             displayText = s['chinese_' + k + '_cloze'];
         } else {
-            // Fallback: reemplazo simple de la respuesta por ___
             const answer = s['chinese_' + k + '_answer'];
             displayText = displayText.replace(answer, '___');
         }
@@ -904,25 +909,54 @@ if (learningChinese) {
     displayText = s.spanish_cloze || s.spanish_full;
 }
 
-// 2. Renderizar con colores (SOLO si hay pinyin y es chino)
-if (learningChinese && s.pinyin && state.showPinyin) {
+// 2. Renderizar con colores
+if (learningChinese && s.pinyin && state.showPinyin && showToneColors) {
     const chars = Array.from(displayText);
+    const pinyinWords = s.pinyin.split(/\s+/); // ["Nǐ", "hǎo,", "wǒ", "jiào", "Lǐ", "Míng," ...]
     
     let coloredHtml = '';
-    let chineseCharIndex = 0; // Contador SOLO de caracteres chinos
-
+    let wordIndex = 0;
+    let charInWordIndex = 0;
+    
+    // Contamos cuántos caracteres chinos reales hay en la palabra actual de pinyin
+    // Para ello, miramos hacia adelante en 'chars' hasta encontrar un espacio/puntuación/hueco
+    
     for (let i = 0; i < chars.length; i++) {
         const char = chars[i];
         
-        // Espacios, huecos y puntuación van tal cual
+        // Si es hueco, espacio o puntuación -> tal cual, reseteamos contador de palabra
         if (char === '_' || /[\s\p{P}]/u.test(char)) {
             coloredHtml += char;
+            // Solo avanzamos wordIndex si encontramos un separador real (espacio)
+            // y si la palabra anterior tenía caracteres
+            if (/[\s]/u.test(char)) {
+                wordIndex++;
+                charInWordIndex = 0;
+            }
             continue;
         }
-
-        // Es un carácter chino. Usar la función V2 que mapea por índice global
-        coloredHtml += getColoredCharV2(char, s.pinyin, chineseCharIndex);
-        chineseCharIndex++; 
+        
+        // Es un carácter chino. Obtenemos la palabra de pinyin actual
+        const currentPyWord = pinyinWords[wordIndex] || '';
+        
+        // Asignamos color basado en la palabra completa
+        // (Para palabras de 1 carácter es exacto. Para palabras largas, todos tendrán el mismo color,
+        // pero al menos no se desfasará el resto de la oración)
+        const toneClass = getToneClass(currentPyWord);
+        
+        coloredHtml += `<span class="${toneClass}">${char}</span>`;
+        
+        charInWordIndex++;
+        
+        // Verificamos si terminamos la palabra china actual
+        // Miramos el siguiente carácter: si es espacio/puntuación/hueco o fin de string, terminamos palabra
+        const nextChar = chars[i + 1];
+        const isEndOfWord = !nextChar || nextChar === '_' || /[\s\p{P}]/u.test(nextChar);
+        
+        if (isEndOfWord) {
+            wordIndex++;
+            charInWordIndex = 0;
+        }
     }
     
     sentenceTextEl.innerHTML = coloredHtml;
