@@ -675,6 +675,24 @@ function ck() {
     return state.charType === 'trad' ? 'trad' : 'simp';
 }
 
+/**
+ * Detecta el tono de una sílaba pinyin y devuelve el carácter envuelto en span con clase de color
+ */
+function getColoredChar(char, pinyinSyllable) {
+    if (!pinyinSyllable) return `<span>${char}</span>`;
+    
+    const py = pinyinSyllable.toLowerCase().trim();
+    let toneClass = 'tone-0'; // Por defecto neutro
+    
+    // Detectar marca de tono (diacrítico)
+    if (/[āēīōūǖ]/.test(py)) toneClass = 'tone-1';
+    else if (/[áéíóúǘ]/.test(py)) toneClass = 'tone-2';
+    else if (/[ǎěǐǒǔǚ]/.test(py)) toneClass = 'tone-3';
+    else if (/[àèìòùǜ]/.test(py)) toneClass = 'tone-4';
+    
+    return `<span class="${toneClass}">${char}</span>`;
+}
+
 function getFiltered() {
     if (state.activeModule === 'todas') return state.sentences;
     return state.sentences.filter(s => s.module === state.activeModule);
@@ -840,14 +858,34 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-    // Mostrar el CLOZE en el idioma que se está APRENDIENDO
-    let clozeText;
-    if (learningChinese) {
-        clozeText = s['chinese_' + k + '_cloze'];
+       // Renderizar caracteres chinos CON COLORES DE TONO
+    const sentenceTextEl = document.getElementById('sentence-text');
+    
+    // Solo aplicar colores si estamos aprendiendo chino Y hay pinyin disponible
+    if (learningChinese && s.pinyin) {
+        const chars = Array.from(s['chinese_' + k + '_full']); // Array de caracteres
+        const pinyins = s.pinyin.split(/\s+/); // Array de sílabas
+        
+        let coloredHtml = '';
+        
+        for (let i = 0; i < chars.length; i++) {
+            const char = chars[i];
+            const syllable = pinyins[i] || '';
+            
+            // Si es espacio o puntuación, no aplicar color
+            if (/[\s\p{P}]/u.test(char)) {
+                coloredHtml += char;
+            } else {
+                coloredHtml += getColoredChar(char, syllable);
+            }
+        }
+        
+        sentenceTextEl.innerHTML = coloredHtml;
     } else {
-        clozeText = s.spanish_cloze;
+        // Comportamiento original si no hay pinyin o modo español
+        const clozeText = learningChinese ? s['chinese_' + k + '_cloze'] : s.spanish_cloze;
+        sentenceTextEl.textContent = clozeText || 'Error en datos';
     }
-    document.getElementById('sentence-text').textContent = clozeText || 'Error en datos';
 
     // Pinyin: solo cuando se aprende chino Y toggle activado
     var pinyinEl = document.getElementById('pinyin-display');
