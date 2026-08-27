@@ -792,6 +792,10 @@ document.getElementById('select-hsk-level').addEventListener('change', (e) => {
     
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
+   // Evento para el botón de colores de tonos
+const btnTones = document.getElementById('btn-tones');
+if (btnTones) {
+    btnTones.addEventListener('click', toggleToneColors);
 }
 
 // ===== Modo ES<->CN =====
@@ -837,8 +841,25 @@ function setModule(mod) {
 function togglePinyin() {
     state.showPinyin = !state.showPinyin;
     var btn = document.getElementById('btn-pinyin');
-    btn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
-    btn.classList.toggle('active', state.showPinyin);
+    
+    if (btn) {
+        btn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+        btn.classList.toggle('active', state.showPinyin);
+    }
+    
+    // MOSTRAR/OCULTAR botón de tonos según estado de pinyin
+    const btnTones = document.getElementById('btn-tones');
+    if (btnTones) {
+        if (state.showPinyin) {
+            btnTones.classList.remove('hidden');
+        } else {
+            btnTones.classList.add('hidden');
+            showToneColors = false;
+            btnTones.textContent = '🎨 Tonos: OFF';
+            btnTones.classList.remove('active');
+        }
+    }
+    
     saveProgress();
     renderCurrentSentence();
 }
@@ -968,7 +989,7 @@ if (learningChinese && s.pinyin && state.showPinyin)  {
     
     // Pinyin: solo cuando se aprende chino Y toggle activado
     var pinyinEl = document.getElementById('pinyin-display');
-    if (learningChinese && state.showPinyin && s.pinyin) {
+    if (learningChinese && s.pinyin && state.showPinyin && showToneColors) {
         pinyinEl.textContent = s.pinyin;
         pinyinEl.classList.remove('hidden');
     } else {
