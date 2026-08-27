@@ -894,15 +894,39 @@ function renderCurrentSentence() {
 
     const sentenceTextEl = document.getElementById('sentence-text');
 
-        // Renderizar con colores SOLO si están activados
+           // Renderizar con colores SOLO si están activados
     if (learningChinese && s.pinyin && showToneColors) {
         const chars = Array.from(displayText);
-        
-        // Extraer TODAS las marcas de tono del string completo de pinyin
-        const allToneMarks = s.pinyin.match(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǜ]/g) || [];
+        const pinyinWords = s.pinyin.split(/\s+/);
         
         let coloredHtml = '';
-        let toneMarkIndex = 0; // Índice independiente para las marcas de tono
+        let wordIndex = 0;
+        let charCountInCurrentWord = 0;
+        let expectedCharsInCurrentWord = 0;
+        
+        // Pre-calcular cuántos caracteres tiene cada palabra de pinyin
+        // Esto evita el desface con partículas neutras
+        const wordCharCounts = [];
+        let tempCharIdx = 0;
+        for (let w = 0; w < pinyinWords.length; w++) {
+            let count = 0;
+            while (tempCharIdx < chars.length && 
+                   chars[tempCharIdx] !== '_' && 
+                   !/[\s\p{P}]/u.test(chars[tempCharIdx])) {
+                count++;
+                tempCharIdx++;
+            }
+            // Saltar separadores
+            while (tempCharIdx < chars.length && 
+                   (chars[tempCharIdx] === '_' || /[\s\p{P}]/u.test(chars[tempCharIdx]))) {
+                tempCharIdx++;
+            }
+            wordCharCounts.push(count > 0 ? count : 1); // Mínimo 1 carácter por palabra
+        }
+        
+        // Ahora renderizar con los conteos correctos
+        wordIndex = 0;
+        charCountInCurrentWord = 0;
         
         for (let i = 0; i < chars.length; i++) {
             const char = chars[i];
@@ -910,21 +934,27 @@ function renderCurrentSentence() {
             // Huecos, espacios y puntuación van tal cual
             if (char === '_' || /[\s\p{P}]/u.test(char)) {
                 coloredHtml += char;
+                // Resetear contador al encontrar separador
+                if (wordIndex < pinyinWords.length) {
+                    wordIndex++;
+                    charCountInCurrentWord = 0;
+                }
                 continue;
             }
             
-            // Es un carácter chino. Asignarle la N-ésima marca de tono
-            let toneClass = 'tone-0';
-            if (toneMarkIndex < allToneMarks.length) {
-                const mark = allToneMarks[toneMarkIndex];
-                if (/[āēīōūǖ]/.test(mark)) toneClass = 'tone-1';
-                else if (/[áéíóúǘ]/.test(mark)) toneClass = 'tone-2';
-                else if (/[ǎěǐǒǚ]/.test(mark)) toneClass = 'tone-3';
-                else if (/[àèìòùǜ]/.test(mark)) toneClass = 'tone-4';
-                toneMarkIndex++;
-            }
+            // Es un carácter chino. Obtener color de la palabra actual
+            const currentPyWord = pinyinWords[wordIndex] || '';
+            const toneClass = getToneClass(currentPyWord);
             
             coloredHtml += `<span class="${toneClass}">${char}</span>`;
+            
+            charCountInCurrentWord++;
+            
+            // Si completamos los caracteres esperados para esta palabra, avanzar
+            if (charCountInCurrentWord >= (wordCharCounts[wordIndex] || 1)) {
+                wordIndex++;
+                charCountInCurrentWord = 0;
+            }
         }
         
         sentenceTextEl.innerHTML = coloredHtml;
