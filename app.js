@@ -716,15 +716,19 @@ function applySavedUI() {
     const btnCnEs = document.getElementById('btn-cn-es');
     if (btnCnEs) btnCnEs.classList.toggle('active', state.mode === 'cn-es');
 
+        // Actualizar estado visual de botones simp/trad
     const btnSimp = document.getElementById('btn-simplified');
-    if (btnSimp) btnSimp.classList.toggle('active', state.charType === 'simp');
-
     const btnTrad = document.getElementById('btn-traditional');
-    if (btnTrad) btnTrad.classList.toggle('active', state.charType === 'trad');
 
-    const scriptLabel = document.getElementById('script-label');
-    if (scriptLabel) scriptLabel.textContent = state.charType === 'simp' ? '简体' : '繁體';
+    if (btnSimp) {
+        btnSimp.classList.toggle('active', state.charType === 'simp');
+        btnSimp.innerHTML = state.charType === 'simp' ? '<b>简</b> 简体' : '简 简体';
+    }
 
+    if (btnTrad) {
+        btnTrad.classList.toggle('active', state.charType === 'trad');
+        btnTrad.innerHTML = state.charType === 'trad' ? '<b>繁</b> 繁體' : '繁 繁體';
+    }
     // Actualizar botones diarios Y de exámenes
     const cats = document.querySelectorAll('.cat-btn, .btn-exam');
     cats.forEach(b => {
@@ -826,9 +830,20 @@ function setMode(mode) {
 
 function setCharType(ct) {
     state.charType = ct;
-    document.getElementById('btn-simplified').classList.toggle('active', ct === 'simp');
-    document.getElementById('btn-traditional').classList.toggle('active', ct === 'trad');
-    document.getElementById('script-label').textContent = ct === 'simp' ? '简体' : '繁體';
+    
+    const btnSimp = document.getElementById('btn-simplified');
+    const btnTrad = document.getElementById('btn-traditional');
+    
+    if (btnSimp) {
+        btnSimp.classList.toggle('active', ct === 'simp');
+        btnSimp.innerHTML = ct === 'simp' ? '<b>简</b> 简体' : '简 简体';
+    }
+    
+    if (btnTrad) {
+        btnTrad.classList.toggle('active', ct === 'trad');
+        btnTrad.innerHTML = ct === 'trad' ? '<b>繁</b> 繁體' : '繁 繁體';
+    }
+    
     saveProgress();
     renderCurrentSentence();
 }
@@ -908,7 +923,7 @@ function renderCurrentSentence() {
 
     const sentenceTextEl = document.getElementById('sentence-text');
 
-           // Renderizar con colores SOLO si están activados
+             // Renderizar con colores SOLO si están activados
     if (learningChinese && s.pinyin && showToneColors) {
         const chars = Array.from(displayText);
         const pinyinWords = s.pinyin.split(/\s+/);
@@ -916,29 +931,30 @@ function renderCurrentSentence() {
         let coloredHtml = '';
         let wordIndex = 0;
         let charCountInCurrentWord = 0;
-        let expectedCharsInCurrentWord = 0;
         
-        // Pre-calcular cuántos caracteres tiene cada palabra de pinyin
-        // Esto evita el desface con partículas neutras
+        // Pre-calcular cuántos caracteres chinos tiene cada palabra de pinyin
+        // Esto evita el desface con partículas neutras o palabras largas
         const wordCharCounts = [];
         let tempCharIdx = 0;
+        
         for (let w = 0; w < pinyinWords.length; w++) {
             let count = 0;
+            // Contar caracteres chinos consecutivos
             while (tempCharIdx < chars.length && 
                    chars[tempCharIdx] !== '_' && 
                    !/[\s\p{P}]/u.test(chars[tempCharIdx])) {
                 count++;
                 tempCharIdx++;
             }
-            // Saltar separadores
+            // Saltar separadores (espacios, puntuación, huecos)
             while (tempCharIdx < chars.length && 
                    (chars[tempCharIdx] === '_' || /[\s\p{P}]/u.test(chars[tempCharIdx]))) {
                 tempCharIdx++;
             }
-            wordCharCounts.push(count > 0 ? count : 1); // Mínimo 1 carácter por palabra
+            wordCharCounts.push(count > 0 ? count : 1);
         }
         
-        // Ahora renderizar con los conteos correctos
+        // Resetear índices para el renderizado real
         wordIndex = 0;
         charCountInCurrentWord = 0;
         
@@ -948,7 +964,7 @@ function renderCurrentSentence() {
             // Huecos, espacios y puntuación van tal cual
             if (char === '_' || /[\s\p{P}]/u.test(char)) {
                 coloredHtml += char;
-                // Resetear contador al encontrar separador
+                // Avanzar al siguiente palabra de pinyin al encontrar separador
                 if (wordIndex < pinyinWords.length) {
                     wordIndex++;
                     charCountInCurrentWord = 0;
