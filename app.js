@@ -605,6 +605,7 @@ const EMBEDDED_SENTENCES = [
   }
 ];
 
+}
 // ===== Constantes =====
 const STORAGE_KEY = 'chino-espanol-app-v2';
 
@@ -637,6 +638,9 @@ let state = {
     showPinyin: true
 };
 
+// Variable global para el botón de colores
+let showToneColors = false; 
+
 // ===== Persistencia localStorage =====
 function saveProgress() {
     try {
@@ -648,7 +652,8 @@ function saveProgress() {
             charType: state.charType,
             currentIndex: state.currentIndex,
             activeModule: state.activeModule,
-            showPinyin: state.showPinyin
+            showPinyin: state.showPinyin,
+            showToneColors: showToneColors // Guardar estado de colores
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -667,6 +672,7 @@ function loadProgress() {
         if (typeof data.currentIndex === 'number') state.currentIndex = data.currentIndex;
         if (data.activeModule) state.activeModule = data.activeModule;
         if (data.showPinyin !== undefined) state.showPinyin = data.showPinyin;
+        if (data.showToneColors !== undefined) showToneColors = data.showToneColors;
     } catch (e) { /* silencioso */ }
 }
 
@@ -676,21 +682,16 @@ function ck() {
 }
 
 /**
- * Detecta el tono de una sílaba pinyin y devuelve el carácter envuelto en span con clase de color
+ * Detecta el tono de una sílaba pinyin y devuelve la clase CSS correspondiente
  */
-function getColoredChar(char, pinyinSyllable) {
-    if (!pinyinSyllable) return `<span>${char}</span>`;
-    
-    const py = pinyinSyllable.toLowerCase().trim();
-    let toneClass = 'tone-0'; // Por defecto neutro
-    
-    // Detectar marca de tono (diacrítico)
-    if (/[āēīōūǖ]/.test(py)) toneClass = 'tone-1';
-    else if (/[áéíóúǘ]/.test(py)) toneClass = 'tone-2';
-    else if (/[ǎěǐǒǔǚ]/.test(py)) toneClass = 'tone-3';
-    else if (/[àèìòùǜ]/.test(py)) toneClass = 'tone-4';
-    
-    return `<span class="${toneClass}">${char}</span>`;
+function getToneClass(syllable) {
+    if (!syllable) return 'tone-0';
+    const py = syllable.toLowerCase();
+    if (/[āēīōūǖ]/.test(py)) return 'tone-1';
+    if (/[áéíóúǘ]/.test(py)) return 'tone-2';
+    if (/[ǎěǐǒǔǚ]/.test(py)) return 'tone-3';
+    if (/[àèìòùǜ]/.test(py)) return 'tone-4';
+    return 'tone-0';
 }
 
 function getFiltered() {
@@ -733,39 +734,46 @@ function applySavedUI() {
 
     const pinyinBtn = document.getElementById('btn-pinyin');
     if (pinyinBtn) {
-        pinyinBtn.textContent = state.showPinyin ? '📖 Pinyin: ON' : '📖 Pinyin: OFF';
+        pinyinBtn.textContent = state.showPinyin ? ' Pinyin: ON' : '📖 Pinyin: OFF';
         pinyinBtn.classList.toggle('active', state.showPinyin);
     }
-}
 
-// ===== Carga de datos (INTEGRADA CON EXÁMENES) =====
-async function loadSentences() {
-    try {
-        // Determinar qué archivo cargar según el módulo activo
-        const sourceFile = DATA_SOURCES[state.activeModule] || DATA_SOURCES['todas'];
-        
-        const r = await fetch(sourceFile);
-        if (!r.ok) throw new Error('Archivo no encontrado');
-        
-        const d = await r.json();
-        
-        // Manejar tanto formato array directo como objeto {sentences: []}
-        state.sentences = Array.isArray(d) ? d : (d.sentences || []);
-        
-        console.log(`✅ ${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
-    } catch (e) {
-        console.warn('⚠️ Falló carga externa, usando datos embebidos:', e.message);
-        // Fallback: usar datos embebidos solo para módulos diarios
-        if (['todas', 'Saludos', 'Migraciones', 'Supermercado'].includes(state.activeModule)) {
-            state.sentences = EMBEDDED_SENTENCES;
+    // Actualizar botón de tonos
+    const btnTones = document.getElementById('btn-tones');
+    if (btnTones) {
+        btnTones.textContent = showToneColors ? '🎨 Tonos: ON' : '🎨 Tonos: OFF';
+        btnTones.classList.toggle('active', showToneColors);
+        // Solo mostrar si el pinyin está activo
+        if (state.showPinyin) {
+            btnTones.classList.remove('hidden');
         } else {
-            state.sentences = [];
-            alert(`No se pudieron cargar las oraciones de ${state.activeModule}. Verifica que el archivo exista.`);
+            btnTones.classList.add('hidden');
         }
     }
 }
 
-// ===== Eventos (INTEGRADO CON BOTONES DE EXAMEN) =====
+// ===== Carga de datos =====
+async function loadSentences() {
+    try {
+        const sourceFile = DATA_SOURCES[state.activeModule] || DATA_SOURCES['todas'];
+        const r = await fetch(sourceFile);
+        if (!r.ok) throw new Error('Archivo no encontrado');
+        
+        const d = await r.json();
+        state.sentences = Array.isArray(d) ? d : (d.sentences || []);
+        
+        console.log(`✅ ${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
+    } catch (e) {
+        console.warn('⚠️ Falló carga externa:', e.message);
+        if (['todas', 'Saludos', 'Migraciones', 'Supermercado'].includes(state.activeModule)) {
+            state.sentences = EMBEDDED_SENTENCES || [];
+        } else {
+            state.sentences = [];
+        }
+    }
+}
+
+// ===== Eventos =====
 function setupEventListeners() {
     document.getElementById('btn-es-cn').addEventListener('click', () => setMode('es-cn'));
     document.getElementById('btn-cn-es').addEventListener('click', () => setMode('cn-es'));
@@ -781,24 +789,25 @@ function setupEventListeners() {
     document.getElementById('btn-play-es').addEventListener('click', () => playAudio('es'));
     document.getElementById('btn-play-cn').addEventListener('click', () => playAudio('cn'));
     
-    // NUEVO: Selecciona TODOS los botones de filtro (diarios + exámenes)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
         btn.addEventListener('click', () => setModule(btn.dataset.module));
     });
-   // Evento para cambiar nivel HSK
-document.getElementById('select-hsk-level').addEventListener('change', (e) => {
-    setModule(e.target.value); // Reutiliza tu función existente
-});
+
+    const hskSelect = document.getElementById('select-hsk-level');
+    if (hskSelect) {
+        hskSelect.addEventListener('change', (e) => setModule(e.target.value));
+    }
     
     document.getElementById('btn-reset').addEventListener('click', resetProgress);
     document.getElementById('btn-pinyin').addEventListener('click', togglePinyin);
-   // Evento para el botón de colores de tonos
-const btnTones = document.getElementById('btn-tones');
-if (btnTones) {
-    btnTones.addEventListener('click', toggleToneColors);
+    
+    const btnTones = document.getElementById('btn-tones');
+    if (btnTones) {
+        btnTones.addEventListener('click', toggleToneColors);
+    }
 }
 
-// ===== Modo ES<->CN =====
+// ===== Funciones de Estado =====
 function setMode(mode) {
     state.mode = mode;
     document.getElementById('btn-es-cn').classList.toggle('active', mode === 'es-cn');
@@ -807,7 +816,6 @@ function setMode(mode) {
     renderCurrentSentence();
 }
 
-// ===== Tipo de carácter simp/trad =====
 function setCharType(ct) {
     state.charType = ct;
     document.getElementById('btn-simplified').classList.toggle('active', ct === 'simp');
@@ -817,27 +825,22 @@ function setCharType(ct) {
     renderCurrentSentence();
 }
 
-// ===== Filtro módulo (AHORA RECARGA DATOS) =====
 function setModule(mod) {
     state.activeModule = mod;
     state.currentIndex = 0;
     state.translationRevealed = false;
     
-    // Actualizar UI de TODOS los botones (diarios y exámenes)
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
         b.classList.toggle('active', b.dataset.module === mod);
     });
     
     saveProgress();
-    
-    // Recargar oraciones del nuevo módulo
     loadSentences().then(() => {
         renderCurrentSentence();
         updateStats();
     });
 }
 
-// ===== Toggle Pinyin =====
 function togglePinyin() {
     state.showPinyin = !state.showPinyin;
     var btn = document.getElementById('btn-pinyin');
@@ -847,7 +850,6 @@ function togglePinyin() {
         btn.classList.toggle('active', state.showPinyin);
     }
     
-    // MOSTRAR/OCULTAR botón de tonos según estado de pinyin
     const btnTones = document.getElementById('btn-tones');
     if (btnTones) {
         if (state.showPinyin) {
@@ -864,7 +866,20 @@ function togglePinyin() {
     renderCurrentSentence();
 }
 
-// ===== Renderizado (SIN SPOILER) =====
+function toggleToneColors() {
+    showToneColors = !showToneColors;
+    const btn = document.getElementById('btn-tones');
+    
+    if (btn) {
+        btn.textContent = showToneColors ? '🎨 Tonos: ON' : '🎨 Tonos: OFF';
+        btn.classList.toggle('active', showToneColors);
+    }
+    
+    saveProgress();
+    renderCurrentSentence();
+}
+
+// ===== Renderizado =====
 function renderCurrentSentence() {
     const filtered = getFiltered();
     if (!filtered.length) return;
@@ -879,144 +894,88 @@ function renderCurrentSentence() {
     document.getElementById('card-level').textContent = 'Nivel ' + s.level;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
-      // ===== FUNCIÓN AUXILIAR PARA COLORES (Versión 2.0 - Infalible) =====
-function getColoredCharV2(char, fullPinyinString, charIndex) {
-    if (!fullPinyinString) return `<span class="tone-0">${char}</span>`;
-    
-    // Buscar TODAS las marcas de tono en el string completo de pinyin
-    const tonedVowels = fullPinyinString.match(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g);
-    
-    let toneClass = 'tone-0';
-    
-    // Si encontramos tonos y el índice del carácter chino es válido
-    if (tonedVowels && charIndex < tonedVowels.length) {
-        const mark = tonedVowels[charIndex];
-        if (/[āēīōūǖ]/.test(mark)) toneClass = 'tone-1';
-        else if (/[áéíóúǘ]/.test(mark)) toneClass = 'tone-2';
-        else if (/[ǎěǐǒǔǚ]/.test(mark)) toneClass = 'tone-3';
-        else if (/[àèìòùǜ]/.test(mark)) toneClass = 'tone-4';
-    }
-    
-    return `<span class="${toneClass}">${char}</span>`;
-}
-
-// ===== FUNCIÓN AUXILIAR PARA COLORES (Versión 3.0 - Mapeo Directo) =====
-function getToneClass(syllable) {
-    if (!syllable) return 'tone-0';
-    const py = syllable.toLowerCase();
-    if (/[āēīōūǖ]/.test(py)) return 'tone-1';
-    if (/[áéíóúǘ]/.test(py)) return 'tone-2';
-    if (/[ǎěǐǒǔǚ]/.test(py)) return 'tone-3';
-    if (/[àèìòùǜ]/.test(py)) return 'tone-4';
-    return 'tone-0';
-}
-
-// ===== RENDERIZADO SEGURO CON COLORES DE TONO =====
-const sentenceTextEl = document.getElementById('sentence-text');
-
-// 1. Determinar texto base
-let displayText = '';
-if (learningChinese) {
-    displayText = s['chinese_' + k + '_full']; 
-    if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
-        if (s['chinese_' + k + '_cloze'].length === displayText.length) {
-            displayText = s['chinese_' + k + '_cloze'];
-        } else {
-            const answer = s['chinese_' + k + '_answer'];
-            displayText = displayText.replace(answer, '___');
-        }
-    }
-} else {
-    displayText = s.spanish_cloze || s.spanish_full;
-}
-
-// 2. Renderizar con colores
-if (learningChinese && s.pinyin && state.showPinyin)  {
-    const chars = Array.from(displayText);
-    const pinyinWords = s.pinyin.split(/\s+/); // ["Nǐ", "hǎo,", "wǒ", "jiào", "Lǐ", "Míng," ...]
-    
-    let coloredHtml = '';
-    let wordIndex = 0;
-    let charInWordIndex = 0;
-    
-    // Contamos cuántos caracteres chinos reales hay en la palabra actual de pinyin
-    // Para ello, miramos hacia adelante en 'chars' hasta encontrar un espacio/puntuación/hueco
-    
-    for (let i = 0; i < chars.length; i++) {
-        const char = chars[i];
-        
-        // Si es hueco, espacio o puntuación -> tal cual, reseteamos contador de palabra
-        if (char === '_' || /[\s\p{P}]/u.test(char)) {
-            coloredHtml += char;
-            // Solo avanzamos wordIndex si encontramos un separador real (espacio)
-            // y si la palabra anterior tenía caracteres
-            if (/[\s]/u.test(char)) {
-                wordIndex++;
-                charInWordIndex = 0;
+    // Determinar texto base
+    let displayText = '';
+    if (learningChinese) {
+        displayText = s['chinese_' + k + '_full']; 
+        if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
+            if (s['chinese_' + k + '_cloze'].length === displayText.length) {
+                displayText = s['chinese_' + k + '_cloze'];
+            } else {
+                const answer = s['chinese_' + k + '_answer'];
+                displayText = displayText.replace(answer, '___');
             }
-            continue;
+        }
+    } else {
+        displayText = s.spanish_cloze || s.spanish_full;
+    }
+
+    const sentenceTextEl = document.getElementById('sentence-text');
+
+    // Renderizar con colores SOLO si están activados
+    if (learningChinese && s.pinyin && state.showPinyin && showToneColors) {
+        const chars = Array.from(displayText);
+        const pinyinWords = s.pinyin.split(/\s+/);
+        
+        let coloredHtml = '';
+        let wordIndex = 0;
+        
+        for (let i = 0; i < chars.length; i++) {
+            const char = chars[i];
+            
+            // Huecos, espacios y puntuación van tal cual
+            if (char === '_' || /[\s\p{P}]/u.test(char)) {
+                coloredHtml += char;
+                if (/[\s]/u.test(char)) wordIndex++;
+                continue;
+            }
+            
+            const currentPyWord = pinyinWords[wordIndex] || '';
+            const toneClass = getToneClass(currentPyWord);
+            coloredHtml += `<span class="${toneClass}">${char}</span>`;
+            
+            // Verificar fin de palabra china
+            const nextChar = chars[i + 1];
+            const isEndOfWord = !nextChar || nextChar === '_' || /[\s\p{P}]/u.test(nextChar);
+            if (isEndOfWord) wordIndex++;
         }
         
-        // Es un carácter chino. Obtenemos la palabra de pinyin actual
-        const currentPyWord = pinyinWords[wordIndex] || '';
-        
-        // Asignamos color basado en la palabra completa
-        // (Para palabras de 1 carácter es exacto. Para palabras largas, todos tendrán el mismo color,
-        // pero al menos no se desfasará el resto de la oración)
-        const toneClass = getToneClass(currentPyWord);
-        
-        coloredHtml += `<span class="${toneClass}">${char}</span>`;
-        
-        charInWordIndex++;
-        
-        // Verificamos si terminamos la palabra china actual
-        // Miramos el siguiente carácter: si es espacio/puntuación/hueco o fin de string, terminamos palabra
-        const nextChar = chars[i + 1];
-        const isEndOfWord = !nextChar || nextChar === '_' || /[\s\p{P}]/u.test(nextChar);
-        
-        if (isEndOfWord) {
-            wordIndex++;
-            charInWordIndex = 0;
-        }
+        sentenceTextEl.innerHTML = coloredHtml;
+    } else {
+        // Texto plano seguro
+        sentenceTextEl.textContent = displayText || 'Error en datos';
     }
     
-    sentenceTextEl.innerHTML = coloredHtml;
-} else {
-    // Sin colores: texto plano seguro
-    sentenceTextEl.textContent = displayText || 'Error en datos';
-}
-// ===== FIN DEL RENDERIZADO =====
-    
-    // Pinyin: solo cuando se aprende chino Y toggle activado
+    // Pinyin debajo
     var pinyinEl = document.getElementById('pinyin-display');
-    if (learningChinese && s.pinyin && state.showPinyin && showToneColors) {
+    if (learningChinese && s.pinyin && state.showPinyin) {
         pinyinEl.textContent = s.pinyin;
         pinyinEl.classList.remove('hidden');
     } else {
         pinyinEl.classList.add('hidden');
     }
 
-    // Ocultar traducción (spoiler protection)
+    // Resetear traducción
     state.translationRevealed = false;
     const transEl = document.getElementById('translation-text');
-    transEl.textContent = '\ud83d\udca1 La traducci\u00f3n aparecer\u00e1 al verificar...';
+    transEl.textContent = '💡 La traducción aparecerá al verificar...';
     transEl.style.opacity = '0.4';
     transEl.style.fontStyle = 'italic';
 
-    // Limpiar
+    // Limpiar input
     document.getElementById('answer-input').value = '';
     hideFeedback();
 
-    // Placeholder en el idioma que se está APRENDIENDO
+    // Placeholder
     if (learningChinese) {
         const charLabel = state.charType === 'trad' ? 'tradicional' : 'simplificado';
         document.getElementById('answer-input').placeholder = 'Escribe en chino (' + charLabel + ')...';
     } else {
-        document.getElementById('answer-input').placeholder = 'Escribe en espa\u00f1ol (conjugado)...';
+        document.getElementById('answer-input').placeholder = 'Escribe en español (conjugado)...';
     }
 }
 
-// ===== Revelar traducción completa =====
+// ===== Lógica de Juego =====
 function showFullTranslation() {
     if (state.translationRevealed) return;
     state.translationRevealed = true;
@@ -1026,12 +985,7 @@ function showFullTranslation() {
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
 
-    let translationText;
-    if (learningChinese) {
-        translationText = s.spanish_full;
-    } else {
-        translationText = s['chinese_' + k + '_full'];
-    }
+    let translationText = learningChinese ? s.spanish_full : s['chinese_' + k + '_full'];
 
     const el = document.getElementById('translation-text');
     el.textContent = translationText || 'Error en datos';
@@ -1039,19 +993,18 @@ function showFullTranslation() {
     el.style.fontStyle = 'normal';
 }
 
-// ===== Verificación con sinónimos =====
 function getValidAnswers(s, learningChinese, k) {
     const answers = [];
     if (learningChinese) {
-        const simpAns = s.chinese_simp_answer;
-        const tradAns = s.chinese_trad_answer;
-        if (simpAns) answers.push(simpAns);
-        if (tradAns && tradAns !== simpAns) answers.push(tradAns);
+        if (s.chinese_simp_answer) answers.push(s.chinese_simp_answer);
+        if (s.chinese_trad_answer && s.chinese_trad_answer !== s.chinese_simp_answer) {
+            answers.push(s.chinese_trad_answer);
+        }
     } else {
         answers.push(s.spanish_answer);
         if (s.spanish_alternatives) {
-            s.spanish_alternatives.forEach(function(alt) {
-                if (answers.indexOf(alt) === -1) answers.push(alt);
+            s.spanish_alternatives.forEach(alt => {
+                if (!answers.includes(alt)) answers.push(alt);
             });
         }
     }
@@ -1072,28 +1025,26 @@ function checkAnswer() {
     }
 
     const validAnswers = getValidAnswers(s, learningChinese, k);
-    const correctAnswer = validAnswers[0];
-    const inputLower = input.toLowerCase();
-
     showFullTranslation();
 
-    const isCorrect = validAnswers.some(function(ans) {
+    const isCorrect = validAnswers.some(ans => {
         const a = ans.toLowerCase();
-        return input === ans || inputLower === a || inputLower.includes(a) || a.includes(inputLower);
+        const i = input.toLowerCase();
+        return input === ans || i === a || i.includes(a) || a.includes(i);
     });
 
     const allOptions = validAnswers.join(' / ');
 
     if (isCorrect) {
-        showFeedback('\u2705 \u00a1Correcto! "' + allOptions + '"', 'correct');
-        validAnswers.forEach(function(a) {
+        showFeedback('✅ ¡Correcto! "' + allOptions + '"', 'correct');
+        validAnswers.forEach(a => {
             state.knownWords.add(a);
             state.newWords.delete(a);
         });
         state.score++;
     } else {
-        showFeedback('\u274c Respuestas v\u00e1lidas: "' + allOptions + '"', 'incorrect');
-        state.newWords.add(correctAnswer);
+        showFeedback('❌ Respuestas válidas: "' + allOptions + '"', 'incorrect');
+        state.newWords.add(validAnswers[0]);
     }
 
     saveProgress();
@@ -1101,7 +1052,6 @@ function checkAnswer() {
     updateVocabularyPanel();
 }
 
-// ===== Revelar respuesta =====
 function revealAnswer() {
     const filtered = getFiltered();
     if (!filtered.length) return;
@@ -1110,19 +1060,15 @@ function revealAnswer() {
     const k = ck();
 
     const validAnswers = getValidAnswers(s, learningChinese, k);
-    const correctAnswer = validAnswers[0];
-    const allOptions = validAnswers.join(' / ');
-
     showFullTranslation();
-    showFeedback('💡 Respuestas válidas: "' + allOptions + '"', 'correct');
+    showFeedback('💡 Respuestas válidas: "' + validAnswers.join(' / ') + '"', 'correct');
 
-    validAnswers.forEach(function(a) { state.newWords.add(a); });
+    validAnswers.forEach(a => state.newWords.add(a));
     saveProgress();
     updateStats();
     updateVocabularyPanel();
 }
 
-// ===== Marcar palabra =====
 function markWord(known) {
     const filtered = getFiltered();
     if (!filtered.length) return;
@@ -1130,12 +1076,7 @@ function markWord(known) {
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
 
-    let answer;
-    if (learningChinese) {
-        answer = s['chinese_' + k + '_answer'];
-    } else {
-        answer = s.spanish_answer;
-    }
+    let answer = learningChinese ? s['chinese_' + k + '_answer'] : s.spanish_answer;
 
     if (known) {
         state.knownWords.add(answer);
@@ -1151,7 +1092,6 @@ function markWord(known) {
     nextSentence();
 }
 
-// ===== Navegación =====
 function nextSentence() {
     const filtered = getFiltered();
     state.currentIndex = (state.currentIndex + 1) % filtered.length;
@@ -1159,7 +1099,6 @@ function nextSentence() {
     renderCurrentSentence();
 }
 
-// ===== Feedback =====
 function showFeedback(msg, type) {
     const el = document.getElementById('feedback');
     el.textContent = msg;
@@ -1171,13 +1110,11 @@ function hideFeedback() {
     document.getElementById('feedback').classList.add('hidden');
 }
 
-// ===== Estadísticas =====
 function updateStats() {
     document.getElementById('stats-known').textContent = 'Conocidas: ' + state.knownWords.size;
     document.getElementById('stats-new').textContent = 'Nuevas: ' + state.newWords.size;
 }
 
-// ===== Panel vocabulario =====
 function updateVocabularyPanel() {
     const list = document.getElementById('vocab-list');
     list.innerHTML = '';
@@ -1195,45 +1132,28 @@ function updateVocabularyPanel() {
     });
 }
 
-// ===== Reset =====
 function resetProgress() {
-    if (!confirm('Borrar todo el progreso guardado?')) return;
+    if (!confirm('¿Borrar todo el progreso guardado?')) return;
     localStorage.removeItem(STORAGE_KEY);
     state.knownWords = new Set();
     state.newWords = new Set();
     state.score = 0;
     state.currentIndex = 0;
+    showToneColors = false;
     updateStats();
     updateVocabularyPanel();
     renderCurrentSentence();
+    applySavedUI();
 }
 
-function toggleToneColors() {
-    showToneColors = !showToneColors;
-    const btn = document.getElementById('btn-tones');
-    
-    if (btn) {
-        btn.textContent = showToneColors ? '🎨 Tonos: ON' : '🎨 Tonos: OFF';
-        btn.classList.toggle('active', showToneColors);
-    }
-    
-    saveProgress();
-    renderCurrentSentence();
-}
-
-// ===== REPRODUCTOR DE AUDIO GLOBAL BLINDADO =====
-const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts'; // <--
-
-// Reproductor de audio global
+// ===== Audio Global =====
+const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
 const globalAudioPlayer = new Audio();
 let activeBtn = null;
 let originalBtnText = '';
 let isPlaying = false;
-// NUEVA VARIABLE PARA EL BOTÓN DE COLORES
-let showToneColors = false; // Empieza apagado
 
 async function playAudio(lang) {
-    // Pausa: si ya está sonando y tocan el mismo botón, pausar
     const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
     if (isPlaying && btn && btn.innerText.includes('⏳')) {
         globalAudioPlayer.pause();
@@ -1242,41 +1162,28 @@ async function playAudio(lang) {
         return;
     }
 
-    // Detener cualquier reproducción previa limpiamente
     if (globalAudioPlayer.src) {
         globalAudioPlayer.onended = null;
         globalAudioPlayer.onerror = null;
         globalAudioPlayer.pause();
         globalAudioPlayer.currentTime = 0;
-        // Guardar y revocar URL vieja DESPUÉS de pausar
-        if (globalAudioPlayer.src.startsWith('blob:')) {
-            const oldUrl = globalAudioPlayer.src;
-            URL.revokeObjectURL(oldUrl);
-        }
+        if (globalAudioPlayer.src.startsWith('blob:')) URL.revokeObjectURL(globalAudioPlayer.src);
         globalAudioPlayer.removeAttribute('src');
-        globalAudioPlayer.load(); // Liberar recurso interno
+        globalAudioPlayer.load();
     }
 
     const filtered = getFiltered();
     const s = filtered[state.currentIndex];
     const k = ck();
 
-    let text, langCode;
-    if (lang === 'es') {
-        text = s.spanish_full;
-        langCode = 'es-ES';
-    } else {
-        text = s['chinese_' + k + '_full'];
-        langCode = 'zh-CN';
-    }
+    let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
+    let langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
 
-    // Capturar referencia del botón ACTUAL
     activeBtn = btn;
     originalBtnText = activeBtn ? activeBtn.innerText : '';
 
-    // Feedback visual inmediato
     if (activeBtn) {
-        activeBtn.innerText = '⏳...';
+        activeBtn.innerText = '...';
         activeBtn.disabled = true;
     }
 
@@ -1284,25 +1191,17 @@ async function playAudio(lang) {
         const response = await fetch(TTS_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text, lang: langCode })
+            body: JSON.stringify({ text, lang: langCode })
         });
 
         if (!response.ok) throw new Error('Error en servidor');
-
         const data = await response.json();
+        if (!data.audio) { restoreButton(); return; }
 
-        if (!data.audio) {
-            console.warn('API respondió sin datos de audio');
-            restoreButton();
-            return;
-        }
-
-        // Decodificar Base64 a Blob
         const binaryString = atob(data.audio);
         const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
+        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+        
         const blob = new Blob([bytes], { type: 'audio/wav' });
         const url = URL.createObjectURL(blob);
         globalAudioPlayer.src = url;
@@ -1311,36 +1210,23 @@ async function playAudio(lang) {
             isPlaying = true;
             await globalAudioPlayer.play();
         } catch (playErr) {
-            console.warn('Autoplay bloqueado o error de reproducción:', playErr);
+            console.warn('Autoplay bloqueado:', playErr);
             restoreButton();
             return;
         }
 
-        globalAudioPlayer.onended = () => {
-            isPlaying = false;
-            restoreButton();
-            URL.revokeObjectURL(url);
-        };
-
-        globalAudioPlayer.onerror = () => {
-            console.error('Error reproduciendo audio blob');
-            restoreButton();
-        };
+        globalAudioPlayer.onended = () => { isPlaying = false; restoreButton(); URL.revokeObjectURL(url); };
+        globalAudioPlayer.onerror = () => { console.error('Error audio'); restoreButton(); };
 
     } catch (error) {
-        console.warn('Vercel falló, usando voz del sistema:', error);
-
+        console.warn('Vercel falló, usando voz sistema:', error);
         if ('speechSynthesis' in window) {
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = langCode;
-            u.rate = 0.8;
-            u.onend = restoreButton;
-            u.onerror = restoreButton;
+            u.lang = langCode; u.rate = 0.8;
+            u.onend = restoreButton; u.onerror = restoreButton;
             speechSynthesis.speak(u);
-        } else {
-            restoreButton();
-        }
+        } else { restoreButton(); }
     }
 }
 
@@ -1353,15 +1239,14 @@ function restoreButton() {
     }
 }
 
-// ===== MODO OSCURO =====
+// ===== Modo Oscuro =====
 const themeBtn = document.getElementById('btn-theme');
-if (themeBtn) { // Protección por si el botón no existe aún
+if (themeBtn) {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         themeBtn.textContent = '☀️';
     }
-
     themeBtn.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
@@ -1369,34 +1254,23 @@ if (themeBtn) { // Protección por si el botón no existe aún
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 }
+
+// ===== Utilidad Pinyin (Opcional, por si se necesita en el futuro) =====
 function splitGroupedPinyin(word) {
     if (!word) return [];
-    
-    // Estrategia: Cortar la palabra cada vez que encontramos una vocal con tono
-    // que NO esté al inicio de la palabra (indicando nueva sílaba)
     const syllables = [];
     let currentSyllable = '';
-    
     for (const char of word) {
-        // Si es una vocal con tono Y ya tenemos consonantes antes, es nueva sílaba
         const isTonedVowel = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(char);
-        
         if (isTonedVowel && currentSyllable.length > 0 && /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/.test(currentSyllable.slice(-1))) {
-             // Caso especial: a veces la consonante final de la sílaba anterior 
-             // se pega al inicio de la siguiente en errores de tipeo, pero asumimos estándar.
-             // Simplemente iniciamos nueva sílaba si la anterior ya tiene vocal con tono
-             if (/[āáǎàēéěèīíǐìōóòūúǔùǖǘǜ]/.test(currentSyllable)) {
+             if (/[āáǎàēéěèīíǐìōóòūúǔùǘǚǜ]/.test(currentSyllable)) {
                  syllables.push(currentSyllable);
                  currentSyllable = char;
                  continue;
              }
         }
-        
         currentSyllable += char;
     }
-    
     if (currentSyllable) syllables.push(currentSyllable);
-    
-    // Fallback: si no detectó tonos, devuelve la palabra original
     return syllables.length > 0 ? syllables : [word];
 }
