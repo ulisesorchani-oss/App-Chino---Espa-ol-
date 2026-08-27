@@ -910,7 +910,7 @@ if (learningChinese) {
 }
 
 // 2. Renderizar con colores
-if (learningChinese && s.pinyin && state.showPinyin && showToneColors) {
+if (learningChinese && s.pinyin && state.showPinyin)  {
     const chars = Array.from(displayText);
     const pinyinWords = s.pinyin.split(/\s+/); // ["Nǐ", "hǎo,", "wǒ", "jiào", "Lǐ", "Míng," ...]
     
