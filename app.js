@@ -605,7 +605,6 @@ const EMBEDDED_SENTENCES = [
   }
 ];
 
-}
 // ===== Constantes =====
 const STORAGE_KEY = 'chino-espanol-app-v2';
 
