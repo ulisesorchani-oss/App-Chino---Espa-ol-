@@ -964,7 +964,6 @@ function toggleToneColors() {
     } else {
         document.getElementById('answer-input').placeholder = 'Escribe en español (conjugado)...';
     }
-}
 
 // ===== Lógica de Juego =====
 function showFullTranslation() {
