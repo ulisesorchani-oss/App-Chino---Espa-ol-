@@ -990,7 +990,6 @@ function toggleToneColors() {
 }
 
     // Determinar texto base y posición del hueco
-    let displayText = s['chinese_' + k + '_full'];
     let blankStart = -1, blankEnd = -1;
 
     if (learningChinese) {
