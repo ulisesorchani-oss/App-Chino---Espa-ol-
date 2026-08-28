@@ -863,7 +863,106 @@ function setModule(mod) {
         updateStats();
     });
 }
+function renderCurrentSentence() {
+    const filtered = getFiltered();
+    if (!filtered.length) return;
+    
+    // Reiniciar índice si nos salimos de rango
+    if (state.currentIndex >= filtered.length) state.currentIndex = 0;
+    
+    const s = filtered[state.currentIndex];
+    if (!s) return;
 
+    const learningChinese = state.mode === 'es-cn';
+    const k = ck();
+
+    // Actualizar Header
+    document.getElementById('card-level').textContent = 'Nivel ' + s.level;
+    document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
+
+    // 1. Determinar texto base y posición del hueco
+    let displayText = '';
+    let blankStart = -1, blankEnd = -1;
+
+    if (learningChinese) {
+        displayText = s['chinese_' + k + '_full'];
+        const cloze = s['chinese_' + k + '_cloze'];
+        const answer = s['chinese_' + k + '_answer'];
+        
+        // Si hay huecos, calculamos dónde están para no colorearlos
+        if (cloze && cloze.includes('___') && answer && displayText.includes(answer)) {
+            blankStart = displayText.indexOf(answer);
+            blankEnd = blankStart + answer.length;
+        }
+    } else {
+        displayText = s.spanish_cloze || s.spanish_full;
+    }
+
+    const sentenceTextEl = document.getElementById('sentence-text');
+
+    // 2. Renderizar con colores usando pinyin-pro (SI ESTÁ ACTIVADO Y DISPONIBLE)
+    if (learningChinese && showToneColors && typeof pinyinPro !== 'undefined') {
+        try {
+            // pinyinPro analiza cada carácter individualmente
+            const items = pinyinPro.pinyin(displayText, { type: 'all' });
+
+            let html = '';
+            let charPos = 0; // contador solo para caracteres chinos
+
+            for (const it of items) {
+                if (it.isZh) { // Si es carácter chino
+                    // Verificar si estamos en la zona del hueco
+                    if (charPos >= blankStart && charPos < blankEnd) {
+                        if (charPos === blankStart) html += '___'; // Insertar hueco una vez
+                    } else {
+                        // Colorear según tono (1-4) o neutro (5)
+                        const toneNum = it.num || 5; 
+                        html += `<span class="tone-${toneNum}">${it.origin}</span>`;
+                    }
+                    charPos++;
+                } else {
+                    // Puntuación, espacios, números pasan limpios
+                    html += it.origin;
+                }
+            }
+            sentenceTextEl.innerHTML = html;
+        } catch (e) {
+            console.warn('Error en pinyin-pro, mostrando texto plano:', e);
+            sentenceTextEl.textContent = displayText;
+        }
+    } else {
+        // 3. Fallback: Texto plano seguro (sin colores o sin librería)
+        sentenceTextEl.textContent = displayText || 'Error en datos';
+    }
+
+    // 4. Mostrar Pinyin debajo (si está activado)
+    var pinyinEl = document.getElementById('pinyin-display');
+    if (learningChinese && s.pinyin && state.showPinyin) {
+        pinyinEl.textContent = s.pinyin;
+        pinyinEl.classList.remove('hidden');
+    } else {
+        pinyinEl.classList.add('hidden');
+    }
+
+    // 5. Resetear traducción y feedback
+    state.translationRevealed = false;
+    const transEl = document.getElementById('translation-text');
+    transEl.textContent = '💡 La traducción aparecerá al verificar...';
+    transEl.style.opacity = '0.4';
+    transEl.style.fontStyle = 'italic';
+
+    document.getElementById('answer-input').value = '';
+    hideFeedback();
+
+    // 6. Placeholder dinámico
+    const input = document.getElementById('answer-input');
+    if (learningChinese) {
+        const charLabel = state.charType === 'trad' ? 'tradicional' : 'simplificado';
+        input.placeholder = 'Escribe en chino (' + charLabel + ')...';
+    } else {
+        input.placeholder = 'Escribe en español (conjugado)...';
+    }
+} // <--- ¡CIERRE DE LA FUNCIÓN!
 function togglePinyin() {
     state.showPinyin = !state.showPinyin;
     var btn = document.getElementById('btn-pinyin');
