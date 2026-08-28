@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende Chino-Español | Minería de Oraciones</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle'%3E%E4%B8%AD%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css?v=20260828b">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🇦🇷 Chino-Español</h1>
+            <p class="subtitle">Aprende con contexto, paso a paso</p>
+        </header>
+
+        <!-- Panel de Control -->
+        <div class="control-panel">
+            <div class="mode-selector">
+                <button id="btn-es-cn" class="mode-btn active">ES→CN Aprendo Chino</button>
+                <button id="btn-cn-es" class="mode-btn">CN→ES Aprendo Español</button>
+            </div>
+            <div class="script-toggle">
+                <button id="btn-simplified" class="script-btn active">简 简体</button>
+                <button id="btn-traditional" class="script-btn">繁 繁體</button>
+            </div>
+            <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
+            <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
+            <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
+
+            <div class="stats">
+                <span id="stats-known">✅ Conocidas: 0</span>
+                <span id="stats-new">🎖️ Nuevas: 0</span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: PRÁCTICA DIARIA -->
+        <div class="section-daily">
+            <h3 class="section-title"> PRÁCTICA DIARIA</h3>
+            <div class="category-filter">
+                <button class="cat-btn active" data-module="todas">Todas</button>
+                <button class="cat-btn" data-module="Saludos">Saludos</button>
+                <button class="cat-btn" data-module="Migraciones">Migraciones</button>
+                <button class="cat-btn" data-module="Supermercado">Supermercado</button>
+                <button id="btn-reset" class="btn-reset">Borrar progreso</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: EXÁMENES INTERNACIONALES -->
+       <div class="section-exams">
+            <h3 class="section-title">🎓 EXÁMENES INTERNACIONALES</h3>
+
+            <!-- Selector de Nivel HSK -->
+            <div class="hsk-level-selector">
+                <label for="select-hsk-level">Nivel HSK:</label>
+               <select id="select-hsk-level" class="level-dropdown">
+                    <option value="HSK1">HSK 1 (Básico)</option>
+                    <option value="HSK2">HSK 2 (Elemental)</option>
+                    <option value="HSK3">HSK 3 (Intermedio Bajo)</option>
+                    <option value="HSK4">HSK 4 (Intermedio Alto)</option>
+                    <option value="HSK5">HSK 5 (Avanzado Bajo)</option>
+                    <option value="HSK6">HSK 6 (Avanzado)</option>
+                </select>
+            </div>
+
+            <!-- Botones otros exámenes -->
+            <div class="category-filter exams-filters">
+                <button class="btn-exam" data-module="TOCFL">TOCFL 🇹🇼</button>
+                <button class="btn-exam" data-module="DELE">DELE 🇪🇸</button>
+            </div>
+        </div>
+
+        <!-- Estado del módulo (cargando / sin datos / info) -->
+        <div id="module-status" class="module-status hidden" role="status"></div>
+
+        <!-- Tarjeta de Oración -->
+        <div class="card" id="sentence-card">
+            <div class="card-header">
+                <span class="card-level" id="card-level">Nivel 1</span>
+
+                <!-- Audio controls dentro del header -->
+                <div class="audio-controls-inline">
+                    <button id="btn-play-es" class="btn-audio-mini">🔊 ES</button>
+                    <button id="btn-play-cn" class="btn-audio-mini">🔊 CN</button>
+                </div>
+
+                <span class="card-number" id="card-number">1/20</span>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
+
+            <div class="sentence-container">
+                <p class="sentence" id="sentence-text"></p>
+                <p class="pinyin-text hidden" id="pinyin-display"></p>
+                <p class="translation" id="translation-text"></p>
+            </div>
+
+            <!-- Input para respuesta -->
+            <div class="answer-section" id="answer-section">
+                <input type="text" id="answer-input" placeholder="Escribe la palabra faltante...">
+                <button id="btn-check" class="btn-primary">Verificar</button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback hidden" id="feedback">
+                <p id="feedback-text"></p>
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="card-actions">
+                <button id="btn-reveal" class="btn-secondary">👁️ Revelar</button>
+                <button id="btn-know" class="btn-success">✅ La sé</button>
+                <button id="btn-not-know" class="btn-warning">🔄 Repetir</button>
+            </div>
+        </div>
+
+        <!-- Panel de Vocabulario -->
+        <div class="vocabulary-panel">
+            <h3>📚 Palabras aprendidas</h3>
+            <p class="vocab-hint">Se guardan automáticamente al cerrar el navegador</p>
+            <div id="vocab-list"></div>
+        </div>
+
+    </div>
+
+    <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
+    <script src="https://unpkg.com/pinyin-pro"></script>
+    <script src="app.js?v=20260828b"></script>
+</body>
+</html>
