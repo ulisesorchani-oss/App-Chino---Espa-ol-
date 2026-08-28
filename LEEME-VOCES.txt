@@ -1,0 +1,47 @@
+LEEME - ACTUALIZACIÓN DE VOCES (v2)
+====================================
+
+QUÉ HAY DE NUEVO
+----------------
+1. Botones de voz nuevos en el panel de control:
+   - [🇨🇳 👩/👨] Voz china: femenina <-> masculina
+   - [🇪🇸 👩/👨] Voz española: femenina <-> masculina
+   Al hacer clic cambian de género y suenan una frase de muestra.
+   Tu elección queda guardada (localStorage), como la velocidad.
+
+2. Voces neuronales (edge-tts, Microsoft) — mucho más naturales:
+   - 🇨🇳 Femenina: zh-CN-XiaoxiaoNeural (cálida, clara)
+   - 🇨🇳 Masculina: zh-CN-YunjianNeural (madura)
+   - 🇪🇸 Femenina: es-AR-ElenaNeural  (¡acento argentino!)
+   - 🇪🇸 Masculina: es-AR-TomasNeural (acento argentino)
+
+3. Respuesto conservado: si edge-tts fallara, la API usa Piper
+   (huayan/davefx) como antes, y si todo falla, la voz del sistema.
+
+ARCHIVOS CAMBIADOS (4 + 1 nuevo de texto)
+-----------------------------------------
+   api/tts.py        <- motor doble: edge-tts + respaldo Piper
+   app.js            <- botones de voz + envío del parámetro "voice"
+   index.html        <- 2 botones nuevos + cache-busting v=20260829
+   style.css         <- estilos .voice-btn (azules)
+   requirements.txt  <- agrega "edge-tts" (obligatorio para desplegar)
+
+CÓMO DESPLEGAR EN VERCEL
+------------------------
+Opción A (recomendada): reemplazá en tu repo TODOS los archivos de este ZIP
+   (excepto este LEEME) y hacé push. Vercel redespliega solo.
+Opción B: subí solo los 5 archivos cambiados de la lista de arriba.
+
+IMPORTANTE: subí SIEMPRE api/tts.py y requirements.txt juntos,
+porque el botón de voz necesita el parámetro "voice" que entiende la
+api/tts.py nueva. Si subís solo app.js, las voces seguirán sonando
+iguales (la API vieja ignora el parámetro) pero nada se rompe.
+
+CAMBIAR EL ACENTO ESPAÑOL (OPCIONAL)
+-----------------------------------
+Por defecto usamos variante argentina (es-AR). Si preferís otra,
+en api/tts.py cambiá las líneas:
+   ("es-ES", "f"): "es-AR-ElenaNeural"  ->  "es-MX-DaliaNeural" (México)
+   ("es-ES", "m"): "es-AR-TomasNeural"  ->  "es-MX-JorgeNeural" (México)
+Otras opciones: es-CO-SalomeNeural (Colombia), es-CL-CatalinaNeural (Chile),
+es-PE-CamilaNeural (Perú), es-US-PalomaNeural (EE.UU. latino).

@@ -670,6 +670,15 @@ const SPEED_LABELS = { '0.85': '🐢 0.85x', '1': '⚡ 1.0x', '0.7': '🐌 0.7x'
 let playbackSpeed = parseFloat(localStorage.getItem('ac_speed'));
 if (SPEED_STEPS.indexOf(playbackSpeed) === -1) playbackSpeed = 0.85;
 
+// ===== Voz TTS (persistente: 'f' = femenina, 'm' = masculina) =====
+const VOICE_ICONS = { f: '👩', m: '👨' };
+let voiceZh = localStorage.getItem('ac_voice_zh') === 'm' ? 'm' : 'f';
+let voiceEs = localStorage.getItem('ac_voice_es') === 'm' ? 'm' : 'f';
+const VOICE_SAMPLES = {
+    zh: '你好！我们一起练习吧。',
+    es: '¡Hola! Vamos a practicar juntos.'
+};
+
 // ===== Persistencia localStorage =====
 function saveProgress() {
     try {
@@ -777,6 +786,18 @@ function applySavedUI() {
         btnSpeed.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
     }
 
+    // Botones de voz (F/M por idioma)
+    const btnVoiceZh = document.getElementById('btn-voice-zh');
+    if (btnVoiceZh) {
+        btnVoiceZh.textContent = '🇨🇳 ' + VOICE_ICONS[voiceZh];
+        btnVoiceZh.title = 'Voz china: ' + (voiceZh === 'f' ? 'femenina' : 'masculina') + ' (clic para cambiar)';
+    }
+    const btnVoiceEs = document.getElementById('btn-voice-es');
+    if (btnVoiceEs) {
+        btnVoiceEs.textContent = '🇪🇸 ' + VOICE_ICONS[voiceEs];
+        btnVoiceEs.title = 'Voz española: ' + (voiceEs === 'f' ? 'femenina' : 'masculina') + ' (clic para cambiar)';
+    }
+
     // Actualizar botón de tonos (SIEMPRE visible)
     const btnTones = document.getElementById('btn-tones');
     if (btnTones) {
@@ -841,6 +862,8 @@ function setupEventListeners() {
     safeAdd('btn-pinyin', togglePinyin);
     safeAdd('btn-tones', toggleToneColors);
     safeAdd('btn-speed', cycleSpeed);
+    safeAdd('btn-voice-zh', () => cycleVoice('zh'));
+    safeAdd('btn-voice-es', () => cycleVoice('es'));
     
     // Input Enter
     const input = document.getElementById('answer-input');
@@ -1257,6 +1280,7 @@ async function playAudio(lang) {
 
     let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
     let langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
+    let voiceGender = lang === 'es' ? voiceEs : voiceZh;
 
     activeBtn = btn;
     originalBtnText = activeBtn ? activeBtn.innerText : '';
@@ -1270,7 +1294,7 @@ async function playAudio(lang) {
         const response = await fetch(TTS_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, lang: langCode })
+            body: JSON.stringify({ text, lang: langCode, voice: voiceGender })
         });
 
         if (!response.ok) throw new Error('Error en servidor');
@@ -1281,7 +1305,7 @@ async function playAudio(lang) {
         const bytes = new Uint8Array(binaryString.length);
         for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
         
-        const blob = new Blob([bytes], { type: 'audio/wav' });
+        const blob = new Blob([bytes], { type: data.mime || 'audio/wav' });
         const url = URL.createObjectURL(blob);
         globalAudioPlayer.src = url;
         globalAudioPlayer.playbackRate = playbackSpeed; // velocidad elegida, voz natural
@@ -1332,6 +1356,45 @@ function cycleSpeed() {
     // Aplicar en vivo si hay audio reproduciéndose
     globalAudioPlayer.playbackRate = playbackSpeed;
     if ('speechSynthesis' in window) speechSynthesis.cancel(); // el próximo TTS usará la nueva velocidad
+}
+
+// ===== Botones de voz: 👩/👨 por idioma (persistente + muestra de audio) =====
+function cycleVoice(lang) {
+    if (lang === 'es') {
+        voiceEs = voiceEs === 'f' ? 'm' : 'f';
+        try { localStorage.setItem('ac_voice_es', voiceEs); } catch (e) { /* sin storage */ }
+    } else {
+        voiceZh = voiceZh === 'f' ? 'm' : 'f';
+        try { localStorage.setItem('ac_voice_zh', voiceZh); } catch (e) { /* sin storage */ }
+    }
+    applySavedUI();
+    playVoiceSample(lang); // reproduce una frase corta para escuchar la voz nueva
+}
+
+function playVoiceSample(lang) {
+    try {
+        const text = VOICE_SAMPLES[lang];
+        const langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
+        const gender = lang === 'es' ? voiceEs : voiceZh;
+        fetch(TTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, lang: langCode, voice: gender })
+        })
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (!d || !d.audio) return;
+                const bin = atob(d.audio);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
+                const a = new Audio(url);
+                a.playbackRate = playbackSpeed;
+                a.onended = () => URL.revokeObjectURL(url);
+                a.play().catch(() => { /* autoplay bloqueado */ });
+            })
+            .catch(() => { /* sin muestra de audio */ });
+    } catch (e) { /* silencioso */ }
 }
 
 // ===== Modo Oscuro =====
