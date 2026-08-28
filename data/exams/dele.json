@@ -1,0 +1,374 @@
+[
+  {
+    "id": "dele-01",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Llevo tres años estudiando español.",
+    "spanish_cloze": "Llevo tres años ___ español.",
+    "spanish_answer": "estudiando",
+    "spanish_alternatives": [
+      "hablando",
+      "aprendiendo"
+    ],
+    "chinese_simp_full": "我学西班牙语三年了。",
+    "chinese_simp_cloze": "我___西班牙语三年了。",
+    "chinese_simp_answer": "学",
+    "chinese_trad_full": "我学西班牙语三年了。",
+    "chinese_trad_cloze": "我___西班牙语三年了。",
+    "chinese_trad_answer": "学",
+    "pinyin": "Wǒ xué Xībānyáyǔ sān nián le."
+  },
+  {
+    "id": "dele-02",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "¿Qué planes tienes para este sábado?",
+    "spanish_cloze": "¿Qué ___ tienes para este sábado?",
+    "spanish_answer": "planes",
+    "spanish_alternatives": [
+      "plan"
+    ],
+    "chinese_simp_full": "这个星期六你有什么计划？",
+    "chinese_simp_cloze": "这个星期六你有什么___？",
+    "chinese_simp_answer": "计划",
+    "chinese_trad_full": "这个星期六你有什么计划？",
+    "chinese_trad_cloze": "这个星期六你有什么___？",
+    "chinese_trad_answer": "计划",
+    "pinyin": "Zhège xīngqīliù nǐ yǒu shénme jìhuà?"
+  },
+  {
+    "id": "dele-03",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Este suéter me queda un poco pequeño.",
+    "spanish_cloze": "Este suéter me queda un poco ___.",
+    "spanish_answer": "pequeño",
+    "spanish_alternatives": [
+      "pequeno",
+      "chico",
+      "ajustado"
+    ],
+    "chinese_simp_full": "这件毛衣有点儿小。",
+    "chinese_simp_cloze": "这件毛衣有点儿___。",
+    "chinese_simp_answer": "小",
+    "chinese_trad_full": "这件毛衣有点儿小。",
+    "chinese_trad_cloze": "这件毛衣有点儿___。",
+    "chinese_trad_answer": "小",
+    "pinyin": "Zhè jiàn máoyī yǒudiǎnr xiǎo."
+  },
+  {
+    "id": "dele-04",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Mañana voy al banco a cambiar dinero.",
+    "spanish_cloze": "Mañana voy al banco a ___ dinero.",
+    "spanish_answer": "cambiar",
+    "spanish_alternatives": [],
+    "chinese_simp_full": "我明天要去银行换钱。",
+    "chinese_simp_cloze": "我明天要去银行___。",
+    "chinese_simp_answer": "换钱",
+    "chinese_trad_full": "我明天要去银行换钱。",
+    "chinese_trad_cloze": "我明天要去银行___。",
+    "chinese_trad_answer": "换钱",
+    "pinyin": "Wǒ míngtiān yào qù yínháng huàn qián."
+  },
+  {
+    "id": "dele-05",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "El médico dice que debo beber más agua.",
+    "spanish_cloze": "El médico dice que debo beber más ___.",
+    "spanish_answer": "agua",
+    "spanish_alternatives": [
+      "líquidos",
+      "liquidos"
+    ],
+    "chinese_simp_full": "医生说我需要多喝水。",
+    "chinese_simp_cloze": "医生说我需要多喝___。",
+    "chinese_simp_answer": "水",
+    "chinese_trad_full": "医生说我需要多喝水。",
+    "chinese_trad_cloze": "医生说我需要多喝___。",
+    "chinese_trad_answer": "水",
+    "pinyin": "Yīshēng shuō wǒ xūyào duō hē shuǐ."
+  },
+  {
+    "id": "dele-06",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "El tren sale a las ocho y media.",
+    "spanish_cloze": "El tren ___ a las ocho y media.",
+    "spanish_answer": "sale",
+    "spanish_alternatives": [
+      "parte",
+      "se va"
+    ],
+    "chinese_simp_full": "火车八点半出发。",
+    "chinese_simp_cloze": "火车八点半___。",
+    "chinese_simp_answer": "出发",
+    "chinese_trad_full": "火车八点半出发。",
+    "chinese_trad_cloze": "火车八点半___。",
+    "chinese_trad_answer": "出发",
+    "pinyin": "Huǒchē bā diǎn bàn chūfā."
+  },
+  {
+    "id": "dele-07",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Mi ordenador tiene un virus.",
+    "spanish_cloze": "Mi ordenador tiene un ___.",
+    "spanish_answer": "virus",
+    "spanish_alternatives": [],
+    "chinese_simp_full": "我的电脑中毒了。",
+    "chinese_simp_cloze": "我的电脑___了。",
+    "chinese_simp_answer": "中毒",
+    "chinese_trad_full": "我的电脑中毒了。",
+    "chinese_trad_cloze": "我的电脑___了。",
+    "chinese_trad_answer": "中毒",
+    "pinyin": "Wǒ de diànnǎo zhòngdú le."
+  },
+  {
+    "id": "dele-08",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Espera aquí el autobús, por favor.",
+    "spanish_cloze": "___ aquí el autobús, por favor.",
+    "spanish_answer": "Espera",
+    "spanish_alternatives": [
+      "esperad",
+      "Espere",
+      "espere"
+    ],
+    "chinese_simp_full": "请在这里等巴士。",
+    "chinese_simp_cloze": "请在这里___巴士。",
+    "chinese_simp_answer": "等",
+    "chinese_trad_full": "请在这里等巴士。",
+    "chinese_trad_cloze": "请在这里___巴士。",
+    "chinese_trad_answer": "等",
+    "pinyin": "Qǐng zài zhèlǐ děng bashì."
+  },
+  {
+    "id": "dele-09",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Ayer compré una sandía en el supermercado.",
+    "spanish_cloze": "Ayer ___ una sandía en el supermercado.",
+    "spanish_answer": "compré",
+    "spanish_alternatives": [
+      "compre",
+      "conseguí",
+      "consegui"
+    ],
+    "chinese_simp_full": "我昨天在超市买了西瓜。",
+    "chinese_simp_cloze": "我昨天在超市___了西瓜。",
+    "chinese_simp_answer": "买",
+    "chinese_trad_full": "我昨天在超市买了西瓜。",
+    "chinese_trad_cloze": "我昨天在超市___了西瓜。",
+    "chinese_trad_answer": "买",
+    "pinyin": "Wǒ zuótiān zài chāoshì mǎi le xīguā."
+  },
+  {
+    "id": "dele-10",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Esta noche hay un partido de fútbol.",
+    "spanish_cloze": "Esta noche hay un partido de ___.",
+    "spanish_answer": "fútbol",
+    "spanish_alternatives": [
+      "futbol",
+      "football"
+    ],
+    "chinese_simp_full": "今晚有一场足球比赛。",
+    "chinese_simp_cloze": "今晚有一场足球___。",
+    "chinese_simp_answer": "比赛",
+    "chinese_trad_full": "今晚有一场足球比赛。",
+    "chinese_trad_cloze": "今晚有一场足球___。",
+    "chinese_trad_answer": "比赛",
+    "pinyin": "Jīnwǎn yǒu yì chǎng zúqiú bǐsài."
+  },
+  {
+    "id": "dele-11",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Mi compañero de piso es muy limpio.",
+    "spanish_cloze": "Mi compañero de piso es muy ___.",
+    "spanish_answer": "limpio",
+    "spanish_alternatives": [
+      "limpia",
+      "ordenado"
+    ],
+    "chinese_simp_full": "我的室友很爱干净。",
+    "chinese_simp_cloze": "我的室友很___。",
+    "chinese_simp_answer": "爱干净",
+    "chinese_trad_full": "我的室友很爱干净。",
+    "chinese_trad_cloze": "我的室友很___。",
+    "chinese_trad_answer": "爱干净",
+    "pinyin": "Wǒ de shìyǒu hěn ài gānjìng."
+  },
+  {
+    "id": "dele-12",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Hace frío, ponte más ropa.",
+    "spanish_cloze": "Hace frío, ___ más ropa.",
+    "spanish_answer": "ponte",
+    "spanish_alternatives": [
+      "póngase",
+      "abrígate",
+      "abrígate"
+    ],
+    "chinese_simp_full": "天冷了，多穿点衣服。",
+    "chinese_simp_cloze": "天冷了，多穿点衣服。",
+    "chinese_simp_answer": "穿衣服",
+    "chinese_trad_full": "天冷了，多穿点衣服。",
+    "chinese_trad_cloze": "天冷了，多穿点衣服。",
+    "chinese_trad_answer": "穿衣服",
+    "pinyin": "Tiān lěng le, duō chuān diǎn yīfu."
+  },
+  {
+    "id": "dele-13",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Hemos reservado mesa en el restaurante.",
+    "spanish_cloze": "Hemos ___ mesa en el restaurante.",
+    "spanish_answer": "reservado",
+    "spanish_alternatives": [
+      "pedido"
+    ],
+    "chinese_simp_full": "我们在餐厅订了位子。",
+    "chinese_simp_cloze": "我们在餐厅订了位子。",
+    "chinese_simp_answer": "订位子",
+    "chinese_trad_full": "我们在餐厅订了位子。",
+    "chinese_trad_cloze": "我们在餐厅订了位子。",
+    "chinese_trad_answer": "订位子",
+    "pinyin": "Wǒmen zài cāntīng dìng le wèizi."
+  },
+  {
+    "id": "dele-14",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Su fiesta de cumpleaños es el viernes por la noche.",
+    "spanish_cloze": "Su fiesta de cumpleaños es el viernes por la ___.",
+    "spanish_answer": "noche",
+    "spanish_alternatives": [
+      "tarde"
+    ],
+    "chinese_simp_full": "他的生日派对在周五晚上。",
+    "chinese_simp_cloze": "他的生日派对在周五___。",
+    "chinese_simp_answer": "晚上",
+    "chinese_trad_full": "他的生日派对在周五晚上。",
+    "chinese_trad_cloze": "他的生日派对在周五___。",
+    "chinese_trad_answer": "晚上",
+    "pinyin": "Tā de shēngrì pàiduì zài zhōuwǔ wǎnshang."
+  },
+  {
+    "id": "dele-15",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Estoy acostumbrado a levantarme temprano para estudiar.",
+    "spanish_cloze": "Estoy ___ a levantarme temprano para estudiar.",
+    "spanish_answer": "acostumbrado",
+    "spanish_alternatives": [
+      "acostumbrada",
+      "habituado"
+    ],
+    "chinese_simp_full": "我习惯早起读书。",
+    "chinese_simp_cloze": "我___早起读书。",
+    "chinese_simp_answer": "习惯",
+    "chinese_trad_full": "我习惯早起读书。",
+    "chinese_trad_cloze": "我___早起读书。",
+    "chinese_trad_answer": "习惯",
+    "pinyin": "Wǒ xíguàn zǎo qǐ dúshū."
+  },
+  {
+    "id": "dele-16",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Esta falda tiene un descuento del cincuenta por ciento.",
+    "spanish_cloze": "Esta falda tiene un ___ del cincuenta por ciento.",
+    "spanish_answer": "descuento",
+    "spanish_alternatives": [
+      "rebaja"
+    ],
+    "chinese_simp_full": "这条裙子打折一半。",
+    "chinese_simp_cloze": "这条裙子___一半。",
+    "chinese_simp_answer": "打折",
+    "chinese_trad_full": "这条裙子打折一半。",
+    "chinese_trad_cloze": "这条裙子___一半。",
+    "chinese_trad_answer": "打折",
+    "pinyin": "Zhè tiáo qúnzi dǎzhé yíbàn."
+  },
+  {
+    "id": "dele-17",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Abre la ventana un momento, por favor.",
+    "spanish_cloze": "Abre la ___ un momento, por favor.",
+    "spanish_answer": "ventana",
+    "spanish_alternatives": [
+      "ventanilla"
+    ],
+    "chinese_simp_full": "请把窗户打开一下。",
+    "chinese_simp_cloze": "请把___打开一下。",
+    "chinese_simp_answer": "窗户",
+    "chinese_trad_full": "请把窗户打开一下。",
+    "chinese_trad_cloze": "请把___打开一下。",
+    "chinese_trad_answer": "窗户",
+    "pinyin": "Qǐng bǎ chuānghu dǎkāi yíxià."
+  },
+  {
+    "id": "dele-18",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "Quiero el filete en su punto.",
+    "spanish_cloze": "Quiero el filete en su ___.",
+    "spanish_answer": "punto",
+    "spanish_alternatives": [
+      "término",
+      "termino"
+    ],
+    "chinese_simp_full": "我要一份牛排，五分熟。",
+    "chinese_simp_cloze": "我要一份牛排，___。",
+    "chinese_simp_answer": "五分熟",
+    "chinese_trad_full": "我要一份牛排，五分熟。",
+    "chinese_trad_cloze": "我要一份牛排，___。",
+    "chinese_trad_answer": "五分熟",
+    "pinyin": "Wǒ yào yí fèn niúpái, wǔ fēn shú."
+  },
+  {
+    "id": "dele-19",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "En la biblioteca hay que guardar silencio.",
+    "spanish_cloze": "En la biblioteca hay que guardar ___.",
+    "spanish_answer": "silencio",
+    "spanish_alternatives": [
+      "calma"
+    ],
+    "chinese_simp_full": "图书馆里要保持安静。",
+    "chinese_simp_cloze": "图书馆里要保持___。",
+    "chinese_simp_answer": "安静",
+    "chinese_trad_full": "图书馆里要保持安静。",
+    "chinese_trad_cloze": "图书馆里要保持___。",
+    "chinese_trad_answer": "安静",
+    "pinyin": "Túshūguǎn lǐ yào bǎochí ānjìng."
+  },
+  {
+    "id": "dele-20",
+    "level": 2,
+    "module": "DELE",
+    "spanish_full": "La semana próxima vamos a mudarnos de casa.",
+    "spanish_cloze": "La semana próxima vamos a mudarnos de ___.",
+    "spanish_answer": "casa",
+    "spanish_alternatives": [
+      "piso",
+      "apartamento"
+    ],
+    "chinese_simp_full": "我们下周要搬家了。",
+    "chinese_simp_cloze": "我们下周要___了。",
+    "chinese_simp_answer": "搬家",
+    "chinese_trad_full": "我们下周要搬家了。",
+    "chinese_trad_cloze": "我们下周要___了。",
+    "chinese_trad_answer": "搬家",
+    "pinyin": "Wǒmen xià zhōu yào bānjiā le."
+  }
+]

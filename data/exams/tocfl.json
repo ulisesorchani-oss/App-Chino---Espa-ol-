@@ -1,0 +1,377 @@
+[
+  {
+    "id": "tocfl-01",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Gracias por tu ayuda.",
+    "spanish_cloze": "Gracias por tu ___.",
+    "spanish_answer": "ayuda",
+    "spanish_alternatives": [
+      "apoyo"
+    ],
+    "chinese_simp_full": "謝謝您的幫忙。",
+    "chinese_simp_cloze": "謝謝您的___。",
+    "chinese_simp_answer": "幫忙",
+    "chinese_trad_full": "謝謝您的幫忙。",
+    "chinese_trad_cloze": "謝謝您的___。",
+    "chinese_trad_answer": "幫忙",
+    "pinyin": "Xièxie nín de bāngmáng."
+  },
+  {
+    "id": "tocfl-02",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Disculpe, ¿dónde está el baño?",
+    "spanish_cloze": "___, ¿dónde está el baño?",
+    "spanish_answer": "Disculpe",
+    "spanish_alternatives": [
+      "perdón",
+      "perdon",
+      "oiga"
+    ],
+    "chinese_simp_full": "請問，廁所在哪裡？",
+    "chinese_simp_cloze": "___，廁所在哪裡？",
+    "chinese_simp_answer": "請問",
+    "chinese_trad_full": "請問，廁所在哪裡？",
+    "chinese_trad_cloze": "___，廁所在哪裡？",
+    "chinese_trad_answer": "請問",
+    "pinyin": "Qǐngwèn, cèsuǒ zài nǎlǐ?"
+  },
+  {
+    "id": "tocfl-03",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Quiero sacar una tarjeta de transporte.",
+    "spanish_cloze": "Quiero sacar una tarjeta de ___.",
+    "spanish_answer": "transporte",
+    "spanish_alternatives": [
+      "metro",
+      "transporte público"
+    ],
+    "chinese_simp_full": "我想辦一張悠遊卡。",
+    "chinese_simp_cloze": "我想辦一張___。",
+    "chinese_simp_answer": "悠遊卡",
+    "chinese_trad_full": "我想辦一張悠遊卡。",
+    "chinese_trad_cloze": "我想辦一張___。",
+    "chinese_trad_answer": "悠遊卡",
+    "pinyin": "Wǒ xiǎng bàn yì zhāng Yōuyóukǎ."
+  },
+  {
+    "id": "tocfl-04",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "¿Mañana va a llover?",
+    "spanish_cloze": "¿Mañana va a ___?",
+    "spanish_answer": "llover",
+    "spanish_alternatives": [],
+    "chinese_simp_full": "明天會下雨嗎？",
+    "chinese_simp_cloze": "明天會___嗎？",
+    "chinese_simp_answer": "下雨",
+    "chinese_trad_full": "明天會下雨嗎？",
+    "chinese_trad_cloze": "明天會___嗎？",
+    "chinese_trad_answer": "下雨",
+    "pinyin": "Míngtiān huì xiàyǔ ma?"
+  },
+  {
+    "id": "tocfl-05",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "La fruta de esta tienda es muy barata.",
+    "spanish_cloze": "La fruta de esta tienda es muy ___.",
+    "spanish_answer": "barata",
+    "spanish_alternatives": [
+      "barato",
+      "económica",
+      "economica"
+    ],
+    "chinese_simp_full": "這家店的水果很便宜。",
+    "chinese_simp_cloze": "這家店的水果很___。",
+    "chinese_simp_answer": "便宜",
+    "chinese_trad_full": "這家店的水果很便宜。",
+    "chinese_trad_cloze": "這家店的水果很___。",
+    "chinese_trad_answer": "便宜",
+    "pinyin": "Zhè jiā diàn de shuǐguǒ hěn piányi."
+  },
+  {
+    "id": "tocfl-06",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Yo trabajo en Taipéi.",
+    "spanish_cloze": "Yo ___ en Taipéi.",
+    "spanish_answer": "trabajo",
+    "spanish_alternatives": [
+      "laboro"
+    ],
+    "chinese_simp_full": "我在台北工作。",
+    "chinese_simp_cloze": "我在台北___。",
+    "chinese_simp_answer": "工作",
+    "chinese_trad_full": "我在台北工作。",
+    "chinese_trad_cloze": "我在台北___。",
+    "chinese_trad_answer": "工作",
+    "pinyin": "Wǒ zài Táiběi gōngzuò."
+  },
+  {
+    "id": "tocfl-07",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Espérame, por favor.",
+    "spanish_cloze": "___, por favor.",
+    "spanish_answer": "Espérame",
+    "spanish_alternatives": [
+      "esperame",
+      "espera",
+      "Espéreme",
+      "espereme"
+    ],
+    "chinese_simp_full": "請等我一下。",
+    "chinese_simp_cloze": "請___我一下。",
+    "chinese_simp_answer": "等",
+    "chinese_trad_full": "請等我一下。",
+    "chinese_trad_cloze": "請___我一下。",
+    "chinese_trad_answer": "等",
+    "pinyin": "Qǐng děng wǒ yíxià."
+  },
+  {
+    "id": "tocfl-08",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "El mercado nocturno de aquí es muy famoso.",
+    "spanish_cloze": "El mercado ___ de aquí es muy famoso.",
+    "spanish_answer": "nocturno",
+    "spanish_alternatives": [
+      "noche"
+    ],
+    "chinese_simp_full": "這裡的夜市非常有名。",
+    "chinese_simp_cloze": "這裡的___非常有名。",
+    "chinese_simp_answer": "夜市",
+    "chinese_trad_full": "這裡的夜市非常有名。",
+    "chinese_trad_cloze": "這裡的___非常有名。",
+    "chinese_trad_answer": "夜市",
+    "pinyin": "Zhèlǐ de yèshì fēicháng yǒumíng."
+  },
+  {
+    "id": "tocfl-09",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "No hablo bien el chino.",
+    "spanish_cloze": "No hablo bien el ___.",
+    "spanish_answer": "chino",
+    "spanish_alternatives": [
+      "mandarín",
+      "mandarin"
+    ],
+    "chinese_simp_full": "我的中文說得不好。",
+    "chinese_simp_cloze": "我的___說得不好。",
+    "chinese_simp_answer": "中文",
+    "chinese_trad_full": "我的中文說得不好。",
+    "chinese_trad_cloze": "我的___說得不好。",
+    "chinese_trad_answer": "中文",
+    "pinyin": "Wǒ de Zhōngwén shuō de bù hǎo."
+  },
+  {
+    "id": "tocfl-10",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "¿Has comido fideos con carne de res?",
+    "spanish_cloze": "¿Has ___ fideos con carne de res?",
+    "spanish_answer": "comido",
+    "spanish_alternatives": [
+      "probado"
+    ],
+    "chinese_simp_full": "你吃過牛肉麵嗎？",
+    "chinese_simp_cloze": "你___牛肉麵嗎？",
+    "chinese_simp_answer": "吃過",
+    "chinese_trad_full": "你吃過牛肉麵嗎？",
+    "chinese_trad_cloze": "你___牛肉麵嗎？",
+    "chinese_trad_answer": "吃過",
+    "pinyin": "Nǐ chī guò niúròu miàn ma?"
+  },
+  {
+    "id": "tocfl-11",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "El tiempo está cada vez más caluroso.",
+    "spanish_cloze": "El tiempo está cada vez más ___.",
+    "spanish_answer": "caluroso",
+    "spanish_alternatives": [
+      "caliente",
+      "cálido",
+      "calido"
+    ],
+    "chinese_simp_full": "天氣越來越熱了。",
+    "chinese_simp_cloze": "天氣越來越___了。",
+    "chinese_simp_answer": "熱",
+    "chinese_trad_full": "天氣越來越熱了。",
+    "chinese_trad_cloze": "天氣越來越___了。",
+    "chinese_trad_answer": "熱",
+    "pinyin": "Tiānqì yuèláiyuè rè le."
+  },
+  {
+    "id": "tocfl-12",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Por favor, pon el equipaje aquí.",
+    "spanish_cloze": "Por favor, pon el equipaje ___.",
+    "spanish_answer": "aquí",
+    "spanish_alternatives": [
+      "aqui",
+      "acá",
+      "aca"
+    ],
+    "chinese_simp_full": "請把行李放在這裡。",
+    "chinese_simp_cloze": "請把行李放在___。",
+    "chinese_simp_answer": "這裡",
+    "chinese_trad_full": "請把行李放在這裡。",
+    "chinese_trad_cloze": "請把行李放在___。",
+    "chinese_trad_answer": "這裡",
+    "pinyin": "Qǐng bǎ xíngli fàng zài zhèlǐ."
+  },
+  {
+    "id": "tocfl-13",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Quiero pedir hora con el médico.",
+    "spanish_cloze": "Quiero pedir ___ con el médico.",
+    "spanish_answer": "hora",
+    "spanish_alternatives": [
+      "cita",
+      "turno"
+    ],
+    "chinese_simp_full": "我要預約看醫生。",
+    "chinese_simp_cloze": "我要___看醫生。",
+    "chinese_simp_answer": "預約",
+    "chinese_trad_full": "我要預約看醫生。",
+    "chinese_trad_cloze": "我要___看醫生。",
+    "chinese_trad_answer": "預約",
+    "pinyin": "Wǒ yào yùyuē kàn yīshēng."
+  },
+  {
+    "id": "tocfl-14",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Esta calle está muy congestionada.",
+    "spanish_cloze": "Esta calle está muy ___.",
+    "spanish_answer": "congestionada",
+    "spanish_alternatives": [
+      "atascada",
+      "tapada"
+    ],
+    "chinese_simp_full": "這條路很塞車。",
+    "chinese_simp_cloze": "這條路很___。",
+    "chinese_simp_answer": "塞車",
+    "chinese_trad_full": "這條路很塞車。",
+    "chinese_trad_cloze": "這條路很___。",
+    "chinese_trad_answer": "塞車",
+    "pinyin": "Zhè tiáo lù hěn sāichē."
+  },
+  {
+    "id": "tocfl-15",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "La semana que viene tenemos un examen.",
+    "spanish_cloze": "La semana que viene tenemos un ___.",
+    "spanish_answer": "examen",
+    "spanish_alternatives": [
+      "test"
+    ],
+    "chinese_simp_full": "我們下個星期考試。",
+    "chinese_simp_cloze": "我們下個星期___。",
+    "chinese_simp_answer": "考試",
+    "chinese_trad_full": "我們下個星期考試。",
+    "chinese_trad_cloze": "我們下個星期___。",
+    "chinese_trad_answer": "考試",
+    "pinyin": "Wǒmen xià gè xīngqī kǎoshì."
+  },
+  {
+    "id": "tocfl-16",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Este diccionario es muy útil.",
+    "spanish_cloze": "Este ___ es muy útil.",
+    "spanish_answer": "diccionario",
+    "spanish_alternatives": [],
+    "chinese_simp_full": "這本字典很有用。",
+    "chinese_simp_cloze": "這本___很有用。",
+    "chinese_simp_answer": "字典",
+    "chinese_trad_full": "這本字典很有用。",
+    "chinese_trad_cloze": "這本___很有用。",
+    "chinese_trad_answer": "字典",
+    "pinyin": "Zhè běn zìdiǎn hěn yǒuyòng."
+  },
+  {
+    "id": "tocfl-17",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "La estación está muy lejos de aquí.",
+    "spanish_cloze": "La estación está muy ___ de aquí.",
+    "spanish_answer": "lejos",
+    "spanish_alternatives": [
+      "alejada",
+      "alejado"
+    ],
+    "chinese_simp_full": "車站離這裡很遠。",
+    "chinese_simp_cloze": "車站離這裡很___。",
+    "chinese_simp_answer": "遠",
+    "chinese_trad_full": "車站離這裡很遠。",
+    "chinese_trad_cloze": "車站離這裡很___。",
+    "chinese_trad_answer": "遠",
+    "pinyin": "Chēzhàn lí zhèlǐ hěn yuǎn."
+  },
+  {
+    "id": "tocfl-18",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "¡Feliz año nuevo!",
+    "spanish_cloze": "¡Feliz año ___!",
+    "spanish_answer": "nuevo",
+    "spanish_alternatives": [
+      "nueva"
+    ],
+    "chinese_simp_full": "祝你新年快樂！",
+    "chinese_simp_cloze": "祝你___！",
+    "chinese_simp_answer": "新年快樂",
+    "chinese_trad_full": "祝你新年快樂！",
+    "chinese_trad_cloze": "祝你___！",
+    "chinese_trad_answer": "新年快樂",
+    "pinyin": "Zhù nǐ xīnnián kuàilè!"
+  },
+  {
+    "id": "tocfl-19",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Me gusta beber té de leche con perlas.",
+    "spanish_cloze": "Me gusta beber té de leche con ___.",
+    "spanish_answer": "perlas",
+    "spanish_alternatives": [
+      "burbujas",
+      "tapioca",
+      "perla"
+    ],
+    "chinese_simp_full": "我喜歡喝珍珠奶茶。",
+    "chinese_simp_cloze": "我喜歡喝___奶茶。",
+    "chinese_simp_answer": "珍珠",
+    "chinese_trad_full": "我喜歡喝珍珠奶茶。",
+    "chinese_trad_cloze": "我喜歡喝___奶茶。",
+    "chinese_trad_answer": "珍珠",
+    "pinyin": "Wǒ xǐhuān hē zhēnzhū nǎichá."
+  },
+  {
+    "id": "tocfl-20",
+    "level": 1,
+    "module": "TOCFL",
+    "spanish_full": "Hoy la entrada al museo es gratuita.",
+    "spanish_cloze": "Hoy la entrada al museo es ___.",
+    "spanish_answer": "gratuita",
+    "spanish_alternatives": [
+      "gratis",
+      "libre"
+    ],
+    "chinese_simp_full": "博物館今天免費參觀。",
+    "chinese_simp_cloze": "博物館今天___參觀。",
+    "chinese_simp_answer": "免費",
+    "chinese_trad_full": "博物館今天免費參觀。",
+    "chinese_trad_cloze": "博物館今天___參觀。",
+    "chinese_trad_answer": "免費",
+    "pinyin": "Bówùguǎn jīntiān miǎnfèi cānguān."
+  }
+]
