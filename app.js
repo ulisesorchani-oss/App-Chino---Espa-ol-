@@ -1,7 +1,7 @@
 // ===== Datos embebidos (fallback sin servidor) =====
 const EMBEDDED_SENTENCES = [
    {
-    "id": 1,
+    "id": 1, 
     "level": 1,
     "module": "Saludos",
     "spanish_full": "Hola, ¿cómo estás?",
