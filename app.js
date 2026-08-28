@@ -890,32 +890,16 @@ function toggleToneColors() {
     renderCurrentSentence();
 }
 
-// ===== Renderizado =====
-function renderCurrentSentence() {
-    const filtered = getFiltered();
-    if (!filtered.length) return;
-    if (state.currentIndex >= filtered.length) state.currentIndex = 0;
-    const s = filtered[state.currentIndex];
-    if (!s) return;
+    // Determinar texto base y posición del hueco
+    let displayText = s['chinese_' + k + '_full'];
+    let blankStart = -1, blankEnd = -1;
 
-    const learningChinese = state.mode === 'es-cn';
-    const k = ck();
-
-    // Header
-    document.getElementById('card-level').textContent = 'Nivel ' + s.level;
-    document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
-
-    // Determinar texto base
-    let displayText = '';
     if (learningChinese) {
-        displayText = s['chinese_' + k + '_full']; 
-        if (s['chinese_' + k + '_cloze'] && s['chinese_' + k + '_cloze'].includes('___')) {
-            if (s['chinese_' + k + '_cloze'].length === displayText.length) {
-                displayText = s['chinese_' + k + '_cloze'];
-            } else {
-                const answer = s['chinese_' + k + '_answer'];
-                displayText = displayText.replace(answer, '___');
-            }
+        const cloze = s['chinese_' + k + '_cloze'];
+        const answer = s['chinese_' + k + '_answer'];
+        if (cloze && cloze.includes('___') && answer && displayText.includes(answer)) {
+            blankStart = displayText.indexOf(answer);
+            blankEnd = blankStart + answer.length;
         }
     } else {
         displayText = s.spanish_cloze || s.spanish_full;
@@ -923,73 +907,33 @@ function renderCurrentSentence() {
 
     const sentenceTextEl = document.getElementById('sentence-text');
 
-             // Renderizar con colores SOLO si están activados
-    if (learningChinese && s.pinyin && showToneColors) {
-        const chars = Array.from(displayText);
-        const pinyinWords = s.pinyin.split(/\s+/);
-        
-        let coloredHtml = '';
-        let wordIndex = 0;
-        let charCountInCurrentWord = 0;
-        
-        // Pre-calcular cuántos caracteres chinos tiene cada palabra de pinyin
-        // Esto evita el desface con partículas neutras o palabras largas
-        const wordCharCounts = [];
-        let tempCharIdx = 0;
-        
-        for (let w = 0; w < pinyinWords.length; w++) {
-            let count = 0;
-            // Contar caracteres chinos consecutivos
-            while (tempCharIdx < chars.length && 
-                   chars[tempCharIdx] !== '_' && 
-                   !/[\s\p{P}]/u.test(chars[tempCharIdx])) {
-                count++;
-                tempCharIdx++;
-            }
-            // Saltar separadores (espacios, puntuación, huecos)
-            while (tempCharIdx < chars.length && 
-                   (chars[tempCharIdx] === '_' || /[\s\p{P}]/u.test(chars[tempCharIdx]))) {
-                tempCharIdx++;
-            }
-            wordCharCounts.push(count > 0 ? count : 1);
-        }
-        
-        // Resetear índices para el renderizado real
-        wordIndex = 0;
-        charCountInCurrentWord = 0;
-        
-        for (let i = 0; i < chars.length; i++) {
-            const char = chars[i];
-            
-            // Huecos, espacios y puntuación van tal cual
-            if (char === '_' || /[\s\p{P}]/u.test(char)) {
-                coloredHtml += char;
-                // Avanzar al siguiente palabra de pinyin al encontrar separador
-                if (wordIndex < pinyinWords.length) {
-                    wordIndex++;
-                    charCountInCurrentWord = 0;
+    // Renderizar con colores usando pinyin-pro
+    if (learningChinese && showToneColors && typeof pinyinPro !== 'undefined') {
+        // Devuelve un objeto por carácter con su tono: { origin, num, isZh, ... }
+        const items = pinyinPro.pinyin(displayText, { type: 'all' });
+
+        let html = '';
+        let charPos = 0; // posición solo contando caracteres chinos
+
+        for (const it of items) {
+            if (it.isZh) {
+                // Si estamos dentro del rango del hueco, insertar ___ una sola vez
+                if (charPos >= blankStart && charPos < blankEnd) {
+                    if (charPos === blankStart) html += '___';
+                } else {
+                    // Colorear según el tono (1-4) o neutro (5)
+                    const toneNum = it.num || 5;
+                    html += `<span class="tone-${toneNum}">${it.origin}</span>`;
                 }
-                continue;
-            }
-            
-            // Es un carácter chino. Obtener color de la palabra actual
-            const currentPyWord = pinyinWords[wordIndex] || '';
-            const toneClass = getToneClass(currentPyWord);
-            
-            coloredHtml += `<span class="${toneClass}">${char}</span>`;
-            
-            charCountInCurrentWord++;
-            
-            // Si completamos los caracteres esperados para esta palabra, avanzar
-            if (charCountInCurrentWord >= (wordCharCounts[wordIndex] || 1)) {
-                wordIndex++;
-                charCountInCurrentWord = 0;
+                charPos++;
+            } else {
+                // Puntuación, espacios, números pasan limpios
+                html += it.origin;
             }
         }
-        
-        sentenceTextEl.innerHTML = coloredHtml;
+        sentenceTextEl.innerHTML = html;
     } else {
-        // Texto plano seguro
+        // Texto plano seguro (sin colores o sin librería)
         sentenceTextEl.textContent = displayText || 'Error en datos';
     }
     
@@ -1148,7 +1092,7 @@ function nextSentence() {
 
 function showFeedback(msg, type) {
     const el = document.getElementById('feedback');
-    el.textContent = msg;
+    el.textContent = msg; 
     el.className = 'feedback ' + type;
     el.classList.remove('hidden');
 }
