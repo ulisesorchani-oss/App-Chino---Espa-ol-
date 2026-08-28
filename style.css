@@ -594,17 +594,13 @@ body.dark-mode .btn-secondary {
 }
 
 /* ===== COLORES POR TONO ===== */
-/* Usando tus variables CSS existentes */
-.tone-1 { color: var(--primary); }   /* Azul #2563eb */
-.tone-2 { color: var(--warning); }   /* Naranja/Ámbar #f59e0b */
-.tone-3 { color: var(--success); }   /* Verde #16a34a */
-.tone-4 { color: var(--danger); }    /* Rojo #dc2626 */
-.tone-0 { color: var(--text-secondary); } /* Gris #64748b */
+/* Tonos 1-4 como ya los tienes */
+.tone-1 { color: var(--primary); }   /* Azul */
+.tone-2 { color: var(--warning); }   /* Naranja/Ámbar */
+.tone-3 { color: var(--success); }   /* Verde */
+.tone-4 { color: var(--danger); }    /* Rojo */
 
-/* Ajustes para Modo Oscuro (usando tus variables dark) */
-body.dark-mode .tone-1 { color: #60a5fa; } /* Azul claro */
-body.dark-mode .tone-2 { color: #fbbf24; } /* Amarillo brillante */
-body.dark-mode .tone-3 { color: #4ade80; } /* Verde neón */
-body.dark-mode .tone-4 { color: #f87171; } /* Rojo suave */
+/* Tono 5 (neutro) - agregar esta clase */
+.tone-5 { color: var(--text-secondary); } /* Gris */
 
 }
