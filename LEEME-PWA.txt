@@ -118,7 +118,7 @@ QUÉ FUNCIONA SIN INTERNET
 ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
 ------------------------------------------------------------
 Cuando cambies app.js, index.html, style.css o los datos:
-  1. Editá la primera línea de sw.js →  const VERSION = 'v8';
+  1. Editá la primera línea de sw.js →  const VERSION = 'v9';
      (subí el número cada vez que publiques cambios)
   2. Commit + push.
 Los usuarios reciben la versión nueva al volver a entrar
@@ -141,3 +141,19 @@ NOTAS TÉCNICAS
   Para diagnosticar en consola: __pwaDebug (hayDialogoNativo(),
   plataforma()).
 ======================================================================
+
+NOVEDADES v6 (feedback de alumnos en clase)
+------------------------------------------------------------
+1. HUECO CLICABLE: el espacio vacío ___ de la oración ahora
+   se ve con subrayado azul punteado y pulso. Al tocarlo, la
+   app te lleva solito al campo de escritura (con un brillo
+   para que no te lo pierdas). Se puede escribir de una.
+2. ORDEN: la PRÁCTICA DIARIA queda arriba, y el LECTOR DE
+   TEXTO pasa al final de la página (abajo de todo).
+3. CAJÓN DE PALABRAS: tocá cualquier palabra aprendida y
+   sale un cartel con su traducción:
+   • palabra china → pinyin + español + frase de ejemplo
+   • palabra española → chino (simplificado y tradicional
+     si difiere) + pinyin + frase de ejemplo
+   El diccionario se va ampliando solo con cada módulo que
+   cargues (Saludos, HSK, TOCFL, DELE...).

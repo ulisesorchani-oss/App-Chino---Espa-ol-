@@ -924,3 +924,129 @@ body.dark-mode .install-help-cols > div {
 body.dark-mode .install-help-note {
     background: rgba(22, 163, 74, 0.15);
 }
+
+/* ===== v6: hueco clicable → banner de escritura ===== */
+.blank-slot {
+    display: inline-block;
+    min-width: 64px;
+    padding: 0 10px;
+    text-align: center;
+    color: var(--primary);
+    font-weight: 700;
+    border-bottom: 3px dashed var(--primary);
+    border-radius: 6px;
+    cursor: pointer;
+    animation: blankPulse 1.8s ease-in-out infinite;
+}
+
+.blank-slot:hover {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+@keyframes blankPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+.answer-section.answer-glow {
+    animation: answerGlow 1.4s ease;
+}
+
+@keyframes answerGlow {
+    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.55); }
+    60% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0.18); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+/* ===== v6: chips del cajón de vocabulario clicables ===== */
+.vocab-item {
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.vocab-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* ===== v6: popup de traducción (cajón de vocabulario) ===== */
+.vocab-pop {
+    position: fixed;
+    left: 50%;
+    bottom: 74px;
+    transform: translateX(-50%);
+    width: min(430px, calc(100vw - 32px));
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+    padding: 16px 20px;
+    z-index: 9500;
+    animation: vocabPopUp 0.22s ease;
+}
+
+@keyframes vocabPopUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.vocab-pop-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    line-height: 1;
+}
+
+.vocab-pop-close:hover {
+    color: var(--danger);
+}
+
+.vp-word {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    padding-right: 20px;
+}
+
+.vp-pinyin {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.vp-trans {
+    font-size: 1.08rem;
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.vp-trad {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.vp-example {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 6px;
+}
+
+.vp-missing {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+body.dark-mode .vocab-pop {
+    background: #1e293b;
+    border-color: #334155;
+}

@@ -818,6 +818,7 @@ async function loadSentences() {
         
         const d = await r.json();
         state.sentences = Array.isArray(d) ? d : (d.sentences || []);
+        indexSentencesForVocab(state.sentences); // amplía el diccionario de traducciones
         
         console.log(`✅ ${state.sentences.length} oraciones cargadas desde: ${sourceFile}`);
         if (state.sentences.length) {
@@ -829,6 +830,7 @@ async function loadSentences() {
         console.warn('⚠️ Falló carga externa:', e.message);
         if (['todas', 'Saludos', 'Migraciones', 'Supermercado'].includes(state.activeModule)) {
             state.sentences = EMBEDDED_SENTENCES || [];
+            indexSentencesForVocab(state.sentences);
             moduleStatus('📚 ' + label + ' · ' + state.sentences.length + ' oraciones (copia local de respaldo)');
         } else {
             state.sentences = [];
@@ -888,6 +890,34 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Hueco de la oración → foco en el banner de escritura (feedback de alumnos)
+    const sentEl = document.getElementById('sentence-text');
+    if (sentEl) {
+        sentEl.addEventListener('click', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('blank-slot')) {
+                e.preventDefault();
+                focusAnswerInput();
+            }
+        });
+    }
+
+    // Cajón de vocabulario: clic en palabra → popup con traducción zh↔es
+    const vocabList = document.getElementById('vocab-list');
+    if (vocabList) {
+        vocabList.addEventListener('click', (e) => {
+            const chip = e.target.closest('.vocab-item');
+            if (chip && chip.dataset.word) showVocabPop(chip.dataset.word);
+        });
+    }
+    safeAdd('btn-vocab-pop-close', hideVocabPop);
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('vocab-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('.vocab-item')) return;
+        hideVocabPop();
+    });
     
     // Audio
     safeAdd('btn-play-es', () => playAudio('es'));
@@ -1055,7 +1085,50 @@ function renderCurrentSentence() {
     // 7. Barra de progreso
     const bar = document.getElementById('progress-bar');
     if (bar) bar.style.width = ((state.currentIndex + 1) / filtered.length * 100) + '%';
+
+    // 8. Hacer el hueco "___" clicable (los alumnos intentan tocarlo para escribir)
+    makeBlanksClickable();
 } // <--- ¡CIERRE DE LA FUNCIÓN!
+
+// ===== Hueco clicable: tocar el "___" lleva al banner de escritura =====
+function makeBlanksClickable() {
+    const el = document.getElementById('sentence-text');
+    if (!el) return;
+    // Envolver cada "___" de los nodos de texto en un span clicable
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n => {
+        if (!n.nodeValue || n.nodeValue.indexOf('___') === -1) return;
+        const frag = document.createDocumentFragment();
+        n.nodeValue.split('___').forEach((part, i) => {
+            if (i > 0) {
+                const b = document.createElement('span');
+                b.className = 'blank-slot';
+                b.setAttribute('role', 'button');
+                b.setAttribute('aria-label', 'Tocá acá para escribir tu respuesta');
+                b.setAttribute('title', 'Tocá el hueco para escribir');
+                b.textContent = '___';
+                frag.appendChild(b);
+            }
+            if (part) frag.appendChild(document.createTextNode(part));
+        });
+        n.parentNode.replaceChild(frag, n);
+    });
+}
+
+function focusAnswerInput() {
+    const input = document.getElementById('answer-input');
+    if (!input) return;
+    try { input.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { input.scrollIntoView(); }
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+    const sec = document.getElementById('answer-section');
+    if (sec) {
+        sec.classList.remove('answer-glow');
+        void sec.offsetWidth; // fuerza reinicio de la animación
+        sec.classList.add('answer-glow');
+    }
+}
 function togglePinyin() {
     state.showPinyin = !state.showPinyin;
     var btn = document.getElementById('btn-pinyin');
@@ -1233,18 +1306,85 @@ function updateStats() {
 function updateVocabularyPanel() {
     const list = document.getElementById('vocab-list');
     list.innerHTML = '';
-    state.knownWords.forEach(w => {
+    const mk = (w, cls) => {
         const el = document.createElement('span');
-        el.className = 'vocab-item known';
+        el.className = 'vocab-item ' + cls;
         el.textContent = w;
+        el.dataset.word = w;
+        el.setAttribute('title', 'Tocá para ver la traducción');
         list.appendChild(el);
+    };
+    state.knownWords.forEach(w => mk(w, 'known'));
+    state.newWords.forEach(w => mk(w, ''));
+}
+
+// ===== Diccionario palabra → traducción (cajón de vocabulario) =====
+// Se alimenta con los datos embebidos y se va AMPLIANDO con cada módulo
+// cargado (Saludos/HSK/TOCFL/DELE), así las palabras guardadas siguen
+// teniendo traducción aunque cambies de módulo.
+const vocabDict = new Map();
+
+function indexSentencesForVocab(arr) {
+    (arr || []).forEach(s => {
+        const es = (s.spanish_answer || '').trim();
+        const zhS = (s.chinese_simp_answer || '').trim();
+        const zhT = (s.chinese_trad_answer || '').trim();
+        const rec = {
+            es: es,
+            zhSimp: zhS,
+            zhTrad: zhT || zhS,
+            pinyin: s.pinyin || '',
+            fullEs: s.spanish_full || '',
+            fullZh: s.chinese_simp_full || ''
+        };
+        [es, zhS, zhT].forEach(w => {
+            if (w && !vocabDict.has(w)) vocabDict.set(w, rec);
+        });
     });
-    state.newWords.forEach(w => {
-        const el = document.createElement('span');
-        el.className = 'vocab-item';
-        el.textContent = w;
-        list.appendChild(el);
-    });
+}
+indexSentencesForVocab(typeof EMBEDDED_SENTENCES !== 'undefined' ? EMBEDDED_SENTENCES : []);
+
+function isZhText(t) { return /[\u3400-\u4dbf\u4e00-\u9fff]/.test(t || ''); }
+
+function wordPinyin(word) {
+    try {
+        if (typeof pinyinPro !== 'undefined' && word) return pinyinPro.pinyin(word, { toneType: 'mark' });
+    } catch (e) {}
+    return '';
+}
+
+function showVocabPop(word) {
+    const pop = document.getElementById('vocab-pop');
+    const body = document.getElementById('vocab-pop-body');
+    if (!pop || !body) return;
+    const rec = vocabDict.get(word);
+    const zh = isZhText(word);
+    let html = '<div class="vp-word">' + escHtml(word) + '</div>';
+    if (zh) {
+        // Palabra china → traducción al español (+ pinyin + ejemplo)
+        const py = wordPinyin(word) || (rec ? rec.pinyin : '');
+        if (py) html += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
+        if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';
+        if (rec && rec.fullEs) html += '<div class="vp-example">“' + escHtml(rec.fullEs) + '”</div>';
+    } else {
+        // Palabra española → traducción al chino (+ pinyin + ejemplo)
+        if (rec) {
+            let zhLine = rec.zhSimp ? escHtml(rec.zhSimp) : '';
+            if (rec.zhTrad && rec.zhTrad !== rec.zhSimp) zhLine += ' <span class="vp-trad">(' + escHtml(rec.zhTrad) + ')</span>';
+            if (zhLine) html += '<div class="vp-trans">🇨🇳 ' + zhLine + '</div>';
+            const py = rec.pinyin || wordPinyin(rec.zhSimp);
+            if (py) html += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
+            if (rec.fullZh) html += '<div class="vp-example">“' + escHtml(rec.fullZh) + '”</div>';
+        }
+    }
+    if (!rec) html += '<div class="vp-missing">🤔 No tengo la traducción de esta palabra en este módulo. Cargá el módulo donde la aprendiste y volvé a tocarla.</div>';
+    body.innerHTML = html;
+    pop.classList.remove('hidden');
+}
+
+function hideVocabPop() {
+    const pop = document.getElementById('vocab-pop');
+    if (pop) pop.classList.add('hidden');
 }
 
 function resetProgress() {

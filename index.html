@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260831f">
+    <link rel="stylesheet" href="style.css?v=20260901a">
 </head>
 <body>
     <div class="container">
@@ -45,21 +45,7 @@
             </div>
         </div>
 
-        <!-- BANNER: LECTOR DE TEXTO LIBRE -->
-        <div class="reader-banner" id="reader-banner">
-            <div class="reader-head">
-                <h3 class="section-title">🗣️ Lector de texto</h3>
-                <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
-            </div>
-            <textarea id="reader-input" class="reader-input" rows="3" maxlength="600" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
-            <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
-            <div class="reader-actions">
-                <button id="btn-reader-clear" class="btn-secondary" type="button">🗑️ Limpiar</button>
-                <button id="btn-reader-play" class="btn-primary" type="button">🔊 Leer</button>
-            </div>
-        </div>
-
-        <!-- SECCIÓN 1: PRÁCTICA DIARIA -->
+        <!-- SECCIÓN 1: PRÁCTICA DIARIA (arriba, feedback de alumnos) -->
         <div class="section-daily">
             <h3 class="section-title"> PRÁCTICA DIARIA</h3>
             <div class="category-filter">
@@ -143,14 +129,34 @@
         <!-- Panel de Vocabulario -->
         <div class="vocabulary-panel">
             <h3>📚 Palabras aprendidas</h3>
-            <p class="vocab-hint">Se guardan automáticamente al cerrar el navegador</p>
+            <p class="vocab-hint">Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción</p>
             <div id="vocab-list"></div>
+        </div>
+
+        <!-- BANNER: LECTOR DE TEXTO LIBRE (abajo de todo, feedback de alumnos) -->
+        <div class="reader-banner" id="reader-banner">
+            <div class="reader-head">
+                <h3 class="section-title">🗣️ Lector de texto</h3>
+                <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
+            </div>
+            <textarea id="reader-input" class="reader-input" rows="3" maxlength="600" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
+            <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
+            <div class="reader-actions">
+                <button id="btn-reader-clear" class="btn-secondary" type="button">🗑️ Limpiar</button>
+                <button id="btn-reader-play" class="btn-primary" type="button">🔊 Leer</button>
+            </div>
         </div>
 
     </div>
 
     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
     <div id="offline-pill" class="offline-pill hidden" role="status">📴 Sin conexión · uso la voz del sistema</div>
+
+    <!-- POPUP: traducción de una palabra del cajón de vocabulario -->
+    <div id="vocab-pop" class="vocab-pop hidden" role="dialog" aria-label="Traducción de la palabra">
+        <button id="btn-vocab-pop-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="vocab-pop-body"></div>
+    </div>
 
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
@@ -197,7 +203,7 @@
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260831f"></script>
+    <script src="app.js?v=20260901a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
