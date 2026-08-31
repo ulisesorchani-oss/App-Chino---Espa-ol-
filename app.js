@@ -1623,6 +1623,24 @@ function splitGroupedPinyin(word) {
     const isIOS = /iphone|ipad|ipod/i.test(ua) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /android/i.test(ua);
+    const isOperaDesktop = /OPR\/|Opera/i.test(ua) && !isAndroid && !isIOS;
+
+    // Clave de plataforma (Opera Android cae en 'android': su menú también
+    // tiene "Añadir a pantalla de inicio"). Función pura para poder probarla
+    // con UAs falsas desde la consola (__pwaDebug.detectaUA).
+    function detectaUA(s) {
+        s = String(s || '');
+        if (/android/i.test(s)) return 'android';
+        if (/iphone|ipad|ipod/i.test(s)) return 'ios';
+        if (/OPR\/|Opera/i.test(s)) return 'opera';
+        return 'desktop';
+    }
+    function platformKey() {
+        if (isAndroid) return 'android';
+        if (isIOS) return 'ios';
+        if (isOperaDesktop) return 'opera';
+        return 'desktop';
+    }
     const alreadyStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
@@ -1639,7 +1657,7 @@ function splitGroupedPinyin(word) {
 
     function highlightPlatform() {
         if (!help) return;
-        const key = isIOS ? 'ios' : (isAndroid ? 'android' : 'desktop');
+        const key = platformKey();
         help.querySelectorAll('[data-platform]').forEach((col) => {
             col.classList.toggle('install-help-active', col.getAttribute('data-platform') === key);
         });
@@ -1701,6 +1719,7 @@ function splitGroupedPinyin(word) {
     window.__pwaDebug = {
         showHelp: showHelp,
         hayDialogoNativo: function () { return !!deferredPrompt; },
-        plataforma: function () { return isIOS ? 'ios' : (isAndroid ? 'android' : 'desktop'); }
+        plataforma: platformKey,
+        detectaUA: detectaUA
     };
 })();

@@ -58,6 +58,24 @@ CÓMO INSTALARLA ("tipo APK")
    • Icono de instalación en la barra de direcciones, o
      Menú → "Instalar Chino·ES...".
 
+🅾 OPERA / OPERA GX EN PC (importante):
+   • Opera de escritorio NO permite instalar PWAs como apps
+     (no muestra el ícono ni abre el diálogo). No es un error
+     de la app: le falta esa función al navegador.
+   • El MODO OFFLINE sí funciona igual en Opera (soporta
+     Service Workers): todo el contenido y reescucha de
+     audios operan sin internet.
+   • Salida fácil: abrí la página UNA vez en Chrome o Edge →
+     ícono ⊕ Instalar → el ícono queda en el escritorio y el
+     archivo instalado es independiente del navegador.
+   • Truco avanzado (ventana propia en Opera): botón derecho
+     en el escritorio → Nuevo → Acceso directo, y en
+     "Ubicación" poné:
+       "C:\Users\TU_USUARIO\AppData\Local\Programs\Opera\opera.exe" --app="https://ulisesorchani-oss.github.io/App-Chino---Espa-ol-/"
+     (en Mac: /Applications/Opera.app/Contents/MacOS/Opera --app=URL).
+     Se abre sin barras, casi como app nativa. Si tu versión
+     de Opera ignora --app, usá la salida fácil con Chrome/Edge.
+
 ❓ ¿NO VES EL ÍCONO DE INSTALACIÓN? (situación común)
 ------------------------------------------------------------
 1. RELOAD: Chrome habilita la instalación desde la SEGUNDA
@@ -71,7 +89,8 @@ CÓMO INSTALARLA ("tipo APK")
    "Aplicaciones" → "Instalar este sitio como aplicación".
 4. Desde la v5.1, el botón 📲 de la app está SIEMPRE visible:
    si el navegador no abre el diálogo, te muestra la guía con
-   los pasos exactos de tu dispositivo.
+   los pasos exactos de tu dispositivo (desde v5.2 detecta
+   Opera y te explica esta misma situación).
 
 Requisito: haber visitado la app al menos una vez con internet
 para que el Service Worker guarde todo (unos segundos).
@@ -95,7 +114,7 @@ QUÉ FUNCIONA SIN INTERNET
 ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
 ------------------------------------------------------------
 Cuando cambies app.js, index.html, style.css o los datos:
-  1. Editá la primera línea de sw.js →  const VERSION = 'v6';
+  1. Editá la primera línea de sw.js →  const VERSION = 'v7';
      (subí el número cada vez que publiques cambios)
   2. Commit + push.
 Los usuarios reciben la versión nueva al volver a entrar

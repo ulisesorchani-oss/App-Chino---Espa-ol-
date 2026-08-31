@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260831d">
+    <link rel="stylesheet" href="style.css?v=20260831e">
 </head>
 <body>
     <div class="container">
@@ -159,7 +159,7 @@
             <h3>📲 Cómo instalar la app</h3>
             <div class="install-help-cols">
                 <div data-platform="android">
-                    <h4>🤖 Android (Chrome)</h4>
+                    <h4>🤖 Android (Chrome u Opera)</h4>
                     <ol>
                         <li>Menú <b>⋮</b> (arriba a la derecha)</li>
                         <li>Tocá <b>“Instalar aplicación”</b> o <b>“Añadir a pantalla de inicio”</b></li>
@@ -173,6 +173,15 @@
                         <li>Menú <b>⋮</b> → <b>“Guardar y compartir”</b> → <b>“Instalar página como aplicación…”</b></li>
                     </ol>
                 </div>
+                <div data-platform="opera">
+                    <h4>🅾 Opera (PC / Mac)</h4>
+                    <ol>
+                        <li><b>Opera de escritorio aún no permite instalar PWAs como apps</b> (tampoco Opera GX) — no es un error de esta app</li>
+                        <li><b>Salida fácil:</b> abrí esta página una vez en <b>Chrome o Edge</b> → ícono <b>⊕ Instalar</b> → el ícono queda en tu escritorio, independiente del navegador</li>
+                        <li><b>Truco avanzado:</b> acceso directo a <b>opera.exe --app=</b>https://… → se abre en ventana propia, sin barras</li>
+                        <li>💡 El <b>modo offline sí funciona</b> en Opera (Service Worker soportado)</li>
+                    </ol>
+                </div>
                 <div data-platform="ios">
                     <h4>📱 iPhone / iPad (Safari)</h4>
                     <ol>
@@ -182,12 +191,12 @@
                     </ol>
                 </div>
             </div>
-            <p class="install-help-tip">💡 ¿No aparece el ícono en la barra? Recargá la página (F5) — Chrome lo habilita desde la segunda visita, cuando el Service Worker ya estaba registrado.</p>
+            <p class="install-help-tip">💡 ¿No aparece el ícono en la barra? Recargá la página (F5) — Chrome lo habilita desde la segunda visita, cuando el Service Worker ya estaba registrado. Si usás Opera en la PC, mirá su columna: ese navegador no ofrece instalación tipo app.</p>
         </div>
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260831d"></script>
+    <script src="app.js?v=20260831e"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

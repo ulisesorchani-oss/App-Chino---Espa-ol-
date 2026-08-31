@@ -824,7 +824,7 @@ body.dark-mode .offline-pill {
     border-radius: var(--radius);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
     padding: 22px;
-    max-width: 680px;
+    max-width: 800px;
     width: 100%;
     max-height: 85vh;
     overflow: auto;
@@ -838,7 +838,7 @@ body.dark-mode .offline-pill {
 
 .install-help-cols {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
