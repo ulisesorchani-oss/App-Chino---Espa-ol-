@@ -678,3 +678,68 @@ body.dark-mode .module-status.error {
 .voice-btn:hover {
     background: var(--primary);
 }
+
+/* ===== BANNER: LECTOR DE TEXTO LIBRE ===== */
+.reader-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+}
+
+.reader-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.reader-head .section-title {
+    margin: 0;
+}
+
+.reader-lang {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.reader-input {
+    width: 100%;
+    min-height: 72px;
+    resize: vertical;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: border-color 0.3s;
+}
+
+.reader-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.reader-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+body.dark-mode .reader-input {
+    background-color: #1e293b;
+    color: white;
+    border-color: #475569;
+}

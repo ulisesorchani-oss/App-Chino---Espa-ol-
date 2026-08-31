@@ -1,0 +1,47 @@
+LEEME - ACTUALIZACIÓN LECTOR DE TEXTO (v3)
+===========================================
+
+(Requiere tener desplegada la v2 de voces F/M; si ya la subiste,
+ esta versión va encima sin tocar la API.)
+
+QUÉ HAY DE NUEVO
+----------------
+Banner "🗣️ Lector de texto" debajo del panel de control:
+  1. Pegás o escribís texto en chino O español
+  2. Detecta el idioma solo (🇨🇳 si hay caracteres chinos, 🇪🇸 si no)
+     y lo muestra en vivo con contador de caracteres (máx. 600)
+  3. Botón "🔊 Leer" lo reproduce con:
+     - la voz que elegiste (👩/👨) para ese idioma
+     - la velocidad configurada (🐢 0.85x etc.)
+  4. Mientras lee, el botón pasa a "⏹ Detener" (clic para cortar);
+     al terminar vuelve solo a "🔊 Leer"
+  5. "🗑️ Limpiar" borra el texto
+
+Extras de robustez incluidos:
+  - Timeout de 15 s en TODAS las peticiones TTS (AbortController):
+    si la red falla, el botón nunca queda trabado y la app cae
+    a la voz del sistema como respaldo.
+  - Un solo audio a la vez: si suena la tarjeta y le das Leer
+    (o al revés), el audio anterior se corta solo.
+
+ARCHIVOS CAMBIADOS (solo 3)
+---------------------------
+   app.js       <- lógica del lector + timeout TTS
+   index.html   <- banner nuevo + cache-busting v=20260831
+   style.css    <- estilos del banner (claro y oscuro)
+
+   api/tts.py y requirements.txt NO cambian (usa la API v2 que ya
+   entiende el parámetro "voice").
+
+CÓMO DESPLEGAR EN VERCEL
+------------------------
+Reemplazá estos 3 archivos en tu repo por los de este ZIP y hacé push.
+Vercel redespliega solo. Si preferís, subí el ZIP completo excepto
+este LEEME.
+
+USO SUGERIDO
+------------
+- Pegá diálogos completos de WeChat o mensajes de vecinos chinos
+  y escuchá la pronunciación.
+- Pegá tu frase en español para oírla antes de usarla en la calle.
+- Combinado con el botón 🐢 0.85x ideal para imitar el ritmo.

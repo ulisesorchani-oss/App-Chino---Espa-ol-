@@ -864,6 +864,15 @@ function setupEventListeners() {
     safeAdd('btn-speed', cycleSpeed);
     safeAdd('btn-voice-zh', () => cycleVoice('zh'));
     safeAdd('btn-voice-es', () => cycleVoice('es'));
+
+    // Lector de texto libre (banner)
+    safeAdd('btn-reader-play', toggleReaderPlay);
+    safeAdd('btn-reader-clear', clearReader);
+    const readerTa = document.getElementById('reader-input');
+    if (readerTa) {
+        readerTa.addEventListener('input', updateReaderLang);
+        updateReaderLang();
+    }
     
     // Input Enter
     const input = document.getElementById('answer-input');
@@ -1255,6 +1264,19 @@ let activeBtn = null;
 let originalBtnText = '';
 let isPlaying = false;
 
+// ===== Petición TTS con timeout (AbortController) =====
+// Evita botones trabados en "⏳" si el servidor tarda o la red falla
+function fetchTTS(body, timeoutMs) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
+    return fetch(TTS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: ctrl.signal
+    }).finally(() => clearTimeout(timer));
+}
+
 async function playAudio(lang) {
     const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
     if (isPlaying && btn && btn.innerText.includes('⏳')) {
@@ -1273,6 +1295,7 @@ async function playAudio(lang) {
         globalAudioPlayer.removeAttribute('src');
         globalAudioPlayer.load();
     }
+    stopReader(); // si el lector libre está sonando, se corta (un solo audio a la vez)
 
     const filtered = getFiltered();
     const s = filtered[state.currentIndex];
@@ -1291,11 +1314,7 @@ async function playAudio(lang) {
     }
 
     try {
-        const response = await fetch(TTS_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, lang: langCode, voice: voiceGender })
-        });
+        const response = await fetchTTS({ text, lang: langCode, voice: voiceGender });
 
         if (!response.ok) throw new Error('Error en servidor');
         const data = await response.json();
@@ -1395,6 +1414,105 @@ function playVoiceSample(lang) {
             })
             .catch(() => { /* sin muestra de audio */ });
     } catch (e) { /* silencioso */ }
+}
+
+// ===== Lector de texto libre (banner): pega chino o español y lo lee =====
+const readerAudio = new Audio();
+readerAudio.preservesPitch = true;        // mantiene la voz natural a distinta velocidad
+readerAudio.webkitPreservesPitch = true;  // Safari
+let readerPlaying = false;
+
+function detectReaderLang(text) {
+    // Si hay CJK (chino simplificado o tradicional) se lee como chino; si no, español
+    return /[\u4e00-\u9fff\u3400-\u4dbf]/.test(text) ? 'zh' : 'es';
+}
+
+function updateReaderLang() {
+    const ta = document.getElementById('reader-input');
+    const label = document.getElementById('reader-lang');
+    if (!ta || !label) return;
+    const t = ta.value.trim();
+    if (!t) { label.textContent = '🌐 Detectado: —'; return; }
+    const lang = detectReaderLang(t);
+    label.textContent = (lang === 'zh' ? '🇨🇳 Chino detectado' : '🇪🇸 Español detectado')
+        + ' · ' + t.length + '/' + (ta.maxLength || 600);
+}
+
+function stopReader() {
+    if (!readerPlaying && !readerAudio.src) return;
+    readerPlaying = false;
+    readerAudio.onended = null;
+    readerAudio.onerror = null;
+    readerAudio.pause();
+    try { readerAudio.currentTime = 0; } catch (e) { /* sin src válido */ }
+    if (readerAudio.src && readerAudio.src.startsWith('blob:')) URL.revokeObjectURL(readerAudio.src);
+    readerAudio.removeAttribute('src');
+    const btn = document.getElementById('btn-reader-play');
+    if (btn) { btn.textContent = '🔊 Leer'; btn.disabled = false; }
+}
+
+async function toggleReaderPlay() {
+    if (readerPlaying) { stopReader(); return; }
+
+    const ta = document.getElementById('reader-input');
+    const btn = document.getElementById('btn-reader-play');
+    if (!ta || !btn) return;
+    const text = ta.value.trim();
+    if (!text) { ta.focus(); return; }
+
+    const lang = detectReaderLang(text);
+    const langCode = lang === 'zh' ? 'zh-CN' : 'es-ES';
+    const gender = lang === 'zh' ? voiceZh : voiceEs; // usa la voz elegida en los botones 👩/👨
+
+    btn.textContent = '⏳ ...';
+    btn.disabled = true;
+
+    // Un solo audio a la vez: cortar voz del sistema, tarjeta y lector
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    if (isPlaying && activeBtn) { restoreButton(); isPlaying = false; }
+    if (globalAudioPlayer.src) {
+        globalAudioPlayer.onended = null;
+        globalAudioPlayer.pause();
+        globalAudioPlayer.removeAttribute('src');
+    }
+    stopReader();
+
+    try {
+        const response = await fetchTTS({ text, lang: langCode, voice: gender });
+        if (!response.ok) throw new Error('Error en servidor');
+        const data = await response.json();
+        if (!data.audio) throw new Error('Sin audio');
+
+        const bin = atob(data.audio);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+        readerAudio.src = url;
+        readerAudio.playbackRate = playbackSpeed;
+
+        readerPlaying = true;
+        btn.textContent = '⏹ Detener';
+        btn.disabled = false;
+        await readerAudio.play();
+        readerAudio.onended = stopReader;
+        readerAudio.onerror = stopReader;
+    } catch (err) {
+        console.warn('Lector: falló el TTS del servidor, usando voz del sistema:', err);
+        stopReader();
+        if ('speechSynthesis' in window) {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = langCode;
+            u.rate = playbackSpeed;
+            speechSynthesis.speak(u);
+        }
+    }
+}
+
+function clearReader() {
+    const ta = document.getElementById('reader-input');
+    stopReader();
+    if (ta) { ta.value = ''; ta.focus(); }
+    updateReaderLang();
 }
 
 // ===== Modo Oscuro =====
