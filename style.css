@@ -768,3 +768,36 @@ body.dark-mode .reader-preview {
     background: #0f172a;
     border-color: #334155;
 }
+
+/* ===== PWA: BOTÓN INSTALAR + PILL OFFLINE ===== */
+.install-btn {
+    border-color: var(--success);
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.25), rgba(5, 150, 105, 0.25));
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.install-btn:hover {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+}
+
+.offline-pill {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #fca5a5;
+    border: 1px solid rgba(252, 165, 165, 0.35);
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    pointer-events: none;
+}
+
+body.dark-mode .offline-pill {
+    background: #020617;
+}

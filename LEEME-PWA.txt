@@ -1,0 +1,101 @@
+<!ARCHIVO LEEME — PWA INSTALABLE + OFFLINE (v5)>
+======================================================================
+ CHINO ⇄ ESPAÑOL — ¡Tu app ahora se instala como una APK y
+ funciona SIN INTERNET!
+======================================================================
+
+QUÉ CAMBIÓ (respecto a la v3/v4 que ya tenés)
+------------------------------------------------------------
+ARCHIVOS NUEVOS (copiar a la raíz del repo):
+  manifest.json         → le dice al navegador cómo "instalar" la app
+  sw.js                 → Service Worker: guarda todo para el offline
+  pinyin-pro.min.js     → pinyin autohospedado (315 KB, ya no depende
+                          del CDN: funciona offline y carga más rápido)
+  icons/icon-192.png    → ícono de la app
+  icons/icon-512.png    → ícono de la app (alta resolución)
+  icons/maskable-512.png→ ícono adaptado para Android (forma circular)
+
+ARCHIVOS MODIFICADOS (reemplazar por los de este ZIP):
+  index.html  → link al manifest, color de tema, botón "📲 Instalar app",
+                pill "📴 Sin conexión", registro del Service Worker y
+                pinyin-pro local (si faltara, usa el CDN como plan B)
+  app.js      → lógica del botón instalar + indicador offline
+  style.css   → estilos del botón instalar y de la pill
+  vercel.json → headers para que sw.js y manifest.json nunca queden
+                viejos en caché (actualizaciones instantáneas)
+
+NO CAMBIÓ: api/tts.py, requirements.txt, data/, README.md
+======================================================================
+
+CÓMO DESPLEGAR (2 minutos)
+------------------------------------------------------------
+1. Copiá TODO el contenido de este ZIP a la raíz de tu repo
+   (junto a index.html). Ojo: la carpeta icons/ debe quedar
+   como carpeta, no como archivos sueltos.
+2. git add . && git commit -m "PWA instalable + offline" && git push
+3. Vercel redespliega solo. Listo ✅
+
+IMPORTANTE: sw.js y pinyin-pro.min.js deben quedar EN LA RAÍZ
+del sitio (junto a index.html), no en una subcarpeta.
+======================================================================
+
+CÓMO INSTALARLA ("tipo APK")
+------------------------------------------------------------
+🤖 ANDROID (Chrome):
+   • Tocá el botón verde "📲 Instalar app" que aparece en la app,
+     o Menú ⋮ → "Instalar aplicación" / "Añadir a pantalla de inicio".
+   • Te queda el ícono violeta con 中 en el escritorio, abre
+     pantalla completa sin barra del navegador. Se desinstala
+     como cualquier app, desde ajustes.
+
+📱 iPHONE/iPAD (Safari únicamente):
+   • Botón Compartir ⬆️ → "Agregar a pantalla de inicio".
+   • (Safari no muestra el botón 📲; el ícono lo toma del manifest.)
+
+💻 PC/Mac (Chrome/Edge):
+   • Icono de instalación en la barra de direcciones, o
+     Menú → "Instalar Chino·ES...".
+
+Requisito: haber visitado la app al menos una vez con internet
+para que el Service Worker guarde todo (unos segundos).
+======================================================================
+
+QUÉ FUNCIONA SIN INTERNET
+------------------------------------------------------------
+✅ Oraciones diarias, HSK 1-5, TOCFL, DELE (datos precacheados)
+✅ Pinyin y colores de tonos (tarjeta Y lector de texto)
+✅ Modos ES→CN / CN→ES, progreso, vocabulario, tema oscuro
+✅ El lector de texto libre → usa la VOZ DEL SISTEMA si no hay red
+✅ REESCUCHA: cada audio que escuchaste una vez queda guardado en
+   caché → lo podés volver a escuchar en modo avión (hasta ~80 audios)
+✅ Con internet: siempre voz natural edge-tts (Xiaoxiao/Yunjian/
+   Elena/Tomás) como hasta ahora, sin cambios
+
+❌ Sin conexión y audio nunca escuchado antes → la app lo avisa y
+   usa la voz del sistema del celular (en Android suena bien).
+======================================================================
+
+ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
+------------------------------------------------------------
+Cuando cambies app.js, index.html, style.css o los datos:
+  1. Editá la primera línea de sw.js →  const VERSION = 'v6';
+     (subí el número cada vez que publiques cambios)
+  2. Commit + push.
+Los usuarios reciben la versión nueva al volver a entrar
+(primer carga desde red, luego vuelve a cachear).
+Si algo quedara viejo: DevTools → Application → Service Workers
+→ Unregister, y recargar.
+======================================================================
+
+NOTAS TÉCNICAS
+------------------------------------------------------------
+• El pinyin del lector es automático (pinyin-pro): con caracteres
+  polifónicos (multi-lectura) puede elegir la lectura más común.
+• TTS cacheado: clave = texto+idioma+voz (hash), tope de 80 audios,
+  se eliminan los más viejos automáticamente.
+• Si borrás pinyin-pro.min.js del repo sin querer, la app sigue
+  funcionando: index.html recurre al CDN automáticamente.
+• El botón 📲 solo aparece cuando el navegador confirma que la app
+  es instalable (criterios: manifest + Service Worker + íconos +
+  conexión segura). En tu Vercel ya se cumplen todos ✅
+======================================================================

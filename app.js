@@ -1607,3 +1607,54 @@ function splitGroupedPinyin(word) {
     if (currentSyllable) syllables.push(currentSyllable);
     return syllables.length > 0 ? syllables : [word];
 }
+
+// ===== PWA: botón "📲 Instalar app" + indicador offline =====
+// Chrome/Edge/Android disparan beforeinstallprompt → mostramos el botón.
+// iOS no lo dispara: ahí se instala con Compartir → "Agregar a inicio".
+(function setupPWA() {
+    const btn = document.getElementById('btn-install');
+    const pill = document.getElementById('offline-pill');
+    let deferredPrompt = null;
+
+    const alreadyStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        if (alreadyStandalone) return;
+        deferredPrompt = e;
+        if (btn) {
+            btn.classList.remove('hidden');
+            btn.title = 'Instalar la app en tu celular o computadora';
+        }
+    });
+
+    if (btn) {
+        btn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            btn.textContent = '⏳ Instalando…';
+            try {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+            } catch (err) { /* usuario canceló o navegador no soporta */ }
+            deferredPrompt = null;
+            btn.classList.add('hidden');
+            btn.textContent = '📲 Instalar app';
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        if (btn) btn.classList.add('hidden');
+        console.log('[PWA] ¡App instalada! 🎉');
+    });
+
+    function updatePill() {
+        if (!pill) return;
+        pill.classList.toggle('hidden', navigator.onLine);
+    }
+    window.addEventListener('online', updatePill);
+    window.addEventListener('offline', updatePill);
+    updatePill();
+})();

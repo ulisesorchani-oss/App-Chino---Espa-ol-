@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aprende Chino-Español | Minería de Oraciones</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle'%3E%E4%B8%AD%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="style.css?v=20260831b">
+    <!-- PWA: instalable tipo app + offline -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Chino·ES">
+    <link rel="stylesheet" href="style.css?v=20260831c">
 </head>
 <body>
     <div class="container">
@@ -30,6 +37,7 @@
             <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
             <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
             <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
+            <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC">📲 Instalar app</button>
 
             <div class="stats">
                 <span id="stats-known">✅ Conocidas: 0</span>
@@ -142,7 +150,21 @@
     </div>
 
     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
-    <script src="https://unpkg.com/pinyin-pro"></script>
-    <script src="app.js?v=20260831b"></script>
+    <div id="offline-pill" class="offline-pill hidden" role="status">📴 Sin conexión · uso la voz del sistema</div>
+    <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
+    <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
+    <script src="app.js?v=20260831c"></script>
+    <script>
+    // Registro del Service Worker (PWA offline)
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('sw.js').then(function (reg) {
+                console.log('[PWA] Service Worker registrado, scope:', reg.scope);
+            }).catch(function (err) {
+                console.warn('[PWA] SW no registrado:', err);
+            });
+        });
+    }
+    </script>
 </body>
 </html>
