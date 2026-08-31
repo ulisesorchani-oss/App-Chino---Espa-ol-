@@ -870,8 +870,12 @@ function setupEventListeners() {
     safeAdd('btn-reader-clear', clearReader);
     const readerTa = document.getElementById('reader-input');
     if (readerTa) {
-        readerTa.addEventListener('input', updateReaderLang);
+        readerTa.addEventListener('input', () => {
+            updateReaderLang();
+            renderReaderPreview();
+        });
         updateReaderLang();
+        renderReaderPreview();
     }
     
     // Input Enter
@@ -1063,6 +1067,7 @@ function togglePinyin() {
     
     saveProgress();
     renderCurrentSentence();
+    renderReaderPreview(); // el lector libre también usa el pinyin
 }
 
 function toggleToneColors() {
@@ -1076,6 +1081,7 @@ function toggleToneColors() {
     
     saveProgress();
     renderCurrentSentence();
+    renderReaderPreview(); // el lector libre también usa los colores de tono
 }
 
 // ===== Lógica de Juego =====
@@ -1513,6 +1519,57 @@ function clearReader() {
     stopReader();
     if (ta) { ta.value = ''; ta.focus(); }
     updateReaderLang();
+    renderReaderPreview();
+}
+
+// ===== Lector: vista previa con pinyin y colores de tono =====
+// Reutiliza los toggles 📖 Pinyin y 🎨 Tonos de la app (y pinyin-pro)
+function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderReaderPreview() {
+    const prev = document.getElementById('reader-preview');
+    if (!prev) return;
+    const ta = document.getElementById('reader-input');
+    const text = (ta && ta.value ? ta.value : '').trim();
+    const isZh = !!text && detectReaderLang(text) === 'zh';
+    const wantPinyin = state.showPinyin;
+    const wantTones = showToneColors;
+
+    // Solo para chino, con algún toggle activo y con la librería disponible
+    if (!isZh || (!wantPinyin && !wantTones) || typeof pinyinPro === 'undefined') {
+        prev.innerHTML = '';
+        prev.classList.add('hidden');
+        return;
+    }
+
+    try {
+        const items = pinyinPro.pinyin(text, { type: 'all' });
+        let pyHtml = '';
+        let hzHtml = '';
+
+        for (const it of items) {
+            if (it.isZh) {
+                const toneNum = it.num || 5;
+                if (wantPinyin) pyHtml += '<span class="tone-' + toneNum + '">' + escHtml(it.pinyin || it.origin) + '</span> ';
+                if (wantTones) hzHtml += '<span class="tone-' + toneNum + '">' + escHtml(it.origin) + '</span>';
+                else hzHtml += escHtml(it.origin);
+            } else {
+                if (wantPinyin) pyHtml += escHtml(it.origin) + ' ';
+                hzHtml += escHtml(it.origin);
+            }
+        }
+
+        let html = '';
+        if (wantPinyin) html += '<div class="reader-py">' + pyHtml.trim() + '</div>';
+        html += '<div class="reader-hz">' + hzHtml + '</div>';
+        prev.innerHTML = html;
+        prev.classList.remove('hidden');
+    } catch (e) {
+        console.warn('Lector: error renderizando pinyin/tonos:', e);
+        prev.classList.add('hidden');
+    }
 }
 
 // ===== Modo Oscuro =====

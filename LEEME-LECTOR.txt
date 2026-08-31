@@ -1,47 +1,39 @@
-LEEME - ACTUALIZACIÓN LECTOR DE TEXTO (v3)
-===========================================
+LEEME - ACTUALIZACIÓN LECTOR CON PINYIN Y TONOS (v4)
+====================================================
 
-(Requiere tener desplegada la v2 de voces F/M; si ya la subiste,
- esta versión va encima sin tocar la API.)
+(Encima de la v3; sigue sin tocar la API ni requirements.txt.)
 
 QUÉ HAY DE NUEVO
 ----------------
-Banner "🗣️ Lector de texto" debajo del panel de control:
-  1. Pegás o escribís texto en chino O español
-  2. Detecta el idioma solo (🇨🇳 si hay caracteres chinos, 🇪🇸 si no)
-     y lo muestra en vivo con contador de caracteres (máx. 600)
-  3. Botón "🔊 Leer" lo reproduce con:
-     - la voz que elegiste (👩/👨) para ese idioma
-     - la velocidad configurada (🐢 0.85x etc.)
-  4. Mientras lee, el botón pasa a "⏹ Detener" (clic para cortar);
-     al terminar vuelve solo a "🔊 Leer"
-  5. "🗑️ Limpiar" borra el texto
+El banner "🗣️ Lector de texto" ahora obedece a los toggles
+📖 Pinyin y 🎨 Tonos de la app:
 
-Extras de robustez incluidos:
-  - Timeout de 15 s en TODAS las peticiones TTS (AbortController):
-    si la red falla, el botón nunca queda trabado y la app cae
-    a la voz del sistema como respaldo.
-  - Un solo audio a la vez: si suena la tarjeta y le das Leer
-    (o al revés), el audio anterior se corta solo.
+  1. Pegás texto chino y, si 📖 Pinyin está ON, aparece debajo la
+     línea de pinyin con marcas de tono (mā, má, mǎ, mà) generada
+     automáticamente por pinyin-pro — no hace falta que el texto
+     traiga pinyin.
+  2. Si 🎨 Tonos está ON, cada sílaba del pinyin Y cada carácter
+     chino se pintan con el color de su tono:
+     🔵 1er tono (mā) · 🟠 2do tono (má) · 🟢 3er tono (mǎ)
+     🔴 4to tono (mà) · ⚪ tono neutro (ma)
+  3. Se actualiza en vivo mientras escribís o pegás, y al cambiar
+     los toggles.
+  4. Con texto en español el panel no aparece (no aplica).
+  5. El color de los caracteres usa los mismos .tone-N de la
+     tarjeta de práctica: coherencia visual total.
+
+  Truco: pegá "妈妈骑马，马慢，妈妈骂马。" con ambos toggles ON
+  y tenés los 5 tonos en una sola línea.
 
 ARCHIVOS CAMBIADOS (solo 3)
 ---------------------------
-   app.js       <- lógica del lector + timeout TTS
-   index.html   <- banner nuevo + cache-busting v=20260831
-   style.css    <- estilos del banner (claro y oscuro)
+   app.js       <- renderReaderPreview + enganche de toggles
+   index.html   <- panel de vista previa + cache-busting v=20260831b
+   style.css    <- estilos .reader-preview (claro y oscuro)
 
-   api/tts.py y requirements.txt NO cambian (usa la API v2 que ya
-   entiende el parámetro "voice").
+   api/tts.py y requirements.txt NO cambian.
 
 CÓMO DESPLEGAR EN VERCEL
 ------------------------
-Reemplazá estos 3 archivos en tu repo por los de este ZIP y hacé push.
-Vercel redespliega solo. Si preferís, subí el ZIP completo excepto
-este LEEME.
-
-USO SUGERIDO
-------------
-- Pegá diálogos completos de WeChat o mensajes de vecinos chinos
-  y escuchá la pronunciación.
-- Pegá tu frase en español para oírla antes de usarla en la calle.
-- Combinado con el botón 🐢 0.85x ideal para imitar el ritmo.
+Reemplazá estos 3 archivos en tu repo por los de este ZIP y push.
+O subí el ZIP completo excepto este LEEME.

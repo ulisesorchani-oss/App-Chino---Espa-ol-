@@ -743,3 +743,28 @@ body.dark-mode .reader-input {
     color: white;
     border-color: #475569;
 }
+
+/* ===== LECTOR: VISTA PREVIA CON PINYIN Y TONOS ===== */
+.reader-preview {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--bg-light);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    line-height: 2;
+    overflow-wrap: break-word;
+}
+
+.reader-preview .reader-py {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.reader-preview .reader-hz {
+    font-size: 1.15rem;
+}
+
+body.dark-mode .reader-preview {
+    background: #0f172a;
+    border-color: #334155;
+}
