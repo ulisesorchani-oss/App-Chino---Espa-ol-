@@ -1608,45 +1608,84 @@ function splitGroupedPinyin(word) {
     return syllables.length > 0 ? syllables : [word];
 }
 
-// ===== PWA: botón "📲 Instalar app" + indicador offline =====
-// Chrome/Edge/Android disparan beforeinstallprompt → mostramos el botón.
-// iOS no lo dispara: ahí se instala con Compartir → "Agregar a inicio".
+// ===== PWA: botón "📲 Instalar app" + guía de instalación + indicador offline =====
+// El botón está SIEMPRE visible (salvo que la app ya esté instalada).
+// Si el navegador dispara beforeinstallprompt → instalación nativa.
+// Si no (algunas versiones de Chrome lo retarden o lo omiten) → muestra
+// una guía con los pasos exactos según el dispositivo.
 (function setupPWA() {
     const btn = document.getElementById('btn-install');
     const pill = document.getElementById('offline-pill');
+    const help = document.getElementById('install-help');
     let deferredPrompt = null;
 
+    const ua = navigator.userAgent || '';
+    const isIOS = /iphone|ipad|ipod/i.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /android/i.test(ua);
     const alreadyStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
+
+    function showHelp(show) {
+        if (help) help.classList.toggle('hidden', !show);
+    }
+
+    const closeBtn = document.getElementById('btn-install-help-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => showHelp(false));
+    if (help) {
+        help.addEventListener('click', (e) => { if (e.target === help) showHelp(false); });
+    }
+
+    function highlightPlatform() {
+        if (!help) return;
+        const key = isIOS ? 'ios' : (isAndroid ? 'android' : 'desktop');
+        help.querySelectorAll('[data-platform]').forEach((col) => {
+            col.classList.toggle('install-help-active', col.getAttribute('data-platform') === key);
+        });
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         if (alreadyStandalone) return;
         deferredPrompt = e;
-        if (btn) {
-            btn.classList.remove('hidden');
-            btn.title = 'Instalar la app en tu celular o computadora';
-        }
+        console.log('[PWA] El navegador confirma: la app es instalable ✅');
+        if (btn) btn.classList.remove('hidden');
     });
 
     if (btn) {
+        if (!alreadyStandalone) {
+            // pequeño delay para darle prioridad al diálogo nativo si viene
+            setTimeout(() => btn.classList.remove('hidden'), 1500);
+        }
         btn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            btn.textContent = '⏳ Instalando…';
-            try {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-            } catch (err) { /* usuario canceló o navegador no soporta */ }
-            deferredPrompt = null;
-            btn.classList.add('hidden');
-            btn.textContent = '📲 Instalar app';
+            if (deferredPrompt) {
+                btn.textContent = '⏳ Instalando…';
+                let outcome = 'dismissed';
+                try {
+                    deferredPrompt.prompt();
+                    // seguro anti-cuelgue: algunos navegadores raros nunca resuelven
+                    const choice = await Promise.race([
+                        deferredPrompt.userChoice,
+                        new Promise((res) => setTimeout(() => res(null), 30000))
+                    ]);
+                    if (choice && choice.outcome) outcome = choice.outcome;
+                } catch (err) { /* usuario canceló o diálogo no disponible */ }
+                deferredPrompt = null;
+                btn.textContent = '📲 Instalar app';
+                if (outcome !== 'timeout') btn.classList.add('hidden');
+                return;
+            }
+            // Sin diálogo nativo disponible → guía paso a paso
+            highlightPlatform();
+            showHelp(true);
         });
     }
 
     window.addEventListener('appinstalled', () => {
         deferredPrompt = null;
         if (btn) btn.classList.add('hidden');
+        showHelp(false);
         console.log('[PWA] ¡App instalada! 🎉');
     });
 
@@ -1657,4 +1696,11 @@ function splitGroupedPinyin(word) {
     window.addEventListener('online', updatePill);
     window.addEventListener('offline', updatePill);
     updatePill();
+
+    // gancho de diagnóstico (consola): __pwaDebug
+    window.__pwaDebug = {
+        showHelp: showHelp,
+        hayDialogoNativo: function () { return !!deferredPrompt; },
+        plataforma: function () { return isIOS ? 'ios' : (isAndroid ? 'android' : 'desktop'); }
+    };
 })();

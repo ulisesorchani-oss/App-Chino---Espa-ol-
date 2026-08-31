@@ -1,4 +1,4 @@
-<!ARCHIVO LEEME — PWA INSTALABLE + OFFLINE (v5)>
+<!ARCHIVO LEEME — PWA INSTALABLE + OFFLINE (v5.1)>
 ======================================================================
  CHINO ⇄ ESPAÑOL — ¡Tu app ahora se instala como una APK y
  funciona SIN INTERNET!
@@ -17,10 +17,12 @@ ARCHIVOS NUEVOS (copiar a la raíz del repo):
 
 ARCHIVOS MODIFICADOS (reemplazar por los de este ZIP):
   index.html  → link al manifest, color de tema, botón "📲 Instalar app",
-                pill "📴 Sin conexión", registro del Service Worker y
-                pinyin-pro local (si faltara, usa el CDN como plan B)
-  app.js      → lógica del botón instalar + indicador offline
-  style.css   → estilos del botón instalar y de la pill
+                pill "📴 Sin conexión", guía de instalación integrada,
+                registro del Service Worker y pinyin-pro local
+                (si faltara, usa el CDN como plan B)
+  app.js      → botón instalar SIEMPRE visible + guía según dispositivo
+                (Android/PC/iPhone) + indicador offline
+  style.css   → estilos del botón, la pill y la guía de instalación
   vercel.json → headers para que sw.js y manifest.json nunca queden
                 viejos en caché (actualizaciones instantáneas)
 
@@ -55,6 +57,21 @@ CÓMO INSTALARLA ("tipo APK")
 💻 PC/Mac (Chrome/Edge):
    • Icono de instalación en la barra de direcciones, o
      Menú → "Instalar Chino·ES...".
+
+❓ ¿NO VES EL ÍCONO DE INSTALACIÓN? (situación común)
+------------------------------------------------------------
+1. RELOAD: Chrome habilita la instalación desde la SEGUNDA
+   visita (cuando el Service Worker ya estaba registrado de la
+   visita anterior). Cerrá la pestaña, abrí de nuevo, y si no,
+   F5.
+2. Mirá al FINAL de la barra de direcciones: el ícono es un
+   monitor con una flecha ↓ o un ⊕ "Instalar". Es chiquito.
+3. Menú del navegador: Chrome ⋮ → "Guardar y compartir" →
+   "Instalar página como aplicación...". Edge: ⋮ →
+   "Aplicaciones" → "Instalar este sitio como aplicación".
+4. Desde la v5.1, el botón 📲 de la app está SIEMPRE visible:
+   si el navegador no abre el diálogo, te muestra la guía con
+   los pasos exactos de tu dispositivo.
 
 Requisito: haber visitado la app al menos una vez con internet
 para que el Service Worker guarde todo (unos segundos).
@@ -95,7 +112,9 @@ NOTAS TÉCNICAS
   se eliminan los más viejos automáticamente.
 • Si borrás pinyin-pro.min.js del repo sin querer, la app sigue
   funcionando: index.html recurre al CDN automáticamente.
-• El botón 📲 solo aparece cuando el navegador confirma que la app
-  es instalable (criterios: manifest + Service Worker + íconos +
-  conexión segura). En tu Vercel ya se cumplen todos ✅
+• El botón 📲 está siempre visible. Si el navegador dispara el
+  evento nativo (beforeinstallprompt) abre el diálogo oficial;
+  si no, muestra la guía de instalación del dispositivo.
+  Para diagnosticar en consola: __pwaDebug (hayDialogoNativo(),
+  plataforma()).
 ======================================================================

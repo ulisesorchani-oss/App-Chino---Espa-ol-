@@ -801,3 +801,111 @@ body.dark-mode .reader-preview {
 body.dark-mode .offline-pill {
     background: #020617;
 }
+
+/* ===== PWA: GUÍA DE INSTALACIÓN ===== */
+.install-help {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 10000;
+}
+
+.install-help.hidden {
+    display: none;
+}
+
+.install-help-card {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    padding: 22px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: auto;
+}
+
+.install-help-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+}
+
+.install-help-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.install-help-cols > div {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background: var(--bg-light);
+    transition: all 0.2s;
+}
+
+.install-help-cols h4 {
+    font-size: 0.92rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.install-help-cols ol {
+    padding-left: 18px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.install-help-active {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+.install-help-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 6px;
+    line-height: 1;
+}
+
+.install-help-close:hover {
+    color: var(--danger);
+}
+
+.install-help-tip {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    background: rgba(37, 99, 235, 0.08);
+    border-left: 3px solid var(--primary);
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+    .install-help-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.dark-mode .install-help-card {
+    background: #1e293b;
+}
+
+body.dark-mode .install-help-cols > div {
+    background: #0f172a;
+    border-color: #334155;
+}

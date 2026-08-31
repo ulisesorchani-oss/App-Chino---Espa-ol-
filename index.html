@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260831c">
+    <link rel="stylesheet" href="style.css?v=20260831d">
 </head>
 <body>
     <div class="container">
@@ -151,9 +151,43 @@
 
     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
     <div id="offline-pill" class="offline-pill hidden" role="status">📴 Sin conexión · uso la voz del sistema</div>
+
+    <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
+    <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
+        <div class="install-help-card">
+            <button id="btn-install-help-close" class="install-help-close" type="button" aria-label="Cerrar">✕</button>
+            <h3>📲 Cómo instalar la app</h3>
+            <div class="install-help-cols">
+                <div data-platform="android">
+                    <h4>🤖 Android (Chrome)</h4>
+                    <ol>
+                        <li>Menú <b>⋮</b> (arriba a la derecha)</li>
+                        <li>Tocá <b>“Instalar aplicación”</b> o <b>“Añadir a pantalla de inicio”</b></li>
+                        <li>Confirmá ✅</li>
+                    </ol>
+                </div>
+                <div data-platform="desktop">
+                    <h4>💻 PC / Mac (Chrome o Edge)</h4>
+                    <ol>
+                        <li>Buscá el ícono <b>⊕ Instalar</b> al final de la barra de direcciones, <b>o</b></li>
+                        <li>Menú <b>⋮</b> → <b>“Guardar y compartir”</b> → <b>“Instalar página como aplicación…”</b></li>
+                    </ol>
+                </div>
+                <div data-platform="ios">
+                    <h4>📱 iPhone / iPad (Safari)</h4>
+                    <ol>
+                        <li>Botón <b>Compartir</b> ⬆️ (abajo)</li>
+                        <li>Deslizá y tocá <b>“Agregar a pantalla de inicio”</b></li>
+                        <li>“Agregar” ✅</li>
+                    </ol>
+                </div>
+            </div>
+            <p class="install-help-tip">💡 ¿No aparece el ícono en la barra? Recargá la página (F5) — Chrome lo habilita desde la segunda visita, cuando el Service Worker ya estaba registrado.</p>
+        </div>
+    </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260831c"></script>
+    <script src="app.js?v=20260831d"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
