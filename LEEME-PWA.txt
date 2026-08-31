@@ -43,12 +43,16 @@ del sitio (junto a index.html), no en una subcarpeta.
 
 CÓMO INSTALARLA ("tipo APK")
 ------------------------------------------------------------
-🤖 ANDROID (Chrome):
+🤖 ANDROID (Chrome, Brave u Opera):
    • Tocá el botón verde "📲 Instalar app" que aparece en la app,
      o Menú ⋮ → "Instalar aplicación" / "Añadir a pantalla de inicio".
    • Te queda el ícono violeta con 中 en el escritorio, abre
      pantalla completa sin barra del navegador. Se desinstala
      como cualquier app, desde ajustes.
+   • NO se descarga ningún APK: la instalación es instantánea
+     y silenciosa. En Brave el ícono puede quedar solo en la
+     pantalla de inicio (no en el cajón de apps) — funciona
+     exactamente igual: pantalla completa + modo offline.
 
 📱 iPHONE/iPAD (Safari únicamente):
    • Botón Compartir ⬆️ → "Agregar a pantalla de inicio".
@@ -114,7 +118,7 @@ QUÉ FUNCIONA SIN INTERNET
 ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
 ------------------------------------------------------------
 Cuando cambies app.js, index.html, style.css o los datos:
-  1. Editá la primera línea de sw.js →  const VERSION = 'v7';
+  1. Editá la primera línea de sw.js →  const VERSION = 'v8';
      (subí el número cada vez que publiques cambios)
   2. Commit + push.
 Los usuarios reciben la versión nueva al volver a entrar

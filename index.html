@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260831e">
+    <link rel="stylesheet" href="style.css?v=20260831f">
 </head>
 <body>
     <div class="container">
@@ -159,15 +159,16 @@
             <h3>📲 Cómo instalar la app</h3>
             <div class="install-help-cols">
                 <div data-platform="android">
-                    <h4>🤖 Android (Chrome u Opera)</h4>
+                    <h4>🤖 Android (Chrome, Brave u Opera)</h4>
                     <ol>
                         <li>Menú <b>⋮</b> (arriba a la derecha)</li>
                         <li>Tocá <b>“Instalar aplicación”</b> o <b>“Añadir a pantalla de inicio”</b></li>
                         <li>Confirmá ✅</li>
                     </ol>
+                    <p class="install-help-note">ℹ️ No se descarga ningún APK: la instalación es instantánea y crea el ícono violeta 中 en tu pantalla de inicio. En Brave el ícono puede quedar solo ahí (no en el cajón de apps) — funciona igual.</p>
                 </div>
                 <div data-platform="desktop">
-                    <h4>💻 PC / Mac (Chrome o Edge)</h4>
+                    <h4>💻 PC / Mac (Chrome, Edge o Brave)</h4>
                     <ol>
                         <li>Buscá el ícono <b>⊕ Instalar</b> al final de la barra de direcciones, <b>o</b></li>
                         <li>Menú <b>⋮</b> → <b>“Guardar y compartir”</b> → <b>“Instalar página como aplicación…”</b></li>
@@ -196,7 +197,7 @@
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260831e"></script>
+    <script src="app.js?v=20260831f"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
