@@ -1070,11 +1070,24 @@ function renderCurrentSentence() {
             sentenceTextEl.innerHTML = html;
         } catch (e) {
             console.warn('Error en pinyin-pro, mostrando texto plano:', e);
-            sentenceTextEl.textContent = displayText;
+            let fb = displayText;
+            if (learningChinese) {
+                const clozeFb = s['chinese_' + k + '_cloze'];
+                if (clozeFb && clozeFb.indexOf('___') !== -1) fb = clozeFb;
+            }
+            sentenceTextEl.textContent = fb || 'Error en datos';
         }
     } else {
-        // 3. Fallback: Texto plano seguro (sin colores o sin librería)
-        sentenceTextEl.textContent = displayText || 'Error en datos';
+        // 3. Fallback: Texto plano seguro (sin colores o sin librería).
+        //    ⚠ En ES→CN hay que usar el cloze (con ___) para NO revelar la
+        //    respuesta — bug reportado: con Tonos OFF se veía la oración
+        //    completa. makeBlanksClickable() vuelve el hueco clicable igual.
+        let plain = displayText || 'Error en datos';
+        if (learningChinese) {
+            const clozeTxt = s['chinese_' + k + '_cloze'];
+            if (clozeTxt && clozeTxt.indexOf('___') !== -1) plain = clozeTxt;
+        }
+        sentenceTextEl.textContent = plain;
     }
 
     // 4. Mostrar Pinyin debajo (si está activado)
@@ -2015,18 +2028,27 @@ const PZ_SHEET_CSS = [
 
 function pzSheetHTML(chars, datas, trazos, cells) {
     const fecha = new Date().toLocaleDateString('es-AR');
+    const C = Math.min(20, Math.max(6, parseInt(cells, 10) || 12));
     let rows = '';
     chars.forEach((ch, i) => {
         const d = datas[i];
-        let inner = '<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>';
-        let n = 0;
+        // Contenido del bloque del carácter: modelo + etapas de trazos
+        const celdas = ['<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
         if (trazos && d) {
-            n = d.strokes.length;
-            for (let k = 1; k <= n; k++) inner += '<div class="pz-cell">' + pzSvg(d, k, '#c9ced6') + '</div>';
+            const n = d.strokes.length;
+            for (let k = 1; k <= n; k++) celdas.push('<div class="pz-cell">' + pzSvg(d, k, '#c9ced6') + '</div>');
         }
-        const total = Math.max(cells, n + 3);           // siempre quedan vacías para practicar
-        for (let e = n + 1; e < total; e++) inner += '<div class="pz-cell"></div>';
-        rows += '<div class="pz-row">' + inner + '</div>';
+        // Todas las filas de la hoja tienen EXACTAMENTE C celdas → tamaño
+        // uniforme (en v6.5 un carácter de 20 trazos agrandaba la fila y
+        // se mezclaban cuadrados grandes y diminutos). Siempre quedan al
+        // menos 2 celdas vacías para practicar.
+        const base = celdas.length;
+        const filas = Math.ceil((base + 2) / C);
+        const total = filas * C;
+        while (celdas.length < total) celdas.push('<div class="pz-cell"></div>');
+        for (let r = 0; r < total; r += C) {
+            rows += '<div class="pz-row">' + celdas.slice(r, r + C).join('') + '</div>';
+        }
     });
     const faltan = chars.filter((c, i) => !datas[i]);
     const nota = faltan.length ? '<p class="pz-note">Sin datos de trazos para: ' + faltan.join(' ') + ' — el carácter modelo usa la fuente del sistema.</p>' : '';
