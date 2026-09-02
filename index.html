@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260901k">
+    <link rel="stylesheet" href="style.css?v=20260902l">
 </head>
 <body>
     <div class="container">
@@ -103,52 +103,33 @@
         <!-- SECCIÓN 3: CLÁSICOS ANTIGUOS (SABIDURÍA MILENARIA) -->
         <div class="section-classics">
             <h3 class="section-title classics-title">📜 CLÁSICOS ANTIGUOS <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
-            <div class="classics-grid">
-                <button class="classic-card" type="button" data-module="Clasicos-Daxue" aria-label="Gran Estudio, Dàxué">
-                    <span class="classic-zh" lang="zh">大学</span>
-                    <span class="classic-py">Dàxué</span>
-                    <span class="classic-es">Gran Estudio</span>
+            <div class="classics-dropdown" id="classics-dropdown">
+                <button id="btn-classics-toggle" class="classics-main-btn" type="button"
+                        aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
+                        title="Elegí un clásico para practicar">
+                    <span aria-hidden="true">📜</span> <span id="classics-current">Clásicos Antiguos</span>
+                    <span class="daily-caret" aria-hidden="true">▾</span>
                 </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Lunyu" aria-label="Analectas, Lúnyǔ">
-                    <span class="classic-zh" lang="zh">论语</span>
-                    <span class="classic-py">Lúnyǔ</span>
-                    <span class="classic-es">Analectas</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Zhongyong" aria-label="Doctrina del Medio, Zhōngyōng">
-                    <span class="classic-zh" lang="zh">中庸</span>
-                    <span class="classic-py">Zhōngyōng</span>
-                    <span class="classic-es">Doctrina del Medio</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Mengzi" aria-label="Mencio, Mèngzǐ">
-                    <span class="classic-zh" lang="zh">孟子</span>
-                    <span class="classic-py">Mèngzǐ</span>
-                    <span class="classic-es">Mencio</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Sanzijing" aria-label="Clásico de los Tres Caracteres, Sānzìjīng">
-                    <span class="classic-zh" lang="zh">三字经</span>
-                    <span class="classic-py">Sānzìjīng</span>
-                    <span class="classic-es">Tres Caracteres</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Xiaojing" aria-label="Clásico de la Piedad Filial, Xiàojīng">
-                    <span class="classic-zh" lang="zh">孝经</span>
-                    <span class="classic-py">Xiàojīng</span>
-                    <span class="classic-es">Piedad Filial</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Daodejing" aria-label="Tao Te King, Dàodéjīng">
-                    <span class="classic-zh" lang="zh">道德经</span>
-                    <span class="classic-py">Dàodéjīng</span>
-                    <span class="classic-es">Tao Te King</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Xinjing" aria-label="Sutra del Corazón, Xīnjīng">
-                    <span class="classic-zh" lang="zh">心经</span>
-                    <span class="classic-py">Xīnjīng</span>
-                    <span class="classic-es">Sutra del Corazón</span>
-                </button>
-                <button class="classic-card" type="button" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
-                    <span class="classic-zh" lang="zh">金刚经</span>
-                    <span class="classic-py">Jīngāngjīng</span>
-                    <span class="classic-es">Sutra del Diamante</span>
-                </button>
+                <ul id="classics-menu" class="classics-menu hidden" role="menu" aria-labelledby="btn-classics-toggle">
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daxue" aria-label="Gran Estudio, Dàxué">
+                        <span class="ci-zh" lang="zh">大学</span><span class="ci-py">Dàxué</span><span class="ci-es">Gran Estudio</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Lunyu" aria-label="Analectas, Lúnyǔ">
+                        <span class="ci-zh" lang="zh">论语</span><span class="ci-py">Lúnyǔ</span><span class="ci-es">Analectas</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Zhongyong" aria-label="Doctrina del Medio, Zhōngyōng">
+                        <span class="ci-zh" lang="zh">中庸</span><span class="ci-py">Zhōngyōng</span><span class="ci-es">Doctrina del Medio</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Mengzi" aria-label="Mencio, Mèngzǐ">
+                        <span class="ci-zh" lang="zh">孟子</span><span class="ci-py">Mèngzǐ</span><span class="ci-es">Mencio</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Sanzijing" aria-label="Clásico de los Tres Caracteres, Sānzìjīng">
+                        <span class="ci-zh" lang="zh">三字经</span><span class="ci-py">Sānzìjīng</span><span class="ci-es">Tres Caracteres</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xiaojing" aria-label="Clásico de la Piedad Filial, Xiàojīng">
+                        <span class="ci-zh" lang="zh">孝经</span><span class="ci-py">Xiàojīng</span><span class="ci-es">Piedad Filial</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daodejing" aria-label="Tao Te King, Dàodéjīng">
+                        <span class="ci-zh" lang="zh">道德经</span><span class="ci-py">Dàodéjīng</span><span class="ci-es">Tao Te King</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xinjing" aria-label="Sutra del Corazón, Xīnjīng">
+                        <span class="ci-zh" lang="zh">心经</span><span class="ci-py">Xīnjīng</span><span class="ci-es">Sutra del Corazón</span></button></li>
+                    <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
+                        <span class="ci-zh" lang="zh">金刚经</span><span class="ci-py">Jīngāngjīng</span><span class="ci-es">Sutra del Diamante</span></button></li>
+                </ul>
             </div>
         </div>
 
@@ -300,7 +281,7 @@
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260901k"></script>
+    <script src="app.js?v=20260902l"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
