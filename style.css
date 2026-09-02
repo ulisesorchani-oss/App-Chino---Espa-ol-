@@ -1071,3 +1071,53 @@ body.dark-mode .vocab-pop {
     background: #1e293b;
     border-color: #334155;
 }
+
+/* ===== ✍️ Planillas de escritura 写字 (v6.5) ===== */
+.writer-banner {
+    border-left-color: #16a085;
+}
+
+.pz-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pz-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.pz-label select.level-dropdown {
+    width: auto;
+    padding: 7px 10px;
+    margin: 0;
+}
+
+.pz-module-btn b {
+    color: var(--primary);
+}
+
+.pz-preview {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.pz-preview iframe {
+    border: 0;
+    display: block;
+    transform-origin: top left;
+}
+
+body.dark-mode .pz-preview {
+    border-color: #334155;
+}

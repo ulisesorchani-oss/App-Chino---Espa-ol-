@@ -1919,3 +1919,265 @@ function splitGroupedPinyin(word) {
         detectaUA: detectaUA
     };
 })();
+
+// ============================================================
+// ✍️ Generador de planillas de escritura 写字 (v6.5)
+// Hoja A4 para imprimir con el formato XieZi: celda modelo +
+// secuencia de trazos progresivos (gris) + celdas vacías con
+// cruz guía. Datos de trazos: hanzi-writer-data vía CDN —
+// el Service Worker los cachea → funcionan offline después
+// del primer uso. Sin datos de red, la hoja se genera igual
+// (carácter modelo con la fuente del sistema).
+// ============================================================
+const PZ_MEM = new Map();               // char → datos|null (memoria de sesión)
+let pzTrazos = localStorage.getItem('ac_pz_trazos') !== '0';   // default ON
+let pzCells = parseInt(localStorage.getItem('ac_pz_cells'), 10) || 12;
+let pzLastSheet = '';                   // HTML de la última hoja generada
+
+function pzIsHan(ch) {
+    const c = ch.codePointAt(0);
+    return (c >= 0x3400 && c <= 0x9FFF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0x20000 && c <= 0x2FA1F);
+}
+
+// Extrae caracteres han únicos (en orden de aparición), tope 40 por hoja
+function pzParseInput(str) {
+    const seen = new Set();
+    const out = [];
+    for (const ch of String(str || '')) {
+        if (!pzIsHan(ch) || seen.has(ch)) continue;
+        seen.add(ch);
+        out.push(ch);
+        if (out.length >= 40) break;
+    }
+    return out;
+}
+
+// Descarga los datos de trazos de un carácter (2 CDNs de respaldo)
+async function pzFetchChar(ch) {
+    if (PZ_MEM.has(ch)) return PZ_MEM.get(ch);
+    const urls = [
+        'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + ch + '.json',
+        'https://unpkg.com/hanzi-writer-data@2.0/' + ch + '.json'
+    ];
+    for (const u of urls) {
+        try {
+            const r = await fetch(u, { mode: 'cors' });
+            if (r.ok) {
+                const d = await r.json();
+                if (d && Array.isArray(d.strokes) && d.strokes.length) {
+                    PZ_MEM.set(ch, d);
+                    return d;
+                }
+            }
+        } catch (e) { /* probá el próximo CDN */ }
+    }
+    PZ_MEM.set(ch, null);
+    return null;
+}
+
+// SVG del carácter con los primeros `upto` trazos (formato Make Me a Hanzi)
+function pzSvg(data, upto, fill) {
+    const n = data.strokes.length;
+    const k = Math.max(1, Math.min(upto || n, n));
+    let paths = '';
+    for (let i = 0; i < k; i++) paths += '<path d="' + data.strokes[i] + '"/>';
+    return '<svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="scale(1, -1) translate(0, -900)" fill="' + fill + '">' + paths + '</g></svg>';
+}
+
+function pzStatus(msg, isError) {
+    const el = document.getElementById('pz-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.toggle('error', !!isError);
+    el.classList.toggle('hidden', !msg);
+}
+
+// CSS autocontenido de la hoja (verde estilo XieZi, A4)
+const PZ_SHEET_CSS = [
+    '@page { size: A4; margin: 11mm; }',
+    '* { box-sizing: border-box; margin: 0; padding: 0; }',
+    'body { font-family: "Segoe UI", Arial, "Helvetica Neue", sans-serif; background: #fff; }',
+    '@media screen { body { padding: 9mm; } }',
+    '.pz-title { font-size: 15pt; font-weight: 700; color: #16a085; margin-bottom: 2.5mm; }',
+    '.pz-title .pz-hz span { margin: 0 1.5mm; }',
+    '.pz-meta { font-size: 9pt; color: #475569; border-bottom: 0.5mm solid #16a085; padding-bottom: 2mm; margin-bottom: 3.5mm; }',
+    '.pz-row { display: flex; gap: 1.2mm; margin-bottom: 1.8mm; break-inside: avoid; page-break-inside: avoid; }',
+    '.pz-cell { flex: 1 1 0; aspect-ratio: 1 / 1; border: 0.5mm solid #2f9e77; position: relative; overflow: hidden; }',
+    '.pz-cell::before { content: ""; position: absolute; inset: 0; background:',
+    '  repeating-linear-gradient(to right, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 100% 0.4mm no-repeat,',
+    '  repeating-linear-gradient(to bottom, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 0.4mm 100% no-repeat; }',
+    '.pz-cell svg, .pz-cell span.pz-glyph { position: absolute; left: 7%; top: 7%; width: 86%; height: 86%; display: block; }',
+    '.pz-cell span.pz-glyph { display: flex; align-items: center; justify-content: center; font-size: 42pt; line-height: 1; color: #1f2937;',
+    '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
+    '.pz-cell svg path { stroke-linejoin: round; }',
+    '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }'
+].join('\n');
+
+function pzSheetHTML(chars, datas, trazos, cells) {
+    const fecha = new Date().toLocaleDateString('es-AR');
+    let rows = '';
+    chars.forEach((ch, i) => {
+        const d = datas[i];
+        let inner = '<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>';
+        let n = 0;
+        if (trazos && d) {
+            n = d.strokes.length;
+            for (let k = 1; k <= n; k++) inner += '<div class="pz-cell">' + pzSvg(d, k, '#c9ced6') + '</div>';
+        }
+        const total = Math.max(cells, n + 3);           // siempre quedan vacías para practicar
+        for (let e = n + 1; e < total; e++) inner += '<div class="pz-cell"></div>';
+        rows += '<div class="pz-row">' + inner + '</div>';
+    });
+    const faltan = chars.filter((c, i) => !datas[i]);
+    const nota = faltan.length ? '<p class="pz-note">Sin datos de trazos para: ' + faltan.join(' ') + ' — el carácter modelo usa la fuente del sistema.</p>' : '';
+    const hz = chars.map((c) => '<span>' + c + '</span>').join(' ');
+    return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Planilla de práctica 写字</title>'
+        + '<style>' + PZ_SHEET_CSS + '</style></head><body>'
+        + '<div class="pz-title">Planilla de práctica · Caracteres <span class="pz-hz">' + hz + '</span></div>'
+        + '<div class="pz-meta">Nombre: ____________________________ &nbsp;&nbsp; Curso: ______________ &nbsp;&nbsp; Fecha: ' + fecha + '</div>'
+        + rows + nota + '</body></html>';
+}
+
+async function pzGenerate() {
+    const ta = document.getElementById('pz-input');
+    const chars = pzParseInput(ta ? ta.value : '');
+    if (!chars.length) {
+        pzStatus('✍️ Escribí primero los caracteres a practicar (ej.: 你是哪国人)', true);
+        return;
+    }
+    const btn = document.getElementById('btn-pz-generate');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando…'; }
+    pzStatus('⏳ Descargando trazos (0/' + chars.length + ')…');
+    const datas = new Array(chars.length).fill(null);
+    let done = 0;
+    await Promise.all(chars.map(async (ch, i) => {
+        datas[i] = await pzFetchChar(ch);
+        done++;
+        pzStatus('⏳ Descargando trazos (' + done + '/' + chars.length + ')…');
+    }));
+    pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells);
+    pzRenderPreview();
+    const btnPrint = document.getElementById('btn-pz-print');
+    if (btnPrint) btnPrint.classList.remove('hidden');
+    const faltan = datas.filter((d) => !d).length;
+    pzStatus(faltan
+        ? '⚠ Hoja lista, pero sin datos de trazos para ' + faltan + ' carácter(es) (¿sin conexión la primera vez?). Se usa el modelo del sistema.'
+        : '✅ Hoja lista (' + chars.length + ' caracteres). Tocá 🖨️ Imprimir / PDF.');
+    if (btn) { btn.disabled = false; btn.textContent = '📄 Generar hoja'; }
+}
+
+// Vista previa: iframe escalado al ancho disponible
+function pzRenderPreview() {
+    const wrap = document.getElementById('pz-preview');
+    if (!wrap || !pzLastSheet) return;
+    wrap.classList.remove('hidden');
+    let f = wrap.querySelector('iframe');
+    if (!f) {
+        f = document.createElement('iframe');
+        f.title = 'Vista previa de la planilla';
+        wrap.appendChild(f);
+    }
+    f.srcdoc = pzLastSheet;
+    f.onload = () => pzFitPreview();
+}
+
+function pzFitPreview() {
+    const wrap = document.getElementById('pz-preview');
+    if (!wrap) return;
+    const f = wrap.querySelector('iframe');
+    if (!f) return;
+    try {
+        const doc = f.contentDocument;
+        if (!doc || !doc.body) return;
+        const W = 794; // 210mm a 96dpi
+        const h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, 1123);
+        const scale = Math.min(1, wrap.clientWidth / W);
+        f.style.width = W + 'px';
+        f.style.height = h + 'px';
+        f.style.transform = 'scale(' + scale + ')';
+        wrap.style.height = Math.ceil(h * scale) + 'px';
+    } catch (e) { /* vista previa es best-effort */ }
+}
+
+// Imprimir / Guardar PDF: hoja sola, sin la interfaz de la app
+function pzPrint() {
+    if (!pzLastSheet) return;
+    const f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+    document.body.appendChild(f);
+    f.srcdoc = pzLastSheet;
+    f.onload = () => {
+        setTimeout(() => {
+            try {
+                f.contentWindow.focus();
+                f.contentWindow.print();
+            } catch (e) {
+                const w = window.open('', '_blank');
+                if (w) {
+                    w.document.write(pzLastSheet);
+                    w.document.close();
+                    setTimeout(() => { try { w.focus(); w.print(); } catch (e2) { /* noop */ } }, 400);
+                }
+            }
+            setTimeout(() => f.remove(), 60000);
+        }, 250);
+    };
+}
+
+// Llena el input con los caracteres de las palabras del módulo activo
+function pzUseModule() {
+    const seen = new Set();
+    let out = '';
+    for (const s of getFiltered()) {
+        for (const ch of String(s.chinese_simp_answer || '')) {
+            if (!pzIsHan(ch) || seen.has(ch)) continue;
+            seen.add(ch);
+            out += ch;
+            if (seen.size >= 40) break;
+        }
+        if (seen.size >= 40) break;
+    }
+    const ta = document.getElementById('pz-input');
+    if (ta && out) {
+        ta.value = out;
+        pzStatus('📋 ' + seen.size + ' caracteres del módulo ' + (MODULE_LABELS[state.activeModule] || state.activeModule) + '. Ahora tocá 📄 Generar hoja.');
+    } else {
+        pzStatus('⚠ El módulo activo no tiene palabras para practicar.', true);
+    }
+}
+
+function pzUpdateControls() {
+    const bt = document.getElementById('btn-pz-trazos');
+    if (bt) {
+        bt.textContent = '✍️ Trazos: ' + (pzTrazos ? 'ON' : 'OFF');
+        bt.classList.toggle('active', pzTrazos);
+    }
+    const sel = document.getElementById('select-pz-cells');
+    if (sel) sel.value = String(pzCells);
+    const nm = document.getElementById('pz-module-name');
+    if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+}
+
+(function pzInit() {
+    const safe = (id, ev, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(ev, fn);
+    };
+    safe('btn-pz-generate', 'click', pzGenerate);
+    safe('btn-pz-print', 'click', pzPrint);
+    safe('btn-pz-module', 'click', pzUseModule);
+    safe('btn-pz-trazos', 'click', () => {
+        pzTrazos = !pzTrazos;
+        localStorage.setItem('ac_pz_trazos', pzTrazos ? '1' : '0');
+        pzUpdateControls();
+    });
+    safe('select-pz-cells', 'change', (e) => {
+        pzCells = parseInt(e.target.value, 10) || 12;
+        localStorage.setItem('ac_pz_cells', String(pzCells));
+    });
+    window.addEventListener('resize', () => {
+        const wrap = document.getElementById('pz-preview');
+        if (wrap && !wrap.classList.contains('hidden')) pzFitPreview();
+    });
+    pzUpdateControls();
+})();
