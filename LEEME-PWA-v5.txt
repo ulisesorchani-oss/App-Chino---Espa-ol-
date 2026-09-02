@@ -1,0 +1,316 @@
+<!ARCHIVO LEEME — PWA INSTALABLE + OFFLINE (v5.1)>
+======================================================================
+ CHINO ⇄ ESPAÑOL — ¡Tu app ahora se instala como una APK y
+ funciona SIN INTERNET!
+======================================================================
+
+QUÉ CAMBIÓ (respecto a la v3/v4 que ya tenés)
+------------------------------------------------------------
+ARCHIVOS NUEVOS (copiar a la raíz del repo):
+  manifest.json         → le dice al navegador cómo "instalar" la app
+  sw.js                 → Service Worker: guarda todo para el offline
+  pinyin-pro.min.js     → pinyin autohospedado (315 KB, ya no depende
+                          del CDN: funciona offline y carga más rápido)
+  icons/icon-192.png    → ícono de la app
+  icons/icon-512.png    → ícono de la app (alta resolución)
+  icons/maskable-512.png→ ícono adaptado para Android (forma circular)
+
+ARCHIVOS MODIFICADOS (reemplazar por los de este ZIP):
+  index.html  → link al manifest, color de tema, botón "📲 Instalar app",
+                pill "📴 Sin conexión", guía de instalación integrada,
+                registro del Service Worker y pinyin-pro local
+                (si faltara, usa el CDN como plan B)
+  app.js      → botón instalar SIEMPRE visible + guía según dispositivo
+                (Android/PC/iPhone) + indicador offline
+  style.css   → estilos del botón, la pill y la guía de instalación
+  vercel.json → headers para que sw.js y manifest.json nunca queden
+                viejos en caché (actualizaciones instantáneas)
+
+NO CAMBIÓ: api/tts.py, requirements.txt, data/, README.md
+======================================================================
+
+CÓMO DESPLEGAR (2 minutos)
+------------------------------------------------------------
+1. Copiá TODO el contenido de este ZIP a la raíz de tu repo
+   (junto a index.html). Ojo: la carpeta icons/ debe quedar
+   como carpeta, no como archivos sueltos.
+2. git add . && git commit -m "PWA instalable + offline" && git push
+3. Vercel redespliega solo. Listo ✅
+
+IMPORTANTE: sw.js y pinyin-pro.min.js deben quedar EN LA RAÍZ
+del sitio (junto a index.html), no en una subcarpeta.
+======================================================================
+
+CÓMO INSTALARLA ("tipo APK")
+------------------------------------------------------------
+🤖 ANDROID (Chrome, Brave u Opera):
+   • Tocá el botón verde "📲 Instalar app" que aparece en la app,
+     o Menú ⋮ → "Instalar aplicación" / "Añadir a pantalla de inicio".
+   • Te queda el ícono violeta con 中 en el escritorio, abre
+     pantalla completa sin barra del navegador. Se desinstala
+     como cualquier app, desde ajustes.
+   • NO se descarga ningún APK: la instalación es instantánea
+     y silenciosa. En Brave el ícono puede quedar solo en la
+     pantalla de inicio (no en el cajón de apps) — funciona
+     exactamente igual: pantalla completa + modo offline.
+
+📱 iPHONE/iPAD (Safari únicamente):
+   • Botón Compartir ⬆️ → "Agregar a pantalla de inicio".
+   • (Safari no muestra el botón 📲; el ícono lo toma del manifest.)
+
+💻 PC/Mac (Chrome/Edge):
+   • Icono de instalación en la barra de direcciones, o
+     Menú → "Instalar Chino·ES...".
+
+🅾 OPERA / OPERA GX EN PC (importante):
+   • Opera de escritorio NO permite instalar PWAs como apps
+     (no muestra el ícono ni abre el diálogo). No es un error
+     de la app: le falta esa función al navegador.
+   • El MODO OFFLINE sí funciona igual en Opera (soporta
+     Service Workers): todo el contenido y reescucha de
+     audios operan sin internet.
+   • Salida fácil: abrí la página UNA vez en Chrome o Edge →
+     ícono ⊕ Instalar → el ícono queda en el escritorio y el
+     archivo instalado es independiente del navegador.
+   • Truco avanzado (ventana propia en Opera): botón derecho
+     en el escritorio → Nuevo → Acceso directo, y en
+     "Ubicación" poné:
+       "C:\Users\TU_USUARIO\AppData\Local\Programs\Opera\opera.exe" --app="https://ulisesorchani-oss.github.io/App-Chino---Espa-ol-/"
+     (en Mac: /Applications/Opera.app/Contents/MacOS/Opera --app=URL).
+     Se abre sin barras, casi como app nativa. Si tu versión
+     de Opera ignora --app, usá la salida fácil con Chrome/Edge.
+
+❓ ¿NO VES EL ÍCONO DE INSTALACIÓN? (situación común)
+------------------------------------------------------------
+1. RELOAD: Chrome habilita la instalación desde la SEGUNDA
+   visita (cuando el Service Worker ya estaba registrado de la
+   visita anterior). Cerrá la pestaña, abrí de nuevo, y si no,
+   F5.
+2. Mirá al FINAL de la barra de direcciones: el ícono es un
+   monitor con una flecha ↓ o un ⊕ "Instalar". Es chiquito.
+3. Menú del navegador: Chrome ⋮ → "Guardar y compartir" →
+   "Instalar página como aplicación...". Edge: ⋮ →
+   "Aplicaciones" → "Instalar este sitio como aplicación".
+4. Desde la v5.1, el botón 📲 de la app está SIEMPRE visible:
+   si el navegador no abre el diálogo, te muestra la guía con
+   los pasos exactos de tu dispositivo (desde v5.2 detecta
+   Opera y te explica esta misma situación).
+
+Requisito: haber visitado la app al menos una vez con internet
+para que el Service Worker guarde todo (unos segundos).
+======================================================================
+
+QUÉ FUNCIONA SIN INTERNET
+------------------------------------------------------------
+✅ Oraciones diarias, HSK 1-5, TOCFL, DELE (datos precacheados)
+✅ Pinyin y colores de tonos (tarjeta Y lector de texto)
+✅ Modos ES→CN / CN→ES, progreso, vocabulario, tema oscuro
+✅ El lector de texto libre → usa la VOZ DEL SISTEMA si no hay red
+✅ REESCUCHA: cada audio que escuchaste una vez queda guardado en
+   caché → lo podés volver a escuchar en modo avión (hasta ~80 audios)
+✅ Con internet: siempre voz natural edge-tts (Xiaoxiao/Yunjian/
+   Elena/Tomás) como hasta ahora, sin cambios
+
+❌ Sin conexión y audio nunca escuchado antes → la app lo avisa y
+   usa la voz del sistema del celular (en Android suena bien).
+======================================================================
+
+ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
+------------------------------------------------------------
+Cuando cambies app.js, index.html, style.css o los datos:
+  1. Editá la primera línea de sw.js →  const VERSION = 'v10';
+     (subí el número cada vez que publiques cambios)
+  2. Commit + push.
+Los usuarios reciben la versión nueva al volver a entrar
+(primer carga desde red, luego vuelve a cachear).
+Si algo quedara viejo: DevTools → Application → Service Workers
+→ Unregister, y recargar.
+======================================================================
+
+NOTAS TÉCNICAS
+------------------------------------------------------------
+• El pinyin del lector es automático (pinyin-pro): con caracteres
+  polifónicos (multi-lectura) puede elegir la lectura más común.
+• TTS cacheado: clave = texto+idioma+voz (hash), tope de 80 audios,
+  se eliminan los más viejos automáticamente.
+• Si borrás pinyin-pro.min.js del repo sin querer, la app sigue
+  funcionando: index.html recurre al CDN automáticamente.
+• El botón 📲 está siempre visible. Si el navegador dispara el
+  evento nativo (beforeinstallprompt) abre el diálogo oficial;
+  si no, muestra la guía de instalación del dispositivo.
+  Para diagnosticar en consola: __pwaDebug (hayDialogoNativo(),
+  plataforma()).
+======================================================================
+
+NOVEDADES v6 (feedback de alumnos en clase)
+------------------------------------------------------------
+1. HUECO CLICABLE: el espacio vacío ___ de la oración ahora
+   se ve con subrayado azul punteado y pulso. Al tocarlo, la
+   app te lleva solito al campo de escritura (con un brillo
+   para que no te lo pierdas). Se puede escribir de una.
+2. ORDEN: la PRÁCTICA DIARIA queda arriba, y el LECTOR DE
+   TEXTO pasa al final de la página (abajo de todo).
+3. CAJÓN DE PALABRAS: tocá cualquier palabra aprendida y
+   sale un cartel con su traducción:
+   • palabra china → pinyin + español + frase de ejemplo
+   • palabra española → chino (simplificado y tradicional
+     si difiere) + pinyin + frase de ejemplo
+   El diccionario se va ampliando solo con cada módulo que
+   cargues (Saludos, HSK, TOCFL, DELE...).
+======================================================================
+
+NOVEDADES v6.1 (corrección de vocabulario + ejemplos bilingües)
+------------------------------------------------------------
+1. EJEMPLO EN EL IDIOMA DE LA PALABRA: en el cajón de palabras,
+   si tocás una palabra china (ej. 謝謝) el ejemplo de abajo
+   ahora sale EN CHINO (謝謝你的幫助。) con su pinyin, y la
+   traducción española queda como apoyo. Si tocás una palabra
+   española, el ejemplo sale en español con apoyo en chino.
+   El ejemplo respeta 简/繁 que tengas elegido.
+2. VOCABULARIO CORREGIDO: revisión completa de los 290
+   registros de datos (Saludos + HSK1-5 + TOCFL + DELE):
+   • pinyin roto reparado (wǒmen, kěyǐ, zhǔnbèi, zuǒzhuǎn,
+     bāshì, yǒnggǎn, xìngrén... en 30+ oraciones)
+   • oraciones españolas con palabras faltantes o con chino
+     incrustado (hsk4/hsk5) corregidas
+   • campos TRADICIONALES corruptos reconstruidos (hsk4/hsk5
+     tenían ___ pegado en la oración; DELE tenía el texto en
+     simplificado en ambos modos)
+   • TOCFL: el modo 简 ahora muestra simplificado de verdad
+     (antes mostraba tradicional)
+   • HSK5: 33 oraciones duplicadas eliminadas (90 → 57)
+   • respuestas que no estaban en la oración (DELE 12/13,
+     HSK4) corregidas
+3. MODO "APRENDO ESPAÑOL" BILINGÜE: con CN → ES activo, los
+   botones suman la traducción al chino: Revelar 显示,
+   La sé 我会, Repetir 再练, y el campo dice
+   "Escribe en español... 用西班牙语写".
+======================================================================
+
+⚠️ NOVEDAD v6.2 — ¡DESDE AHORA SUBÍ SOLO 4 ARCHIVOS!
+------------------------------------------------------------
+QUÉ CAMBIÓ: TODO el contenido (Saludos + HSK1-5 + TOCFL +
+DELE, 257 oraciones) ahora vive DENTRO de app.js. La app ya
+NO necesita la carpeta data/ para nada (ni para offline).
+
+POR QUÉ: si te fallaba subir la carpeta data/ a GitHub desde
+el celular, ese problema desapareció: no hay más carpetas.
+
+CÓMO PUBLICAR ESTA VERSIÓN (2 minutos, desde el celular):
+1. Entra a tu repo en github.com
+2. Botón "Add file" → "Upload files"
+3. Arrastrá/elegí SOLO estos 4 archivos del ZIP:
+      index.html
+      app.js
+      style.css
+      sw.js
+4. "Commit changes" → esperá ~1 minuto → listo ✅
+   (GitHub Pages se actualiza solo)
+
+LA CARPETA data/ VIEJA DE TU REPO:
+   puede quedar ahí (no molesta) o borrarla si querés; la
+   app la ignora porque los datos ya van incluidos.
+
+IMPORTANTE para el futuro: cada vez que te pase una versión
+nueva, mirá el archivo SUBIR-A-GITHUB.txt que viene en el
+ZIP: te dice exactamente qué archivos subir.
+======================================================================
+
+🇨🇳 NOVEDADES v6.3 — ¡HSK 6 disponible!
+------------------------------------------------------------
+• Nuevo módulo HSK 6 con las primeras 100 oraciones
+  (tanda 1 del material enviado: palabras de 挨 a 臂).
+  Cada palabra trae su oración con hueco, pinyin,
+  tradicional y traducción al español.
+• En el cajón de palabras ya funcionan las traducciones
+  de estas 100 palabras nuevas.
+• Las próximas tandas (sigue la lista hasta 方言 y más)
+  se agregan igual: contenido nuevo dentro de app.js,
+  siempre los mismos 4 archivos para subir.
+======================================================================
+
+🇨🇳 NOVEDADES v6.4 — HSK 6 llega a 200 oraciones
+------------------------------------------------------------
+• Tanda 2 integrada: palabras de 闭塞 a 操劳. El módulo
+  HSK 6 ahora tiene 200 oraciones con hueco, pinyin,
+  tradicional y traducción.
+• Sigue la misma mecánica: más tandas dentro de app.js,
+  siempre los mismos 4 archivos para subir.
+
+======================================================================
+✍️ NOVEDADES v6.5 — Generador de planillas de escritura 写字
+----------------------------------------------------------------------
+• Nueva sección al final de la app: "✍️ Planillas de escritura".
+  Pegás los caracteres (ej.: 你是哪国人) y la app arma una hoja
+  A4 lista para imprimir, con el formato XieZi:
+  - celda modelo (carácter oscuro),
+  - secuencia de trazos progresivos en gris,
+  - celdas vacías con cruz guía, grilla verde.
+• Opciones (pocas, a propósito): Trazos ON/OFF y celdas por
+  fila (10 / 12 / 14). Botón "Usar módulo" carga los caracteres
+  de las palabras del módulo activo (ej.: HSK 6).
+• Botón 🖨️ Imprimir / PDF: imprime SOLO la hoja, sin la interfaz.
+• Los datos de trazos se descargan una única vez y quedan
+  guardados: después funciona incluso sin conexión.
+• Si un carácter no tiene datos de trazos (sin conexión la
+  primera vez), la hoja se genera igual con el carácter modelo
+  de la fuente del sistema.
+• El resto de la app no cambió: mismos 4 archivos para subir.
+
+----------------------------------------------------------------------
+🔧 CORRECCIÓN v6.5.1 (misma v6.5, resubir los 4 archivos)
+----------------------------------------------------------------------
+• Planillas: todas las filas ahora tienen exactamente la misma
+  cantidad de celdas → cuadrados todos del mismo tamaño, aunque
+  el carácter tenga muchos trazos (antes: 覺, 難, 歡 salían con
+  cuadraditos diminutos).
+• Corregido un error viejo: con 🎨 Tonos: OFF se revelaba la
+  oración completa en ES→CN. Ahora muestra el hueco ___ como
+  corresponde (y el hueco sigue siendo clicable).
+• sw.js sube a v15: los alumnos reciben el update solo.
+
+======================================================================
+✂️ NOVEDADES v6.6 — Oraciones HSK 5 más simples y cortas
+----------------------------------------------------------------------
+• Las 57 oraciones del módulo HSK 5 fueron reescritas: pasaron de
+  36 caracteres promedio (frases tipo ensayo, de 28 a 45 chars) a
+  12.9 promedio (9 a 16 chars), al estilo corto de HSK 6.
+  Antes HSK 5 parecía MÁS difícil que HSK 6; ahora la dificultad
+  vuelve a crecer de a poco: HSK4 → HSK5 → HSK6.
+• Misma palabra objetivo, mismo hueco ___ , pinyin con tonos,
+  tradicional y traducción. Todo lo demás funciona igual.
+• Bonus: app.js quedó 22 KB más liviano.
+• Se corrigió un duplicado: hsk5_90 repetía exactamente la misma
+  oración que hsk5_32; ahora tiene oración propia.
+• sw.js sube a v16: los alumnos reciben el update solo.
+• Nota: HSK 4 todavía tiene oraciones largas (33 chars prom.).
+  Si querés, se simplifica igual en la próxima.
+
+======================================================================
+✂️ NOVEDADES v6.8 — HSK 6 llega a 300 oraciones (tanda 3: 201-300)
+----------------------------------------------------------------------
+• Se sumaron 100 oraciones nuevas al módulo HSK 6 (palabras 201 a
+  300 de la lista oficial: 操练 → 出息). El módulo pasa de 200 a
+  300 oraciones; la app completa ahora tiene 557 embebidas.
+• Mismo estilo corto y cotidiano del resto (prom. 12.9 chars,
+  rango 7-20): una sola idea por oración, pinyin con tonos,
+  tradicional, cloze ___ en chino y en español, y alternativas de
+  respuesta donde hace falta (ej. diesel/gasoil, trato hecho).
+• sw.js sube a v18 y el cache-busting a 20260901j: los alumnos
+  reciben el update solo, sin tocar nada.
+• Próxima tanda: palabras 301-400 cuando pidas "seguí" otra vez.
+
+======================================================================
+✂️ NOVEDADES v6.7 — Oraciones HSK 4 más simples y cortas
+----------------------------------------------------------------------
+• Mismo tratamiento que HSK 5 en la v6.6: las 40 oraciones del
+  módulo HSK 4 fueron reescritas de 32.5 caracteres promedio
+  (frases tipo ensayo de 28 a 38 chars) a 11.7 promedio
+  (8 a 16 chars), al estilo corto de HSK 6.
+• Con esto la escalera de dificultad queda prolija en toda la
+  app: HSK1-3 → HSK4 (corto) → HSK5 (corto) → HSK6 (corto).
+• Misma palabra objetivo, mismo hueco ___ , pinyin con tonos,
+  tradicional y traducción. Todo lo demás funciona igual.
+• Bonus: app.js quedó 13 KB más liviano (35 KB menos en total
+  con las dos simplificaciones).
+• sw.js sube a v17: los alumnos reciben el update solo.
