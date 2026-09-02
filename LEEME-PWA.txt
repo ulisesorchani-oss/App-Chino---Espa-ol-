@@ -256,3 +256,129 @@ ZIP: te dice exactamente qué archivos subir.
   primera vez), la hoja se genera igual con el carácter modelo
   de la fuente del sistema.
 • El resto de la app no cambió: mismos 4 archivos para subir.
+
+----------------------------------------------------------------------
+🔧 CORRECCIÓN v6.5.1 (misma v6.5, resubir los 4 archivos)
+----------------------------------------------------------------------
+• Planillas: todas las filas ahora tienen exactamente la misma
+  cantidad de celdas → cuadrados todos del mismo tamaño, aunque
+  el carácter tenga muchos trazos (antes: 覺, 難, 歡 salían con
+  cuadraditos diminutos).
+• Corregido un error viejo: con 🎨 Tonos: OFF se revelaba la
+  oración completa en ES→CN. Ahora muestra el hueco ___ como
+  corresponde (y el hueco sigue siendo clicable).
+• sw.js sube a v15: los alumnos reciben el update solo.
+
+======================================================================
+✂️ NOVEDADES v6.6 — Oraciones HSK 5 más simples y cortas
+----------------------------------------------------------------------
+• Las 57 oraciones del módulo HSK 5 fueron reescritas: pasaron de
+  36 caracteres promedio (frases tipo ensayo, de 28 a 45 chars) a
+  12.9 promedio (9 a 16 chars), al estilo corto de HSK 6.
+  Antes HSK 5 parecía MÁS difícil que HSK 6; ahora la dificultad
+  vuelve a crecer de a poco: HSK4 → HSK5 → HSK6.
+• Misma palabra objetivo, mismo hueco ___ , pinyin con tonos,
+  tradicional y traducción. Todo lo demás funciona igual.
+• Bonus: app.js quedó 22 KB más liviano.
+• Se corrigió un duplicado: hsk5_90 repetía exactamente la misma
+  oración que hsk5_32; ahora tiene oración propia.
+• sw.js sube a v16: los alumnos reciben el update solo.
+• Nota: HSK 4 todavía tiene oraciones largas (33 chars prom.).
+  Si querés, se simplifica igual en la próxima.
+
+======================================================================
+📥 NOVEDADES v7.1 — Planillas: descarga directa de PDF (sin impresora)
+----------------------------------------------------------------------
+• El botón de planillas ahora es "⬇️ Descargar PDF": descarga el
+  archivo .pdf directo a tu dispositivo (planilla-hanzi-FECHA.pdf),
+  SIN abrir el diálogo de la impresora.
+• PDF con páginas A4 reales: si la hoja es larga (muchos caracteres),
+  se divide sola en varias páginas A4.
+• Se conserva un botón secundario 🖨️ para quien quiera imprimir
+  directo en papel (ahora es un ícono chiquito al lado).
+• Las 2 librerías que generan el PDF viajan DENTRO del repo
+  (html2canvas.min.js y jspdf.umd.min.js) → funciona offline después
+  del primer uso y se cargan solo cuando las necesitás.
+• IMPORTANTE al subir a GitHub: esta versión requiere subir 6
+  archivos (se suman las 2 librerías). Ver SUBIR-A-GITHUB.txt.
+
+🧭 NOVEDADES v7.0 — Clásicos en menú desplegable + 繁體 + más contenido
+----------------------------------------------------------------------
+• CLÁSICOS ANTIGUOS ahora también con menú desplegable (igual que
+  Práctica Diaria): las 9 tarjetas pasaron a ser un único botón
+  "📜 Clásicos Antiguos" que abre un menú con los 9 clásicos
+  (nombre chino + pinyin + nombre en español). Navegación mucho
+  más liviana en el celular. Se conserva el estilo serif/ámbar.
+  Accesible: teclado (flechas, Enter, Escape), roles ARIA y
+  cierre al hacer clic afuera. El botón muestra el clásico activo
+  (ej.: 📜 道德经 · Tao Te King).
+• CHINO TRADICIONAL en los clásicos: los nombres del menú y del
+  botón siguen el switch 简/繁 en vivo (論語, 道德經, 金剛經...)
+  y las citas ya renderizan en tradicional con su respuesta
+  aceptada (無形, 禮...). Antes solo se veían en simplificado.
+• PRÁCTICA DIARIA duplicada: las 8 categorías nuevas pasan de 6
+  a 12 oraciones cada una (+48: restaurante, colectivo, subte,
+  clase de idioma, shopping, cine, gimnasio y barrio chino).
+• CLÁSICOS TRIPLICADOS: los 9 clásicos pasan de 4 a 12 citas
+  cada una (+72). Nuevas: 温故而知新, 学而不思则罔, 天将降大任,
+  知足不辱, 道法自然, 治大国若烹小鲜, 色声香味触法, 若见诸相
+  非相 y más, todas con pinyin, cloze y tradicional.
+• La app completa ahora embebe 761 oraciones (146 diarias + 507
+  de exámenes + 108 de clásicos). sw.js sube a v20; cache-busting
+  20260902l: los alumnos reciben el update solo.
+
+======================================================================
+🧭 NOVEDADES v6.9 — Navegación nueva + Clásicos Antiguos
+----------------------------------------------------------------------
+• PRÁCTICA DIARIA con menú desplegable: en lugar de los 4 botones
+  sueltos ahora hay un único botón destacado "📚 Práctica Diaria"
+  que abre un menú limpio con 12 categorías: Todas, Saludos,
+  Supermercado, Migraciones + 8 nuevas: En un restaurante, En el
+  colectivo, En el subterráneo, En la clase de idioma, En el
+  shopping, En el cine, En el gimnasio y Barrio chino (6 oraciones
+  nuevas por categoría = 48 oraciones nuevas).
+• El menú es accesible: funciona con teclado (flechas, Enter,
+  Escape), tiene roles ARIA (menu/menuitem/aria-expanded) y se
+  cierra al hacer clic afuera. El botón muestra la categoría activa.
+• Sección nueva "📜 CLÁSICOS ANTIGUOS (Sabiduría Milenaria)" debajo
+  de Exámenes Internacionales: 9 tarjetas bilingües con tipografía
+  serif y borde ámbar (universidad 大学 Dàxué, Analectas 论语,
+  Doctrina del Medio 中庸, Mencio 孟子, Tres Caracteres 三字经,
+  Piedad Filial 孝经, Tao Te King 道德经, Sutra del Corazón 心经 y
+  Sutra del Diamante 金刚经), con 4 citas famosas cada una (36 en
+  total), traducidas y con pinyin.
+• DATA_SOURCES actualizado: los módulos nuevos mapean a
+  data/daily/*.json y data/classics/*.json (archivos incluidos en
+  el repo; en la app van embebidos para funcionar offline).
+• La app completa ahora embebe 641 oraciones (98 diarias + 507 de
+  exámenes + 36 de clásicos). sw.js sube a v19; cache-busting
+  20260901k: los alumnos reciben el update solo.
+
+======================================================================
+✂️ NOVEDADES v6.8 — HSK 6 llega a 300 oraciones (tanda 3: 201-300)
+----------------------------------------------------------------------
+• Se sumaron 100 oraciones nuevas al módulo HSK 6 (palabras 201 a
+  300 de la lista oficial: 操练 → 出息). El módulo pasa de 200 a
+  300 oraciones; la app completa ahora tiene 557 embebidas.
+• Mismo estilo corto y cotidiano del resto (prom. 12.9 chars,
+  rango 7-20): una sola idea por oración, pinyin con tonos,
+  tradicional, cloze ___ en chino y en español, y alternativas de
+  respuesta donde hace falta (ej. diesel/gasoil, trato hecho).
+• sw.js sube a v18 y el cache-busting a 20260901j: los alumnos
+  reciben el update solo, sin tocar nada.
+• Próxima tanda: palabras 301-400 cuando pidas "seguí" otra vez.
+
+======================================================================
+✂️ NOVEDADES v6.7 — Oraciones HSK 4 más simples y cortas
+----------------------------------------------------------------------
+• Mismo tratamiento que HSK 5 en la v6.6: las 40 oraciones del
+  módulo HSK 4 fueron reescritas de 32.5 caracteres promedio
+  (frases tipo ensayo de 28 a 38 chars) a 11.7 promedio
+  (8 a 16 chars), al estilo corto de HSK 6.
+• Con esto la escalera de dificultad queda prolija en toda la
+  app: HSK1-3 → HSK4 (corto) → HSK5 (corto) → HSK6 (corto).
+• Misma palabra objetivo, mismo hueco ___ , pinyin con tonos,
+  tradicional y traducción. Todo lo demás funciona igual.
+• Bonus: app.js quedó 13 KB más liviano (35 KB menos en total
+  con las dos simplificaciones).
+• sw.js sube a v17: los alumnos reciben el update solo.

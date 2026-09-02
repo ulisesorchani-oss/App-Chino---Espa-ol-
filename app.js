@@ -2246,7 +2246,9 @@ function pzSvg(data, upto, fill) {
     const k = Math.max(1, Math.min(upto || n, n));
     let paths = '';
     for (let i = 0; i < k; i++) paths += '<path d="' + data.strokes[i] + '"/>';
-    return '<svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="scale(1, -1) translate(0, -900)" fill="' + fill + '">' + paths + '</g></svg>';
+    // width/height explícitos: el CSS de la celda los pisa (86%), pero
+    // html2canvas necesita tamaño intrínseco para rasterizar el SVG.
+    return '<svg viewBox="0 0 1024 1024" width="1024" height="1024" aria-hidden="true"><g transform="scale(1, -1) translate(0, -900)" fill="' + fill + '">' + paths + '</g></svg>';
 }
 
 function pzStatus(msg, isError) {
@@ -2331,12 +2333,14 @@ async function pzGenerate() {
     }));
     pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells);
     pzRenderPreview();
-    const btnPrint = document.getElementById('btn-pz-print');
-    if (btnPrint) btnPrint.classList.remove('hidden');
+    ['btn-pz-pdf', 'btn-pz-print'].forEach((id) => {
+        const b = document.getElementById(id);
+        if (b) b.classList.remove('hidden');
+    });
     const faltan = datas.filter((d) => !d).length;
     pzStatus(faltan
         ? '⚠ Hoja lista, pero sin datos de trazos para ' + faltan + ' carácter(es) (¿sin conexión la primera vez?). Se usa el modelo del sistema.'
-        : '✅ Hoja lista (' + chars.length + ' caracteres). Tocá 🖨️ Imprimir / PDF.');
+        : '✅ Hoja lista (' + chars.length + ' caracteres). Tocá ⬇️ Descargar PDF.');
     if (btn) { btn.disabled = false; btn.textContent = '📄 Generar hoja'; }
 }
 
@@ -2373,7 +2377,104 @@ function pzFitPreview() {
     } catch (e) { /* vista previa es best-effort */ }
 }
 
-// Imprimir / Guardar PDF: hoja sola, sin la interfaz de la app
+// ============================================================
+// v7.1 — Descargar PDF directo (SIN abrir el diálogo de impresora)
+// html2canvas rasteriza la hoja (SVGs incluidos) y jsPDF la envuelve
+// en páginas A4. Libs LOCALES al repo (offline tras el 1er uso: el
+// SW las precachea) y de carga PEREZOSA (no penalizan el arranque).
+// ============================================================
+function pzLoadScript(src) {
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('No se pudo cargar ' + src));
+        document.head.appendChild(s);
+    });
+}
+
+async function pzEnsurePdfLibs() {
+    if (!window.html2canvas) await pzLoadScript('html2canvas.min.js');
+    if (!(window.jspdf && window.jspdf.jsPDF)) await pzLoadScript('jspdf.umd.min.js');
+}
+
+// CSS de la hoja re-escopado al holder: las reglas globales de la hoja
+// (*, body, @page) no deben tocar el resto de la app.
+function pzHolderCss() {
+    return PZ_SHEET_CSS
+        .replace('@page { size: A4; margin: 11mm; }', '')
+        .replace('* { box-sizing: border-box; margin: 0; padding: 0; }',
+                 '#pz-pdf-holder, #pz-pdf-holder * { box-sizing: border-box; margin: 0; padding: 0; }')
+        .replace(/body \{[^}]*\}/g, '')
+        .replace('@media screen {  }', '');
+}
+
+async function pzDownloadPDF() {
+    if (!pzLastSheet) return;
+    const btn = document.getElementById('btn-pz-pdf');
+    try {
+        if (btn) btn.disabled = true;
+        await pzEnsurePdfLibs();
+        pzStatus('⏳ Generando PDF…');
+
+        // Holder fuera de pantalla: 794px = A4 a 96dpi; padding 42px ≈ 11mm
+        // (igual que el margen @page de la versión impresa).
+        const doc = new DOMParser().parseFromString(pzLastSheet, 'text/html');
+        const holder = document.createElement('div');
+        holder.id = 'pz-pdf-holder';
+        holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;'
+            + 'background:#fff;font-family:"Segoe UI",Arial,"Helvetica Neue",sans-serif;padding:42px;';
+        const st = document.createElement('style');
+        // .pz-cell usa aspect-ratio (que html2canvas no soporta) → alto
+        // explícito = mismo cuadrado que en pantalla/impresión.
+        const C = Math.min(20, Math.max(6, parseInt(pzCells, 10) || 12));
+        const GAP = 1.2 * 96 / 25.4;
+        const cw = (794 - 84 - (C - 1) * GAP) / C;
+        // Guía en cruz de cada celda: el ::before original usa un shorthand
+        // repeating-linear-gradient que html2canvas no pinta → equivalente
+        // con gradientes simples (línea sólida 0.4mm horizontal + vertical).
+        const mm = (x) => (x * 96 / 25.4).toFixed(2) + 'px';
+        st.textContent = pzHolderCss() + '.pz-cell{height:' + cw.toFixed(2) + 'px;}'
+            + '#pz-pdf-holder .pz-cell::before{content:"";position:absolute;inset:0;'
+            + 'background-image:linear-gradient(#a7d9c4,#a7d9c4),linear-gradient(#a7d9c4,#a7d9c4);'
+            + 'background-size:100% ' + mm(0.4) + ',' + mm(0.4) + ' 100%;'
+            + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}';
+        holder.appendChild(st);
+        while (doc.body.firstChild) holder.appendChild(doc.body.firstChild);
+        document.body.appendChild(holder);
+
+        const canvas = await window.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff', logging: false });
+        holder.remove();
+
+        // Troceo en páginas A4 (1123px × escala 2) con fondo blanco
+        const A4H = 1123 * 2;
+        const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const paginas = Math.max(1, Math.ceil(canvas.height / A4H));
+        for (let p = 0; p < paginas; p++) {
+            const h = Math.min(A4H, canvas.height - p * A4H);
+            const c2 = document.createElement('canvas');
+            c2.width = canvas.width; c2.height = A4H;
+            const ctx = c2.getContext('2d');
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c2.width, c2.height);
+            ctx.drawImage(canvas, 0, p * A4H, canvas.width, h, 0, 0, canvas.width, h);
+            if (p > 0) pdf.addPage();
+            pdf.addImage(c2.toDataURL('image/png'), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+        }
+        const t = new Date();
+        const pad = (x) => String(x).padStart(2, '0');
+        const nombre = 'planilla-hanzi-' + t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate())
+            + '-' + pad(t.getHours()) + pad(t.getMinutes()) + '.pdf';
+        pdf.save(nombre);
+        pzStatus('✅ PDF descargado: ' + nombre + (paginas > 1 ? ' (' + paginas + ' páginas)' : ''));
+    } catch (err) {
+        console.warn('[Planillas] descarga de PDF falló:', err);
+        pzStatus('⚠ No se pudo generar el PDF. Probá el botón 🖨️ para imprimir y elegir "Guardar como PDF".', true);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// Imprimir (secundario): hoja sola, sin la interfaz de la app
 function pzPrint() {
     if (!pzLastSheet) return;
     const f = document.createElement('iframe');
@@ -2438,6 +2539,7 @@ function pzUpdateControls() {
         if (el) el.addEventListener(ev, fn);
     };
     safe('btn-pz-generate', 'click', pzGenerate);
+    safe('btn-pz-pdf', 'click', pzDownloadPDF);
     safe('btn-pz-print', 'click', pzPrint);
     safe('btn-pz-module', 'click', pzUseModule);
     safe('btn-pz-trazos', 'click', () => {

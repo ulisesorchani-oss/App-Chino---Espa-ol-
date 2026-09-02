@@ -11,7 +11,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v6') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v20';
+const VERSION = 'v21';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1'; // persiste entre versiones (no se borra)
 const TTS_MAX_ENTRIES = 80;
@@ -22,6 +22,8 @@ const PRECACHE = [
   './app.js',
   './style.css',
   './pinyin-pro.min.js',
+  './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
+  './jspdf.umd.min.js',    // v7.1: ídem
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
