@@ -1040,6 +1040,27 @@ body.dark-mode .install-help-note {
     margin-top: 6px;
 }
 
+/* Pinyin del ejemplo (palabra china tocada) */
+.vp-example-py {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+/* Apoyo: ejemplo traducido al otro idioma, más discreto */
+.vp-example-alt {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin-top: 4px;
+}
+
+.vp-example-py-inline {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
 .vp-missing {
     font-size: 0.86rem;
     color: var(--text-secondary);

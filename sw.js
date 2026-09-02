@@ -11,7 +11,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v6') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v9';
+const VERSION = 'v13';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1'; // persiste entre versiones (no se borra)
 const TTS_MAX_ENTRIES = 80;
@@ -25,15 +25,8 @@ const PRECACHE = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/maskable-512.png',
-  './data/sentences.json',
-  './data/exams/hsk1.json',
-  './data/exams/hsk2.json',
-  './data/exams/hsk3.json',
-  './data/exams/hsk4.json',
-  './data/exams/hsk5.json',
-  './data/exams/tocfl.json',
-  './data/exams/dele.json'
+  './icons/maskable-512.png'
+  // v6.2: los datos van DENTRO de app.js (EMBEDDED_MODULE_DATA) — no hace falta data/
 ];
 
 /* ---------- Install: precache tolerante (un 404 no rompe el SW) ---------- */
@@ -76,7 +69,16 @@ self.addEventListener('fetch', (event) => {
 
 /* ---------- Shell mismo origen: cache-first + refresh en background ---------- */
 async function cacheFirstShell(req) {
-  const cached = await caches.match(req, { ignoreVary: true });
+  let cached = await caches.match(req, { ignoreVary: true });
+  if (!cached) {
+    // Fallback sin query: 'app.js?v=20260901c' matchea el './app.js' precacheado
+    // (así el offline funciona desde la 1ª visita). Online siempre gana la red:
+    // un ?v= nuevo no está en caché → fetch → se guarda con su query completa.
+    try {
+      const u = new URL(req.url);
+      if (u.search) cached = await caches.match(u.pathname, { ignoreVary: true });
+    } catch (e) { /* noop */ }
+  }
   if (cached) {
     // refresca la copia en silencio para la próxima visita
     fetch(req).then((res) => {
