@@ -1,8 +1,8 @@
 ======================================================================
- v7.1 — SUBIR A GITHUB: 6 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.2 — SUBIR A GITHUB: 6 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 6 ARCHIVOS (se suman 2 librerías de PDF).
+⚠️ ESTA VERSIÓN SUBE 6 ARCHIVOS (los mismos de v7.1: nada nuevo).
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
@@ -22,7 +22,7 @@ PASO A PASO (funciona igual desde el celular o la PC):
       ✅ html2canvas.min.js   (NUEVO en v7.1)
       ✅ jspdf.umd.min.js     (NUEVO en v7.1)
 
-5. Abajo escribí un título (ej: v7.1) y toca el botón verde
+5. Abajo escribí un título (ej: v7.2) y toca el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
@@ -30,7 +30,7 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS:
-      app.js             = 525 KB aprox.
+      app.js             = 529 KB aprox.
       html2canvas.min.js = 194 KB   ← si no existe, no es la v7.1
       jspdf.umd.min.js   = 357 KB   ← si no existe, no es la v7.1
 
@@ -40,8 +40,8 @@ B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
    Buscá la línea const VERSION. Debe decir:
 
-      const VERSION = 'v21';     ← correcto (v7.1)
-      const VERSION = 'v20';     ← viejo: el upload no llegó
+      const VERSION = 'v22';     ← correcto (v7.2)
+      const VERSION = 'v21';     ← viejo: el upload no llegó
 
 C) EN LA APP (2 recargas): generá una planilla y tocá
    "⬇️ Descargar PDF". Debe bajar el archivo .pdf directamente,
@@ -59,8 +59,10 @@ SI AÚN ASÍ VES LO VIEJO:
 ------------------------------------------------------------
 1. Verificá B) arriba (sw.js con v21). Esa es la prueba real de
    qué hay en GitHub, sin importar el caché de tu navegador.
-2. En el celular con la app instalada como PWA: cerrala por
+2. Extra: generá una planilla y tocá "⬇️ Descargar PDF" → baja el .pdf;
+   y al responder una oración, el hueco se completa solo.
+3. En el celular con la app instalada como PWA: cerrala por
    COMPLETO (deslizala fuera de apps recientes) y reabrila.
-3. Último recurso: borrá datos del sitio (Chrome → Configuración
+4. Último recurso: borrá datos del sitio (Chrome → Configuración
    → Privacidad → Cookies → el sitio → Borrar) y reentrá.
 ======================================================================

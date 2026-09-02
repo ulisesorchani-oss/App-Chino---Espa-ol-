@@ -287,6 +287,20 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+✏️ NOVEDADES v7.2 — La oración queda completa al responder + hueco siempre bien puesto
+----------------------------------------------------------------------
+• Al responder CORRECTO, el espacio ___ desaparece: la oración se
+  muestra COMPLETA con tu palabra resaltada en verde.
+• Si respondés mal, también se completa mostrando la palabra
+  correcta en rojo (se aprende igual viendo la frase entera).
+• Revelar muestra la oración completa con la respuesta en ámbar.
+• Corregido: algunas oraciones (clásicos y HSK) mostraban la frase
+  COMPLETA sin hueco, o el hueco en el lugar equivocado cuando la
+  palabra aparecía dos veces. Ahora el hueco siempre está donde
+  corresponde, con y sin colores de tonos.
+• 4 oraciones tenían la respuesta inconsistente con el texto
+  (挨/捱, 別緻/別致, Mediante/mediante, Camino/camino) → corregidas.
+
 📥 NOVEDADES v7.1 — Planillas: descarga directa de PDF (sin impresora)
 ----------------------------------------------------------------------
 • El botón de planillas ahora es "⬇️ Descargar PDF": descarga el
