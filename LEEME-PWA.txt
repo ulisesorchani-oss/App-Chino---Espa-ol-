@@ -118,7 +118,7 @@ QUÉ FUNCIONA SIN INTERNET
 ACTUALIZAR LA APP EN EL FUTURO (MUY IMPORTANTE)
 ------------------------------------------------------------
 Cuando cambies app.js, index.html, style.css o los datos:
-  1. Editá la primera línea de sw.js →  const VERSION = 'v9';
+  1. Editá la primera línea de sw.js →  const VERSION = 'v10';
      (subí el número cada vez que publiques cambios)
   2. Commit + push.
 Los usuarios reciben la versión nueva al volver a entrar
@@ -157,3 +157,102 @@ NOVEDADES v6 (feedback de alumnos en clase)
      si difiere) + pinyin + frase de ejemplo
    El diccionario se va ampliando solo con cada módulo que
    cargues (Saludos, HSK, TOCFL, DELE...).
+======================================================================
+
+NOVEDADES v6.1 (corrección de vocabulario + ejemplos bilingües)
+------------------------------------------------------------
+1. EJEMPLO EN EL IDIOMA DE LA PALABRA: en el cajón de palabras,
+   si tocás una palabra china (ej. 謝謝) el ejemplo de abajo
+   ahora sale EN CHINO (謝謝你的幫助。) con su pinyin, y la
+   traducción española queda como apoyo. Si tocás una palabra
+   española, el ejemplo sale en español con apoyo en chino.
+   El ejemplo respeta 简/繁 que tengas elegido.
+2. VOCABULARIO CORREGIDO: revisión completa de los 290
+   registros de datos (Saludos + HSK1-5 + TOCFL + DELE):
+   • pinyin roto reparado (wǒmen, kěyǐ, zhǔnbèi, zuǒzhuǎn,
+     bāshì, yǒnggǎn, xìngrén... en 30+ oraciones)
+   • oraciones españolas con palabras faltantes o con chino
+     incrustado (hsk4/hsk5) corregidas
+   • campos TRADICIONALES corruptos reconstruidos (hsk4/hsk5
+     tenían ___ pegado en la oración; DELE tenía el texto en
+     simplificado en ambos modos)
+   • TOCFL: el modo 简 ahora muestra simplificado de verdad
+     (antes mostraba tradicional)
+   • HSK5: 33 oraciones duplicadas eliminadas (90 → 57)
+   • respuestas que no estaban en la oración (DELE 12/13,
+     HSK4) corregidas
+3. MODO "APRENDO ESPAÑOL" BILINGÜE: con CN → ES activo, los
+   botones suman la traducción al chino: Revelar 显示,
+   La sé 我会, Repetir 再练, y el campo dice
+   "Escribe en español... 用西班牙语写".
+======================================================================
+
+⚠️ NOVEDAD v6.2 — ¡DESDE AHORA SUBÍ SOLO 4 ARCHIVOS!
+------------------------------------------------------------
+QUÉ CAMBIÓ: TODO el contenido (Saludos + HSK1-5 + TOCFL +
+DELE, 257 oraciones) ahora vive DENTRO de app.js. La app ya
+NO necesita la carpeta data/ para nada (ni para offline).
+
+POR QUÉ: si te fallaba subir la carpeta data/ a GitHub desde
+el celular, ese problema desapareció: no hay más carpetas.
+
+CÓMO PUBLICAR ESTA VERSIÓN (2 minutos, desde el celular):
+1. Entra a tu repo en github.com
+2. Botón "Add file" → "Upload files"
+3. Arrastrá/elegí SOLO estos 4 archivos del ZIP:
+      index.html
+      app.js
+      style.css
+      sw.js
+4. "Commit changes" → esperá ~1 minuto → listo ✅
+   (GitHub Pages se actualiza solo)
+
+LA CARPETA data/ VIEJA DE TU REPO:
+   puede quedar ahí (no molesta) o borrarla si querés; la
+   app la ignora porque los datos ya van incluidos.
+
+IMPORTANTE para el futuro: cada vez que te pase una versión
+nueva, mirá el archivo SUBIR-A-GITHUB.txt que viene en el
+ZIP: te dice exactamente qué archivos subir.
+======================================================================
+
+🇨🇳 NOVEDADES v6.3 — ¡HSK 6 disponible!
+------------------------------------------------------------
+• Nuevo módulo HSK 6 con las primeras 100 oraciones
+  (tanda 1 del material enviado: palabras de 挨 a 臂).
+  Cada palabra trae su oración con hueco, pinyin,
+  tradicional y traducción al español.
+• En el cajón de palabras ya funcionan las traducciones
+  de estas 100 palabras nuevas.
+• Las próximas tandas (sigue la lista hasta 方言 y más)
+  se agregan igual: contenido nuevo dentro de app.js,
+  siempre los mismos 4 archivos para subir.
+======================================================================
+
+🇨🇳 NOVEDADES v6.4 — HSK 6 llega a 200 oraciones
+------------------------------------------------------------
+• Tanda 2 integrada: palabras de 闭塞 a 操劳. El módulo
+  HSK 6 ahora tiene 200 oraciones con hueco, pinyin,
+  tradicional y traducción.
+• Sigue la misma mecánica: más tandas dentro de app.js,
+  siempre los mismos 4 archivos para subir.
+
+======================================================================
+✍️ NOVEDADES v6.5 — Generador de planillas de escritura 写字
+----------------------------------------------------------------------
+• Nueva sección al final de la app: "✍️ Planillas de escritura".
+  Pegás los caracteres (ej.: 你是哪国人) y la app arma una hoja
+  A4 lista para imprimir, con el formato XieZi:
+  - celda modelo (carácter oscuro),
+  - secuencia de trazos progresivos en gris,
+  - celdas vacías con cruz guía, grilla verde.
+• Opciones (pocas, a propósito): Trazos ON/OFF y celdas por
+  fila (10 / 12 / 14). Botón "Usar módulo" carga los caracteres
+  de las palabras del módulo activo (ej.: HSK 6).
+• Botón 🖨️ Imprimir / PDF: imprime SOLO la hoja, sin la interfaz.
+• Los datos de trazos se descargan una única vez y quedan
+  guardados: después funciona incluso sin conexión.
+• Si un carácter no tiene datos de trazos (sin conexión la
+  primera vez), la hoja se genera igual con el carácter modelo
+  de la fuente del sistema.
+• El resto de la app no cambió: mismos 4 archivos para subir.
