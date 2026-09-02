@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260901j">
+    <link rel="stylesheet" href="style.css?v=20260901k">
 </head>
 <body>
     <div class="container">
@@ -48,11 +48,30 @@
         <!-- SECCIÓN 1: PRÁCTICA DIARIA (arriba, feedback de alumnos) -->
         <div class="section-daily">
             <h3 class="section-title"> PRÁCTICA DIARIA</h3>
-            <div class="category-filter">
-                <button class="cat-btn active" data-module="todas">Todas</button>
-                <button class="cat-btn" data-module="Saludos">Saludos</button>
-                <button class="cat-btn" data-module="Migraciones">Migraciones</button>
-                <button class="cat-btn" data-module="Supermercado">Supermercado</button>
+            <div class="category-filter daily-filter">
+                <div class="daily-dropdown" id="daily-dropdown">
+                    <button id="btn-daily-toggle" class="daily-main-btn" type="button"
+                            aria-haspopup="menu" aria-expanded="false" aria-controls="daily-menu"
+                            title="Elegí una categoría de práctica diaria">
+                        <span aria-hidden="true">📚</span> <span id="daily-current">Práctica Diaria</span>
+                        <span class="daily-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <ul id="daily-menu" class="daily-menu hidden" role="menu" aria-labelledby="btn-daily-toggle">
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="todas">📖 Todas</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Saludos">👋 Saludos</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Supermercado">🛒 Supermercado</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Migraciones">🛂 Migraciones</button></li>
+                        <li role="separator" class="daily-menu-sep" aria-hidden="true"></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En un restaurante">🍜 En un restaurante</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el colectivo">🚌 En el colectivo</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el subterráneo">🚇 En el subterráneo</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En la clase de idioma">🏫 En la clase de idioma</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el shopping">🛍️ En el shopping</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el cine">🎬 En el cine</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el gimnasio">🏋️ En el gimnasio</button></li>
+                        <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Barrio chino">🏮 Barrio chino</button></li>
+                    </ul>
+                </div>
                 <button id="btn-reset" class="btn-reset">Borrar progreso</button>
             </div>
         </div>
@@ -78,6 +97,58 @@
             <div class="category-filter exams-filters">
                 <button class="btn-exam" data-module="TOCFL">TOCFL 🇹🇼</button>
                 <button class="btn-exam" data-module="DELE">DELE 🇪🇸</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: CLÁSICOS ANTIGUOS (SABIDURÍA MILENARIA) -->
+        <div class="section-classics">
+            <h3 class="section-title classics-title">📜 CLÁSICOS ANTIGUOS <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
+            <div class="classics-grid">
+                <button class="classic-card" type="button" data-module="Clasicos-Daxue" aria-label="Gran Estudio, Dàxué">
+                    <span class="classic-zh" lang="zh">大学</span>
+                    <span class="classic-py">Dàxué</span>
+                    <span class="classic-es">Gran Estudio</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Lunyu" aria-label="Analectas, Lúnyǔ">
+                    <span class="classic-zh" lang="zh">论语</span>
+                    <span class="classic-py">Lúnyǔ</span>
+                    <span class="classic-es">Analectas</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Zhongyong" aria-label="Doctrina del Medio, Zhōngyōng">
+                    <span class="classic-zh" lang="zh">中庸</span>
+                    <span class="classic-py">Zhōngyōng</span>
+                    <span class="classic-es">Doctrina del Medio</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Mengzi" aria-label="Mencio, Mèngzǐ">
+                    <span class="classic-zh" lang="zh">孟子</span>
+                    <span class="classic-py">Mèngzǐ</span>
+                    <span class="classic-es">Mencio</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Sanzijing" aria-label="Clásico de los Tres Caracteres, Sānzìjīng">
+                    <span class="classic-zh" lang="zh">三字经</span>
+                    <span class="classic-py">Sānzìjīng</span>
+                    <span class="classic-es">Tres Caracteres</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Xiaojing" aria-label="Clásico de la Piedad Filial, Xiàojīng">
+                    <span class="classic-zh" lang="zh">孝经</span>
+                    <span class="classic-py">Xiàojīng</span>
+                    <span class="classic-es">Piedad Filial</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Daodejing" aria-label="Tao Te King, Dàodéjīng">
+                    <span class="classic-zh" lang="zh">道德经</span>
+                    <span class="classic-py">Dàodéjīng</span>
+                    <span class="classic-es">Tao Te King</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Xinjing" aria-label="Sutra del Corazón, Xīnjīng">
+                    <span class="classic-zh" lang="zh">心经</span>
+                    <span class="classic-py">Xīnjīng</span>
+                    <span class="classic-es">Sutra del Corazón</span>
+                </button>
+                <button class="classic-card" type="button" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
+                    <span class="classic-zh" lang="zh">金刚经</span>
+                    <span class="classic-py">Jīngāngjīng</span>
+                    <span class="classic-es">Sutra del Diamante</span>
+                </button>
             </div>
         </div>
 
@@ -229,7 +300,7 @@
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260901j"></script>
+    <script src="app.js?v=20260901k"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
