@@ -287,6 +287,23 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🇪🇸 NOVEDADES v7.4 — DELE con menú desplegable: exámenes para escolares
+----------------------------------------------------------------------
+• El botón DELE ahora es un MENÚ DESPLEGABLE (igual que Clásicos
+  Antiguos): tocás DELE 🇪🇸 y elegís el examen.
+• Nuevos exámenes PARA ESCOLARES (orientados a chicos de 11 a 17):
+  - DELE A1 Escolares: 30 oraciones nuevas (nivel inicial)
+  - DELE A2/B1 Escolares: 50 oraciones (las 20 de siempre + 30 nuevas)
+• Temas de chicos: la escuela, la mochila, los compañeros, el
+  recreo, mascotas, fútbol, cumpleaños, el celular, viajes de
+  intercambio, el club de robótica...
+• Sección "ADULTOS (próximamente)" ya visible en el menú,
+  deshabilitada: ahí se sumarán los exámenes para adultos.
+• Cada examen mantiene la mecánica completa: hueco en chino y en
+  español, pinyin con tonos, 繁體 y la oración que queda completa
+  en verde al responder bien (v7.2).
+• DELE pasa de 20 a 80 oraciones. Total de la app: 921.
+
 ✨ NOVEDADES v7.3 — HSK 6: 100 oraciones nuevas (tanda 4)
 ----------------------------------------------------------------------
 • HSK 6 crece de 300 a 400 oraciones: palabras 301 a 400 de la

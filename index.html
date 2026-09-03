@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260904o">
+    <link rel="stylesheet" href="style.css?v=20260904p">
 </head>
 <body>
     <div class="container">
@@ -96,7 +96,24 @@
             <!-- Botones otros exámenes -->
             <div class="category-filter exams-filters">
                 <button class="btn-exam" data-module="TOCFL">TOCFL 🇹🇼</button>
-                <button class="btn-exam" data-module="DELE">DELE 🇪🇸</button>
+                <div class="dele-dropdown" id="dele-dropdown">
+                    <button id="btn-dele-toggle" class="dele-main-btn" type="button"
+                            aria-haspopup="menu" aria-expanded="false" aria-controls="dele-menu"
+                            title="Elegí un examen DELE">
+                        <span aria-hidden="true">🇪🇸</span> <span id="dele-current">DELE</span>
+                        <span class="daily-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <ul id="dele-menu" class="dele-menu hidden" role="menu" aria-labelledby="btn-dele-toggle">
+                        <li class="dele-group-label" role="none">🎒 Escolares (11 a 17 años)</li>
+                        <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A1-Escolares" aria-label="DELE A1 para escolares">
+                            <span class="ci-zh">A1</span><span class="ci-py">inicial</span><span class="ci-es">Escolares</span></button></li>
+                        <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A2B1-Escolares" aria-label="DELE A2/B1 para escolares">
+                            <span class="ci-zh">A2/B1</span><span class="ci-py">intermedio</span><span class="ci-es">Escolares</span></button></li>
+                        <li class="dele-group-label" role="none">🌍 Adultos (próximamente)</li>
+                        <li role="none"><button type="button" class="cat-btn dele-item dele-soon" role="menuitem" disabled aria-disabled="true">
+                            <span class="ci-zh">A1–C2</span><span class="ci-py">en camino</span><span class="ci-es">para adultos</span></button></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -282,7 +299,7 @@
     </div>
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <script src="app.js?v=20260904o"></script>
+    <script src="app.js?v=20260904p"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

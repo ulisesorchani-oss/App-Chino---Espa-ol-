@@ -1456,3 +1456,179 @@ body.dark-mode .classics-menu .ci-py {
 body.dark-mode .classics-menu .ci-es {
     color: #94a3b8;
 }
+
+/* ----- Dropdown DELE (v7.4, paleta rojo España 🇪🇸) ----- */
+/* Mismo patrón que Clásicos: botón principal + menú absoluto. */
+.dele-dropdown {
+    position: relative;
+    flex: 1 1 100%;
+    max-width: 260px;
+}
+
+.dele-main-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 16px;
+    background: #fff5f5;
+    color: #7f1d1d;
+    border: 2px solid var(--danger);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+}
+
+.dele-main-btn:hover {
+    background: #fecaca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(220, 38, 38, 0.35);
+}
+
+.dele-main-btn[aria-expanded="true"] {
+    border-radius: 20px 20px 0 0;
+    transform: translateY(0);
+}
+
+.dele-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 70;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: #fffafa;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    border-top: 2px solid var(--danger);
+}
+
+.dele-menu.hidden {
+    display: none;
+}
+
+.dele-group-label {
+    padding: 7px 12px 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #b91c1c;
+    opacity: 0.75;
+    list-style: none;
+}
+
+.dele-menu .cat-btn {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    padding: 9px 12px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #450a0a;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.2s;
+}
+
+.dele-menu .cat-btn:hover:not(.active) {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.dele-menu .cat-btn.active {
+    background: #fee2e2;
+    color: #7f1d1d;
+    border-left-color: #b91c1c;
+    font-weight: 700;
+}
+
+.dele-menu .ci-zh {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #b91c1c;
+    white-space: nowrap;
+    min-width: 44px;
+}
+
+.dele-menu .ci-py {
+    font-style: italic;
+    font-size: 0.75rem;
+    color: #dc2626;
+    white-space: nowrap;
+}
+
+.dele-menu .ci-es {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.2;
+}
+
+/* ítem "próximamente" (adultos): atenuado y no clicable */
+.dele-menu .dele-soon {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.dele-menu .dele-soon .ci-zh {
+    color: #9ca3af;
+}
+
+.dele-menu .dele-soon .ci-py {
+    color: #9ca3af;
+}
+
+@media (max-width: 380px) {
+    .dele-menu .ci-py {
+        display: none;
+    }
+}
+
+body.dark-mode .dele-main-btn {
+    background: #2a1416;
+    color: #fca5a5;
+    border-color: #b91c1c;
+}
+
+body.dark-mode .dele-menu {
+    background: #1c1214;
+    border-top-color: #b91c1c;
+}
+
+body.dark-mode .dele-menu .cat-btn {
+    color: #e7e5e4;
+}
+
+body.dark-mode .dele-menu .cat-btn:hover:not(.active) {
+    background: rgba(252, 165, 165, 0.08);
+}
+
+body.dark-mode .dele-menu .cat-btn.active {
+    background: rgba(252, 165, 165, 0.14);
+    color: #fca5a5;
+    border-left-color: #ef4444;
+}
+
+body.dark-mode .dele-menu .ci-zh {
+    color: #f87171;
+}
+
+body.dark-mode .dele-menu .ci-py {
+    color: #fb7185;
+}
+
+body.dark-mode .dele-group-label {
+    color: #f87171;
+}
