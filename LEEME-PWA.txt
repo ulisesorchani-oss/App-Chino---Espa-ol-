@@ -287,6 +287,19 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+✨ NOVEDADES v7.3 — HSK 6: 100 oraciones nuevas (tanda 4)
+----------------------------------------------------------------------
+• HSK 6 crece de 300 a 400 oraciones: palabras 301 a 400 de la
+  lista (初步 → 得力). Unidades de estudio nuevas con la misma
+  mecánica de siempre: hueco en chino, hueco en español, pinyin
+  con tonos y versiones en 繁體 automáticas.
+• Oraciones cortas (promedio 10 caracteres, igual que las tandas
+  anteriores), una sola idea por frase y vocabulario cotidiano.
+• Varias aceptan más de una respuesta en español (ej: Tomamos /
+  Agarramos un taxi...).
+• Todo sigue embebido en la app: 861 oraciones en total y cero
+  descargas extra al arrancar.
+
 ✏️ NOVEDADES v7.2 — La oración queda completa al responder + hueco siempre bien puesto
 ----------------------------------------------------------------------
 • Al responder CORRECTO, el espacio ___ desaparece: la oración se
