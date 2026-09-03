@@ -1954,3 +1954,55 @@ body.dark-mode .rec-pitch-wrap {
     .rec-detail { font-size: 0.72rem; }
     .rec-pitch { height: 80px; }
 }
+
+/* ============================================================
+   v7.8 — MODO ESPAÑOL (cn-es): feedback SIN tonos (spec v4.0 §5)
+   Chips de palabras + métrica de confianza + comparativa textual.
+   ============================================================ */
+.rec-es-word {
+    display: inline-block;
+    padding: 2px 9px;
+    margin: 2px;
+    border-radius: 9px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.rec-es-word.is-bad {
+    background: rgba(220, 38, 38, 0.10);
+    color: var(--danger);
+    border-color: rgba(220, 38, 38, 0.4);
+    text-decoration: underline wavy rgba(220, 38, 38, 0.55);
+    text-underline-offset: 3px;
+}
+.rec-conf {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 3px 0 0;
+}
+.rec-es-vs {
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    margin: 5px 0 0;
+    white-space: pre-line;
+    font-weight: 500;
+}
+
+/* ---------- Modo oscuro (v7.8) ---------- */
+body.dark-mode .rec-es-word {
+    background: rgba(52, 211, 153, 0.14);
+    border-color: rgba(52, 211, 153, 0.35);
+}
+body.dark-mode .rec-es-word.is-bad {
+    background: rgba(248, 113, 113, 0.12);
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* ---------- Responsive (v7.8) ---------- */
+@media (max-width: 480px) {
+    .rec-es-word { font-size: 0.95rem; padding: 2px 7px; }
+    .rec-conf { font-size: 0.72rem; }
+    .rec-es-vs { font-size: 0.78rem; }
+}

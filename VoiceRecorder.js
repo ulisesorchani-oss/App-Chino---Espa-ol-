@@ -95,7 +95,15 @@ const T = {
     // v7.7 — tono real (F0 + DTW, pitch-analyzer.js)
     refBtn: '🔊 Referencia',
     refBtnStop: '⏸ Pausar ref.',
-    pitchLabel: 'Contorno de tono · azul: tu voz · gris: referencia · 声调对比（蓝：你 · 灰：参考）'
+    pitchLabel: 'Contorno de tono · azul: tu voz · gris: referencia · 声调对比（蓝：你 · 灰：参考）',
+
+    // v7.8 — modo Español (cn-es): feedback SIN tonos (spec v4.0 §5)
+    hintProcLocalEs: '🧠 Analizando pronunciación… 正在分析发音',
+    esWordLabel: 'Palabras a revisar:',
+    confLabel: 'Confianza del reconocimiento:',
+    esNote: 'El feedback fonético fino (rr, b/v…) llega en la Fase 2 — por ahora compará con la referencia y con tu oído.',
+    charByEs: 'Palabras:',
+    charByEsT: '詞語：'
 };
 
 /* ============================================================
@@ -635,9 +643,12 @@ const VR = {
     },
 
     /** app.js lo llama en cada oración nueva: fija objetivo y resetea la UI.
-     *  v7.6: 3.er arg script ('s'|'t') para los mensajes zh 简/繁. */
-    setTarget(zhText, pinyinText, script) {
+     *  v7.6: 3.er arg script ('s'|'t') para los mensajes zh 简/繁.
+     *  v7.8 (spec v4.0): 4.º arg targetLang ('zh'|'es') — en modo cn-es el
+     *  objetivo es la oración ESPAÑOLA y la UI nunca muestra tonos. */
+    setTarget(zhText, pinyinText, script, targetLang) {
         this._evalTok++; // invalida evaluaciones en vuelo (anti-carrera)
+        this._targetLang = (targetLang === 'es') ? 'es' : 'zh';
         if (this.state === 'recording') {
             if (this._veActive()) window.VE.abort();
             else {
@@ -754,7 +765,8 @@ const VR = {
         const tok = ++this._evalTok; // v7.6: si navegan a otra oración, no pisar la UI
         this._cancelWave();
         this._setBtn('', 'is-processing');      // spinner CSS (texto vacío)
-        this.hint.textContent = this._veActive() ? T.hintProcLocal : T.hintProc;
+        this.hint.textContent = !this._veActive() ? T.hintProc
+            : (this._targetLang === 'es' ? T.hintProcLocalEs : T.hintProcLocal);
 
         // ── v7.6: motor local Whisper WASM (voice-evaluator.js) ──
         // stopAndEvaluate SIEMPRE devuelve el objeto estandarizado
@@ -832,6 +844,9 @@ const VR = {
         const isManual = res.mode === 'manual' ||
                          (!hasTones && !hasLegacy &&
                           (res.score === null || res.score === undefined));
+        // v7.8 (spec v4.0): en modo Español (cn-es) se OCULTA TODO elemento
+        // tonal — sin colores de tono, sin gráfico de pitch (spec §5).
+        const isEs = res.language === 'es' || res.evalMode === 'cn-es';
 
         if (!isManual && res.score !== null && res.score !== undefined) {
             this._setBtn(res.score >= EVAL_CONFIG.goodThreshold ? '✅' : '✗',
@@ -859,7 +874,10 @@ const VR = {
         const zh = document.createElement('p'); zh.className = 'rec-msg-zh'; zh.textContent = zhLine;
         this.result.appendChild(es); this.result.appendChild(zh);
 
-        if (hasTones) {
+        if (isEs) {
+            // ── v7.8: chips de palabras + confianza + comparativa (SIN tonos) ──
+            this._showSpanishExtra(res);
+        } else if (hasTones) {
             /* ── v7.7: TONOS REALES (F0 + DTW) ──
                Color por tono ESPERADO con la paleta de la app
                (azul 1.º, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro);
@@ -885,7 +903,11 @@ const VR = {
 
             // Detalle cualitativo de lo que hay que practicar (máx. 4):
             // "N.º 5: sonó como 2.º tono, buscá 4.º tono (cae fuerte)"
-            const bad = res.toneScores.filter((w) => w.status !== 'ok').slice(0, 4);
+            // v7.8 (spec §1): el error SEGMENTAL (/s/ vs /sh/) va PRIMERO.
+            const bad = res.toneScores.filter((w) => w.status !== 'ok')
+                .slice()
+                .sort((a, b) => ((b.status === 'segmental') ? 1 : 0) - ((a.status === 'segmental') ? 1 : 0))
+                .slice(0, 4);
             if (bad.length) {
                 const det = document.createElement('div');
                 det.className = 'rec-details';
@@ -996,6 +1018,53 @@ const VR = {
         this.playBtn.textContent = T.playBtn;
         this.againBtn.classList.remove('hidden');
         this.againBtn.textContent = T.againBtn;
+    },
+
+    /* ---------- v7.8: extras del modo Español (cn-es) ----------
+       spec v4.0 §5: chips por palabra (verde/rojo), métrica de
+       CONFIANZA visible y comparativa textual — jamás tonos. */
+    _showSpanishExtra(res) {
+        this._pitchCanvas = null; // NUNCA hay gráfico de pitch en español
+        if (Array.isArray(res.esWords) && res.esWords.length) {
+            const lbl = document.createElement('p');
+            lbl.className = 'rec-transcript-label';
+            lbl.textContent = this.script === 't' ? T.charByEsT : T.charByEs;
+            this.result.appendChild(lbl);
+            const box = document.createElement('div');
+            box.className = 'rec-transcript';
+            res.esWords.forEach((w) => {
+                const sp = document.createElement('span');
+                sp.className = 'rec-es-word' + (w.ok ? '' : ' is-bad');
+                sp.textContent = w.word;
+                if (!w.ok) sp.title = w.heard ? ('Se entendió: «' + w.heard + '»') : 'No se entendió esta palabra';
+                box.appendChild(sp);
+            });
+            this.result.appendChild(box);
+        }
+        // métrica de confianza (spec §5: visible SOLO en modo español)
+        if (typeof res.confidence === 'number' && isFinite(res.confidence)) {
+            const p = document.createElement('p');
+            p.className = 'rec-conf';
+            p.textContent = '🧠 ' + T.confLabel + ' ' + Math.round(res.confidence * 100) + ' %' +
+                            (typeof res.confidenceThreshold === 'number'
+                                ? ' · umbral ' + Math.round(res.confidenceThreshold * 100) + ' %' : '');
+            this.result.appendChild(p);
+        }
+        // comparativa textual del desvío (spec §3: "Se detectó: 'X' — Se esperaba: 'Y'")
+        if (res.esMismatch) {
+            const p = document.createElement('p');
+            p.className = 'rec-es-vs';
+            p.textContent = 'Se detectó: «' + res.esMismatch.heard +
+                            '» — Se esperaba: «' + res.esMismatch.expected + '»';
+            this.result.appendChild(p);
+        }
+        // nota de alcance (Fase 2) solo cuando hay algo que revisar
+        if (res.esVerdict === 'mismatch' || res.esVerdict === 'close') {
+            const p = document.createElement('p');
+            p.className = 'rec-tip';
+            p.textContent = 'ℹ️ ' + T.esNote;
+            this.result.appendChild(p);
+        }
     },
 
     /* ---------- v7.7: reproducción del audio de referencia ---------- */

@@ -1,11 +1,10 @@
 ======================================================================
- v7.7 — SUBIR A GITHUB: 9 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.8 — SUBIR A GITHUB: 11 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 9 ARCHIVOS: los 8 de v7.6 + 1 NUEVO
-   (pitch-analyzer.js, el motor de análisis de tono). Si subís solo
-   los de siempre, la evaluación queda con el tono "inventado" de
-   v7.6: NO salteés el nuevo.
+⚠️ ESTA VERSIÓN SUBE 11 ARCHIVOS: los 9 de v7.7 + 2 NUEVOS
+   (config.js y text-utils.js). Si subís solo los de siempre, la
+   evaluación en modo CN→ES queda rota: NO salteés los nuevos.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
@@ -16,19 +15,21 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 9 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 11 archivos del ZIP, a la RAÍZ:
 
       ✅ index.html
       ✅ app.js
-      ✅ VoiceRecorder.js      ← captura + UI (actualizado)
-      ✅ pitch-analyzer.js     ← NUEVO en v7.7 (análisis de tono) ←←←
-      ✅ voice-evaluator.js    ← orquestador (actualizado)
+      ✅ VoiceRecorder.js
+      ✅ voice-evaluator.js    ← evaluador por MODO (actualizado)
+      ✅ pitch-analyzer.js     ← motor de tono (con ciclo de vida)
+      ✅ config.js             ← NUEVO en v7.8 (umbral calibrable) ←←←
+      ✅ text-utils.js         ← NUEVO en v7.8 (comparación de texto) ←←←
       ✅ style.css
       ✅ sw.js
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.7) y toca el botón verde
+5. Abajo escribí un título (ej: v7.8) y toca el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
@@ -36,13 +37,16 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS (aproximados):
-      index.html         = 23 KB
-      app.js             = 616 KB
-      VoiceRecorder.js   = 54 KB
-      pitch-analyzer.js  = 21 KB  ← NUEVO: si no está,
-                             no subiste la v7.7
-      voice-evaluator.js = 46 KB
-      style.css          = 40 KB
+      index.html         = 24 KB
+      app.js             = 617 KB
+      VoiceRecorder.js   = 58 KB
+      voice-evaluator.js = 74 KB
+      pitch-analyzer.js  = 33 KB
+      config.js          = 4 KB   ← NUEVO: si no está,
+                             no subiste la v7.8
+      text-utils.js      = 10 KB ← NUEVO: si no está,
+                             no subiste la v7.8
+      style.css          = 41 KB
       sw.js              = 8 KB
       html2canvas.min.js = 194 KB
       jspdf.umd.min.js   = 357 KB
@@ -53,32 +57,37 @@ B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
    Buscá la línea const VERSION. Debe decir:
 
-      const VERSION = 'v27';     ← correcto (v7.7)
-      const VERSION = 'v26';     ← viejo: el upload no llegó
+      const VERSION = 'v28';     ← correcto (v7.8)
+      const VERSION = 'v27';     ← viejo: el upload no llegó
 
-C) EN LA APP: grabá una oración con el 🎤 y fijate que debajo:
-      · la oración aparece con colores de TONO esperado
-        (azul 1.er, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro),
-        con subrayado punteado = casi y rojo ondulado = a practicar
-      · aparece un gráfico "Contorno de tono" (azul = vos,
-        gris punteado = referencia)
-      · hay un botón nuevo "🔊 Referencia" junto a
-        "▶️ Escuchar mi grabación"
+C) EN LA APP — PRUEBA DEL MODO CHINO (1 minuto): en ES→CN grabá una
+   oración con el 🎤 → colores por tono esperado + gráfico de
+   contornos + botón 🔊 Referencia, igual que en v7.7.
 
-D) PRUEBA RÁPIDA (1 minuto): decí la oración exagerando un tono
-   mal a propósito (ej. el 4.º tono dicho plano) → el carácter
-   tiene que quedar marcado en rojo con el mensaje
-   "sonó como 1.er tono, buscá 4.º tono".
+D) EN LA APP — PRUEBA DEL MODO ESPAÑOL (1 minuto, lo NUEVO): tocá
+   "CN→ES Aprendo Español" arriba, grabá la oración ESPAÑOLA con el
+   🎤:
+      · bien dicha → ✅ verde + "¡Excelente pronunciación!" y la
+        línea "Confianza del reconocimiento: NN %"
+      · cambiándole una palabra → ❌ rojo "Se detectó: «...» —
+        Se esperaba: «...»"
+      · NADA de colores de tono ni gráfico de tonos en este modo.
+E) CAMBIO DE MODO (memoria): alterná ES→CN ↔ CN→ES varias veces
+   seguidas mientras grabás — la app no se traba y no aparecen
+   errores en consola (el motor de tono se destruye y se recrea).
 
-QUÉ HAY DE NUEVO EN v7.7 (resumen para el commit):
+QUÉ HAY DE NUEVO EN v7.8 (resumen para el commit):
 ------------------------------------------------------------
-• Tono medido de verdad: F0 (YIN) + DTW contra la referencia,
-  en semitonos relativos al hablante — no más inferencia del
-  transcript. Whisper queda SOLO para verificar el contenido.
-• pitch-analyzer.js NUEVO (motor de tono autocontenido).
-• Feedback cualitativo por carácter + gráfico de contornos
-  superpuestos + botón de audio de referencia.
-• @huggingface/transformers (el paquete actual; @xenova quedó
-  deprecado) y caché de modelos persistente en el SW (v27):
-  las actualizaciones ya no re-descargan los 40 MB.
+• Evaluador condicional por MODO (spec Prompt v4.0): español =
+  solo Whisper + confianza; chino = Whisper + tonos medidos con
+  validación segmental primero (/s/ vs /sh/).
+• Objetivo de práctica por modo: oración española en CN→ES.
+• config.js + text-utils.js nuevos; normalización honesta
+  (tildes fuera por límite de Whisper, ñ preservada), Levenshtein
+  por palabra con tolerancia que escala, feedback sin tonos en
+  español + métrica de confianza visible.
+• Motor de tono LAZY con dispose() seguro (Promise que siempre
+  resuelve, timeout 2 s): cero memoria fantasma al cambiar de modo.
+• Documentación del módulo: README-Pronunciacion.md (calibración
+  del umbral + casos de prueba QA con fixtures de audio).
 ======================================================================

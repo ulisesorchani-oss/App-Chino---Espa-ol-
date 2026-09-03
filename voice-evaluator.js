@@ -1,6 +1,19 @@
 /* ============================================================
-   voice-evaluator.js — v7.7 Orquestador de Evaluación de
-   Pronunciación · 100 % LOCAL Y PRIVADO (spec corregida v2)
+   voice-evaluator.js — v7.8 Orquestador de Evaluación de
+   Pronunciación · 100 % LOCAL Y PRIVADO (spec Prompt v4.0 final)
+   ------------------------------------------------------------
+   v7.8 — BIFURCACIÓN ESTRICTA POR MODO (spec v4.0 §1):
+     · es-cn (Aprendo Chino): Whisper (contenido) + F0/DTW (tono
+       real) + validación SEGMENTAL PRIMERO (/s/ vs /sh/).
+     · cn-es (Aprendo Español): SOLO Whisper — PROHIBIDO
+       instanciar/ejecutar PitchAnalyzer (el español no es lengua
+       tonal: su F0 es entonación, no significado léxico).
+     · setMode() async: aborta la evaluación en vuelo, hace
+       await pitchAnalyzer.dispose() al salir del chino (Promise
+       que SIEMPRE resuelve) y recién entonces muta el modo.
+     · normalizeText(text, language) honesta (text-utils.js) +
+       Levenshtein por palabra con getMaxAcceptableDistance()
+       (config.js) para el feedback granular del español.
    ------------------------------------------------------------
    ARQUITECTURA (dos motores complementarios, NO uno solo):
 
@@ -61,7 +74,11 @@ const VE_CONFIG = {
     // @huggingface/transformers (los modelos siguen bajo el namespace
     // Xenova/ en el Hub). Pin fijo: sin sorpresas de breaking changes.
     libUrl: 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1',
-    language: 'zh',           // el objetivo de pronunciación siempre es chino
+    // v7.8 (spec v4.0 §1): el idioma de transcripción depende del MODO:
+    //   es-cn → 'zh' (verificar qué carácter dijo)
+    //   cn-es → 'es' (solo Whisper; SIN análisis de tono)
+    languageZh: 'zh',
+    languageEs: 'es',
     task: 'transcribe',
     dtype: 'q8',              // int8: 4× más liviano, ideal WASM
     device: 'wasm',           // spec: WebAssembly determinista (sin WebGPU)
@@ -108,7 +125,14 @@ const S = {
     noteCloudZhT: '雲端評估還沒配置，先用耳朵對照吧。',
     noteDefaultEs: 'Esta vez no hubo evaluación automática — escucharte y comparar sirve igual.',
     noteDefaultZhS: '这次没能自动评估，自己听录音对照也一样有效。',
-    noteDefaultZhT: '這次沒能自動評估，自己聽錄音對照也一樣有效。'
+    noteDefaultZhT: '這次沒能自動評估，自己聽錄音對照也一樣有效。',
+
+    // v7.8 (spec v4.0 §5): fallo del motor Whisper → mensaje genérico.
+    // NUNCA fallback automático al análisis de pitch.
+    genFailEs: 'No se pudo analizar el audio. Intentá de nuevo.',
+    genFailZhS: '没能分析这段音频，请再试一次。',
+    genFailZhT: '沒能分析這段音頻，請再試一次。',
+    procEsEs: '🧠 Analizando pronunciación…'
 };
 
 /* Nombres de tono para el feedback cualitativo (spec: "sonó como
@@ -152,12 +176,48 @@ const WORKER_SRC = [
     "    }",
     "  } else if (m.type === 'transcribe') {",
     "    try {",
-    "      const out = await asr(m.audio, { language: '" + VE_CONFIG.language + "', task: '" + VE_CONFIG.task + "' });",
-    "      self.postMessage({ type: 'result', id: m.id, text: (out && out.text) || '' });",
+    "      const r = await transcribe(m);",
+    "      self.postMessage({ type: 'result', id: m.id, text: r.text, confidence: r.confidence });",
     "    } catch (err) {",
     "      self.postMessage({ type: 'transcribe-error', id: m.id,",
     "        message: String((err && err.message) || err) });",
     "    }",
+    "  }",
+    "",
+    "  // v7.8 (spec v4.0 CASO B): confianza PROMEDIO POR TOKEN.",
+    "  // Greedy decoding: el token elegido es el ARGMAX de cada paso, así",
+    "  // que la log-prob elegida = mx − logsumexp(logits). Se excluyen de",
+    "  // la media los tokens especiales/timestamp (id ≥ 50257).",
+    "  async function transcribe(m) {",
+    "    const lang = m.language || '" + VE_CONFIG.languageZh + "';",
+    "    if (m.wantConfidence && asr.model && asr.processor && asr.tokenizer) {",
+    "      try {",
+    "        const inputs = await asr.processor(m.audio);",
+    "        const gen = await asr.model.generate(Object.assign({}, inputs, {",
+    "          output_scores: true, return_dict_in_generate: true,",
+    "          max_new_tokens: 224, language: lang, task: '" + VE_CONFIG.task + "'",
+    "        }));",
+    "        const text = asr.tokenizer.decode(Array.from(gen.sequences[0].data, Number),",
+    "                                          { skip_special_tokens: true });",
+    "        let conf = null;",
+    "        if (gen.scores && gen.scores.length) {",
+    "          let sum = 0, n = 0;",
+    "          for (let i = 0; i < gen.scores.length; i++) {",
+    "            const data = gen.scores[i].data;",
+    "            let mx = -Infinity, arg = 0;",
+    "            for (let j = 0; j < data.length; j++) if (data[j] > mx) { mx = data[j]; arg = j; }",
+    "            if (arg >= 50257) continue; // especiales/timestamps fuera de la media",
+    "            let lse = 0;",
+    "            for (let j = 0; j < data.length; j++) lse += Math.exp(data[j] - mx);",
+    "            sum += mx - Math.log(lse); n++;",
+    "          }",
+    "          if (n) conf = Math.exp(sum / n); // ← confianza promedio por token",
+    "        }",
+    "        return { text: String(text || '').trim(), confidence: conf };",
+    "      } catch (e2) { /* camino directo falló → pipeline simple abajo */ }",
+    "    }",
+    "    const out = await asr(m.audio, { language: lang, task: '" + VE_CONFIG.task + "' });",
+    "    return { text: String((out && out.text) || '').trim(), confidence: null };",
     "  }",
     "};"
 ].join('\n');
@@ -209,16 +269,22 @@ class LocalWhisperEngine {
         return this._loadingPromise;
     }
 
-    /** Float32Array 16 kHz mono → texto (dentro del dispositivo).
-     *  SOLO verificación de contenido: el tono lo mide LocalToneAnalyzer. */
-    async transcribe(float32) {
+    /** Float32Array 16 kHz mono → { text, confidence } (dentro del
+     *  dispositivo). SOLO verificación de contenido: el tono lo mide
+     *  LocalToneAnalyzer; la confianza es la métrica del modo Español
+     *  (spec v4.0 CASO B) y NO mide calidad fonética (ver config.js). */
+    async transcribe(float32, opts) {
+        opts = opts || {};
+        const lang = opts.language || VE_CONFIG.languageZh;
         await this.preload();
         if (this._mode === 'worker') {
             const id = ++this._seq;
             const self = this;
             return new Promise((resolve, reject) => {
                 self._pending.set(id, { resolve: resolve, reject: reject });
-                self._worker.postMessage({ type: 'transcribe', id: id, audio: float32 });
+                self._worker.postMessage({ type: 'transcribe', id: id, audio: float32,
+                                           language: lang,
+                                           wantConfidence: !!opts.wantConfidence });
                 setTimeout(() => {
                     if (self._pending.has(id)) {
                         self._pending.delete(id);
@@ -227,8 +293,9 @@ class LocalWhisperEngine {
                 }, VE_CONFIG.transcribeTimeoutMs); // nunca colgar la UI más de 60 s
             });
         }
-        const out = await this._mainPipe(float32, { language: VE_CONFIG.language, task: VE_CONFIG.task });
-        return (out && out.text) || '';
+        // fallback hilo principal (iOS<15): pipeline simple → sin confianza
+        const out = await this._mainPipe(float32, { language: lang, task: VE_CONFIG.task });
+        return { text: String((out && out.text) || '').trim(), confidence: null };
     }
 
     /* ---------- carga en worker (camino principal) ---------- */
@@ -252,7 +319,10 @@ class LocalWhisperEngine {
                     const p = self._pending.get(m.id);
                     if (p) {
                         self._pending.delete(m.id);
-                        if (m.type === 'result') p.resolve(m.text || '');
+                        if (m.type === 'result')
+                            p.resolve({ text: m.text || '',
+                                        confidence: (typeof m.confidence === 'number' &&
+                                                     isFinite(m.confidence)) ? m.confidence : null });
                         else p.reject(new Error(m.message || 'transcribe-error'));
                     }
                 }
@@ -371,7 +441,15 @@ class LocalToneAnalyzer {
         }
         this.PA = window.PitchAnalyzerModule;
         this._refCache = new Map();   // clave text|voice → referencia lista
+        this._pitch = null;           // v7.8: PitchAnalyzer (Worker de DSP) opcional
     }
+
+    /* ── v7.8 (spec v4.0 §4): el Worker de DSP lo crea y lo destruye
+       PronunciationEvaluator según el MODO. detachPitch() suelta la
+       referencia y vacía el cache de contornos: al salir del modo
+       chino, el PitchAnalyzer NO queda en memoria. */
+    attachPitch(pitchAnalyzer) { this._pitch = pitchAnalyzer; }
+    detachPitch() { this._pitch = null; this._refCache.clear(); }
 
     /** Tono esperado por carácter, desde pinyin-pro (pySyll → 'xue3').
      *  Devuelve '1'..'4' o '0' (neutro); null si no se pudo. */
@@ -399,9 +477,11 @@ class LocalToneAnalyzer {
         return { contour: ct, voicedRatio: f0r.voicedRatio, durationSec: f0r.durationSec };
     }
 
-    /** Referencia de tono para la frase: TTS → decode → contorno.
-     *  Cacheada por (texto|voz). Sin red → plantillas canónicas. */
-    async getReference(targetText, expectedTones, voice) {
+    /** Contorno de referencia para la frase: TTS → decode → contorno.
+     *  Cacheada por (texto|voz). Sin red → plantillas canónicas.
+     *  v7.8: `signal` = AbortController de la evaluación en vuelo —
+     *  si el modo cambia a mitad de la descarga, se corta acá también. */
+    async getReference(targetText, expectedTones, voice, signal) {
         const key = targetText + '|' + (voice || 'f');
         if (this._refCache.has(key)) return this._refCache.get(key);
 
@@ -423,13 +503,21 @@ class LocalToneAnalyzer {
             // frase, el mismo que el botón 🔊 CN ya genera) — el audio del
             // ALUMNO jamás viaja por la red.
             const ctrl = new AbortController();
+            const onOuter = function () { ctrl.abort(); };
+            if (signal) {
+                if (signal.aborted) ctrl.abort();
+                else signal.addEventListener('abort', onOuter, { once: true });
+            }
             const timer = setTimeout(() => ctrl.abort(), 15000);
             const resp = await fetch(TTS_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: targetText, lang: 'zh-CN', voice: voice || 'f' }),
                 signal: ctrl.signal
-            }).finally(() => clearTimeout(timer));
+            }).finally(() => {
+                clearTimeout(timer);
+                if (signal) signal.removeEventListener('abort', onOuter);
+            });
             if (!resp.ok) return fallback('tts-http-' + resp.status);
 
             const data = await resp.json();
@@ -474,25 +562,57 @@ class LocalToneAnalyzer {
         }
     }
 
-    /** Evaluación de tonos completa para un buffer del alumno. */
-    async evaluateTones(pcm16k, chars, expectedTones, voice) {
-        const student = this.analyzeStudent(pcm16k);
-        const ref = await this.getReference(
-            chars.join(''), expectedTones, voice); // clave estable sin puntuación
+    /** Evaluación de tonos completa para un buffer del alumno.
+     *  v7.8: si hay un PitchAnalyzer (Worker) asociado, el DSP del
+     *  ALUMNO corre en el Worker; el decode/F0 de la REFERENCIA sigue
+     *  en el hilo principal (AudioContext no existe en Workers). */
+    async evaluateTones(pcm16k, chars, expectedTones, voice, signal) {
+        if (this._pitch && !this._pitch.disposed) {
+            // Referencia: TTS de la frase (el MISMO audio 🔊 CN) con
+            // fallback a plantillas canónicas si no hay red.
+            const refInfo = await this.getReference(chars.join(''), expectedTones, voice, signal);
+            const refSemis = refInfo.refIsTemplate ? null : refInfo.semis;
+            const r = await this._pitch.analyze(pcm16k, {
+                nChars: chars.length,
+                expectedTones: expectedTones,
+                refSemis: refSemis,
+                framesPerChar: VE_CONFIG.refFramesPerChar
+            });
+            return this._buildResult(r, chars, expectedTones, refInfo);
+        }
 
+        /* camino sin Worker (Node / iOS viejo / Worker roto): mismo
+           DSP ejecutado en el hilo principal — mismo contrato. */
+        const student = this.analyzeStudent(pcm16k);
+        const ref = await this.getReference(chars.join(''), expectedTones, voice, signal);
         const cmp = this.PA.compare(
             student.contour.semis, ref.semis, chars.length, expectedTones);
 
+        return this._buildResult({
+            chars: cmp.chars,
+            alignmentCost: cmp.alignmentCost,
+            semis: student.contour.semis,
+            refSemis: ref.semis,
+            refBounds: cmp.chars.map(function (c) { return c.refStart; }),
+            refIsTemplate: ref.refIsTemplate,
+            voicedRatio: student.voicedRatio,
+            durationSec: student.durationSec
+        }, chars, expectedTones, ref);
+    }
+
+    /** v7.8: forma común del resultado para ambas rutas (Worker / main). */
+    _buildResult(r, chars, expectedTones, ref) {
         const toneScores = chars.map((ch, k) => {
-            const c = cmp.chars[k] || { status: 'nodata', detected: null, deviation: 0 };
+            const c = (r.chars && r.chars[k]) || { status: 'nodata', detected: null, deviation: 0 };
             return {
                 char: ch,
                 pinyin: (window.VoiceRecorderModule && window.VoiceRecorderModule.pySyll ?
                          window.VoiceRecorderModule.pySyll(ch) : '') || '',
                 expected: expectedTones[k],
                 detected: c.detected,
-                status: c.status,          // 'ok' | 'approx' | 'wrong' | 'nodata'
+                status: c.status,          // 'ok' | 'approx' | 'wrong' | 'nodata' (+'segmental' al fusionar)
                 deviation: c.deviation,
+                frames: c.frames || [],
                 msgEs: this._charMsgEs(k, ch, c, expectedTones[k]),
                 msgZh: this._charMsgZh(k, ch, c, expectedTones[k])
             };
@@ -501,15 +621,15 @@ class LocalToneAnalyzer {
         return {
             toneScores: toneScores,
             contours: {
-                student: student.contour.semis,   // semitonos (solo frames sonoros)
-                ref: ref.semis,
-                refBounds: cmp.chars.map(function (c) { return c.refStart; }),
+                student: r.semis,                 // semitonos (solo frames sonoros)
+                ref: r.refSemis,
+                refBounds: (r.chars || []).map(function (c) { return c.refStart; }),
                 refIsTemplate: ref.refIsTemplate
             },
             refAudioUrl: ref.refAudioUrl,
             refIsTemplate: ref.refIsTemplate,
-            voicedRatio: student.voicedRatio,
-            durationSec: student.durationSec
+            voicedRatio: r.voicedRatio,
+            durationSec: r.durationSec
         };
     }
 
@@ -554,34 +674,81 @@ class LocalToneAnalyzer {
 class LocalEvaluator {
     constructor(engine) {
         this.whisper = new LocalWhisperProvider(engine);
-        this.tone = new LocalToneAnalyzer();
+        // v7.8 (spec v4.0 §4): el analizador de tono es LAZY. Solo se
+        // instancia si pitch-analyzer.js ya está cargado (modo chino en
+        // uso). En modo Español NUNCA se instancia ni se consulta:
+        // "si el usuario nunca entró a modo Chino, el Worker no existe".
+        this._tone = (typeof window.PitchAnalyzerModule === 'object')
+            ? new LocalToneAnalyzer() : null;
     }
 
+    get tone() { return this._tone; }
+
+    /** v7.8: garantiza el analizador de tono (solo se llama en es-cn). */
+    ensureTone() {
+        if (!this._tone) {
+            if (typeof window.PitchAnalyzerModule !== 'object')
+                throw new Error('pitch-analyzer-missing');
+            this._tone = new LocalToneAnalyzer();
+        }
+        return this._tone;
+    }
+    attachPitch(pa) { if (this._tone) this._tone.attachPitch(pa); }
+    detachPitch() { if (this._tone) this._tone.detachPitch(); }
+
+    /** Punto de entrada (spec v4.0 §1): bifurcación ESTRICTA por
+     *  state.mode. Cualquier otro valor → console.error + STOP. */
     async evaluate(audioBlob, targetText, ctx) {
         ctx = ctx || {};
-        this.tone._script = ctx.script === 't' ? 't' : 's';
+        const mode = ctx.mode;
+        if (mode !== 'es-cn' && mode !== 'cn-es') {
+            console.error('[VE] state.mode inválido: "' + mode +
+                '" — debe ser exactamente "es-cn" o "cn-es" (spec v4.0 §1/§5)');
+            throw new Error('invalid-mode');
+        }
+        if (this._tone) this._tone._script = ctx.script === 't' ? 't' : 's';
+        if (mode === 'cn-es') return this._evaluateSpanish(audioBlob, targetText, ctx);
+        return this._evaluateChinese(audioBlob, targetText, ctx);
+    }
 
+    /* ══════════ CASO A: es-cn — Aprendo Chino (pipeline completo) ══
+       Whisper (¿qué carácter dijo?) + F0/DTW (¿qué tono dijo?) EN
+       PARALELO sobre el MISMO buffer + validación SEGMENTAL primero. */
+    async _evaluateChinese(audioBlob, targetText, ctx) {
         const pcm = await blobToFloat32_16k(audioBlob);
         if (isSilence(pcm)) throw new Error('no-speech');
 
         const M = window.VoiceRecorderModule || {};
         const chars = (typeof M.hanziChars === 'function') ? M.hanziChars(targetText) : [];
-        const expectedTones = chars.map((ch) => this.tone.expectedToneOf(ch));
+        const tone = this.ensureTone();
+        const expectedTones = chars.map((ch) => tone.expectedToneOf(ch));
 
         // ── dos pipelines en paralelo sobre el MISMO buffer ──
         const [wRes, tRes] = await Promise.allSettled([
-            this.whisper.transcribe(pcm),                    // (a) ¿qué carácter dijo?
-            this.tone.evaluateTones(pcm, chars, expectedTones, ctx.voice) // (b) ¿qué tono dijo?
+            this.whisper.transcribe(pcm, { language: VE_CONFIG.languageZh }),   // (a)
+            tone.evaluateTones(pcm, chars, expectedTones, ctx.voice, ctx.signal) // (b)
         ]);
 
-        const heard = (wRes.status === 'fulfilled') ? String(wRes.value || '').trim() : null;
-        const toneData = (tRes.status === 'fulfilled') ? tRes.value : null;
-        const toneErr = (tRes.status === 'rejected') ? tRes.reason : null;
+        // spec v4.0 §5: si WHISPER falla por MOTOR (no por falta de voz),
+        // mensaje genérico y NUNCA fallback automático al análisis de pitch.
+        if (wRes.status === 'rejected') {
+            const wMsg = String((wRes.reason && wRes.reason.message) || wRes.reason || '');
+            if (wMsg.indexOf('no-speech') < 0) {
+                const e = new Error('engine-fail');
+                e.cause = wRes.reason;
+                throw e;
+            }
+        }
 
         // Si TODO falló → que la fachada caiga al modo manual 🎧
-        if (!heard && !toneData) {
-            throw (toneErr || new Error('engine-error'));
+        if (wRes.status === 'rejected' && tRes.status === 'rejected') {
+            throw (tRes.reason || wRes.reason || new Error('engine-error'));
         }
+
+        const wVal = (wRes.status === 'fulfilled') ? wRes.value : null;
+        const heard = wVal ? String(wVal.text || '').trim() : null;
+        const toneData = (tRes.status === 'fulfilled') ? tRes.value : null;
+        const toneErr = (tRes.status === 'rejected') ? tRes.reason : null;
 
         /* ── verificación de contenido (Whisper, solo texto) ── */
         let contentCheck = null, contentWordScores = [];
@@ -606,13 +773,46 @@ class LocalEvaluator {
             refAudioUrl = toneData.refAudioUrl || null;
             refIsTemplate = !!toneData.refIsTemplate;
             voicedRatio = toneData.voicedRatio;
-            if (toneScores.length) {
+        }
+
+        /* ── v7.8: VALIDACIÓN SEGMENTAL PRIMERO (spec v4.0 §1 CASO A) ──
+           Alineo objetivo↔transcripción por sílaba BASE (sin tono: así
+           妈/麻 quedan alineados y su veredicto lo da el tono medido).
+           Un carácter con sílaba distinta (/si/ vs /shi/) es un ERROR
+           SEGMENTAL: se reporta PRIMERO y se OMITE su análisis tonal. */
+        const segChars = [];
+        if (heard && chars.length && toneScores.length &&
+            typeof window.TextUtils === 'object' && typeof M.pySyll === 'function') {
+            const heardChars = (typeof M.hanziChars === 'function') ? M.hanziChars(heard) : [];
+            const stripT = (p) => String(p || '').replace(/[0-5]$/, '');
+            const al = window.TextUtils.levenshteinWords(
+                chars.map((c) => stripT(M.pySyll(c))),
+                heardChars.map((c) => stripT(M.pySyll(c))));
+            al.ops.forEach((o) => {
+                if (o.ti < 0 || o.hi < 0 || !toneScores[o.ti]) return;
+                const seg = window.TextUtils.segmentalCompare(
+                    chars[o.ti], heardChars[o.hi], M.pySyll);
+                if (seg && seg.kind === 'segmental') {
+                    toneScores[o.ti].status = 'segmental';
+                    toneScores[o.ti].segmental = seg;
+                    toneScores[o.ti].msgEs = this._segMsgEs(o.ti, seg);
+                    toneScores[o.ti].msgZh = this._segMsgZh(o.ti, seg);
+                    segChars.push(toneScores[o.ti]);
+                }
+            });
+        }
+
+        /* precisión de tono: los caracteres SEGMENTALES quedan fuera del
+           promedio (su error ya cuenta en el contenido, no en el tono) */
+        if (toneScores.length) {
+            const evaluable = toneScores.filter((t) => t.status !== 'segmental');
+            if (evaluable.length) {
                 let acc = 0;
-                toneScores.forEach((t) => {
+                evaluable.forEach((t) => {
                     if (t.status === 'ok') acc += 1;
                     else if (t.status === 'approx') acc += 0.5;
                 });
-                toneAcc = acc / toneScores.length;
+                toneAcc = acc / evaluable.length;
             }
         }
 
@@ -622,9 +822,12 @@ class LocalEvaluator {
         if (toneAcc !== null) {
             const contentPart = contentCheck ? contentCheck.sim : 1; // sin Whisper no se castiga
             score = Math.round(100 * (0.65 * toneAcc + 0.35 * contentPart));
+        } else if (contentCheck) {
+            // todo segmental/nodata en tono → el chip refleja solo contenido
+            score = Math.round(100 * contentCheck.sim * 0.35);
         }
 
-        const fb = this._overallFeedback(toneScores, toneAcc, contentCheck, ctx.script);
+        const fb = this._overallChineseFeedback(toneScores, toneAcc, contentCheck, ctx.script);
         return {
             // spec: misma forma de datos para TODOS los providers
             transcription: heard,
@@ -638,17 +841,196 @@ class LocalEvaluator {
             refAudioUrl: refAudioUrl,
             refIsTemplate: refIsTemplate,
             voicedRatio: voicedRatio,
+            confidence: wVal ? wVal.confidence : null, // métrica SOLO mostrada en modo ES
             provider: 'local',
             mode: 'auto',
+            language: 'zh',
+            evalMode: 'es-cn',
+            segmentalCount: segChars.length,
             note: this._noteFor(heard, toneErr, ctx.script === 't' ? 't' : 's'),
             audioBlob: audioBlob
         };
     }
 
-    /* ---------- feedback cualitativo global (spec UX) ---------- */
-    _overallFeedback(toneScores, toneAcc, contentCheck, script) {
+    /* ══════════ CASO B: cn-es — Aprendo Español (SOLO Whisper) ══════
+       PROHIBIDO instanciar o consultar PitchAnalyzer (spec v4.0 §1):
+       el español no es lengua tonal. Métrica de confianza configurable
+       + comparación tolerante por palabra (nunca igualdad estricta). */
+    async _evaluateSpanish(audioBlob, targetText, ctx) {
+        const pcm = await blobToFloat32_16k(audioBlob);
+        if (isSilence(pcm)) throw new Error('no-speech');
+
+        // Whisper con métrica de confianza (log-probabilities por token).
+        // Los errores de MOTOR suben tal cual → la fachada muestra el
+        // mensaje genérico (spec §5); jamás se pide auxilio al pitch.
+        const w = await this.whisper.transcribe(pcm, {
+            language: VE_CONFIG.languageEs,
+            wantConfidence: true
+        });
+
+        const cfg = (typeof window.PronunciationConfig === 'object') ? window.PronunciationConfig : {};
+        const THRESH = (typeof cfg.SPANISH_CONFIDENCE_THRESHOLD === 'number')
+            ? cfg.SPANISH_CONFIDENCE_THRESHOLD : 0.85;
+
+        // Comparación tolerante (spec §3): normalización → Levenshtein
+        // por palabra → umbral dinámico getMaxAcceptableDistance().
+        const heardN = window.TextUtils.normalizeText(w.text, 'es');
+        const targetN = window.TextUtils.normalizeText(targetText, 'es');
+        const tw = targetN.split(' ').filter(Boolean);
+        const hw = heardN.split(' ').filter(Boolean);
+        const al = window.TextUtils.levenshteinWords(tw, hw);
+        const maxD = window.TextUtils.getMaxAcceptableDistance(tw.length);
+
+        let okWords = 0;
+        al.ops.forEach((o) => { if (o.ti >= 0 && o.ok) okWords++; });
+
+        let verdict;
+        if (al.dist === 0) {
+            // coincidencia textual → decide la CONFIANZA (spec §3)
+            verdict = (w.confidence !== null && w.confidence < THRESH) ? 'doubt' : 'perfect';
+        } else if (al.dist <= maxD) {
+            verdict = 'close';
+        } else {
+            verdict = 'mismatch';
+        }
+
+        // palabras divergentes (para "Revisá: ...")
+        const divs = [];
+        al.ops.forEach((o) => {
+            if (o.ti >= 0 && !o.ok) {
+                divs.push({ expected: tw[o.ti], heard: (o.hi >= 0 ? hw[o.hi] : '') });
+            }
+        });
+
+        const fb = this._esFeedback(verdict, okWords, tw.length, divs, heardN, targetN, ctx.script);
+
+        /* chip orientativo: perfecto 100 · dudosa 78 · cercana según
+           proporción (cap 79) · desvío (cap 59) */
+        let score = null;
+        if (verdict === 'perfect') score = 100;
+        else if (verdict === 'doubt') score = 78;
+        else if (verdict === 'close')
+            score = Math.max(60, Math.min(79, Math.round(100 * okWords / Math.max(1, tw.length))));
+        else
+            score = Math.max(0, Math.min(59, Math.round(100 * okWords / Math.max(1, tw.length))));
+
+        const esWords = tw.map((word, i) => {
+            let op = null;
+            for (let q = 0; q < al.ops.length; q++) if (al.ops[q].ti === i) { op = al.ops[q]; break; }
+            return { word: word, ok: !!(op && op.ok), heard: (op && op.hi >= 0) ? hw[op.hi] : '' };
+        });
+
+        // referencia para comparar con el oído: TTS ES de la frase
+        // (el MISMO audio 🔊 ES; best-effort → sin TTS no hay botón)
+        let refAudioUrl = null;
+        try { refAudioUrl = await this._esRefUrl(targetText, ctx.voiceEs); }
+        catch (e) { /* sin red/TTS → el botón de referencia no aparece */ }
+
+        return {
+            // spec: misma forma de datos para TODOS los providers
+            transcription: w.text,
+            normalizedTranscription: heardN,
+            normalizedExpected: targetN,
+            toneScores: [],                       // vacío: SIN tonos en español
+            overallFeedback: fb,
+            score: score,
+            feedback: fb.es + '\n' + fb.zh,
+            wordScores: [],                       // los chips van en esWords (sin paleta tonal)
+            esWords: esWords,
+            esVerdict: verdict,                   // 'perfect' | 'doubt' | 'close' | 'mismatch'
+            confidence: w.confidence,             // se MUESTRA en pantalla (spec §5)
+            confidenceThreshold: THRESH,
+            esMismatch: (verdict === 'mismatch')
+                ? { heard: heardN, expected: targetN, distance: al.dist, maxDistance: maxD }
+                : null,
+            contentCheck: null,
+            contours: null,                       // NUNCA hay gráfico de pitch en español
+            refAudioUrl: refAudioUrl,
+            refIsTemplate: false,
+            voicedRatio: null,
+            provider: 'local',
+            mode: 'auto',
+            language: 'es',
+            evalMode: 'cn-es',
+            segmentalCount: 0,
+            note: '',
+            audioBlob: audioBlob
+        };
+    }
+
+    /* ---------- feedback del modo Español (spec v4.0 §3) ---------- */
+    _esFeedback(verdict, okWords, total, divs, heardN, targetN, script) {
+        const t = script === 't';
+        let es = '', zh = '';
+        if (verdict === 'perfect') {
+            es = '¡Excelente pronunciación! 🎉';
+            zh = t ? '發音太棒了！' : '发音太棒了！';
+        } else if (verdict === 'doubt') {
+            es = 'Se entendió, pero pronunciación dudosa — escuchá la referencia y volvé a intentar.';
+            zh = t ? '聽懂了，但發音有點含糊——聽參考音頻再試一次。' : '听懂了，但发音有点含糊——听参考音频再试一次。';
+        } else if (verdict === 'close') {
+            es = 'Acertaste ' + okWords + ' de ' + total + ' palabras.';
+            zh = t ? '說對了 ' + okWords + '/' + total + ' 個詞。' : '说对了 ' + okWords + '/' + total + ' 个词。';
+            const list = divs.slice(0, 3).map((d) =>
+                '«' + d.expected + '»' + (d.heard ? ' (se entendió «' + d.heard + '»)' : ''));
+            if (list.length) es += ' Revisá: ' + list.join(', ') + '.';
+        } else { // mismatch
+            es = 'Se detectó: «' + heardN + '» — Se esperaba: «' + targetN + '»';
+            zh = (t ? '我聽到：' : '我听到：') + heardN +
+                 (t ? ' · 目標：' : ' · 目标：') + targetN;
+        }
+        return { es: es, zh: zh };
+    }
+
+    /** TTS ES de la frase para el botón 🔊 Referencia (best-effort).
+     *  ⚠️ PRIVACIDAD: pide la referencia, jamás envía la voz del alumno. */
+    async _esRefUrl(text, voiceEs) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 10000);
+        try {
+            const resp = await fetch(TTS_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, lang: 'es-ES', voice: voiceEs || 'f' }),
+                signal: ctrl.signal
+            });
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            if (!data || !data.audio) return null;
+            const bin = atob(data.audio);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+        } catch (e) {
+            return null;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    /* ---------- mensajes de error SEGMENTAL (spec v4.0 §1/§3) ---------- */
+    _segMsgEs(k, seg) {
+        // formato spec QA #2: "Fonema incorrecto: se detectó /s/, se esperaba /sh/"
+        return 'N.º ' + (k + 1) + ': Fonema incorrecto: se detectó /' + seg.heard +
+               '/, se esperaba /' + seg.expected + '/ — oí «' + (seg.heardPinyin || '?') +
+               '», era «' + (seg.expectedPinyin || '?') + '»';
+    }
+    _segMsgZh(k, seg) {
+        const t = (this._tone && this._tone._script === 't');
+        const num = t ? ('第' + (k + 1) + '個字') : ('第' + (k + 1) + '个字');
+        const label = (seg.unit === 'inicial')
+            ? (t ? '聲母不對' : '声母不对')
+            : (t ? '韻母不對' : '韵母不对');
+        return num + '：' + label +
+               (t ? '（聽起來像 /' : '（听起来像 /') + seg.heard + (t ? '/，要讀 /' : '/，要读 /') +
+               seg.expected + '/）';
+    }
+
+    /* ---------- feedback cualitativo global (spec UX, modo chino) ---------- */
+    _overallChineseFeedback(toneScores, toneAcc, contentCheck, script) {
         const t = script === 't';
         const wrong = toneScores.filter((x) => x.status === 'wrong');
+        const segs = toneScores.filter((x) => x.status === 'segmental');
         const okN = toneScores.filter((x) => x.status === 'ok').length;
 
         // 1. línea global según precisión de tono
@@ -669,9 +1051,11 @@ class LocalEvaluator {
         // 2. detalles por carácter (máx 2 en la línea global; el resto
         //    se ve en el detalle de la UI) — estilo spec:
         //    "5to carácter: sonó como 2º tono, buscá 4º tono (bajada fuerte)"
-        const worst = wrong.slice(0, 2).map((x) => x.msgEs);
+        //    v7.8 (spec §1): el error SEGMENTAL se muestra PRIMERO, luego
+        //    el tonal. El segmental ya OMITE el análisis tonal (v4.0 §1).
+        const worst = segs.concat(wrong).slice(0, 2).map((x) => x.msgEs);
         if (worst.length) es += ' ' + worst.join(' · ');
-        const worstZh = wrong.slice(0, 2).map((x) => x.msgZh);
+        const worstZh = segs.concat(wrong).slice(0, 2).map((x) => x.msgZh);
         if (worstZh.length) zh += ' ' + worstZh.join(' · ');
 
         // 3. verificación de contenido (Whisper): solo informa QUÉ se entendió
@@ -713,18 +1097,22 @@ class LocalWhisperProvider {
         this.engine = engine;
         this.id = 'local';
     }
-    /** Float32Array 16 kHz → texto en el dispositivo.
-     *  ⚠️ Whisper NO puntúa pronunciación ni tono — solo transcribe. */
-    async transcribe(float32) {
-        const heard = String(await this.engine.transcribe(float32) || '').trim();
+    /** Float32Array 16 kHz → { text, confidence } en el dispositivo.
+     *  ⚠️ Whisper NO puntúa pronunciación ni tono — solo transcribe;
+     *  la confianza es una métrica de certeza del ASR (ver config.js). */
+    async transcribe(float32, opts) {
+        const r = await this.engine.transcribe(float32, opts || {});
+        const heard = String((r && r.text) || '').trim();
         if (!heard) throw new Error('no-speech');
-        return heard;
+        return { text: heard,
+                 confidence: (r && typeof r.confidence === 'number') ? r.confidence : null };
     }
     /** Compatibilidad con la fachada v7.6 (blob → transcripción). */
     async evaluate(audioBlob, targetText, ctx) {
         const pcm = await blobToFloat32_16k(audioBlob);
         if (isSilence(pcm)) throw new Error('no-speech');
-        return { transcription: await this.transcribe(pcm), provider: 'local' };
+        const r = await this.transcribe(pcm, { language: VE_CONFIG.languageZh });
+        return { transcription: r.text, provider: 'local' };
     }
 }
 
@@ -771,8 +1159,29 @@ class CloudSpeechProvider {
 }
 
 /* ============================================================
+   v7.8 (spec v4.0 §4 — LAZY): inyecta pitch-analyzer.js SOLO cuando
+   se necesita (modo chino). Sin query → lo sirve el precache del
+   Service Worker (funciona offline). Nada se carga al iniciar la
+   app ni en modo Español.
+   ============================================================ */
+function ensurePitchScript() {
+    if (typeof window.PitchAnalyzerModule === 'object') return Promise.resolve();
+    if (ensurePitchScript._p) return ensurePitchScript._p;
+    ensurePitchScript._p = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'pitch-analyzer.js';
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => { ensurePitchScript._p = null; reject(new Error('pitch-script-load-failed')); };
+        (document.head || document.documentElement).appendChild(s);
+    });
+    return ensurePitchScript._p;
+}
+
+/* ============================================================
    FACHADA — PronunciationEvaluator
    startRecording() · stopAndEvaluate() · setProvider('local'|'cloud')
+   v7.8: + setMode('es-cn'|'cn-es') async (spec v4.0 §4/§5)
    ============================================================ */
 class PronunciationEvaluator {
     constructor() {
@@ -781,13 +1190,21 @@ class PronunciationEvaluator {
         try {
             this.local = new LocalEvaluator(this.engine);
         } catch (e) {
-            // pitch-analyzer.js no cargó → Whisper solo (sin tono)
-            console.warn('[VE] LocalToneAnalyzer no disponible:', (e && e.message) || e);
+            // pitch-analyzer.js no cargó aún → se garantiza en setMode/evaluación
+            console.warn('[VE] LocalToneAnalyzer no disponible todavía:', (e && e.message) || e);
             this.local = null;
         }
         // this.cloud = new CloudSpeechProvider({ endpoint: '...' }); // ← FASE premium
         this.script = 's';                             // 's' | 't' (简体/繁體)
-        this._recorder = null;                         // instancia de VoiceRecorder (v7.5)
+        // v7.8 (spec v4.0): estado de MODO. null hasta el primer setMode
+        // válido; el pipeline se detiene con console.error si no es
+        // exactamente 'es-cn' o 'cn-es'.
+        this.mode = null;
+        this._pitch = null;            // PitchAnalyzer (Worker DSP) — SOLO es-cn
+        this._setModePromise = null;   // transición de modo en curso
+        this._evalAbort = null;        // AbortController de la evaluación en vuelo
+        this._voiceEs = undefined;     // voz TTS de referencia ES ('f'|'m')
+        this._recorder = null;         // instancia de VoiceRecorder (v7.5)
         this._lastBlob = null;
     }
 
@@ -805,7 +1222,86 @@ class PronunciationEvaluator {
         try { return localStorage.getItem('ac_voice_zh') === 'm' ? 'm' : 'f'; }
         catch (e) { return 'f'; }
     }
+    /** v7.8: voz TTS de referencia ESPAÑOLA (la misma que usa 🔊 ES). */
+    setVoiceEs(v) { this._voiceEs = v === 'm' ? 'm' : 'f'; }
+    get voiceEs() {
+        if (this._voiceEs) return this._voiceEs;
+        try { return localStorage.getItem('ac_voice_es') === 'm' ? 'm' : 'f'; }
+        catch (e) { return 'f'; }
+    }
     get activeRecorder() { return this._recorder; }
+
+    /* ────────────────────────────────────────────────────────────
+       v7.8 — setMode(newMode) — spec v4.0 §4 (GESTIÓN DE MEMORIA)
+       1. Aborta la evaluación en curso inmediatamente (AbortController).
+       2. Si salimos del modo chino → ESPERA la destrucción CONFIRMADA
+          del Worker: `await this._pitch.dispose()` (AWAIT OBLIGATORIO;
+          la Promise SIEMPRE resuelve — timeout 2 s → terminate forzoso).
+       3. Recién DESPUÉS muta this.mode.
+       4. Bajo demanda: al entrar a chino solo garantiza el SCRIPT
+          (liviano); el Worker WASM de pitch nace en la 1.ª evaluación
+          es-cn — setMode jamás hace trabajo pesado al iniciar la app.
+       ⚠️ Valida que newMode sea EXACTAMENTE 'es-cn' o 'cn-es': otro
+          valor → console.error explícito + excepción (pipeline detenido).
+       ──────────────────────────────────────────────────────────── */
+    async setMode(newMode) {
+        if (newMode !== 'es-cn' && newMode !== 'cn-es') {
+            console.error('[VE] state.mode inválido: "' + newMode +
+                '" — debe ser exactamente \'es-cn\' o \'cn-es\' (spec v4.0 §5)');
+            throw new Error('invalid-mode');
+        }
+        this._setModePromise = this._applyMode(newMode);
+        return this._setModePromise;
+    }
+
+    async _applyMode(newMode) {
+        // 1. abortar evaluación en curso inmediatamente
+        this._abortEval();
+
+        // 2. si salimos del modo chino → dispose OBLIGATORIO (await)
+        if (this.mode === 'es-cn' && newMode !== 'es-cn' && this._pitch) {
+            try {
+                await this._pitch.dispose();      // ← AWAIT OBLIGATORIO (spec §4)
+            } catch (e) {
+                console.warn('[VE] dispose falló, forzando limpieza:', e);
+            }
+            this._pitch = null;                   // fuera de memoria (spec §4)
+            if (this.local) this.local.detachPitch(); // + cache de contornos fuera
+        }
+
+        // 3. mutar el modo SOLO después del dispose (spec §4)
+        this.mode = newMode;
+
+        // 4. lazy load bajo demanda (spec §4): script liviano del motor
+        //    de tono al entrar a chino; el Worker se crea al evaluar.
+        if (newMode === 'es-cn' && typeof window.PitchAnalyzerModule !== 'object') {
+            try { await ensurePitchScript(); }
+            catch (e) {
+                console.warn('[VE] pitch-analyzer.js no cargó (el tono no se podrá medir):',
+                             (e && e.message) || e);
+            }
+        }
+        return true;
+    }
+
+    /** AbortController de la evaluación en vuelo (spec v4.0 §5). */
+    _abortEval() {
+        if (this._evalAbort) {
+            try { this._evalAbort.abort(); } catch (e) { /* noop */ }
+            this._evalAbort = null;
+        }
+    }
+
+    /** Crea el Worker de DSP la PRIMERA vez que se evalúa en es-cn
+     *  (lazy real: iniciar la app o entrar al modo no lo instancia). */
+    async _ensurePitch() {
+        if (this._pitch && !this._pitch.disposed) return this._pitch;
+        if (typeof window.PitchAnalyzerModule !== 'object') await ensurePitchScript();
+        if (typeof window.PitchAnalyzerModule !== 'object') throw new Error('pitch-analyzer-missing');
+        this._pitch = await window.PitchAnalyzerModule.PitchAnalyzer.create();
+        if (this.local) this.local.attachPitch(this._pitch);
+        return this._pitch;
+    }
 
     /* ---------- captura ---------- */
     async startRecording(opts) {
@@ -843,6 +1339,17 @@ class PronunciationEvaluator {
 
     /* ---------- corte + evaluación → objeto estandarizado SIEMPRE ---------- */
     async stopAndEvaluate(targetText) {
+        // v7.8: si hay una transición de modo en vuelo (clic llegó mientras
+        // setMode hacía dispose), esperamos antes de evaluar.
+        try { if (this._setModePromise) await this._setModePromise; }
+        catch (e) { return this._manual(null, e); } // invalid-mode → genérico
+        // spec v4.0 §5: modo inválido → console.error + STOP del pipeline
+        if (this.mode !== 'es-cn' && this.mode !== 'cn-es') {
+            console.error('[VE] state.mode inválido: "' + this.mode +
+                '" — pipeline detenido (spec v4.0 §5)');
+            return this._manual(null, new Error('invalid-mode'));
+        }
+
         const rec = this._recorder;
         this._recorder = null;
         if (!rec) return this._manual(null, null);
@@ -875,6 +1382,12 @@ class PronunciationEvaluator {
      *  Útil para tests y para futuras integraciones sin pasar por la UI. */
     async evaluatePronunciation(audioBlob, targetText) {
         try {
+            try { if (this._setModePromise) await this._setModePromise; }
+            catch (e) { return this._manual(audioBlob, e); }
+            if (this.mode !== 'es-cn' && this.mode !== 'cn-es') {
+                console.error('[VE] state.mode inválido: "' + this.mode + '" — pipeline detenido');
+                return this._manual(audioBlob, new Error('invalid-mode'));
+            }
             if (this.provider === 'cloud') {
                 if (!this.cloud) throw new Error('cloud-not-configured');
                 return await this.cloud.evaluate(audioBlob, targetText, { script: this.script });
@@ -892,12 +1405,28 @@ class PronunciationEvaluator {
         const ui = this._ui();
         // Espera acotada al motor (1.ª vez): la barra sigue en pantalla
         await this._waitForEngine();
-        if (ui) ui.setVoiceStatus(S.procEs, this._zh(S.procZhS, S.procZhT), null);
+        if (ui) {
+            ui.setVoiceStatus(
+                this.mode === 'cn-es' ? S.procEsEs : S.procEs,
+                this._zh(S.procZhS, S.procZhT), null);
+        }
         if (!this.local) throw new Error('engine-error'); // pitch-analyzer faltante
-        const res = await this.local.evaluate(blob, targetText, {
-            script: this.script,
-            voice: this.voice
-        });
+        // v7.8 (spec §5): AbortController — setMode aborta la evaluación
+        // en vuelo al cambiar de modo; el resultado descartado no pisa la UI.
+        const ac = this._evalAbort = new AbortController();
+        if (this.mode === 'es-cn') await this._ensurePitch(); // Worker DSP bajo demanda
+        const res = await Promise.race([
+            this.local.evaluate(blob, targetText, {
+                script: this.script,
+                voice: this.voice,
+                voiceEs: this.voiceEs,
+                mode: this.mode,
+                signal: ac.signal
+            }),
+            new Promise((_, reject) => {
+                ac.signal.addEventListener('abort', () => reject(new Error('eval-aborted')));
+            })
+        ]);
         res.audioBlob = blob;
         return res;
     }
@@ -925,9 +1454,19 @@ class PronunciationEvaluator {
     }
 
     _manual(blob, err) {
-        let es = S.manEs, zh = this._zh(S.manZhS, S.manZhT), note = this._zh(S.noteDefaultZhS, S.noteDefaultZhT, S.noteDefaultEs);
-        if (err) {
-            const msg = String((err && err.message) || err);
+        const msg = String((err && err.message) || err || '');
+        // v7.8 (spec §5): fallo del MOTOR (o modo inválido) → mensaje
+        // genérico "No se pudo analizar el audio. Intentá de nuevo."
+        // y NUNCA un fallback automático al análisis de pitch.
+        const hardFail = msg.indexOf('engine-fail') >= 0 ||
+                         msg.indexOf('invalid-mode') >= 0 ||
+                         msg.indexOf('engine-error') >= 0 ||
+                         msg.indexOf('transcribe-timeout') >= 0 ||
+                         msg.indexOf('eval-aborted') >= 0;
+        let es = hardFail ? S.genFailEs : S.manEs;
+        let zh = hardFail ? this._zh(S.genFailZhS, S.genFailZhT) : this._zh(S.manZhS, S.manZhT);
+        let note = this._zh(S.noteDefaultZhS, S.noteDefaultZhT, S.noteDefaultEs);
+        if (err && !hardFail) {
             if (msg.indexOf('no-speech') >= 0) {
                 note = this._zh(S.noteNoSpeechZhS, S.noteNoSpeechZhT, S.noteNoSpeechEs);
             } else if (msg.indexOf('no-voice-tono') >= 0) {
@@ -940,6 +1479,8 @@ class PronunciationEvaluator {
                        msg.indexOf('no-audiocontext') >= 0 || msg.indexOf('pitch-analyzer') >= 0) {
                 note = this._zh(S.noteEngineZhS, S.noteEngineZhT, S.noteEngineEs);
             }
+        } else if (hardFail) {
+            note = ''; // el mensaje principal ya pide reintentar
         }
         return {
             score: null,
@@ -949,6 +1490,8 @@ class PronunciationEvaluator {
             transcript: '',
             provider: this.provider,
             mode: 'manual',
+            language: this.mode === 'cn-es' ? 'es' : 'zh', // v7.8
+            evalMode: this.mode,
             note: note,
             audioBlob: blob
         };

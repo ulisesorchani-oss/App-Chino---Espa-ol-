@@ -857,6 +857,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSentences();
     setupEventListeners();
     applySavedUI();
+    // v7.8 (spec v4.0): sincronizar el MODO con el evaluador de voz lo
+    // antes posible. No bloquea el render: si tarda, la evaluación de
+    // voz espera la transición antes de analizar (VE._setModePromise).
+    if (window.VE && typeof window.VE.setMode === 'function') {
+        window.VE.setMode(state.mode).catch((e) =>
+            console.warn('[app] VE.setMode inicial falló:', (e && e.message) || e));
+    }
     renderCurrentSentence();
     updateStats();
     updateVocabularyPanel();
@@ -1057,7 +1064,24 @@ function setupEventListeners() {
 }
 
 // ===== Funciones de Estado =====
-function setMode(mode) {
+// v7.8 (spec v4.0 §4/§5): el cambio de modo es ASÍNCRONO. El evaluador
+// de voz (window.VE) aborta la evaluación en curso y hace
+// await pitchAnalyzer.dispose() ANTES de que mutemos state.mode (la
+// Promise de dispose SIEMPRE resuelve — timeout 2 s — así que el
+// cambio nunca se bloquea). Modo inválido → console.error y NO cambia.
+async function setMode(mode) {
+    if (mode !== 'es-cn' && mode !== 'cn-es') {
+        console.error('[app] state.mode inválido: "' + mode +
+                      '" — debe ser exactamente "es-cn" o "cn-es" (spec v4.0 §5)');
+        return;
+    }
+    if (window.VE && typeof window.VE.setMode === 'function') {
+        try { await window.VE.setMode(mode); }
+        catch (e) {
+            console.warn('[app] VE.setMode falló, no se cambia el modo:', (e && e.message) || e);
+            return;
+        }
+    }
     state.mode = mode;
     document.getElementById('btn-es-cn').classList.toggle('active', mode === 'es-cn');
     document.getElementById('btn-cn-es').classList.toggle('active', mode === 'cn-es');
@@ -1542,12 +1566,17 @@ function renderCurrentSentence() {
     makeBlanksClickable();
 
     // 9. Módulo de pronunciación (v7.5): nueva oración → nuevo objetivo + reset.
-    //    El objetivo es SIEMPRE la oración china completa (sin hueco): lo que el
-    //    alumno debe pronunciar. VoiceRecorder.js compara por pinyin, así que
-    //    funciona igual en 简体 y 繁體.
+    //    v7.8 (spec v4.0 §1): el objetivo depende del MODO —
+    //      · es-cn (Aprendo Chino)   → oración china completa + pinyin
+    //        (pipeline completo: Whisper contenido + F0/DTW tonos).
+    //      · cn-es (Aprendo Español) → oración ESPAÑOLA, sin pinyin
+    //        (SOLO Whisper: el español no es lengua tonal).
     if (window.VR && typeof window.VR.setTarget === 'function') {
         // v7.6: 3.er arg = guion activo (s/t) → mensajes zh en 简/繁
-        window.VR.setTarget(s['chinese_' + k + '_full'], s.pinyin || '', k);
+        // v7.8: 4.º arg = idioma del objetivo ('zh'|'es')
+        const esMode = state.mode === 'cn-es';
+        const target = esMode ? (s.spanish_full || '') : s['chinese_' + k + '_full'];
+        window.VR.setTarget(target, esMode ? '' : (s.pinyin || ''), k, esMode ? 'es' : 'zh');
     }
 } // <--- ¡CIERRE DE LA FUNCIÓN!
 

@@ -481,6 +481,252 @@ function compare(studentContour, refContour, nChars, expectedTones) {
 }
 
 /* ============================================================
+   PITCHANALYZER — INSTANCIA CON CICLO DE VIDA (spec Prompt v4.0 §4)
+   ------------------------------------------------------------
+   Mientras que las funciones de arriba son PURAS (stateless), la
+   clase PitchAnalyzer es la INSTANCIA que el orquestador crea
+   bajo demanda en modo Chino y DESTRUYE al salir de él:
+
+     · PitchAnalyzer.create()  → lazy: crea el Worker de DSP.
+       Nunca se llama al iniciar la app ni en modo Español (cn-es):
+       "si el usuario nunca entró a modo Chino, el Worker no debe
+       existir" (spec §4).
+     · .analyze(pcm, opts)     → F0 + semitonos + DTW + clasificación
+       dentro del Worker (el hilo principal queda libre).
+     · .dispose()              → devuelve una Promise<void> que
+       SIEMPRE resuelve, NUNCA rechaza (spec §4: "Un fallo en
+       limpieza NUNCA debe bloquear cambio de modo").
+
+   NOTA DE ARQUITECTURA HONESTA (adaptación de la spec al app real):
+   la spec imagina un Worker WASM con su AudioContext y su
+   AudioWorkletNode. Acá el DSP de pitch es JS puro (sin WASM) y
+   la captura de micro pertenece a VoiceRecorder.js (MediaRecorder),
+   los AudioContext de decodificación son TRANSITORIOS (se crean y
+   se cierran por audio). Por eso dispose() libera lo que ESTA
+   clase posee de verdad: el Worker de DSP + sus promesas en
+   vuelo + la referencia al módulo. El paso "cerrar AudioContext"
+   de la spec no aplica (no hay AudioContext propio que cerrar) y
+   se documenta en vez de fingirse.
+
+   TIMELINE DE dispose() (spec §4, adaptado):
+     1. marca this._disposed + rechaza los analyze() en vuelo
+     2. envía 'terminate' al Worker
+     3. espera el 'ack' con timeout de 2000 ms
+     4. ack antes del timeout → Worker se cierra solo
+        timeout vencido → worker.terminate() forzoso
+     5. limpia referencias (worker/blob/null) y RESUELVE IGUAL
+   "Esta Promise siempre resuelve. El timeout es fallback de
+    seguridad, no error." (spec §4)
+   ============================================================ */
+const PA_DISPOSE_TIMEOUT_MS = 2000; // spec v4.0 §4: 2 segundos
+
+/* URL de ESTE archivo (para que el Worker se construya con el
+   mismo código que corre en la página — una sola fuente de verdad). */
+var PA_SELF_URL = (typeof document !== 'undefined' && document.currentScript &&
+                   document.currentScript.src) || '';
+
+/* Glue que se APEGA al final del código del módulo dentro del Worker:
+   el UMD de arriba detecta que no hay `module` y cuelga la factory en
+   self.PitchAnalyzerModule → el glue solo enruta mensajes. */
+const PA_WORKER_GLUE = [
+    ';(function () {',
+    '  var PA = self.PitchAnalyzerModule;',
+    '  function runAnalyze(m) {',
+    '    var f0r = PA.extractF0(m.pcm, 16000);',
+    '    var ct = PA.contourToSemis(f0r.f0);',
+    '    var enough = f0r.voicedRatio >= PA.CONFIG.minVoicedRatio && f0r.voicedFrames >= 10 && ct.semis.length >= 8;',
+    '    if (!enough) return { error: "no-voice-tono", voicedRatio: f0r.voicedRatio, voicedFrames: f0r.voicedFrames };',
+    '    var refSemis = m.refSemis, refIsTemplate = false;',
+    '    if (!refSemis) {',
+    '      var tpl = PA.templateForSequence((m.expectedTones || []).map(function (t) { return t || "1"; }), m.framesPerChar || 8);',
+    '      refSemis = tpl.semis; refIsTemplate = true;',
+    '    }',
+    '    var cmp = PA.compare(ct.semis, refSemis, m.nChars, m.expectedTones);',
+    '    return { chars: cmp.chars, alignmentCost: cmp.alignmentCost,',
+    '             semis: ct.semis, refSemis: refSemis,',
+    '             refBounds: cmp.chars.map(function (c) { return c.refStart; }),',
+    '             refIsTemplate: refIsTemplate,',
+    '             voicedRatio: f0r.voicedRatio, durationSec: f0r.durationSec };',
+    '  }',
+    '  self.onmessage = function (e) {',
+    '    var m = e.data || {};',
+    '    if (m.type === "terminate") { self.postMessage({ type: "ack" }); setTimeout(function () { self.close(); }, 30); return; }',
+    '    if (m.type !== "analyze") return;',
+    '    try { var r = runAnalyze(m); if (r && r.error) self.postMessage({ type: "result", id: m.id, error: r.error });',
+    '          else self.postMessage({ type: "result", id: m.id, result: r }); }',
+    '    catch (err) { self.postMessage({ type: "result", id: m.id, error: String((err && err.message) || err) }); }',
+    '  };',
+    '})();'
+].join('\n');
+
+class PitchAnalyzer {
+    constructor() {
+        this._worker = null;
+        this._blobUrl = null;
+        this._pending = new Map();   // id → {resolve, reject}
+        this._seq = 0;
+        this._disposed = false;
+        this._mainOnly = false;      // sin Worker (Node/iOS viejo) → DSP en el hilo principal
+        this._booting = null;
+    }
+
+    /** Fábrica async (spec §4: this.pitchAnalyzer = await PitchAnalyzer.create()).
+     *  Nunca rechaza por falta de Worker: cae a modo hilo principal. */
+    static async create(opts) {
+        const inst = new PitchAnalyzer();
+        await inst._boot(opts || {});
+        return inst;
+    }
+
+    async _boot(opts) {
+        if (this._booting) return this._booting;
+        this._booting = (async () => {
+            if (typeof Worker === 'undefined' || typeof fetch === 'undefined' ||
+                typeof Blob === 'undefined' || typeof URL === 'undefined') {
+                this._mainOnly = true; return;
+            }
+            try {
+                const src = opts.sourceText != null ? opts.sourceText
+                          : await this._fetchSource(opts.sourceUrl);
+                const blob = new Blob([src, '\n', PA_WORKER_GLUE], { type: 'application/javascript' });
+                this._blobUrl = URL.createObjectURL(blob);
+                this._worker = new Worker(this._blobUrl);
+                const self = this;
+                this._worker.onmessage = function (e) {
+                    const m = e.data || {};
+                    if (m.type === 'ack') return;            // lo escucha dispose()
+                    const p = self._pending.get(m.id);
+                    if (!p) return;
+                    self._pending.delete(m.id);
+                    if (m.error) p.reject(new Error(m.error)); else p.resolve(m.result);
+                };
+                this._worker.onerror = function () {
+                    // Worker roto en runtime → matar pendientes y no volver a usarlo
+                    self._failAllPending(new Error('pitch-worker-error'));
+                    self._mainOnly = true;
+                    self._cleanupWorker();
+                };
+            } catch (e) {
+                this._mainOnly = true;
+                this._cleanupWorker();
+            }
+        })();
+        return this._booting;
+    }
+
+    async _fetchSource(srcUrl) {
+        const url = srcUrl || PA_SELF_URL || 'pitch-analyzer.js';
+        const res = await fetch(url, { cache: 'force-cache' }); // SW precache → offline OK
+        if (!res.ok) throw new Error('pitch-src-http-' + res.status);
+        return await res.text();
+    }
+
+    get disposed() { return this._disposed; }
+    get mode() { return this._mainOnly ? 'main' : 'worker'; }
+
+    /** Analiza el buffer del alumno. opts:
+     *    nChars, expectedTones ['1'..'4'|'0'|null], refSemis (Array|null),
+     *    framesPerChar (para plantillas sin red).
+     *  Rechaza con 'no-voice-tono' si la voz es insuficiente (spec v3),
+     *  con 'pitch-disposed' si ya se destruyó. */
+    async analyze(pcm, opts) {
+        if (this._disposed) throw new Error('pitch-disposed');
+        opts = opts || {};
+        if (this._worker) {
+            const id = ++this._seq;
+            const self = this;
+            try {
+                return await new Promise(function (resolve, reject) {
+                    self._pending.set(id, { resolve: resolve, reject: reject });
+                    // SIN transferables: el mismo buffer lo usa Whisper en paralelo
+                    self._worker.postMessage({ type: 'analyze', id: id, pcm: pcm,
+                        nChars: opts.nChars, expectedTones: opts.expectedTones || null,
+                        refSemis: opts.refSemis || null,
+                        framesPerChar: opts.framesPerChar || 8 });
+                });
+            } catch (e) {
+                if (String((e && e.message) || e) === 'pitch-disposed') throw e;
+                this._mainOnly = true; // Worker falló en vuelo → camino directo
+            }
+        }
+        return this._analyzeMain(pcm, opts);
+    }
+
+    /** Camino sin Worker (Node, iOS viejo, Worker roto). Mismo DSP. */
+    _analyzeMain(pcm, opts) {
+        const f0r = extractF0(pcm, 16000);
+        const ct = contourToSemis(f0r.f0);
+        if (f0r.voicedRatio < PA_CONFIG.minVoicedRatio || f0r.voicedFrames < 10 || ct.semis.length < 8) {
+            const e = new Error('no-voice-tono');
+            e.details = { voicedRatio: f0r.voicedRatio, voicedFrames: f0r.voicedFrames };
+            throw e;
+        }
+        let refSemis = opts.refSemis, refIsTemplate = false;
+        if (!refSemis) {
+            const tpl = templateForSequence((opts.expectedTones || []).map(function (t) { return t || '1'; }),
+                                            opts.framesPerChar || 8);
+            refSemis = tpl.semis; refIsTemplate = true;
+        }
+        const cmp = compare(ct.semis, refSemis, opts.nChars, opts.expectedTones);
+        return {
+            chars: cmp.chars, alignmentCost: cmp.alignmentCost,
+            semis: ct.semis, refSemis: refSemis,
+            refBounds: cmp.chars.map(function (c) { return c.refStart; }),
+            refIsTemplate: refIsTemplate,
+            voicedRatio: f0r.voicedRatio, durationSec: f0r.durationSec
+        };
+    }
+
+    _failAllPending(err) {
+        const self = this;
+        this._pending.forEach(function (p) { p.reject(err); });
+        this._pending.clear();
+    }
+
+    /* ---------- dispose() — spec v4.0 §4 (CRÍTICO) ----------
+       Devuelve Promise<void> que SIEMPRE resuelve, NUNCA rechaza.
+       Esta Promise siempre resuelve. El timeout es fallback de
+       seguridad, no error. El cambio de modo debe hacer
+       `await pitchAnalyzer.dispose()` ANTES de mutar state.mode. */
+    async dispose() {
+        this._disposed = true;
+        this._failAllPending(new Error('pitch-disposed')); // los analyze en vuelo fallan ya
+        const w = this._worker;
+        if (w) {
+            await new Promise(function (resolve) {
+                let settled = false;
+                const finish = function () {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timer);
+                    try { w.terminate(); } catch (e) { /* noop */ }
+                    resolve();                 // ← resuelve SIEMPRE
+                };
+                const timer = setTimeout(finish, PA_DISPOSE_TIMEOUT_MS); // spec: 2 s
+                try {
+                    w.addEventListener('message', function onAck(ev) {
+                        if ((ev.data || {}).type === 'ack') {
+                            w.removeEventListener('message', onAck);
+                            finish();          // ack antes del timeout
+                        }
+                    });
+                    w.postMessage({ type: 'terminate' });
+                } catch (e) { finish(); }    // postMessage roto → forzoso y resuelve
+            });
+        }
+        this._cleanupWorker();
+        this._pending.clear();
+    }
+
+    _cleanupWorker() {
+        if (this._worker) { try { this._worker.terminate(); } catch (e) { /* noop */ } }
+        this._worker = null;
+        if (this._blobUrl) { try { URL.revokeObjectURL(this._blobUrl); } catch (e) { /* noop */ } }
+        this._blobUrl = null;
+    }
+}
+
+/* ============================================================
    EXPORT
    ============================================================ */
 return {
@@ -496,7 +742,8 @@ return {
     templateForSequence: templateForSequence,
     medianOf: medianOf,
     percentileOf: percentileOf,
-    TONE_TEMPLATES: TONE_TEMPLATES
+    TONE_TEMPLATES: TONE_TEMPLATES,
+    PitchAnalyzer: PitchAnalyzer          // v7.8: instancia con dispose()
 };
 
 });

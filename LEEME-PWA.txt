@@ -287,6 +287,54 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🎯 NOVEDADES v7.8 — Evaluador por MODO: español (solo oído de
+   Whisper) vs chino (tonos medidos) · spec Prompt v4.0
+----------------------------------------------------------------------
+• GRAN CAMBIO: el módulo de voz ahora se comporta según el MODO de
+  estudio que tengas activado (botones ES→CN / CN→ES):
+    · ES→CN (Aprendo Chino): pipeline completo — Whisper verifica
+      QUÉ carácter dijiste + el tono se MIDE con F0/DTW.
+    · CN→ES (Aprendo Español): SOLO Whisper. Cero análisis de tono
+      (el español no es lengua tonal: su altura es entonación, no
+      significado). Antes el evaluador aplicaba tonos "ciegamente"
+      en español y daba feedback sin sentido pedagógico.
+• Objetivo de práctica según modo: en CN→ES el 🎤 ahora espera la
+  oración ESPAÑOLA (antes esperaba la china); en ES→CN, la china.
+• Feedback de español (sin NINGÚN elemento tonal):
+    ✅ verde "¡Excelente pronunciación!" (transcripción OK y
+      confianza alta del reconocimiento)
+    ⚠️ amarillo "Se entendió, pero pronunciación dudosa" (confianza
+      baja) o "Acertaste X de Y palabras. Revisá: ..." (casi)
+    ❌ rojo "Se detectó: «...» — Se esperaba: «...»" (desvío)
+  + nueva métrica visible: "Confianza del reconocimiento: NN %"
+  + chips por palabra (verde/rojo) + botón 🔊 Referencia con el
+  audio TTS ES de la frase para comparar con tu oído.
+• Comparación tolerante (nunca igualdad estricta): normalización de
+  texto honesta por idioma (NFC, minúsculas, sin tildes PORQUE
+  Whisper no las transcribe de forma confiable — la ñ se preserva
+  porque SÍ es un fonema distinto), Levenshtein POR PALABRA y
+  tolerancia que escala con la frase: 3 palabras o menos exigen
+  perfección, 10 palabras toleran 2 tropiezos (getMaxAcceptable-
+  Distance en el nuevo config.js).
+• Validación SEGMENTAL primero en chino: si decís /si/ donde iba
+  /shi/ (四 vs 是), te avisa "Fonema incorrecto: se detectó /s/,
+  se esperaba /sh/" ANTES de cualquier comentario de tono — y ese
+  carácter no se evalúa tonalmente (era una mezcla confusa antes).
+• Archivos NUEVOS: config.js (umbral de confianza + tolerancias
+  calibrables, con método de calibración documentado) y
+  text-utils.js (normalización + comparación léxica compartidos).
+  Documentación completa del módulo: README-Pronunciacion.md.
+• Ciclo de vida de memoria (spec §4): el motor de tono ahora es
+  LAZY — si nunca practicás chino, ni el script ni su Worker
+  existen; al cambiar de CN→ES a ES→CN la app ESPERA la
+  destrucción confirmada del Worker (Promise que siempre resuelve,
+  timeout 2 s) antes de cambiar de modo. Cero Workers zombis.
+• Whisper dejó de traducir errores del motor en "escuchá tu
+  grabación": si el motor falla, avisa claro "No se pudo analizar
+  el audio. Intentá de nuevo." (nunca cae al análisis de tono).
+• sw.js sube a v28 (+config.js y text-utils.js en el precache).
+
+======================================================================
 🎯 NOVEDADES v7.7 — Tono medido DE VERDAD (F0 + DTW) · spec corregida
 ----------------------------------------------------------------------
 • GRAN CAMBIO PEDAGÓGICO: el feedback de tonos ya no sale de una

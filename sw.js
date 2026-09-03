@@ -10,11 +10,13 @@
    - v7.7: caché PERSISTENTE de modelos de IA (Whisper ONNX de
      huggingface.co + runtime WASM de jsdelivr) → el motor de
      pronunciación NO se re-descarga (40 MB) en cada update.
+   - v7.8: +config.js/text-utils.js en precache; pitch-analyzer.js
+     se inyecta LAZY solo en modo Chino (sigue precacheado p/ offline).
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v27';
+const VERSION = 'v28';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -24,9 +26,11 @@ const PRECACHE = [
   './',
   './index.html',
   './app.js',
-  './VoiceRecorder.js',    // v7.5/7.7: captura + UI de pronunciación
-  './pitch-analyzer.js',   // v7.7: F0 (YIN) + DTW + clasificador de tonos
-  './voice-evaluator.js',  // v7.6/7.7: orquestador Whisper (contenido) + tono
+  './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
+  './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
+  './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
+  './pitch-analyzer.js',   // v7.7/7.8: F0 (YIN) + DTW + clase PitchAnalyzer (carga LAZY en es-cn)
+  './voice-evaluator.js',  // v7.6-7.8: orquestador por MODO (es-cn / cn-es)
   './style.css',
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
@@ -38,6 +42,8 @@ const PRECACHE = [
   // v6.2: los datos van DENTRO de app.js (EMBEDDED_MODULE_DATA) — no hace falta data/
   // v7.7: los archivos DEL MODELO Whisper (40 MB) NO van al precache:
   //       los gestiona MODEL_CACHE en runtime (ver cacheFirstModel).
+  // v7.8: pitch-analyzer.js sigue en el precache aunque se cargue LAZY:
+  //       así el ensurePitchScript() del modo chino funciona offline.
 ];
 
 /* ---------- Install: precache tolerante (un 404 no rompe el SW) ---------- */
