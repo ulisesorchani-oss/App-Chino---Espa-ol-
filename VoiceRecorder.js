@@ -22,6 +22,12 @@
    ni servidor) y se libera al cambiar de oración o grabar de
    nuevo. FASE 1 funciona 100% local (comparación en el propio
    navegador).
+   ------------------------------------------------------------
+   v7.6: con voice-evaluator.js cargado, window.VR delega la
+   evaluación en window.VE (Whisper WASM 100% en el dispositivo:
+   ni siquiera la transcripción sale del teléfono). Este archivo
+   queda como capa de CAPTURA + camino de fallback
+   (webspeech → modo manual 🎧). La UI no cambia.
    ============================================================ */
 (function () {
 'use strict';
@@ -30,9 +36,9 @@
    CONFIG DE EVALUACIÓN — el único lugar que se toca en FASE 2
    ============================================================ */
 const EVAL_CONFIG = {
-    // FASE 1 (hoy, gratis y sin servidor): 'webspeech'
-    // FASE 2 (futuro premium, ver stubs abajo):
-    //   'whisper-serverless' | 'azure' | 'superspeech'
+    // v7.6: proveedor LEGADO (fallback). Con voice-evaluator.js cargado,
+    // VR usa window.VE → Whisper WASM 100% local ('local').
+    // FASE premium: VE.setProvider('cloud') — ver voice-evaluator.js.
     provider: 'webspeech',
 
     // FASE 2 — descomentar y completar cuando se contrate el servicio:
@@ -68,7 +74,16 @@ const T = {
 
     againBtn: '🔁 Grabar de nuevo',
     playBtn:  '▶️ Escuchar mi grabación',
-    stopBtn:  '⏸ Pausar'
+    stopBtn:  '⏸ Pausar',
+
+    // v7.6 — motor local Whisper (textos que VR muestra directamente)
+    hintProcLocal: '🧠 Analizando tono… 正在分析发音',
+    privacyLocal: '🔒 Tu voz se procesa 100 % en tu dispositivo: no se envía a ningún servidor ni se guarda · 你的语音100%在设备上处理：不上传，也不保存',
+    privacyLegacy: '🔒 Tu grabación no se guarda; la comparación ocurre en tu navegador · 你的录音不会保存，对比在浏览器里完成',
+    heardS: '我听到：',
+    heardT: '我聽到：',
+    charByS: '逐字发音反馈：',
+    charByT: '逐字發音反饋：'
 };
 
 /* ============================================================
@@ -367,14 +382,15 @@ function scoreTranscript(targetText, transcript) {
     return { score: score, wordScores: wordScores, sim: sim };
 }
 
-/** Mensaje motivador bilingüe según puntaje. */
-function feedbackFor(score, wordScores) {
+/** Mensaje motivador bilingüe según puntaje (script: 's'|'t', v7.6). */
+function feedbackFor(score, wordScores, script) {
+    const t = script === 't';
     if (score === null || score === undefined)
-        return { es: T.manEs, zh: T.manZh };
-    if (score >= 90) return { es: '¡Excelente pronunciación! 🎉', zh: '发音太棒了！' };
-    if (score >= EVAL_CONFIG.goodThreshold) return { es: '¡Muy bien! Suenas casi nativo 👏', zh: '很好！非常接近原音！' };
-    if (score >= 60) return { es: '¡Bien! Practicá las letras marcadas 🎯', zh: '不错！练一练标红的字。' };
-    return { es: 'Escuchá el audio CN e intentalo de nuevo 💪', zh: '听一听中文音频，再试一次！' };
+        return { es: T.manEs, zh: t ? '🎧 聽一聽你的錄音，跟中文音頻對比' : T.manZh };
+    if (score >= 90) return { es: '¡Excelente pronunciación! 🎉', zh: t ? '發音太棒了！' : '发音太棒了！' };
+    if (score >= EVAL_CONFIG.goodThreshold) return { es: '¡Muy bien! Suenas casi nativo 👏', zh: t ? '很好！非常接近原音！' : '很好！非常接近原音！' };
+    if (score >= 60) return { es: '¡Bien! Practicá las letras marcadas 🎯', zh: t ? '不錯！練一練標紅的字。' : '不错！练一练标红的字。' };
+    return { es: 'Escuchá el audio CN e intentalo de nuevo 💪', zh: t ? '聽一聽中文音頻，再試一次！' : '听一听中文音频，再试一次！' };
 }
 
 /** Tip de tono: revisa los tonos de los caracteres fallados. */
@@ -521,11 +537,13 @@ async function evaluatePronunciation(audioBlob, targetText, extra) {
 const VR = {
     state: 'idle',          // idle | recording | processing
     targetZh: '',           // oración china completa (objetivo de pronunciación)
+    script: 's',            // v7.6: 's' | 't' → mensajes zh 简/繁 según preferencia
     _recorder: null,
     _recognizer: null,
     _recUrl: null,          // ObjectURL de la última grabación (para escucharla)
     _player: null,
     _rafId: 0,
+    _evalTok: 0,            // v7.6: token anti-carrera (navegar durante la evaluación)
 
     init() {
         this.btn = document.getElementById('btn-record');
@@ -536,6 +554,9 @@ const VR = {
         this.rowActions = document.getElementById('record-row-actions');
         this.playBtn = document.getElementById('btn-play-my-rec');
         this.againBtn = document.getElementById('btn-rec-again');
+        this.dlBar = document.getElementById('rec-dl');          // v7.6
+        this.dlFill = document.getElementById('rec-dl-fill');    // v7.6
+        this.privacyNote = document.getElementById('record-privacy-note'); // v7.6
         if (!this.btn || !this.panel) return; // HTML viejo → módulo dormido, cero errores
 
         this._player = new Audio();
@@ -553,16 +574,65 @@ const VR = {
         });
 
         this._drawIdleWave();
+
+        // v7.6: si el motor local (Whisper WASM) gobierna, la nota de
+        // privacidad puede prometer más: nada sale del dispositivo.
+        this._updatePrivacy();
     },
 
-    /** app.js lo llama en cada oración nueva: fija objetivo y resetea la UI. */
-    setTarget(zhText, pinyinText) {
-        if (this.state === 'recording') { this._recorder.abort(); this._recognizer.abort(); }
+    /** v7.6 — ¿voice-evaluator.js gobierna esta sesión? (local|cloud) */
+    _veActive() {
+        return !!(window.VE && typeof window.VE.stopAndEvaluate === 'function' &&
+                  (window.VE.provider === 'local' || window.VE.provider === 'cloud'));
+    },
+
+    /** v7.6 — nota de privacidad honesta según el motor activo. */
+    _updatePrivacy() {
+        if (!this.privacyNote) return;
+        this.privacyNote.textContent = this._veActive() ? T.privacyLocal : T.privacyLegacy;
+    },
+
+    /** v7.6 — estado del motor local: texto bilingüe + barra de descarga.
+     *  pct null → oculta la barra. Lo llama window.VE. */
+    setVoiceStatus(es, zh, pct) {
+        this._setDl(pct);
+        if (es) {
+            this.hint.textContent = zh ? (es + ' ' + zh) : es;
+            this.hint.classList.remove('hidden');
+        }
+    },
+    /** v7.6 — solo barra (mientras graba: no tapar el texto "Grabando…"). */
+    setVoiceProgress(pct) { this._setDl(pct); },
+    _setDl(pct) {
+        if (!this.dlBar || !this.dlFill) return;
+        if (pct === null || pct === undefined) {
+            this.dlBar.classList.add('hidden');
+        } else {
+            this.dlBar.classList.remove('hidden');
+            this.dlFill.style.width = Math.max(3, Math.min(100, pct)) + '%';
+        }
+    },
+
+    /** app.js lo llama en cada oración nueva: fija objetivo y resetea la UI.
+     *  v7.6: 3.er arg script ('s'|'t') para los mensajes zh 简/繁. */
+    setTarget(zhText, pinyinText, script) {
+        this._evalTok++; // invalida evaluaciones en vuelo (anti-carrera)
+        if (this.state === 'recording') {
+            if (this._veActive()) window.VE.abort();
+            else {
+                if (this._recorder) this._recorder.abort();
+                if (this._recognizer) this._recognizer.abort();
+            }
+        }
+        this._recorder = null;
         this.state = 'idle';
+        this.script = script === 't' ? 't' : 's';
+        if (window.VE && typeof window.VE.setScript === 'function') window.VE.setScript(this.script);
         this.targetZh = String(zhText || '');
         this._releaseUrl();
         this._player.removeAttribute('src');
         this._setBtn('🎤', '');
+        this._setDl(null); // v7.6: barra de descarga fuera
         this.panel.classList.remove('is-recording');
         this.hint.textContent = T.hintTap;
         this.hint.classList.remove('hidden');
@@ -582,6 +652,40 @@ const VR = {
         // Soporte del navegador (MediaRecorder/getUserMedia)
         if (!VoiceRecorder.supported()) {
             this._showError(!navigator.mediaDevices ? T.errSecure : T.errSupport);
+            return;
+        }
+
+        // ── v7.6: con voice-evaluator.js, el motor local (Whisper WASM) toma
+        // el mando. La descarga del modelo (1.ª vez) corre EN PARALELO sin
+        // bloquear el micro; el audio nunca sale del dispositivo.
+        if (this._veActive()) {
+            this._updatePrivacy();
+            this.state = 'recording';
+            this._setBtn('🔴 00:00', 'is-recording');
+            this.panel.classList.add('is-recording');
+            this.hint.textContent = T.hintRec;
+            this.hint.classList.remove('hidden');
+            this.result.classList.add('hidden');
+            this.result.innerHTML = '';
+            this.rowActions.classList.add('hidden');
+            this._releaseUrl();
+            try {
+                await window.VE.startRecording({
+                    maxSeconds: EVAL_CONFIG.maxSeconds,
+                    onTick: (s) => {
+                        const mm = String(Math.floor(s / 60)).padStart(2, '0');
+                        const ss = String(s % 60).padStart(2, '0');
+                        this._setBtn('🔴 ' + mm + ':' + ss, 'is-recording');
+                    },
+                    onAutoStop: (res) => { if (res && this.state === 'recording') this._finishRecording(); }
+                });
+                this._recorder = window.VE.activeRecorder; // waveform = mismo pipeline
+                this._loopWave();
+            } catch (err) {
+                this._recorder = null;
+                this._backToIdle();
+                this._showError(this._errText(err));
+            }
             return;
         }
 
@@ -622,12 +726,36 @@ const VR = {
     async _finishRecording() {
         if (this.state !== 'recording') return;
         this.state = 'processing';
+        const tok = ++this._evalTok; // v7.6: si navegan a otra oración, no pisar la UI
         this._cancelWave();
         this._setBtn('', 'is-processing');      // spinner CSS (texto vacío)
-        this.hint.textContent = T.hintProc;
+        this.hint.textContent = this._veActive() ? T.hintProcLocal : T.hintProc;
 
+        // ── v7.6: motor local Whisper WASM (voice-evaluator.js) ──
+        // stopAndEvaluate SIEMPRE devuelve el objeto estandarizado
+        // (o modo manual 🎧 si el motor no pudo: nunca rompe la UI).
+        if (this._veActive()) {
+            let res = null;
+            try { res = await window.VE.stopAndEvaluate(this.targetZh); }
+            catch (err) { res = null; }
+            if (tok !== this._evalTok) return; // navegaron a otra oración
+            this._backToIdle();
+            if (!res || res.mode === 'error') {
+                this._showError((res && res.errorMsg) || T.errGeneric);
+                return;
+            }
+            if (res.audioBlob && res.audioBlob.size) {
+                this._recUrl = URL.createObjectURL(res.audioBlob);
+                this._player.src = this._recUrl;
+            }
+            this._showResult(res);
+            return;
+        }
+
+        // ── camino legado v7.5 (webspeech → manual 🎧) ──
         const blobRes = await this._recorder.stop();
         const recog = await this._recognizer.stop();
+        if (tok !== this._evalTok) return;
         this._backToIdle();
 
         if (!blobRes || !blobRes.blob || !blobRes.blob.size) {
@@ -692,6 +820,38 @@ const VR = {
         const es = document.createElement('p'); es.className = 'rec-msg-es'; es.textContent = lines[0] || '';
         const zh = document.createElement('p'); zh.className = 'rec-msg-zh'; zh.textContent = lines[1] || '';
         this.result.appendChild(es); this.result.appendChild(zh);
+
+        // v7.6: feedback carácter por carácter con la MISMA paleta de tonos
+        // de la app (azul 1.er, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro)
+        // + lo que el motor escuchó, para transparencia total del proceso.
+        if (!isManual && Array.isArray(res.wordScores) && res.wordScores.length) {
+            const lbl = document.createElement('p');
+            lbl.className = 'rec-transcript-label';
+            lbl.textContent = this.script === 't' ? T.charByT : T.charByS;
+            this.result.appendChild(lbl);
+
+            const box = document.createElement('div');
+            box.className = 'rec-transcript';
+            res.wordScores.forEach((w) => {
+                const sp = document.createElement('span');
+                if (w.ok) {
+                    const m = w.pinyin && w.pinyin.match(/[1-5]$/);
+                    sp.className = 'tone-' + (m ? m[0] : '5'); // paleta de tonos de la app
+                } else {
+                    sp.className = 'rec-bad';                  // carácter a practicar
+                }
+                sp.textContent = w.char;
+                box.appendChild(sp);
+            });
+            this.result.appendChild(box);
+
+            if (res.transcript) {
+                const heard = document.createElement('p');
+                heard.className = 'rec-heard';
+                heard.textContent = (this.script === 't' ? T.heardT : T.heardS) + ' ' + res.transcript;
+                this.result.appendChild(heard);
+            }
+        }
 
         // Caracteres a practicar (máx. 3) + tip de tono
         if (!isManual && Array.isArray(res.wordScores)) {
@@ -815,8 +975,12 @@ const VR = {
 window.VR = VR;                                  // lo único que app.js necesita
 window.evaluatePronunciation = evaluatePronunciation; // adaptador público (spec)
 window.VoiceRecorder = VoiceRecorder;            // clase encapsulada (futuro/tests)
+// v7.6: voice-evaluator.js reutiliza el motor de puntaje (pinyin con tonos)
+// y el pipeline WAV — cero duplicación entre ambos archivos.
 window.VoiceRecorderModule = { EVAL_CONFIG: EVAL_CONFIG, blobToWav16k: blobToWav16k,
-                               LiveRecognizer: LiveRecognizer };
+                               LiveRecognizer: LiveRecognizer,
+                               scoreTranscript: scoreTranscript, feedbackFor: feedbackFor,
+                               toneTip: toneTip, pySyll: pySyll, hanziChars: hanziChars };
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => VR.init());

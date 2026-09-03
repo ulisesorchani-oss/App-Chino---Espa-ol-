@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260904q">
+    <link rel="stylesheet" href="style.css?v=20260904r">
 </head>
 <body>
     <div class="container">
@@ -200,13 +200,15 @@
         <!-- v7.5: GRABACIÓN Y EVALUACIÓN DE PRONUNCIACIÓN (panel bajo la tarjeta) -->
         <div id="record-panel" class="record-panel" role="region" aria-label="Grabación y evaluación de pronunciación">
             <canvas id="record-wave" class="record-wave" height="34" aria-hidden="true"></canvas>
+            <!-- v7.6: barra de progreso de la descarga del motor Whisper (1.ª vez) -->
+            <div id="rec-dl" class="rec-dl hidden" aria-hidden="true"><div id="rec-dl-fill" class="rec-dl-fill"></div></div>
             <p id="record-hint" class="record-hint">👆 Tocá 🎤 para grabar tu pronunciación</p>
             <div id="record-result" class="record-result hidden" aria-live="polite"></div>
             <div id="record-row-actions" class="record-row hidden">
                 <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button">▶️ Escuchar mi grabación</button>
                 <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button">🔁 Grabar de nuevo</button>
             </div>
-            <p class="record-privacy">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
+            <p class="record-privacy" id="record-privacy-note">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
         </div>
 
         <!-- Panel de Vocabulario -->
@@ -314,8 +316,10 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260904q"></script>
-    <script src="app.js?v=20260904q"></script>
+    <script src="VoiceRecorder.js?v=20260904r"></script>
+    <!-- v7.6: motor de evaluación Whisper WASM 100% local (privado) -->
+    <script src="voice-evaluator.js?v=20260904r"></script>
+    <script src="app.js?v=20260904r"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

@@ -1,10 +1,11 @@
 ======================================================================
- v7.5 — SUBIR A GITHUB: 7 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.6 — SUBIR A GITHUB: 8 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 7 ARCHIVOS: los 6 de siempre + 1 NUEVO
-   (VoiceRecorder.js, el módulo de pronunciación). Si subís solo
-   los de siempre, el botón 🎤 no funciona: NO salteés el nuevo.
+⚠️ ESTA VERSIÓN SUBE 8 ARCHIVOS: los 7 de siempre + 1 NUEVO
+   (voice-evaluator.js, el motor de IA local Whisper). Si subís solo
+   los de siempre, la evaluación de pronunciación queda en el modo
+   viejo: NO salteés el nuevo.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
@@ -15,17 +16,18 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 7 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 8 archivos del ZIP, a la RAÍZ:
 
       ✅ index.html
       ✅ app.js
-      ✅ VoiceRecorder.js     ← NUEVO en v7.5 (no lo saltees)
+      ✅ VoiceRecorder.js     ← grabación (de v7.5, actualizado)
+      ✅ voice-evaluator.js   ← NUEVO en v7.6 (motor IA local) ←←←
       ✅ style.css
       ✅ sw.js
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.5) y toca el botón verde
+5. Abajo escribí un título (ej: v7.6) y toca el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
@@ -33,8 +35,10 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS:
-      app.js             = 616 KB aprox.  (no cambió en v7.5)
-      VoiceRecorder.js   = 25 KB aprox.   ← NUEVO: si no está, no subiste la v7.5
+      app.js             = 616 KB aprox.
+      VoiceRecorder.js   = 45 KB aprox.
+      voice-evaluator.js = 27 KB aprox. ← NUEVO: si no está,
+                            no subiste la v7.6
       html2canvas.min.js = 194 KB
       jspdf.umd.min.js   = 357 KB
 
@@ -44,39 +48,35 @@ B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
    Buscá la línea const VERSION. Debe decir:
 
-      const VERSION = 'v25';     ← correcto (v7.5)
-      const VERSION = 'v24';     ← viejo: el upload no llegó
+      const VERSION = 'v26';     ← correcto (v7.6)
+      const VERSION = 'v25';     ← viejo: el upload no llegó
 
-C) EN LA APP: en cualquier tarjeta, al lado de 🔊 ES y 🔊 CN debe
-   verse el botón nuevo 🎤. Tocás 🎤 y:
-      • el navegador pregunta permiso de micrófono → Permitir
-      • el botón se pone ROJO pulsante con temporizador (00:01,
-        00:02…) y abajo aparece la waveform (barras rojas)
-      • corta solo a los 20 segundos, evalúa y muestra puntaje
-        0-100 con mensaje motivador; si el navegador no puede
-        autoevaluar, muestra 🎧 con "Escuchá tu grabación"
+C) EN LA APP: en cualquier tarjeta, tocá 🎤 y mirá la letra chica
+   de abajo. Debe decir:
 
-D) Prueba del modo manual: tocá "▶️ Escuchar mi grabación" y
-   después "🔁 Grabar de nuevo" — ambos deben funcionar.
+      "🔒 Tu voz se procesa 100 % en tu dispositivo: no se envía
+       a ningún servidor ni se guarda"
 
-E) Prueba rápida (v7.2): respondé bien y la oración debe quedar
-   COMPLETA con la palabra en verde.
+   La 1.ª vez que un alumno graba, va a ver una barra marrón/
+   azul "⬇️ Descargando motor de voz (solo la 1.ª vez): X %" —
+   es el modelo de IA (~40 MB) bajando AL CELULAR del alumno.
+   Es normal y pasa una sola vez por dispositivo.
 
-QUÉ TRAE v7.5
+D) PRUEBA RÁPIDA DEL MOTOR (opcional, 1 minuto):
+   Grabá diciendo la oración de la tarjeta → después de "Analizando
+   tono…" tiene que aparecer el puntaje + la oración con colores
+   (verde/azul = bien dicho, rojo subrayado = a practicar) y la
+   línea "我听到：…" con lo que entendió el motor.
+
+QUÉ HAY DE NUEVO EN v7.6 (resumen para el commit):
 ------------------------------------------------------------
-✅ Botón 🎤 Grabar mi voz en cada tarjeta (junto a 🔊 ES/CN)
-✅ Estados: 🎤 → 🔴 pulsante + timer → spinner → ✅/✗ + puntaje
-✅ Waveform animada mientras graba (feedback inmediato)
-✅ Evaluación FASE 1 gratis: Web Speech API + comparación por
-   pinyin con tonos (funciona igual en 简体 y 繁體)
-✅ Chips con caracteres a practicar + tips de tono
-✅ ▶️ Escuchar mi grabación + 🔁 Grabar de nuevo
-✅ Modo manual 🎧 donde no hay autoevaluación (nunca se rompe)
-✅ Límite 20 s + errores amigables bilingües + privacidad
-   ("tu voz se procesa localmente y no se guarda")
-✅ VoiceRecorder.js: módulo encapsulado, preparado para FASE 2
-   premium (SuperSpeech/Azure/Whisper) sin reescribir el front
-✅ Total de la app: 921 oraciones embebidas (sin cambios)
-✅ Mantiene todo lo de v7.4 (DELE Escolares), v7.3 (HSK6 400),
-   v7.2 (hueco que se rellena), v7.1 (PDF directo) y v7.0
-   (clásicos + 繁體)
+• Evaluación de pronunciación con Whisper WebAssembly 100 % local:
+  la voz del alumno NUNCA sale del dispositivo (privacidad total).
+• Modelo whisper-tiny cuantizado (~40 MB) descargado 1 sola vez y
+  cacheado en el navegador (después funciona sin internet).
+• Feedback carácter por carácter con la paleta de tonos de la app
+  + línea "我听到" con la transcripción.
+• Mensajes de estado en 简/繁 según la preferencia del alumno.
+• Preparado para el futuro premium: cambiar a un proveedor de nube
+  (SuperSpeech/Azure) es UNA línea: VE.setProvider('cloud').
+======================================================================

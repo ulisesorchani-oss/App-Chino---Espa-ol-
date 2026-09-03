@@ -287,6 +287,36 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🧠 NOVEDADES v7.6 — Evaluación de pronunciación con IA LOCAL (Whisper)
+----------------------------------------------------------------------
+• GRAN CAMBIO: la evaluación del 🎤 ahora corre 100 % EN EL CELULAR
+  del alumno con Whisper (OpenAI) compilado a WebAssembly. La voz
+  NUNCA sale del dispositivo: ni se envía a Google ni a ningún
+  servidor. Privacidad total — ideal para alumnos en China.
+• Archivo nuevo: voice-evaluator.js (motor WASM autocontenido).
+  Usará el modelo whisper-tiny cuantizado (~40 MB) que se descarga
+  UNA sola vez la primera vez que el alumno graba (barra de
+  progreso "Descargando motor de voz: X %") y queda cacheado en el
+  navegador: la 2.ª vez arranca al instante y hasta funciona sin
+  internet.
+• Feedback nuevo carácter por carácter: la oración se muestra con
+  la MISMA paleta de tonos de la app (azul 1.er, ámbar 2.º, verde
+  3.er, rojo 4.º) y los caracteres mal pronunciados quedan marcados
+  en rojo con subrayado ondulado. Debajo: "我听到：…" con lo que el
+  motor escuchó (transparencia total).
+• Mensajes en chino según la preferencia del alumno: 简/繁
+  ("正在分析发音…" / "正在分析發音…", etc.).
+• Más inteligente: si el alumno queda en silencio o el micro no
+  capta nada, lo avisa amigablemente ("没听清楚…") en vez de dar 0.
+• Si el navegador no soporta el motor WASM (móviles muy viejos),
+  la app vuelve sola al modo anterior (Web Speech → 🎧 manual):
+  NUNCA se rompe nada.
+• Costo para Ulises: CERO. No hay servidor de evaluación; el único
+  costo es la descarga inicial del modelo, que la paga la red del
+  alumno una vez.
+• sw.js sube a v26 (+ voice-evaluator.js en el precache).
+
+======================================================================
 🎤 NOVEDADES v7.5 — Grabación y evaluación de pronunciación
 ----------------------------------------------------------------------
 • Botón nuevo "🎤 Grabar mi voz" junto a los botones de audio

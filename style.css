@@ -1822,3 +1822,69 @@ body.dark-mode .btn-record.is-processing::after {
     .record-panel { padding: 9px 10px 8px; margin-top: -10px; }
     .record-row .rec-action { flex: 1 1 auto; }
 }
+
+/* ============================================================
+   v7.6 — voice-evaluator.js: motor Whisper WASM 100% local
+   (barra de descarga del modelo + feedback carácter por carácter
+   con la paleta de tonos de la app + transparencia "escuché: …")
+   ============================================================ */
+.rec-dl {
+    height: 6px;
+    max-width: 280px;
+    margin: 6px auto 3px;
+    border-radius: 3px;
+    background: rgba(37, 99, 235, 0.12);
+    overflow: hidden;
+}
+
+.rec-dl-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    transition: width 0.25s ease;
+}
+
+.rec-transcript-label {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin: 7px 0 1px;
+}
+
+.rec-transcript {
+    font-size: 1.35rem;
+    letter-spacing: 0.14em;
+    line-height: 1.55;
+    margin: 2px 0;
+}
+
+.rec-transcript .rec-bad {
+    color: var(--danger);
+    font-weight: 700;
+    background: rgba(220, 38, 38, 0.10);
+    border-radius: 4px;
+    text-decoration: underline wavy var(--danger) 2px;
+    text-underline-offset: 5px;
+    padding: 0 1px;
+}
+
+.rec-heard {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    margin: 5px auto 0;
+    max-width: 92%;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Modo oscuro ---------- */
+body.dark-mode .rec-dl { background: rgba(147, 197, 253, 0.14); }
+
+body.dark-mode .rec-transcript .rec-bad {
+    background: rgba(248, 113, 113, 0.12);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+    .rec-transcript { font-size: 1.18rem; letter-spacing: 0.1em; }
+    .rec-dl { max-width: 220px; }
+}

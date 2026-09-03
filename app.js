@@ -1546,7 +1546,8 @@ function renderCurrentSentence() {
     //    alumno debe pronunciar. VoiceRecorder.js compara por pinyin, así que
     //    funciona igual en 简体 y 繁體.
     if (window.VR && typeof window.VR.setTarget === 'function') {
-        window.VR.setTarget(s['chinese_' + k + '_full'], s.pinyin || '');
+        // v7.6: 3.er arg = guion activo (s/t) → mensajes zh en 简/繁
+        window.VR.setTarget(s['chinese_' + k + '_full'], s.pinyin || '', k);
     }
 } // <--- ¡CIERRE DE LA FUNCIÓN!
 
