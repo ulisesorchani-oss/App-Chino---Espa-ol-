@@ -7,21 +7,26 @@
      del mismo origen + fallback offline para navegaciones.
    - Bonus: caché de audios TTS (POST /api/tts) → lo que ya
      escuchaste se puede reescuchar SIN conexión.
+   - v7.7: caché PERSISTENTE de modelos de IA (Whisper ONNX de
+     huggingface.co + runtime WASM de jsdelivr) → el motor de
+     pronunciación NO se re-descarga (40 MB) en cada update.
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
-      subí VERSION (ej. 'v6') para que todos reciban el update.
+      subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v26';
+const VERSION = 'v27';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
-const TTS_CACHE = 'chino-es-tts-v1'; // persiste entre versiones (no se borra)
+const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
+const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
 const TTS_MAX_ENTRIES = 80;
 
 const PRECACHE = [
   './',
   './index.html',
   './app.js',
-  './VoiceRecorder.js',    // v7.5: grabación y evaluación de pronunciación
-  './voice-evaluator.js',  // v7.6: motor Whisper WASM 100% local (privacidad)
+  './VoiceRecorder.js',    // v7.5/7.7: captura + UI de pronunciación
+  './pitch-analyzer.js',   // v7.7: F0 (YIN) + DTW + clasificador de tonos
+  './voice-evaluator.js',  // v7.6/7.7: orquestador Whisper (contenido) + tono
   './style.css',
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
@@ -31,6 +36,8 @@ const PRECACHE = [
   './icons/icon-512.png',
   './icons/maskable-512.png'
   // v6.2: los datos van DENTRO de app.js (EMBEDDED_MODULE_DATA) — no hace falta data/
+  // v7.7: los archivos DEL MODELO Whisper (40 MB) NO van al precache:
+  //       los gestiona MODEL_CACHE en runtime (ver cacheFirstModel).
 ];
 
 /* ---------- Install: precache tolerante (un 404 no rompe el SW) ---------- */
@@ -44,12 +51,12 @@ self.addEventListener('install', (event) => {
   })());
 });
 
-/* ---------- Activate: limpiar caches viejos (conserva audio TTS) ---------- */
+/* ---------- Activate: limpiar caches viejos (conservan TTS y modelos) ---------- */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys
-      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE)
+      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE && k !== MODEL_CACHE)
       .map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
@@ -66,10 +73,38 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin === self.location.origin) {
     event.respondWith(cacheFirstShell(req));
+  } else if (isModelAsset(url)) {
+    event.respondWith(cacheFirstModel(req)); // v7.7: modelos IA → caché persistente
   } else {
     event.respondWith(cacheFirstRuntime(req)); // CDN y otros cross-origin GET
   }
 });
+
+/* ---------- v7.7: ¿es un archivo del motor de IA (grande, inmutable)? ---------- */
+function isModelAsset(url) {
+  return url.hostname === 'huggingface.co' ||
+         url.hostname.endsWith('.hf.co') ||
+         (url.hostname === 'cdn.jsdelivr.net' &&
+          (url.pathname.includes('@huggingface/transformers') ||
+           url.pathname.includes('onnxruntime-web')));
+}
+
+/* ---------- v7.7: modelos IA — cache-first SIN refresco (inmutables) ----------
+   Distinto del shell: acá no conviene revalidar en background (son
+   ~40 MB). Una vez cacheados, arrancan sin red para siempre. */
+async function cacheFirstModel(req) {
+  const cached = await caches.match(req, { ignoreVary: true });
+  if (cached) return cached;
+  try {
+    const res = await fetch(req);
+    if (res && (res.ok || res.type === 'opaque')) {
+      try { const c = await caches.open(MODEL_CACHE); await c.put(req, res.clone()); } catch (e) { /* noop */ }
+    }
+    return res;
+  } catch (err) {
+    throw err;
+  }
+}
 
 /* ---------- Shell mismo origen: cache-first + refresh en background ---------- */
 async function cacheFirstShell(req) {

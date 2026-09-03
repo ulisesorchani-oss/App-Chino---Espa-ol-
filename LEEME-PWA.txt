@@ -287,6 +287,42 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🎯 NOVEDADES v7.7 — Tono medido DE VERDAD (F0 + DTW) · spec corregida
+----------------------------------------------------------------------
+• GRAN CAMBIO PEDAGÓGICO: el feedback de tonos ya no sale de una
+  inferencia del transcript (Whisper no fue hecho para eso). Ahora
+  se MIDEN dos cosas distintas y complementarias:
+     1) ¿Dijo el CARÁCTER correcto?  → Whisper WASM (solo contenido)
+     2) ¿Dijo el TONO correcto?      → análisis de pitch F0 + DTW
+  El tono es lo que más cuesta del chino y por fin se mide de
+  verdad, en el dispositivo y sin mandar la voz a ningún servidor.
+• Archivo nuevo: pitch-analyzer.js (motor de tono autocontenido,
+  sin dependencias): detección de pitch YIN, contornos en
+  SEMITONOS relativos al hablante (la voz grave del alumno no se
+  compara injustamente con la locutora), alineación temporal DTW
+  y clasificador de tonos 1/2/3/4 + neutro.
+• Referencia del tono: el audio TTS de la frase (el MISMO 🔊 CN
+  que el alumno ya escucha). Sin internet → plantillas canónicas
+  de tono (55/35/214/51). La voz del alumno JAMÁS viaja.
+• Resultado cualitativo por carácter (no solo un número):
+     "N.º 5: sonó como 2.º tono, buscá 4.º tono (cae fuerte)"
+  con color por tono ESPERADO (paleta de la app), subrayado
+  punteado ámbar = casi, rojo ondulado = a practicar.
+• Gráfico nuevo: contorno de pitch del ALUMNO superpuesto con el
+  de la REFERENCIA (azul vs gris punteado), con marcas rojas bajo
+  los caracteres flojos — el alumno VE su entonación.
+• Botón nuevo "🔊 Referencia": escucha el audio contra el que se
+  comparó tu tono, al lado de "▶️ Escuchar mi grabación".
+• Nuevo aviso honesto: "No se detectó voz suficiente para analizar
+  el tono" (el F0 falla con audio muy corto o con ruido).
+• Motor Whisper actualizado a @huggingface/transformers (el paquete
+  @xenova/transformers quedó deprecado) — mismo modelo tiny,
+  misma descarga única cacheada.
+• sw.js sube a v27, con caché PERSISTENTE de modelos: la
+  actualización de la app ya NO re-descarga los 40 MB del motor.
+• sw.js sube a v27 (+ pitch-analyzer.js en el precache).
+
+======================================================================
 🧠 NOVEDADES v7.6 — Evaluación de pronunciación con IA LOCAL (Whisper)
 ----------------------------------------------------------------------
 • GRAN CAMBIO: la evaluación del 🎤 ahora corre 100 % EN EL CELULAR

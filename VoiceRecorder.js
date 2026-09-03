@@ -1,6 +1,6 @@
 /* ============================================================
-   VoiceRecorder.js — v7.5 Módulo de Grabación y Evaluación de
-   Pronunciación para Chino ⇄ Español
+   VoiceRecorder.js — v7.5/7.7 Módulo de Grabación y Evaluación
+   de Pronunciación para Chino ⇄ Español
    ------------------------------------------------------------
    ARQUITECTURA (encapsulada, sin tocar la app existente):
      · Clase VoiceRecorder  → getUserMedia + MediaRecorder +
@@ -28,6 +28,13 @@
    ni siquiera la transcripción sale del teléfono). Este archivo
    queda como capa de CAPTURA + camino de fallback
    (webspeech → modo manual 🎧). La UI no cambia.
+   v7.7: el feedback de TONOS ahora sale de una medición real
+   (F0 + DTW en pitch-analyzer.js, vía voice-evaluator.js) y no
+   de una inferencia del transcript. Novedades de render: color
+   por tono esperado + aproximados punteados + detalle cualitativo
+   por carácter + gráfico de contornos superpuestos + botón del
+   audio de referencia. El render legado v7.5 queda intacto como
+   fallback (webspeech).
    ============================================================ */
 (function () {
 'use strict';
@@ -82,8 +89,13 @@ const T = {
     privacyLegacy: '🔒 Tu grabación no se guarda; la comparación ocurre en tu navegador · 你的录音不会保存，对比在浏览器里完成',
     heardS: '我听到：',
     heardT: '我聽到：',
-    charByS: '逐字发音反馈：',
-    charByT: '逐字發音反饋：'
+    charByS: '逐字声调反馈：',
+    charByT: '逐字聲調反饋：',
+
+    // v7.7 — tono real (F0 + DTW, pitch-analyzer.js)
+    refBtn: '🔊 Referencia',
+    refBtnStop: '⏸ Pausar ref.',
+    pitchLabel: 'Contorno de tono · azul: tu voz · gris: referencia · 声调对比（蓝：你 · 灰：参考）'
 };
 
 /* ============================================================
@@ -541,6 +553,8 @@ const VR = {
     _recorder: null,
     _recognizer: null,
     _recUrl: null,          // ObjectURL de la última grabación (para escucharla)
+    _refUrl: null,          // v7.7: ObjectURL del audio de referencia (TTS) — NO se revoca (VE lo cachea)
+    _refPlayer: null,       // v7.7: reproductor propio del audio de referencia
     _player: null,
     _rafId: 0,
     _evalTok: 0,            // v7.6: token anti-carrera (navegar durante la evaluación)
@@ -554,6 +568,7 @@ const VR = {
         this.rowActions = document.getElementById('record-row-actions');
         this.playBtn = document.getElementById('btn-play-my-rec');
         this.againBtn = document.getElementById('btn-rec-again');
+        this.refBtn = document.getElementById('btn-play-ref');    // v7.7
         this.dlBar = document.getElementById('rec-dl');          // v7.6
         this.dlFill = document.getElementById('rec-dl-fill');    // v7.6
         this.privacyNote = document.getElementById('record-privacy-note'); // v7.6
@@ -561,12 +576,18 @@ const VR = {
 
         this._player = new Audio();
         this._player.preload = 'auto';
+        this._refPlayer = new Audio(); // v7.7: referencia suena independiente de mi grabación
 
         this.btn.addEventListener('click', () => this._onBtnClick());
         this.againBtn.addEventListener('click', () => this._onBtnClick());
         this.playBtn.addEventListener('click', () => this._togglePlay());
+        if (this.refBtn) this.refBtn.addEventListener('click', () => this._toggleRef());
         this._player.addEventListener('ended', () => { this.playBtn.textContent = T.playBtn; });
         this._player.addEventListener('pause', () => { if (!this._player.ended) this.playBtn.textContent = T.playBtn; });
+        if (this._refPlayer) {
+            this._refPlayer.addEventListener('ended', () => { if (this.refBtn) this.refBtn.textContent = T.refBtn; });
+            this._refPlayer.addEventListener('pause', () => { if (this.refBtn) this.refBtn.textContent = T.refBtn; });
+        }
 
         // Seguridad: si la pestaña se oculta grabando, cortar (evita micro abierto)
         document.addEventListener('visibilitychange', () => {
@@ -631,6 +652,10 @@ const VR = {
         this.targetZh = String(zhText || '');
         this._releaseUrl();
         this._player.removeAttribute('src');
+        // v7.7: pauso y suelto la referencia (sin revoke: el cache de VE la reuse)
+        if (this._refPlayer) { try { this._refPlayer.pause(); } catch (e) {} }
+        this._refUrl = null;
+        if (this.refBtn) { this.refBtn.classList.add('hidden'); this.refBtn.textContent = T.refBtn; }
         this._setBtn('🎤', '');
         this._setDl(null); // v7.6: barra de descarga fuera
         this.panel.classList.remove('is-recording');
@@ -802,9 +827,13 @@ const VR = {
     /* ---------- resultado ---------- */
     _showResult(res) {
         this.result.innerHTML = '';
-        const isManual = res.mode === 'manual' || res.score === null || res.score === undefined;
+        const hasTones = Array.isArray(res.toneScores) && res.toneScores.length > 0;   // v7.7
+        const hasLegacy = Array.isArray(res.wordScores) && res.wordScores.length > 0;
+        const isManual = res.mode === 'manual' ||
+                         (!hasTones && !hasLegacy &&
+                          (res.score === null || res.score === undefined));
 
-        if (!isManual) {
+        if (!isManual && res.score !== null && res.score !== undefined) {
             this._setBtn(res.score >= EVAL_CONFIG.goodThreshold ? '✅' : '✗',
                          res.score >= EVAL_CONFIG.goodThreshold ? 'is-ok' : 'is-bad');
             const chip = document.createElement('span');
@@ -816,15 +845,90 @@ const VR = {
             this._setBtn('🎧', 'is-manual'); // sin autoevaluación: invita a escucharse
         }
 
-        const lines = String(res.feedback || '').split('\n');
-        const es = document.createElement('p'); es.className = 'rec-msg-es'; es.textContent = lines[0] || '';
-        const zh = document.createElement('p'); zh.className = 'rec-msg-zh'; zh.textContent = lines[1] || '';
+        // Feedback global — v7.7: overallFeedback {es, zh}; legado: 'es\nzh'
+        let esLine = '', zhLine = '';
+        if (res.overallFeedback && typeof res.overallFeedback === 'object') {
+            esLine = res.overallFeedback.es || '';
+            zhLine = res.overallFeedback.zh || '';
+        } else {
+            const lines = String(res.feedback || '').split('\n');
+            esLine = lines[0] || '';
+            zhLine = lines[1] || '';
+        }
+        const es = document.createElement('p'); es.className = 'rec-msg-es'; es.textContent = esLine;
+        const zh = document.createElement('p'); zh.className = 'rec-msg-zh'; zh.textContent = zhLine;
         this.result.appendChild(es); this.result.appendChild(zh);
 
-        // v7.6: feedback carácter por carácter con la MISMA paleta de tonos
-        // de la app (azul 1.er, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro)
-        // + lo que el motor escuchó, para transparencia total del proceso.
-        if (!isManual && Array.isArray(res.wordScores) && res.wordScores.length) {
+        if (hasTones) {
+            /* ── v7.7: TONOS REALES (F0 + DTW) ──
+               Color por tono ESPERADO con la paleta de la app
+               (azul 1.º, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro);
+               subrayado punteado = aproximado; rojo = tono equivocado. */
+            const lbl = document.createElement('p');
+            lbl.className = 'rec-transcript-label';
+            lbl.textContent = this.script === 't' ? T.charByT : T.charByS;
+            this.result.appendChild(lbl);
+
+            const box = document.createElement('div');
+            box.className = 'rec-transcript';
+            res.toneScores.forEach((w) => {
+                const sp = document.createElement('span');
+                const toneCls = 'tone-' + (w.expected && w.expected !== '0' ? w.expected : '5');
+                if (w.status === 'ok') sp.className = toneCls;
+                else if (w.status === 'approx') sp.className = toneCls + ' rec-approx';
+                else sp.className = 'rec-bad';                     // a practicar
+                sp.textContent = w.char;
+                sp.title = (w.msgEs || '') + (w.msgZh ? '\n' + w.msgZh : '');
+                box.appendChild(sp);
+            });
+            this.result.appendChild(box);
+
+            // Detalle cualitativo de lo que hay que practicar (máx. 4):
+            // "N.º 5: sonó como 2.º tono, buscá 4.º tono (cae fuerte)"
+            const bad = res.toneScores.filter((w) => w.status !== 'ok').slice(0, 4);
+            if (bad.length) {
+                const det = document.createElement('div');
+                det.className = 'rec-details';
+                bad.forEach((w) => {
+                    const p = document.createElement('p');
+                    p.className = 'rec-detail' + (w.status === 'wrong' ? ' is-wrong' : '');
+                    p.textContent = (w.msgEs || '') + (w.msgZh ? ' · ' + w.msgZh : '');
+                    det.appendChild(p);
+                });
+                this.result.appendChild(det);
+            }
+
+            // Gráfico: contorno del alumno vs referencia superpuestos
+            if (res.contours && res.contours.student && res.contours.student.length &&
+                res.contours.ref && res.contours.ref.length) {
+                const wrap = document.createElement('div');
+                wrap.className = 'rec-pitch-wrap';
+                const pl = document.createElement('p');
+                pl.className = 'rec-pitch-label';
+                pl.textContent = T.pitchLabel;
+                const cv = document.createElement('canvas');
+                cv.className = 'rec-pitch';
+                cv.setAttribute('role', 'img');
+                cv.setAttribute('aria-label', T.pitchLabel);
+                wrap.appendChild(pl);
+                wrap.appendChild(cv);
+                this.result.appendChild(wrap);
+                this._pitchCanvas = cv;
+                this._drawPitch(res.contours, res.toneScores);
+            } else {
+                this._pitchCanvas = null;
+            }
+
+            // Lo que Whisper entendió (solo verificación de contenido)
+            const heardTxt = res.transcription || res.transcript || '';
+            if (heardTxt) {
+                const heard = document.createElement('p');
+                heard.className = 'rec-heard';
+                heard.textContent = (this.script === 't' ? T.heardT : T.heardS) + ' ' + heardTxt;
+                this.result.appendChild(heard);
+            }
+        } else if (hasLegacy) {
+            // ── camino legado v7.5 (webspeech): feedback por contenido ──
             const lbl = document.createElement('p');
             lbl.className = 'rec-transcript-label';
             lbl.textContent = this.script === 't' ? T.charByT : T.charByS;
@@ -845,27 +949,24 @@ const VR = {
             });
             this.result.appendChild(box);
 
-            if (res.transcript) {
+            if (res.transcript || res.transcription) {
                 const heard = document.createElement('p');
                 heard.className = 'rec-heard';
-                heard.textContent = (this.script === 't' ? T.heardT : T.heardS) + ' ' + res.transcript;
+                heard.textContent = (this.script === 't' ? T.heardT : T.heardS) + ' ' + (res.transcript || res.transcription);
                 this.result.appendChild(heard);
             }
-        }
 
-        // Caracteres a practicar (máx. 3) + tip de tono
-        if (!isManual && Array.isArray(res.wordScores)) {
+            // Caracteres a practicar (máx. 3) + tip de tono
             const bad = res.wordScores.filter((w) => !w.ok).slice(0, 3);
             if (bad.length && bad.length < res.wordScores.length) {
-                const box = document.createElement('div'); box.className = 'rec-words';
+                const box2 = document.createElement('div'); box2.className = 'rec-words';
                 bad.forEach((w) => {
                     const chipW = document.createElement('span');
                     chipW.className = 'rec-word';
-                    // Pinyin en formato tono-numérico (ej. xue3) — refuerza el tono a practicar
                     chipW.textContent = w.char + (w.pinyin ? ' (' + w.pinyin + ')' : '');
-                    box.appendChild(chipW);
+                    box2.appendChild(chipW);
                 });
-                this.result.appendChild(box);
+                this.result.appendChild(box2);
                 const tip = toneTip(res.wordScores);
                 if (tip) {
                     const p = document.createElement('p'); p.className = 'rec-tip'; p.textContent = '🎯 ' + tip;
@@ -878,6 +979,16 @@ const VR = {
             this.result.appendChild(p);
         }
 
+        // v7.7: botón del audio DE REFERENCIA contra el que se comparó el tono
+        if (res.refAudioUrl && this.refBtn) {
+            this._refUrl = res.refAudioUrl; // NO se revoca: el cache de VE lo reutiliza
+            this.refBtn.classList.remove('hidden');
+            this.refBtn.textContent = T.refBtn;
+        } else if (this.refBtn) {
+            this._refUrl = null;
+            this.refBtn.classList.add('hidden');
+        }
+
         this.hint.classList.add('hidden');
         this.result.classList.remove('hidden');
         this.rowActions.classList.remove('hidden');
@@ -887,10 +998,89 @@ const VR = {
         this.againBtn.textContent = T.againBtn;
     },
 
+    /* ---------- v7.7: reproducción del audio de referencia ---------- */
+    _toggleRef() {
+        if (!this._refUrl || !this._refPlayer || !this.refBtn) return;
+        if (this._refPlayer.paused) {
+            // misma URL del blob cacheado en VE (no descarga de nuevo)
+            if (this._refPlayer.src !== this._refUrl) this._refPlayer.src = this._refUrl;
+            this._refPlayer.play().then(() => { this.refBtn.textContent = T.refBtnStop; }).catch(() => {});
+        } else {
+            this._refPlayer.pause();
+            this.refBtn.textContent = T.refBtn;
+        }
+    },
+
+    /* ---------- v7.7: gráfico de contornos de pitch superpuestos ---------- */
+    _drawPitch(contours, toneScores) {
+        const cv = this._pitchCanvas;
+        if (!cv || !cv.getContext || !contours) return;
+        const S = contours.student, R = contours.ref;
+        if (!S || !R || !S.length || !R.length) return;
+        const c0 = cv.getContext('2d');
+        if (!c0) return; // webview sin canvas 2D (defensa)
+
+        const dpr = window.devicePixelRatio || 1;
+        const cssW = cv.clientWidth || 300;
+        cv.width = Math.round(cssW * dpr);
+        cv.height = Math.round(92 * dpr);
+        const c = c0;
+        const w = cv.width, h = cv.height;
+        c.clearRect(0, 0, w, h);
+
+        let lo = Infinity, hi = -Infinity;
+        for (let i = 0; i < S.length; i++) { if (S[i] < lo) lo = S[i]; if (S[i] > hi) hi = S[i]; }
+        for (let i = 0; i < R.length; i++) { if (R[i] < lo) lo = R[i]; if (R[i] > hi) hi = R[i]; }
+        const pad = Math.max(1, (hi - lo) * 0.12);
+        lo -= pad; hi += pad;
+        const X = (t) => 1 + t * (w - 2);
+        const Y = (v) => (h - 8 * dpr) - ((v - lo) / (hi - lo)) * (h - 14 * dpr);
+
+        // fronteras por carácter (líneas verticales suaves)
+        if (Array.isArray(contours.refBounds)) {
+            c.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+            c.lineWidth = 1;
+            contours.refBounds.forEach((b) => {
+                const x = X(b / R.length);
+                c.beginPath(); c.moveTo(x, 2); c.lineTo(x, h - 2); c.stroke();
+            });
+        }
+
+        // referencia (gris, punteada)
+        c.strokeStyle = '#94a3b8';
+        c.lineWidth = 1.5 * dpr;
+        c.setLineDash([4 * dpr, 3 * dpr]);
+        c.beginPath();
+        R.forEach((v, i) => { const x = X(i / (R.length - 1)), y = Y(v); if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+        c.stroke();
+        c.setLineDash([]);
+
+        // alumno (azul, continuo, más grueso)
+        c.strokeStyle = '#2563eb';
+        c.lineWidth = 2.2 * dpr;
+        c.lineJoin = 'round';
+        c.beginPath();
+        S.forEach((v, i) => { const x = X(i / (S.length - 1)), y = Y(v); if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+        c.stroke();
+
+        // marcas rojas bajo los caracteres con tono equivocado
+        if (Array.isArray(toneScores)) {
+            c.strokeStyle = '#dc2626';
+            c.lineWidth = 3 * dpr;
+            toneScores.forEach((t) => {
+                if (t.status !== 'wrong' || !Array.isArray(t.frames) || t.frames.length < 2) return;
+                const x0 = X(t.frames[0] / (S.length - 1));
+                const x1 = X(t.frames[t.frames.length - 1] / (S.length - 1));
+                c.beginPath(); c.moveTo(x0, h - 3 * dpr); c.lineTo(x1, h - 3 * dpr); c.stroke();
+            });
+        }
+    },
+
     /* ---------- waveform ---------- */
     _drawIdleWave() {
         if (!this.wave || !this.wave.getContext) return;
         const c = this.wave.getContext('2d');
+        if (!c) return; // webview sin canvas 2D (defensa)
         this._fitCanvas();
         const w = this.wave.width, h = this.wave.height;
         c.clearRect(0, 0, w, h);
@@ -907,6 +1097,7 @@ const VR = {
         const draw = () => {
             if (!this._recorder || !this._recorder.recording) return;
             const c = this.wave.getContext('2d');
+            if (!c) return;
             const w = this.wave.width, h = this.wave.height;
             const lv = this._recorder.levels(28);
             c.clearRect(0, 0, w, h);

@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260904r">
+    <link rel="stylesheet" href="style.css?v=20260905a">
 </head>
 <body>
     <div class="container">
@@ -206,6 +206,7 @@
             <div id="record-result" class="record-result hidden" aria-live="polite"></div>
             <div id="record-row-actions" class="record-row hidden">
                 <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button">▶️ Escuchar mi grabación</button>
+                <button id="btn-play-ref" class="btn-secondary rec-action hidden" type="button">🔊 Referencia</button>
                 <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button">🔁 Grabar de nuevo</button>
             </div>
             <p class="record-privacy" id="record-privacy-note">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
@@ -316,10 +317,12 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260904r"></script>
-    <!-- v7.6: motor de evaluación Whisper WASM 100% local (privado) -->
-    <script src="voice-evaluator.js?v=20260904r"></script>
-    <script src="app.js?v=20260904r"></script>
+    <script src="VoiceRecorder.js?v=20260905a"></script>
+    <!-- v7.7: análisis de tono real F0+DTW (autocontenido, antes de voice-evaluator.js) -->
+    <script src="pitch-analyzer.js?v=20260905a"></script>
+    <!-- v7.6/v7.7: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
+    <script src="voice-evaluator.js?v=20260905a"></script>
+    <script src="app.js?v=20260905a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

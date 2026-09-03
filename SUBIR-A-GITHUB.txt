@@ -1,11 +1,11 @@
 ======================================================================
- v7.6 — SUBIR A GITHUB: 8 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.7 — SUBIR A GITHUB: 9 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 8 ARCHIVOS: los 7 de siempre + 1 NUEVO
-   (voice-evaluator.js, el motor de IA local Whisper). Si subís solo
-   los de siempre, la evaluación de pronunciación queda en el modo
-   viejo: NO salteés el nuevo.
+⚠️ ESTA VERSIÓN SUBE 9 ARCHIVOS: los 8 de v7.6 + 1 NUEVO
+   (pitch-analyzer.js, el motor de análisis de tono). Si subís solo
+   los de siempre, la evaluación queda con el tono "inventado" de
+   v7.6: NO salteés el nuevo.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
@@ -16,29 +16,34 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 8 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 9 archivos del ZIP, a la RAÍZ:
 
       ✅ index.html
       ✅ app.js
-      ✅ VoiceRecorder.js     ← grabación (de v7.5, actualizado)
-      ✅ voice-evaluator.js   ← NUEVO en v7.6 (motor IA local) ←←←
+      ✅ VoiceRecorder.js      ← captura + UI (actualizado)
+      ✅ pitch-analyzer.js     ← NUEVO en v7.7 (análisis de tono) ←←←
+      ✅ voice-evaluator.js    ← orquestador (actualizado)
       ✅ style.css
       ✅ sw.js
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.6) y toca el botón verde
+5. Abajo escribí un título (ej: v7.7) y toca el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
 
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
-A) ANTES de subir, mirá los TAMAÑOS:
-      app.js             = 616 KB aprox.
-      VoiceRecorder.js   = 45 KB aprox.
-      voice-evaluator.js = 27 KB aprox. ← NUEVO: si no está,
-                            no subiste la v7.6
+A) ANTES de subir, mirá los TAMAÑOS (aproximados):
+      index.html         = 23 KB
+      app.js             = 616 KB
+      VoiceRecorder.js   = 54 KB
+      pitch-analyzer.js  = 21 KB  ← NUEVO: si no está,
+                             no subiste la v7.7
+      voice-evaluator.js = 46 KB
+      style.css          = 40 KB
+      sw.js              = 8 KB
       html2canvas.min.js = 194 KB
       jspdf.umd.min.js   = 357 KB
 
@@ -48,35 +53,32 @@ B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
    Buscá la línea const VERSION. Debe decir:
 
-      const VERSION = 'v26';     ← correcto (v7.6)
-      const VERSION = 'v25';     ← viejo: el upload no llegó
+      const VERSION = 'v27';     ← correcto (v7.7)
+      const VERSION = 'v26';     ← viejo: el upload no llegó
 
-C) EN LA APP: en cualquier tarjeta, tocá 🎤 y mirá la letra chica
-   de abajo. Debe decir:
+C) EN LA APP: grabá una oración con el 🎤 y fijate que debajo:
+      · la oración aparece con colores de TONO esperado
+        (azul 1.er, ámbar 2.º, verde 3.er, rojo 4.º, gris neutro),
+        con subrayado punteado = casi y rojo ondulado = a practicar
+      · aparece un gráfico "Contorno de tono" (azul = vos,
+        gris punteado = referencia)
+      · hay un botón nuevo "🔊 Referencia" junto a
+        "▶️ Escuchar mi grabación"
 
-      "🔒 Tu voz se procesa 100 % en tu dispositivo: no se envía
-       a ningún servidor ni se guarda"
+D) PRUEBA RÁPIDA (1 minuto): decí la oración exagerando un tono
+   mal a propósito (ej. el 4.º tono dicho plano) → el carácter
+   tiene que quedar marcado en rojo con el mensaje
+   "sonó como 1.er tono, buscá 4.º tono".
 
-   La 1.ª vez que un alumno graba, va a ver una barra marrón/
-   azul "⬇️ Descargando motor de voz (solo la 1.ª vez): X %" —
-   es el modelo de IA (~40 MB) bajando AL CELULAR del alumno.
-   Es normal y pasa una sola vez por dispositivo.
-
-D) PRUEBA RÁPIDA DEL MOTOR (opcional, 1 minuto):
-   Grabá diciendo la oración de la tarjeta → después de "Analizando
-   tono…" tiene que aparecer el puntaje + la oración con colores
-   (verde/azul = bien dicho, rojo subrayado = a practicar) y la
-   línea "我听到：…" con lo que entendió el motor.
-
-QUÉ HAY DE NUEVO EN v7.6 (resumen para el commit):
+QUÉ HAY DE NUEVO EN v7.7 (resumen para el commit):
 ------------------------------------------------------------
-• Evaluación de pronunciación con Whisper WebAssembly 100 % local:
-  la voz del alumno NUNCA sale del dispositivo (privacidad total).
-• Modelo whisper-tiny cuantizado (~40 MB) descargado 1 sola vez y
-  cacheado en el navegador (después funciona sin internet).
-• Feedback carácter por carácter con la paleta de tonos de la app
-  + línea "我听到" con la transcripción.
-• Mensajes de estado en 简/繁 según la preferencia del alumno.
-• Preparado para el futuro premium: cambiar a un proveedor de nube
-  (SuperSpeech/Azure) es UNA línea: VE.setProvider('cloud').
+• Tono medido de verdad: F0 (YIN) + DTW contra la referencia,
+  en semitonos relativos al hablante — no más inferencia del
+  transcript. Whisper queda SOLO para verificar el contenido.
+• pitch-analyzer.js NUEVO (motor de tono autocontenido).
+• Feedback cualitativo por carácter + gráfico de contornos
+  superpuestos + botón de audio de referencia.
+• @huggingface/transformers (el paquete actual; @xenova quedó
+  deprecado) y caché de modelos persistente en el SW (v27):
+  las actualizaciones ya no re-descargan los 40 MB.
 ======================================================================
