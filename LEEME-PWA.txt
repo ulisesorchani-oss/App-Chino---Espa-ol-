@@ -287,6 +287,50 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🎤 NOVEDADES v7.5 — Grabación y evaluación de pronunciación
+----------------------------------------------------------------------
+• Botón nuevo "🎤 Grabar mi voz" junto a los botones de audio
+  (🔊 ES / 🔊 CN) en cada tarjeta: el alumno graba su voz leyendo
+  la oración china y recibe feedback al instante.
+• 4 estados del botón con feedback visual: 🎤 reposo → 🔴 rojo
+  pulsante con temporizador (00:05) mientras graba → spinner
+  mientras evalúa → ✅ verde (bien) o ✗ roja (mejorar) con
+  puntaje 0-100 en el panel.
+• Waveform animada durante la grabación (barras rojas que
+  reaccionan a la voz): feedback inmediato de que el microfono
+  está captando audio.
+• Evaluación FASE 1 (gratis, sin servidor): Web Speech API del
+  navegador transcribe lo dicho y lo compara con la oración por
+  PINYIN CON TONOS. Funciona igual en 简体 y 繁體 (la comparación
+  por pinyin es idéntica), y corrige los dígitos que a veces
+  mete el reconocedor ("2本" → "二本").
+• Mensajes motivadores bilingües según puntaje + chips rojos con
+  los caracteres a practicar (ej. 学 (xue2)) + tip de tono si
+  falla uno solo (ej. "Practicá el 3.er tono (ǎ, baja y sube)").
+• Botón "▶️ Escuchar mi grabación": el alumno se escucha y se
+  autocorrige comparando con el audio CN. Y "🔁 Grabar de nuevo".
+• Fallback elegante: si el navegador no soporta autoevaluación
+  (Firefox, Safari viejo, sin conexión), pasa a modo 🎧 manual —
+  graba, suena y se compara a oído. Nada se rompe.
+• Límite de 20 s por grabación (auto-corte) para archivos
+  livianos; manejo robusto de errores con mensajes amigables
+  bilingües: permiso denegado (con cómo habilitarlo), micro
+  ocupado, sin micro, navegador viejo, sin HTTPS.
+• Privacidad primero: nota visible "🔒 Tu voz se procesa
+  localmente y no se guarda · 你的声音只在设备上处理，不会保存".
+  El audio vive solo en memoria y se libera al navegar.
+• Arquitectura preparada para FASE 2 premium (SuperSpeech /
+  Azure / Whisper): nuevo archivo VoiceRecorder.js encapsulado
+  con adaptador evaluatePronunciation() que ya convierte a WAV
+  16 kHz mono 16-bit (el estándar de oro de las APIs de
+  evaluación fonética). Activar un proveedor premium = cambiar
+  UNA línea de config; el frontend no se reescribe.
+• app.js solo suma 1 llamada (VR.setTarget por oración): el
+  módulo es 100% independiente y duerme si falta el HTML.
+• sw.js sube a v25 (precachea VoiceRecorder.js) y el
+  cache-busting a 20260904q: los alumnos reciben el update solo.
+
+======================================================================
 🇪🇸 NOVEDADES v7.4 — DELE con menú desplegable: exámenes para escolares
 ----------------------------------------------------------------------
 • El botón DELE ahora es un MENÚ DESPLEGABLE (igual que Clásicos

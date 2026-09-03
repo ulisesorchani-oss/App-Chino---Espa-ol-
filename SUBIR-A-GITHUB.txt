@@ -1,8 +1,10 @@
 ======================================================================
- v7.2 — SUBIR A GITHUB: 6 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.5 — SUBIR A GITHUB: 7 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 6 ARCHIVOS (los mismos de v7.1: nada nuevo).
+⚠️ ESTA VERSIÓN SUBE 7 ARCHIVOS: los 6 de siempre + 1 NUEVO
+   (VoiceRecorder.js, el módulo de pronunciación). Si subís solo
+   los de siempre, el botón 🎤 no funciona: NO salteés el nuevo.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
@@ -13,16 +15,17 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 6 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 7 archivos del ZIP, a la RAÍZ:
 
       ✅ index.html
       ✅ app.js
+      ✅ VoiceRecorder.js     ← NUEVO en v7.5 (no lo saltees)
       ✅ style.css
       ✅ sw.js
-      ✅ html2canvas.min.js   (NUEVO en v7.1)
-      ✅ jspdf.umd.min.js     (NUEVO en v7.1)
+      ✅ html2canvas.min.js
+      ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.2) y toca el botón verde
+5. Abajo escribí un título (ej: v7.5) y toca el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
@@ -30,9 +33,10 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS:
-      app.js             = 529 KB aprox.
-      html2canvas.min.js = 194 KB   ← si no existe, no es la v7.1
-      jspdf.umd.min.js   = 357 KB   ← si no existe, no es la v7.1
+      app.js             = 616 KB aprox.  (no cambió en v7.5)
+      VoiceRecorder.js   = 25 KB aprox.   ← NUEVO: si no está, no subiste la v7.5
+      html2canvas.min.js = 194 KB
+      jspdf.umd.min.js   = 357 KB
 
 B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
@@ -40,29 +44,39 @@ B) DESPUÉS de subir, abrí esta dirección en el navegador:
 
    Buscá la línea const VERSION. Debe decir:
 
-      const VERSION = 'v22';     ← correcto (v7.2)
-      const VERSION = 'v21';     ← viejo: el upload no llegó
+      const VERSION = 'v25';     ← correcto (v7.5)
+      const VERSION = 'v24';     ← viejo: el upload no llegó
 
-C) EN LA APP (2 recargas): generá una planilla y tocá
-   "⬇️ Descargar PDF". Debe bajar el archivo .pdf directamente,
-   SIN abrir el diálogo de la impresora. Al lado queda un botón
-   🖨️ chiquito por si querés imprimir en papel.
+C) EN LA APP: en cualquier tarjeta, al lado de 🔊 ES y 🔊 CN debe
+   verse el botón nuevo 🎤. Tocás 🎤 y:
+      • el navegador pregunta permiso de micrófono → Permitir
+      • el botón se pone ROJO pulsante con temporizador (00:01,
+        00:02…) y abajo aparece la waveform (barras rojas)
+      • corta solo a los 20 segundos, evalúa y muestra puntaje
+        0-100 con mensaje motivador; si el navegador no puede
+        autoevaluar, muestra 🎧 con "Escuchá tu grabación"
 
-¿Y LOS DEMÁS ARCHIVOS DEL ZIP?
+D) Prueba del modo manual: tocá "▶️ Escuchar mi grabación" y
+   después "🔁 Grabar de nuevo" — ambos deben funcionar.
+
+E) Prueba rápida (v7.2): respondé bien y la oración debe quedar
+   COMPLETA con la palabra en verde.
+
+QUÉ TRAE v7.5
 ------------------------------------------------------------
-• manifest.json, pinyin-pro.min.js, icons/, vercel.json:
-  ya están en tu repo y NO cambiaron → no hace falta subirlos.
-• LEEME-PWA.txt: para tu referencia, no se usa en la app.
-• NO subas nada más. Con esos 6 archivos queda todo.
-
-SI AÚN ASÍ VES LO VIEJO:
-------------------------------------------------------------
-1. Verificá B) arriba (sw.js con v21). Esa es la prueba real de
-   qué hay en GitHub, sin importar el caché de tu navegador.
-2. Extra: generá una planilla y tocá "⬇️ Descargar PDF" → baja el .pdf;
-   y al responder una oración, el hueco se completa solo.
-3. En el celular con la app instalada como PWA: cerrala por
-   COMPLETO (deslizala fuera de apps recientes) y reabrila.
-4. Último recurso: borrá datos del sitio (Chrome → Configuración
-   → Privacidad → Cookies → el sitio → Borrar) y reentrá.
-======================================================================
+✅ Botón 🎤 Grabar mi voz en cada tarjeta (junto a 🔊 ES/CN)
+✅ Estados: 🎤 → 🔴 pulsante + timer → spinner → ✅/✗ + puntaje
+✅ Waveform animada mientras graba (feedback inmediato)
+✅ Evaluación FASE 1 gratis: Web Speech API + comparación por
+   pinyin con tonos (funciona igual en 简体 y 繁體)
+✅ Chips con caracteres a practicar + tips de tono
+✅ ▶️ Escuchar mi grabación + 🔁 Grabar de nuevo
+✅ Modo manual 🎧 donde no hay autoevaluación (nunca se rompe)
+✅ Límite 20 s + errores amigables bilingües + privacidad
+   ("tu voz se procesa localmente y no se guarda")
+✅ VoiceRecorder.js: módulo encapsulado, preparado para FASE 2
+   premium (SuperSpeech/Azure/Whisper) sin reescribir el front
+✅ Total de la app: 921 oraciones embebidas (sin cambios)
+✅ Mantiene todo lo de v7.4 (DELE Escolares), v7.3 (HSK6 400),
+   v7.2 (hueco que se rellena), v7.1 (PDF directo) y v7.0
+   (clásicos + 繁體)

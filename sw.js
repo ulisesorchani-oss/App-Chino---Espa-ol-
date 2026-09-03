@@ -11,7 +11,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v6') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v24';
+const VERSION = 'v25';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1'; // persiste entre versiones (no se borra)
 const TTS_MAX_ENTRIES = 80;
@@ -20,6 +20,7 @@ const PRECACHE = [
   './',
   './index.html',
   './app.js',
+  './VoiceRecorder.js',    // v7.5: grabación y evaluación de pronunciación
   './style.css',
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)

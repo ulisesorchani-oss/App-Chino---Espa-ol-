@@ -1632,3 +1632,193 @@ body.dark-mode .dele-menu .ci-py {
 body.dark-mode .dele-group-label {
     color: #f87171;
 }
+
+/* ============================================================
+   v7.5 — GRABACIÓN Y EVALUACIÓN DE PRONUNCIACIÓN
+   Botón 🎤 (en el header de la tarjeta) + panel bajo la tarjeta
+   ============================================================ */
+
+/* ---------- Botón 🎤: mismo lenguaje visual que 🔊 ES / 🔊 CN ---------- */
+.btn-record {
+    padding: 4px 12px;               /* un poco más grande: botón clave para el alumno */
+    font-size: 0.78rem;
+    min-width: 52px;
+}
+
+/* GRABANDO: rojo pulsante (el timer lo escribe VoiceRecorder.js) */
+.btn-record.is-recording {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+    animation: recPulse 1.2s ease-out infinite;
+}
+
+@keyframes recPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+/* PROCESANDO: spinner CSS (texto vacío) */
+.btn-record.is-processing {
+    color: transparent;
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-record.is-processing::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    margin: auto;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(37, 99, 235, 0.25);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: recSpin 0.7s linear infinite;
+}
+
+@keyframes recSpin { to { transform: rotate(360deg); } }
+
+/* RESULTADO: ✅ verde (bien) / ✗ roja (mejorar) / 🎧 modo manual */
+.btn-record.is-ok {
+    background: var(--success);
+    color: #fff;
+    border-color: var(--success);
+}
+
+.btn-record.is-bad {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+}
+
+.btn-record.is-manual {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* ---------- Panel bajo la tarjeta ---------- */
+.record-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px 14px 9px;
+    margin: -8px auto 20px;          /* se pega visualmente a la tarjeta */
+    max-width: 600px;                /* = ancho del .container → misma línea que la tarjeta */
+}
+
+.record-wave {
+    display: none;                   /* solo mientras graba */
+    width: 100%;
+    height: 34px;
+    margin: 2px 0 4px;
+}
+
+.record-panel.is-recording .record-wave { display: block; }
+
+.record-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 2px 0;
+}
+
+.record-panel.is-recording .record-hint {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.record-result { text-align: center; font-size: 0.9rem; }
+
+.rec-score {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.rec-score.ok  { background: var(--success); }
+.rec-score.mid { background: var(--warning); }
+.rec-score.low { background: var(--danger); }
+
+.rec-msg-es { font-weight: 600; margin: 2px 0; color: var(--text-primary); }
+.rec-msg-zh { margin: 2px 0; color: var(--text-secondary); white-space: pre-line; }
+
+.rec-words {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 7px 0 2px;
+}
+
+.rec-word {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    color: var(--danger);
+    border-radius: 10px;
+    padding: 2px 9px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.rec-tip {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin: 5px 0 0;
+}
+
+.rec-error {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin: 2px 0;
+    white-space: pre-line;
+}
+
+.record-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 9px;
+    flex-wrap: wrap;
+}
+
+.rec-action { font-size: 0.8rem; padding: 5px 11px; }
+
+.record-privacy {
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 9px 0 0;
+    opacity: 0.75;
+}
+
+/* ---------- Modo oscuro ---------- */
+body.dark-mode .record-panel {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .rec-word {
+    background: rgba(252, 165, 165, 0.1);
+    border-color: rgba(252, 165, 165, 0.4);
+    color: #fca5a5;
+}
+
+body.dark-mode .btn-record.is-processing::after {
+    border-color: rgba(147, 197, 253, 0.25);
+    border-top-color: #93c5fd;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+    .btn-record { padding: 4px 9px; min-width: 46px; }
+    .record-panel { padding: 9px 10px 8px; margin-top: -10px; }
+    .record-row .rec-action { flex: 1 1 auto; }
+}

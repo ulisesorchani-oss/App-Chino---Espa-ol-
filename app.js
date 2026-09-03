@@ -1540,6 +1540,14 @@ function renderCurrentSentence() {
 
     // 8. Hacer el hueco "___" clicable (los alumnos intentan tocarlo para escribir)
     makeBlanksClickable();
+
+    // 9. Módulo de pronunciación (v7.5): nueva oración → nuevo objetivo + reset.
+    //    El objetivo es SIEMPRE la oración china completa (sin hueco): lo que el
+    //    alumno debe pronunciar. VoiceRecorder.js compara por pinyin, así que
+    //    funciona igual en 简体 y 繁體.
+    if (window.VR && typeof window.VR.setTarget === 'function') {
+        window.VR.setTarget(s['chinese_' + k + '_full'], s.pinyin || '');
+    }
 } // <--- ¡CIERRE DE LA FUNCIÓN!
 
 // ===== Hueco clicable: tocar el "___" lleva al banner de escritura =====
