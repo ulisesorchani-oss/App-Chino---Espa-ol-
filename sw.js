@@ -20,11 +20,14 @@
    - v7.11: ídem — sin cambios de precache (leyenda de tonos + esquemas
      de color viven en index.html/style.css/app.js: popup #tone-legend-pop,
      variables --tone-N con fallback y paleta Okabe-Ito para daltonismo).
+   - v7.12: +dict-mini.js en precache — Capa 4: diccionario offline
+     zh↔es (~1.630 entradas + 802 alias, CC-BY-SA 4.0). Archivo NUEVO
+     en el shell: sin precache no existiría offline.
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v31';
+const VERSION = 'v32';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -40,6 +43,7 @@ const PRECACHE = [
   './pitch-analyzer.js',   // v7.7/7.8: F0 (YIN) + DTW + clase PitchAnalyzer (carga LAZY en es-cn)
   './voice-evaluator.js',  // v7.6-7.8: orquestador por MODO (es-cn / cn-es)
   './style.css',
+  './dict-mini.js',         // v7.12: Capa 4 — diccionario offline zh↔es (CC-BY-SA 4.0)
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
   './jspdf.umd.min.js',    // v7.1: ídem

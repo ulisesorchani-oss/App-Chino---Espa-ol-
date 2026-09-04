@@ -2062,6 +2062,54 @@ if (typeof EMBEDDED_MODULE_DATA !== 'undefined') {
     });
 }
 
+// ===== v7.12 Capa 4 — diccionario offline (dict-mini.js, CC-BY-SA 4.0) =====
+// ~1.630 entradas frecuentes zh→es seleccionadas del vocabulario del curso +
+// CC-CEDICT (MDBG); definiciones ES propias. Los ALIAS (formas tradicionales y
+// variantes) apuntan a la entrada real: "嗎"→"吗". Además se construye un índice
+// INVERSO es→zh para tocar palabras españolas y proponer candidatos chinos.
+const DICT_MINI_RAW = (typeof window !== 'undefined' && window.DICT_MINI) || {};
+const dictMini = new Map();     // clave → { py, def }
+const dictMiniAlias = new Map(); // alias → clave real
+(function () {
+    const keys = Object.keys(DICT_MINI_RAW);
+    keys.forEach(k => {
+        const v = DICT_MINI_RAW[k];
+        if (Array.isArray(v)) dictMini.set(k, { py: v[0] || '', def: v[1] || '' });
+    });
+    keys.forEach(k => {
+        const v = DICT_MINI_RAW[k];
+        if (typeof v === 'string') { if (dictMini.has(v)) dictMiniAlias.set(k, v); return; }
+        if (v[2] && dictMini.has(k) && !dictMini.has(v[2])) dictMiniAlias.set(v[2], k);
+    });
+})();
+
+function dictMiniLookup(word) {
+    const w = String(word || '').trim();
+    if (!w) return null;
+    const key = dictMini.has(w) ? w : (dictMiniAlias.get(w) || '');
+    return key ? dictMini.get(key) : null;
+}
+
+// Índice inverso ES→ZH: cada sentido de cada entrada aporta sus palabras ES (≥3
+// letras, sin stop words) → hasta 3 candidatos chinos por palabra española.
+const dictMiniEs = new Map();
+(function () {
+    const push = (es, z, py, def) => {
+        if (!ES_STOP.has(es)) {
+            if (!dictMiniEs.has(es)) dictMiniEs.set(es, []);
+            const list = dictMiniEs.get(es);
+            if (list.length < 3 && !list.some(x => x.z === z)) list.push({ z: z, py: py, def: def });
+        }
+    };
+    dictMini.forEach((val, z) => {
+        (val.def || '').split(';').forEach(sense => {
+            (sense.toLowerCase().match(/[a-záéíóúüñ]+/g) || []).forEach(tok => {
+                if (tok.length >= 3) push(tok, z, val.py, sense.trim());
+            });
+        });
+    });
+})();
+
 // v7.10 Capa 2: candidatos de lema para una palabra española (el 1.º es la
 // palabra misma; el resto plurales y conjugaciones frecuentes → infinitivo)
 function esLemmaCandidates(w) {
@@ -2109,6 +2157,23 @@ function lookupVocab(word) {
         for (const cand of esLemmaCandidates(lw)) {
             if (cand !== lw && vocabDict.has(cand)) return { level: 'lemma', lemma: cand, rec: vocabDict.get(cand) };
         }
+    }
+    // v7.12 Capa 4: definición breve del diccionario offline (dict-mini.js).
+    // ZH: la entrada da pinyin de diccionario + sentidos ES (+ contexto de
+    // lección si además vive en algún texto). ES: índice inverso → candidatos
+    // chinos con pinyin y sentido.
+    if (zh) {
+        const d = dictMiniLookup(w);
+        if (d) return { level: 'dict', py: d.py, def: d.def, rec: wordHitDict.get(w) || null };
+    } else {
+        let dItems = dictMiniEs.get(lw) || null;
+        let dLemma = '';
+        if (!dItems) {
+            for (const cand of esLemmaCandidates(lw)) {
+                if (cand !== lw && dictMiniEs.has(cand)) { dItems = dictMiniEs.get(cand); dLemma = cand; break; }
+            }
+        }
+        if (dItems) return { level: 'dict-es', items: dItems, lemma: dLemma, rec: wordHitDict.get(w) || wordHitDict.get(lw) || null };
     }
     // 3) la palabra vive dentro del texto de una lección
     if (wordHitDict.has(w)) return { level: 'hit', rec: wordHitDict.get(w) };
@@ -2187,18 +2252,37 @@ function showVocabPop(word) {
     const rec = hit.rec;
     let html = '<div class="vp-word">' + escHtml(w) + '</div>';
     if (zh) {
-        // Palabra china: pinyin SIEMPRE (pinyin-pro), haya o no ficha
-        const py = wordPinyin(w) || (rec ? rec.pinyin : '');
+        // Palabra china: pinyin SIEMPRE — v7.12: si hay entrada de diccionario
+        // (dict-mini) su pinyin de diccionario va primero (tonos neutros reales)
+        const py = (hit.level === 'dict' && hit.py) || wordPinyin(w) || (rec ? rec.pinyin : '');
         if (py) html += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
     }
     if (hit.level === 'exact') {
         // Respuesta exacta: EXACTAMENTE lo mismo que mostraba siempre
         if (zh) {
             if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';
+            // v7.12: la ficha de la lección + sentidos extra del diccionario si suman
+            const dX = dictMiniLookup(w);
+            if (dX && dX.def && (!rec || !rec.es || rec.es.toLowerCase() !== dX.def.toLowerCase())) {
+                html += '<div class="vp-def">📖 ' + escHtml(dX.def) + '</div>';
+            }
             if (rec) html += vpZhExampleHtml(rec, w);
         } else if (rec) {
             html += vpEsExactHtml(rec, w);
         }
+    } else if (hit.level === 'dict') {
+        // v7.12 Capa 4: definición breve del diccionario offline (dict-mini.js)
+        if (hit.def) html += '<div class="vp-def">🇪🇸 ' + escHtml(hit.def) + '</div>';
+        if (hit.rec) html += '<div class="vp-note">🔎 También aparece en una lección:</div>' + vpZhExampleHtml(hit.rec, '');
+    } else if (hit.level === 'dict-es') {
+        // v7.12 Capa 4: candidatos chinos para una palabra española
+        html += '<div class="vp-note">📖 Diccionario' + (hit.lemma ? ' (lema «' + escHtml(hit.lemma) + '»)' : '') + ':</div>';
+        hit.items.forEach(it => {
+            html += '<div class="vp-dict-es-row"><span class="vp-dict-zh">🇨🇳 ' + escHtml(it.z) + '</span>'
+                + (it.py ? ' <span class="vp-dict-py">(' + escHtml(it.py) + ')</span>' : '')
+                + ' <span class="vp-dict-def">— ' + escHtml(it.def) + '</span></div>';
+        });
+        if (hit.rec) html += vpEsExampleHtml(hit.rec, '');
     } else if (hit.level === 'lemma') {
         // v7.10 Capa 2: tocó una conjugación/plural → ficha del LEMA
         if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';

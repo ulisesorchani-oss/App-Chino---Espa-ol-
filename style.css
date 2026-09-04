@@ -1253,6 +1253,58 @@ body.dark-mode .vp-char-row {
     }
 }
 
+/* ===== v7.12 Capa 4: definición breve de diccionario en el popup ===== */
+/* Sentidos ES del dict-mini (bloque chip destacado) */
+.vp-def {
+    font-size: 0.92rem;
+    color: var(--text);
+    background: var(--bg-light);
+    border-left: 3px solid var(--primary);
+    border-radius: 6px;
+    padding: 6px 9px;
+    margin-top: 7px;
+}
+
+/* v7.12: índice inverso ES→ZH — una fila por candidato chino */
+.vp-dict-es-row {
+    font-size: 0.86rem;
+    margin-top: 6px;
+    line-height: 1.45;
+}
+
+.vp-dict-zh {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.vp-dict-py {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.vp-dict-def {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+/* Regla de duplicación: Modo Oscuro */
+body.dark-mode .vp-def {
+    background: #0f172a;
+    border-left-color: #60a5fa;
+}
+
+/* Regla de duplicación: Móvil ≤480px */
+@media (max-width: 480px) {
+    .vp-def {
+        font-size: 0.88rem;
+        padding: 5px 8px;
+    }
+
+    .vp-dict-zh {
+        font-size: 1rem;
+    }
+}
+
 /* ===== ✍️ Planillas de escritura 写字 (v6.5) ===== */
 .writer-banner {
     border-left-color: #16a085;
