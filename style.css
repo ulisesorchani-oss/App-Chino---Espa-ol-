@@ -610,13 +610,18 @@ body.dark-mode .blank-fill.correct { color: #4ade80; background: rgba(74, 222, 1
 body.dark-mode .blank-fill.wrong   { color: #f87171; background: rgba(248, 113, 113, .12); }
 body.dark-mode .blank-fill.reveal  { color: #fbbf24; background: rgba(251, 191, 36, .14); }
 
-.tone-1 { color: var(--primary); }   /* Azul */
-.tone-2 { color: var(--warning); }   /* Naranja/Ámbar */
-.tone-3 { color: var(--success); }   /* Verde */
-.tone-4 { color: var(--danger); }    /* Rojo */
+/* v7.11: los colores de tono se resuelven con variables (--tone-N) que
+   applyToneScheme() define SOLO si el usuario elige un esquema distinto del
+   estándar. Sin variable definida, cada regla cae a su color nativo de la
+   app (mismo look de siempre, y el modo oscuro sigue adaptándose solo). */
+.tone-1 { color: var(--tone-1, var(--primary)); }   /* Azul */
+.tone-2 { color: var(--tone-2, var(--warning)); }   /* Naranja/Ámbar */
+.tone-3 { color: var(--tone-3, var(--success)); }   /* Verde */
+.tone-4 { color: var(--tone-4, var(--danger)); }    /* Rojo */
 
-/* Tono 5 (neutro) - agregar esta clase */
-.tone-5 { color: var(--text-secondary); } /* Gris */
+/* Tono neutro: el DOM usa tone-5 (pinyin-pro num 5); tone-0 queda como
+   alias defensivo por si alguna función vuelve a generar ese nombre. */
+.tone-0, .tone-5 { color: var(--tone-0, var(--text-secondary)); } /* Gris */
 
 /* ===== BARRA DE PROGRESO ===== */
 .progress-track {
@@ -2165,4 +2170,128 @@ body.dark-mode .rec-es-word.is-bad {
     .rec-es-word { font-size: 0.95rem; padding: 2px 7px; }
     .rec-conf { font-size: 0.72rem; }
     .rec-es-vs { font-size: 0.78rem; }
+}
+
+/* ===== v7.11: leyenda de tonos + esquemas de color ===== */
+/* El popup reutiliza .vocab-pop (posición/ancho/animación); acá solo el ancho
+   propio y el contenido. Las muestras (.tl-sample) y la oración demo usan las
+   MISMAS clases tone-1..5 que la tarjeta y el lector → reflejan en vivo el
+   esquema activo sin JS extra. */
+.btn-tone-info {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+#tone-legend-pop { width: min(370px, calc(100vw - 32px)); }
+
+.tl-title {
+    margin: 0 0 4px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    padding-right: 20px;
+}
+.tl-intro {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+.tl-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 6px 0 8px;
+}
+.tl-row { display: flex; align-items: center; gap: 10px; }
+.tl-sample {
+    font-size: 1.3rem;
+    font-weight: 700;
+    width: 34px;
+    text-align: center;
+    line-height: 1.2;
+}
+.tl-label { font-size: 0.86rem; color: var(--text-primary); }
+
+/* Oración demo (妈妈骑马，马慢，妈妈骂马。) — previsualiza el esquema activo */
+.tl-demo {
+    font-size: 1.12rem;
+    line-height: 1.9;
+    letter-spacing: 2px;
+    margin: 2px 0 10px;
+    padding: 6px 10px;
+    background: rgba(37, 99, 235, 0.06);
+    border-radius: 8px;
+}
+body.dark-mode .tl-demo { background: rgba(147, 197, 253, 0.09); }
+
+.tl-sub {
+    margin: 8px 0 6px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.tl-schemes { display: flex; flex-direction: column; gap: 5px; }
+.tl-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.tl-custom {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 10px 0 2px;
+}
+/* .tl-custom define display:grid y vive DESPUÉS de .hidden en este archivo:
+   a igual especificidad ganaría grid y la grilla jamás se ocultaría
+   (mismo caso que .install-help.hidden). La regla compuesta garantiza ocultarla. */
+.tl-custom.hidden { display: none; }
+.tl-custom label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.tl-custom input[type="color"] {
+    width: 100%;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+}
+.tl-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+/* ---------- Modo oscuro (regla de duplicación) ---------- */
+body.dark-mode .tl-title,
+body.dark-mode .tl-sub,
+body.dark-mode .tl-label,
+body.dark-mode .tl-opt { color: #e2e8f0; }
+body.dark-mode .tl-intro,
+body.dark-mode .tl-check,
+body.dark-mode .tl-custom label { color: #cbd5e1; }
+
+/* ---------- Responsive ≤480px (regla de duplicación) ---------- */
+@media (max-width: 480px) {
+    .tl-sample { font-size: 1.15rem; width: 30px; }
+    .tl-label { font-size: 0.8rem; }
+    .tl-demo { font-size: 1.02rem; letter-spacing: 1px; }
+    .tl-custom { gap: 5px; }
+    .tl-custom input[type="color"] { height: 26px; }
+    .btn-tone-info { padding: 6px 10px; }
 }

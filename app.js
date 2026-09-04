@@ -772,7 +772,11 @@ let state = {
     translationRevealed: false,
     showPinyin: true,
     answered: false,
-    filledAnswer: null   // v7.2: 'correct' | 'wrong' | 'reveal' → el hueco se muestra completo
+    filledAnswer: null,  // v7.2: 'correct' | 'wrong' | 'reveal' → el hueco se muestra completo
+    // v7.11: esquema de colores de tono + leyenda
+    toneScheme: 'standard',   // 'standard' | 'colorblind' | 'custom'
+    toneCustomColors: null,   // {'1':'#hex',...,'5':'#hex'} — 5 = neutro
+    toneLegendSeen: false     // la leyenda ya se mostró al activar tonos
 };
 
 // Variable global para el botón de colores
@@ -805,7 +809,11 @@ function saveProgress() {
             currentIndex: state.currentIndex,
             activeModule: state.activeModule,
             showPinyin: state.showPinyin,
-            showToneColors: showToneColors // Guardar estado de colores
+            showToneColors: showToneColors, // Guardar estado de colores
+            // v7.11: esquema de tonos
+            toneScheme: state.toneScheme,
+            toneCustomColors: state.toneCustomColors,
+            toneLegendSeen: state.toneLegendSeen
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -825,6 +833,19 @@ function loadProgress() {
         if (data.activeModule) state.activeModule = data.activeModule;
         if (data.showPinyin !== undefined) state.showPinyin = data.showPinyin;
         if (data.showToneColors !== undefined) showToneColors = data.showToneColors;
+        // v7.11: esquema de tonos (validado — localStorage puede venir viejo o trucado)
+        if (['standard', 'colorblind', 'custom'].indexOf(data.toneScheme) !== -1) {
+            state.toneScheme = data.toneScheme;
+        }
+        if (data.toneCustomColors && typeof data.toneCustomColors === 'object') {
+            const clean = {};
+            for (let n = 1; n <= 5; n++) {
+                const v = data.toneCustomColors[String(n)];
+                if (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)) clean[String(n)] = v;
+            }
+            if (Object.keys(clean).length) state.toneCustomColors = clean;
+        }
+        if (data.toneLegendSeen !== undefined) state.toneLegendSeen = !!data.toneLegendSeen;
     } catch (e) { /* silencioso */ }
 }
 
@@ -854,6 +875,7 @@ function getFiltered() {
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
     loadProgress();
+    applyToneScheme(); // v7.11: restaurar esquema de tonos guardado (respeta dark ya aplicado)
     await loadSentences();
     setupEventListeners();
     applySavedUI();
@@ -988,6 +1010,56 @@ function setupEventListeners() {
     safeAdd('btn-reset', resetProgress);
     safeAdd('btn-pinyin', togglePinyin);
     safeAdd('btn-tones', toggleToneColors);
+
+    // ── v7.11: leyenda de tonos + esquema de colores ──
+    safeAdd('btn-tone-info', showToneLegend);
+    safeAdd('btn-tone-legend-close', hideToneLegend);
+    // Cambio de esquema (radios estáticos → listener directo con 'change')
+    document.querySelectorAll('input[name="tone-scheme"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            state.toneScheme = e.target.value;
+            const customDiv = document.getElementById('tone-custom-colors');
+            if (customDiv) customDiv.classList.toggle('hidden', state.toneScheme !== 'custom');
+            if (state.toneScheme === 'custom' && !state.toneCustomColors) {
+                // Sembrar el custom con el look actual (TONE_CUSTOM_DEFAULT)
+                state.toneCustomColors = {};
+                for (let n = 1; n <= 5; n++) {
+                    state.toneCustomColors[String(n)] = TONE_CUSTOM_DEFAULT[String(n)];
+                    const inp = document.getElementById('tc-' + n);
+                    if (inp) inp.value = TONE_CUSTOM_DEFAULT[String(n)];
+                }
+            }
+            applyToneScheme();
+            saveProgress();
+        });
+    });
+    // Colores personalizados: SOLO 'input' (actualización en vivo).
+    // ⚠ No usar safeAdd (click) acá: dispararía doble con 'input'.
+    for (let n = 1; n <= 5; n++) {
+        const inp = document.getElementById('tc-' + n);
+        if (inp) inp.addEventListener('input', (e) => {
+            if (!state.toneCustomColors) state.toneCustomColors = {};
+            state.toneCustomColors[String(n)] = e.target.value;
+            applyToneScheme();
+            saveProgress();
+        });
+    }
+    // "No mostrar esta leyenda al activar los tonos"
+    const chkLegend = document.getElementById('chk-tone-legend-once');
+    if (chkLegend) chkLegend.addEventListener('change', (e) => {
+        state.toneLegendSeen = !!e.target.checked;
+        saveProgress();
+    });
+    // Clic fuera cierra el popup (mismo patrón que #vocab-pop). Los botones
+    // que lo ABREN (🎨 Tonos y ℹ️) no deben cerrarlo con el mismo clic, y
+    // 🌙 tema tampoco: sirven para previsualizar el esquema en ambos modos.
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('tone-legend-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && (e.target.closest('#btn-tones') || e.target.closest('#btn-tone-info') || e.target.closest('#btn-theme'))) return;
+        hideToneLegend();
+    });
     safeAdd('btn-speed', cycleSpeed);
     safeAdd('btn-voice-zh', () => cycleVoice('zh'));
     safeAdd('btn-voice-es', () => cycleVoice('es'));
@@ -1653,9 +1725,82 @@ function toggleToneColors() {
         btn.classList.toggle('active', showToneColors);
     }
     
+    // v7.11: la PRIMERA vez que se activan los tonos se muestra la leyenda.
+    // Se marca toneLegendSeen acá mismo (si no, reaparecería en cada
+    // activación aunque no marcaras el checkbox); con el botón ℹ️ del panel
+    // se puede reabrir cuando quieras.
+    if (showToneColors && !state.toneLegendSeen) {
+        state.toneLegendSeen = true;
+        showToneLegend();
+    }
+    
     saveProgress();
     renderCurrentSentence();
     renderReaderPreview(); // el lector libre también usa los colores de tono
+}
+
+// ===== v7.11: esquemas de color para los tonos =====
+// Estándar NO se aplica por JS: son las variables nativas de la app
+// (--primary/--warning/--success/--danger/--text-secondary) a las que el CSS
+// cae cuando no hay variable --tone-N definida. Así el look de siempre no
+// cambia ni una pixel, y el modo oscuro sigue adaptándose solo.
+const TONE_SCHEMES = {
+    colorblind: { // paleta Okabe-Ito (segura para deuteranopía/protanopía)
+        light: { 1: '#0072B2', 2: '#E69F00', 3: '#009E73', 4: '#D55E00', 5: '#999999' },
+        dark:  { 1: '#56B4E9', 2: '#E69F00', 3: '#009E73', 4: '#D55E00', 5: '#999999' } // azul cielo: legible sobre fondo oscuro
+    }
+};
+// Semilla del esquema personalizado = look actual de la app (el usuario parte
+// de lo que conoce y ajusta desde ahí). Claves SIEMPRE como string '1'..'5'.
+const TONE_CUSTOM_DEFAULT = { 1: '#2563eb', 2: '#d97706', 3: '#16a34a', 4: '#dc2626', 5: '#64748b' };
+
+// Paleta activa según esquema + modo (light/dark). null = estándar → el CSS
+// usa sus fallbacks nativos y NO se pisan los colores del usuario.
+function toneActivePalette() {
+    if (state.toneScheme === 'colorblind') {
+        return document.body.classList.contains('dark-mode')
+            ? TONE_SCHEMES.colorblind.dark
+            : TONE_SCHEMES.colorblind.light;
+    }
+    if (state.toneScheme === 'custom' && state.toneCustomColors) return state.toneCustomColors;
+    return null;
+}
+
+// Aplica (o limpia) las variables --tone-N en :root. El neutro (5) comparte
+// la variable --tone-0 porque el CSS estiliza .tone-0 y .tone-5 juntas.
+function applyToneScheme() {
+    const root = document.documentElement;
+    const pal = toneActivePalette();
+    for (let n = 1; n <= 5; n++) {
+        const varName = (n === 5) ? '--tone-0' : ('--tone-' + n);
+        const val = pal ? pal[String(n)] : null;
+        if (val) root.style.setProperty(varName, val);
+        else root.style.removeProperty(varName);
+    }
+}
+
+function showToneLegend() {
+    const pop = document.getElementById('tone-legend-pop');
+    if (!pop) return;
+    // Sincronizar radios + grilla custom + checkbox con el estado real
+    document.querySelectorAll('input[name="tone-scheme"]').forEach(r => {
+        r.checked = (r.value === state.toneScheme);
+    });
+    const customDiv = document.getElementById('tone-custom-colors');
+    if (customDiv) customDiv.classList.toggle('hidden', state.toneScheme !== 'custom');
+    const colors = state.toneCustomColors || TONE_CUSTOM_DEFAULT;
+    for (let n = 1; n <= 5; n++) {
+        const inp = document.getElementById('tc-' + n);
+        if (inp && colors[String(n)]) inp.value = colors[String(n)];
+    }
+    const chk = document.getElementById('chk-tone-legend-once');
+    if (chk) chk.checked = !!state.toneLegendSeen;
+    pop.classList.remove('hidden');
+}
+
+function hideToneLegend() {
+    const pop = document.getElementById('tone-legend-pop');
+    if (pop) pop.classList.add('hidden');
 }
 
 // ===== Lógica de Juego =====
@@ -2527,6 +2672,7 @@ if (themeBtn) {
         const isDark = document.body.classList.contains('dark-mode');
         themeBtn.textContent = isDark ? '☀️' : '🌙';
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        applyToneScheme(); // v7.11: los esquemas preset tienen variante oscura (Okabe-Ito)
     });
 }
 

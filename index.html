@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260906b">
+    <link rel="stylesheet" href="style.css?v=20260906c">
 </head>
 <body>
     <div class="container">
@@ -34,6 +34,7 @@
             </div>
             <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
             <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
+            <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores">ℹ️</button>
             <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
             <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
             <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
@@ -271,6 +272,37 @@
         <div id="vocab-pop-body"></div>
     </div>
 
+    <!-- v7.11: POPUP leyenda de tonos + esquema de colores (mismo patrón que #vocab-pop) -->
+    <div id="tone-legend-pop" class="vocab-pop hidden" role="dialog" aria-label="Leyenda de tonos y colores">
+        <button id="btn-tone-legend-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="tone-legend-body">
+            <h3 class="tl-title">🎨 Colores por tono</h3>
+            <p class="tl-intro">Cada color indica el tono de la sílaba (activá 🎨 Tonos para verlo en las frases):</p>
+            <div class="tl-grid">
+                <div class="tl-row"><span class="tl-sample tone-1">ā</span><span class="tl-label">Tono 1 · alto y plano</span></div>
+                <div class="tl-row"><span class="tl-sample tone-2">á</span><span class="tl-label">Tono 2 · sube</span></div>
+                <div class="tl-row"><span class="tl-sample tone-3">ǎ</span><span class="tl-label">Tono 3 · baja y sube</span></div>
+                <div class="tl-row"><span class="tl-sample tone-4">à</span><span class="tl-label">Tono 4 · cae fuerte</span></div>
+                <div class="tl-row"><span class="tl-sample tone-5">a</span><span class="tl-label">Tono 5 · neutro, sin énfasis</span></div>
+            </div>
+            <div class="tl-demo" aria-hidden="true"><span class="tone-1">妈</span><span class="tone-1">妈</span><span class="tone-2">骑</span><span class="tone-3">马</span>，<span class="tone-3">马</span><span class="tone-4">慢</span>，<span class="tone-1">妈</span><span class="tone-1">妈</span><span class="tone-4">骂</span><span class="tone-3">马</span>。</div>
+            <h4 class="tl-sub">⚙️ Esquema de colores</h4>
+            <div class="tl-schemes">
+                <label class="tl-opt"><input type="radio" name="tone-scheme" value="standard" checked> Estándar (colores de la app)</label>
+                <label class="tl-opt"><input type="radio" name="tone-scheme" value="colorblind"> Amigable para daltonismo (Okabe-Ito)</label>
+                <label class="tl-opt"><input type="radio" name="tone-scheme" value="custom"> Personalizado</label>
+            </div>
+            <div id="tone-custom-colors" class="tl-custom hidden">
+                <label>1<input type="color" id="tc-1" value="#2563eb" aria-label="Color del tono 1"></label>
+                <label>2<input type="color" id="tc-2" value="#d97706" aria-label="Color del tono 2"></label>
+                <label>3<input type="color" id="tc-3" value="#16a34a" aria-label="Color del tono 3"></label>
+                <label>4<input type="color" id="tc-4" value="#dc2626" aria-label="Color del tono 4"></label>
+                <label>·<input type="color" id="tc-5" value="#64748b" aria-label="Color del tono neutro"></label>
+            </div>
+            <label class="tl-check"><input type="checkbox" id="chk-tone-legend-once"> No mostrar esta leyenda al activar los tonos</label>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -317,18 +349,18 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260906b"></script>
+    <script src="config.js?v=20260906c"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260906b"></script>
+    <script src="text-utils.js?v=20260906c"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260906b"></script>
+    <script src="VoiceRecorder.js?v=20260906c"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260906b"></script>
-    <script src="app.js?v=20260906b"></script>
+    <script src="voice-evaluator.js?v=20260906c"></script>
+    <script src="app.js?v=20260906c"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

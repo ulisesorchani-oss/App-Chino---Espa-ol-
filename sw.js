@@ -17,11 +17,14 @@
      invalidar el shell cacheado (app.js + style.css).
    - v7.10: ídem v7.9 — sin cambios de precache (diccionario al toque
      vive en app.js: wordHitDict + lemas + desglose por carácter).
+   - v7.11: ídem — sin cambios de precache (leyenda de tonos + esquemas
+     de color viven en index.html/style.css/app.js: popup #tone-legend-pop,
+     variables --tone-N con fallback y paleta Okabe-Ito para daltonismo).
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v30';
+const VERSION = 'v31';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
