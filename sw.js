@@ -29,11 +29,16 @@
      cada carácter (hanzi-writer-data, jsdelivr) van a una caché
      PERSISTENTE nueva (chino-es-hanzi-v1) → offline desde la 2.ª vez
      y no se borran en cada update (mismo criterio que los modelos IA).
+   - v7.14: +lessons.js en precache — textos completos de las lecciones
+     para el botón "📖 Leer lección" (Clásicos). Archivo PLANO de datos
+     (patrón dict-mini.js): agregar lecciones nuevas NO regenera app.js,
+     solo edita lessons.js. El botón carga el texto en el Lector (pinyin
+     interlineal + diccionario + TTS); en CN→ES el botón se oculta.
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v33';
+const VERSION = 'v34';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -51,6 +56,7 @@ const PRECACHE = [
   './voice-evaluator.js',  // v7.6-7.8: orquestador por MODO (es-cn / cn-es)
   './style.css',
   './dict-mini.js',         // v7.12: Capa 4 — diccionario offline zh↔es (CC-BY-SA 4.0)
+  './lessons.js',           // v7.14: textos completos de las lecciones (📖 Leer lección)
   './hanzi-writer.min.js',  // v7.13: orden de trazos (MIT) — se inyecta LAZY pero precacheado p/ offline
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)

@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260906e">
+    <link rel="stylesheet" href="style.css?v=20260906f">
 </head>
 <body>
     <div class="container">
@@ -192,6 +192,10 @@
 
             <!-- Botones de navegación -->
             <div class="card-actions">
+                <!-- v7.14: aparece solo cuando la oración pertenece a un texto
+                     continuo (Clásicos...) y el modo es "Aprendo Chino" -->
+                <button id="btn-read-lesson" class="btn-secondary btn-lesson hidden" type="button"
+                        title="Leer el texto completo de esta lección en el Lector">📖 Leer lección</button>
                 <button id="btn-reveal" class="btn-secondary">👁️ Revelar</button>
                 <button id="btn-know" class="btn-success">✅ La sé</button>
                 <button id="btn-not-know" class="btn-warning">🔄 Repetir</button>
@@ -226,7 +230,8 @@
                 <h3 class="section-title">🗣️ Lector de texto</h3>
                 <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
             </div>
-            <textarea id="reader-input" class="reader-input" rows="3" maxlength="600" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
+            <!-- v7.14: maxlength 1200 — las lecciones (lessons.js) cargan textos completos -->
+            <textarea id="reader-input" class="reader-input" rows="3" maxlength="1200" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
             <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
             <div class="reader-actions">
                 <button id="btn-reader-clear" class="btn-secondary" type="button">🗑️ Limpiar</button>
@@ -349,19 +354,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260906e"></script>
+    <script src="config.js?v=20260906f"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260906e"></script>
+    <script src="text-utils.js?v=20260906f"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260906e"></script>
+    <script src="VoiceRecorder.js?v=20260906f"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260906e"></script>
-    <script src="dict-mini.js?v=20260906e"></script>
-    <script src="app.js?v=20260906e"></script>
+    <script src="voice-evaluator.js?v=20260906f"></script>
+    <script src="dict-mini.js?v=20260906f"></script>
+    <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
+    <script src="lessons.js?v=20260906f"></script>
+    <script src="app.js?v=20260906f"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

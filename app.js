@@ -1060,6 +1060,7 @@ function setupEventListeners() {
     safeAdd('btn-reveal', revealAnswer);
     safeAdd('btn-know', () => markWord(true));
     safeAdd('btn-not-know', () => markWord(false));
+    safeAdd('btn-read-lesson', readCurrentLesson); // v7.14: leer lección completa
     safeAdd('btn-reset', resetProgress);
     safeAdd('btn-pinyin', togglePinyin);
     safeAdd('btn-tones', toggleToneColors);
@@ -1710,6 +1711,15 @@ function renderCurrentSentence() {
         if (btnReveal) btnReveal.textContent = '👁️ Revelar';
         if (btnKnow) btnKnow.textContent = '✅ La sé';
         if (btnNotKnow) btnNotKnow.textContent = '🔄 Repetir';
+    }
+
+    // v7.14: botón "📖 Leer lección" — SOLO si la oración pertenece a un
+    // texto continuo (p. ej. Clásicos) y el modo es "Aprendo Chino" (es-cn).
+    // En CN→ES el botón desaparece (el texto de la lección es chino).
+    const btnLesson = document.getElementById('btn-read-lesson');
+    if (btnLesson) {
+        const hasLesson = state.mode === 'es-cn' && !!lessonForSentence(s);
+        btnLesson.classList.toggle('hidden', !hasLesson);
     }
 
     // 7. Barra de progreso
@@ -2450,7 +2460,7 @@ function loadHanziWriter() {
     if (vpStrokes.libPromise) return vpStrokes.libPromise;
     vpStrokes.libPromise = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'hanzi-writer.min.js?v=20260906e'; // local: el SW lo precachea → offline
+        s.src = 'hanzi-writer.min.js?v=20260906f'; // local: el SW lo precachea → offline
         s.onload = () => resolve();
         s.onerror = () => {
             // Fallback CDN (mismo archivo): sin local y sin red → falla solo la
@@ -2800,7 +2810,9 @@ async function toggleReaderPlay() {
     stopReader();
 
     try {
-        const response = await fetchTTS({ text, lang: langCode, voice: gender });
+        // v7.14: timeout escalado con el largo — una lección completa tarda
+        // más de 15 s en sintetizarse (15 s base + 50 ms por carácter).
+        const response = await fetchTTS({ text, lang: langCode, voice: gender }, Math.max(15000, text.length * 50));
         if (!response.ok) throw new Error('Error en servidor');
         const data = await response.json();
         if (!data.audio) throw new Error('Sin audio');
@@ -2836,6 +2848,76 @@ function clearReader() {
     if (ta) { ta.value = ''; ta.focus(); }
     updateReaderLang();
     renderReaderPreview();
+}
+
+// ===== v7.14: LEER LA LECCIÓN COMPLETA (lessons.js) =====
+// Los textos completos viven en lessons.js (archivo plano de datos, patrón
+// dict-mini.js) — agregar lecciones nuevas NO toca app.js: solo se agrega
+// una entrada al array de LESSONS_DATA.
+// Mapeo oración → lección:
+//   · L.module === s.module  → el módulo entero es la lección (Clásicos)
+//   · L.ids contiene s.id    → lección parcial (futuro: artículos, capítulos)
+function lessonForSentence(s) {
+    if (!s || typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) return null;
+    const list = LESSONS_DATA.lessons;
+    for (let i = 0; i < list.length; i++) {
+        const L = list[i];
+        if (L.module && s.module === L.module) return L;
+        if (Array.isArray(L.ids) && L.ids.indexOf(s.id) !== -1) return L;
+    }
+    return null;
+}
+
+// Carga el texto completo de la lección de la oración actual en el Lector
+// (pinyin interlineal, tonos, diccionario al toque y lectura en voz alta).
+async function readCurrentLesson() {
+    if (state.mode !== 'es-cn') {
+        moduleStatus('ℹ️ La lectura completa está disponible en modo "Aprendo Chino".');
+        return;
+    }
+    const filtered = getFiltered();
+    const s = filtered && filtered[state.currentIndex];
+    if (!s) return;
+
+    if (typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) {
+        moduleStatus('⚠ No se pudo cargar lessons.js — revisá que el archivo esté subido.', true);
+        return;
+    }
+
+    const lesson = lessonForSentence(s);
+    if (!lesson) {
+        moduleStatus('ℹ️ Esta oración no pertenece a un texto continuo.');
+        return;
+    }
+
+    const k = ck();
+    const text = (k === 'trad' ? (lesson.text_trad || lesson.text_simp)
+                               : (lesson.text_simp || lesson.text_trad)) || '';
+    if (!text) {
+        moduleStatus('⚠ La lección no tiene texto cargado.', true);
+        return;
+    }
+
+    const ta = document.getElementById('reader-input');
+    if (!ta) return;
+
+    stopReader(); // regla "un solo audio" — si el lector estaba sonando, se corta
+    ta.value = text;
+    if (typeof updateReaderLang === 'function') updateReaderLang();
+    if (typeof renderReaderPreview === 'function') renderReaderPreview();
+
+    // Bajar al lector + destello para que se entienda de dónde salió el texto
+    const banner = document.getElementById('reader-banner');
+    if (banner && banner.scrollIntoView) {
+        banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        banner.classList.remove('lesson-glow');
+        void banner.offsetWidth; // reinicia la animación si ya estaba
+        banner.classList.add('lesson-glow');
+        setTimeout(() => banner.classList.remove('lesson-glow'), 2500);
+    }
+
+    const chars = text.replace(/\n/g, '').length;
+    moduleStatus('📖 Leyendo: ' + (lesson.title || lesson.id) + ' · ' + chars + ' caracteres en el Lector');
 }
 
 // ===== Lector: vista previa con pinyin y colores de tono =====
