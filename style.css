@@ -2614,3 +2614,142 @@ body.dark-mode .reader-library-select {
         white-space: nowrap;
     }
 }
+
+/* ============================================================
+   v7.16 — Banner de Práctica de Trazos (fullscreen)
+   El popup #vocab-pop queda para CONSULTA; la práctica con el
+   dedo va a #writer-practice-banner con lienzo grande.
+   Los colores usan variables del tema (se intercambian solas en
+   dark); el bloque dark de más abajo refuerza lo que no cubren.
+   ============================================================ */
+.wp-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg-card);
+    z-index: 2000; /* encima del vocab-pop y de la leyenda de tonos */
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.wp-banner.hidden { display: none; }
+
+.wp-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+}
+.wp-top h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+.wp-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.wp-close:hover { border-color: var(--primary); color: var(--primary); }
+
+.wp-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding-bottom: 12px;
+}
+.wp-canvas {
+    width: min(80vw, 340px);
+    height: min(80vw, 340px);
+    position: relative;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-light);
+    touch-action: none; /* trazar con el dedo sin scrollear la página */
+}
+.wp-canvas.loading::after {
+    content: '···';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--text-secondary);
+    animation: wpPulse 1.2s ease-in-out infinite;
+}
+@keyframes wpPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+.wp-nav { display: flex; align-items: center; gap: 12px; }
+.wp-nav span {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    min-width: 44px;
+    text-align: center;
+}
+.wp-nav button:disabled { opacity: 0.35; cursor: default; }
+
+.wp-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.wp-hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Duplicación Regla 6.2 — MODO OSCURO (refuerzo: el canvas y el
+   borde dashed no derivan de una variable que cambie sola) */
+body.dark-mode .wp-banner { background: #0f172a; }
+body.dark-mode .wp-top h3 { color: #f1f5f9; }
+body.dark-mode .wp-close {
+    background: transparent;
+    border-color: #334155;
+    color: #94a3b8;
+}
+body.dark-mode .wp-close:hover { border-color: #60a5fa; color: #60a5fa; }
+body.dark-mode .wp-canvas {
+    background: #1e293b; /* el trazo claro (#e2e8f0 de vpStrokeColors) resalta */
+    border-color: #334155;
+}
+body.dark-mode .wp-canvas.loading::after { color: #94a3b8; }
+body.dark-mode .wp-nav span,
+body.dark-mode .wp-hint { color: #94a3b8; }
+
+/* Duplicación Regla 6.2 — MÓVIL ≤480px */
+@media (max-width: 480px) {
+    .wp-banner { padding: 12px 12px; }
+    .wp-top h3 { font-size: 1rem; }
+    .wp-body { gap: 12px; }
+    .wp-canvas {
+        width: min(82vw, 300px);
+        height: min(82vw, 300px);
+    }
+    .wp-controls { gap: 10px; }
+    .wp-controls .btn-secondary,
+    .wp-controls .btn-primary {
+        font-size: 0.95rem;
+        padding: 9px 14px;
+    }
+    .wp-hint { font-size: 0.85rem; }
+}

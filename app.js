@@ -1180,16 +1180,45 @@ function setupEventListeners() {
     if (vocabPopEl) {
         vocabPopEl.addEventListener('click', (e) => {
             if (e.target.closest && e.target.closest('.vp-stroke-anim')) { vpStrokesAnimate(); return; }
-            if (e.target.closest && e.target.closest('.vp-stroke-quiz')) vpStrokesQuiz();
+            // v7.16: ✍ Practicar ya NO traza en los cuadros chicos del popup
+            // (frustrante con el dedo) → cierra la consulta y abre el banner
+            // de práctica grande con los caracteres de la palabra tocada.
+            if (e.target.closest && e.target.closest('.vp-stroke-quiz')) {
+                const vpBody = document.getElementById('vocab-pop-body');
+                const word = vpBody && vpBody.dataset ? vpBody.dataset.word : '';
+                openWriterPractice(word || '');
+            }
         });
     }
     // v7.13: Escape cierra el popup de vocabulario y la leyenda de tonos
     // (los popups ya se cerraban con ✕ y clic fuera; teclado incluido).
+    // v7.16: primero el banner de práctica (está siempre encima).
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
+        const wpb = document.getElementById('writer-practice-banner');
+        if (wpb && !wpb.classList.contains('hidden')) { closeWriterPractice(); return; }
         const tl = document.getElementById('tone-legend-pop');
         if (tl && !tl.classList.contains('hidden')) { hideToneLegend(); return; }
         hideVocabPop();
+    });
+    // v7.16: botones del banner de práctica (HTML estático → safeAdd sirve)
+    safeAdd('btn-wp-close', closeWriterPractice);
+    safeAdd('btn-wp-animate', () => {
+        if (!wpPractice.writer) return;
+        try { wpPractice.writer.cancelQuiz(); } catch (e) {}
+        wpSetHint('▶ Mirá el orden de los trazos…');
+        wpPractice.writer.animateCharacter().catch(() => {});
+    });
+    safeAdd('btn-wp-quiz', () => wpStartQuiz());
+    safeAdd('btn-wp-prev', () => wpNavStep(-1));
+    safeAdd('btn-wp-next', () => wpNavStep(1));
+    // v7.16: rotación/redimensionado con el banner abierto → remonta el
+    // lienzo al tamaño nuevo (debounce; solo si hay writer activo).
+    window.addEventListener('resize', () => {
+        const wpb = document.getElementById('writer-practice-banner');
+        if (!wpb || wpb.classList.contains('hidden') || !wpPractice.writer) return;
+        clearTimeout(wpPractice.resizeT);
+        wpPractice.resizeT = setTimeout(() => wpShowChar({}), 250);
     });
     document.addEventListener('click', (e) => {
         const pop = document.getElementById('vocab-pop');
@@ -2334,6 +2363,7 @@ function showVocabPop(word) {
     const body = document.getElementById('vocab-pop-body');
     if (!pop || !body) return;
     const w = String(word || '').trim();
+    body.dataset.word = w; // v7.16: la práctica grande necesita la palabra tocada
     const zh = isZhText(w);
     const hit = lookupVocab(w);
     const rec = hit.rec;
@@ -2423,7 +2453,7 @@ function showVocabPop(word) {
                 + '<button type="button" class="vp-stroke-btn vp-stroke-anim">▶ Animar</button>'
                 + '<button type="button" class="vp-stroke-btn vp-stroke-quiz">✍ Practicar</button>'
                 + '</div>'
-                + '<div class="vp-stroke-hint">Tocá ✍ Practicar y trazá con el dedo (o el mouse) sobre el carácter</div>'
+                + '<div class="vp-stroke-hint">Tocá ✍ Practicar para pasar a la pantalla grande y trazar con el dedo</div>'
                 + '</div>';
         }
     }
@@ -2462,7 +2492,7 @@ function loadHanziWriter() {
     if (vpStrokes.libPromise) return vpStrokes.libPromise;
     vpStrokes.libPromise = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'hanzi-writer.min.js?v=20260906g'; // local: el SW lo precachea → offline
+        s.src = 'hanzi-writer.min.js?v=20260906h'; // local: el SW lo precachea → offline
         s.onload = () => resolve();
         s.onerror = () => {
             // Fallback CDN (mismo archivo): sin local y sin red → falla solo la
@@ -2550,28 +2580,172 @@ function vpStrokesAnimate() {
     );
 }
 
-// ✍ Practicar: quiz secuencial — se traza el carácter actual con el dedo;
-// al completarlo pasa al siguiente (resaltado .quiz-on en el cuadro activo)
-function vpStrokesQuiz() {
-    const list = vpStrokes.writers;
-    if (!list.length) return;
-    let i = 0;
-    const next = () => {
-        if (i >= list.length) return;
-        const wr = list[i];
-        const box = vpStrokes.boxes[i];
-        vpStrokes.boxes.forEach(b => b.classList.remove('quiz-on'));
-        if (box) box.classList.add('quiz-on');
-        i++;
-        try { if (wr.cancelQuiz) wr.cancelQuiz(); } catch (e) {}
-        wr.quiz({
-            onComplete: () => {
-                if (box) { box.classList.remove('quiz-on'); box.classList.add('quiz-ok'); }
-                next();
+// ============================================================
+// v7.16 — BANNER DE PRÁCTICA GRANDE (✍ Practicar del popup).
+//  · Separación consulta / práctica: el popup queda para CONSULTAR
+//    (traducción, pinyin, ejemplo y trazos en cuadros chicos con
+//    ▶ Animar); la PRÁCTICA con el dedo va a un banner fullscreen
+//    (#writer-practice-banner) con un lienzo de min(80vw, 340px).
+//  · Reutiliza el motor v7.13: loadHanziWriter() (librería local +
+//    fallback CDN), vpStrokeColors() (colores por tema) y la caché
+//    persistente de datos por carácter (offline desde la 2.ª vez).
+//  · Palabras de varios caracteres (爸爸, 谢谢) → navegación ◀ ▶ y
+//    quiz secuencial: al completar un carácter avanza solo al
+//    siguiente y arranca su quiz (misma "racha" que el v7.13).
+//  · Generación wpPractice.gen: cerrar el banner o cambiar de
+//    carácter invalida callbacks en vuelo (carga de datos, quiz,
+//    animación) — mismo patrón que vpStrokes.gen del popup.
+// ============================================================
+const wpPractice = { gen: 0, word: '', chars: [], idx: 0, writer: null, pending: null, resizeT: null };
+
+function wpSetHint(msg) {
+    const h = document.getElementById('wp-hint');
+    if (h) h.textContent = msg;
+}
+
+function wpUpdateNav() {
+    const counter = document.getElementById('wp-counter');
+    if (counter) counter.textContent = (wpPractice.idx + 1) + ' / ' + wpPractice.chars.length;
+    const prev = document.getElementById('btn-wp-prev');
+    if (prev) prev.disabled = wpPractice.idx === 0;
+    const nxt = document.getElementById('btn-wp-next');
+    if (nxt) nxt.disabled = wpPractice.idx >= wpPractice.chars.length - 1;
+}
+
+// Monta el carácter wpPractice.idx en el lienzo grande.
+//  opts.quiz    → al cargar los datos arranca el quiz (racha del quiz)
+//  opts.animate → al cargar los datos anima los trazos (guía visual)
+function wpShowChar(opts) {
+    opts = opts || {};
+    const target = document.getElementById('wp-target');
+    if (!target) return;
+    const myGen = ++wpPractice.gen; // invalida montaje/callbacks anteriores
+    wpPractice.pending = opts.quiz ? 'quiz' : (opts.animate ? 'animate' : null);
+    const ch = wpPractice.chars[wpPractice.idx];
+    if (!ch) return;
+    if (wpPractice.writer) { try { wpPractice.writer.cancelQuiz(); } catch (e) {} }
+    wpPractice.writer = null;
+    target.innerHTML = ''; // nunca dos SVG montados (memoria)
+    target.classList.add('loading');
+    wpUpdateNav();
+    loadHanziWriter().then(() => {
+        if (myGen !== wpPractice.gen) return; // cerró el banner o cambió de char
+        const cols = vpStrokeColors();
+        const size = target.offsetWidth || 320; // el banner ya está visible
+        try {
+            wpPractice.writer = HanziWriter.create(target, ch, {
+                width: size,
+                height: size,
+                padding: 16,
+                showOutline: true,
+                strokeColor: cols.stroke,
+                outlineColor: cols.outline,
+                highlightColor: cols.highlight,
+                drawingColor: cols.drawing,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 220,
+                showHintAfterMisses: 2,
+                onLoadCharDataSuccess: () => {
+                    if (myGen !== wpPractice.gen) return;
+                    target.classList.remove('loading');
+                    if (wpPractice.pending === 'quiz') {
+                        setTimeout(() => { if (myGen === wpPractice.gen) wpStartQuiz(myGen); }, 350);
+                    } else if (wpPractice.pending === 'animate' && wpPractice.writer) {
+                        wpPractice.writer.animateCharacter().catch(() => {});
+                    }
+                },
+                onLoadCharDataError: () => {
+                    if (myGen !== wpPractice.gen) return;
+                    target.classList.remove('loading');
+                    wpSetHint('⚠ No pude cargar los datos del carácter (¿sin conexión la primera vez?)');
+                }
+            });
+        } catch (e) {
+            target.classList.remove('loading');
+            wpSetHint('⚠ No se pudo montar el carácter.');
+        }
+    }).catch(() => {
+        if (myGen !== wpPractice.gen) return;
+        target.classList.remove('loading');
+        wpSetHint('⚠ No se pudo cargar el motor de trazos (¿sin conexión la primera vez?)');
+    });
+}
+
+// ✍ Trazar: quiz del carácter actual con el dedo (o el mouse).
+//  Al completar: si quedan caracteres → auto-avanza y encadena el
+//  quiz; si era el último → mensaje de palabra completa.
+function wpStartQuiz(myGen) {
+    const wr = wpPractice.writer;
+    if (!wr) return;
+    if (typeof myGen === 'number' && myGen !== wpPractice.gen) return;
+    try { wr.cancelQuiz(); } catch (e) {}
+    // gen VIGENTE al arrancar el quiz: el botón ✍ Trazar llama sin myGen
+    // (undefined) → el guard del closure compara contra este valor, nunca
+    // contra el parámetro (undefined !== gen era SIEMPRE true y el
+    // auto-avance onComplete no se ejecutaba jamás — bug cazado por el E2E).
+    const gen = typeof myGen === 'number' ? myGen : wpPractice.gen;
+    const total = wpPractice.chars.length;
+    const i = wpPractice.idx;
+    wpSetHint(total > 1
+        ? '✍ Trazá «' + wpPractice.chars[i] + '» con el dedo (' + (i + 1) + ' de ' + total + ')'
+        : '✍ Trazá con el dedo sobre el carácter gris');
+    wr.quiz({
+        onComplete: () => {
+            if (gen !== wpPractice.gen) return; // cerró o navegó mientras tanto
+            if (i < total - 1) {
+                wpPractice.idx++;
+                wpSetHint('👏 ¡Bien! Ahora «' + wpPractice.chars[wpPractice.idx] + '» (' + (wpPractice.idx + 1) + ' de ' + total + ')');
+                wpShowChar({ quiz: true }); // racha: monta el siguiente y arranca su quiz
+            } else {
+                wpSetHint('🎉 ¡«' + wpPractice.word + '» completa! Repasá con ▶ Animar o volvé a ✍ Trazar.');
             }
-        });
-    };
-    next();
+        }
+    });
+}
+
+// ◀ ▶ navegación manual entre los caracteres de la palabra
+function wpNavStep(dir) {
+    const next = wpPractice.idx + dir;
+    if (next < 0 || next >= wpPractice.chars.length) return;
+    wpPractice.idx = next;
+    wpShowChar({ animate: true }); // navegar = ver cómo se escribe
+}
+
+// Punto de entrada (delegación .vp-stroke-quiz del popup): cierra la
+// consulta y abre el banner con los caracteres únicos de la palabra.
+function openWriterPractice(word) {
+    const w = String(word || '').trim();
+    const chars = [];
+    for (const ch of w) if (READER_HANZI.test(ch) && chars.indexOf(ch) === -1) chars.push(ch);
+    const banner = document.getElementById('writer-practice-banner');
+    if (!chars.length || !banner) {
+        moduleStatus('ℹ️ Tocá una palabra china para practicar sus trazos.', true);
+        return;
+    }
+    hideVocabPop(); // primero se cierra el popup de consulta
+    wpPractice.gen++;
+    wpPractice.word = w;
+    wpPractice.chars = chars.slice(0, VP_STROKES_MAX); // mismo tope que el popup
+    wpPractice.idx = 0;
+    wpPractice.pending = null;
+    const title = document.getElementById('wp-title');
+    if (title) title.textContent = 'Practicar: ' + w;
+    const nav = document.getElementById('wp-nav');
+    if (nav) nav.classList.toggle('hidden', wpPractice.chars.length < 2);
+    banner.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // fullscreen: sin scroll detrás
+    wpShowChar({ animate: true }); // guía: anima el primer carácter al abrir
+}
+
+function closeWriterPractice() {
+    wpPractice.gen++; // invalida callbacks en vuelo (carga, quiz, animación)
+    if (wpPractice.writer) { try { wpPractice.writer.cancelQuiz(); } catch (e) {} }
+    wpPractice.writer = null;
+    const banner = document.getElementById('writer-practice-banner');
+    if (banner) banner.classList.add('hidden');
+    const target = document.getElementById('wp-target');
+    if (target) target.innerHTML = ''; // libera el SVG
+    document.body.style.overflow = ''; // restaura el scroll de la app
 }
 
 function resetProgress() {

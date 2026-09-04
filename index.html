@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260906g">
+    <link rel="stylesheet" href="style.css?v=20260906h">
 </head>
 <body>
     <div class="container">
@@ -286,6 +286,30 @@
         <div id="vocab-pop-body"></div>
     </div>
 
+    <!-- v7.16: BANNER de práctica de trazos (pantalla completa). Se abre con
+         ✍ Practicar del popup de vocabulario; el popup queda para CONSULTA
+         (traducción + pinyin + ejemplo) y aquí se TRAZA con el dedo sobre
+         un lienzo grande. Motor Hanzi Writer v7.13 reutilizado (lazy). -->
+    <div id="writer-practice-banner" class="wp-banner hidden" role="dialog" aria-modal="true" aria-label="Práctica de trazos">
+        <div class="wp-top">
+            <h3 id="wp-title">Practicar</h3>
+            <button id="btn-wp-close" type="button" class="wp-close" aria-label="Cerrar práctica">✕</button>
+        </div>
+        <div class="wp-body">
+            <div id="wp-target" class="wp-canvas"></div>
+            <div id="wp-nav" class="wp-nav hidden">
+                <button id="btn-wp-prev" type="button" class="btn-secondary" aria-label="Carácter anterior">◀</button>
+                <span id="wp-counter">1 / 2</span>
+                <button id="btn-wp-next" type="button" class="btn-secondary" aria-label="Carácter siguiente">▶</button>
+            </div>
+            <div class="wp-controls">
+                <button id="btn-wp-animate" type="button" class="btn-secondary">▶ Animar</button>
+                <button id="btn-wp-quiz" type="button" class="btn-primary">✍ Trazar</button>
+            </div>
+            <p class="wp-hint" id="wp-hint">Trazá con el dedo sobre el carácter gris</p>
+        </div>
+    </div>
+
     <!-- v7.11: POPUP leyenda de tonos + esquema de colores (mismo patrón que #vocab-pop) -->
     <div id="tone-legend-pop" class="vocab-pop hidden" role="dialog" aria-label="Leyenda de tonos y colores">
         <button id="btn-tone-legend-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -363,21 +387,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260906g"></script>
+    <script src="config.js?v=20260906h"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260906g"></script>
+    <script src="text-utils.js?v=20260906h"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260906g"></script>
+    <script src="VoiceRecorder.js?v=20260906h"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260906g"></script>
-    <script src="dict-mini.js?v=20260906g"></script>
+    <script src="voice-evaluator.js?v=20260906h"></script>
+    <script src="dict-mini.js?v=20260906h"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260906g"></script>
-    <script src="app.js?v=20260906g"></script>
+    <script src="lessons.js?v=20260906h"></script>
+    <script src="app.js?v=20260906h"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
