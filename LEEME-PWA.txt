@@ -287,6 +287,44 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+📖 NOVEDADES v7.10 — DICCIONARIO REAL AL TOQUE (Opción B):
+   cualquier palabra resuelve, no solo las respuestas de las lecciones
+----------------------------------------------------------------------
+• Hasta ahora, tocar una palabra (lector o cajón de vocabulario)
+  solo encontraba traducción si la palabra era EXACTAMENTE la
+  respuesta de una oración. El lector v7.9 lo dejó en evidencia:
+  tocar 学生, 中国 o "profesora" caía en
+  "🤔 No tengo la traducción". Ahora el toque resuelve en
+  CUATRO niveles, de mejor a peor:
+    1) EXACTA (igual que siempre): traducción directa + ejemplo.
+    2) LEMA en español (nuevo): tocás "amigos" y la app te da la
+       ficha de "amigo"; "comieron" busca "comer"; plurales y las
+       conjugaciones más comunes (probá: niñas, cantan, comiendo).
+    3) APARECE EN UNA LECCIÓN (nuevo): la palabra vive dentro del
+       texto de alguna lección → el popup muestra ESA lección
+       completa (chino + pinyin + español) como contexto honesto,
+       con el rótulo "🔎 Aparece en una lección" — sin fingir una
+       traducción 1:1 que no tenemos.
+    4) POR CARÁCTER (nuevo, chino): palabras compuestas que no
+       están en ningún texto se desglosan en fichas individuales:
+       tocá 冷水 y veis 冷 (frío) + 水 (agua) con su pinyin.
+• EL ESPAÑOL AHORA TAMBIÉN ES TOCABLE: en modo CN→ES, pegá un
+  texto en el lector y tocá cualquier palabra — mismo popup,
+  mismo diccionario. El texto se ve exactamente igual que antes
+  (plano, sin pinyin), solo que ahora es consultable.
+• EL DICCIONARIO NACE COMPLETO: antes se llenaba a medida que
+  abrías módulos; ahora indexa TODAS las lecciones embebidas
+  (921 oraciones → ~2.500 palabras español + ~1.800 chinas)
+  justo al arrancar, sin archivos nuevos.
+• Detalles finos: tocar "Hola" encuentra "hola" (ignora
+  mayúsculas); las palabras funcionales (el, la, de, que...) no
+  generan ruido; si de verdad no hay nada, el mensaje 🤔 sigue
+  siendo honesto — y el pinyin aparece igual (cortesía de
+  pinyin-pro).
+• sw.js sube a v30. SIN archivos nuevos: todo vive en app.js
+  (diccionario) y style.css (fichas del popup).
+
+======================================================================
 🗣️ NOVEDADES v7.9 — LECTOR INTERLINEAL: pinyin debajo de cada
    carácter + tocar palabra para ver su traducción
 ----------------------------------------------------------------------

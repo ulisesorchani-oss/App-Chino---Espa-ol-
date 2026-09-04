@@ -855,6 +855,15 @@ body.dark-mode .reader-preview {
     vertical-align: baseline;
 }
 
+/* v7.10: palabras del lector en ESPAÑOL — tocables con el mismo popup,
+   visual plano (sin ruby) para no cambiar cómo se ve el texto */
+.reader-word-plain {
+    display: inline;
+    margin: 0;
+    padding: 0 1px;
+    border-radius: 3px;
+}
+
 /* Regla de duplicación: Modo Oscuro (la variable --text-secondary ya vira sola) */
 body.dark-mode .reader-word:active {
     background-color: rgba(255, 255, 255, 0.12);
@@ -1181,6 +1190,62 @@ body.dark-mode .install-help-note {
 body.dark-mode .vocab-pop {
     background: #1e293b;
     border-color: #334155;
+}
+
+/* ===== v7.10: popup — lema / aparece-en / desglose por carácter ===== */
+.vp-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 8px 0 2px;
+}
+
+.vp-chars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.vp-char-row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+.vp-char {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.vp-char-py {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.vp-char-es {
+    font-size: 0.8rem;
+}
+
+/* Regla de duplicación: Modo Oscuro */
+body.dark-mode .vp-char-row {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+/* Regla de duplicación: Móvil ≤480px */
+@media (max-width: 480px) {
+    .vp-char {
+        font-size: 1.05rem;
+    }
+
+    .vp-char-row {
+        padding: 3px 6px;
+        gap: 4px;
+    }
 }
 
 /* ===== ✍️ Planillas de escritura 写字 (v6.5) ===== */

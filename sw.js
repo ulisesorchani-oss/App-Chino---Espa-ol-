@@ -15,11 +15,13 @@
    - v7.9: sin cambios de precache — lector interlineal vive en app.js
      (rubí por palabra + toque → #vocab-pop). VERSION sube solo para
      invalidar el shell cacheado (app.js + style.css).
+   - v7.10: ídem v7.9 — sin cambios de precache (diccionario al toque
+     vive en app.js: wordHitDict + lemas + desglose por carácter).
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v29';
+const VERSION = 'v30';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

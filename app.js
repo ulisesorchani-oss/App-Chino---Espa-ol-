@@ -1822,11 +1822,52 @@ function updateVocabularyPanel() {
     state.newWords.forEach(w => mk(w, ''));
 }
 
-// ===== Diccionario palabra → traducción (cajón de vocabulario) =====
+// ===== Diccionario palabra → traducción (cajón de vocabulario + lector) =====
 // Se alimenta con los datos embebidos y se va AMPLIANDO con cada módulo
 // cargado (Saludos/HSK/TOCFL/DELE), así las palabras guardadas siguen
 // teniendo traducción aunque cambies de módulo.
+//
+// v7.10 (Opción B) — el toque resuelve en TRES niveles, de mejor a peor:
+//   vocabDict    → respuestas EXACTAS de las lecciones (traducción directa)
+//   wordHitDict  → Capa 1: cada palabra de los TEXTOS COMPLETOS indexada
+//                  ("profesora", "中国", "朋友"...) → muestra la lección donde vive
+//   lemas ES     → Capa 2: "amigos"→"amigo", "comieron"→"comer" (candidatos)
+//   por carácter → Capa 3: "大小" se desglosa en 大 + 小 con su ficha individual
+// Cero archivos nuevos: todo se deriva de los datos que ya viajan en app.js.
 const vocabDict = new Map();
+const wordHitDict = new Map();
+// Regex compartida por diccionario y lector interlineal (fuente única)
+const READER_HANZI = /[\u3400-\u4dbf\u4e00-\u9fff]/;
+// Palabras funcionales que NO valen como "aparece en" en español
+const ES_STOP = new Set(['el','la','los','las','un','una','unos','unas','de','del','al','a','en','y','o','u','que','se','su','sus','es','son','con','por','para','pero','muy','mas','más','yo','tu','tus','mi','mis','me','te','lo','le','les','no','si','sí','hay','fue','era','este','esta','esto','estos','estas','ese','esa','eso','como','donde','dónde','cuando','cuándo','qué','sino','porque','él','ella','ellos','ellas','nosotros','usted','ustedes','hoy','ya','aún','todavia','todavía','tambien','también']);
+
+// Segmentador zh compartido (1 sola instancia para diccionario + lector)
+let _zhSegmenter;
+function getZhSegmenter() {
+    if (_zhSegmenter === undefined) {
+        _zhSegmenter = null;
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+            try { _zhSegmenter = new Intl.Segmenter('zh', { granularity: 'word' }); } catch (e) { _zhSegmenter = null; }
+        }
+    }
+    return _zhSegmenter;
+}
+
+function esWords(text) {
+    return String(text || '').toLowerCase().match(/[a-záéíóúüñ]+/g) || [];
+}
+
+// Palabras hanzi de un texto (Intl.Segmenter; sin Segmenter → carácter a carácter)
+function zhWordsList(text) {
+    if (!text) return [];
+    const seg = getZhSegmenter();
+    if (seg) {
+        try {
+            return Array.from(seg.segment(String(text)), s => s.segment).filter(s => READER_HANZI.test(s));
+        } catch (e) { /* cae al fallback */ }
+    }
+    return Array.from(String(text)).filter(ch => READER_HANZI.test(ch));
+}
 
 function indexSentencesForVocab(arr) {
     (arr || []).forEach(s => {
@@ -1845,11 +1886,105 @@ function indexSentencesForVocab(arr) {
         [es, zhS, zhT].forEach(w => {
             if (w && !vocabDict.has(w)) vocabDict.set(w, rec);
         });
+        // alias minúscula del ES (tocar "Hola" en el lector encuentra "hola")
+        if (es) { const lw = es.toLowerCase(); if (!vocabDict.has(lw)) vocabDict.set(lw, rec); }
+        indexWordHits(rec);
     });
 }
-indexSentencesForVocab(typeof EMBEDDED_SENTENCES !== 'undefined' ? EMBEDDED_SENTENCES : []);
 
-function isZhText(t) { return /[\u3400-\u4dbf\u4e00-\u9fff]/.test(t || ''); }
+// v7.10 Capa 1: indexa cada palabra de los textos completos de la oración
+function indexWordHits(rec) {
+    esWords(rec.fullEs).forEach(w => {
+        if (w.length >= 3 && !ES_STOP.has(w) && !wordHitDict.has(w)) wordHitDict.set(w, rec);
+    });
+    [rec.fullZhSimp, rec.fullZhTrad].forEach(t => zhWordsList(t).forEach(w => {
+        if (!wordHitDict.has(w)) wordHitDict.set(w, rec);
+    }));
+}
+
+indexSentencesForVocab(typeof EMBEDDED_SENTENCES !== 'undefined' ? EMBEDDED_SENTENCES : []);
+// v7.10: el diccionario nace COMPLETO — además del módulo base, indexa TODOS
+// los módulos embebidos (deduplicados por referencia: los alias apuntan a la
+// misma lista). Así "profesora" o "中国" resuelven aunque ese módulo no se abrió.
+if (typeof EMBEDDED_MODULE_DATA !== 'undefined') {
+    const _seenModArr = new Set();
+    Object.keys(EMBEDDED_MODULE_DATA).forEach(k => {
+        const arr = EMBEDDED_MODULE_DATA[k];
+        if (Array.isArray(arr) && !_seenModArr.has(arr)) {
+            _seenModArr.add(arr);
+            indexSentencesForVocab(arr);
+        }
+    });
+}
+
+// v7.10 Capa 2: candidatos de lema para una palabra española (el 1.º es la
+// palabra misma; el resto plurales y conjugaciones frecuentes → infinitivo)
+function esLemmaCandidates(w) {
+    const out = [w];
+    const add = x => { if (x && x.length >= 3 && out.indexOf(x) === -1) out.push(x); };
+    if (w.length >= 4) {
+        if (/es$/.test(w)) add(w.slice(0, -2));
+        if (/s$/.test(w)) add(w.slice(0, -1));
+    }
+    if (w.length >= 5) {
+        const map = [
+            ['ando', ['ar']], ['iendo', ['er', 'ir']],
+            ['aron', ['ar']], ['ieron', ['er', 'ir']],
+            ['aste', ['ar']], ['iste', ['er', 'ir']],
+            ['amos', ['ar']], ['emos', ['er']], ['imos', ['ir']],
+            ['aban', ['ar']], ['aba', ['ar']], ['ía', ['er', 'ir', 'ar']],
+            ['an', ['ar', 'er', 'ir']], ['as', ['ar', 'er']],
+            ['o', ['ar', 'er', 'ir']], ['a', ['ar', 'er']], ['é', ['ar']], ['ó', ['ar', 'er']]
+        ];
+        for (const pair of map) {
+            if (w.endsWith(pair[0])) {
+                const stem = w.slice(0, -pair[0].length);
+                if (stem.length >= 3) {
+                    pair[1].forEach(r => add(stem + r));
+                    add(stem);
+                }
+                break;   // un solo sufijo: el más específico que matchea
+            }
+        }
+    }
+    return out;
+}
+
+// v7.10: resolución del toque — exacta > lema > aparece-en > por carácter
+function lookupVocab(word) {
+    const w = String(word || '').trim();
+    if (!w) return { level: 'none' };
+    const zh = isZhText(w);
+    // 1) respuesta exacta (alias minúscula incluido)
+    if (vocabDict.has(w)) return { level: 'exact', rec: vocabDict.get(w) };
+    const lw = zh ? w : w.toLowerCase();
+    if (!zh && lw !== w && vocabDict.has(lw)) return { level: 'exact', rec: vocabDict.get(lw) };
+    // 2) ES: algún lema es respuesta exacta
+    if (!zh) {
+        for (const cand of esLemmaCandidates(lw)) {
+            if (cand !== lw && vocabDict.has(cand)) return { level: 'lemma', lemma: cand, rec: vocabDict.get(cand) };
+        }
+    }
+    // 3) la palabra vive dentro del texto de una lección
+    if (wordHitDict.has(w)) return { level: 'hit', rec: wordHitDict.get(w) };
+    if (!zh && lw !== w && wordHitDict.has(lw)) return { level: 'hit', rec: wordHitDict.get(lw) };
+    if (!zh) {
+        for (const cand of esLemmaCandidates(lw)) {
+            if (cand !== lw && wordHitDict.has(cand)) return { level: 'hit', lemma: cand, rec: wordHitDict.get(cand) };
+        }
+    }
+    // 4) ZH: desglose carácter a carácter — solo si ALGÚN carácter tiene
+    // ficha real (si no, mejor el mensaje honesto; el pinyin ya está arriba)
+    if (zh) {
+        const chars = [];
+        for (const ch of w) if (READER_HANZI.test(ch) && chars.indexOf(ch) === -1) chars.push(ch);
+        const parts = chars.map(ch => ({ ch: ch, py: wordPinyin(ch), rec: vocabDict.get(ch) || wordHitDict.get(ch) || null }));
+        if (parts.length && parts.some(p => p.rec)) return { level: 'chars', parts: parts };
+    }
+    return { level: 'none' };
+}
+
+function isZhText(t) { return READER_HANZI.test(t || ''); }
 
 function wordPinyin(word) {
     try {
@@ -1858,48 +1993,90 @@ function wordPinyin(word) {
     return '';
 }
 
+// Ejemplo EN CHINO de una lección (respeta 简/繁 elegido) + pinyin + apoyo ES
+function vpZhExampleHtml(rec, word) {
+    let h = '';
+    const ejemploZh = (ck() === 'trad' ? (rec.fullZhTrad || rec.fullZhSimp) : (rec.fullZhSimp || rec.fullZhTrad)) || '';
+    if (ejemploZh && ejemploZh !== word) {
+        h += '<div class="vp-example">🇨🇳 ' + escHtml(ejemploZh) + '</div>';
+        const pyEj = rec.pinyin || wordPinyin(ejemploZh);
+        if (pyEj) h += '<div class="vp-example-py">📖 ' + escHtml(pyEj) + '</div>';
+        if (rec.fullEs) h += '<div class="vp-example-alt">🇪🇸 “' + escHtml(rec.fullEs) + '”</div>';
+    }
+    return h;
+}
+
+// Ejemplo EN ESPAÑOL de una lección + apoyo en chino con pinyin
+function vpEsExampleHtml(rec, word) {
+    let h = '';
+    if (rec.fullEs && rec.fullEs !== word) {
+        h += '<div class="vp-example">🇪🇸 “' + escHtml(rec.fullEs) + '”</div>';
+    }
+    const apoyoZh = (ck() === 'trad' ? (rec.fullZhTrad || rec.fullZhSimp) : (rec.fullZhSimp || rec.fullZhTrad)) || '';
+    if (apoyoZh) {
+        const pyAp = wordPinyin(apoyoZh) || rec.pinyin;
+        h += '<div class="vp-example-alt">🇨🇳 ' + escHtml(apoyoZh) + (pyAp ? ' <span class="vp-example-py-inline">(' + escHtml(pyAp) + ')</span>' : '') + '</div>';
+    }
+    return h;
+}
+
+// Traducción directa ES→ZH (respuesta exacta tocada desde el modo español)
+function vpEsExactHtml(rec, word) {
+    let h = '';
+    let zhLine = rec.zhSimp ? escHtml(rec.zhSimp) : '';
+    if (rec.zhTrad && rec.zhTrad !== rec.zhSimp) zhLine += ' <span class="vp-trad">(' + escHtml(rec.zhTrad) + ')</span>';
+    if (zhLine) h += '<div class="vp-trans">🇨🇳 ' + zhLine + '</div>';
+    const py = wordPinyin(rec.zhSimp) || rec.pinyin;
+    if (py) h += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
+    h += vpEsExampleHtml(rec, word);
+    return h;
+}
+
 function showVocabPop(word) {
     const pop = document.getElementById('vocab-pop');
     const body = document.getElementById('vocab-pop-body');
     if (!pop || !body) return;
-    const rec = vocabDict.get(word);
-    const zh = isZhText(word);
-    let html = '<div class="vp-word">' + escHtml(word) + '</div>';
+    const w = String(word || '').trim();
+    const zh = isZhText(w);
+    const hit = lookupVocab(w);
+    const rec = hit.rec;
+    let html = '<div class="vp-word">' + escHtml(w) + '</div>';
     if (zh) {
-        // Palabra china → traducción al español + EJEMPLO EN CHINO (idioma de la
-        // palabra tocada, respeta 简/繁 elegido) + apoyo en español (feedback de alumnos)
-        const py = wordPinyin(word) || (rec ? rec.pinyin : '');
+        // Palabra china: pinyin SIEMPRE (pinyin-pro), haya o no ficha
+        const py = wordPinyin(w) || (rec ? rec.pinyin : '');
         if (py) html += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
-        if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';
-        if (rec) {
-            const ejemploZh = (ck() === 'trad' ? (rec.fullZhTrad || rec.fullZhSimp) : (rec.fullZhSimp || rec.fullZhTrad)) || '';
-            if (ejemploZh && ejemploZh !== word) {
-                html += '<div class="vp-example">🇨🇳 ' + escHtml(ejemploZh) + '</div>';
-                const pyEj = rec.pinyin || wordPinyin(ejemploZh);
-                if (pyEj) html += '<div class="vp-example-py">📖 ' + escHtml(pyEj) + '</div>';
-                if (rec.fullEs) html += '<div class="vp-example-alt">🇪🇸 “' + escHtml(rec.fullEs) + '”</div>';
-            }
-        }
-    } else {
-        // Palabra española → traducción al chino + EJEMPLO EN ESPAÑOL (idioma de
-        // la palabra tocada) + apoyo en chino con pinyin (feedback de alumnos)
-        if (rec) {
-            let zhLine = rec.zhSimp ? escHtml(rec.zhSimp) : '';
-            if (rec.zhTrad && rec.zhTrad !== rec.zhSimp) zhLine += ' <span class="vp-trad">(' + escHtml(rec.zhTrad) + ')</span>';
-            if (zhLine) html += '<div class="vp-trans">🇨🇳 ' + zhLine + '</div>';
-            const py = wordPinyin(rec.zhSimp) || rec.pinyin;
-            if (py) html += '<div class="vp-pinyin">📖 ' + escHtml(py) + '</div>';
-            if (rec.fullEs && rec.fullEs !== word) {
-                html += '<div class="vp-example">🇪🇸 “' + escHtml(rec.fullEs) + '”</div>';
-            }
-            const apoyoZh = (ck() === 'trad' ? (rec.fullZhTrad || rec.fullZhSimp) : (rec.fullZhSimp || rec.fullZhTrad)) || '';
-            if (apoyoZh) {
-                const pyAp = wordPinyin(apoyoZh) || rec.pinyin;
-                html += '<div class="vp-example-alt">🇨🇳 ' + escHtml(apoyoZh) + (pyAp ? ' <span class="vp-example-py-inline">(' + escHtml(pyAp) + ')</span>' : '') + '</div>';
-            }
-        }
     }
-    if (!rec) html += '<div class="vp-missing">🤔 No tengo la traducción de esta palabra en este módulo. Cargá el módulo donde la aprendiste y volvé a tocarla.</div>';
+    if (hit.level === 'exact') {
+        // Respuesta exacta: EXACTAMENTE lo mismo que mostraba siempre
+        if (zh) {
+            if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';
+            if (rec) html += vpZhExampleHtml(rec, w);
+        } else if (rec) {
+            html += vpEsExactHtml(rec, w);
+        }
+    } else if (hit.level === 'lemma') {
+        // v7.10 Capa 2: tocó una conjugación/plural → ficha del LEMA
+        if (rec && rec.es) html += '<div class="vp-trans">🇪🇸 ' + escHtml(rec.es) + '</div>';
+        html += '<div class="vp-note">🔎 Por el lema «' + escHtml(hit.lemma) + '»</div>';
+        html += vpEsExampleHtml(rec, '');
+    } else if (hit.level === 'hit') {
+        // v7.10 Capa 1: la palabra vive dentro del texto de una lección.
+        // Honestidad: se muestra la lección como contexto, NO como traducción 1:1.
+        html += '<div class="vp-note">🔎 Aparece en una lección' + (hit.lemma ? ' (lema «' + escHtml(hit.lemma) + '»)' : '') + ':</div>';
+        html += zh ? vpZhExampleHtml(rec, '') : vpEsExampleHtml(rec, '');
+    } else if (hit.level === 'chars') {
+        // v7.10 Capa 3: desglose carácter a carácter
+        html += '<div class="vp-note">🔤 Carácter por carácter:</div><div class="vp-chars">';
+        hit.parts.forEach(p => {
+            html += '<div class="vp-char-row"><span class="vp-char">' + escHtml(p.ch) + '</span>'
+                + (p.py ? '<span class="vp-char-py">' + escHtml(p.py) + '</span>' : '')
+                + (p.rec && p.rec.es ? '<span class="vp-char-es">🇪🇸 ' + escHtml(p.rec.es) + '</span>' : '')
+                + '</div>';
+        });
+        html += '</div>';
+    } else {
+        html += '<div class="vp-missing">🤔 No tengo la traducción de esta palabra en este módulo. Cargá el módulo donde la aprendiste y volvé a tocarla.</div>';
+    }
     body.innerHTML = html;
     pop.classList.remove('hidden');
 }
@@ -2204,17 +2381,15 @@ function escHtml(s) {
 //     con los límites de palabra del Segmenter. Cache por palabra: pinyin-pro
 //     es lookup de diccionario y las palabras repetidas dominan el texto real.
 const _readerPyCache = new Map();   // segmento → items|null (memoria de sesión)
-const READER_HANZI = /[\u3400-\u4dbf\u4e00-\u9fff]/;
 // Puntuación que NO debe arrancar renglón: se pega dentro de la palabra anterior
 const READER_STICKY = /[，。！？、；：…—·（）()《》〈〉「」『』,.!?;:]/;
 
 function readerSegmentLine(line) {
-    // Palabras naturales del chino (你好 = 1 palabra); fallback: carácter a carácter
-    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-        try {
-            const seg = new Intl.Segmenter('zh', { granularity: 'word' });
-            return Array.from(seg.segment(line), s => s.segment);
-        } catch (e) { /* navegadores sin soporte real */ }
+    // Palabras naturales del chino (你好 = 1 palabra); fallback: carácter a carácter.
+    // v7.10: comparte la ÚNICA instancia de Intl.Segmenter con el diccionario.
+    const seg = getZhSegmenter();
+    if (seg) {
+        try { return Array.from(seg.segment(line), s => s.segment); } catch (e) { /* cae al fallback */ }
     }
     return Array.from(line);
 }
@@ -2280,6 +2455,23 @@ function renderZhLineHtml(line, wantPinyin, wantTones) {
     return out.join('');
 }
 
+// v7.10: tokeniza una línea en ESPAÑOL envolviendo cada palabra en un span
+// tocable (.reader-word-plain = mismo popup, visual plano sin ruby).
+// Los números solos quedan como texto (no hay nada que traducir).
+function readerEsLineHtml(line) {
+    let out = '';
+    let last = 0;
+    const re = /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g;
+    let m;
+    while ((m = re.exec(line))) {
+        if (m.index > last) out += escHtml(line.slice(last, m.index));
+        out += '<span class="reader-word reader-word-plain" data-word="' + escHtml(m[0]) + '">' + escHtml(m[0]) + '</span>';
+        last = m.index + m[0].length;
+    }
+    out += escHtml(line.slice(last));
+    return out;
+}
+
 function renderReaderPreview() {
     const prev = document.getElementById('reader-preview');
     if (!prev) return;
@@ -2295,9 +2487,10 @@ function renderReaderPreview() {
         return;
     }
 
-    // Español / no-chino → texto plano con saltos (sin ruby, sin toque)
+    // Español / no-chino → texto plano con saltos; SIN ruby pero con palabras
+    // tocables (v7.10): el mismo popup de vocabulario sirve también en CN→ES.
     if (detectReaderLang(text) !== 'zh') {
-        prev.innerHTML = '<div class="reader-es">' + escHtml(text).replace(/\n/g, '<br>') + '</div>';
+        prev.innerHTML = '<div class="reader-es">' + text.split('\n').map(readerEsLineHtml).join('<br>') + '</div>';
         prev.classList.remove('hidden');
         return;
     }
