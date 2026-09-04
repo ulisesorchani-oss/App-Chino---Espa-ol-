@@ -1041,12 +1041,45 @@ async function loadSentences() {
 }
 
 // ===== Eventos =====
+// v7.18: TABS de selectores de contenido — un solo panel visible, tab activo
+// persistido. Solo mueve clases 'hidden'/'active': los dropdowns internos
+// (daily/dele/classics) siguen usando su propia lógica y setModule() intactos.
+function setupModuleTabs() {
+    const bar = document.getElementById('module-tabs');
+    if (!bar) return;
+    const panels = { daily: 'panel-daily', exams: 'panel-exams', classics: 'panel-classics' };
+    const TAB_KEY = 'ac_tab';
+    const activate = (name, save) => {
+        if (!panels[name]) name = 'daily';
+        bar.querySelectorAll('.mtab').forEach(b => {
+            const on = b.dataset.tab === name;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        Object.keys(panels).forEach(k => {
+            const p = document.getElementById(panels[k]);
+            if (p) p.classList.toggle('hidden', k !== name);
+        });
+        if (save) { try { localStorage.setItem(TAB_KEY, name); } catch (e) {} }
+    };
+    bar.addEventListener('click', (e) => {
+        const b = e.target.closest('.mtab');
+        if (b) activate(b.dataset.tab, true);
+    });
+    let saved = null;
+    try { saved = localStorage.getItem(TAB_KEY); } catch (e) {}
+    activate(saved || 'daily', false);
+}
+
 function setupEventListeners() {
     // Función auxiliar para evitar errores si falta algún botón
     const safeAdd = (id, callback) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('click', callback);
     };
+
+    // v7.18: tabs de módulos (Diaria / Exámenes / Clásicos)
+    setupModuleTabs();
 
     // Modo ES/CN
     safeAdd('btn-es-cn', () => setMode('es-cn'));
@@ -2492,7 +2525,7 @@ function loadHanziWriter() {
     if (vpStrokes.libPromise) return vpStrokes.libPromise;
     vpStrokes.libPromise = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'hanzi-writer.min.js?v=20260906i'; // local: el SW lo precachea → offline
+        s.src = 'hanzi-writer.min.js?v=20260906j'; // local: el SW lo precachea → offline
         s.onload = () => resolve();
         s.onerror = () => {
             // Fallback CDN (mismo archivo): sin local y sin red → falla solo la

@@ -2753,3 +2753,254 @@ body.dark-mode .wp-hint { color: #94a3b8; }
     }
     .wp-hint { font-size: 0.85rem; }
 }
+
+/* ======================================================================
+   v7.18 MOBILE-FIRST: la práctica primero, la configuración después
+   Orden: header compacto → barra de estudio sticky → TARJETA → tabs de
+   módulos → stats + vocabulario → lector/planillas → borrar progreso.
+   ====================================================================== */
+
+/* ===== Header compacto: 1 fila con acciones a la derecha ===== */
+.header {
+    margin-bottom: 14px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-row h1 {
+    font-size: 1.45rem;
+    margin-bottom: 0;
+    text-align: left;
+    line-height: 1.2;
+}
+
+.header .subtitle {
+    text-align: left;
+    font-size: 0.82rem;
+    margin: 4px 0 0;
+    opacity: 0.85;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+/* El botón de tema deja de ser flotante y pasa a ser ícono del header */
+.header-actions .theme-toggle {
+    position: static;
+    width: 42px;
+    height: 42px;
+    font-size: 1.15rem;
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: none;
+}
+
+.header-actions .theme-toggle:hover {
+    transform: scale(1.08);
+}
+
+body.dark-mode .header-actions .theme-toggle {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+/* Instalar: chip compacto del header (aparece solo con beforeinstallprompt) */
+.header-actions .install-btn {
+    min-height: 42px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+}
+
+/* ===== Barra de estudio: modos 2 columnas + chips flex-wrap ===== */
+.control-panel {
+    display: block;
+    margin-bottom: 14px;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Sticky: pinyin/tonos/velocidad/voces siempre a mano durante la práctica */
+.control-panel.study-bar {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(102, 126, 234, 0.94);
+    box-shadow: 0 6px 18px rgba(31, 38, 135, 0.28);
+}
+
+body.dark-mode .control-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+body.dark-mode .control-panel.study-bar {
+    background: rgba(30, 27, 75, 0.96);
+}
+
+.mode-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 50px;
+    padding: 7px 10px;
+    border-radius: 14px;
+}
+
+.mode-btn b {
+    font-size: 0.95rem;
+    line-height: 1.1;
+}
+
+.mode-btn small {
+    font-size: 0.67rem;
+    font-weight: 500;
+    opacity: 0.85;
+    line-height: 1.1;
+}
+
+body.dark-mode .mode-btn.active small,
+body.dark-mode .mode-btn.active b {
+    opacity: 1;
+}
+
+/* Toolbar de chips: 1-2 filas, NO pila vertical */
+.tools-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.tools-row > button,
+.tools-row > .script-toggle {
+    min-height: 40px;
+}
+
+.tools-row .speed-btn,
+.tools-row .pinyin-btn,
+.tools-row .btn-secondary {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+.tools-row .script-toggle {
+    border-width: 1.5px;
+}
+
+.tools-row .script-btn {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+}
+
+/* ===== Tabs de módulos (debajo de la práctica) ===== */
+.module-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 4px 0 14px;
+}
+
+.mtab {
+    min-height: 44px;
+    padding: 8px 6px;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.10);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.25s;
+}
+
+.mtab.active {
+    background: white;
+    color: var(--primary);
+    border-color: white;
+}
+
+.mtab:not(.active):hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.tab-panel {
+    margin-bottom: 18px;
+}
+
+/* El separador punteado de la era pre-tabs no aplica dentro de un panel */
+.tab-panel.section-exams {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* ===== Stats al final + zona destructiva discreta ===== */
+.stats-bottom {
+    justify-content: center;
+    margin: 0 0 10px;
+}
+
+.danger-zone {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0 24px;
+}
+
+.danger-zone .btn-reset {
+    margin-left: 0;
+    border-color: rgba(255, 255, 255, 0.35);
+    font-size: 0.72rem;
+    opacity: 0.85;
+}
+
+.danger-zone .btn-reset:hover {
+    opacity: 1;
+}
+
+/* ===== Ajustes ≥768px: mismo orden, más aire ===== */
+@media (min-width: 768px) {
+    .header-row h1 { font-size: 1.7rem; }
+    .control-panel { padding: 12px 14px; }
+    .tools-row { gap: 10px; }
+}
+
+/* ===== Duplicación móvil ≤480px (Regla 6.2) ===== */
+@media (max-width: 480px) {
+    .header-row h1 { font-size: 1.22rem; }
+    .header .subtitle { font-size: 0.76rem; }
+    .control-panel { padding: 8px; }
+    .mode-selector { gap: 6px; margin-bottom: 8px; }
+    .mode-btn { min-height: 48px; }
+    .mode-btn b { font-size: 0.88rem; }
+    .mode-btn small { font-size: 0.62rem; }
+    .tools-row { gap: 6px; }
+    .tools-row .speed-btn,
+    .tools-row .pinyin-btn,
+    .tools-row .btn-secondary { padding: 7px 10px; font-size: 0.75rem; min-height: 40px; }
+    .tools-row .script-btn { padding: 7px 10px; font-size: 0.74rem; }
+    .mtab { font-size: 0.78rem; min-height: 42px; padding: 7px 4px; }
+    .module-tabs { gap: 6px; }
+    .stats-bottom { font-size: 0.82rem; gap: 12px; }
+    .danger-zone { padding-bottom: 20px; }
+}
