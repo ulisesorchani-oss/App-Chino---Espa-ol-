@@ -34,11 +34,16 @@
      (patrón dict-mini.js): agregar lecciones nuevas NO regenera app.js,
      solo edita lessons.js. El botón carga el texto en el Lector (pinyin
      interlineal + diccionario + TTS); en CN→ES el botón se oculta.
+   - v7.15: sin cambios de precache — secciones/capítulos y Biblioteca
+     de Lecturas viven en lessons.js + app.js (mismo archivo plano).
+     lessons.js v2: entradas con ids (secciones), group/label (Biblioteca)
+     y status 'planned' (plantadas "próximamente"). VERSION sube para
+     invalidar el shell (app.js + lessons.js + index.html + style.css).
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v34';
+const VERSION = 'v35';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

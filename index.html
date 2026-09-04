@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260906f">
+    <link rel="stylesheet" href="style.css?v=20260906g">
 </head>
 <body>
     <div class="container">
@@ -232,6 +232,15 @@
             </div>
             <!-- v7.14: maxlength 1200 — las lecciones (lessons.js) cargan textos completos -->
             <textarea id="reader-input" class="reader-input" rows="3" maxlength="1200" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
+            <!-- v7.15: BIBLIOTECA DE LECTURAS — cargar por secciones/capítulos
+                 desde lessons.js sin estar estudiando ese módulo. Las
+                 plantadas (planned) aparecen como "· próximamente". -->
+            <div class="reader-library">
+                <select id="reader-library" class="reader-library-select" aria-label="Biblioteca de lecturas">
+                    <option value="">📚 Biblioteca de lecturas…</option>
+                </select>
+                <button id="btn-library-load" class="btn-secondary" type="button" title="Cargar la lectura elegida en el Lector">Cargar</button>
+            </div>
             <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
             <div class="reader-actions">
                 <button id="btn-reader-clear" class="btn-secondary" type="button">🗑️ Limpiar</button>
@@ -354,21 +363,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260906f"></script>
+    <script src="config.js?v=20260906g"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260906f"></script>
+    <script src="text-utils.js?v=20260906g"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260906f"></script>
+    <script src="VoiceRecorder.js?v=20260906g"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260906f"></script>
-    <script src="dict-mini.js?v=20260906f"></script>
+    <script src="voice-evaluator.js?v=20260906g"></script>
+    <script src="dict-mini.js?v=20260906g"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260906f"></script>
-    <script src="app.js?v=20260906f"></script>
+    <script src="lessons.js?v=20260906g"></script>
+    <script src="app.js?v=20260906g"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

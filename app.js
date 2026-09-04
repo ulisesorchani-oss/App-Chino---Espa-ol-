@@ -931,6 +931,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyToneScheme(); // v7.11: restaurar esquema de tonos guardado (respeta dark ya aplicado)
     await loadSentences();
     setupEventListeners();
+    buildReaderLibrary(); // v7.15: poblar la Biblioteca de Lecturas (lessons.js)
     applySavedUI();
     // v7.8 (spec v4.0): sincronizar el MODO con el evaluador de voz lo
     // antes posible. No bloquea el render: si tarda, la evaluación de
@@ -1061,6 +1062,7 @@ function setupEventListeners() {
     safeAdd('btn-know', () => markWord(true));
     safeAdd('btn-not-know', () => markWord(false));
     safeAdd('btn-read-lesson', readCurrentLesson); // v7.14: leer lección completa
+    safeAdd('btn-library-load', loadLibraryLesson); // v7.15: Biblioteca de Lecturas
     safeAdd('btn-reset', resetProgress);
     safeAdd('btn-pinyin', togglePinyin);
     safeAdd('btn-tones', toggleToneColors);
@@ -2460,7 +2462,7 @@ function loadHanziWriter() {
     if (vpStrokes.libPromise) return vpStrokes.libPromise;
     vpStrokes.libPromise = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'hanzi-writer.min.js?v=20260906f'; // local: el SW lo precachea → offline
+        s.src = 'hanzi-writer.min.js?v=20260906g'; // local: el SW lo precachea → offline
         s.onload = () => resolve();
         s.onerror = () => {
             // Fallback CDN (mismo archivo): sin local y sin red → falla solo la
@@ -2850,25 +2852,66 @@ function clearReader() {
     renderReaderPreview();
 }
 
-// ===== v7.14: LEER LA LECCIÓN COMPLETA (lessons.js) =====
-// Los textos completos viven en lessons.js (archivo plano de datos, patrón
-// dict-mini.js) — agregar lecciones nuevas NO toca app.js: solo se agrega
-// una entrada al array de LESSONS_DATA.
+// ===== v7.14/v7.15: LEER LA LECCIÓN COMPLETA + BIBLIOTECA =====
+// Los textos viven en lessons.js (archivo plano de datos, patrón
+// dict-mini.js) — agregar lecciones o secciones nuevas NO toca app.js:
+// solo se agrega una entrada al array de LESSONS_DATA.
 // Mapeo oración → lección:
-//   · L.module === s.module  → el módulo entero es la lección (Clásicos)
-//   · L.ids contiene s.id    → lección parcial (futuro: artículos, capítulos)
+//   · L.ids contiene s.id    → SECCIÓN / capítulo (coincidencia
+//     específica — v7.15: GANA sobre el módulo entero)
+//   · L.module === s.module  → el módulo entero es la lección
+//   · L.status === 'planned' → plantada sin texto: solo Biblioteca
 function lessonForSentence(s) {
     if (!s || typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) return null;
     const list = LESSONS_DATA.lessons;
+    let exact = null, broad = null;
     for (let i = 0; i < list.length; i++) {
         const L = list[i];
-        if (L.module && s.module === L.module) return L;
-        if (Array.isArray(L.ids) && L.ids.indexOf(s.id) !== -1) return L;
+        if (L.status === 'planned') continue; // plantada: sin texto, solo Biblioteca
+        if (Array.isArray(L.ids) && L.ids.indexOf(s.id) !== -1) {
+            if (!exact) exact = L;
+        } else if (L.module && s.module === L.module) {
+            if (!broad) broad = L;
+        }
     }
-    return null;
+    return exact || broad; // la sección (específica) gana sobre el módulo
 }
 
-// Carga el texto completo de la lección de la oración actual en el Lector
+// v7.15: vuelca el texto de una lección/sección en el Lector y avisa.
+// Devuelve true si cargó texto (las plantadas avisan y devuelven false).
+function fillReaderWithLesson(lesson) {
+    const k = ck();
+    const text = (k === 'trad' ? (lesson.text_trad || lesson.text_simp)
+                               : (lesson.text_simp || lesson.text_trad)) || '';
+    if (!text) {
+        moduleStatus('📝 "' + (lesson.title || lesson.id) + '" todavía no tiene texto — está plantada para rellenar.');
+        return false;
+    }
+
+    const ta = document.getElementById('reader-input');
+    if (!ta) return false;
+
+    stopReader(); // regla "un solo audio" — si el lector estaba sonando, se corta
+    ta.value = text;
+    if (typeof updateReaderLang === 'function') updateReaderLang();
+    if (typeof renderReaderPreview === 'function') renderReaderPreview();
+
+    // Bajar al lector + destello para que se entienda de dónde salió el texto
+    const banner = document.getElementById('reader-banner');
+    if (banner && banner.scrollIntoView) {
+        banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        banner.classList.remove('lesson-glow');
+        void banner.offsetWidth; // reinicia la animación si ya estaba
+        banner.classList.add('lesson-glow');
+        setTimeout(() => banner.classList.remove('lesson-glow'), 2500);
+    }
+
+    const chars = text.replace(/\n/g, '').length;
+    moduleStatus('📖 Leyendo: ' + (lesson.title || lesson.id) + ' · ' + chars + ' caracteres en el Lector');
+    return true;
+}
+
+// Carga el texto de la lección/sección de la oración actual en el Lector
 // (pinyin interlineal, tonos, diccionario al toque y lectura en voz alta).
 async function readCurrentLesson() {
     if (state.mode !== 'es-cn') {
@@ -2890,34 +2933,74 @@ async function readCurrentLesson() {
         return;
     }
 
-    const k = ck();
-    const text = (k === 'trad' ? (lesson.text_trad || lesson.text_simp)
-                               : (lesson.text_simp || lesson.text_trad)) || '';
-    if (!text) {
-        moduleStatus('⚠ La lección no tiene texto cargado.', true);
+    fillReaderWithLesson(lesson);
+}
+
+// ===== v7.15: BIBLIOTECA DE LECTURAS (en el Lector) =====
+// Un <select> + botón Cargar: cualquier lectura o sección de lessons.js
+// se puede leer SIN estar estudiando ese módulo. Las plantadas
+// (status 'planned') aparecen como "· próximamente" deshabilitadas.
+function buildReaderLibrary() {
+    const sel = document.getElementById('reader-library');
+    if (!sel) return;
+    sel.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '📚 Elegí una lectura…';
+    sel.appendChild(ph);
+
+    if (typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) {
+        sel.disabled = true;
         return;
     }
+    sel.disabled = false;
 
-    const ta = document.getElementById('reader-input');
-    if (!ta) return;
+    // Orden del archivo = orden del autor; un óptgroup por 'group'
+    const groups = [];
+    const byGroup = {};
+    LESSONS_DATA.lessons.forEach(L => {
+        const g = L.group || 'Lecturas';
+        if (!byGroup[g]) { byGroup[g] = []; groups.push(g); }
+        byGroup[g].push(L);
+    });
+    groups.forEach(g => {
+        const og = document.createElement('optgroup');
+        og.label = g;
+        byGroup[g].forEach(L => {
+            const o = document.createElement('option');
+            o.value = L.id;
+            if (L.status === 'planned') {
+                o.disabled = true;
+                o.textContent = (L.label || L.title) + ' · próximamente';
+            } else {
+                o.textContent = L.label || L.title;
+            }
+            og.appendChild(o);
+        });
+        sel.appendChild(og);
+    });
+}
 
-    stopReader(); // regla "un solo audio" — si el lector estaba sonando, se corta
-    ta.value = text;
-    if (typeof updateReaderLang === 'function') updateReaderLang();
-    if (typeof renderReaderPreview === 'function') renderReaderPreview();
-
-    // Bajar al lector + destello para que se entienda de dónde salió el texto
-    const banner = document.getElementById('reader-banner');
-    if (banner && banner.scrollIntoView) {
-        banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        banner.classList.remove('lesson-glow');
-        void banner.offsetWidth; // reinicia la animación si ya estaba
-        banner.classList.add('lesson-glow');
-        setTimeout(() => banner.classList.remove('lesson-glow'), 2500);
+// Carga en el Lector la lectura elegida en la Biblioteca
+function loadLibraryLesson() {
+    const sel = document.getElementById('reader-library');
+    if (!sel || !sel.value) {
+        moduleStatus('📚 Elegí una lectura de la Biblioteca primero.');
+        return;
     }
-
-    const chars = text.replace(/\n/g, '').length;
-    moduleStatus('📖 Leyendo: ' + (lesson.title || lesson.id) + ' · ' + chars + ' caracteres en el Lector');
+    if (typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) {
+        moduleStatus('⚠ No se pudo cargar lessons.js — revisá que el archivo esté subido.', true);
+        return;
+    }
+    let L = null;
+    for (let i = 0; i < LESSONS_DATA.lessons.length; i++) {
+        if (LESSONS_DATA.lessons[i].id === sel.value) { L = LESSONS_DATA.lessons[i]; break; }
+    }
+    if (!L) {
+        moduleStatus('⚠ No encontré esa lectura en lessons.js.', true);
+        return;
+    }
+    fillReaderWithLesson(L);
 }
 
 // ===== Lector: vista previa con pinyin y colores de tono =====
