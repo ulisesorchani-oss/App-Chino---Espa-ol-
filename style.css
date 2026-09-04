@@ -785,6 +785,101 @@ body.dark-mode .reader-preview {
     border-color: #334155;
 }
 
+/* ===== v7.9: LECTOR INTERLINEAL (hanzi + pinyin debajo + toque) ===== */
+/* Palabra = unidad tocable (inline-flex): los renglones cortan POR PALABRA,
+   nunca a mitad de palabra, como en un libro de texto chino. */
+.reader-placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.reader-es {
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.reader-line {
+    line-height: 1.45;
+    white-space: pre-wrap;      /* conserva espacios dobles si los hubiera */
+}
+
+.reader-word {
+    display: inline-flex;
+    align-items: flex-end;
+    margin: 0 6px 8px 0;
+    padding: 2px 1px;
+    border-radius: 6px;
+    cursor: pointer;
+    vertical-align: top;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s;
+}
+
+.reader-word:active {
+    background-color: rgba(37, 99, 235, 0.12);
+}
+
+.ruby-col {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 1.35em;          /* columnas parejas dentro de la palabra */
+}
+
+.ruby-char {
+    font-size: 1.45rem;
+    line-height: 1.25;
+}
+
+.ruby-py {
+    font-size: 0.72rem;
+    line-height: 1.1;
+    margin-top: 2px;
+    color: var(--text-secondary);
+    white-space: nowrap;        /* el pinyin no parte en vertical */
+}
+
+/* Puntuación pegada a la palabra anterior: columna estrecha, sin pinyin */
+.ruby-col.ruby-punct {
+    min-width: auto;
+}
+
+.ruby-punct .ruby-char {
+    font-size: 1.45rem;
+}
+
+/* Latin/dígitos sueltos dentro de texto chino (nombres, números) */
+.reader-non-zh {
+    display: inline;
+    vertical-align: baseline;
+}
+
+/* Regla de duplicación: Modo Oscuro (la variable --text-secondary ya vira sola) */
+body.dark-mode .reader-word:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Regla de duplicación: Móvil ≤480px */
+@media (max-width: 480px) {
+    .ruby-char,
+    .ruby-punct .ruby-char {
+        font-size: 1.25rem;
+    }
+
+    .ruby-py {
+        font-size: 0.62rem;
+    }
+
+    .ruby-col {
+        min-width: 1.2em;
+    }
+
+    .reader-word {
+        margin: 0 4px 6px 0;
+    }
+}
+
 /* ===== PWA: BOTÓN INSTALAR + PILL OFFLINE ===== */
 .install-btn {
     border-color: var(--success);

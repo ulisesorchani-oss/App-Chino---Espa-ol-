@@ -287,6 +287,40 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🗣️ NOVEDADES v7.9 — LECTOR INTERLINEAL: pinyin debajo de cada
+   carácter + tocar palabra para ver su traducción
+----------------------------------------------------------------------
+• El Lector de texto (abajo de todo) cambió el motor de vista
+  previa. ANTES mostraba dos filas planas (pinyin arriba, hanzi
+  abajo). AHORA usa el formato de libro de texto chino:
+    · el texto se agrupa en PALABRAS naturales (gracias al
+      segmentador Intl.Segmenter del navegador);
+    · cada carácter lleva su pinyin DEBAJO, en columnas parejas;
+    · cada palabra es una unidad: el renglón nunca corta a mitad
+      de palabra;
+    · la puntuación (，。！？…) se pega a la palabra anterior, no
+      arranca renglón.
+• TOCAR UNA PALABRA abre el popup de vocabulario (el mismo del
+  cajón "Palabras aprendidas"): traducción, pinyin y ejemplo de la
+  lección si la palabra está en el módulo cargado; si no, avisa
+  con elegancia. Funciona con el dedo en el celular y con clic en
+  la PC.
+• Los interruptores de siempre siguen mandando dentro del lector:
+    · 📖 Pinyin OFF → desaparece la fila de abajo, quedan solo los
+      caracteres.
+    · 🎨 Tonos ON → hanzi Y pinyin se colorean (azul/naranja/
+      verde/rojo por tono, igual que las tarjetas).
+• El box de vista previa ahora SIEMPRE está visible: con texto
+  español se muestra como texto plano (sin ruby); vacío muestra
+  una guía breve de qué se puede pegar.
+• Pinyin por palabra (no sobre el texto completo): la alineación
+  carácter↔pinyin es exacta dentro de cada palabra y el resultado
+  queda en cache — repintar al escribir es instantáneo incluso en
+  celulares humildes.
+• Sin archivos nuevos: es un refactor de app.js + style.css.
+  sw.js sube a v29 para repartir el shell actualizado.
+
+======================================================================
 🎯 NOVEDADES v7.8 — Evaluador por MODO: español (solo oído de
    Whisper) vs chino (tonos medidos) · spec Prompt v4.0
 ----------------------------------------------------------------------

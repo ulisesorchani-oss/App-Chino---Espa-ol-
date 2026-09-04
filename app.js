@@ -1004,6 +1004,15 @@ function setupEventListeners() {
         updateReaderLang();
         renderReaderPreview();
     }
+    // v7.9: toque en palabra del lector → popup de vocabulario.
+    // DELEGADO en #reader-preview (sobrevive a cada re-render del innerHTML).
+    const readerPrev = document.getElementById('reader-preview');
+    if (readerPrev) {
+        readerPrev.addEventListener('click', (e) => {
+            const w = e.target.closest('.reader-word');
+            if (w && w.dataset.word) showVocabPop(w.dataset.word);
+        });
+    }
     
     // Input Enter
     const input = document.getElementById('answer-input');
@@ -1040,7 +1049,9 @@ function setupEventListeners() {
         const pop = document.getElementById('vocab-pop');
         if (!pop || pop.classList.contains('hidden')) return;
         if (pop.contains(e.target)) return;
-        if (e.target.closest && e.target.closest('.vocab-item')) return;
+        // v7.9: los .reader-word del lector ABREN el popup — ese mismo clic
+        // no debe cerrarlo (igual que las chips .vocab-item del cajón)
+        if (e.target.closest && (e.target.closest('.vocab-item') || e.target.closest('.reader-word'))) return;
         hideVocabPop();
     });
     
@@ -2179,47 +2190,134 @@ function escHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// ===== v7.9: LECTOR INTERLINEAL =====
+// Cambios clave vs v7.8 (dos filas planas pinyin/hanzi):
+//  1. El texto chino se renderiza POR PALABRA (Intl.Segmenter): cada hanzi
+//     lleva su pinyin DEBAJO (columnas ruby interlineales, como libro de texto).
+//  2. Cada palabra es TOCABLE → abre el popup de vocabulario (#vocab-pop, el
+//     mismo del cajón de palabras aprendidas). Base para Opción B/C.
+//  3. Los toggles siguen mandando: 📖 Pinyin OFF oculta la fila de abajo;
+//     🎨 Tonos ON colorea hanzi y pinyin (clases tone-1..5 existentes).
+//  4. El pinyin se calcula POR SEGMENTO (no sobre el texto completo): la
+//     alineación carácter↔pinyin queda garantizada dentro de cada palabra y
+//     desaparece el problema de sincronizar el array global de pinyin-pro
+//     con los límites de palabra del Segmenter. Cache por palabra: pinyin-pro
+//     es lookup de diccionario y las palabras repetidas dominan el texto real.
+const _readerPyCache = new Map();   // segmento → items|null (memoria de sesión)
+const READER_HANZI = /[\u3400-\u4dbf\u4e00-\u9fff]/;
+// Puntuación que NO debe arrancar renglón: se pega dentro de la palabra anterior
+const READER_STICKY = /[，。！？、；：…—·（）()《》〈〉「」『』,.!?;:]/;
+
+function readerSegmentLine(line) {
+    // Palabras naturales del chino (你好 = 1 palabra); fallback: carácter a carácter
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+        try {
+            const seg = new Intl.Segmenter('zh', { granularity: 'word' });
+            return Array.from(seg.segment(line), s => s.segment);
+        } catch (e) { /* navegadores sin soporte real */ }
+    }
+    return Array.from(line);
+}
+
+function readerPinyinItems(word) {
+    // items 1:1 con los caracteres del segmento: [{origin, pinyin, num, isZh}, ...]
+    if (_readerPyCache.has(word)) return _readerPyCache.get(word);
+    let items = null;
+    try {
+        if (typeof pinyinPro !== 'undefined' && READER_HANZI.test(word)) {
+            const all = pinyinPro.pinyin(word, { type: 'all' });
+            if (all && all.length) items = all;
+        }
+    } catch (e) { items = null; }
+    _readerPyCache.set(word, items);
+    return items;
+}
+
+function readerWordCols(word, wantPinyin, wantTones) {
+    // Columnas ruby de una palabra; si items no aligna 1:1 → degrada a sin pinyin
+    const items = (wantPinyin || wantTones) ? readerPinyinItems(word) : null;
+    const chars = Array.from(word);
+    const useItems = !!(items && items.length === chars.length);
+    let cols = '';
+    for (let i = 0; i < chars.length; i++) {
+        const ch = chars[i];
+        const it = useItems ? items[i] : null;
+        const isZhChar = !!(it && it.isZh);
+        const toneCls = (wantTones && isZhChar) ? ' tone-' + (it.num || 5) : '';
+        let col = '<span class="ruby-col"><span class="ruby-char' + toneCls + '">' + escHtml(ch) + '</span>';
+        if (wantPinyin && isZhChar) col += '<span class="ruby-py' + toneCls + '">' + escHtml(it.pinyin || ch) + '</span>';
+        col += '</span>';
+        cols += col;
+    }
+    return cols;
+}
+
+function renderZhLineHtml(line, wantPinyin, wantTones) {
+    const segs = readerSegmentLine(line);
+    const out = [];
+    let lastWord = null;    // palabra en construcción (para pegarle puntuación)
+    const flush = () => {
+        if (!lastWord) return;
+        out.push('<span class="reader-word" data-word="' + escHtml(lastWord.text) + '">'
+            + lastWord.cols + lastWord.punct + '</span>');
+        lastWord = null;
+    };
+
+    for (const seg of segs) {
+        if (!seg) continue;
+        if (READER_HANZI.test(seg)) {
+            flush();
+            lastWord = { text: seg, cols: readerWordCols(seg, wantPinyin, wantTones), punct: '' };
+        } else if (lastWord && seg.length === 1 && READER_STICKY.test(seg)) {
+            // puntuación pegada a la palabra anterior (columna propia, sin pinyin)
+            lastWord.punct += '<span class="ruby-col ruby-punct"><span class="ruby-char">' + escHtml(seg) + '</span></span>';
+        } else {
+            flush();
+            out.push('<span class="reader-non-zh">' + escHtml(seg) + '</span>');
+        }
+    }
+    flush();
+    return out.join('');
+}
+
 function renderReaderPreview() {
     const prev = document.getElementById('reader-preview');
     if (!prev) return;
     const ta = document.getElementById('reader-input');
     const text = (ta && ta.value ? ta.value : '').trim();
-    const isZh = !!text && detectReaderLang(text) === 'zh';
     const wantPinyin = state.showPinyin;
     const wantTones = showToneColors;
 
-    // Solo para chino, con algún toggle activo y con la librería disponible
-    if (!isZh || (!wantPinyin && !wantTones) || typeof pinyinPro === 'undefined') {
-        prev.innerHTML = '';
-        prev.classList.add('hidden');
+    // Sin texto → placeholder (el box se descubre desde el arranque)
+    if (!text) {
+        prev.innerHTML = '<span class="reader-placeholder">Pegá texto chino o español acá… con chino verás el pinyin debajo de cada carácter y podés tocar cualquier palabra.</span>';
+        prev.classList.remove('hidden');
+        return;
+    }
+
+    // Español / no-chino → texto plano con saltos (sin ruby, sin toque)
+    if (detectReaderLang(text) !== 'zh') {
+        prev.innerHTML = '<div class="reader-es">' + escHtml(text).replace(/\n/g, '<br>') + '</div>';
+        prev.classList.remove('hidden');
+        return;
+    }
+
+    // Chino sin librería (CDN caído y sin precache) → plano legible, nunca romper
+    if (typeof pinyinPro === 'undefined') {
+        prev.innerHTML = '<div class="reader-hz">' + escHtml(text).replace(/\n/g, '<br>') + '</div>';
+        prev.classList.remove('hidden');
         return;
     }
 
     try {
-        const items = pinyinPro.pinyin(text, { type: 'all' });
-        let pyHtml = '';
-        let hzHtml = '';
-
-        for (const it of items) {
-            if (it.isZh) {
-                const toneNum = it.num || 5;
-                if (wantPinyin) pyHtml += '<span class="tone-' + toneNum + '">' + escHtml(it.pinyin || it.origin) + '</span> ';
-                if (wantTones) hzHtml += '<span class="tone-' + toneNum + '">' + escHtml(it.origin) + '</span>';
-                else hzHtml += escHtml(it.origin);
-            } else {
-                if (wantPinyin) pyHtml += escHtml(it.origin) + ' ';
-                hzHtml += escHtml(it.origin);
-            }
-        }
-
-        let html = '';
-        if (wantPinyin) html += '<div class="reader-py">' + pyHtml.trim() + '</div>';
-        html += '<div class="reader-hz">' + hzHtml + '</div>';
-        prev.innerHTML = html;
+        prev.innerHTML = text.split('\n').map(l =>
+            '<div class="reader-line">' + (l ? renderZhLineHtml(l, wantPinyin, wantTones) : '&nbsp;') + '</div>'
+        ).join('');
         prev.classList.remove('hidden');
     } catch (e) {
-        console.warn('Lector: error renderizando pinyin/tonos:', e);
-        prev.classList.add('hidden');
+        console.warn('Lector: error renderizando interlineal:', e);
+        prev.innerHTML = '<div class="reader-hz">' + escHtml(text).replace(/\n/g, '<br>') + '</div>';
+        prev.classList.remove('hidden');
     }
 }
 
