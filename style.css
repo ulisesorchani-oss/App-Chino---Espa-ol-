@@ -2347,3 +2347,161 @@ body.dark-mode .tl-custom label { color: #cbd5e1; }
     .tl-custom input[type="color"] { height: 26px; }
     .btn-tone-info { padding: 6px 10px; }
 }
+
+/* ============================================================
+   v7.13 — Orden de trazos (Hanzi Writer) + contexto de palabras
+   ============================================================ */
+/* Sección de trazos dentro de #vocab-pop (solo palabras chinas) */
+.vp-strokes {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+.vp-strokes-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.vp-stroke-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+.vp-stroke-char {
+    width: 130px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-light);
+    padding: 4px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.vp-stroke-target { width: 100%; line-height: 0; }
+.vp-stroke-target svg { display: block; margin: 0 auto; }
+/* Estado cargando (mientras llegan los datos del carácter) */
+.vp-stroke-char.loading::after {
+    content: '···';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    animation: vpStrokePulse 1.1s ease-in-out infinite;
+}
+@keyframes vpStrokePulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
+/* Carácter sin datos en hanzi-writer-data (raro) o motor sin cargar */
+.vp-stroke-char.nodata {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.vp-stroke-char.nodata::after {
+    content: 'sin datos';
+    position: static;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    animation: none;
+}
+/* Cuadro activo durante ✍ Practicar (y verde al completarlo) */
+.vp-stroke-char.quiz-on {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+.vp-stroke-char.quiz-ok { border-color: var(--success); }
+.vp-stroke-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.vp-stroke-btn {
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.vp-stroke-btn:hover { background: var(--primary); color: #fff; }
+.vp-stroke-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.vp-stroke-hint,
+.vp-stroke-note {
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+/* Contexto guardado al marcar la palabra (v7.13 B4) */
+.vp-ctx {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 10px;
+    background: var(--bg-light);
+}
+.vp-ctx-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+.vp-ctx-zh { font-size: 1.05rem; color: var(--text-primary); }
+.vp-ctx-py { font-size: 0.78rem; color: var(--text-secondary); }
+.vp-ctx-es {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* ---------- Modo oscuro (regla de duplicación) ---------- */
+body.dark-mode .vp-strokes { border-top-color: #334155; }
+body.dark-mode .vp-strokes-title,
+body.dark-mode .vp-ctx-title,
+body.dark-mode .vp-stroke-hint,
+body.dark-mode .vp-stroke-note { color: #94a3b8; }
+body.dark-mode .vp-stroke-char {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .vp-stroke-char.loading::after { color: #94a3b8; }
+body.dark-mode .vp-stroke-char.nodata::after { color: #94a3b8; }
+body.dark-mode .vp-stroke-char.quiz-on {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25);
+}
+body.dark-mode .vp-stroke-char.quiz-ok { border-color: #4ade80; }
+body.dark-mode .vp-stroke-btn {
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+body.dark-mode .vp-stroke-btn:hover { background: #60a5fa; color: #0f172a; }
+body.dark-mode .vp-ctx {
+    background: #0f172a;
+    border-color: #334155;
+    border-left-color: #60a5fa;
+}
+body.dark-mode .vp-ctx-zh { color: #e2e8f0; }
+body.dark-mode .vp-ctx-es { color: #94a3b8; }
+
+/* ---------- Responsive ≤480px (regla de duplicación) ---------- */
+@media (max-width: 480px) {
+    /* Los cuadros de trazo se crean a 100px en pantallas chicas
+       (mountVpStrokes mide innerWidth) — el card acompaña */
+    .vp-stroke-char { width: 108px; }
+    .vp-stroke-btn { padding: 7px 12px; font-size: 0.8rem; }
+    .vp-ctx-zh { font-size: 1rem; }
+}

@@ -23,14 +23,21 @@
    - v7.12: +dict-mini.js en precache — Capa 4: diccionario offline
      zh↔es (~1.630 entradas + 802 alias, CC-BY-SA 4.0). Archivo NUEVO
      en el shell: sin precache no existiría offline.
+   - v7.13: +hanzi-writer.min.js en precache — orden de trazos (MIT).
+     La librería se INYECTA lazy (cero costo inicial) pero vive en el
+     shell → funciona offline desde la 1.ª instalación. Los datos de
+     cada carácter (hanzi-writer-data, jsdelivr) van a una caché
+     PERSISTENTE nueva (chino-es-hanzi-v1) → offline desde la 2.ª vez
+     y no se borran en cada update (mismo criterio que los modelos IA).
    ------------------------------------------------------------
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v32';
+const VERSION = 'v33';
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
+const DATA_CACHE = 'chino-es-hanzi-v1';  // v7.13: datos de trazos Hanzi Writer — NUNCA se borra
 const TTS_MAX_ENTRIES = 80;
 
 const PRECACHE = [
@@ -44,6 +51,7 @@ const PRECACHE = [
   './voice-evaluator.js',  // v7.6-7.8: orquestador por MODO (es-cn / cn-es)
   './style.css',
   './dict-mini.js',         // v7.12: Capa 4 — diccionario offline zh↔es (CC-BY-SA 4.0)
+  './hanzi-writer.min.js',  // v7.13: orden de trazos (MIT) — se inyecta LAZY pero precacheado p/ offline
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
   './jspdf.umd.min.js',    // v7.1: ídem
@@ -74,7 +82,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys
-      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE && k !== MODEL_CACHE)
+      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE && k !== MODEL_CACHE && k !== DATA_CACHE)
       .map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
@@ -92,11 +100,21 @@ self.addEventListener('fetch', (event) => {
   if (url.origin === self.location.origin) {
     event.respondWith(cacheFirstShell(req));
   } else if (isModelAsset(url)) {
-    event.respondWith(cacheFirstModel(req)); // v7.7: modelos IA → caché persistente
+    event.respondWith(cacheFirstImmutable(req, MODEL_CACHE)); // v7.7: modelos IA → caché persistente
+  } else if (isHanziData(url)) {
+    event.respondWith(cacheFirstImmutable(req, DATA_CACHE)); // v7.13: datos de trazos → caché persistente
   } else {
     event.respondWith(cacheFirstRuntime(req)); // CDN y otros cross-origin GET
   }
 });
+
+/* ---------- v7.13: ¿son datos de un carácter para Hanzi Writer? ----------
+   JSON chicos (~15 KB) e INMUTABLES (el trazo de 你 no cambia): una vez
+   cacheados funcionan offline para siempre y no se re-bajan en updates. */
+function isHanziData(url) {
+  return url.hostname === 'cdn.jsdelivr.net' &&
+         url.pathname.includes('hanzi-writer-data');
+}
 
 /* ---------- v7.7: ¿es un archivo del motor de IA (grande, inmutable)? ---------- */
 function isModelAsset(url) {
@@ -107,16 +125,18 @@ function isModelAsset(url) {
            url.pathname.includes('onnxruntime-web')));
 }
 
-/* ---------- v7.7: modelos IA — cache-first SIN refresco (inmutables) ----------
-   Distinto del shell: acá no conviene revalidar en background (son
-   ~40 MB). Una vez cacheados, arrancan sin red para siempre. */
-async function cacheFirstModel(req) {
+/* ---------- v7.7/7.13: inmutables — cache-first SIN refresco ----------
+   Modelos IA (40 MB) y datos de caracteres de Hanzi Writer: acá no
+   conviene revalidar en background. Cache parametrizable para que
+   cada familia viva en su caché persistente. */
+async function cacheFirstImmutable(req, cacheName) {
+  const cacheToUse = cacheName || MODEL_CACHE;
   const cached = await caches.match(req, { ignoreVary: true });
   if (cached) return cached;
   try {
     const res = await fetch(req);
     if (res && (res.ok || res.type === 'opaque')) {
-      try { const c = await caches.open(MODEL_CACHE); await c.put(req, res.clone()); } catch (e) { /* noop */ }
+      try { const c = await caches.open(cacheToUse); await c.put(req, res.clone()); } catch (e) { /* noop */ }
     }
     return res;
   } catch (err) {

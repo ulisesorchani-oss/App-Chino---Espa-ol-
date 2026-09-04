@@ -776,7 +776,11 @@ let state = {
     // v7.11: esquema de colores de tono + leyenda
     toneScheme: 'standard',   // 'standard' | 'colorblind' | 'custom'
     toneCustomColors: null,   // {'1':'#hex',...,'5':'#hex'} — 5 = neutro
-    toneLegendSeen: false     // la leyenda ya se mostró al activar tonos
+    toneLegendSeen: false,    // la leyenda ya se mostró al activar tonos
+    // v7.13: contexto guardado al marcar una palabra → wordContexts[palabra] =
+    // { zh: oración simplificada, zt: oración tradicional, es: oración española,
+    //   py: pinyin de la PALABRA }. Se muestra en el popup ("tu ejemplo").
+    wordContexts: {}
 };
 
 // Variable global para el botón de colores
@@ -813,7 +817,9 @@ function saveProgress() {
             // v7.11: esquema de tonos
             toneScheme: state.toneScheme,
             toneCustomColors: state.toneCustomColors,
-            toneLegendSeen: state.toneLegendSeen
+            toneLegendSeen: state.toneLegendSeen,
+            // v7.13: contexto de las palabras marcadas
+            wordContexts: state.wordContexts
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -846,7 +852,54 @@ function loadProgress() {
             if (Object.keys(clean).length) state.toneCustomColors = clean;
         }
         if (data.toneLegendSeen !== undefined) state.toneLegendSeen = !!data.toneLegendSeen;
+        // v7.13: contextos guardados (validados — localStorage puede venir viejo)
+        if (data.wordContexts && typeof data.wordContexts === 'object') {
+            const clean = {};
+            for (const k in data.wordContexts) {
+                const c = data.wordContexts[k];
+                if (k && c && typeof c === 'object') {
+                    clean[k] = {
+                        zh: typeof c.zh === 'string' ? c.zh : '',
+                        zt: typeof c.zt === 'string' ? c.zt : '',
+                        es: typeof c.es === 'string' ? c.es : '',
+                        py: typeof c.py === 'string' ? c.py : ''
+                    };
+                }
+            }
+            state.wordContexts = clean;
+        }
     } catch (e) { /* silencioso */ }
+}
+
+// v7.13: guarda el CONTEXTO de las palabras marcadas (la oración actual).
+// Compatibilidad hacia atrás: palabras viejas sin contexto → el popup las
+// muestra sin ejemplo, sin romperse. Tope de 600 entradas (borra las viejas).
+const WORD_CTX_MAX = 600;
+function rememberWordContext(words, s) {
+    if (!words || !words.length || !s) return;
+    const zhS = String(s.chinese_simp_full || '');
+    const zhT = String(s.chinese_trad_full || zhS);
+    const esS = String(s.spanish_full || '');
+    let changed = false;
+    (Array.isArray(words) ? words : [words]).forEach(w => {
+        if (!w) return;
+        const cur = state.wordContexts[w];
+        if (cur && cur.zh === zhS && cur.zt === zhT && cur.es === esS) return; // ya está
+        state.wordContexts[w] = {
+            zh: zhS,
+            zt: zhT,
+            es: esS,
+            py: isZhText(w) ? (wordPinyin(w) || (cur ? cur.py : '')) : ''
+        };
+        changed = true;
+    });
+    if (changed) {
+        const keys = Object.keys(state.wordContexts);
+        if (keys.length > WORD_CTX_MAX) {
+            keys.slice(0, keys.length - WORD_CTX_MAX).forEach(k => delete state.wordContexts[k]);
+        }
+        saveProgress();
+    }
 }
 
 // ===== Helpers =====
@@ -1117,6 +1170,24 @@ function setupEventListeners() {
         });
     }
     safeAdd('btn-vocab-pop-close', hideVocabPop);
+    // v7.13: botones ▶ Animar / ✍ Practicar de la sección de trazos.
+    // DELEGADO en #vocab-pop (el body del popup se re-renderiza en cada
+    // apertura → los botones nuevos no necesitan listeners propios).
+    const vocabPopEl = document.getElementById('vocab-pop');
+    if (vocabPopEl) {
+        vocabPopEl.addEventListener('click', (e) => {
+            if (e.target.closest && e.target.closest('.vp-stroke-anim')) { vpStrokesAnimate(); return; }
+            if (e.target.closest && e.target.closest('.vp-stroke-quiz')) vpStrokesQuiz();
+        });
+    }
+    // v7.13: Escape cierra el popup de vocabulario y la leyenda de tonos
+    // (los popups ya se cerraban con ✕ y clic fuera; teclado incluido).
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const tl = document.getElementById('tone-legend-pop');
+        if (tl && !tl.classList.contains('hidden')) { hideToneLegend(); return; }
+        hideVocabPop();
+    });
     document.addEventListener('click', (e) => {
         const pop = document.getElementById('vocab-pop');
         if (!pop || pop.classList.contains('hidden')) return;
@@ -1871,10 +1942,12 @@ function checkAnswer() {
             state.newWords.delete(a);
         });
         state.score++;
+        rememberWordContext(validAnswers, s); // v7.13: contexto de la oración actual
         refillBlank('correct');   // v7.2: la oración queda completa (verde)
     } else {
         showFeedback('❌ Respuestas válidas: "' + allOptions + '"', 'incorrect');
         state.newWords.add(validAnswers[0]);
+        rememberWordContext([validAnswers[0]], s); // v7.13
         refillBlank('wrong');     // v7.2: se muestra la palabra correcta (rojo)
     }
 
@@ -1900,6 +1973,7 @@ function revealAnswer() {
     refillBlank('reveal');       // v7.2: oración completa con la respuesta (ámbar)
 
     validAnswers.forEach(a => state.newWords.add(a));
+    rememberWordContext(validAnswers, s); // v7.13: contexto de la oración actual
     saveProgress();
     updateStats();
     updateVocabularyPanel();
@@ -1921,6 +1995,7 @@ function markWord(known) {
         state.newWords.add(answer);
         state.knownWords.delete(answer);
     }
+    rememberWordContext([answer], s); // v7.13: contexto de la oración actual
 
     saveProgress();
     updateStats();
@@ -2306,13 +2381,185 @@ function showVocabPop(word) {
     } else {
         html += '<div class="vp-missing">🤔 No tengo la traducción de esta palabra en este módulo. Cargá el módulo donde la aprendiste y volvé a tocarla.</div>';
     }
+    // v7.13: contexto guardado al marcar la palabra ("tu ejemplo").
+    // Palabras viejas sin contexto → no hay sección (compatibilidad hacia atrás).
+    const ctx = state.wordContexts[w];
+    if (ctx) {
+        const zhCtx = ck() === 'trad' ? (ctx.zt || ctx.zh) : (ctx.zh || ctx.zt);
+        let inner = '';
+        if (zhCtx) inner += '<div class="vp-ctx-zh">🇨🇳 ' + escHtml(zhCtx)
+            + (zh && ctx.py ? ' <span class="vp-ctx-py">(' + escHtml(ctx.py) + ')</span>' : '') + '</div>';
+        if (ctx.es) inner += '<div class="vp-ctx-es">🇪🇸 “' + escHtml(ctx.es) + '”</div>';
+        if (inner) html += '<div class="vp-ctx"><div class="vp-ctx-title">📌 Tu ejemplo (donde la marcaste)</div>' + inner + '</div>';
+    }
+    // v7.13: ORDEN DE TRAZOS (Hanzi Writer) — solo palabras CHINAS.
+    // En modo CN→ES la palabra es española → sin sección de trazos: queda la
+    // palabra grande + ejemplo + traducción al chino (diccionario inverso).
+    if (zh) {
+        let chars = [];
+        for (const ch of w) if (READER_HANZI.test(ch) && chars.indexOf(ch) === -1) chars.push(ch);
+        if (chars.length) {
+            html += '<div class="vp-strokes" id="vp-strokes">'
+                + '<div class="vp-strokes-title">✍️ Orden de trazos</div>'
+                + '<div class="vp-stroke-row">'
+                + chars.slice(0, VP_STROKES_MAX).map(ch =>
+                    '<div class="vp-stroke-char loading"><div class="vp-stroke-target" data-char="' + escHtml(ch) + '"></div></div>'
+                  ).join('')
+                + '</div>'
+                + (chars.length > VP_STROKES_MAX ? '<div class="vp-stroke-note">…y ' + (chars.length - VP_STROKES_MAX) + ' carácter(es) más</div>' : '')
+                + '<div class="vp-stroke-btns">'
+                + '<button type="button" class="vp-stroke-btn vp-stroke-anim">▶ Animar</button>'
+                + '<button type="button" class="vp-stroke-btn vp-stroke-quiz">✍ Practicar</button>'
+                + '</div>'
+                + '<div class="vp-stroke-hint">Tocá ✍ Practicar y trazá con el dedo (o el mouse) sobre el carácter</div>'
+                + '</div>';
+        }
+    }
     body.innerHTML = html;
     pop.classList.remove('hidden');
+    if (zh) mountVpStrokes(w); // v7.13: carga lazy del motor + instancias por carácter
 }
 
 function hideVocabPop() {
+    // v7.13: corta quizzes/animaciones y montajes en curso de Hanzi Writer
+    vpStrokes.gen++;
+    vpStrokes.writers.forEach(wr => { try { if (wr.cancelQuiz) wr.cancelQuiz(); } catch (e) {} });
+    vpStrokes.writers = [];
+    vpStrokes.boxes = [];
     const pop = document.getElementById('vocab-pop');
     if (pop) pop.classList.add('hidden');
+}
+
+// ============================================================
+// v7.13 — ORDEN DE TRAZOS con Hanzi Writer (librería MIT, chanind).
+//  · Librería LOCAL (hanzi-writer.min.js, precacheada por el SW) que se
+//    INYECTA solo la 1.ª vez que el popup muestra un hanzi → cero costo
+//    inicial; si el archivo local falta, fallback al CDN de jsdelivr.
+//  · Los datos de cada carácter (hanzi-writer-data, jsdelivr) los cachea
+//    el Service Worker en caché PERSISTENTE → offline desde la 2.ª vez.
+//  · Simplificado Y tradicional: el carácter viaja tal cual (el dataset
+//    cubre ambos guiones) — vale el state.charType activo al abrir.
+//  · Chars duplicados (妈妈) se muestran UNA vez; tope VP_STROKES_MAX.
+// ============================================================
+const VP_STROKES_MAX = 8;
+const HANZI_WRITER_CDN = 'https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js';
+const vpStrokes = { libPromise: null, gen: 0, writers: [], boxes: [] };
+
+function loadHanziWriter() {
+    if (window.HanziWriter) return Promise.resolve();
+    if (vpStrokes.libPromise) return vpStrokes.libPromise;
+    vpStrokes.libPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'hanzi-writer.min.js?v=20260906e'; // local: el SW lo precachea → offline
+        s.onload = () => resolve();
+        s.onerror = () => {
+            // Fallback CDN (mismo archivo): sin local y sin red → falla solo la
+            // sección de trazos, el resto de la app sigue igual.
+            const c = document.createElement('script');
+            c.src = HANZI_WRITER_CDN;
+            c.onload = () => resolve();
+            c.onerror = () => { vpStrokes.libPromise = null; reject(new Error('Hanzi Writer no disponible')); };
+            document.head.appendChild(c);
+        };
+        document.head.appendChild(s);
+    });
+    return vpStrokes.libPromise;
+}
+
+// Colores del trazo según tema (respeta body.dark-mode)
+function vpStrokeColors() {
+    const dark = document.body.classList.contains('dark-mode');
+    return dark
+        ? { stroke: '#e2e8f0', outline: '#475569', highlight: '#60a5fa', drawing: '#93c5fd' }
+        : { stroke: '#1e293b', outline: '#cbd5e1', highlight: '#2563eb', drawing: '#2563eb' };
+}
+
+function mountVpStrokes(word) {
+    const wrap = document.getElementById('vp-strokes');
+    if (!wrap) return;
+    const myGen = ++vpStrokes.gen; // invalida el montaje anterior si el popup reabre
+    vpStrokes.writers = [];
+    vpStrokes.boxes = [];
+    loadHanziWriter().then(() => {
+        if (myGen !== vpStrokes.gen) return; // el popup ya se cerró
+        const size = (window.innerWidth <= 480) ? 100 : 120;
+        const cols = vpStrokeColors();
+        const targets = wrap.querySelectorAll('.vp-stroke-target');
+        Array.prototype.forEach.call(targets, (target) => {
+            const ch = target.dataset.char;
+            const box = target.parentElement;
+            if (!ch || !box) return;
+            try {
+                const writer = HanziWriter.create(target, ch, {
+                    width: size,
+                    height: size,
+                    padding: 5,
+                    showOutline: true,
+                    strokeColor: cols.stroke,
+                    outlineColor: cols.outline,
+                    highlightColor: cols.highlight,
+                    drawingColor: cols.drawing,
+                    strokeAnimationSpeed: 1,
+                    delayBetweenStrokes: 220,
+                    showHintAfterMisses: 2,
+                    onLoadCharDataSuccess: () => {
+                        if (myGen === vpStrokes.gen) box.classList.remove('loading');
+                    },
+                    onLoadCharDataError: () => {
+                        if (myGen !== vpStrokes.gen) return;
+                        box.classList.remove('loading');
+                        box.classList.add('nodata');
+                    }
+                });
+                vpStrokes.writers.push(writer);
+                vpStrokes.boxes.push(box);
+            } catch (e) {
+                box.classList.remove('loading');
+                box.classList.add('nodata');
+            }
+        });
+    }).catch(() => {
+        if (myGen !== vpStrokes.gen) return;
+        wrap.querySelectorAll('.vp-stroke-char').forEach(b => { b.classList.remove('loading'); b.classList.add('nodata'); });
+        const note = document.createElement('div');
+        note.className = 'vp-stroke-note';
+        note.textContent = '⚠ No se pudo cargar el motor de trazos (¿sin conexión la primera vez?).';
+        wrap.appendChild(note);
+    });
+}
+
+// ▶ Animar: trazo a trazo, carácter por carácter en secuencia
+function vpStrokesAnimate() {
+    vpStrokes.boxes.forEach(b => b.classList.remove('quiz-on'));
+    vpStrokes.writers.forEach(wr => { try { if (wr.cancelQuiz) wr.cancelQuiz(); } catch (e) {} });
+    vpStrokes.writers.reduce(
+        (p, wr) => p.then(() => wr.animateCharacter()).catch(() => {}),
+        Promise.resolve()
+    );
+}
+
+// ✍ Practicar: quiz secuencial — se traza el carácter actual con el dedo;
+// al completarlo pasa al siguiente (resaltado .quiz-on en el cuadro activo)
+function vpStrokesQuiz() {
+    const list = vpStrokes.writers;
+    if (!list.length) return;
+    let i = 0;
+    const next = () => {
+        if (i >= list.length) return;
+        const wr = list[i];
+        const box = vpStrokes.boxes[i];
+        vpStrokes.boxes.forEach(b => b.classList.remove('quiz-on'));
+        if (box) box.classList.add('quiz-on');
+        i++;
+        try { if (wr.cancelQuiz) wr.cancelQuiz(); } catch (e) {}
+        wr.quiz({
+            onComplete: () => {
+                if (box) { box.classList.remove('quiz-on'); box.classList.add('quiz-ok'); }
+                next();
+            }
+        });
+    };
+    next();
 }
 
 function resetProgress() {
@@ -2320,6 +2567,7 @@ function resetProgress() {
     localStorage.removeItem(STORAGE_KEY);
     state.knownWords = new Set();
     state.newWords = new Set();
+    state.wordContexts = {}; // v7.13
     state.score = 0;
     state.currentIndex = 0;
     showToneColors = false;
