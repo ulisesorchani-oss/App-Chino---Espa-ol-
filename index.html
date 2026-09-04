@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260906h">
+    <link rel="stylesheet" href="style.css?v=20260906i">
 </head>
 <body>
     <div class="container">
@@ -387,21 +387,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260906h"></script>
+    <script src="config.js?v=20260906i"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260906h"></script>
+    <script src="text-utils.js?v=20260906i"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260906h"></script>
+    <script src="VoiceRecorder.js?v=20260906i"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260906h"></script>
-    <script src="dict-mini.js?v=20260906h"></script>
+    <script src="voice-evaluator.js?v=20260906i"></script>
+    <script src="dict-mini.js?v=20260906i"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260906h"></script>
-    <script src="app.js?v=20260906h"></script>
+    <script src="lessons.js?v=20260906i"></script>
+    <script src="app.js?v=20260906i"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
