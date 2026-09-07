@@ -1,0 +1,7 @@
+{
+ "estandar": "HSK 3.0 (GF0025-2021)",
+ "palabras_unicas": 10944,
+ "notas": "Reparto 7-9 en tercios por frecuencia; repetidos entre niveles en su nivel más bajo; traducciones ES curadas (acepción común primero).",
+ "formato": "{\"h\": simplificado, \"t\": tradicional|null, \"p\": pinyin, \"es\": glosa, \"alts\": alternativas|null}",
+ "licencias": "lista oficial GF0025-2021 · nar-ran/hsk-vocab-es (MIT) · CC-CEDICT vía dict-mini (CC-BY-SA 4.0)"
+}
