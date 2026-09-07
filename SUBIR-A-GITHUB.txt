@@ -1,13 +1,22 @@
 ======================================================================
- v7.8 — SUBIR A GITHUB: 11 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v7.20 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ ESTA VERSIÓN SUBE 11 ARCHIVOS: los 9 de v7.7 + 2 NUEVOS
-   (config.js y text-utils.js). Si subís solo los de siempre, la
-   evaluación en modo CN→ES queda rota: NO salteés los nuevos.
+⚠️ MISMA CANTIDAD DE ARCHIVOS QUE SIEMPRE (no hay archivos nuevos).
+   En esta versión cambian 4: index.html, app.js, style.css y sw.js
+   (Test de Colocación + HSK 3.0 + mobile-first).
+   Subí SIEMPRE los 14 juntos: mezclar viejos y nuevos rompe la app.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
+
+¿Y LAS FUENTES JSON DEL HSK 3.0? NO HACE FALTA SUBIRLAS:
+------------------------------------------------------------
+Todo el vocabulario (10.944 palabras) viaja DENTRO de app.js —
+por eso la app funciona offline y con un solo archivo. El ZIP
+"fuentes-hsk30-json.zip" es solo el respaldo del dataset para
+futuras mejoras (no se usa en runtime). Si querés publicarlo
+igual en el repo, podés, pero la app no lo necesita.
 
 PASO A PASO (funciona igual desde el celular o la PC):
 ------------------------------------------------------------
@@ -15,79 +24,60 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 11 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 14 archivos del ZIP, a la RAÍZ:
 
-      ✅ index.html
-      ✅ app.js
+      ✅ index.html           ← ACTUALIZADO (botones 🎯 + popup del test)
+      ✅ app.js               ← ACTUALIZADO (HSK 3.0 + Test de Colocación)
+      ✅ style.css            ← ACTUALIZADO (estilos del test)
+      ✅ sw.js                ← ACTUALIZADO (v40: invalida la caché)
+      ✅ lessons.js
+      ✅ hanzi-writer.min.js
+      ✅ dict-mini.js
       ✅ VoiceRecorder.js
-      ✅ voice-evaluator.js    ← evaluador por MODO (actualizado)
-      ✅ pitch-analyzer.js     ← motor de tono (con ciclo de vida)
-      ✅ config.js             ← NUEVO en v7.8 (umbral calibrable) ←←←
-      ✅ text-utils.js         ← NUEVO en v7.8 (comparación de texto) ←←←
-      ✅ style.css
-      ✅ sw.js
+      ✅ voice-evaluator.js
+      ✅ pitch-analyzer.js
+      ✅ config.js
+      ✅ text-utils.js
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.8) y toca el botón verde
+5. Abajo escribí un título (ej: v7.20) y tocá el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
-6. Esperá ~1-2 minutos. GitHub Pages se actualiza solo.
+6. Esperá ~1-2 minutos. Vercel/GitHub Pages se actualiza solo.
 
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS (aproximados):
-      index.html         = 24 KB
-      app.js             = 617 KB
-      VoiceRecorder.js   = 58 KB
-      voice-evaluator.js = 74 KB
-      pitch-analyzer.js  = 33 KB
-      config.js          = 4 KB   ← NUEVO: si no está,
-                             no subiste la v7.8
-      text-utils.js      = 10 KB ← NUEVO: si no está,
-                             no subiste la v7.8
-      style.css          = 41 KB
-      sw.js              = 8 KB
-      html2canvas.min.js = 194 KB
-      jspdf.umd.min.js   = 357 KB
+      index.html           = 34 KB   ← actualizado
+      app.js               = 942 KB  ← actualizado (HSK 3.0 + test)
+      style.css            = 73 KB   ← actualizado
+      sw.js                = 12 KB   ← actualizado (v40)
+      lessons.js           = 27 KB   (no cambió)
+      dict-mini.js         = 99 KB   (no cambió)
+      pinyin-pro.min.js    = 316 KB  (no se sube de nuevo, referencia)
 
-B) DESPUÉS de subir, abrí esta dirección en el navegador:
+B) DESPUÉS de subir, abrí tu app y recargá 2 veces (F5).
+   Mirá la consola (F12) o probá directo:
+      https://TU-USUARIO.github.io/TU-REPO/sw.js
+   → tiene que decir:  const VERSION = 'v40'
 
-   https://ulisesorchani-oss.github.io/App-Chino---Espa-ol-/sw.js
-
-   Buscá la línea const VERSION. Debe decir:
-
-      const VERSION = 'v28';     ← correcto (v7.8)
-      const VERSION = 'v27';     ← viejo: el upload no llegó
-
-C) EN LA APP — PRUEBA DEL MODO CHINO (1 minuto): en ES→CN grabá una
-   oración con el 🎤 → colores por tono esperado + gráfico de
-   contornos + botón 🔊 Referencia, igual que en v7.7.
-
-D) EN LA APP — PRUEBA DEL MODO ESPAÑOL (1 minuto, lo NUEVO): tocá
-   "CN→ES Aprendo Español" arriba, grabá la oración ESPAÑOLA con el
-   🎤:
-      · bien dicha → ✅ verde + "¡Excelente pronunciación!" y la
-        línea "Confianza del reconocimiento: NN %"
-      · cambiándole una palabra → ❌ rojo "Se detectó: «...» —
-        Se esperaba: «...»"
-      · NADA de colores de tono ni gráfico de tonos en este modo.
-E) CAMBIO DE MODO (memoria): alterná ES→CN ↔ CN→ES varias veces
-   seguidas mientras grabás — la app no se traba y no aparecen
-   errores en consola (el motor de tono se destruye y se recrea).
-
-QUÉ HAY DE NUEVO EN v7.8 (resumen para el commit):
+PRUEBA RÁPIDA DE 1 MINUTO (v7.20):
 ------------------------------------------------------------
-• Evaluador condicional por MODO (spec Prompt v4.0): español =
-  solo Whisper + confianza; chino = Whisper + tonos medidos con
-  validación segmental primero (/s/ vs /sh/).
-• Objetivo de práctica por modo: oración española en CN→ES.
-• config.js + text-utils.js nuevos; normalización honesta
-  (tildes fuera por límite de Whisper, ñ preservada), Levenshtein
-  por palabra con tolerancia que escala, feedback sin tonos en
-  español + métrica de confianza visible.
-• Motor de tono LAZY con dispose() seguro (Promise que siempre
-  resuelve, timeout 2 s): cero memoria fantasma al cambiar de modo.
-• Documentación del módulo: README-Pronunciacion.md (calibración
-  del umbral + casos de prueba QA con fixtures de audio).
+1. Abrí la app en el celular → pestaña 📚 Diaria → tocá
+   "🎯 ¿No sabés qué nivel tenés? Hacé el test de colocación".
+2. Tocá "▶ Empezar test": aparecen palabras con 4 opciones.
+   - Si respondés 2 bien seguidas, sube de nivel (HSK 2, 3…).
+   - Si fallás 2, corta y te muestra tu nivel.
+3. En el resultado tocá "📚 Practicar HSK X": la pestaña
+   Exámenes queda abierta con ese nivel cargado.
+4. Volvé a abrir el test: tu resultado figura en la intro y
+   como línea "🎯 Último test…" bajo el selector.
+
+SI ALGO SALIÓ MAL:
+------------------------------------------------------------
+• "Sigue viéndose igual" → no se subió sw.js, o el navegador
+  guardó la versión vieja: recargá 2 veces / probá en incógnito.
+• "No aparece el botón 🎯" → se subieron index.html y app.js de
+  versiones distintas: subí los 14 archivos juntos de ESTE ZIP.
 ======================================================================

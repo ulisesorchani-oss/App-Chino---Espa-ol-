@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260907a">
+    <link rel="stylesheet" href="style.css?v=20260908a">
 </head>
 <body>
     <div class="container">
@@ -151,6 +151,12 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- v7.20: Test de Colocación también en Diaria (pestaña por defecto) -->
+                <button id="btn-placement-daily" class="placement-daily-btn" type="button"
+                        title="Unas pocas preguntas y te ubicamos en tu nivel de HSK 3.0">
+                    🎯 ¿No sabés qué nivel tenés? Hacé el <b>test de colocación</b>
+                </button>
             </div>
 
             <!-- Panel Exámenes -->
@@ -171,6 +177,12 @@
                         <option value="HSK9">HSK 9 · Superior III (1871 nuevas)</option>
                     </select>
                 </div>
+                <!-- v7.20: Test de Colocación HSK 3.0 — junto al selector de nivel, su ubicación natural -->
+                <button id="btn-placement" class="placement-btn" type="button"
+                        title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy">
+                    🎯 Test de colocación — descubrí tu nivel
+                </button>
+                <p id="placement-status" class="placement-status hidden" role="status"></p>
                 <div class="category-filter exams-filters">
                     <button class="btn-exam" data-module="TOCFL">TOCFL 🇹🇼</button>
                     <div class="dele-dropdown" id="dele-dropdown">
@@ -362,6 +374,12 @@
         </div>
     </div>
 
+    <!-- v7.20: POPUP Test de Colocación (mismo patrón que #vocab-pop) -->
+    <div id="placement-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Test de colocación HSK">
+        <button id="btn-placement-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="placement-body"></div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -408,21 +426,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260907a"></script>
+    <script src="config.js?v=20260908a"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260907a"></script>
+    <script src="text-utils.js?v=20260908a"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260907a"></script>
+    <script src="VoiceRecorder.js?v=20260908a"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260907a"></script>
-    <script src="dict-mini.js?v=20260907a"></script>
+    <script src="voice-evaluator.js?v=20260908a"></script>
+    <script src="dict-mini.js?v=20260908a"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260907a"></script>
-    <script src="app.js?v=20260907a"></script>
+    <script src="lessons.js?v=20260908a"></script>
+    <script src="app.js?v=20260908a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

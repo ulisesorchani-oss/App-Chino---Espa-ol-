@@ -287,6 +287,326 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🎯 NOVEDADES v7.20 — TEST DE COLOCACIÓN: ¿qué nivel HSK tenés?
+----------------------------------------------------------------------
+• ¿PARA QUÉ SIRVE? Un alumno nuevo no sabe si empezar en HSK 1 o en
+  HSK 5. Ahora la app te lo dice: quiz adaptativo con palabras REALES
+  del HSK 3.0 — te muestra un hanzi y elegís el significado entre
+  4 opciones en español.
+• ¿DÓNDE ESTÁ? Botón 🎯 en la pestaña Diaria ("¿No sabés qué nivel
+  tenés?") y en Exámenes, junto al selector de nivel. 2 a 5 minutos,
+  sin registro, todo queda en tu dispositivo.
+• ¿CÓMO FUNCIONA? Arranca en HSK 1 y sube de a un nivel:
+  - 2 aciertos → pasás al nivel siguiente.
+  - 2 errores → el test termina solo.
+  - 1-1 → desempate con una 3.ª palabra del mismo nivel.
+  Resultado = tu nivel de partida, con la descripción de la banda
+  (Elemental / Intermedio / Superior) y botón "📚 Practicar HSK X"
+  que abre el módulo ya cargado.
+• QUEDA GUARDADO: la línea "🎯 Último test: HSK X · aciertos · fecha"
+  bajo el selector, y en la intro del test el botón para practicar tu
+  nivel sin repetirlo. Podés repetir el test cuando quieras (🔁).
+• AL RESPONDER cada palabra ves ✅/❌ con su pinyin y significado:
+  aunque "pierdas", seguís aprendiendo.
+• sw.js sube a v40 (invalida la caché) y el cache-busting pasa a
+  20260908a. Sin archivos nuevos: cambian index.html, app.js,
+  style.css y sw.js.
+
+======================================================================
+🇨🇳 NOVEDADES v7.19 — HSK 3.0 COMPLETO: 9 niveles · 11.000 palabras
+----------------------------------------------------------------------
+• La app pasó del HSK 2.0 (6 niveles) al estándar oficial HSK 3.0
+  (GF0025-2021): 9 niveles y 11.092 palabras del vocabulario completo,
+  con traducciones al español curadas (10.944 palabras únicas).
+• NUEVOS NIVELES HSK 7, 8 y 9 (Superior I/II/III) en el selector.
+  Los conteos del selector muestran palabras NUEVAS de cada nivel.
+• Las palabras se practican como tarjetas de vocabulario (traducción
+  directa ES⇄CN) dentro del mismo motor de práctica: funcionan en
+  ambos modos (Aprendo Chino / Aprendo Español), respetan 简/繁,
+  colores de tonos y pinyin, y suman al cajón de vocabulario.
+• SIGUE SIENDO UN SOLO ARCHIVO: todo el vocabulario viaja embebido en
+  app.js (926 KB, +261 KB) — offline, sin carpeta de datos extra.
+  Práctica Diaria, Clásicos, TOCFL y DELE no cambiaron.
+
+======================================================================
+📱 NOVEDADES v7.18 — MOBILE-FIRST: la práctica primero
+----------------------------------------------------------------------
+• En el celular la app abre DIRECTO con la oración de práctica en el
+  primer pantallazo (antes había ~800px de configuración arriba).
+• Barra de estudio sticky: modos ES⇄CN y herramientas (简/繁, pinyin,
+  tonos, velocidad, voces) siempre visibles al hacer scroll.
+• Selectores reorganizados en 3 pestañas con memoria: 📚 Diaria /
+  🎓 Exámenes / 📜 Clásicos — al volver, abre la última que usaste.
+• El botón 🌙 de tema pasó al header junto a 📲 Instalar, y
+  "🗑️ Borrar progreso" quedó al final, discreto.
+
+======================================================================
+📖 NOVEDADES v7.17 — DICCIONARIO ALINEADO:
+   adiós a las traducciones cruzadas (aeropuerto ≠ autobús)
+----------------------------------------------------------------------
+• EL BUG QUE REPORTASTE, CORREGIDO: al tocar 機場 (jī chǎng) el
+  diccionario decía "autobús". Causa: en la tarjeta del ejemplo
+  "¿Dónde está la parada del autobús al aeropuerto?", el hueco
+  español estaba puesto sobre "autobús" en vez de sobre
+  "aeropuerto", y el app mostraba eso como traducción de la
+  palabra. Ahora la ficha de 機場 dice 🇪🇸 aeropuerto, como corresponde.
+• AUDITORÍA COMPLETA DE LAS 921 TARJETAS: revisamos TODAS las
+  oraciones del app (HSK 1-6, TOCFL, DELE, clásicos y práctica
+  diaria) comparando la palabra china ocultada con la palabra
+  española ocultada. Encontramos y corregimos 25 tarjetas
+  desalineadas de este tipo, entre ellas:
+    - 機場 mostraba "autobús" → ahora "aeropuerto" (HSK2)
+    - 三 mostraba "tiene" → ahora "tres" (DELE A1)
+    - 比赛 mostraba "fútbol" → ahora "partido" (DELE)
+    - 弹 mostraba "desde" → ahora "Toco" (DELE A2B1)
+    - 谈 mostraba "proyecto" → ahora "Hablamos" (DELE A2B1)
+    - 饼干 decía "facturas" → ahora "galletitas" (práctica diaria)
+    - 评分 decía "críticas" → ahora "puntuación" (práctica diaria)
+    - 动作 decía "postura" → ahora "movimiento" (práctica diaria)
+    - y 17 tarjetas más con el mismo problema.
+• CÓMO SE CORRIGIÓ: en cada tarjeta, el hueco del chino y el
+  hueco del español ahora cubren LA MISMA PALABRA (o su
+  traducción directa). Cuando la palabra española no existía en
+  la oración, se reescribió la frase con naturalidad rioplatense.
+• NADA CAMBIA EN TU USO: mismas pantallas, mismo diccionario,
+  mismas prácticas. Solo que ahora lo que dice la ficha coincide
+  siempre con lo que significa el carácter.
+• Los clásicos (Tao, Sutra del Corazón, 三字经...) mantienen su
+  traducción literaria libre: ahí el hueco sigue la traducción,
+  no al revés, y así debe ser.
+• sw.js sube a v37. SIN ARCHIVOS NUEVOS: se actualizan
+  index.html, app.js y sw.js (el resto no cambia).
+
+======================================================================
+✍️ NOVEDADES v7.16 — BANNER DE PRÁCTICA DE TRAZOS:
+   la escritura a mano ahora es grande y cómoda
+----------------------------------------------------------------------
+• SEPARACIÓN CONSULTA / PRÁCTICA: el popup de vocabulario queda
+  para CONSULTAR (traducción, pinyin, ejemplo, orden de trazos
+  en cuadros chicos con ▶ Animar). El botón "✍ Practicar" ahora
+  ABRE UN BANNER A PANTALLA COMPLETA dedicado solo a escribir.
+• LIENZO GRANDE: el carácter ocupa un cuadro de hasta 340 px
+  (80% del ancho del teléfono) en vez de los 100-120 px del
+  popup: trazar con el dedo ya no es una lucha contra el dedo
+  gordo. El área usa touch-action none: la página no se mueve
+  mientras escribís.
+• GUÍA AUTOMÁTICA: al abrir el banner, el carácter se anima
+  solo trazo por trazo para mostrar el orden antes de que
+  practiques. Botones ▶ Animar (mirar de nuevo) y ✍ Trazar
+  (modo examen: el trazo se pone azul si va bien, y a los 2
+  errores te muestra el trazo correcto).
+• PALABRAS DE VARIOS CARACTERES (老师, 中国...): navegación
+  ◀ ▶ con contador (1/2, 2/2). Al terminar un carácter la app
+  pasa SOLA al siguiente y arranca su modo trazar: una racha
+  hasta completar la palabra entera, con 🎉 final.
+• CIERRE COMODO: ✕ arriba a la derecha, o la tecla Escape.
+  Al cerrar se libera el lienzo (sin lienzos acumulados) y
+  el scroll de la app vuelve a su lugar.
+• MISMO MOTOR, CERO DESCARGAS NUEVAS: reutiliza el motor de
+  la v7.13 (librería local + datos por carácter en caché
+  persistente). Una vez que practicaste un carácter, podés
+  seguir practicándolo offline para siempre.
+• DETALLE: en el popup el pie de la sección de trazos ahora
+  avisa "Tocá ✍ Practicar para pasar a la pantalla grande".
+• sw.js sube a v36. SIN ARCHIVOS NUEVOS: se actualizan
+  index.html, app.js y style.css (los 14 subibles no cambian).
+
+======================================================================
+📚 NOVEDADES v7.15 — BIBLIOTECA DE LECTURAS + SECCIONES:
+   capítulos y partes para estudiar por objetivos
+----------------------------------------------------------------------
+• BIBLIOTECA DE LECTURAS 📚: dentro del Lector de texto hay un
+  desplegable nuevo con TODO el material de lectura de la app,
+  ordenado en grupos (cada clásico, práctica diaria, lecturas
+  HSK). Elegís una lectura → botón "Cargar" → el texto aparece
+  en el Lector con pinyin interlineal, tonos, diccionario al
+  toque y lectura en voz alta. No hace falta estar estudiando
+  ese módulo: la Biblioteca se lee sola, como un estante.
+• CAPÍTULOS DEL TAO TE KING: sus 12 frases ahora son 12
+  CAPÍTULOS separados (Cap. 1 道可道 "El Tao que puede
+  decirse", Cap. 8 上善若水 "El bien supremo es como el
+  agua", Cap. 25, 33, 41, 44, 48, 58, 60, 64...). El botón
+  "📖 Leer lección" ahora carga EL CAPÍTULO de la frase que
+  estás estudiando, no el texto entero: leer por partes.
+• SECCIONES PEDAGÓGICAS: el Sutra del Corazón quedó dividido
+  en 5 secciones (1 El vacío esencial · 2 El vacío de todos
+  los dharmas · 3 Sin obstáculos · 4 Los seis sentidos vacíos
+  · 5 Al otro lado del sufrimiento) y el Clásico de los Tres
+  Caracteres en 5 (nacer buenos, tallar la naturaleza, la
+  responsabilidad de educar, ejemplos para chicos, los tres
+  fundamentos). Cada sección se estudia y se lee por separado;
+  el texto completo de cada clásico sigue disponible en la
+  Biblioteca ("Texto completo").
+• SECCIONES PLANTADAS "PRÓXIMAMENTE": la Biblioteca ya muestra
+  el material que viene, con la casilla lista para rellenar:
+    - PRÁCTICA DIARIA: Subte, Shopping, Restaurante, Gimnasio,
+      Colectivo, Clase de idioma, Cine, Barrio Chino;
+    - LECTURAS GRADUADAS · HSK: Lecturas 1 y 2 para HSK 1 y 2,
+      y una por nivel hasta HSK 6.
+  Aparecen deshabilitadas ("· próximamente") hasta que se les
+  cargue el texto. Rellenarlas = editar lessons.js: pegar el
+  texto y borrar el campo status. La app no se regenera.
+• TODO SIGUE FUNCIONANDO IGUAL: el botón 📖 desaparece donde
+  no corresponde (HSK, práctica diaria, CN→ES), respeta 简/繁,
+  la voz y la velocidad. Plantadas nunca pisan el Lector.
+• sw.js sube a v35. MISMA CANTIDAD DE ARCHIVOS: lessons.js se
+  actualiza (los 14 subibles no cambian).
+
+======================================================================
+📖 NOVEDADES v7.14 — LEER LA LECCIÓN COMPLETA:
+   el texto entero del clásico, en el Lector, con un botón
+----------------------------------------------------------------------
+• BOTÓN "📖 LEER LECCIÓN": en las tarjetas de los CLÁSICOS
+  (Gran Estudio, Analectas, Tao Te King, Sutra del Corazón...)
+  aparece un botón nuevo con borde punteado. Tocarlo carga el
+  TEXTO COMPLETO de ese clásico en el Lector de texto (te baja
+  solo hasta ahí con un destello):
+    - cada oración en su renglón, como versos;
+    - pinyin interlineal debajo de cada carácter (📖 Pinyin);
+    - colores de tono (🎨 Tonos);
+    - tocás cualquier palabra → su significado (diccionario);
+    - 🔊 Leer → te lo lee EN VOZ ALTA completa.
+  Ya no tenés que copiar y pegar: la lección se lee de corrido,
+  como un libro.
+• TRABAJA CON TUS AJUSTES: respeta 简/繁 (si estudiás
+  tradicional, el texto se carga en 繁體), tu voz y tu velocidad.
+• EL BOTÓN NO ESTORBA: solo aparece donde tiene sentido. En los
+  módulos HSK/TOCFL/DELE/práctica diaria (oraciones sueltas, no
+  textos continuos) no se muestra. En modo CN→ES (aprendo
+  español) tampoco, porque el texto de la lección es chino.
+• PARA AMPLIAR EL CURSO: los textos viven en un archivo nuevo
+  lessons.js que es SOLO DATOS. Agregar una lección nueva (otro
+  clásico, un artículo, un capítulo) = agregarle una entrada a
+  ese archivo. La app NO se regenera y no crece.
+• FUNCIONA OFFLINE: lessons.js viaja dentro de la app y el
+  Service Worker lo precachea → podés leer los clásicos sin
+  conexión desde la primera instalación.
+• sw.js sube a v34. UN ARCHIVO NUEVO: lessons.js (los 13
+  de siempre + este = 14).
+
+======================================================================
+✍️ NOVEDADES v7.13 — ORDEN DE TRAZOS + TU EJEMPLO GUARDADO:
+   tocá una palabra → la ves Y la escribes
+----------------------------------------------------------------------
+• ORDEN DE TRAZOS REAL (Hanzi Writer, open source MIT): el popup de
+  cualquier palabra china ahora trae la sección "✍️ Orden de trazos"
+  con un cuadro por carácter:
+    - ▶ ANIMAR: dibuja el carácter trazo a trazo, en el orden
+      correcto, carácter por carácter en secuencia.
+    - ✍ PRACTICAR: vos trazás el carácter con el DEDO (o el mouse)
+      y la app te corrige al instante: el trazo se pinta azul si va
+      bien y te muestra la forma correcta si te equivocás. Al
+      terminar un carácter pasa solo al siguiente.
+  Funciona en SIMPLIFICADO y TRADICIONAL (謝謝 se practica igual).
+  Si un carácter se repite (妈妈) se muestra una sola vez.
+• TU EJEMPLO GUARDADO (📌): cuando marcás una palabra (La sé ✅ /
+  Repetir 🔁 / Revelar 💡 / respuesta correcta), la app guarda la
+  ORACIÓN donde la marcaste. Después, al tocar la palabra (cajón o
+  lector), el popup muestra "Tu ejemplo (donde la marcaste)" con la
+  frase en chino + pinyin de la palabra + su traducción. Tus
+  palabras ya no quedan sueltas: viajan con su contexto.
+  - Las palabras guardadas ANTES de esta versión no se rompen:
+    simplemente aparecen sin el bloque 📌 hasta que las vuelvas a
+    marcar.
+  - En modo CN→ES (aprendo español) la palabra española NO muestra
+    trazos: queda la palabra grande + su traducción al chino +
+    ejemplo + tu contexto guardado.
+• FUNCIONA OFFLINE: el motor de trazos (hanzi-writer.min.js) viaja
+  dentro de la app y el Service Worker lo precachea; los datos de
+  cada carácter (trazos SVG, ~15 KB) se cachean en una caché
+  PERSISTENTE propia → una vez practicado un carácter, después lo
+  practicás sin conexión. Cero costo inicial: el motor se carga
+  solo la primera vez que abrís trazos.
+• Colores del trazo respetan el MODO OSCURO (trazo claro sobre
+  cuadro oscuro) y en celular los cuadros se achican para que todo
+  entre en pantalla. Escape también cierra el popup.
+• LIBRERÍA ABIERTA: Hanzi Writer v3.5 de Chanind Master — licencia
+  MIT, archivo hanzi-writer.min.js incluido en el paquete. Los
+  datos de trazos son de hanzi-writer-data (MIT).
+• Probá: tocá ✅ La sé en una tarjeta → tocá la palabra en el cajón
+  → 📌 tu ejemplo + Orden de trazos → ▶ Animar → ✍ Practicar y
+  trazá con el dedo.
+• sw.js sube a v33. UN ARCHIVO NUEVO: hanzi-writer.min.js (los 12
+  de siempre + este).
+
+======================================================================
+📖 NOVEDADES v7.12 — DICCIONARIO AL TOQUE (Capa 4):
+   las palabras sin ficha ahora TIENEN definición en español
+----------------------------------------------------------------------
+• DEFINICIÓN BREVE REAL: hasta ahora, una palabra que aparecía en
+  una lección pero no tenía ficha propia (ej: 公共) solo decía
+  "Aparece en una lección". Ahora muestra su DEFINICIÓN en
+  español (公共 = público) junto con el pinyin de diccionario y,
+  debajo, la lección donde aparece como contexto extra.
+• 1.630 ENTRADAS + 802 ALIAS: diccionario offline construido sobre
+  el vocabulario del curso + CC-CEDICT (MDBG), con definiciones
+  propias en español para estudiantes. Incluye:
+    - todas las palabras frecuentes del curso que no tenían ficha
+    - variantes TRADICIONALES: al leer en 传统, 嗎/老師/圖書館
+      resuelven igual (van como alias a su entrada simplificada)
+    - citas clásicas de las lecciones: 三人行, 兼善天下,
+      大器晚成, 富贵不能淫... con su explicación
+    - combos de la vida real: 很好, 不敢, 看起来, 一辈子...
+• DICCIÓNARIO INVERSO ESPAÑOL → CHINO: tocás una palabra española
+  (en el lector ES o el cajón) y el popup te propone hasta 3
+  candidatos chinos con pinyin y sentido (tocás "público" →
+  公 gōng / 公共 gònggòng).
+• FICHAS EXACTAS ENRIQUECIDAS: si una respuesta de lección tiene
+  además sentidos de diccionario que suman, se muestran con un
+  bloque 📖 discreto debajo de la traducción.
+• ORDEN DE RESOLUCIÓN DEL TOQUE (de mejor a peor):
+  respuesta exacta → lema ES → DICCIONARIO (nuevo) → aparece en
+  una lección → carácter por carácter → "no sé" honesto.
+  Las capas anteriores NO cambian: 谢谢 sigue exacta, 饕餮 sigue
+  honesto, 冷水 sigue por carácter.
+• FUNCIONA OFFLINE: el diccionario viaja dentro de la app
+  (dict-mini.js, ~98 KB) y el Service Worker lo precachea.
+• DATOS ABIERTOS: entradas y pinyin basados en CC-CEDICT (MDBG)
+  bajo licencia CC-BY-SA 4.0; definiciones ES propias. Atribución
+  en la cabecera de dict-mini.js y en este LEEME.
+• Probá: escribí 公共汽车站在哪儿？ en el lector → tocá 公共 →
+  definición + lección. Después tocá "público" en una frase
+  española → candidatos chinos.
+• sw.js sube a v32. UN ARCHIVO NUEVO: dict-mini.js (los 11 de
+  siempre + este).
+
+======================================================================
+🎨 NOVEDADES v7.11 — LEYENDA DE TONOS + ESQUEMAS DE COLOR:
+   qué significa cada color y elegí cómo verlos
+----------------------------------------------------------------------
+• LEYENDA LA PRIMERA VEZ: al activar "🎨 Tonos: ON" por primera
+  vez se abre una leyenda que explica cada color (Tono 1 alto y
+  plano · Tono 2 sube · Tono 3 baja y sube · Tono 4 cae fuerte ·
+  Tono 5 neutro) con una oración de ejemplo pintada en vivo
+  (妈妈骑马，马慢，妈妈骂马。). Solo molesta esa única vez.
+• BOTÓN ℹ️ NUEVO: junto a "🎨 Tonos" hay un botón ℹ️ que reabre
+  la leyenda cuando quieras (también sirve para configurar los
+  colores ANTES de activar los tonos).
+• 3 ESQUEMAS DE COLOR:
+    - Estándar: los colores de siempre de la app (no cambia nada
+      para quien ya la usaba).
+    - Amigable para daltonismo (paleta Okabe-Ito): azul/naranja/
+      verde/vermillón distinguibles aunque cueste ver el rojo y
+      el verde; en modo oscuro el azul pasa a cielo para leerse
+      bien sobre fondo oscuro.
+    - Personalizado: 5 selectores de color (uno por tono) con
+      cambio EN VIVO — lo que elegís se ve al instante en la
+      leyenda, la tarjeta y el lector.
+• SE VE EN TODOS LADOS: los colores nuevos aplican a la vez en la
+  tarjeta de práctica, en el pinyin del lector interlineal y en
+  la leyenda (usan la misma fuente de color).
+• SE RECUERDA TODO: el esquema y los colores personalizados se
+  guardan solos y sobreviven a recargar/cerrar la app. El checkbox
+  "No mostrar esta leyenda al activar los tonos" evita que vuelva
+  a abrirse (si lo destildás, se muestra una vez más como
+  recordatorio).
+• Probá: tocá ℹ️ → elegí "Amigable para daltonismo" → mirá la
+  oración de la leyenda y el lector cambiar a azul/naranja/verde/
+  vermillón → tocá 🌙 para verlo en oscuro (el popup NO se cierra).
+• sw.js sube a v31. SIN archivos nuevos: popup y lógica viven en
+  index.html + style.css + app.js.
+
+======================================================================
 📖 NOVEDADES v7.10 — DICCIONARIO REAL AL TOQUE (Opción B):
    cualquier palabra resuelve, no solo las respuestas de las lecciones
 ----------------------------------------------------------------------
