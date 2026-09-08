@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260909b">
+    <link rel="stylesheet" href="style.css?v=20260909c">
 </head>
 <body>
     <div class="container">
@@ -302,10 +302,14 @@
                             <span class="ci-zh" lang="zh">金刚经</span><span class="ci-py">Jīngāngjīng</span><span class="ci-es">Sutra del Diamante</span></button></li>
                     </ul>
                 </div>
+                <!-- v9.2: LEER EL TEXTO ORIGINAL — los clásicos se tratan como las
+                     lecciones: se elige el clásico directamente y se lee por
+                     bloques (capítulos/pasajes del texto real, no las oraciones
+                     de práctica). La lista la arma classics.js + app.js. -->
+                <h4 class="cread-head">📖 Leer el texto original <span class="cread-sub">por bloques, como las lecciones</span></h4>
+                <div class="cread-list" id="cread-list" role="group" aria-label="Leer el texto original de un clásico"></div>
             </div>
         </div>
-
-        <!-- v7.18: stats compactas al final, junto al vocabulario -->
         <div class="stats stats-bottom">
             <span id="stats-known">✅ Conocidas: 0</span>
             <span id="stats-new">🎖️ Nuevas: 0</span>
@@ -366,6 +370,8 @@
                 </label>
                 <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
             </div>
+            <!-- v9.2: contador de caracteres por hoja A4 según 10/12/14 celdas -->
+            <div id="pz-counter" class="pz-counter" role="status">📊 Hoja A4…</div>
             <div id="pz-status" class="module-status hidden" role="status"></div>
             <div class="reader-actions">
                 <button id="btn-pz-generate" class="btn-primary" type="button">📄 Generar hoja</button>
@@ -469,6 +475,19 @@
         </div>
     </div>
 
+    <!-- v9.2: LECTOR DE CLÁSICOS — texto original por bloques (misma piel que
+         las lecciones; bloque actual en #cr-progress-num como X/N) -->
+    <div id="cread-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Leer clásico">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span id="cr-progress-num" class="lq-progress-num">📖</span>
+                <div id="cr-segments" class="lq-segments" aria-hidden="true"></div>
+                <button id="cr-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="cr-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -515,21 +534,22 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260909b"></script>
+    <script src="config.js?v=20260909c"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260909b"></script>
+    <script src="text-utils.js?v=20260909c"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260909b"></script>
+    <script src="VoiceRecorder.js?v=20260909c"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260909b"></script>
-    <script src="dict-mini.js?v=20260909b"></script>
+    <script src="voice-evaluator.js?v=20260909c"></script>
+    <script src="dict-mini.js?v=20260909c"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260909b"></script>
-    <script src="app.js?v=20260909b"></script>
+    <script src="lessons.js?v=20260909c"></script>
+    <script src="classics.js?v=20260909c"></script>
+    <script src="app.js?v=20260909c"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

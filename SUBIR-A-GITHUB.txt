@@ -1,28 +1,34 @@
 ======================================================================
- v9.0 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v9.2 — SUBIR A GITHUB: 15 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
-⚠️ MISMA CANTIDAD DE ARCHIVOS QUE SIEMPRE (no hay archivos nuevos).
-   En esta versión cambian 5: index.html, app.js, style.css, lessons.js
-   y sw.js (Huayu Diario + Lecciones graduadas + fix tradicional).
-   Subí SIEMPRE los 14 juntos: mezclar viejos y nuevos rompe la app.
+⚠️ CAMBIA LA CANTIDAD: ahora son 15 archivos porque entra UNO NUEVO:
+   classics.js (los textos originales de los 9 clásicos, 97 KB).
+   En esta versión cambian 6: index.html, app.js, style.css, sw.js,
+   LEEME-PWA.txt y classics.js (NUEVO). lessons.js NO cambió.
+   Subí SIEMPRE los 15 juntos: mezclar viejos y nuevos rompe la app
+   (si classics.js no se sube, el lector de clásicos no abre).
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
 
 ¿QUÉ CAMBIA EN ESTA VERSIÓN?
 ------------------------------------------------------------
-1) NUEVA MARCA: Huayu Diario 日常華語 — "Aprende mandarin, vive el
-   idioma". Título, íconos y caché nuevos. Tu progreso se conserva.
-2) 📖 LECCIONES GRADUADAS: nueva pestaña con 10 mini-dramas HSK 1-6.
-   Cada historia: lectura con pinyin opcional y audio por línea +
-   práctica de 10 oraciones con hueco y 3 opciones (estilo test de
-   colocación). Errores → tarjetas comparativas + mazo SRS.
-3) FIX: palabras aprendidas ya se guardan SIEMPRE en simplificado,
-   aunque estudies con 繁 activado (y los guardados viejos migran
-   solos: 謝謝 pasa a ser 谢谢).
-4) Nada más cambió: HSK 3.0 (9 niveles), TOCFL Band A, DELE, Clásicos,
-   SRS, colocación y planillas siguen exactamente igual.
+1) CLÁSICOS COMO LAS LECCIONES: la pestaña 📜 Clásicos suma
+   "📖 Leer el texto original" — 9 tarjetas que abren el TEXTO
+   ORIGINAL por bloques (capítulos/pasajes), con traducción
+   española línea por línea, pinyin interlineal opcional, 🔊 por
+   línea y 🇪🇸 oculto por defecto (misma preferencia que las
+   lecciones). Textos completos: 大学 · 三字经 · 孝经 · 心经.
+   Selección de capítulos: 论语 · 孟子 · 中庸 · 道德经 · 金刚经.
+2) EL BOTÓN 📖 LEER LECCIÓN AHORA SALTA: practicando una frase de
+   un clásico, el botón abre el texto original EN EL BLOQUE donde
+   vive la frase (línea resaltada). Antes volcaba las oraciones de
+   práctica en el Lector — eso quedó reemplazado.
+3) 🎯 PRACTICAR ESTE CLÁSICO dentro del lector → carga el módulo.
+4) PLANILLAS: contador EN VIVO de caracteres por hoja A4 según 10,
+   12 o 14 celdas por fila: "entran X de Y · Z quedan por fuera".
+   Exacto tras descargar los trazos; sin conexión muestra ≈.
 
 PASO A PASO (funciona igual desde el celular o la PC):
 ------------------------------------------------------------
@@ -30,13 +36,14 @@ PASO A PASO (funciona igual desde el celular o la PC):
    carpetas de versiones anteriores).
 2. Entrá a tu repo en github.com
 3. Tocá "Add file" → "Upload files"
-4. Subí EXACTAMENTE estos 14 archivos del ZIP, a la RAÍZ:
+4. Subí EXACTAMENTE estos 15 archivos del ZIP, a la RAÍZ:
 
-      ✅ index.html           ← ACTUALIZADO (marca + pestaña Lecciones)
-      ✅ app.js               ← ACTUALIZADO (motor de lecciones + fix trad)
-      ✅ style.css            ← ACTUALIZADO (overlay de lecciones, dark)
-      ✅ lessons.js           ← ACTUALIZADO (10 historias + 100 ejercicios)
-      ✅ sw.js                ← ACTUALIZADO (v46: invalida la caché)
+      ✅ index.html           ← ACTUALIZADO (lista de clásicos + overlay)
+      ✅ app.js               ← ACTUALIZADO (lector de clásicos + contador)
+      ✅ style.css            ← ACTUALIZADO (tarjetas/chips/nav/contador + dark)
+      ✅ sw.js                ← ACTUALIZADO (v48: invalida la caché)
+      ✅ classics.js          ← NUEVO (textos originales de los 9 clásicos)
+      ✅ lessons.js           (no cambió en v9.2 — subilo por las dudas)
       ✅ hanzi-writer.min.js
       ✅ dict-mini.js
       ✅ VoiceRecorder.js
@@ -47,11 +54,7 @@ PASO A PASO (funciona igual desde el celular o la PC):
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-   (son 14: index, app, style, sw, lessons, hanzi-writer, dict-mini,
-    VoiceRecorder, voice-evaluator, pitch-analyzer, config, text-utils,
-    html2canvas, jspdf)
-
-5. Abajo escribí un título (ej: v9.0) y tocá el botón verde
+5. Abajo escribí un título (ej: v9.2) y tocá el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. Vercel/GitHub Pages se actualiza solo.
@@ -59,37 +62,46 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS (aproximados):
-      index.html           = 40 KB   ← actualizado
-      app.js               = 1.051 KB ← actualizado (motor lecciones)
-      style.css            = 99 KB   ← actualizado (overlay lecciones)
-      lessons.js           = 121 KB  ← actualizado (10 historias)
-      sw.js                = 11 KB   ← actualizado (v46)
+      index.html           = 42 KB   ← actualizado
+      app.js               = 1.082 KB ← actualizado (lector + contador)
+      style.css            = 104 KB  ← actualizado (bloque v9.2)
+      sw.js                = 12 KB   ← actualizado (v48)
+      classics.js          = 97 KB   ← NUEVO
+      lessons.js           = 121 KB  (no cambió)
       dict-mini.js         = 98 KB   (no cambió)
       pinyin-pro.min.js    = 316 KB  (no se sube de nuevo, referencia)
 
 B) DESPUÉS de subir, abrí tu app y recargá 2 veces (F5).
    Mirá la consola (F12) o probá directo:
       https://TU-USUARIO.github.io/TU-REPO/sw.js
-   → tiene que decir:  const VERSION = 'v46'
+   → tiene que decir:  const VERSION = 'v48'
 
-PRUEBA RÁPIDA DE 1 MINUTO (v9.0):
+PRUEBA RÁPIDA DE 1 MINUTO (v9.2):
 ------------------------------------------------------------
-1. Abrí la app: arriba dice 日常華語 Huayu Diario y el ícono es 語.
-2. Tocá la pestaña 📖 Lecciones: hay 10 historias con chips HSK 1-6.
-3. Entrá a 🎒 El primer día de clase → 📖 Leer: tocá 🔤 Pinyin y
-   tocá cualquier línea para escucharla.
-4. Ahora 🎯 Practicar: elegí la palabra que falta entre 3 opciones.
-   Si errás, vas a ver TU RESPUESTA vs RESPUESTA CORRECTA con pinyin
-   y audio — y la palabra entra a tu Repaso SRS.
-5. (Opcional) Andá a 📚 Diaria, activá 繁 y respondé una oración:
-   en Palabras aprendidas queda guardada en SIMPLIFICADO.
+1. Abrí la app → pestaña 📜 Clásicos → abajo: "📖 Leer el texto
+   original". Tocá 心经 Sutra del Corazón (badge "✓ completo").
+2. Se abre el sutra completo en bloques: tocá una línea para
+   escucharla; probá 🔤 Pinyin y 🇪🇸 Español (nace oculto).
+   Navegá con ‹ Anterior / Siguiente › o los chips de bloques.
+3. Tocá ✕ y andá a 📜 Clásicos → elegí 论语 Analectas (dropdown
+   de práctica de siempre). Practicá hasta que salga 逝者如斯夫…
+   y tocá "📖 Leer lección": el lector abre EN 子罕第九 con la
+   frase resaltada. Ese es el salto nuevo.
+4. Dentro del lector, tocá "🎯 Practicar este clásico": carga el
+   módulo de práctica de ese clásico.
+5. Andé a ✍️ Planillas: escribí 你好 y mirá la línea verde
+   "📊 Hoja A4 (12 celdas/fila…)". Cambiá 10/12/14 celdas y el
+   número se actualiza solo. Pegá 40+ caracteres y verás cuántos
+   "quedan por fuera".
 
 SI ALGO SALIÓ MAL:
 ------------------------------------------------------------
+• "El lector de clásicos no abre" → falta classics.js en el repo:
+  subí los 15 archivos juntos de ESTE ZIP.
 • "Sigue viéndose igual" → no se subió sw.js, o el navegador
   guardó la versión vieja: recargá 2 veces / probá en incógnito.
-• "No veo la pestaña Lecciones" → faltó index.html o lessons.js
-  nuevo: subí los 14 juntos de ESTE ZIP.
-• "Las historias no abren" → lessons.js viejo mezclado con app.js
-  nuevo: subí los 14 archivos juntos de ESTE ZIP.
+• "El 📖 sigue volcando oraciones al Lector" → falta app.js nuevo
+  (o classics.js): subí los 15 juntos de ESTE ZIP.
+• "El contador de planillas no aparece" → faltan index.html y/o
+  app.js nuevos: subí los 15 juntos de ESTE ZIP.
 ======================================================================

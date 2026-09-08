@@ -1437,6 +1437,8 @@ function setCharType(ct) {
     updateClassicsScript();   // nombres de clásicos en 简/繁
     updateClassicsBtnLabel();
     renderCurrentSentence();
+    // v9.2: hook para módulos nuevos (lector de clásicos) que siguen el guion
+    try { document.dispatchEvent(new CustomEvent('ac-script-change')); } catch (e) { }
 }
 
 function setModule(mod) {
@@ -3401,6 +3403,13 @@ async function readCurrentLesson() {
     const s = filtered && filtered[state.currentIndex];
     if (!s) return;
 
+    // v9.2: los CLÁSICOS abren su lector propio (texto original por bloques,
+    // como las lecciones) en el bloque donde vive la frase practicada — ya no
+    // vuelcan la concatenación de oraciones de práctica en el Lector.
+    if (s.module && String(s.module).indexOf('Clasicos-') === 0 && typeof window.CR_open === 'function') {
+        if (window.CR_open(s.module, s)) return;
+    }
+
     if (typeof LESSONS_DATA === 'undefined' || !LESSONS_DATA || !LESSONS_DATA.lessons) {
         moduleStatus('⚠ No se pudo cargar lessons.js — revisá que el archivo esté subido.', true);
         return;
@@ -3451,6 +3460,9 @@ function buildReaderLibrary() {
             if (L.status === 'planned') {
                 o.disabled = true;
                 o.textContent = (L.label || L.title) + ' · próximamente';
+            } else if (L.module && String(L.module).indexOf('Clasicos-') === 0) {
+                // v9.2: los clásicos abren el lector de clásicos (texto original)
+                o.textContent = '📖 Leer el texto original (lector de clásicos)';
             } else {
                 o.textContent = L.label || L.title;
             }
@@ -3477,6 +3489,13 @@ function loadLibraryLesson() {
     }
     if (!L) {
         moduleStatus('⚠ No encontré esa lectura en lessons.js.', true);
+        return;
+    }
+    // v9.2: los clásicos de la Biblioteca abren el lector de clásicos
+    // (texto original por bloques) — los textos viejos de lessons.js eran
+    // la concatenación de oraciones de práctica.
+    if (L.module && String(L.module).indexOf('Clasicos-') === 0 && typeof window.CR_open === 'function') {
+        window.CR_open(L.module);
         return;
     }
     fillReaderWithLesson(L);
@@ -4031,6 +4050,7 @@ async function pzGenerate() {
     }));
     pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle);
     pzRenderPreview();
+    pzCounterRender(); // v9.2: con datos reales el contador es exacto
     ['btn-pz-pdf', 'btn-pz-print'].forEach((id) => {
         const b = document.getElementById(id);
         if (b) b.classList.remove('hidden');
@@ -4215,6 +4235,7 @@ function pzUseModule() {
     if (ta && out) {
         ta.value = out;
         pzStatus('📋 ' + seen.size + ' caracteres del módulo ' + (MODULE_LABELS[state.activeModule] || state.activeModule) + '. Ahora tocá 📄 Generar hoja.');
+        pzCounterUpdate(); // v9.2: el módulo cargado entra al contador
     } else {
         pzStatus('⚠ El módulo activo no tiene palabras para practicar.', true);
     }
@@ -4234,6 +4255,134 @@ function pzUpdateControls() {
     if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
 }
 
+// ======================================================================
+// v9.2 — CONTADOR DE CARACTERES POR HOJA A4 (según 10/12/14 celdas)
+// ======================================================================
+// Le responde al docente la pregunta práctica: "¿cuántos caracteres entran
+// en UNA hoja A4 con la config elegida y cuántos quedan por fuera?".
+// · Estilo clásico: cada carácter ocupa ceil((modelo + etapas + 2)/C) filas
+//   de celdas de altura fija → capacidad analítica con header medido.
+// · Estilo cuaderno: se mide cada bloque real (la tira 筆順 envuelve según
+//   los trazos) en un holder con la MISMA geometría del PDF (794px, pad 42px).
+// · Sin datos de trazos todavía → n estimado 10 trazos y se marca "≈" — el
+//   contador precarga los datos en silencio y se afila solo a exacto.
+const PZ_PAGE_H = 1123;                    // A4 a 96dpi
+const PZ_PAGE_PAD = 42;                    // padding del holder ≈ 11mm de margen
+const PZ_PAGE_LIMIT = PZ_PAGE_PAD + (PZ_PAGE_H - 2 * PZ_PAGE_PAD); // fondo página 1
+const PZ_MM = 96 / 25.4;                   // px por mm
+
+function pzCounterData() {
+    const ta = document.getElementById('pz-input');
+    const raw = ta ? ta.value : '';
+    const chars = pzParseInput(raw);
+    let rawHan = 0;
+    for (const ch of String(raw)) if (pzIsHan(ch)) rawHan++;
+    return { chars, rawHan };
+}
+
+function pzCounterCompute() {
+    const { chars, rawHan } = pzCounterData();
+    const C = Math.min(20, Math.max(6, parseInt(pzCells, 10) || 12));
+    const GAP = 1.2 * PZ_MM;
+    const cw = (794 - 84 - (C - 1) * GAP) / C;
+    const rowH = cw + 1.8 * PZ_MM;
+    const datas = chars.map((ch) => (PZ_MEM.has(ch) ? PZ_MEM.get(ch) : null));
+    const unknown = datas.filter((d) => !d).length;
+    const estN = (i) => (pzTrazos ? (datas[i] ? datas[i].strokes.length : 10) : 0);
+
+    let headerH = 60, blocks = null;
+    try {
+        // mide la hoja REAL (misma geometría que el PDF) — la altura de la
+        // cabecera y de cada bloque cuaderno depende del contenido
+        const html = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;background:#fff;padding:42px;';
+        const st = document.createElement('style');
+        st.textContent = pzHolderCss() + '.pz-cell{height:' + cw.toFixed(2) + 'px;}';
+        holder.appendChild(st);
+        while (doc.body.firstChild) holder.appendChild(doc.body.firstChild);
+        document.body.appendChild(holder);
+        const first = holder.querySelector(pzStyle === 'cuaderno' ? '.pz2-block' : '.pz-row');
+        const meta = holder.querySelector('.pz-meta');
+        if (first) headerH = first.offsetTop;
+        else if (meta) headerH = meta.offsetTop + meta.offsetHeight + 3.5 * PZ_MM;
+        if (pzStyle === 'cuaderno') {
+            blocks = [];
+            holder.querySelectorAll('.pz2-block').forEach((b) => {
+                blocks.push({ top: b.offsetTop, h: b.offsetHeight + 4 * PZ_MM });
+            });
+        }
+        holder.remove();
+    } catch (e) { /* medidas por defecto */ }
+
+    let fit = 0, capOnly = 0;
+    if (pzStyle === 'cuaderno') {
+        if (blocks && blocks.length) {
+            for (const b of blocks) { if (b.top + b.h <= PZ_PAGE_LIMIT) fit++; else break; }
+        } else {
+            const estH = 26 * PZ_MM; // bloque típico (tarjeta 24mm + envolturas)
+            fit = Math.floor((PZ_PAGE_LIMIT - headerH) / estH);
+        }
+        capOnly = fit;
+    } else {
+        const rowsAvail = Math.floor((PZ_PAGE_LIMIT - headerH) / rowH);
+        if (!chars.length) {
+            // capacidad genérica: carácter de referencia de 10 trazos
+            const rows1 = Math.ceil((1 + (pzTrazos ? 10 : 0) + 2) / C);
+            capOnly = Math.floor(rowsAvail / Math.max(1, rows1));
+        } else {
+            let acc = 0;
+            while (fit < chars.length && acc + Math.ceil((1 + estN(fit) + 2) / C) <= rowsAvail) {
+                acc += Math.ceil((1 + estN(fit) + 2) / C);
+                fit++;
+            }
+            capOnly = Math.floor(rowsAvail / Math.max(1, Math.ceil((1 + (pzTrazos ? 10 : 0) + 2) / C)));
+        }
+    }
+    return { chars: chars.length, rawHan, fit, capOnly, unknown, est: unknown > 0 && chars.length > 0 };
+}
+
+function pzCounterRender() {
+    const el = document.getElementById('pz-counter');
+    if (!el) return;
+    const C = Math.min(20, Math.max(6, parseInt(pzCells, 10) || 12));
+    const r = pzCounterCompute();
+    const cfg = C + ' celdas/fila · ' + (pzStyle === 'cuaderno' ? 'cuaderno 筆順' : 'clásica');
+    if (!r.chars) {
+        el.textContent = '📊 Hoja A4 (' + cfg + '): entran ≈' + r.capOnly +
+            ' caracteres por hoja (carácter de referencia, 10 trazos).';
+        return;
+    }
+    const est = r.est ? ' (≈ estimado: faltan datos de trazos)' : '';
+    const sobran = Math.max(0, r.chars - r.fit);
+    if (sobran === 0) {
+        el.textContent = '📊 Hoja A4 (' + cfg + '): los ' + r.chars + ' caracteres entran en una hoja' + est +
+            (r.rawHan > r.chars ? ' · solo los primeros 40 se usan' : '') + '.';
+    } else {
+        el.textContent = '📊 Hoja A4 (' + cfg + '): entran ' + r.fit + ' de ' + r.chars +
+            ' caracteres · ' + sobran + ' quedan por fuera (hoja 2+)' + est +
+            (r.rawHan > r.chars ? ' · solo los primeros 40 se usan' : '') + '.';
+    }
+}
+
+// Precarga silenciosa de datos de trazos → el contador pasa de ≈ a exacto
+function pzCounterPrefetch() {
+    const { chars } = pzCounterData();
+    const missing = chars.filter((ch) => !PZ_MEM.has(ch));
+    if (!missing.length) return;
+    Promise.all(missing.map((ch) => pzFetchChar(ch)))
+        .then(() => pzCounterRender())
+        .catch(() => { });
+}
+
+let pzCounterTimer = null;
+function pzCounterUpdate() {
+    pzCounterRender();
+    clearTimeout(pzCounterTimer);
+    pzCounterTimer = setTimeout(() => { pzCounterPrefetch(); }, 450);
+}
+
 (function pzInit() {
     const safe = (id, ev, fn) => {
         const el = document.getElementById(id);
@@ -4247,20 +4396,25 @@ function pzUpdateControls() {
         pzTrazos = !pzTrazos;
         localStorage.setItem('ac_pz_trazos', pzTrazos ? '1' : '0');
         pzUpdateControls();
+        pzCounterUpdate(); // v9.2: los trazos cambian cuánto ocupa cada carácter
     });
     safe('select-pz-cells', 'change', (e) => {
         pzCells = parseInt(e.target.value, 10) || 12;
         localStorage.setItem('ac_pz_cells', String(pzCells));
+        pzCounterUpdate(); // v9.2: 10/12/14 cambian la capacidad de la hoja
     });
     safe('select-pz-style', 'change', (e) => {
         pzStyle = (e.target.value === 'cuaderno') ? 'cuaderno' : 'clasica';
         localStorage.setItem('ac_pz_style', pzStyle);
+        pzCounterUpdate(); // v9.2: el estilo cambia el tamaño de cada bloque
     });
+    safe('pz-input', 'input', pzCounterUpdate); // v9.2: contador en vivo
     window.addEventListener('resize', () => {
         const wrap = document.getElementById('pz-preview');
         if (wrap && !wrap.classList.contains('hidden')) pzFitPreview();
     });
     pzUpdateControls();
+    pzCounterRender(); // v9.2: capacidad al abrir el panel
 })();
 
 // ======================================================================
@@ -5505,5 +5659,322 @@ function pzUpdateControls() {
         get lessons() { return LESSONS.length; },
         get state() { return { view: S.view, idx: S.idx, answered: S.answered, results: S.results.slice() }; },
         get rightPos() { return (S.view === 'quiz' && S.order) ? S.order[S.idx].indexOf(0) : -1; }
+    };
+})();
+
+// ======================================================================
+// v9.2 — LECTOR DE CLÁSICOS (texto original por bloques, como las lecciones)
+// ======================================================================
+// Los clásicos ya no se "leen" como concatenación de oraciones de práctica:
+// cada módulo muestra su TEXTO ORIGINAL en bloques (capítulos/pasajes) con
+// la misma experiencia que el lector de lecciones: pinyin interlineal
+// opcional (pinyin-pro), traducción 🇪🇸 oculta por defecto (misma
+// preferencia 'ac_lq_es'), TTS por línea (fetchTTS + fallback sistema) y
+// navegación entre bloques. Datos: classics.js (window.CLASSIC_TEXTS +
+// window.CLASSIC_T con tradicional horneado vía opencc).
+// Entradas: (a) lista directa en la pestaña Clásicos (#cread-list);
+//           (b) botón 📖 Leer lección de la tarjeta → window.CR_open(mod, oración)
+//               que salta al bloque/línea donde vive la frase practicada;
+//           (c) Biblioteca del Lector (entradas de clásicos).
+(function classicsReadInit() {
+    'use strict';
+    const DATA = (typeof window.CLASSIC_TEXTS !== 'undefined') ? window.CLASSIC_TEXTS : null;
+    if (!DATA) return;
+    const T = (typeof window.CLASSIC_T !== 'undefined') ? window.CLASSIC_T : { line: {}, label: {} };
+
+    const $ = (id) => document.getElementById(id);
+    const escHtml = (t) => String(t == null ? '' : t).replace(/[&<>"']/g,
+        c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const pop = $('cread-pop');
+    if (!pop) return;
+    const body = $('cr-body'), progNum = $('cr-progress-num');
+
+    const CR = { mod: null, block: 0, pinyin: false };
+
+    // ── utilidades compartidas con lessonsInit ──
+    const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
+    const pyLine = (zh) => {
+        try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
+        catch (e) { return ''; }
+    };
+
+    // ── matcher: oración practicada → bloque/línea del texto original ──
+    // 1) normaliza (solo Han) · 2) alias de citas abreviadas · 3) contención
+    // 4) respaldo: solapamiento de pares de caracteres (Dice ≥ 0.55).
+    const CR_ALIAS = { // EL MISMO mapa vive en scripts/build_classics_v92.py
+        '生于忧患死于安乐': '生于忧患而死于安乐',
+        '祸兮福所倚福兮祸所伏': '祸兮福之所倚福兮祸之所伏',
+        '佛说世界即非世界是名世界': '如来说世界非世界是名世界',
+        '行远必自迩登高必自卑': '行远必自迩辟如登高必自卑'
+    };
+    const CR_NO_HIT = { '百善孝为先。': 1 }; // proverbio posterior, no es del 孝经
+    function crNorm(s) {
+        const m = String(s == null ? '' : s).match(/[\u3400-\u9FFF\uF900-\uFAFF]/g) || [];
+        return m.join('');
+    }
+    function crDice(a, b) {
+        if (!a || !b) return 0;
+        const bg = (s) => { const out = new Set(); for (let i = 0; i < s.length - 1; i++) out.add(s.slice(i, i + 2)); return out; };
+        const A = bg(a), B = bg(b);
+        let inter = 0;
+        A.forEach(x => { if (B.has(x)) inter++; });
+        return (2 * inter) / (A.size + B.size);
+    }
+    function findLine(mod, sentence) {
+        let target = crNorm(sentence && sentence.chinese_simp_full);
+        if (!target) return { block: 0, line: -1 };
+        if (CR_NO_HIT[sentence.chinese_simp_full]) return { block: 0, line: -1 };
+        if (CR_ALIAS[target]) target = CR_ALIAS[target];
+        const blocks = DATA[mod].blocks;
+        let best = { r: 0, block: 0, line: -1 };
+        for (let b = 0; b < blocks.length; b++) {
+            const lines = blocks[b].l;
+            for (let i = 0; i < lines.length; i++) {
+                const ln = crNorm(lines[i][0]);
+                if (!ln) continue;
+                if (ln.indexOf(target) !== -1 || target.indexOf(ln) !== -1) return { block: b, line: i };
+                const r = crDice(target, ln);
+                if (r > best.r) best = { r, block: b, line: i };
+            }
+        }
+        return best.r >= 0.55 ? { block: best.block, line: best.line } : { block: 0, line: -1 };
+    }
+
+    // ── TTS: mismo pipeline que el lector de lecciones ──
+    let crAudio = null;
+    async function speakCr(text, el) {
+        try {
+            if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
+                globalAudioPlayer.pause();
+                if (typeof isPlaying !== 'undefined') isPlaying = false;
+            }
+            if (crAudio) { crAudio.pause(); crAudio = null; }
+            if (el) el.classList.add('lq-speaking');
+            const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            if (!resp.ok) throw new Error('TTS http ' + resp.status);
+            const data = await resp.json();
+            if (!data.audio) throw new Error('TTS sin audio');
+            const bin = atob(data.audio);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+            crAudio = new Audio(url);
+            crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            await crAudio.play();
+            crAudio.onended = () => { URL.revokeObjectURL(url); crAudio = null; if (el) el.classList.remove('lq-speaking'); };
+        } catch (e) {
+            try {
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'zh-CN';
+                    u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+                    speechSynthesis.speak(u);
+                }
+            } catch (e2) { /* silencioso */ }
+            if (el) el.classList.remove('lq-speaking');
+        }
+    }
+    function stopCrSpeak() {
+        if (crAudio) { crAudio.pause(); crAudio = null; }
+        try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+        body.querySelectorAll('.lq-speaking').forEach(el => el.classList.remove('lq-speaking'));
+    }
+
+    // ── preferencia 🇪🇸 COMPARTIDA con las lecciones ('ac_lq_es') ──
+    const esPref = () => { try { return localStorage.getItem('ac_lq_es') === '1'; } catch (e) { return false; } };
+    const setEsPref = (v) => { try { localStorage.setItem('ac_lq_es', v ? '1' : '0'); } catch (e) { } };
+
+    // ── overlay ──
+    function openCrPop() {
+        pop.classList.remove('hidden');
+        try { document.body.style.overflow = 'hidden'; } catch (e) { }
+    }
+    function closeCrPop() {
+        stopCrSpeak();
+        pop.classList.add('hidden');
+        try { document.body.style.overflow = ''; } catch (e) { }
+        CR.mod = null;
+    }
+
+    // ── vista: un bloque del texto original ──
+    function renderBlock(hitLine) {
+        const mod = CR.mod, info = DATA[mod];
+        const k = zhKey(), trad = (k === 'trad');
+        const blocks = info.blocks, b = CR.block, blk = blocks[b];
+        const cinfo = (typeof CLASSICS_INFO !== 'undefined') ? CLASSICS_INFO[mod] : null;
+        const titleZh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : (trad ? (T.label[mod] || '') : '');
+        const flatBase = blocks.slice(0, b).reduce((a, x) => a + x.l.length, 0);
+        const tlines = T.line[mod] || [];
+        const tlabels = T.label[mod] || [];
+        progNum.textContent = (b + 1) + '/' + blocks.length;
+
+        const lines = blk.l.map((pair, i) => {
+            const zh = trad ? (tlines[flatBase + i] || pair[0]) : pair[0];
+            // v9.2 fix: si el pinyin está ON, las líneas de un bloque nuevo nacen
+            // CON pinyin (antes quedaban vacías/ocultas hasta re-tocar el botón)
+            const pyCls = CR.pinyin ? 'lq-line-py' : 'lq-line-py hidden';
+            return '<div class="lq-line' + (i === hitLine ? ' cr-flash' : '') + '" data-i="' + i + '"' +
+                (i === hitLine ? ' id="cr-hit"' : '') + ' role="button" tabindex="0" title="Tocá para escuchar">' +
+                '<div class="lq-line-zh">' + escHtml(zh) + '</div>' +
+                '<div class="' + pyCls + '" data-zh="' + escHtml(zh) + '">' + (CR.pinyin ? escHtml(pyLine(zh)) : '') + '</div>' +
+                '<div class="lq-line-es' + (esPref() ? '' : ' hidden') + '">' + escHtml(pair[1]) + '</div></div>';
+        }).join('');
+
+        const chips = blocks.map((x, i) =>
+            '<button type="button" class="cr-chip' + (i === b ? ' active' : '') + '" data-b="' + i + '">' +
+            escHtml(trad ? (tlabels[i] || x.n) : x.n) + '</button>').join('');
+
+        const badgeTxt = info.badge === 'completo' ? 'texto completo' : 'selección de capítulos';
+        body.innerHTML =
+            '<div class="lq-story-head"><span class="lq-story-emoji">' + info.emoji + '</span>' +
+            '<div><div class="lq-story-zh">' + escHtml(titleZh) + '</div>' +
+            '<div class="lq-story-es">' + escHtml(info.es) + ' · ' + badgeTxt + '</div></div></div>' +
+            '<p class="cr-intro">' + escHtml(info.intro) + '</p>' +
+            '<div class="cr-chips" id="cr-chips">' + chips + '</div>' +
+            '<div class="lq-lines" id="cr-lines">' + lines + '</div>' +
+            '<div class="lq-story-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-es">🇪🇸 Español: ' + (esPref() ? 'ON' : 'OFF') + '</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-py">🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF') + '</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="cr-practice">🎯 Practicar este clásico</button>' +
+            '</div>' +
+            '<div class="cr-nav">' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-prev"' + (b === 0 ? ' disabled' : '') + '>‹ Anterior</button>' +
+            '<span class="cr-nav-num">' + escHtml(trad ? (tlabels[b] || blk.n) : blk.n) + '</span>' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-next"' + (b === blocks.length - 1 ? ' disabled' : '') + '>Siguiente ›</button>' +
+            '</div>';
+
+        body.querySelector('#cr-es').addEventListener('click', (e) => {
+            const v = !esPref();
+            setEsPref(v);
+            e.target.textContent = '🇪🇸 Español: ' + (v ? 'ON' : 'OFF');
+            body.querySelectorAll('.lq-line-es').forEach(el => el.classList.toggle('hidden', !v));
+        });
+        body.querySelector('#cr-py').addEventListener('click', (e) => {
+            CR.pinyin = !CR.pinyin;
+            e.target.textContent = '🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF');
+            body.querySelectorAll('.lq-line-py').forEach(el => {
+                if (CR.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
+                el.classList.toggle('hidden', !CR.pinyin);
+            });
+        });
+        body.querySelector('#cr-practice').addEventListener('click', () => {
+            closeCrPop();
+            if (typeof setModule === 'function') setModule(mod);
+            const card = $('sentence-card');
+            if (card) try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+        });
+        body.querySelector('#cr-prev').addEventListener('click', () => {
+            if (CR.block > 0) { CR.block--; renderBlock(-1); }
+        });
+        body.querySelector('#cr-next').addEventListener('click', () => {
+            if (CR.block < DATA[mod].blocks.length - 1) { CR.block++; renderBlock(-1); }
+        });
+        body.querySelector('#cr-chips').addEventListener('click', (e) => {
+            const chip = e.target.closest('.cr-chip');
+            if (!chip) return;
+            CR.block = +chip.dataset.b;
+            renderBlock(-1);
+        });
+        body.querySelector('#cr-lines').addEventListener('click', (e) => {
+            const line = e.target.closest('.lq-line');
+            if (!line) return;
+            const i = +line.dataset.i;
+            const pair = blk.l[i];
+            speakCr(trad ? (tlines[flatBase + i] || pair[0]) : pair[0], line.querySelector('.lq-line-zh'));
+        });
+        if (hitLine >= 0) {
+            const hit = body.querySelector('#cr-hit');
+            if (hit) try { hit.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+        }
+    }
+
+    function openCr(mod, blockIdx, hitLine) {
+        if (!DATA[mod]) return false;
+        CR.mod = mod;
+        CR.block = Math.max(0, Math.min(blockIdx || 0, DATA[mod].blocks.length - 1));
+        openCrPop();
+        renderBlock(hitLine === undefined ? -1 : hitLine);
+        return true;
+    }
+
+    // API pública: abrir el lector de un clásico (y saltar a la frase si hay)
+    window.CR_open = function (mod, sentence) {
+        if (!DATA[mod]) return false;
+        let block = 0, line = -1;
+        if (sentence) {
+            const hit = findLine(mod, sentence);
+            block = hit.block; line = hit.line;
+        }
+        return openCr(mod, block, line);
+    };
+
+    // ── lista directa en la pestaña Clásicos ──
+    function renderCrList() {
+        const wrap = $('cread-list');
+        if (!wrap) return;
+        const k = zhKey(), trad = (k === 'trad');
+        wrap.innerHTML = '';
+        Object.keys(DATA).forEach(mod => {
+            const info = DATA[mod];
+            const cinfo = (typeof CLASSICS_INFO !== 'undefined') ? CLASSICS_INFO[mod] : null;
+            const zh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : '';
+            const nLines = info.blocks.reduce((a, x) => a + x.l.length, 0);
+            const card = document.createElement('div');
+            card.className = 'cr-card';
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            card.dataset.mod = mod;
+            card.innerHTML =
+                '<div class="cr-card-top"><span class="cr-emoji" aria-hidden="true">' + info.emoji + '</span>' +
+                '<span class="cr-zh">' + escHtml(zh) + '</span>' +
+                '<span class="cr-badge' + (info.badge === 'completo' ? ' full' : '') + '">' +
+                (info.badge === 'completo' ? '✓ completo' : 'selección') + '</span></div>' +
+                '<div class="cr-es">' + escHtml(info.es) + '</div>' +
+                '<div class="cr-meta">' + info.blocks.length + ' bloques · ' + nLines + ' líneas</div>' +
+                '<div class="cr-cta">📖 Leer el original</div>';
+            wrap.appendChild(card);
+        });
+    }
+    function bindCrList() {
+        const wrap = $('cread-list');
+        if (!wrap) return;
+        wrap.addEventListener('click', (e) => {
+            const card = e.target.closest('.cr-card');
+            if (card) openCr(card.dataset.mod, 0, -1);
+        });
+        wrap.addEventListener('keydown', (e) => {
+            const card = e.target.closest('.cr-card');
+            if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCr(card.dataset.mod, 0, -1); }
+        });
+    }
+
+    function bindCrPop() {
+        $('cr-close').addEventListener('click', closeCrPop);
+        pop.addEventListener('click', (e) => { if (e.target === pop) closeCrPop(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !pop.classList.contains('hidden')) closeCrPop();
+        });
+        // el switch 简/繁 re-renderiza el bloque abierto y la lista
+        document.addEventListener('ac-script-change', () => {
+            if (CR.mod && !pop.classList.contains('hidden')) renderBlock(-1);
+            renderCrList();
+        });
+    }
+
+    function boot() {
+        bindCrList();
+        bindCrPop();
+        renderCrList();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+
+    // API de solo lectura para pruebas E2E
+    window.CR_DEBUG = {
+        get mods() { return Object.keys(DATA).length; },
+        get view() { return { mod: CR.mod, block: CR.block, open: !pop.classList.contains('hidden') }; },
+        get flash() { return !!body.querySelector('.cr-flash'); }
     };
 })();

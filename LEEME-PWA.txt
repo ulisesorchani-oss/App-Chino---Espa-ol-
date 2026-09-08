@@ -142,6 +142,52 @@ NOTAS TÉCNICAS
   plataforma()).
 ======================================================================
 
+🇨🇳 NOVEDADES v9.2 — LECTOR DE CLÁSICOS (texto original por
+   bloques) + CONTADOR DE CARACTERES POR HOJA A4
+------------------------------------------------------------
+1) LOS CLÁSICOS SE LEEN COMO LAS LECCIONES: la pestaña 📜 Clásicos
+   ahora tiene "📖 Leer el texto original" con 9 tarjetas (una por
+   clásico). Cada una abre el TEXTO ORIGINAL organizado en bloques
+   (capítulos/pasajes) — ya no la lista de oraciones de práctica:
+   · TEXTO COMPLETO (4): 大学 Gran Estudio · 三字经 Tres Caracteres
+     · 孝经 Piedad Filial · 心经 Sutra del Corazón
+   · SELECCIÓN DE CAPÍTULOS COMPLETOS (5): 论语 (10 pasajes),
+     孟子 (9), 中庸 (8 capítulos), 道德经 (13 estrofas de 81),
+     金刚经 (9 品)
+   · 87 bloques · 395 líneas con traducción al español línea por
+     línea (autoría propia; textos de dominio público). El 简/繁
+     switch también cambia el texto del lector.
+   · Misma experiencia que las lecciones: tocá una línea para
+     escucharla, botón 🔤 Pinyin interlineal, botón 🇪🇸 Español
+     (OCULTO por defecto — comparte la preferencia con las
+     lecciones), navegación Anterior/Siguiente y chips por bloque.
+2) EL BOTÓN 📖 LEER LECCIÓN SALTA AL BLOQUE: cuando practicás una
+   frase de un clásico, el botón "📖 Leer lección" de la tarjeta
+   abre el texto original EN EL BLOQUE DONDE VIVE ESA FRASE (la
+   línea queda resaltada unos segundos). También funciona desde la
+   Biblioteca del Lector.
+3) 🎯 PRACTICAR ESTE CLÁSICO: dentro del lector, un botón carga el
+   módulo de práctica de ese clásico y te lleva a la tarjeta.
+4) PLANILLAS: CONTADOR DE CARACTERES POR HOJA A4 — el banner de
+   ✍️ Planillas ahora muestra en vivo "entran X de Y caracteres ·
+   Z quedan por fuera (hoja 2+)" según elijas 10, 12 o 14 celdas
+   por fila (y también cambia con el estilo de hoja y el toggle de
+   trazos). Con los datos de trazos descargados el número es
+   EXACTO; sin ellos muestra "≈ estimado" y se afila solo.
+   Nota: la hoja usa caracteres ÚNICOS (si repetís uno, cuenta una
+   vez) y el tope sigue siendo 40 por hoja.
+
+(Recap v9.0–v9.1: rebranding Huayu Diario 日常華語 · pestaña 📖
+Lecciones con 10 mini-dramas graduados HSK 3.0 · traducción 🇪🇸
+opcional en lecciones · planillas estilo cuaderno 筆順+寫字 con
+renglones finos y trazos oscuros · palabras aprendidas 100%
+simplificado · TOCFL Band A completa · vercel.json moderno para
+app-chino-espa-ol.vercel.app.)
+======================================================================
+
+
+======================================================================
+
 NOVEDADES v6 (feedback de alumnos en clase)
 ------------------------------------------------------------
 1. HUECO CLICABLE: el espacio vacío ___ de la oración ahora
@@ -285,6 +331,33 @@ ZIP: te dice exactamente qué archivos subir.
 • sw.js sube a v16: los alumnos reciben el update solo.
 • Nota: HSK 4 todavía tiene oraciones largas (33 chars prom.).
   Si querés, se simplifica igual en la próxima.
+
+======================================================================
+✍️ NOVEDADES v9.1 — TRADUCCIÓN OPCIONAL + PLANILLAS ESTILO CUADERNO
+----------------------------------------------------------------------
+• 🇪🇸 TRADUCCIÓN A PEDIDO: en las lecciones graduadas la traducción ya
+  NO aparece sola (ni en la lectura ni en la práctica). Hay un botón
+  🇪🇸 Español / 🇪🇸 Traducción para mostrarla cuando el alumno la
+  necesite. La preferencia se recuerda entre sesiones.
+  La práctica sigue siendo posible sin traducción: el contexto de la
+  oración y la insignia del nivel alcanzan para elegir la palabra.
+• ✍️ PLANILLAS · NUEVO ESTILO CUADERNO (筆順 + 寫字): como el modelo
+  clásico de cuaderno chino — por cada carácter trae:
+  - la tarjeta con el carácter grande y su pinyin abajo
+  - la fila 筆順 "Orden de los trazos": el carácter apareciendo trazo
+    a trazo, con el TRAZO NUEVO de cada etapa más oscuro (se ve qué
+    trazo se agrega) y el carácter completo en gris al final
+  - la fila 寫字 "Practicar": 3 calcos verdes + casilleros vacíos
+  Se elige con el nuevo selector "Estilo de hoja" (Clásica / Cuaderno).
+• ✍️ PLANILLAS · MÁS LEGIBLES EN IMPRESORAS FLOJAS:
+  - los renglones verdes ahora son más finos (borde 0.5→0.3mm, cruz
+    0.4→0.22mm) — menos tinta, más espacio para el trazo
+  - el orden de trazos es más oscuro (antes casi no se notaba con
+    poca tinta): etapas previas #a0a6ae y trazo nuevo #47505c
+  Los dos estilos (Clásica y Cuaderno) usan los colores nuevos.
+• Nada más cambió: lecciones, HSK 3.0, TOCFL, SRS y colocación
+  siguen exactamente igual.
+• sw.js sube a v47 — los alumnos reciben el update solos.
 
 ======================================================================
 🇹🇼 NOVEDADES v9.0 — HUAYU DIARIO 日常華語 + LECCIONES GRADUADAS

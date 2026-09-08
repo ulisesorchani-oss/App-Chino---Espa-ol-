@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v47'; // v9.1: traducción opcional en lecciones (🇪🇸 OFF por defecto) + planillas: estilo cuaderno 筆順/寫字, renglones más finos y trazos más oscuros — invalida shell
+const VERSION = 'v48'; // v9.2: lector de clásicos (texto original por bloques + salto desde la práctica + lista directa) + contador de caracteres por hoja A4 en planillas — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -67,6 +67,7 @@ const PRECACHE = [
   './style.css',
   './dict-mini.js',         // v7.12: Capa 4 — diccionario offline zh↔es (CC-BY-SA 4.0)
   './lessons.js',           // v7.14: textos completos de las lecciones (📖 Leer lección)
+  './classics.js',          // v9.2: TEXTO ORIGINAL de los 9 clásicos por bloques (lector de clásicos)
   './hanzi-writer.min.js',  // v7.13: orden de trazos (MIT) — se inyecta LAZY pero precacheado p/ offline
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
