@@ -3799,6 +3799,8 @@ function splitGroupedPinyin(word) {
 // ============================================================
 const PZ_MEM = new Map();               // char → datos|null (memoria de sesión)
 let pzTrazos = localStorage.getItem('ac_pz_trazos') !== '0';   // default ON
+// v9.1: estilo de hoja — 'clasica' (de siempre) o 'cuaderno' (筆順 + 寫字 como la referencia)
+let pzStyle = localStorage.getItem('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
 let pzCells = parseInt(localStorage.getItem('ac_pz_cells'), 10) || 12;
 let pzLastSheet = '';                   // HTML de la última hoja generada
 
@@ -3843,15 +3845,20 @@ async function pzFetchChar(ch) {
     return null;
 }
 
-// SVG del carácter con los primeros `upto` trazos (formato Make Me a Hanzi)
-function pzSvg(data, upto, fill) {
+// SVG del carácter con los primeros `upto` trazos (formato Make Me a Hanzi).
+// v9.1: lastFill pinta el TRAZO NUEVO de cada etapa más oscuro — se ve qué
+// trazo se agrega (antes todas las etapas eran el mismo gris clarito).
+function pzSvg(data, upto, fill, lastFill) {
     const n = data.strokes.length;
     const k = Math.max(1, Math.min(upto || n, n));
     let paths = '';
-    for (let i = 0; i < k; i++) paths += '<path d="' + data.strokes[i] + '"/>';
+    for (let i = 0; i < k; i++) {
+        const f = (lastFill && i === k - 1 && k > 1) ? lastFill : fill;
+        paths += '<path d="' + data.strokes[i] + '" fill="' + f + '"/>';
+    }
     // width/height explícitos: el CSS de la celda los pisa (86%), pero
     // html2canvas necesita tamaño intrínseco para rasterizar el SVG.
-    return '<svg viewBox="0 0 1024 1024" width="1024" height="1024" aria-hidden="true"><g transform="scale(1, -1) translate(0, -900)" fill="' + fill + '">' + paths + '</g></svg>';
+    return '<svg viewBox="0 0 1024 1024" width="1024" height="1024" aria-hidden="true"><g transform="scale(1, -1) translate(0, -900)">' + paths + '</g></svg>';
 }
 
 function pzStatus(msg, isError) {
@@ -3861,6 +3868,13 @@ function pzStatus(msg, isError) {
     el.classList.toggle('error', !!isError);
     el.classList.toggle('hidden', !msg);
 }
+
+// Colores v9.1: etapas previas MÁS OSCURAS que antes (#c9ced6 → #a0a6ae) y el
+// trazo nuevo aún más oscuro (#47505c) — antes en impresoras con poca tinta
+// casi no se notaba. Renglones verdes más finos: borde 0.5→0.3mm, cruz 0.4→0.22mm.
+const PZ_PREV_FILL = '#a0a6ae';   // trazos ya escritos en la etapa
+const PZ_CUR_FILL = '#47505c';    // el trazo nuevo de la etapa
+const PZ_TRACE_FILL = '#b5d6c4';  // calco verde suave (fila 寫字 del estilo cuaderno)
 
 // CSS autocontenido de la hoja (verde estilo XieZi, A4)
 const PZ_SHEET_CSS = [
@@ -3872,20 +3886,100 @@ const PZ_SHEET_CSS = [
     '.pz-title .pz-hz span { margin: 0 1.5mm; }',
     '.pz-meta { font-size: 9pt; color: #475569; border-bottom: 0.5mm solid #16a085; padding-bottom: 2mm; margin-bottom: 3.5mm; }',
     '.pz-row { display: flex; gap: 1.2mm; margin-bottom: 1.8mm; break-inside: avoid; page-break-inside: avoid; }',
-    '.pz-cell { flex: 1 1 0; aspect-ratio: 1 / 1; border: 0.5mm solid #2f9e77; position: relative; overflow: hidden; }',
+    '.pz-cell { flex: 1 1 0; aspect-ratio: 1 / 1; border: 0.3mm solid #2f9e77; position: relative; overflow: hidden; }',
     '.pz-cell::before { content: ""; position: absolute; inset: 0; background:',
-    '  repeating-linear-gradient(to right, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 100% 0.4mm no-repeat,',
-    '  repeating-linear-gradient(to bottom, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 0.4mm 100% no-repeat; }',
+    '  repeating-linear-gradient(to right, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 100% 0.22mm no-repeat,',
+    '  repeating-linear-gradient(to bottom, transparent 0 2.4mm, #a7d9c4 2.4mm 4.4mm) center / 0.22mm 100% no-repeat; }',
     '.pz-cell svg, .pz-cell span.pz-glyph { position: absolute; left: 7%; top: 7%; width: 86%; height: 86%; display: block; }',
     '.pz-cell span.pz-glyph { display: flex; align-items: center; justify-content: center; font-size: 42pt; line-height: 1; color: #1f2937;',
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     '.pz-cell svg path { stroke-linejoin: round; }',
-    '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }'
+    '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }',
+    // ── v9.1 estilo CUADERNO (筆順 + 寫字, como el modelo de la referencia) ──
+    '.pz2-block { display: grid; grid-template-columns: 24mm 17mm 1fr; gap: 2.5mm 2.5mm; align-items: center;',
+    '  margin-bottom: 4mm; break-inside: avoid; page-break-inside: avoid; }',
+    '.pz2-card { grid-row: span 2; border: 0.3mm solid #64748b; border-radius: 1.5mm; padding: 2mm 1mm;',
+    '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5mm; min-height: 24mm; }',
+    '.pz2-card .pz2-hz svg { width: 17mm; height: 17mm; display: block; }',
+    '.pz2-card .pz2-hz span.pz2-fallback { font-size: 30pt; line-height: 1; color: #1f2937;',
+    '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
+    '.pz2-card .pz2-py { font-size: 9pt; color: #475569; }',
+    '.pz2-lab { font-size: 7.5pt; color: #475569; text-align: center; line-height: 1.3; }',
+    '.pz2-lab b { display: block; font-size: 10pt; color: #16a085; }',
+    '.pz2-strokes { display: flex; flex-wrap: wrap; gap: 0.6mm; align-items: center; }',
+    '.pz2-strokes svg { width: 9.5mm; height: 9.5mm; display: block; }',
+    '.pz2-cells { display: flex; gap: 1.2mm; }',
+    '.pz2-cells .pz-cell { flex: 1 1 0; }'
 ].join('\n');
 
-function pzSheetHTML(chars, datas, trazos, cells) {
+// Pinyin por carácter (mapa perezoso desde las tuplas HSK 3.0 + TOCFL embebidas)
+let _pzPyMap = null;
+function pzPinyinOf(ch) {
+    if (!_pzPyMap) {
+        _pzPyMap = {};
+        try {
+            for (const key in EMBEDDED_MODULE_DATA) {
+                const rows = EMBEDDED_MODULE_DATA[key];
+                if (!Array.isArray(rows)) continue;
+                for (const r of rows) {
+                    if (Array.isArray(r) && r[0] && r[0].length === 1 && r[2] && !_pzPyMap[r[0]]) {
+                        _pzPyMap[r[0]] = String(r[2]).split('(')[0].trim();
+                    }
+                }
+            }
+        } catch (e) { _pzPyMap = {}; }
+    }
+    return _pzPyMap[ch] || '';
+}
+
+function pzSheetHTML(chars, datas, trazos, cells, style) {
     const fecha = new Date().toLocaleDateString('es-AR');
     const C = Math.min(20, Math.max(6, parseInt(cells, 10) || 12));
+    const esCuaderno = (style === 'cuaderno');
+    if (esCuaderno) {
+        // ── estilo CUADERNO (v9.1): tarjeta del carácter + fila 筆順
+        // (Orden de los trazos, progresión sin casilleros) + fila 寫字
+        // (calco + casilleros) — como el modelo de la referencia. ──
+        let blocks = '';
+        chars.forEach((ch, i) => {
+            const d = datas[i];
+            const py = pzPinyinOf(ch);
+            const hz = d
+                ? pzSvg(d, d.strokes.length, '#1f2937')
+                : '<span class="pz2-fallback">' + ch + '</span>';
+            const trazosHtml = (trazos && d)
+                ? (() => {
+                    const n = d.strokes.length;
+                    let s = '';
+                    for (let k = 1; k <= n; k++) {
+                        s += pzSvg(d, k, PZ_PREV_FILL, PZ_CUR_FILL);
+                    }
+                    s += pzSvg(d, n, '#c9ced6'); // el carácter completo en gris, como el modelo
+                    return '<div class="pz2-strokes">' + s + '</div>';
+                })()
+                : '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>';
+            const boxes = Math.max(4, C);
+            let cellsHtml = '';
+            for (let b = 0; b < boxes; b++) {
+                const traced = (trazos && d && b < 3) ? pzSvg(d, d.strokes.length, PZ_TRACE_FILL) : '';
+                cellsHtml += '<div class="pz-cell">' + traced + '</div>';
+            }
+            blocks += '<div class="pz2-block">'
+                + '<div class="pz2-card"><div class="pz2-hz">' + hz + '</div>'
+                + (py ? '<div class="pz2-py">' + py + '</div>' : '') + '</div>'
+                + '<div class="pz2-lab"><b>筆順</b>Orden de los trazos</div>'
+                + trazosHtml
+                + '<div class="pz2-lab"><b>寫字</b>Practicar</div>'
+                + '<div class="pz2-cells">' + cellsHtml + '</div>'
+                + '</div>';
+        });
+        const hz2 = chars.map((c) => '<span>' + c + '</span>').join(' ');
+        return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Planilla de práctica 写字</title>'
+            + '<style>' + PZ_SHEET_CSS + '</style></head><body>'
+            + '<div class="pz-title">Planilla de práctica · Caracteres <span class="pz-hz">' + hz2 + '</span></div>'
+            + '<div class="pz-meta">Nombre: ____________________________ &nbsp;&nbsp; Curso: ______________ &nbsp;&nbsp; Fecha: ' + fecha + '</div>'
+            + blocks + '</body></html>';
+    }
     let rows = '';
     chars.forEach((ch, i) => {
         const d = datas[i];
@@ -3893,7 +3987,8 @@ function pzSheetHTML(chars, datas, trazos, cells) {
         const celdas = ['<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
         if (trazos && d) {
             const n = d.strokes.length;
-            for (let k = 1; k <= n; k++) celdas.push('<div class="pz-cell">' + pzSvg(d, k, '#c9ced6') + '</div>');
+            // v9.1: el trazo NUEVO de cada etapa va más oscuro — se ve qué trazo se agrega
+            for (let k = 1; k <= n; k++) celdas.push('<div class="pz-cell">' + pzSvg(d, k, PZ_PREV_FILL, PZ_CUR_FILL) + '</div>');
         }
         // Todas las filas de la hoja tienen EXACTAMENTE C celdas → tamaño
         // uniforme (en v6.5 un carácter de 20 trazos agrandaba la fila y
@@ -3934,7 +4029,7 @@ async function pzGenerate() {
         done++;
         pzStatus('⏳ Descargando trazos (' + done + '/' + chars.length + ')…');
     }));
-    pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells);
+    pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle);
     pzRenderPreview();
     ['btn-pz-pdf', 'btn-pz-print'].forEach((id) => {
         const b = document.getElementById(id);
@@ -4035,12 +4130,13 @@ async function pzDownloadPDF() {
         const cw = (794 - 84 - (C - 1) * GAP) / C;
         // Guía en cruz de cada celda: el ::before original usa un shorthand
         // repeating-linear-gradient que html2canvas no pinta → equivalente
-        // con gradientes simples (línea sólida 0.4mm horizontal + vertical).
+        // con gradientes simples (línea sólida 0.22mm horizontal + vertical,
+        // v9.1: más finita igual que la hoja impresa).
         const mm = (x) => (x * 96 / 25.4).toFixed(2) + 'px';
         st.textContent = pzHolderCss() + '.pz-cell{height:' + cw.toFixed(2) + 'px;}'
             + '#pz-pdf-holder .pz-cell::before{content:"";position:absolute;inset:0;'
             + 'background-image:linear-gradient(#a7d9c4,#a7d9c4),linear-gradient(#a7d9c4,#a7d9c4);'
-            + 'background-size:100% ' + mm(0.4) + ',' + mm(0.4) + ' 100%;'
+            + 'background-size:100% ' + mm(0.22) + ',' + mm(0.22) + ' 100%;'
             + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}';
         holder.appendChild(st);
         while (doc.body.firstChild) holder.appendChild(doc.body.firstChild);
@@ -4132,6 +4228,8 @@ function pzUpdateControls() {
     }
     const sel = document.getElementById('select-pz-cells');
     if (sel) sel.value = String(pzCells);
+    const stl = document.getElementById('select-pz-style');
+    if (stl) stl.value = pzStyle;
     const nm = document.getElementById('pz-module-name');
     if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
 }
@@ -4153,6 +4251,10 @@ function pzUpdateControls() {
     safe('select-pz-cells', 'change', (e) => {
         pzCells = parseInt(e.target.value, 10) || 12;
         localStorage.setItem('ac_pz_cells', String(pzCells));
+    });
+    safe('select-pz-style', 'change', (e) => {
+        pzStyle = (e.target.value === 'cuaderno') ? 'cuaderno' : 'clasica';
+        localStorage.setItem('ac_pz_style', pzStyle);
     });
     window.addEventListener('resize', () => {
         const wrap = document.getElementById('pz-preview');
@@ -5044,6 +5146,13 @@ function pzUpdateControls() {
 
     // ── estado de la sesión abierta ──
     const S = { lesson: null, view: null, idx: 0, results: [], answered: false, pinyin: false };
+    // v9.1: traducción OCULTA por defecto (lector y práctica) — el alumno elige
+    // verla con el botón 🇪🇸. Preferencia persistente.
+    let verEs = localStorage.getItem('ac_lq_es') === '1';
+    const setVerEs = (v) => {
+        verEs = !!v;
+        try { localStorage.setItem('ac_lq_es', verEs ? '1' : '0'); } catch (e) { }
+    };
 
     const pop = $('lesson-pop');
     if (!pop) return;
@@ -5185,7 +5294,7 @@ function pzUpdateControls() {
             return '<div class="lq-line" data-i="' + i + '" role="button" tabindex="0" title="Tocá para escuchar">' +
                 '<div class="lq-line-zh">' + escHtml(zh) + '</div>' +
                 '<div class="lq-line-py hidden" data-zh="' + escHtml(ln.zh) + '"></div>' +
-                '<div class="lq-line-es">' + escHtml(ln.es) + '</div></div>';
+                '<div class="lq-line-es' + (verEs ? '' : ' hidden') + '">' + escHtml(ln.es) + '</div></div>';
         }).join('');
         body.innerHTML =
             '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
@@ -5194,10 +5303,16 @@ function pzUpdateControls() {
             '<p class="lq-blurb">' + escHtml(l.blurb) + '</p>' +
             '<div class="lq-lines">' + lines + '</div>' +
             '<div class="lq-story-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-story-es">🇪🇸 Español: ' + (verEs ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-pinyin">🔤 Pinyin: OFF</button>' +
             '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">🎯 Practicar ' + l.quiz.length + '</button>' +
             '</div>';
         body.querySelector('#lq-story-practice').addEventListener('click', () => openQuiz(l));
+        body.querySelector('#lq-story-es').addEventListener('click', (e) => {
+            setVerEs(!verEs);
+            e.target.textContent = '🇪🇸 Español: ' + (verEs ? 'ON' : 'OFF');
+            body.querySelectorAll('.lq-line-es').forEach(el => el.classList.toggle('hidden', !verEs));
+        });
         body.querySelector('#lq-story-pinyin').addEventListener('click', (e) => {
             S.pinyin = !S.pinyin;
             e.target.textContent = '🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF');
@@ -5250,9 +5365,10 @@ function pzUpdateControls() {
                 'ABC'[pos] + '</span><span class="lq-opt-zh">' + escHtml(zh) + '</span></button>';
         }).join('');
         body.innerHTML =
-            '<div class="lq-lesson-tag">' + l.emoji + ' ' + escHtml(l.titleEs) + '</div>' +
+            '<div class="lq-tag-row"><div class="lq-lesson-tag">' + l.emoji + ' ' + escHtml(l.titleEs) + '</div>' +
+            '<button type="button" class="lq-btn lq-ghost lq-mini" id="lq-es-toggle">🇪🇸 Traducción: ' + (verEs ? 'ON' : 'OFF') + '</button></div>' +
             '<div class="lq-zh" id="lq-zh">' + zhHtml + '</div>' +
-            '<div class="lq-es-box">' + escHtml(q.es) + '</div>' +
+            '<div class="lq-es-box' + (verEs ? '' : ' hidden') + '" id="lq-es-box">' + escHtml(q.es) + '</div>' +
             '<div class="lq-opts" id="lq-opts">' + opts + '</div>' +
             '<div class="lq-feedback hidden" id="lq-feedback"></div>' +
             '<div class="lq-foot">' +
@@ -5261,6 +5377,12 @@ function pzUpdateControls() {
             '</div>';
         body.querySelector('#lq-speak').addEventListener('click', (e) =>
             speakZh(zhFull.replace('___', q.opts[0].z), e.target));
+        body.querySelector('#lq-es-toggle').addEventListener('click', (e) => {
+            setVerEs(!verEs);
+            e.target.textContent = '🇪🇸 Traducción: ' + (verEs ? 'ON' : 'OFF');
+            const box = body.querySelector('#lq-es-box');
+            if (box) box.classList.toggle('hidden', !verEs);
+        });
         body.querySelector('#lq-opts').addEventListener('click', (e) => {
             const b = e.target.closest('.lq-opt');
             if (b && !S.answered) answer(+b.dataset.pos);

@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v46'; // v9.0: Huayu Diario 日常華語 — lecciones graduadas (mini-dramas HSK 1-6) + fix trad→simp + rebrand — invalida shell
+const VERSION = 'v47'; // v9.1: traducción opcional en lecciones (🇪🇸 OFF por defecto) + planillas: estilo cuaderno 筆順/寫字, renglones más finos y trazos más oscuros — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

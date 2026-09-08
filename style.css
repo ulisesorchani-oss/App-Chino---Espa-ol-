@@ -3767,7 +3767,10 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
 .lq-line-zh { font-size: 1.12rem; line-height: 1.6; color: #1e293b; }
 .lq-line-py { font-size: 0.78rem; color: #7c5cf0; margin-top: 2px; }
 .lq-line-es { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
-.lq-story-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+.lq-story-foot { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; }
+.lq-tag-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.lq-tag-row .lq-lesson-tag { margin-bottom: 0; }
+.lq-mini { padding: 6px 10px; font-size: 0.72rem; border-radius: 8px; }
 
 /* ── vista práctica ── */
 .lq-lesson-tag { font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px; }
