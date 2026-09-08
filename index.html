@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aprende Chino-Español | Minería de Oraciones</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle'%3E%E4%B8%AD%3C/text%3E%3C/svg%3E">
+    <title>Huayu Diario 日常華語 | Aprende mandarin, vive el idioma</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle'%3E%E8%AA%9E%3C/text%3E%3C/svg%3E">
     <!-- PWA: instalable tipo app + offline -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260908f">
+    <meta name="apple-mobile-web-app-title" content="Huayu Diario">
+    <link rel="stylesheet" href="style.css?v=20260909a">
 </head>
 <body>
     <div class="container">
         <!-- v7.18 Header compacto: una fila, acciones a la derecha -->
         <header class="header">
             <div class="header-row">
-                <h1>🇦🇷 Chino-Español</h1>
+                <h1>日常華語 Huayu Diario</h1>
                 <div class="header-actions">
                     <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC">📲 Instalar</button>
                     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
                 </div>
             </div>
-            <p class="subtitle">Aprende con contexto, paso a paso</p>
+            <p class="subtitle">Aprende mandarin, vive el idioma</p>
         </header>
 
         <!-- v8.1 BARRA DE ESTUDIO (sticky en móvil): queda solo el Repaso SRS.
@@ -144,6 +144,7 @@
         <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
             <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button">📚 Diaria</button>
             <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button">🎓 Exámenes</button>
+            <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button">📖 Lecciones</button>
             <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button">📜 Clásicos</button>
         </nav>
 
@@ -252,6 +253,22 @@
                         </ul>
                     </div>
                 </div>
+            </div>
+
+            <!-- Panel Lecciones graduadas (v9.0) -->
+            <div class="tab-panel section-lessons hidden" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
+                <h3 class="section-title lessons-title">📖 LECCIONES GRADUADAS <span class="lessons-sub">(mini-dramas HSK 3.0)</span></h3>
+                <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones.</p>
+                <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
+                    <button type="button" class="lv-chip active" data-level="all">Todo</button>
+                    <button type="button" class="lv-chip" data-level="1">HSK 1</button>
+                    <button type="button" class="lv-chip" data-level="2">HSK 2</button>
+                    <button type="button" class="lv-chip" data-level="3">HSK 3</button>
+                    <button type="button" class="lv-chip" data-level="4">HSK 4</button>
+                    <button type="button" class="lv-chip" data-level="5">HSK 5</button>
+                    <button type="button" class="lv-chip" data-level="6">HSK 6</button>
+                </div>
+                <div class="lesson-list" id="lesson-list" data-level="all"></div>
             </div>
 
             <!-- Panel Clásicos -->
@@ -434,6 +451,18 @@
         <div id="srs-body"></div>
     </div>
 
+    <!-- v9.0: LECCIONES GRADUADAS — overlay de lectura + práctica (estilo pantalla completa) -->
+    <div id="lesson-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Lección graduada">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span id="lq-progress-num" class="lq-progress-num">1/10</span>
+                <div id="lq-segments" class="lq-segments" aria-hidden="true"></div>
+                <button id="lq-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="lq-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -480,21 +509,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260908f"></script>
+    <script src="config.js?v=20260909a"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260908f"></script>
+    <script src="text-utils.js?v=20260909a"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260908f"></script>
+    <script src="VoiceRecorder.js?v=20260909a"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260908f"></script>
-    <script src="dict-mini.js?v=20260908f"></script>
+    <script src="voice-evaluator.js?v=20260909a"></script>
+    <script src="dict-mini.js?v=20260909a"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260908f"></script>
-    <script src="app.js?v=20260908f"></script>
+    <script src="lessons.js?v=20260909a"></script>
+    <script src="app.js?v=20260909a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

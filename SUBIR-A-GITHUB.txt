@@ -1,11 +1,10 @@
 ======================================================================
- v8.3 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v9.0 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
 ⚠️ MISMA CANTIDAD DE ARCHIVOS QUE SIEMPRE (no hay archivos nuevos).
-   En esta versión cambian 4: index.html, app.js, style.css y sw.js
-   (TOCFL Band A completo: 1.219 palabras oficiales + menú 🇹🇼 con
-   3 niveles + homógrafos oficiales por nivel).
+   En esta versión cambian 5: index.html, app.js, style.css, lessons.js
+   y sw.js (Huayu Diario + Lecciones graduadas + fix tradicional).
    Subí SIEMPRE los 14 juntos: mezclar viejos y nuevos rompe la app.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
@@ -13,22 +12,17 @@
 
 ¿QUÉ CAMBIA EN ESTA VERSIÓN?
 ------------------------------------------------------------
-1) TOCFL BAND A COMPLETA (v8.2 + v8.3): el botón 🇹🇼 TOCFL abre un
-   menú con 3 tracks de vocabulario oficial de Taiwán:
-      準備 TOCFL Prep (pre-A1) · 392 palabras
-      入門 TOCFL Nivel 1 (A1) · 344 palabras
-      基礎 TOCFL Nivel 2 (A2) · 483 palabras
-   = 1.219 palabras, 100% de la lista oficial vigente 2023
-   (8000zhuyin_202307 de tocfl.edu.tw), con traducciones al español
-   curadas y orden oficial de la lista.
-   El "TOCFL" viejo (20 oraciones de muestra) sigue disponible
-   debajo, en el mismo menú.
-2) HOMÓGRAFOS OFICIALES: palabras como 还/只/长/花/上/下 tienen su
-   tarjeta propia por nivel con el pinyin y sentido correctos
-   (还 huán devolver en N1 vs 还 hái todavía en Prep).
-3) NADA MÁS CAMBIÓ: los 9 niveles HSK 3.0 (10.944 palabras), el
-   repaso SRS, el test de colocación, los modos y las oraciones
-   siguen exactamente igual.
+1) NUEVA MARCA: Huayu Diario 日常華語 — "Aprende mandarin, vive el
+   idioma". Título, íconos y caché nuevos. Tu progreso se conserva.
+2) 📖 LECCIONES GRADUADAS: nueva pestaña con 10 mini-dramas HSK 1-6.
+   Cada historia: lectura con pinyin opcional y audio por línea +
+   práctica de 10 oraciones con hueco y 3 opciones (estilo test de
+   colocación). Errores → tarjetas comparativas + mazo SRS.
+3) FIX: palabras aprendidas ya se guardan SIEMPRE en simplificado,
+   aunque estudies con 繁 activado (y los guardados viejos migran
+   solos: 謝謝 pasa a ser 谢谢).
+4) Nada más cambió: HSK 3.0 (9 niveles), TOCFL Band A, DELE, Clásicos,
+   SRS, colocación y planillas siguen exactamente igual.
 
 PASO A PASO (funciona igual desde el celular o la PC):
 ------------------------------------------------------------
@@ -38,11 +32,11 @@ PASO A PASO (funciona igual desde el celular o la PC):
 3. Tocá "Add file" → "Upload files"
 4. Subí EXACTAMENTE estos 14 archivos del ZIP, a la RAÍZ:
 
-      ✅ index.html           ← ACTUALIZADO (menú TOCFL con 3 niveles)
-      ✅ app.js               ← ACTUALIZADO (1.219 palabras TOCFL + insignias)
-      ✅ style.css            ← ACTUALIZADO (menú desplegable TOCFL, dark incluido)
-      ✅ sw.js                ← ACTUALIZADO (v45: invalida la caché)
-      ✅ lessons.js
+      ✅ index.html           ← ACTUALIZADO (marca + pestaña Lecciones)
+      ✅ app.js               ← ACTUALIZADO (motor de lecciones + fix trad)
+      ✅ style.css            ← ACTUALIZADO (overlay de lecciones, dark)
+      ✅ lessons.js           ← ACTUALIZADO (10 historias + 100 ejercicios)
+      ✅ sw.js                ← ACTUALIZADO (v46: invalida la caché)
       ✅ hanzi-writer.min.js
       ✅ dict-mini.js
       ✅ VoiceRecorder.js
@@ -53,7 +47,11 @@ PASO A PASO (funciona igual desde el celular o la PC):
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v8.3) y tocá el botón verde
+   (son 14: index, app, style, sw, lessons, hanzi-writer, dict-mini,
+    VoiceRecorder, voice-evaluator, pitch-analyzer, config, text-utils,
+    html2canvas, jspdf)
+
+5. Abajo escribí un título (ej: v9.0) y tocá el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. Vercel/GitHub Pages se actualiza solo.
@@ -61,39 +59,37 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS (aproximados):
-      index.html           = 39 KB   ← actualizado (menú TOCFL)
-      app.js               = 1.031 KB ← actualizado (+ TOCFL Band A)
-      style.css            = 89 KB   ← actualizado (menú desplegable)
-      sw.js                = 12 KB   ← actualizado (v45)
-      lessons.js           = 27 KB   (no cambió)
-      dict-mini.js         = 99 KB   (no cambió)
+      index.html           = 40 KB   ← actualizado
+      app.js               = 1.051 KB ← actualizado (motor lecciones)
+      style.css            = 99 KB   ← actualizado (overlay lecciones)
+      lessons.js           = 121 KB  ← actualizado (10 historias)
+      sw.js                = 11 KB   ← actualizado (v46)
+      dict-mini.js         = 98 KB   (no cambió)
       pinyin-pro.min.js    = 316 KB  (no se sube de nuevo, referencia)
 
 B) DESPUÉS de subir, abrí tu app y recargá 2 veces (F5).
    Mirá la consola (F12) o probá directo:
       https://TU-USUARIO.github.io/TU-REPO/sw.js
-   → tiene que decir:  const VERSION = 'v45'
+   → tiene que decir:  const VERSION = 'v46'
 
-PRUEBA RÁPIDA DE 1 MINUTO (v8.3):
+PRUEBA RÁPIDA DE 1 MINUTO (v9.0):
 ------------------------------------------------------------
-1. Abrí la app y entrá a 🎓 Exámenes → tocá el botón 🇹🇼 TOCFL.
-2. Se despliega el menú con: TOCFL Prep (392) · Nivel 1 (344) ·
-   Nivel 2 (483) · TOCFL (oraciones de muestra, el de siempre).
-3. Elegí 入門 Nivel 1: la tarjeta muestra un hanzi con la insignia
-   "TOCFL N1" y el contador 1/344. Escribí el significado en
-   español y Verificar: ✅.
-4. Andá a una palabra como 还 (avanzá con Siguiente): en Nivel 1
-   pide "huán / devolver". Cambiá a TOCFL Prep: la MISMA palabra
-   es "hái / todavía" — así de claros quedan los homógrafos.
-5. Tocá 简/繁: las tarjetas muestran su tradicional real (只→隻).
-6. Entrá a 🎓 Exámenes → HSK 1: todo sigue igual que siempre.
+1. Abrí la app: arriba dice 日常華語 Huayu Diario y el ícono es 語.
+2. Tocá la pestaña 📖 Lecciones: hay 10 historias con chips HSK 1-6.
+3. Entrá a 🎒 El primer día de clase → 📖 Leer: tocá 🔤 Pinyin y
+   tocá cualquier línea para escucharla.
+4. Ahora 🎯 Practicar: elegí la palabra que falta entre 3 opciones.
+   Si errás, vas a ver TU RESPUESTA vs RESPUESTA CORRECTA con pinyin
+   y audio — y la palabra entra a tu Repaso SRS.
+5. (Opcional) Andá a 📚 Diaria, activá 繁 y respondé una oración:
+   en Palabras aprendidas queda guardada en SIMPLIFICADO.
 
 SI ALGO SALIÓ MAL:
 ------------------------------------------------------------
 • "Sigue viéndose igual" → no se subió sw.js, o el navegador
   guardó la versión vieja: recargá 2 veces / probá en incógnito.
-• "El botón TOCFL no despliega menú" → se subieron index.html y
-  app.js de versiones distintas: subí los 14 juntos de ESTE ZIP.
-• "Me faltan palabras (no llegan a 344/483)" → falta app.js nuevo:
-  subí los 14 archivos juntos de ESTE ZIP.
+• "No veo la pestaña Lecciones" → faltó index.html o lessons.js
+  nuevo: subí los 14 juntos de ESTE ZIP.
+• "Las historias no abren" → lessons.js viejo mezclado con app.js
+  nuevo: subí los 14 archivos juntos de ESTE ZIP.
 ======================================================================

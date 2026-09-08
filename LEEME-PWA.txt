@@ -287,6 +287,147 @@ ZIP: te dice exactamente qué archivos subir.
   Si querés, se simplifica igual en la próxima.
 
 ======================================================================
+🇹🇼 NOVEDADES v9.0 — HUAYU DIARIO 日常華語 + LECCIONES GRADUADAS
+----------------------------------------------------------------------
+• NUEVO NOMBRE: la app ahora se llama Huayu Diario 日常華語 con el lema
+  "Aprende mandarin, vive el idioma". Íconos nuevos (語 sobre el
+  gradiente de siempre), título, manifest y caché del Service Worker
+  con la marca nueva. TU PROGRESO NO SE TOCA: se mantiene todo.
+• 📖 LECCIONES GRADUADAS (nueva pestaña): 10 historias cortas originales
+  — mini-dramas — graduadas al vocabulario OFICIAL del HSK 3.0:
+  - HSK 1: El primer día de clase · Vamos a casa de la abuela
+  - HSK 2: El regalo de cumpleaños · Xiaoli está enferma
+  - HSK 3: El celular roto · Plan para el fin de semana
+  - HSK 4: El vecino que canta · El sabor de la abuela
+  - HSK 5: La carta que llegó tarde
+  - HSK 6: El puente del abuelo
+  Cada línea del texto usa SOLO palabras de ese nivel o inferiores
+  (validado por script contra las listas oficiales GF0025-2021, cero
+  palabras fuera de nivel, como los graded readers profesionales).
+• CÓMO SE PRACTICA: tocá 🎯 Practicar y la historia te da 10 oraciones
+  del texto con una palabra tapada: elegís entre 3 opciones. Si
+  acertás, la palabra entra a "Palabras aprendidas". Si fallás, ves
+  TU RESPUESTA y la RESPUESTA CORRECTA cara a cara (con pinyin, audio
+  y significados) y la palabra entra sola a tu mazo de Repaso SRS.
+• El lector de la historia tiene pinyin interlineal opcional (🔤) y
+  cada línea se puede escuchar tocándola. Las opciones se mezclan en
+  cada sesión (la correcta no siempre está en el mismo lugar). Tu
+  mejor puntaje queda guardado por lección (🎯 7/10 ✓ completada).
+• ARREGLO IMPORTANTE: si estudiabas con 繁 (tradicional) activado, las
+  palabras aprendidas quedaban guardadas en tradicional (謝謝 en vez
+  de 谢谢) y una misma palabra podía contar doble. Ahora TODO se
+  guarda en simplificado y tus guardados viejos se convierten solos.
+• ¿Por qué HSK 1 tiene 497 palabras? Porque son las del HSK 3.0 (el
+  estándar oficial de 2021): su nivel 1 tiene 500 palabras, no las 150
+  del HSK viejo. 3 entradas repetidas se fusionan → 497.
+• sw.js sube a v46 — los alumnos reciben el update solos.
+
+======================================================================
+🇹🇼 NOVEDADES v8.3 — TOCFL BAND A 100% LISTA OFICIAL (1.219 palabras)
+----------------------------------------------------------------------
+• BAND A COMPLETA: los 3 niveles TOCFL ahora cubren el 100% de la
+  lista oficial vigente (華語八千詞表, archivo 8000zhuyin_202307 de
+  tocfl.edu.tw). Nada quedó afuera:
+  - 準備 TOCFL Prep (pre-A1) · 392 palabras
+  - 入門 TOCFL Nivel 1 (A1) · 344 palabras
+  - 基礎 TOCFL Nivel 2 (A2) · 483 palabras
+  En total 1.219 palabras (antes 1.208: faltaban 11).
+• LAS 11 QUE FALTABAN eran homógrafos: palabras que ya estaban pero
+  con OTRO sentido y otra pronunciación oficial en cada nivel. Ahora
+  cada una tiene su tarjeta propia con pinyin y significado correcto:
+  - Nivel 1: 在 zài (en proceso de), 哪 na (partícula), 还 huán
+    (devolver), 只 zhī (medida, con tradicional 隻), 长 zhǎng
+    (crecer), 过 guò (celebrar).
+  - Nivel 2: 花 huā (gastar), 下 xià (bajar), 上 shàng (subir),
+    可能 kěnéng (posibilidad), 等 děng (etcétera).
+  En TOCFL Prep siguen intactas sus glosas originales (还 hái
+  todavía, 只 zhǐ solo, 花 flor...) — así el alumno ve la diferencia
+  entre niveles.
+• ORDEN OFICIAL: las palabras se muestran en el mismo orden de la
+  lista oficial de Taiwán (por ID), no al azar.
+• Todo lo demás funciona igual: los 9 niveles HSK 3.0 (10.944
+  palabras), el repaso SRS, el test de colocación y los modos de
+  estudio no se tocaron.
+• sw.js sube a v45 — los alumnos reciben el update solos.
+
+======================================================================
+🇹🇼 NOVEDADES v8.2 — TOCFL BAND A: NUEVO MÓDULO OFICIAL (1.208 palabras)
+----------------------------------------------------------------------
+• TOCFL DE VERDAD: hasta ahora "TOCFL 🇹🇼" eran solo 20 oraciones de
+  muestra. Ahora es un módulo completo con el vocabulario oficial
+  Band A de Taiwán, dividido en 3 tracks que aparecen en un menú
+  desplegable al tocar el botón 🇹🇼 TOCFL:
+  - 準備 TOCFL Prep · 392 palabras (pre-A1, primeros pasos)
+  - 入門 TOCFL Nivel 1 · 338 palabras (A1)
+  - 基礎 TOCFL Nivel 2 · 478 palabras (A2)
+  (En v8.3 los niveles 1 y 2 crecieron a 344 y 483 con los
+  homógrafos oficiales — ver arriba.)
+• ESPAÑOL CURADO A MANO: cada palabra trae su traducción al español
+  estilo diccionario (acepción común primero, hasta 2 alternativas).
+  Las que vinieron de traducción automática fueron revisadas una por
+  una con criterio lexicográfico.
+• INTEGRADO A TODO: insignia de nivel en la tarjeta (TOCFL Prep/N1/
+  N2), funciona con ambos modos (Aprendo Chino / Aprendo Español),
+  con 简/繁 (las tarjetas traen su tradicional real, ej. 只→隻),
+  con el repaso SRS (las que fallás entran a tu mazo) y con el
+  contador de palabras aprendidas.
+• Datos: lista oficial TOCFL vigente 2023 (tocfl.edu.tw), misma
+  fuente que usa el examen real.
+• sw.js sube a v43/44 — los alumnos reciben el update solos.
+
+======================================================================
+🎨 NOVEDADES v8.1 — UX DE LA TARJETA + VOCABULARIO AL REVÉS (corregido)
+----------------------------------------------------------------------
+• VOCABULARIO HSK CORREGIDO: en "Aprendo Chino" ahora el vocabulario
+  muestra EL HANZI (con su pinyin de guía) y VOS ESCRIBÍS el significado
+  en español. Antes mostraba la palabra en español y te pedía el hanzi
+  de memoria — justo al revés de lo que un alumno necesita. Ahora:
+  - Aprendo Chino (CN→ES): ves chino (oraciones y palabras), demostrás
+    que lo entendés. Las oraciones siguen igual que siempre.
+  - Aprendo Español (ES→CN): modo espejo para producir — ves la glosa
+    española y escribís el hanzi (o completás el hueco en español).
+• LOS CONTROLES VIVEN EN LA TARJETA: los botones de modo (Aprendo
+  Chino / Aprendo Español) y todas las herramientas (简/繁, Pinyin,
+  Tonos, velocidad 0.85x, voces 🇨🇳/🇪🇸) se movieron del panel de
+  arriba al CABECERA DE LA TARJETA de práctica — pegados a lo que
+  controlan. La barra superior queda limpia y la tarjeta aparece antes
+  en la pantalla del celular.
+• LA BARRA STICKY queda solo con 🔁 Repaso (SRS), siempre a mano.
+• Nada se rompió: todos los botones siguen funcionando igual (los
+  listeners van por ID). Atajos de siempre intactos.
+• sw.js sube a v42 — los alumnos reciben el update solos.
+
+======================================================================
+🔁 NOVEDADES v7.21 — REPASO SRS: las palabras que cuestan vuelven solas
+----------------------------------------------------------------------
+• ¿QUÉ ES? Repetición espaciada (el método de Anki): cada palabra que
+  TE CUESTA vuelve justo antes de olvidarla. El mazo se llena SOLO,
+  sin configurar nada:
+  - ❌ cada respuesta incorrecta de la práctica
+  - 🔄 cada palabra marcada con "Repetir"
+  - 🔁 botón "Sumar a mi repaso" en el popup de vocabulario
+  - 🌱 semilla opcional de 12 palabras desde tu nivel del test de
+    colocación (aparece en la intro si ya hiciste el test)
+• ¿DÓNDE ESTÁ? Botón 🔁 en la barra de estudio (sticky en el celular):
+  - "Repaso inteligente" si el mazo está vacío.
+  - "Repaso del día" con badge naranja de vencidas si toca repasar.
+  - "Repaso · todo al día" cuando ya repasaste.
+• LA SESIÓN: te muestra el hanzi (🔊 escucharlo, ✍ practicar trazos),
+  lo pensás, "👁️ Ver respuesta" revela pinyin + significado (+ tu
+  ejemplo si lo marcaste desde una oración) y calificás:
+  😵 Otra vez (vuelve en 10 min) · 🙂 Bien · 😎 Fácil.
+• EL ALGORITMO (Leitner de 6 cajas): Bien sube la palabra de caja,
+  Otra vez la manda al inicio. Intervalos 1 · 3 · 7 · 14 · 30 días.
+  Tandas de hasta 25; podés "🌅 Adelantar" si querés repasar más.
+• 📊 VER MI MAZO: cuántas palabras, cuántas vencen hoy, distribución
+  por cajas y próxima tanda. "🗑️ Vaciar mazo" por si querés empezar
+  de cero. Todo se guarda en tu dispositivo (localStorage) y sobrevive
+  al cierre del navegador. "🗑️ Borrar progreso" también borra el mazo.
+• sw.js sube a v41 (invalida la caché) y el cache-busting pasa a
+  20260908b. Sin archivos nuevos: cambian index.html, app.js,
+  style.css y sw.js.
+
+======================================================================
 🎯 NOVEDADES v7.20 — TEST DE COLOCACIÓN: ¿qué nivel HSK tenés?
 ----------------------------------------------------------------------
 • ¿PARA QUÉ SIRVE? Un alumno nuevo no sabe si empezar en HSK 1 o en

@@ -888,13 +888,45 @@ function saveProgress() {
     } catch (e) { /* silencioso */ }
 }
 
+// v9.0: canonicalización trad→simp para los guardados viejos. Hasta v8.3 las
+// ORACIONES guardaban la respuesta en el guion activo: quien estudió con 繁
+// tiene 謝謝/時間/哪裡 en "Palabras aprendidas" en vez de 谢谢/时间/哪里. El mapa
+// se construye de los datos embebidos (todo trad guardado salió de acá).
+let _trad2simp = null;
+function canonicalHanzi(w) {
+    if (!_trad2simp) {
+        _trad2simp = {};
+        try {
+            for (const key in EMBEDDED_MODULE_DATA) {
+                const rows = EMBEDDED_MODULE_DATA[key];
+                if (!Array.isArray(rows)) continue;
+                for (const s of rows) {
+                    if (Array.isArray(s)) {
+                        if (s[1] && s[1] !== s[0]) _trad2simp[s[1]] = s[0];
+                    } else if (s && s.chinese_trad_answer && s.chinese_simp_answer &&
+                               s.chinese_trad_answer !== s.chinese_simp_answer) {
+                        _trad2simp[s.chinese_trad_answer] = s.chinese_simp_answer;
+                    }
+                }
+            }
+        } catch (e) { /* silencioso */ }
+    }
+    return _trad2simp[w] || w;
+}
+function canonicalizeWordSet(set) {
+    const out = new Set();
+    set.forEach(w => out.add(canonicalHanzi(w)));
+    return out;
+}
+
 function loadProgress() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         const data = JSON.parse(raw);
-        if (data.knownWords) state.knownWords = new Set(data.knownWords);
-        if (data.newWords) state.newWords = new Set(data.newWords);
+        // v9.0: al cargar, los guardados legacy se canonicalizan a simplificado
+        if (data.knownWords) state.knownWords = canonicalizeWordSet(new Set(data.knownWords));
+        if (data.newWords) state.newWords = canonicalizeWordSet(new Set(data.newWords));
         if (typeof data.score === 'number') state.score = data.score;
         if (data.mode) state.mode = data.mode;
         if (data.charType) state.charType = data.charType;
@@ -1122,7 +1154,8 @@ async function loadSentences() {
 function setupModuleTabs() {
     const bar = document.getElementById('module-tabs');
     if (!bar) return;
-    const panels = { daily: 'panel-daily', exams: 'panel-exams', classics: 'panel-classics' };
+    // v9.0: + panel-lessons (Lecciones graduadas)
+    const panels = { daily: 'panel-daily', exams: 'panel-exams', lessons: 'panel-lessons', classics: 'panel-classics' };
     const TAB_KEY = 'ac_tab';
     const activate = (name, save) => {
         if (!panels[name]) name = 'daily';
@@ -2216,10 +2249,15 @@ function checkAnswer() {
             state.knownWords.add(wordKey);
             state.newWords.delete(wordKey);
         } else {
-            validAnswers.forEach(a => {
-                state.knownWords.add(a);
-                state.newWords.delete(a);
-            });
+            // v9.0: oraciones → se registra UNA entrada canónica (el hanzi
+            // SIMPLIFICADO si la respuesta es china). Antes se guardaban todas
+            // las respuestas válidas en el guion activo: estudiando con 繁
+            // quedaba 謝謝 (y además entraban simp+trad como dos palabras).
+            const canon = learningChinese
+                ? String(s.chinese_simp_answer || validAnswers[0] || '').trim()
+                : validAnswers[0];
+            state.knownWords.add(canon);
+            state.newWords.delete(canon);
         }
         state.score++;
         rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
@@ -2258,7 +2296,11 @@ function revealAnswer() {
     if (wordKey) {
         state.newWords.add(wordKey);
     } else {
-        validAnswers.forEach(a => state.newWords.add(a));
+        // v9.0: oraciones → canónico simplificado (coherente con checkAnswer)
+        const canon = learningChinese
+            ? String(s.chinese_simp_answer || validAnswers[0] || '').trim()
+            : validAnswers[0];
+        state.newWords.add(canon);
     }
     rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
     saveProgress();
@@ -2274,10 +2316,11 @@ function markWord(known) {
     const k = ck();
 
     // v8.1: palabras → el hanzi es la identidad canónica (coherente con
-    // checkAnswer); oraciones → sin cambios (es-cn registra chino, cn-es español).
+    // checkAnswer); v9.0: oraciones también registran el hanzi SIMPLIFICADO
+    // canónico (antes usaban el guion activo → 謝謝 en vez de 谢谢).
     let answer = s.w
         ? String(s.chinese_simp_answer || s['chinese_' + k + '_answer']).trim()
-        : (learningChinese ? s['chinese_' + k + '_answer'] : s.spanish_answer);
+        : (learningChinese ? String(s.chinese_simp_answer || s['chinese_' + k + '_answer']).trim() : s.spanish_answer);
 
     if (known) {
         state.knownWords.add(answer);
@@ -4968,4 +5011,377 @@ function pzUpdateControls() {
 
     load();
     updateBar();
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// v9.0 — LECCIONES GRADUADAS (Huayu Diario 日常華語)
+// -------------------------------------------------------------------
+// Mini-dramas HSK 3.0 (window.GRADED_LESSONS, datos en lessons.js):
+//  · Lector de la historia con pinyin interlineal opcional y TTS por línea.
+//  · Práctica estilo test: 10 oraciones del texto con un hueco ___ y 3
+//    opciones (1 correcta + 2 distractores del mismo nivel), con ficha
+//    comparativa al responder (tu respuesta vs correcta, como la referencia).
+//  · Integración: aciertos → palabras aprendidas; errores → newWords +
+//    mazo SRS (window.acSrsMiss). Progreso por lección en 'ac_lessons_v1'.
+// Patrón IIFE (pzInit/srsInit/lessonsInit): cero acoplamiento, listeners
+// delegados en #lesson-list / #lesson-pop.
+// ═══════════════════════════════════════════════════════════════════
+(function lessonsInit() {
+    'use strict';
+    const LESSONS = (typeof window.GRADED_LESSONS !== 'undefined') ? window.GRADED_LESSONS : [];
+    if (!LESSONS.length) return;
+
+    const $ = (id) => document.getElementById(id);
+    const escHtml = (t) => String(t == null ? '' : t).replace(/[&<>"']/g,
+        c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // ── progreso por lección ──
+    const LKEY = 'ac_lessons_v1';
+    let LB = {};
+    try { LB = JSON.parse(localStorage.getItem(LKEY) || '{}') || {}; } catch (e) { LB = {}; }
+    const saveLB = () => { try { localStorage.setItem(LKEY, JSON.stringify(LB)); } catch (e) { } };
+    const progOf = (id) => LB[id] || {};
+
+    // ── estado de la sesión abierta ──
+    const S = { lesson: null, view: null, idx: 0, results: [], answered: false, pinyin: false };
+
+    const pop = $('lesson-pop');
+    if (!pop) return;
+    const body = $('lq-body'), segs = $('lq-segments'), progNum = $('lq-progress-num');
+
+    // ── utilidades compartidas ──
+    const ckKey = (typeof ck === 'function') ? ck() : 'simp';
+    const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
+    const pyLine = (zh) => {
+        try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
+        catch (e) { return ''; }
+    };
+
+    // TTS: reutiliza fetchTTS/Vercel con fallback speechSynthesis (patrón SRS)
+    let lqAudio = null;
+    async function speakZh(text, btn) {
+        try {
+            if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
+                globalAudioPlayer.pause();
+                if (typeof isPlaying !== 'undefined') isPlaying = false;
+            }
+            if (lqAudio) { lqAudio.pause(); lqAudio = null; }
+            if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
+            const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            if (!resp.ok) throw new Error('TTS http ' + resp.status);
+            const data = await resp.json();
+            if (!data.audio) throw new Error('TTS sin audio');
+            const bin = atob(data.audio);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+            lqAudio = new Audio(url);
+            lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            await lqAudio.play();
+            lqAudio.onended = () => { URL.revokeObjectURL(url); lqAudio = null; };
+        } catch (e) {
+            // fallback: voz del sistema
+            try {
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'zh-CN';
+                    u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+                    speechSynthesis.speak(u);
+                }
+            } catch (e2) { /* silencioso */ }
+        } finally {
+            if (btn) { btn.disabled = false; btn.classList.remove('lq-loading'); }
+        }
+    }
+    function stopSpeak() {
+        if (lqAudio) { lqAudio.pause(); lqAudio = null; }
+        try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+    }
+
+    // ── lista de lecciones ──
+    function renderList() {
+        const wrap = $('lesson-list');
+        if (!wrap) return;
+        const filt = wrap.dataset.level || 'all';
+        wrap.innerHTML = '';
+        LESSONS.filter(l => filt === 'all' || String(l.hsk) === filt).forEach(l => {
+            const p = progOf(l.id);
+            const best = (p.best != null) ? p.best + '/10' : '—';
+            const flag = p.completed ? ' <span class="lq-done">✓ completada</span>' : '';
+            const card = document.createElement('div');
+            card.className = 'lesson-card';
+            card.innerHTML =
+                '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + l.emoji + '</span>' +
+                '<span class="lc-hsk">HSK ' + l.hsk + '</span>' +
+                '<span class="lc-best">🎯 ' + best + flag + '</span></div>' +
+                '<div class="lc-titles"><span class="lc-zh">' + escHtml(l.titleZh) + '</span>' +
+                '<span class="lc-es">' + escHtml(l.titleEs) + '</span></div>' +
+                '<p class="lc-blurb">' + escHtml(l.blurb) + '</p>' +
+                '<div class="lc-meta">' + l.lines.length + ' líneas · ' + l.quiz.length + ' ejercicios</div>' +
+                '<div class="lc-actions">' +
+                '<button type="button" class="lq-btn lc-read" data-act="read" data-id="' + l.id + '">📖 Leer</button>' +
+                '<button type="button" class="lq-btn lc-practice" data-act="practice" data-id="' + l.id + '">🎯 Practicar</button>' +
+                '</div>';
+            wrap.appendChild(card);
+        });
+    }
+
+    function bindList() {
+        const wrap = $('lesson-list');
+        if (!wrap) return;
+        wrap.addEventListener('click', (e) => {
+            const btn = e.target.closest('.lq-btn[data-act]');
+            if (!btn) return;
+            const l = LESSONS.find(x => x.id === btn.dataset.id);
+            if (!l) return;
+            if (btn.dataset.act === 'read') openStory(l);
+            else openQuiz(l);
+        });
+        const chips = $('lesson-levels');
+        if (chips) chips.addEventListener('click', (e) => {
+            const chip = e.target.closest('.lv-chip');
+            if (!chip) return;
+            chips.querySelectorAll('.lv-chip').forEach(c => c.classList.toggle('active', c === chip));
+            wrap.dataset.level = chip.dataset.level;
+            renderList();
+        });
+    }
+
+    // ── overlay: abrir/cerrar ──
+    function openPop() {
+        pop.classList.remove('hidden');
+        try { document.body.style.overflow = 'hidden'; } catch (e) { }
+    }
+    function closePop() {
+        stopSpeak();
+        pop.classList.add('hidden');
+        try { document.body.style.overflow = ''; } catch (e) { }
+        S.lesson = null; S.view = null;
+        renderList(); // refresca el mejor puntaje
+    }
+    function bindPop() {
+        $('lq-close').addEventListener('click', closePop);
+        pop.addEventListener('click', (e) => {
+            if (e === null) return;
+            const t = e.target;
+            if (t === pop) closePop();                 // clic en el fondo
+            if (t.closest && t.closest('#lq-close')) return;
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !pop.classList.contains('hidden')) closePop();
+        });
+    }
+
+    // ── vista LECTURA ──
+    function openStory(l) {
+        S.lesson = l; S.view = 'story'; S.pinyin = false;
+        openPop();
+        progNum.textContent = '📖';
+        segs.innerHTML = '';
+        const k = zhKey();
+        const lines = l.lines.map((ln, i) => {
+            const zh = (k === 'trad' ? ln.zhT : ln.zh);
+            return '<div class="lq-line" data-i="' + i + '" role="button" tabindex="0" title="Tocá para escuchar">' +
+                '<div class="lq-line-zh">' + escHtml(zh) + '</div>' +
+                '<div class="lq-line-py hidden" data-zh="' + escHtml(ln.zh) + '"></div>' +
+                '<div class="lq-line-es">' + escHtml(ln.es) + '</div></div>';
+        }).join('');
+        body.innerHTML =
+            '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
+            '<div><div class="lq-story-zh">' + escHtml(k === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</div>' +
+            '<div class="lq-story-es">' + escHtml(l.titleEs) + ' · HSK ' + l.hsk + '</div></div></div>' +
+            '<p class="lq-blurb">' + escHtml(l.blurb) + '</p>' +
+            '<div class="lq-lines">' + lines + '</div>' +
+            '<div class="lq-story-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-story-pinyin">🔤 Pinyin: OFF</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">🎯 Practicar ' + l.quiz.length + '</button>' +
+            '</div>';
+        body.querySelector('#lq-story-practice').addEventListener('click', () => openQuiz(l));
+        body.querySelector('#lq-story-pinyin').addEventListener('click', (e) => {
+            S.pinyin = !S.pinyin;
+            e.target.textContent = '🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF');
+            body.querySelectorAll('.lq-line-py').forEach(el => {
+                if (S.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
+                el.classList.toggle('hidden', !S.pinyin);
+            });
+        });
+        body.querySelector('.lq-lines').addEventListener('click', (e) => {
+            const line = e.target.closest('.lq-line');
+            if (!line) return;
+            const ln = l.lines[+line.dataset.i];
+            speakZh(k === 'trad' ? ln.zhT : ln.zh, line.querySelector('.lq-line-zh'));
+        });
+    }
+    // ── vista PRÁCTICA ──
+    function openQuiz(l) {
+        S.lesson = l; S.view = 'quiz'; S.idx = 0; S.results = new Array(l.quiz.length).fill(null);
+        // mezcla por sesión: los datos traen opts[0]=correcta; el orden visible
+        // se baraja acá para que la posición de la correcta no sea predecible.
+        S.order = l.quiz.map(() => {
+            const d = [0, 1, 2];
+            for (let i = d.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [d[i], d[j]] = [d[j], d[i]];
+            }
+            return d;
+        });
+        openPop();
+        renderQuestion();
+    }
+    function renderSegments() {
+        segs.innerHTML = S.results.map(r =>
+            '<span class="lq-seg' + (r === true ? ' ok' : r === false ? ' bad' : '') + '"></span>').join('');
+    }
+    function renderQuestion() {
+        const l = S.lesson, q = l.quiz[S.idx], ord = S.order[S.idx];
+        S.answered = false;
+        progNum.textContent = (S.idx + 1) + '/' + l.quiz.length;
+        renderSegments();
+        const k = zhKey();
+        const zhFull = (k === 'trad' ? q.zhT : q.zh);
+        const parts = zhFull.split('___');
+        const zhHtml = escHtml(parts[0]) + '<span class="lq-blank" id="lq-blank">？</span>' + escHtml(parts[1] || '');
+        const rightPos = ord.indexOf(0); // posición visible de la correcta
+        const opts = ord.map((dataIdx, pos) => {
+            const o = q.opts[dataIdx];
+            const zh = (k === 'trad' && o.t) ? o.t : o.z;
+            return '<button type="button" class="lq-opt" data-pos="' + pos + '"><span class="lq-opt-letter">' +
+                'ABC'[pos] + '</span><span class="lq-opt-zh">' + escHtml(zh) + '</span></button>';
+        }).join('');
+        body.innerHTML =
+            '<div class="lq-lesson-tag">' + l.emoji + ' ' + escHtml(l.titleEs) + '</div>' +
+            '<div class="lq-zh" id="lq-zh">' + zhHtml + '</div>' +
+            '<div class="lq-es-box">' + escHtml(q.es) + '</div>' +
+            '<div class="lq-opts" id="lq-opts">' + opts + '</div>' +
+            '<div class="lq-feedback hidden" id="lq-feedback"></div>' +
+            '<div class="lq-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-speak">🔊 Escuchar</button>' +
+            '<button type="button" class="lq-btn lq-primary hidden" id="lq-next">Siguiente ▶</button>' +
+            '</div>';
+        body.querySelector('#lq-speak').addEventListener('click', (e) =>
+            speakZh(zhFull.replace('___', q.opts[0].z), e.target));
+        body.querySelector('#lq-opts').addEventListener('click', (e) => {
+            const b = e.target.closest('.lq-opt');
+            if (b && !S.answered) answer(+b.dataset.pos);
+        });
+        body.querySelector('#lq-next').addEventListener('click', next);
+    }
+    function wordCard(o, label, cls) {
+        // ficha de palabra: hanzi con colores de tono + pinyin + 🔊 + significados
+        let zhHtml = escHtml(o.z);
+        try {
+            if (typeof showToneColors !== 'undefined' && showToneColors && typeof pinyinPro !== 'undefined') {
+                zhHtml = pinyinPro.pinyin(o.z, { type: 'all' }).map(it =>
+                    it.isZh ? '<span class="tone-' + (it.num || 5) + '">' + escHtml(it.origin) + '</span>' : escHtml(it.origin)).join('');
+            }
+        } catch (e) { /* plano */ }
+        const meanings = ['<li>' + escHtml(o.e) + '</li>'].concat((o.a || []).map(a => '<li>' + escHtml(a) + '</li>')).join('');
+        return '<div class="lq-card ' + cls + '"><div class="lq-card-label">' + label + '</div>' +
+            '<div class="lq-card-zh">' + zhHtml + '</div>' +
+            '<div class="lq-card-py">' + escHtml(o.p) + ' <button type="button" class="lq-say" data-zh="' + escHtml(o.z) + '" aria-label="Escuchar palabra">🔊</button></div>' +
+            '<ul class="lq-card-es">' + meanings + '</ul></div>';
+    }
+    function answer(pos) {
+        const l = S.lesson, q = l.quiz[S.idx], ord = S.order[S.idx];
+        S.answered = true;
+        const dataIdx = ord[pos];
+        const ok = dataIdx === 0;
+        S.results[S.idx] = ok;
+        renderSegments();
+        // rellena el hueco con lo elegido y marca las opciones
+        const blank = body.querySelector('#lq-blank');
+        const k = zhKey();
+        const chosen = q.opts[dataIdx], right = q.opts[0];
+        if (blank) {
+            blank.textContent = (k === 'trad' && chosen.t) ? chosen.t : chosen.z;
+            blank.classList.add(ok ? 'fill-ok' : 'fill-bad');
+        }
+        body.querySelectorAll('.lq-opt').forEach((b, bi) => {
+            b.disabled = true;
+            if (bi === ord.indexOf(0)) b.classList.add('is-right');
+            else if (bi === pos) b.classList.add('is-wrong');
+        });
+        // feedback: correcto → una tarjeta; error → tu respuesta vs correcta
+        let fb;
+        if (ok) {
+            fb = '<div class="lq-verdict ok">✓ ¡Correcto!</div>' + wordCard(right, 'LA PALABRA', 'lq-card-green');
+        } else {
+            fb = '<div class="lq-verdict bad">✗ Casi — repasala en tu mazo</div>' +
+                '<div class="lq-cards">' + wordCard(chosen, 'TU RESPUESTA', 'lq-card-red') +
+                wordCard(right, 'RESPUESTA CORRECTA', 'lq-card-green') + '</div>';
+        }
+        const fbel = body.querySelector('#lq-feedback');
+        fbel.innerHTML = fb;
+        fbel.classList.remove('hidden');
+        // bookkeeping idéntico al motor principal (identidad = hanzi simplificado)
+        if (ok) {
+            if (typeof state !== 'undefined') {
+                state.knownWords.add(right.z);
+                state.newWords.delete(right.z);
+            }
+        } else {
+            if (typeof state !== 'undefined') state.newWords.add(right.z);
+            if (typeof window.acSrsMiss === 'function') {
+                window.acSrsMiss({
+                    w: 1, module: 'Lección ' + l.titleEs, level: l.hsk,
+                    chinese_simp_answer: right.z, chinese_trad_answer: right.t || right.z,
+                    spanish_answer: right.e, spanish_alternatives: right.a || null,
+                    spanish_full: q.es, chinese_simp_full: q.zh, pinyin: right.p
+                });
+            }
+        }
+        try { saveProgress(); updateStats(); updateVocabularyPanel(); } catch (e) { }
+        // botón siguiente (o terminar)
+        const nx = body.querySelector('#lq-next');
+        nx.classList.remove('hidden');
+        if (S.idx === l.quiz.length - 1) nx.textContent = 'Ver resultado 🏁';
+    }
+    function next() {
+        const l = S.lesson;
+        if (S.idx < l.quiz.length - 1) { S.idx++; renderQuestion(); return; }
+        // resultado final
+        const score = S.results.filter(Boolean).length;
+        const prev = progOf(l.id);
+        LB[l.id] = {
+            best: Math.max(prev.best || 0, score),
+            completed: true,
+            last: new Date().toISOString().slice(0, 10)
+        };
+        saveLB();
+        progNum.textContent = '🏁';
+        segs.innerHTML = '';
+        const msg = score === 10 ? '¡Perfecto! Diez de diez.' :
+            score >= 7 ? '¡Muy bien! La historia ya es tuya.' :
+                'Buen intento. Leé la historia otra vez y repetí.';
+        body.innerHTML =
+            '<div class="lq-final">' +
+            '<div class="lq-final-emoji">' + l.emoji + '</div>' +
+            '<div class="lq-final-score">' + score + '/' + l.quiz.length + '</div>' +
+            '<div class="lq-final-msg">' + msg + '</div>' +
+            '<div class="lq-final-actions">' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-final-read">📖 Leer la historia</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-final-retry">🔁 Repetir práctica</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="lq-final-close">Seguir ✕</button>' +
+            '</div></div>';
+        body.querySelector('#lq-final-read').addEventListener('click', () => openStory(l));
+        body.querySelector('#lq-final-retry').addEventListener('click', () => openQuiz(l));
+        body.querySelector('#lq-final-close').addEventListener('click', closePop);
+    }
+
+    // ── arranque ──
+    function boot() {
+        bindList();
+        bindPop();
+        renderList();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+
+    // API de solo lectura para pruebas E2E
+    window.LQ_DEBUG = {
+        get lessons() { return LESSONS.length; },
+        get state() { return { view: S.view, idx: S.idx, answered: S.answered, results: S.results.slice() }; },
+        get rightPos() { return (S.view === 'quiz' && S.order) ? S.order[S.idx].indexOf(0) : -1; }
+    };
 })();
