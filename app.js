@@ -2095,6 +2095,7 @@ function checkAnswer() {
         showFeedback('❌ Respuestas válidas: "' + allOptions + '"', 'incorrect');
         state.newWords.add(validAnswers[0]);
         rememberWordContext([validAnswers[0]], s); // v7.13
+        if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s); // v7.21: alimenta el mazo de repaso
         refillBlank('wrong');     // v7.2: se muestra la palabra correcta (rojo)
     }
 
@@ -2141,6 +2142,7 @@ function markWord(known) {
     } else {
         state.newWords.add(answer);
         state.knownWords.delete(answer);
+        if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s); // v7.21: "🔄 Repetir" también alimenta el mazo
     }
     rememberWordContext([answer], s); // v7.13: contexto de la oración actual
 
@@ -2566,6 +2568,13 @@ function showVocabPop(word) {
                 + '</div>';
         }
     }
+    // v7.21: botón "Sumar a mi repaso" (SRS) para palabras chinas.
+    // El handler delegado vive en la IIFE srsInit (final de app.js).
+    if (zh && typeof window.acSrsHas === 'function') {
+        const inDeck = !!window.acSrsHas(w);
+        html += '<button type="button" class="vp-srs-add' + (inDeck ? ' is-in' : '') + '">'
+            + (inDeck ? '✓ Ya está en tu repaso' : '🔁 Sumar a mi repaso') + '</button>';
+    }
     body.innerHTML = html;
     pop.classList.remove('hidden');
     if (zh) mountVpStrokes(w); // v7.13: carga lazy del motor + instancias por carácter
@@ -2860,6 +2869,7 @@ function closeWriterPractice() {
 function resetProgress() {
     if (!confirm('¿Borrar todo el progreso guardado?')) return;
     localStorage.removeItem(STORAGE_KEY);
+    if (typeof window.acSrsReset === 'function') window.acSrsReset(); // v7.21: el mazo de repaso también se borra
     state.knownWords = new Set();
     state.newWords = new Set();
     state.wordContexts = {}; // v7.13
@@ -4310,4 +4320,509 @@ function pzUpdateControls() {
     };
 
     plUpdateStatus(); // restaura la línea "Último test" junto al selector
+})();
+
+// ======================================================================
+// v7.21 — REPASO SRS (repetición espaciada · Leitner de 6 cajas)
+// ======================================================================
+// El mazo se llena SOLO con las palabras que cuestan:
+//   · ❌ respuesta incorrecta en la práctica   (hook en checkAnswer)
+//   · 🔄 botón "Repetir" de la tarjeta         (hook en markWord)
+//   · 🔁 "Sumar a mi repaso" del popup de vocabulario
+//   · 🌱 semilla opcional desde el nivel del test de colocación
+// Algoritmo: 6 cajas — 1 = relearning (10 min, re-encola en la sesión),
+// 2..6 = 1 / 3 / 7 / 14 / 30 días. Botones Otra vez / Bien / Fácil
+// (estilo Anki-lite). Todo persiste en localStorage 'ac_srs' (clave =
+// hanzi simplificado, canónica). Popup #srs-pop clon de #placement-pop;
+// IIFE autocontenida: el código existente solo llama hooks window.acSrs*.
+(function srsInit() {
+    'use strict';
+
+    const SRS_KEY = 'ac_srs';
+    const DAY = 86400000;
+    const MIN = 60000;
+    const AGAIN_MS = 10 * MIN;          // caja 1: relearning dentro de la sesión
+    const BOX_DAYS = { 2: 1, 3: 3, 4: 7, 5: 14, 6: 30 };
+    const MAX_CARDS = 1000;             // tope del mazo (localStorage sanísimo)
+    const SESSION_MAX = 25;             // tarjetas por tanda
+    const SEED_SIZE = 12;               // semilla desde el test de colocación
+
+    // ---- almacenamiento ----
+    let DB = { v: 1, cards: {} };
+    function load() {
+        try {
+            const r = JSON.parse(localStorage.getItem(SRS_KEY) || 'null');
+            if (r && r.v === 1 && r.cards && typeof r.cards === 'object') DB = r;
+        } catch (e) { /* corrupto → mazo vacío */ }
+    }
+    function save() {
+        try { localStorage.setItem(SRS_KEY, JSON.stringify(DB)); } catch (e) { /* silencioso */ }
+    }
+
+    // ---- consultas ----
+    function dueList() {
+        const now = Date.now(); const out = [];
+        for (const zh in DB.cards) {
+            const c = DB.cards[zh];
+            if (c && c.d <= now) out.push({ zh: zh, card: c });
+        }
+        out.sort((a, b) => a.card.d - b.card.d); // la más vencida primero
+        return out;
+    }
+    function dueCount() { return dueList().length; }
+    function totalCount() { return Object.keys(DB.cards).length; }
+    function futureCount() { return totalCount() - dueCount(); }
+    function nextDueMs() {
+        let m = Infinity;
+        for (const zh in DB.cards) { const c = DB.cards[zh]; if (c.d > Date.now() && c.d < m) m = c.d; }
+        return m;
+    }
+    function boxDist() {
+        const dist = [0, 0, 0, 0, 0, 0, 0]; // índice = caja
+        for (const zh in DB.cards) { const c = DB.cards[zh]; if (c.b >= 1 && c.b <= 6) dist[c.b]++; }
+        return dist;
+    }
+    function fmtRel(ms) {
+        if (ms <= AGAIN_MS + 2000) return '10 min';
+        const d = Math.round(ms / DAY);
+        if (d <= 1) return 'mañana';
+        return 'en ' + d + ' días';
+    }
+
+    // ---- altas ----
+    // Devuelve true si agregó; 'dup' si ya estaba; false si clave inválida o mazo lleno.
+    function addCard(o) {
+        const zh = String(o && o.zh || '').trim();
+        if (!zh || zh.length > 20 || !READER_HANZI.test(zh)) return false;
+        if (DB.cards[zh]) return 'dup';
+        if (totalCount() >= MAX_CARDS) return false;
+        const now = Date.now();
+        DB.cards[zh] = {
+            b: 1, d: o.dueNow ? now : now + AGAIN_MS, a: now, r: 0, l: 0,
+            es: o.es || '', py: o.py || '', zt: o.zt || '',
+            m: o.m || '', lv: o.lv || 0,
+            ctxZh: o.ctxZh || '', ctxZt: o.ctxZt || '', ctxEs: o.ctxEs || ''
+        };
+        save(); updateBar();
+        return true;
+    }
+
+    // Hook desde la práctica (checkAnswer ✗ y markWord(false)): recibe la oración.
+    window.acSrsMiss = function (s) {
+        if (!s) return;
+        const zh = String(s.chinese_simp_answer || '').trim();
+        const cur = DB.cards[zh];
+        if (cur) { cur.b = 1; cur.d = Date.now() + AGAIN_MS; cur.l++; save(); updateBar(); return; }
+        addCard({
+            zh: zh,
+            zt: s.chinese_trad_answer || '',
+            es: s.w ? (s.spanish_full || '') : '', // w:1 → la glosa ES el spanish_full
+            py: '', m: s.module || '', lv: s.level || 0,
+            ctxZh: s.w ? '' : (s.chinese_simp_full || ''),
+            ctxZt: s.w ? '' : (s.chinese_trad_full || ''),
+            ctxEs: s.w ? '' : (s.spanish_full || '')
+        });
+    };
+
+    // Alta manual (popup de vocabulario / semilla)
+    window.acSrsAdd = function (o) { return addCard(o); };
+    window.acSrsHas = function (w) { return !!DB.cards[String(w || '').trim()]; };
+    window.acSrsReset = function () { DB = { v: 1, cards: {} }; save(); updateBar(); };
+
+    // Glosa de respaldo para tarjetas sin es guardado (módulos de oraciones)
+    function srsGloss(zh, card) {
+        if (card && card.es) return card.es;
+        try {
+            const hit = lookupVocab(zh);
+            if (hit && hit.rec && hit.rec.es) return hit.rec.es;
+        } catch (e) { /* módulo no cargado */ }
+        try {
+            const d = dictMiniLookup(zh);
+            if (d && d.def) return d.def;
+        } catch (e) { /* sin diccionario */ }
+        return '';
+    }
+
+    // ---- semilla desde el test de colocación ----
+    function placementLevel() {
+        try {
+            const r = JSON.parse(localStorage.getItem('ac_placement') || 'null');
+            if (r && r.v === 1 && r.level >= 1 && r.level <= 9) return r.level;
+        } catch (e) { /* sin colocación */ }
+        return 0;
+    }
+    function seedFromPlacement() {
+        const lv = placementLevel();
+        if (!lv) return 0;
+        const key = 'HSK' + lv;
+        if (typeof EMBEDDED_MODULE_DATA === 'undefined' || !EMBEDDED_MODULE_DATA[key]) return 0;
+        const rows = EMBEDDED_MODULE_DATA[key];
+        const cards = Array.isArray(rows[0]) ? expandWordCards(key, rows) : rows;
+        const pool = cards.slice();
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+        }
+        let n = 0;
+        for (const c of pool) {
+            if (n >= SEED_SIZE) break;
+            const zh = String(c.chinese_simp_full || '');
+            if (DB.cards[zh]) continue;
+            if (addCard({ zh: zh, zt: c.chinese_trad_full || '', es: c.spanish_full || '',
+                          py: c.pinyin || '', m: key, lv: lv, dueNow: true }) === true) n++;
+        }
+        return n;
+    }
+
+    // ---- calificación ----
+    function grade(zh, kind) {
+        const c = DB.cards[zh];
+        if (!c) return;
+        const now = Date.now();
+        if (kind === 'again') { c.b = 1; c.d = now + AGAIN_MS; c.l++; }
+        else if (kind === 'easy') { c.b = Math.min(c.b + 2, 6); c.d = now + (BOX_DAYS[c.b] * DAY); c.r++; }
+        else { c.b = Math.min(c.b + 1, 6); c.d = now + (BOX_DAYS[c.b] * DAY); c.r++; }
+        save(); updateBar();
+    }
+
+    // ---- TTS de la tarjeta (mismo pipeline que la app: Vercel → voz sistema) ----
+    function srsSpeak(text) {
+        const t = String(text || '').trim();
+        if (!t) return;
+        try {
+            if (globalAudioPlayer && !globalAudioPlayer.paused) { globalAudioPlayer.pause(); }
+            if (typeof stopReader === 'function') stopReader();
+        } catch (e) { /* silencioso */ }
+        const speakFallback = () => {
+            if (!('speechSynthesis' in window)) return;
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(t);
+            u.lang = 'zh-CN'; u.rate = playbackSpeed;
+            speechSynthesis.speak(u);
+        };
+        fetchTTS({ text: t, lang: 'zh-CN', voice: voiceZh })
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (!d || !d.audio) return speakFallback();
+                const bin = atob(d.audio);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
+                const a = new Audio(url);
+                a.playbackRate = playbackSpeed;
+                a.onended = () => URL.revokeObjectURL(url);
+                a.play().catch(() => { speakFallback(); });
+            })
+            .catch(speakFallback);
+    }
+
+    // ---- sesión ----
+    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false };
+
+    function startSession() {
+        SR.queue = dueList().slice(0, SESSION_MAX);
+        if (!SR.queue.length) return renderIntro();
+        SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
+        SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
+        renderQuiz();
+    }
+    function aheadSession() {
+        // "Adelantar": repasa hasta 10 tarjetas aún no vencidas (las más próximas)
+        const now = Date.now(); const fut = [];
+        for (const zh in DB.cards) { const c = DB.cards[zh]; if (c.d > now) fut.push({ zh: zh, card: c }); }
+        fut.sort((a, b) => a.card.d - b.card.d);
+        SR.queue = fut.slice(0, 10);
+        if (!SR.queue.length) return renderStats();
+        SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
+        SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        const body = document.getElementById('srs-body');
+        if (!body) return;
+        const item = SR.queue[SR.i];
+        if (!item) return renderSummary();
+        SR.cur = item; SR.revealed = false;
+        const card = item.card;
+        const zh = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
+        const box = card.b;
+        const nextGood = Math.min(box + 1, 6);
+        const nextEasy = Math.min(box + 2, 6);
+        const hintB = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
+        body.innerHTML =
+            '<div class="srs-meta">' +
+                '<span class="srs-chip">Repaso</span>' +
+                '<span class="srs-count">' + (SR.i + 1) + ' / ' + SR.total + '</span>' +
+                (card.lv ? '<span class="srs-lv">HSK ' + card.lv + '</span>' : '') +
+                '<span class="srs-box">caja ' + box + '</span>' +
+            '</div>' +
+            '<div class="srs-card" lang="zh">' + escHtml(zh) + '</div>' +
+            '<div class="srs-tools">' +
+                '<button type="button" class="srs-tool srs-speak" title="Escuchar la palabra">🔊</button>' +
+                '<button type="button" class="srs-tool srs-write" title="Practicar los trazos">✍</button>' +
+            '</div>' +
+            '<button type="button" class="btn-primary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
+            '<div id="srs-ans" class="srs-ans hidden">' +
+                (card.py ? '<div class="srs-py">📖 ' + escHtml(card.py) + '</div>' : '') +
+                '<div class="srs-es">🇪🇸 ' + (srsGloss(item.zh, card)
+                    ? escHtml(srsGloss(item.zh, card)) : '<span class="srs-es-missing">—</span>') + '</div>' +
+                (card.ctxZh ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
+                    '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' +
+                    (card.ctxEs ? '<div class="srs-ctx-es">“' + escHtml(card.ctxEs) + '”</div>' : '') + '</div>' : '') +
+                '<div class="srs-grades">' +
+                    '<button type="button" class="srs-grade srs-g-again" data-k="again">😵 Otra vez<small>' + hintB(1) + '</small></button>' +
+                    '<button type="button" class="srs-grade srs-g-good" data-k="good">🙂 Bien<small>' + hintB(nextGood) + '</small></button>' +
+                    '<button type="button" class="srs-grade srs-g-easy" data-k="easy">😎 Fácil<small>' + hintB(nextEasy) + '</small></button>' +
+                '</div>' +
+            '</div>';
+        const ans = document.getElementById('srs-ans');
+        if (ans) ans.classList.add('hidden');
+    }
+
+    function doReveal() {
+        SR.revealed = true;
+        const ans = document.getElementById('srs-ans');
+        const btn = document.querySelector('#srs-body .srs-reveal-btn');
+        if (btn) btn.classList.add('hidden');
+        if (ans) ans.classList.remove('hidden');
+    }
+
+    function doGrade(kind) {
+        if (!SR.cur) return;
+        const item = SR.cur;
+        grade(item.zh, kind);
+        SR.done++;
+        if (kind === 'again') {
+            SR.again++;
+            if (!item.requeued) { item.requeued = true; SR.queue.push(item); SR.total++; }
+        }
+        SR.i++;
+        if (SR.i >= SR.queue.length) return renderSummary();
+        renderQuiz();
+    }
+
+    function renderSummary() {
+        SR.phase = 'result'; SR.cur = null;
+        const body = document.getElementById('srs-body');
+        if (!body) return;
+        const left = dueCount();
+        const nxt = nextDueMs();
+        const nextTxt = left > 0
+            ? 'Quedan ' + left + ' vencida' + (left === 1 ? '' : 's') + ' para hoy'
+            : (isFinite(nxt) ? 'Tu próxima tanda es ' + fmtRel(nxt - Date.now()) : 'Tu mazo sigue activo');
+        body.innerHTML =
+            '<div class="srs-done-badge">🎉</div>' +
+            '<h3 class="srs-title" style="text-align:center">¡Repaso listo!</h3>' +
+            '<p class="srs-sum-line">' + SR.done + ' respuesta' + (SR.done === 1 ? '' : 's') +
+                ' · ' + SR.unique + ' tarjeta' + (SR.unique === 1 ? '' : 's') +
+                (SR.again ? ' · ' + SR.again + ' para volver a ver' : '') + '</p>' +
+            '<p class="srs-sum-next">' + nextTxt + '</p>' +
+            '<div class="srs-actions">' +
+                (left > 0 ? '<button type="button" class="btn-primary srs-start">▶ Seguir repaso (' + left + ')</button>' : '') +
+                '<button type="button" class="btn-primary srs-close-btn">Listo ✅</button>' +
+                '<button type="button" class="btn-secondary srs-stats-btn">📊 Ver mi mazo</button>' +
+            '</div>';
+    }
+
+    function renderStats() {
+        SR.phase = 'stats'; SR.cur = null;
+        const body = document.getElementById('srs-body');
+        if (!body) return;
+        const total = totalCount(); const due = dueCount(); const fut = futureCount();
+        const dist = boxDist();
+        const nxt = nextDueMs();
+        const boxNames = ['—', 'relearning', '1 d', '3 d', '7 d', '14 d', '30 d'];
+        let rows = '';
+        for (let b = 1; b <= 6; b++) {
+            if (!dist[b]) continue;
+            rows += '<div class="srs-stat-row"><span class="srs-stat-k">caja ' + b +
+                ' <small>(' + boxNames[b] + ')</small></span><span class="srs-stat-v">' + dist[b] + '</span></div>';
+        }
+        body.innerHTML =
+            '<h3 class="srs-title">📊 Mi mazo de repaso</h3>' +
+            '<div class="srs-stat-row srs-stat-hero"><span class="srs-stat-k">Palabras</span><span class="srs-stat-v">' + total + '</span></div>' +
+            '<div class="srs-stat-row"><span class="srs-stat-k">Vencen hoy</span><span class="srs-stat-v">' + due + '</span></div>' +
+            (rows || '<p class="srs-sum-line">El mazo se llena solo: cada palabra que fallás en la práctica o marcás con 🔄 Repetir entra acá.</p>') +
+            (isFinite(nxt) && fut > 0 ? '<p class="srs-sum-next">Próxima tarjeta ' + fmtRel(nxt - Date.now()) + '</p>' : '') +
+            '<div class="srs-actions">' +
+                (due > 0 ? '<button type="button" class="btn-primary srs-start">▶ Empezar repaso (' + due + ')</button>' : '') +
+                (fut > 0 ? '<button type="button" class="btn-secondary srs-ahead">🌅 Adelantar (hasta 10)</button>' : '') +
+                '<button type="button" class="btn-secondary srs-close-btn">Cerrar</button>' +
+            '</div>' +
+            (total > 0 ? '<button type="button" class="srs-clear">🗑️ Vaciar mazo</button>' : '');
+    }
+
+    function renderIntro() {
+        SR.phase = 'intro'; SR.cur = null;
+        const body = document.getElementById('srs-body');
+        if (!body) return;
+        const total = totalCount(); const due = dueCount();
+        if (total === 0) {
+            const lv = placementLevel();
+            body.innerHTML =
+                '<h3 class="srs-title">🔁 Repaso inteligente</h3>' +
+                '<p class="srs-intro">Repasá <b>justo antes de olvidar</b>. Tu mazo se llena solo con las palabras que cuestan:</p>' +
+                '<ul class="srs-points">' +
+                    '<li>❌ Cada respuesta incorrecta de la práctica</li>' +
+                    '<li>🔄 Cada palabra marcada con “Repetir”</li>' +
+                    '<li>🔁 “Sumar a mi repaso” en el popup de vocabulario</li>' +
+                '</ul>' +
+                '<p class="srs-intro">Cada tarjeta vuelve a los <b>1 · 3 · 7 · 14 · 30 días</b>, y si la fallás, reaparece en minutos.</p>' +
+                (lv ? '<div class="srs-actions"><button type="button" class="btn-primary srs-seed">🌱 Empezar con ' + SEED_SIZE +
+                        ' palabras de HSK ' + lv + '</button></div>' :
+                    '<p class="srs-sum-next">🎯 ¿No sabés por dónde empezar? Hacé el <b>test de colocación</b> y sembramos tu mazo con tu nivel.</p>') +
+                '<div class="srs-actions"><button type="button" class="btn-secondary srs-close-btn">Entendido</button></div>';
+            return;
+        }
+        // hay mazo
+        if (due > 0) {
+            body.innerHTML =
+                '<h3 class="srs-title">🔁 Repaso del día</h3>' +
+                '<div class="srs-hero-due">' + due + '</div>' +
+                '<p class="srs-sum-line">tarjeta' + (due === 1 ? '' : 's') + ' vencida' + (due === 1 ? '' : 's') + ' de un mazo de ' + total + '</p>' +
+                (due > SESSION_MAX ? '<p class="srs-sum-next">Esta tanda: ' + SESSION_MAX + ' · el resto sigue mañana</p>' : '') +
+                '<div class="srs-actions">' +
+                    '<button type="button" class="btn-primary srs-start">▶ Empezar repaso (' + Math.min(due, SESSION_MAX) + ')</button>' +
+                    '<button type="button" class="btn-secondary srs-stats-btn">📊 Ver mi mazo</button>' +
+                '</div>';
+            return;
+        }
+        renderStats(); // mazo activo, nada vencido → estadísticas
+    }
+
+    // ---- barra sticky (label + badge) ----
+    function updateBar() {
+        const btn = document.getElementById('btn-srs');
+        if (!btn) return;
+        const label = document.getElementById('srs-bar-label');
+        const badge = document.getElementById('srs-bar-badge');
+        const total = totalCount(); const due = dueCount();
+        btn.classList.toggle('has-due', due > 0);
+        if (badge) {
+            if (due > 0) { badge.textContent = due > 99 ? '99+' : String(due); badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
+        }
+        if (label) {
+            label.textContent = total === 0 ? 'Repaso inteligente'
+                : (due > 0 ? 'Repaso del día' : 'Repaso · todo al día');
+        }
+        btn.title = 'Repaso con repetición espaciada' +
+            (total ? ' · ' + total + ' en el mazo' : '') + (due ? ' · ' + due + ' vencen hoy' : '');
+    }
+
+    // ---- abrir / cerrar ----
+    function srsOpen() {
+        load(); // por si otra pestaña modificó el mazo
+        renderIntro();
+        const pop = document.getElementById('srs-pop');
+        if (pop) pop.classList.remove('hidden');
+    }
+    function srsClose() {
+        const pop = document.getElementById('srs-pop');
+        if (pop) pop.classList.add('hidden');
+        SR.phase = 'idle'; SR.cur = null;
+    }
+
+    // ---- wiring (patrón placementInit: autocontenido) ----
+    const safe = (id, ev, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(ev, fn);
+    };
+    safe('btn-srs', 'click', srsOpen);
+    safe('btn-srs-close', 'click', srsClose);
+
+    // Delegado en #srs-body (el body se re-renderiza por fase)
+    const body = document.getElementById('srs-body');
+    if (body) {
+        body.addEventListener('click', (e) => {
+            const b = e.target.closest('button');
+            if (!b) return;
+            if (b.classList.contains('srs-start')) startSession();
+            else if (b.classList.contains('srs-reveal')) doReveal();
+            else if (b.classList.contains('srs-grade')) doGrade(b.dataset.k);
+            else if (b.classList.contains('srs-seed')) {
+                const n = seedFromPlacement();
+                if (n > 0) startSession();
+                else renderIntro();
+            }
+            else if (b.classList.contains('srs-ahead')) aheadSession();
+            else if (b.classList.contains('srs-stats-btn')) renderStats();
+            else if (b.classList.contains('srs-close-btn')) srsClose();
+            else if (b.classList.contains('srs-speak')) {
+                if (SR.cur) srsSpeak(ck() === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh);
+            }
+            else if (b.classList.contains('srs-write')) {
+                if (SR.cur) openWriterPractice(SR.cur.zh); // banner grande de trazos (v7.16)
+            }
+            else if (b.classList.contains('srs-clear')) {
+                if (confirm('¿Vaciar todo el mazo de repaso? Las palabras podrán sumarse de nuevo.')) {
+                    window.acSrsReset();
+                    renderIntro();
+                }
+            }
+        });
+    }
+
+    // Botón "🔁 Sumar a mi repaso" del popup de vocabulario (delegado)
+    const vpop = document.getElementById('vocab-pop');
+    if (vpop) {
+        vpop.addEventListener('click', (e) => {
+            const btnEl = e.target.closest ? e.target.closest('.vp-srs-add') : null;
+            if (!btnEl) return;
+            const vb = document.getElementById('vocab-pop-body');
+            const w = (vb && vb.dataset ? vb.dataset.word : '') || '';
+            const zh = String(w).trim();
+            if (!zh || DB.cards[zh]) return;
+            let es = '', zt = '';
+            try {
+                const hit = lookupVocab(zh);
+                if (hit && hit.rec) { es = hit.rec.es || ''; zt = hit.rec.zhTrad || ''; }
+            } catch (err) { /* sin módulo cargado */ }
+            try {
+                if (!es) { const d = dictMiniLookup(zh); if (d && d.def) es = d.def; }
+            } catch (err) { /* sin diccionario */ }
+            const added = addCard({ zh: zh, zt: zt, es: es, py: wordPinyin(zh), dueNow: true });
+            if (added === true) {
+                // Actualización IN SITU (sin re-render): si re-renderizáramos el
+                // body, este botón quedaría descolgado del DOM y el listener
+                // "clic fuera" de vocab-pop (pop.contains) cerraría el popup
+                // justo después de responder — el mismo falso positivo v7.20.
+                btnEl.classList.add('is-in');
+                btnEl.textContent = '✓ Ya está en tu repaso';
+            }
+        });
+    }
+
+    // Clic fuera cierra (composedPath, mismo fix v7.20: el body se re-renderiza)
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('srs-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        const path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+        if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('#btn-srs')) return;
+        srsClose();
+    });
+
+    // Escape cierra (después de vocab/placement: cada popup cierra el propio)
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const pop = document.getElementById('srs-pop');
+        if (pop && !pop.classList.contains('hidden')) srsClose();
+    });
+
+    // Vuelta a la pestaña / app: refresca el badge (vencimientos por timestamp)
+    window.addEventListener('focus', () => { load(); updateBar(); });
+
+    // Gancho de solo lectura para tests E2E
+    window.SRS_DEBUG = function () {
+        return {
+            total: totalCount(), due: dueCount(), phase: SR.phase,
+            i: SR.i, totalQ: SR.total, done: SR.done, again: SR.again,
+            cur: SR.cur ? SR.cur.zh : null, revealed: SR.revealed
+        };
+    };
+
+    load();
+    updateBar();
 })();

@@ -3170,3 +3170,232 @@ body.dark-mode .pl-fb { border-top-color: var(--border); }
     .placement-btn { font-size: 0.95rem; padding: 12px 14px; }
     .pl-result-lv { font-size: 2.2rem; }
 }
+
+/* ======================================================================
+   v7.21 — REPASO SRS (repetición espaciada · Leitner 6 cajas)
+   Popup #srs-pop reutiliza .vocab-pop. Botón del día en la barra de
+   estudio (sticky en móvil) con badge de vencidas. Dark + ≤480px al final.
+   ====================================================================== */
+#srs-pop {
+    max-height: min(76vh, 620px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* --- botón del día en la barra de estudio --- */
+.srs-bar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.srs-bar-btn .srs-bar-ico { font-size: 1.05rem; }
+.srs-bar-btn:hover { border-color: var(--primary); color: var(--text-primary); }
+.srs-bar-btn:active { transform: scale(0.99); }
+.srs-bar-btn.has-due {
+    border: 1.5px solid transparent;
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.srs-bar-badge {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+/* la regla display:inline-flex de arriba pisa la clase global .hidden por
+   orden del cascade → la re-declaramos con mayor especificidad */
+.srs-bar-badge.hidden { display: none; }
+
+/* --- popup: títulos / intro / estadísticas --- */
+.srs-title { margin: 2px 0 10px; font-size: 1.15rem; color: var(--text-primary); }
+.srs-intro { font-size: 0.92rem; line-height: 1.5; color: var(--text-secondary); margin: 0 0 10px; }
+.srs-points { list-style: none; margin: 0 0 12px; padding: 0; font-size: 0.88rem; color: var(--text-secondary); }
+.srs-points li { padding: 3px 0; }
+.srs-hero-due {
+    text-align: center;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1.1;
+    margin: 6px 0 2px;
+}
+.srs-sum-line { text-align: center; color: var(--text-secondary); font-size: 0.88rem; margin: 4px 0 8px; }
+.srs-sum-next { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin: 4px 0 10px; }
+.srs-actions { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 4px; }
+.srs-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.srs-stat-row small { color: var(--text-secondary); font-weight: 400; }
+.srs-stat-hero { border-width: 1.5px; font-weight: 800; }
+.srs-stat-v { font-weight: 800; color: var(--primary); }
+.srs-clear {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--danger);
+    font-size: 0.82rem;
+    cursor: pointer;
+    opacity: 0.85;
+}
+.srs-clear:hover { background: rgba(220, 38, 38, 0.08); opacity: 1; }
+
+/* --- tarjeta de repaso --- */
+.srs-meta { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px; flex-wrap: wrap; }
+.srs-chip {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.8rem;
+}
+.srs-count { font-size: 0.82rem; color: var(--text-secondary); }
+.srs-lv { font-size: 0.78rem; color: var(--text-secondary); }
+.srs-box { margin-left: auto; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+.srs-card {
+    text-align: center;
+    font-size: clamp(2.4rem, 10vw, 3.2rem);
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin: 6px 0 8px;
+    word-break: break-word;
+}
+.srs-tools { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
+.srs-tool {
+    width: 44px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: border-color 0.12s ease, transform 0.1s ease;
+}
+.srs-tool:hover { border-color: var(--primary); }
+.srs-tool:active { transform: scale(0.95); }
+.srs-reveal-btn { width: 100%; }
+
+.srs-ans { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; text-align: center; }
+.srs-ans.hidden { display: none; }
+.srs-py { color: var(--text-secondary); font-size: 1rem; margin-bottom: 2px; }
+.srs-es { color: var(--text-primary); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; word-break: break-word; }
+.srs-es-missing { color: var(--text-secondary); font-weight: 400; }
+.srs-ctx {
+    margin: 0 auto 12px;
+    max-width: 96%;
+    background: rgba(37, 99, 235, 0.06);
+    border: 1px solid rgba(37, 99, 235, 0.20);
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: left;
+}
+.srs-ctx-title { font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 3px; }
+.srs-ctx-zh { font-size: 0.98rem; color: var(--text-primary); }
+.srs-ctx-es { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
+
+/* --- botones de calificación (Otra vez / Bien / Fácil) --- */
+.srs-grades { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.srs-grade {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 56px;
+    transition: border-color 0.12s ease, background 0.12s ease, transform 0.1s ease;
+}
+.srs-grade small { font-weight: 500; font-size: 0.72rem; color: var(--text-secondary); }
+.srs-grade:active { transform: scale(0.96); }
+.srs-g-again:hover { border-color: var(--danger); background: rgba(220, 38, 38, 0.08); }
+.srs-g-good:hover { border-color: var(--success); background: rgba(22, 163, 74, 0.08); }
+.srs-g-easy:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); }
+
+/* --- botón "Sumar a mi repaso" del popup de vocabulario --- */
+.vp-srs-add {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1.5px dashed var(--primary);
+    border-radius: 10px;
+    background: rgba(37, 99, 235, 0.06);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.vp-srs-add:hover { background: rgba(37, 99, 235, 0.14); }
+.vp-srs-add:active { transform: scale(0.98); }
+.vp-srs-add.is-in {
+    border-style: solid;
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(22, 163, 74, 0.08);
+    cursor: default;
+}
+
+/* --- dark mode --- */
+body.dark-mode .srs-bar-btn { border-color: var(--border); color: var(--text-secondary); }
+body.dark-mode .srs-bar-btn:hover { border-color: #93b4ff; color: var(--text-primary); }
+body.dark-mode .srs-bar-btn.has-due { border-color: transparent; color: #fff; }
+body.dark-mode .srs-tool { background: rgba(255, 255, 255, 0.05); border-color: var(--border); }
+body.dark-mode .srs-tool:hover { border-color: #93b4ff; }
+body.dark-mode .srs-grade { background: rgba(255, 255, 255, 0.05); border-color: var(--border); }
+body.dark-mode .srs-g-again:hover { background: rgba(220, 38, 38, 0.16); }
+body.dark-mode .srs-g-good:hover { background: rgba(22, 163, 74, 0.18); }
+body.dark-mode .srs-g-easy:hover { background: rgba(147, 180, 255, 0.10); border-color: #93b4ff; }
+body.dark-mode .srs-stat-row { border-color: var(--border); }
+body.dark-mode .srs-ctx { background: rgba(147, 180, 255, 0.10); border-color: rgba(147, 180, 255, 0.30); }
+body.dark-mode .vp-srs-add { background: rgba(147, 180, 255, 0.08); color: #93b4ff; border-color: #93b4ff; }
+body.dark-mode .vp-srs-add:hover { background: rgba(147, 180, 255, 0.16); }
+body.dark-mode .vp-srs-add.is-in { color: #4ade80; border-color: #4ade80; background: rgba(22, 163, 74, 0.12); }
+
+@media (max-width: 480px) {
+    .srs-bar-btn { padding: 9px 12px; font-size: 0.88rem; }
+    .srs-card { font-size: 2.6rem; }
+    .srs-grade { font-size: 0.84rem; min-height: 52px; padding: 8px 3px; }
+    .srs-hero-due { font-size: 2.6rem; }
+}
