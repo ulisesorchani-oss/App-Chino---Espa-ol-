@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v41'; // v7.21: Repaso SRS (repetición espaciada) — invalida shell
+const VERSION = 'v45'; // v8.3: TOCFL Band A completa al 100% con la lista oficial vigente 2023 (1.219 palabras, homógrafos POS por nivel) — invalida shell
 const SHELL_CACHE = `chino-es-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

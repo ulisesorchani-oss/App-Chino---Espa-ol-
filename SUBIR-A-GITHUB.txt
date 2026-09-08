@@ -1,22 +1,34 @@
 ======================================================================
- v7.20 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
+ v8.3 — SUBIR A GITHUB: 14 ARCHIVOS (2 minutos) + VERIFICACIÓN
 ======================================================================
 
 ⚠️ MISMA CANTIDAD DE ARCHIVOS QUE SIEMPRE (no hay archivos nuevos).
    En esta versión cambian 4: index.html, app.js, style.css y sw.js
-   (Test de Colocación + HSK 3.0 + mobile-first).
+   (TOCFL Band A completo: 1.219 palabras oficiales + menú 🇹🇼 con
+   3 niveles + homógrafos oficiales por nivel).
    Subí SIEMPRE los 14 juntos: mezclar viejos y nuevos rompe la app.
 ⚠️ SI VES LA VERSIÓN VIEJA DESPUÉS DE SUBIR: casi siempre es porque
    se subieron archivos de una carpeta extraída ANTERIOR. Usá la
    verificación de abajo para confirmar.
 
-¿Y LAS FUENTES JSON DEL HSK 3.0? NO HACE FALTA SUBIRLAS:
+¿QUÉ CAMBIA EN ESTA VERSIÓN?
 ------------------------------------------------------------
-Todo el vocabulario (10.944 palabras) viaja DENTRO de app.js —
-por eso la app funciona offline y con un solo archivo. El ZIP
-"fuentes-hsk30-json.zip" es solo el respaldo del dataset para
-futuras mejoras (no se usa en runtime). Si querés publicarlo
-igual en el repo, podés, pero la app no lo necesita.
+1) TOCFL BAND A COMPLETA (v8.2 + v8.3): el botón 🇹🇼 TOCFL abre un
+   menú con 3 tracks de vocabulario oficial de Taiwán:
+      準備 TOCFL Prep (pre-A1) · 392 palabras
+      入門 TOCFL Nivel 1 (A1) · 344 palabras
+      基礎 TOCFL Nivel 2 (A2) · 483 palabras
+   = 1.219 palabras, 100% de la lista oficial vigente 2023
+   (8000zhuyin_202307 de tocfl.edu.tw), con traducciones al español
+   curadas y orden oficial de la lista.
+   El "TOCFL" viejo (20 oraciones de muestra) sigue disponible
+   debajo, en el mismo menú.
+2) HOMÓGRAFOS OFICIALES: palabras como 还/只/长/花/上/下 tienen su
+   tarjeta propia por nivel con el pinyin y sentido correctos
+   (还 huán devolver en N1 vs 还 hái todavía en Prep).
+3) NADA MÁS CAMBIÓ: los 9 niveles HSK 3.0 (10.944 palabras), el
+   repaso SRS, el test de colocación, los modos y las oraciones
+   siguen exactamente igual.
 
 PASO A PASO (funciona igual desde el celular o la PC):
 ------------------------------------------------------------
@@ -26,10 +38,10 @@ PASO A PASO (funciona igual desde el celular o la PC):
 3. Tocá "Add file" → "Upload files"
 4. Subí EXACTAMENTE estos 14 archivos del ZIP, a la RAÍZ:
 
-      ✅ index.html           ← ACTUALIZADO (botones 🎯 + popup del test)
-      ✅ app.js               ← ACTUALIZADO (HSK 3.0 + Test de Colocación)
-      ✅ style.css            ← ACTUALIZADO (estilos del test)
-      ✅ sw.js                ← ACTUALIZADO (v40: invalida la caché)
+      ✅ index.html           ← ACTUALIZADO (menú TOCFL con 3 niveles)
+      ✅ app.js               ← ACTUALIZADO (1.219 palabras TOCFL + insignias)
+      ✅ style.css            ← ACTUALIZADO (menú desplegable TOCFL, dark incluido)
+      ✅ sw.js                ← ACTUALIZADO (v45: invalida la caché)
       ✅ lessons.js
       ✅ hanzi-writer.min.js
       ✅ dict-mini.js
@@ -41,7 +53,7 @@ PASO A PASO (funciona igual desde el celular o la PC):
       ✅ html2canvas.min.js
       ✅ jspdf.umd.min.js
 
-5. Abajo escribí un título (ej: v7.20) y tocá el botón verde
+5. Abajo escribí un título (ej: v8.3) y tocá el botón verde
    "Commit changes". IMPORTANTE: esperá a que termine el giro
    y vuelva a mostrarse la lista de archivos del repo.
 6. Esperá ~1-2 minutos. Vercel/GitHub Pages se actualiza solo.
@@ -49,10 +61,10 @@ PASO A PASO (funciona igual desde el celular o la PC):
 VERIFICACIÓN OBLIGATORIA (30 segundos):
 ------------------------------------------------------------
 A) ANTES de subir, mirá los TAMAÑOS (aproximados):
-      index.html           = 34 KB   ← actualizado
-      app.js               = 942 KB  ← actualizado (HSK 3.0 + test)
-      style.css            = 73 KB   ← actualizado
-      sw.js                = 12 KB   ← actualizado (v40)
+      index.html           = 39 KB   ← actualizado (menú TOCFL)
+      app.js               = 1.031 KB ← actualizado (+ TOCFL Band A)
+      style.css            = 89 KB   ← actualizado (menú desplegable)
+      sw.js                = 12 KB   ← actualizado (v45)
       lessons.js           = 27 KB   (no cambió)
       dict-mini.js         = 99 KB   (no cambió)
       pinyin-pro.min.js    = 316 KB  (no se sube de nuevo, referencia)
@@ -60,24 +72,28 @@ A) ANTES de subir, mirá los TAMAÑOS (aproximados):
 B) DESPUÉS de subir, abrí tu app y recargá 2 veces (F5).
    Mirá la consola (F12) o probá directo:
       https://TU-USUARIO.github.io/TU-REPO/sw.js
-   → tiene que decir:  const VERSION = 'v40'
+   → tiene que decir:  const VERSION = 'v45'
 
-PRUEBA RÁPIDA DE 1 MINUTO (v7.20):
+PRUEBA RÁPIDA DE 1 MINUTO (v8.3):
 ------------------------------------------------------------
-1. Abrí la app en el celular → pestaña 📚 Diaria → tocá
-   "🎯 ¿No sabés qué nivel tenés? Hacé el test de colocación".
-2. Tocá "▶ Empezar test": aparecen palabras con 4 opciones.
-   - Si respondés 2 bien seguidas, sube de nivel (HSK 2, 3…).
-   - Si fallás 2, corta y te muestra tu nivel.
-3. En el resultado tocá "📚 Practicar HSK X": la pestaña
-   Exámenes queda abierta con ese nivel cargado.
-4. Volvé a abrir el test: tu resultado figura en la intro y
-   como línea "🎯 Último test…" bajo el selector.
+1. Abrí la app y entrá a 🎓 Exámenes → tocá el botón 🇹🇼 TOCFL.
+2. Se despliega el menú con: TOCFL Prep (392) · Nivel 1 (344) ·
+   Nivel 2 (483) · TOCFL (oraciones de muestra, el de siempre).
+3. Elegí 入門 Nivel 1: la tarjeta muestra un hanzi con la insignia
+   "TOCFL N1" y el contador 1/344. Escribí el significado en
+   español y Verificar: ✅.
+4. Andá a una palabra como 还 (avanzá con Siguiente): en Nivel 1
+   pide "huán / devolver". Cambiá a TOCFL Prep: la MISMA palabra
+   es "hái / todavía" — así de claros quedan los homógrafos.
+5. Tocá 简/繁: las tarjetas muestran su tradicional real (只→隻).
+6. Entrá a 🎓 Exámenes → HSK 1: todo sigue igual que siempre.
 
 SI ALGO SALIÓ MAL:
 ------------------------------------------------------------
 • "Sigue viéndose igual" → no se subió sw.js, o el navegador
   guardó la versión vieja: recargá 2 veces / probá en incógnito.
-• "No aparece el botón 🎯" → se subieron index.html y app.js de
-  versiones distintas: subí los 14 archivos juntos de ESTE ZIP.
+• "El botón TOCFL no despliega menú" → se subieron index.html y
+  app.js de versiones distintas: subí los 14 juntos de ESTE ZIP.
+• "Me faltan palabras (no llegan a 344/483)" → falta app.js nuevo:
+  subí los 14 archivos juntos de ESTE ZIP.
 ======================================================================

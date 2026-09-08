@@ -12,7 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Chino·ES">
-    <link rel="stylesheet" href="style.css?v=20260908b">
+    <link rel="stylesheet" href="style.css?v=20260908f">
 </head>
 <body>
     <div class="container">
@@ -28,25 +28,12 @@
             <p class="subtitle">Aprende con contexto, paso a paso</p>
         </header>
 
-        <!-- v7.18 BARRA DE ESTUDIO (sticky en móvil): modos 2 columnas + chips flex-wrap -->
+        <!-- v8.1 BARRA DE ESTUDIO (sticky en móvil): queda solo el Repaso SRS.
+             Los modos y las herramientas de visualización viven ahora DENTRO de
+             la tarjeta (#sentence-card > .card-tools-header), pegados a lo que
+             controlan — antes llenaban esta barra y empujaban la tarjeta abajo. -->
         <div class="control-panel study-bar" id="control-panel">
-            <div class="mode-selector">
-                <button id="btn-es-cn" class="mode-btn active"><b>ES→CN</b><small>Aprendo Chino</small></button>
-                <button id="btn-cn-es" class="mode-btn"><b>CN→ES</b><small>Aprendo Español</small></button>
-            </div>
-            <div class="tools-row">
-                <div class="script-toggle">
-                    <button id="btn-simplified" class="script-btn active">简 简体</button>
-                    <button id="btn-traditional" class="script-btn">繁 繁體</button>
-                </div>
-                <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
-                <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
-                <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores">ℹ️</button>
-                <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
-                <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
-                <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
-            </div>
-            <!-- v7.21: REPASO SRS — botón del día en la barra de estudio (sticky en móvil).
+            <!-- v7.21: REPASO SRS — botón del día en la barra sticky.
                  El badge naranja muestra cuántas tarjetas vencen hoy. -->
             <button id="btn-srs" class="srs-bar-btn" type="button"
                     title="Repaso con repetición espaciada: las palabras que fallaste o marcaste vuelven justo antes de olvidarlas">
@@ -59,9 +46,39 @@
         <!-- Estado del módulo (cargando / sin datos / info) — v7.18: pegado a la tarjeta -->
         <div id="module-status" class="module-status hidden" role="status"></div>
 
-        <!-- v7.18: TARJETA DE PRÁCTICA — protagonista absoluta, lo primero visible en móvil -->
+        <!-- v8.1: TARJETA DE PRÁCTICA — protagonista absoluta, lo primero visible en móvil.
+             Cabecera de herramientas integrada: modos + controles de visualización. -->
         <!-- Tarjeta de Oración -->
         <div class="card" id="sentence-card">
+            <!-- v8.1: CABECERA DE HERRAMIENTAS DE LA TARJETA. Los IDs no cambian
+                 (los listeners usan safeAdd por ID) — solo se reubicaron bloques.
+                 Modos: decisión de nivel de app, siempre visibles. Herramientas:
+                 controles de visualización de la tarjeta (简/繁, pinyin, tonos,
+                 velocidad, voces) — afectan lo que el alumno ve acá y ahora. -->
+            <div class="card-tools-header">
+                <!-- v8.1: en "Aprendo Chino" el vocabulario HSK muestra el HANZI
+                     (+ pinyin) y se responde en español; "Aprendo Español" es el
+                     modo espejo (ves español, produces chino). Las flechas
+                     describen el recorrido de estudio (del material que ves hacia
+                     la lengua que producís). -->
+                <div class="mode-selector" role="group" aria-label="Modo de estudio">
+                    <button id="btn-es-cn" class="mode-btn active"><b>CN→ES</b><small>Aprendo Chino</small></button>
+                    <button id="btn-cn-es" class="mode-btn"><b>ES→CN</b><small>Aprendo Español</small></button>
+                </div>
+                <div class="tools-row">
+                    <div class="script-toggle">
+                        <button id="btn-simplified" class="script-btn active">简 简体</button>
+                        <button id="btn-traditional" class="script-btn">繁 繁體</button>
+                    </div>
+                    <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
+                    <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
+                    <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores">ℹ️</button>
+                    <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
+                    <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
+                    <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
+                </div>
+            </div>
+
             <div class="card-header">
                 <span class="card-level" id="card-level">Nivel 1</span>
 
@@ -192,7 +209,30 @@
                 </button>
                 <p id="placement-status" class="placement-status hidden" role="status"></p>
                 <div class="category-filter exams-filters">
-                    <button class="btn-exam" data-module="TOCFL">TOCFL 🇹🇼</button>
+                    <!-- v8.3: dropdown TOCFL — Band A 100% lista oficial vigente (華語八千詞表 2023):
+                         392 + 344 + 483 = 1.219 palabras + las 20 oraciones de muestra -->
+                    <div class="tocfl-dropdown" id="tocfl-dropdown">
+                        <button id="btn-tocfl-toggle" class="tocfl-main-btn" type="button"
+                                aria-haspopup="menu" aria-expanded="false" aria-controls="tocfl-menu"
+                                title="Elegí un nivel TOCFL">
+                            <span aria-hidden="true">🇹🇼</span> <span id="tocfl-current">TOCFL</span>
+                            <span class="daily-caret" aria-hidden="true">▾</span>
+                        </button>
+                        <ul id="tocfl-menu" class="tocfl-menu hidden" role="menu" aria-labelledby="btn-tocfl-toggle">
+                            <li class="dele-group-label" role="none">🎯 Band A (Novice → A2)</li>
+                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Preparación, Novice 1 y 2">
+                                <span class="ci-zh">準備</span><span class="ci-py">pre-A1</span><span class="ci-es">Preparación · 392 palabras</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL Nivel 1, 入門級">
+                                <span class="ci-zh">入門</span><span class="ci-py">A1</span><span class="ci-es">Nivel 1 · 344 palabras</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL Nivel 2, 基礎級">
+                                <span class="ci-zh">基礎</span><span class="ci-py">A2</span><span class="ci-es">Nivel 2 · 483 palabras</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, oraciones de muestra">
+                                <span class="ci-zh">示例</span><span class="ci-py">muestra</span><span class="ci-es">Oraciones de examen · 20</span></button></li>
+                            <li class="dele-group-label" role="none">🚀 Band B y C (próximamente)</li>
+                            <li role="none"><button type="button" class="cat-btn tocfl-item dele-soon" role="menuitem" disabled aria-disabled="true">
+                                <span class="ci-zh">進階</span><span class="ci-py">en camino</span><span class="ci-es">Niveles 3 a 6</span></button></li>
+                        </ul>
+                    </div>
                     <div class="dele-dropdown" id="dele-dropdown">
                         <button id="btn-dele-toggle" class="dele-main-btn" type="button"
                                 aria-haspopup="menu" aria-expanded="false" aria-controls="dele-menu"
@@ -440,21 +480,21 @@
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
     <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
-    <script src="config.js?v=20260908b"></script>
+    <script src="config.js?v=20260908f"></script>
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
-    <script src="text-utils.js?v=20260908b"></script>
+    <script src="text-utils.js?v=20260908f"></script>
     <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260908b"></script>
+    <script src="VoiceRecorder.js?v=20260908f"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
     <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260908b"></script>
-    <script src="dict-mini.js?v=20260908b"></script>
+    <script src="voice-evaluator.js?v=20260908f"></script>
+    <script src="dict-mini.js?v=20260908f"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
-    <script src="lessons.js?v=20260908b"></script>
-    <script src="app.js?v=20260908b"></script>
+    <script src="lessons.js?v=20260908f"></script>
+    <script src="app.js?v=20260908f"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

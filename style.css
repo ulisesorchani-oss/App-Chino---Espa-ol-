@@ -3399,3 +3399,280 @@ body.dark-mode .vp-srs-add.is-in { color: #4ade80; border-color: #4ade80; backgr
     .srs-grade { font-size: 0.84rem; min-height: 52px; padding: 8px 3px; }
     .srs-hero-due { font-size: 2.6rem; }
 }
+
+/* ======================================================================
+   v8.1 — MODOS Y HERRAMIENTAS DENTRO DE LA TARJETA
+   La cabecera de herramientas vive en #sentence-card, pegada a lo que
+   controla (Recetario 7.1: reordenar botones · Tabla 17: riesgo bajo).
+   La barra sticky (study-bar) queda solo con el Repaso SRS. Los chips
+   venían vestidos para la barra violeta (bordes/texto blancos) → acá se
+   re-vesten con la paleta de la tarjeta. Los IDs no cambian.
+   ====================================================================== */
+.card-tools-header {
+    margin: -24px -24px 18px;   /* sangra hasta los bordes de .card (padding 24px) */
+    padding: 14px 14px 12px;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.card-tools-header .mode-selector {
+    margin-bottom: 10px;
+}
+
+/* Modos: decisión de nivel de app → grandes, siempre visibles, arriba */
+.card-tools-header .mode-btn {
+    border-color: var(--primary);
+    background: transparent;
+    color: var(--primary);
+}
+.card-tools-header .mode-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Chips de visualización sobre fondo claro */
+.card-tools-header .script-toggle {
+    border-color: var(--border);
+}
+.card-tools-header .script-btn {
+    color: var(--text-secondary);
+}
+.card-tools-header .script-btn.active {
+    background: var(--primary);
+    color: white;
+}
+.card-tools-header .pinyin-btn {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--primary);
+}
+.card-tools-header .pinyin-btn.active {
+    background: var(--primary);
+    color: white;
+}
+/* speed-btn / voice-btn / #btn-tones / .btn-tone-info ya usan la paleta
+   de la app (--success/--primary/--warning/--bg-light): sin cambios. */
+
+/* Barra sticky v8.1: solo SRS → sin margen superior heredado */
+#control-panel .srs-bar-btn {
+    margin-top: 0;
+}
+
+/* --- Modo oscuro: la tarjeta se oscurece vía variables; los chips que
+       usan --primary directo piden el azul claro de la paleta dark --- */
+body.dark-mode .card-tools-header .mode-btn {
+    border-color: #93c5fd;
+    color: #93c5fd;
+}
+body.dark-mode .card-tools-header .mode-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+body.dark-mode .card-tools-header .script-btn {
+    color: var(--text-secondary);
+}
+body.dark-mode .card-tools-header .script-btn.active {
+    background: #2563eb;
+    color: white;
+}
+body.dark-mode .card-tools-header .pinyin-btn {
+    border-color: #93c5fd;
+    background: rgba(147, 197, 253, 0.10);
+    color: #93c5fd;
+}
+body.dark-mode .card-tools-header .pinyin-btn.active {
+    background: #2563eb;
+    color: white;
+}
+
+/* --- Móvil ≤480px: chips compactos; .card mantiene padding 24px → mismo margen --- */
+@media (max-width: 480px) {
+    .card-tools-header {
+        padding: 10px 10px 10px;
+    }
+    .card-tools-header .mode-selector { margin-bottom: 8px; }
+    .card-tools-header .mode-btn { min-height: 46px; }
+    .card-tools-header .tools-row .speed-btn,
+    .card-tools-header .tools-row .pinyin-btn,
+    .card-tools-header .tools-row .btn-secondary { padding: 7px 10px; font-size: 0.75rem; min-height: 40px; }
+    .card-tools-header .tools-row .script-btn { padding: 7px 10px; font-size: 0.74rem; }
+}
+
+/* ============================================================
+   v8.2 — DROPDOWN TOCFL (Band A: Preparación + Nivel 1 + Nivel 2)
+   Mismo patrón que el dropdown DELE (v7.4) pero con paleta TEAL
+   (identidad Taiwán) para distinguirlo del rojo DELE.
+   Reutiliza .dele-group-label (etiquetas de grupo) y .ci-zh/.ci-py/.ci-es.
+   ============================================================ */
+.tocfl-dropdown {
+    position: relative;
+    flex: 1 1 100%;
+    max-width: 260px;
+}
+
+.tocfl-main-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 16px;
+    background: #f0fdfa;
+    color: #134e4a;
+    border: 2px solid #0d9488;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(13, 148, 136, 0.25);
+}
+
+.tocfl-main-btn:hover {
+    background: #ccfbf1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(13, 148, 136, 0.35);
+}
+
+.tocfl-main-btn[aria-expanded="true"] {
+    border-radius: 20px 20px 0 0;
+    transform: translateY(0);
+}
+
+.tocfl-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 70;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: #f7fefc;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    border-top: 2px solid #0d9488;
+}
+
+.tocfl-menu.hidden {
+    display: none;
+}
+
+/* las etiquetas de grupo reutilizan .dele-group-label (roja) → re-vestir en teal */
+.tocfl-menu .dele-group-label {
+    color: #0f766e;
+}
+
+.tocfl-menu .cat-btn {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    padding: 9px 12px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #134e4a;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.2s;
+}
+
+.tocfl-menu .cat-btn:hover:not(.active) {
+    background: rgba(13, 148, 136, 0.08);
+}
+
+.tocfl-menu .cat-btn.active {
+    background: #ccfbf1;
+    color: #134e4a;
+    border-left-color: #0f766e;
+    font-weight: 700;
+}
+
+.tocfl-menu .ci-zh {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #0f766e;
+    white-space: nowrap;
+    min-width: 44px;
+}
+
+.tocfl-menu .ci-py {
+    font-style: italic;
+    font-size: 0.75rem;
+    color: #0d9488;
+    white-space: nowrap;
+}
+
+.tocfl-menu .ci-es {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.2;
+}
+
+/* ítem "próximamente" (Band B/C): atenuado y no clicable */
+.tocfl-menu .dele-soon {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.tocfl-menu .dele-soon .ci-zh {
+    color: #9ca3af;
+}
+
+.tocfl-menu .dele-soon .ci-py {
+    color: #9ca3af;
+}
+
+@media (max-width: 380px) {
+    .tocfl-menu .ci-py {
+        display: none;
+    }
+}
+
+/* --- Dark mode v8.2 (espeja el DELE) --- */
+body.dark-mode .tocfl-main-btn {
+    background: #102a26;
+    color: #5eead4;
+    border-color: #0d9488;
+}
+
+body.dark-mode .tocfl-menu {
+    background: #0e211e;
+    border-top-color: #0d9488;
+}
+
+body.dark-mode .tocfl-menu .cat-btn {
+    color: #e7e5e4;
+}
+
+body.dark-mode .tocfl-menu .cat-btn:hover:not(.active) {
+    background: rgba(94, 234, 212, 0.08);
+}
+
+body.dark-mode .tocfl-menu .cat-btn.active {
+    background: rgba(94, 234, 212, 0.14);
+    color: #5eead4;
+    border-left-color: #2dd4bf;
+}
+
+body.dark-mode .tocfl-menu .ci-zh {
+    color: #2dd4bf;
+}
+
+body.dark-mode .tocfl-menu .ci-py {
+    color: #14b8a6;
+}
+
+body.dark-mode .tocfl-group-label,
+body.dark-mode .tocfl-menu .dele-group-label {
+    color: #2dd4bf;
+}
