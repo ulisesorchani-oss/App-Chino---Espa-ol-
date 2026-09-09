@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v50'; // v9.4: karaoke de lectura (✨, off por defecto) en lecciones y clásicos, 4 voces chinas (Xiaoxiao/Yunjian/Xiaoyi/Yunxi), tema papel de arroz 🏮, planilla cuaderno sin rótulos repetidos — invalida shell
+const VERSION = 'v51'; // v9.5: karaoke por PALABRA completa (Intl.Segmenter), f2 = femenina adulta Xiaobei (api/tts.py nuevo), TOCFL Band B completa (N3 進階 1091 + N4 高階 2194) — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

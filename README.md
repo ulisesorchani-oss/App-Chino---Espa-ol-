@@ -62,3 +62,13 @@ Pruebas hechas (navegador real, sin errores de consola)
 - Flujo Verificar -> feedback -> Siguiente ▶ -> siguiente oración
 - Botón de velocidad cicla y persiste
 - POST a /api/tts -> 200, audio reproducido
+
+Módulo de pronunciación (v7.6 → v7.8)
+-------------------------------------------------------
+Evaluación de voz 100% local y privada (Whisper WASM en el
+dispositivo + análisis de tono F0/DTW). Documentación completa
+del módulo — arquitectura por modo (es-cn / cn-es), método de
+calibración de SPANISH_CONFIDENCE_THRESHOLD y casos de prueba
+de integración/QA con fixtures de audio — en:
+
+    README-Pronunciacion.md
