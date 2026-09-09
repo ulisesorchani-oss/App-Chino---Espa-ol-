@@ -10,7 +10,9 @@ import base64
 
 # ============================================================
 # 1) edge-tts (voces neuronales de Microsoft, calidad natural)
-#    - Chino:  femenina (Xiaoxiao) y masculina (Yunjian)
+#    - Chino: 4 voces (v9.5): femenina joven (Xiaoxiao), masculina
+#      adulta (Yunjian), FEMENINA ADULTA (Xiaobei) y masculina
+#      joven (Yunxi)
 #    - Español: variante LATINOAMERICANA (Argentina)
 #      femenina (Elena) y masculina (Tomás)
 # ============================================================
@@ -41,12 +43,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mapa de voces edge-tts: (idioma, género) -> voz neuronal
+# Mapa de voces edge-tts: (idioma, voz) -> voz neuronal
+# v9.5: f2 pasa de Xiaoyi (joven, sonaba igual que Xiaoxiao) a Xiaobei
+# (FEMENINA ADULTA, voz real distinta). m2 sigue siendo Yunxi (joven).
+# El cliente puede pedir f/m/f2/m2 para chino (el botón 🇨🇳 cicla las
+# cuatro); el español mantiene f/m.
 EDGE_VOICES = {
-    ("zh-CN", "f"): "zh-CN-XiaoxiaoNeural",   # 🇨🇳 femenina, cálida y clara
-    ("zh-CN", "m"): "zh-CN-YunjianNeural",    # 🇨🇳 masculina, madura
-    ("es-ES", "f"): "es-AR-ElenaNeural",      # 🇦🇷 femenina, acento argentino
-    ("es-ES", "m"): "es-AR-TomasNeural",      # 🇦🇷 masculina, acento argentino
+    ("zh-CN", "f"): "zh-CN-XiaoxiaoNeural",           # 🇨🇳 femenina, joven y cálida
+    ("zh-CN", "m"): "zh-CN-YunjianNeural",            # 🇨🇳 masculina, adulta
+    ("zh-CN", "f2"): "zh-CN-liaoning-XiaobeiNeural",  # 🇨🇳 FEMENINA ADULTA (v9.5)
+    ("zh-CN", "m2"): "zh-CN-YunxiNeural",             # 🇨🇳 masculina joven
+    ("es-ES", "f"): "es-AR-ElenaNeural",              # 🇦🇷 femenina, acento argentino
+    ("es-ES", "m"): "es-AR-TomasNeural",              # 🇦🇷 masculina, acento argentino
 }
 
 # ---------- Piper (respaldo) ----------
@@ -118,15 +126,17 @@ async def generate_tts(request: Request):
         body = await request.json()
         text = (body.get("text") or "").strip()
         lang = body.get("lang", "es-ES")
-        # 'voice' = 'f' (femenina) o 'm' (masculina); acepta 'gender' por compatibilidad
+        # 'voice' = 'f'/'f2' (femenina) o 'm'/'m2' (masculina); acepta 'gender' por compatibilidad
         gender = str(body.get("voice", body.get("gender", "f"))).lower()
 
         if not text:
             return JSONResponse(status_code=400, content={"error": "Falta texto"})
         if lang not in ("zh-CN", "es-ES"):
             lang = "es-ES"
-        if gender not in ("f", "m"):
+        if gender not in ("f", "m", "f2", "m2"):
             gender = "f"
+        if lang == "es-ES" and gender in ("f2", "m2"):
+            gender = "f" if gender == "f2" else "m"  # el español no tiene variantes 2
 
         voice_name = EDGE_VOICES.get((lang, gender), EDGE_VOICES[("es-ES", "f")])
 
