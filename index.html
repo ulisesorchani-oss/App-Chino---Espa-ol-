@@ -4,28 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Huayu Diario 日常華語 | Aprende mandarin, vive el idioma</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle'%3E%E8%AA%9E%3C/text%3E%3C/svg%3E">
+    <!-- v9.8: favicon con el sello rojo 日常華語 (reemplaza el SVG azul genérico) -->
+    <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
     <!-- PWA: instalable tipo app + offline -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/logo-192.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260910e">
+    <link rel="stylesheet" href="style.css?v=20260910g">
 </head>
 <body>
     <div class="container">
-        <!-- v7.18 Header compacto: una fila, acciones a la derecha -->
-        <header class="header">
+        <!-- v9.8 Header de marca: sello 日常華語 + nombre + slogan (identidad visual).
+             El sello va a la izquierda y el texto a la derecha (QA v9.8). Los botones
+             📲 Instalar / 🌙 tema conservan sus IDs — app.js no cambia. -->
+        <header class="header header-branded">
             <div class="header-row">
-                <h1>日常華語 Huayu Diario</h1>
+                <div class="brand-block">
+                    <img src="icons/logo-sello.png" alt="Sello 日常華語 — Huayu Diario" class="app-logo-img" width="58" height="58">
+                    <div class="brand-text">
+                        <h1 class="app-title">Huayu Diario</h1>
+                        <p class="app-slogan">Aprende chino, vive el idioma · 華語</p>
+                    </div>
+                </div>
                 <div class="header-actions">
                     <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC">📲 Instalar</button>
                     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
                 </div>
             </div>
-            <p class="subtitle">Aprende mandarin, vive el idioma</p>
         </header>
 
         <!-- v8.1 BARRA DE ESTUDIO (sticky en móvil): queda solo el Repaso SRS.

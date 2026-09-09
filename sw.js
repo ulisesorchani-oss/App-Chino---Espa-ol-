@@ -50,7 +50,9 @@
    ============================================================ */
 // v9.5: karaoke por PALABRA completa (Intl.Segmenter), f2 = femenina adulta Xiaobei (api/tts.py nuevo), TOCFL Band B completa (N3 進階 1091 + N4 高階 2194)
 // v9.6c: +2 mini-dramas HSK por nivel (lessons-extra.js en precache)
-const VERSION = 'v53'; // — invalida shell
+// v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
+//       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
+const VERSION = 'v54'; // — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -77,9 +79,11 @@ const PRECACHE = [
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
   './jspdf.umd.min.js',    // v7.1: ídem
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-512.png'
+  './icons/logo-192.png',      // v9.8: ícono PWA (lockup completo 日常華語)
+  './icons/logo-512.png',      // v9.8: ícono PWA alta resolución
+  './icons/logo-sello.png',    // v9.8: sello rojo del header
+  './icons/maskable-icon.png', // v9.8: ícono adaptable (safe zone círculo)
+  './icons/favicon.png'        // v9.8: favicon PNG del sello
   // v6.2: los datos van DENTRO de app.js (EMBEDDED_MODULE_DATA) — no hace falta data/
   // v7.7: los archivos DEL MODELO Whisper (40 MB) NO van al precache:
   //       los gestiona MODEL_CACHE en runtime (ver cacheFirstModel).

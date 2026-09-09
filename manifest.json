@@ -1,31 +1,30 @@
 {
-  "name": "Huayu Diario 日常華語 — Aprende mandarin, vive el idioma",
+  "name": "Huayu Diario — Aprende chino, vive el idioma",
   "short_name": "Huayu Diario",
-  "description": "Aprende mandarin con lecciones graduadas (mini-dramas HSK 1-6), oraciones diarias, exámenes HSK 3.0/TOCFL/DELE, lector con pinyin y colores de tonos, repaso inteligente y voz natural TTS.",
+  "description": "Práctica diaria de mandarín (華語) con contexto real: mini-dramas HSK 3.0 y TOCFL, clásicos, repaso SRS, diccionario offline y pronunciación. 日常華語.",
   "lang": "es",
   "dir": "ltr",
-  "start_url": "./index.html",
+  "id": "./",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f8fafc",
+  "background_color": "#fefefe",
   "theme_color": "#667eea",
   "categories": ["education"],
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/logo-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/logo-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "icons/maskable-512.png",
+      "src": "icons/maskable-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
