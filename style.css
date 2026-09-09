@@ -4021,3 +4021,86 @@ body.dark-mode .pz-counter {
     .cr-chip { padding: 4px 9px; font-size: 0.7rem; }
     .pz-counter { font-size: 0.74rem; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v9.3 — fix corrección (espacios IME) · quiz inline de clásicos ·
+   velocidad en lecturas · toque por carácter (LingQ) · 💾 respaldo +
+   Anki · 🅰 modo abuelo
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── pie de la lectura: ahora 4 botones (🇪🇸 · 🔤 · ⚡ · 🎯) ── */
+.lq-story-foot { grid-template-columns: 1fr 1fr 0.72fr 1.32fr; }
+
+/* ── carácter tocable (lecciones y clásicos) ── */
+.lq-line { position: relative; padding-right: 44px; }
+.lq-ch { border-radius: 3px; }
+.lq-ch:hover { background: rgba(124, 92, 240, .16); }
+.lq-ch:active { background: rgba(124, 92, 240, .3); }
+
+/* ── 🔊 por línea ── */
+.lq-line-say {
+    position: absolute; top: 8px; right: 6px;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid #eceff5; background: #f8fafc;
+    font-size: 13px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: transform .12s ease, border-color .12s ease;
+}
+.lq-line-say:active { transform: scale(.92); border-color: #7c5cf0; }
+.lq-line-say.lq-loading { opacity: .45; pointer-events: none; }
+body.dark-mode .lq-line-say { background: #1e293b; border-color: #334155; }
+
+/* ── respaldo de progreso ── */
+.bk-title { margin: 0 0 8px; font-size: 1.05rem; }
+.bk-intro { font-size: .8rem; color: #64748b; margin: 0 0 12px; line-height: 1.5; }
+.bk-actions { display: flex; flex-direction: column; gap: 8px; }
+.bk-actions .btn-primary, .bk-actions .btn-secondary { width: 100%; }
+.bk-note { font-size: .72rem; color: #94a3b8; margin: 10px 0 0; line-height: 1.45; }
+body.dark-mode .bk-intro { color: #94a3b8; }
+
+/* ── 🅰 MODO ABUELO — letras grandes (persistente) ── */
+body.grand-mode .sentence { font-size: 1.85rem; line-height: 1.5; }
+body.grand-mode .pinyin-text { font-size: 1.2rem; }
+body.grand-mode .translation { font-size: 1.18rem; }
+body.grand-mode #answer-input { font-size: 1.25rem; padding: 12px 14px; }
+body.grand-mode .btn-check,
+body.grand-mode #btn-check { font-size: 1.1rem; }
+body.grand-mode .mode-btn { font-size: .95rem; }
+body.grand-mode .mode-btn small { font-size: .72rem; }
+body.grand-mode .script-btn,
+body.grand-mode .pinyin-btn,
+body.grand-mode .speed-btn,
+body.grand-mode .btn-secondary { font-size: .95rem; }
+body.grand-mode .feedback { font-size: 1.12rem; }
+body.grand-mode .vocab-item { font-size: 1.1rem; }
+body.grand-mode .vocab-pop { font-size: 1.05rem; }
+body.grand-mode .vp-word { font-size: 2.2rem; }
+body.grand-mode .mtab { font-size: .98rem; }
+body.grand-mode .module-status { font-size: .95rem; }
+/* lectores de lecciones y clásicos */
+body.grand-mode .lq-line-zh { font-size: 1.5rem; line-height: 1.75; }
+body.grand-mode .lq-line-py { font-size: .95rem; }
+body.grand-mode .lq-line-es { font-size: 1rem; }
+body.grand-mode .lq-zh { font-size: 1.55rem; }
+body.grand-mode .lq-opt-zh { font-size: 1.35rem; }
+body.grand-mode .lq-opt { padding: 14px; }
+body.grand-mode .lq-btn { font-size: 1rem; }
+body.grand-mode .lq-es-box, body.grand-mode .lq-blurb, body.grand-mode .cr-intro { font-size: 1rem; }
+body.grand-mode .lq-card-zh { font-size: 1.5rem; }
+body.grand-mode .lq-card-py { font-size: 1rem; }
+body.grand-mode .lq-card-es { font-size: .95rem; }
+body.grand-mode .lq-verdict { font-size: 1.15rem; }
+body.grand-mode .srs-card { font-size: 2.1rem; }
+body.grand-mode .srs-py, body.grand-mode .srs-es { font-size: 1.05rem; }
+body.grand-mode .pl-hanzi { font-size: 2.2rem; }
+body.grand-mode .pl-prompt { font-size: 1.1rem; }
+body.grand-mode .pl-opt { font-size: 1.05rem; }
+body.grand-mode .reader-word { font-size: 1.05rem; }
+body.grand-mode .lq-line-say { width: 34px; height: 34px; font-size: 15px; }
+
+@media (max-width: 480px) {
+    .lq-line-say { top: 6px; right: 5px; width: 27px; height: 27px; font-size: 12px; }
+    .lq-line { padding-right: 38px; }
+    body.grand-mode .sentence { font-size: 1.6rem; }
+}

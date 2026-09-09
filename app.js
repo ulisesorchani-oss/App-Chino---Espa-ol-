@@ -888,6 +888,152 @@ function saveProgress() {
     } catch (e) { /* silencioso */ }
 }
 
+// ===== v9.3: RESPALDO DE PROGRESO + EXPORTAR A ANKI =====
+// Respaldo: JSON con TODAS las claves de la app (progreso, mazo SRS,
+// lecciones, ajustes) → importable en otro equipo (github.io ↔ vercel.app)
+// sin perder nada. Anki: TSV con las cabeceras mágicas de Anki
+// (#separator/#html) → Archivo → Importar mapea las 3 columnas + tags.
+function backupCollect() {
+    const data = {};
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k) continue;
+            if (k === STORAGE_KEY || k === 'theme' || /^ac_/.test(k)) data[k] = localStorage.getItem(k);
+        }
+    } catch (e) { /* sin storage */ }
+    return data;
+}
+function backupDownload(name, content, mime) {
+    try {
+        const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 800);
+        return true;
+    } catch (e) { return false; }
+}
+function backupHoy() { return new Date().toISOString().slice(0, 10); }
+function showBackupMsg(t) {
+    const el = document.getElementById('backup-msg');
+    if (el) el.textContent = t;
+    else moduleStatus(t);
+}
+function doBackupExport() {
+    const payload = { app: 'huayu-diario', kind: 'respaldo', version: 1, date: new Date().toISOString(), data: backupCollect() };
+    if (backupDownload('huayu-diario-respaldo-' + backupHoy() + '.json', JSON.stringify(payload), 'application/json')) {
+        showBackupMsg('✅ Respaldo descargado. Guardalo en un lugar seguro.');
+    }
+}
+function doBackupImport(file) {
+    const rd = new FileReader();
+    rd.onload = () => {
+        try {
+            const obj = JSON.parse(String(rd.result || ''));
+            if (!obj || obj.app !== 'huayu-diario' || !obj.data || typeof obj.data !== 'object') throw new Error('formato');
+            let n = 0;
+            Object.keys(obj.data).forEach(k => {
+                try { localStorage.setItem(k, String(obj.data[k])); n++; } catch (e) { }
+            });
+            showBackupMsg('✅ Importado (' + n + ' bloques). Recargando…');
+            setTimeout(() => { try { location.reload(); } catch (e) { } }, 900);
+        } catch (e) {
+            showBackupMsg('⚠ El archivo no parece un respaldo de Huayu Diario.');
+        }
+    };
+    rd.readAsText(file);
+}
+function ankiGloss(zh) {
+    try { const hit = lookupVocab(zh); if (hit && hit.rec && hit.rec.es) return hit.rec.es; } catch (e) { }
+    try { const d = dictMiniLookup(zh); if (d && d.def) return d.def; } catch (e) { }
+    return '';
+}
+function ankiPinyin(zh) {
+    try {
+        const hit = lookupVocab(zh);
+        if (hit && hit.level === 'dict' && hit.py) return hit.py;
+        if (hit && hit.rec && hit.rec.pinyin) return hit.rec.pinyin;
+    } catch (e) { }
+    try { if (typeof wordPinyin === 'function') { const p = wordPinyin(zh); if (p) return p; } } catch (e) { }
+    try {
+        if (typeof pinyinPro !== 'undefined') {
+            return pinyinPro.pinyin(zh, { type: 'all' }).map(x => x.isZh ? (x.pinyin || x.origin) : x.origin).join(' ').replace(/\s+/g, ' ').trim();
+        }
+    } catch (e) { }
+    return '';
+}
+function doAnkiExport() {
+    const rows = [];
+    const seen = new Set();
+    const push = (zh, py, es, tags) => {
+        zh = String(zh || '').trim();
+        if (!zh || seen.has(zh) || !READER_HANZI.test(zh)) return;
+        const pyF = String(py || ankiPinyin(zh) || '').replace(/\t/g, ' ').trim();
+        const esF = String(es || ankiGloss(zh) || '').replace(/\t/g, ' ').replace(/\r?\n/g, '<br>').trim();
+        if (!pyF && !esF) return; // sin datos útiles para estudiar
+        seen.add(zh);
+        rows.push([zh, pyF, esF, tags || 'huayu-diario'].join('\t'));
+    };
+    // 1) mazo de repaso (SRS) — con lo guardado, glosa de respaldo si falta
+    try {
+        const db = JSON.parse(localStorage.getItem('ac_srs') || 'null');
+        if (db && db.cards) {
+            Object.keys(db.cards).forEach(zh => {
+                const c = db.cards[zh] || {};
+                push(zh, c.py || '', c.es || '', 'huayu-repaso');
+            });
+        }
+    } catch (e) { }
+    // 2) palabras del estudio (conocidas / a repasar)
+    try {
+        const prog = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (prog) {
+            (prog.newWords || []).forEach(w => push(w, '', '', 'huayu-a-repasar'));
+            (prog.knownWords || []).forEach(w => push(w, '', '', 'huayu-conocidas'));
+        }
+    } catch (e) { }
+    if (!rows.length) {
+        showBackupMsg('⚠ Todavía no hay palabras para exportar — practicá un poco primero.');
+        return;
+    }
+    const tsv = '#separator:tab\n#html:true\n#tags column:4\n' + rows.join('\n') + '\n';
+    if (backupDownload('huayu-diario-anki-' + backupHoy() + '.txt', tsv, 'text/tab-separated-values')) {
+        showBackupMsg('✅ ' + rows.length + ' palabras exportadas. En Anki: Archivo → Importar.');
+    }
+}
+function openBackupPop() {
+    const p = document.getElementById('backup-pop');
+    if (p) p.classList.remove('hidden');
+}
+function closeBackupPop() {
+    const p = document.getElementById('backup-pop');
+    if (p) p.classList.add('hidden');
+}
+
+// ===== v9.3: MODO ABUELO — letras grandes para alumnos adultos mayores =====
+// Persistente ('ac_grand'): agranda tarjeta, botones, lectores, repaso y
+// opciones del quiz sin tocar el resto del diseño.
+function applyGrand() {
+    let on = false;
+    try { on = localStorage.getItem('ac_grand') === '1'; } catch (e) { }
+    document.body.classList.toggle('grand-mode', on);
+    const b = document.getElementById('btn-grand');
+    if (b) {
+        b.classList.toggle('active', on);
+        b.textContent = on ? '🅰 Grande ON' : '🅰 Grande';
+        b.title = 'Letras grandes para leer cómodo (modo abuelo)';
+    }
+}
+function toggleGrand() {
+    try {
+        localStorage.setItem('ac_grand', document.body.classList.contains('grand-mode') ? '0' : '1');
+    } catch (e) { }
+    applyGrand();
+}
+
 // v9.0: canonicalización trad→simp para los guardados viejos. Hasta v8.3 las
 // ORACIONES guardaban la respuesta en el guion activo: quien estudió con 繁
 // tiene 謝謝/時間/哪裡 en "Palabras aprendidas" en vez de 谢谢/时间/哪里. El mapa
@@ -1046,6 +1192,8 @@ function applySavedUI() {
 
     const btnCnEs = document.getElementById('btn-cn-es');
     if (btnCnEs) btnCnEs.classList.toggle('active', state.mode === 'cn-es');
+
+    applyGrand(); // v9.3: restaurar modo abuelo (letras grandes)
 
         // Actualizar estado visual de botones simp/trad
     const btnSimp = document.getElementById('btn-simplified');
@@ -1258,6 +1406,22 @@ function setupEventListeners() {
         hideToneLegend();
     });
     safeAdd('btn-speed', cycleSpeed);
+    // v9.3: respaldo de progreso + exportar a Anki + modo abuelo
+    safeAdd('btn-backup', openBackupPop);
+    safeAdd('btn-backup-close', closeBackupPop);
+    safeAdd('btn-backup-export', doBackupExport);
+    safeAdd('btn-backup-import', () => {
+        const f = document.getElementById('backup-file');
+        if (f) f.click();
+    });
+    const backupFileEl = document.getElementById('backup-file');
+    if (backupFileEl) backupFileEl.addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (f) doBackupImport(f);
+        e.target.value = ''; // permite re-importar el mismo archivo
+    });
+    safeAdd('btn-anki-export', doAnkiExport);
+    safeAdd('btn-grand', toggleGrand);
     safeAdd('btn-voice-zh', () => cycleVoice('zh'));
     safeAdd('btn-voice-es', () => cycleVoice('es'));
 
@@ -1367,7 +1531,8 @@ function setupEventListeners() {
         if (pop.contains(e.target)) return;
         // v7.9: los .reader-word del lector ABREN el popup — ese mismo clic
         // no debe cerrarlo (igual que las chips .vocab-item del cajón)
-        if (e.target.closest && (e.target.closest('.vocab-item') || e.target.closest('.reader-word'))) return;
+        // v9.3: ídem los caracteres tocables .lq-ch de lecciones y clásicos
+        if (e.target.closest && (e.target.closest('.vocab-item') || e.target.closest('.reader-word') || e.target.closest('.lq-ch'))) return;
         hideVocabPop();
     });
     
@@ -2233,14 +2398,31 @@ function checkAnswer() {
 
     // v7.19: tarjetas de palabra → coincidencia EXACTA (sin acentos y sin mayúsculas).
     // El matching por inclusión de las oraciones sería demasiado laxo con glosas cortas.
+    // v9.3: normalización ROBUSTA de la corrección. Caso real (明明德): el teclado
+    // chino del celular mete ESPACIOS entre candidatos ("明 明 德"), agrega
+    // puntuación de arrastre o escribe el español sin acentos — y la respuesta
+    // correcta se marcaba mal. Ahora se comparan versiones normalizadas: sin
+    // espacios (el chino no usa), sin puntuación, sin acentos y sin mayúsculas.
+    // La inclusión se conserva: responder la oración completa o una parte del
+    // blank sigue contando como antes.
     const deacc = (x) => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normZh = (t) => deacc(String(t == null ? '' : t)).toLowerCase()
+        .replace(/[\s\u00A0\u3000]+/g, '')
+        .replace(/[。，、！？：；「」『』《》（）〈〉·…―—–\-.!?;:,"'“”‘’()\[\]{}]/g, '');
+    const normEs = (t) => deacc(String(t == null ? '' : t)).toLowerCase()
+        .replace(/^[¿¡"'“”(\[\s]+/, '').replace(/[.!?,;:)"“”'\]\s]+$/g, '')
+        .replace(/\s+/g, ' ').trim();
+    const expectChineseAns = s.w ? !learningChinese : learningChinese;
     const isCorrect = s.w
-        ? validAnswers.some(ans => deacc(ans.toLowerCase()) === deacc(input.toLowerCase()))
-        : validAnswers.some(ans => {
-            const a = ans.toLowerCase();
-            const i = input.toLowerCase();
-            return input === ans || i === a || i.includes(a) || a.includes(i);
-        });
+        ? validAnswers.some(ans => normEs(ans) === normEs(input))
+        : (() => {
+            const iN = expectChineseAns ? normZh(input) : normEs(input);
+            if (!iN) return false;
+            return validAnswers.some(ans => {
+                const aN = expectChineseAns ? normZh(ans) : normEs(ans);
+                return !!aN && (iN === aN || iN.includes(aN) || aN.includes(iN));
+            });
+        })();
 
     const allOptions = validAnswers.join(' / ');
 
@@ -5312,6 +5494,32 @@ function pzCounterUpdate() {
     if (!pop) return;
     const body = $('lq-body'), segs = $('lq-segments'), progNum = $('lq-progress-num');
 
+    // v9.3: cada carácter han tocable (estilo LingQ/DuChinese): lo toqués →
+    // popup con su pinyin, su significado y “🔁 Sumar a mi repaso” (el MISMO
+    // popup de vocabulario de toda la app). Los no-han quedan como texto.
+    const LQ_RE_HANZI = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+    function zhCharsHtml(zh) {
+        return String(zh == null ? '' : zh).split('').map(ch =>
+            LQ_RE_HANZI.test(ch)
+                ? '<span class="lq-ch" data-ch="' + escHtml(ch) + '">' + escHtml(ch) + '</span>'
+                : escHtml(ch)
+        ).join('');
+    }
+    // v9.3: chip ⚡ de velocidad — muestra y cambia la MISMA velocidad que el
+    // botón ⚡ de la tarjeta (queda sincronizado: llama a cycleSpeed global).
+    function speedLabel() {
+        return '⚡ ' + ((typeof playbackSpeed === 'number') ? playbackSpeed : 1) + 'x';
+    }
+    function bindSpeedChip(btn) {
+        if (!btn) return;
+        btn.textContent = speedLabel();
+        btn.title = 'Velocidad de la lectura: la MISMA que elegís con ⚡ en la tarjeta';
+        btn.addEventListener('click', () => {
+            if (typeof cycleSpeed === 'function') cycleSpeed();
+            btn.textContent = speedLabel();
+        });
+    }
+
     // ── utilidades compartidas ──
     const ckKey = (typeof ck === 'function') ? ck() : 'simp';
     const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
@@ -5339,7 +5547,14 @@ function pzCounterUpdate() {
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
             lqAudio = new Audio(url);
+            // v9.3: la lectura respeta la velocidad elegida (⚡ arriba) Y con
+            // preservesPitch la voz sigue natural a 0.85x/0.7x. Se re-afirma
+            // en 'playing' porque iOS Safari puede resetear el rate al cargar.
+            try { lqAudio.preservesPitch = true; lqAudio.webkitPreservesPitch = true; } catch (e2) { }
             lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            lqAudio.addEventListener('playing', () => {
+                try { lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
+            }, { once: true });
             await lqAudio.play();
             lqAudio.onended = () => { URL.revokeObjectURL(url); lqAudio = null; };
         } catch (e) {
@@ -5445,8 +5660,9 @@ function pzCounterUpdate() {
         const k = zhKey();
         const lines = l.lines.map((ln, i) => {
             const zh = (k === 'trad' ? ln.zhT : ln.zh);
-            return '<div class="lq-line" data-i="' + i + '" role="button" tabindex="0" title="Tocá para escuchar">' +
-                '<div class="lq-line-zh">' + escHtml(zh) + '</div>' +
+            return '<div class="lq-line" data-i="' + i + '" role="button" tabindex="0" title="Tocá un carácter para verlo · 🔊 para escuchar la línea">' +
+                '<div class="lq-line-zh">' + zhCharsHtml(zh) + '</div>' +
+                '<button type="button" class="lq-line-say" data-zh="' + escHtml(zh) + '" aria-label="Escuchar la línea">🔊</button>' +
                 '<div class="lq-line-py hidden" data-zh="' + escHtml(ln.zh) + '"></div>' +
                 '<div class="lq-line-es' + (verEs ? '' : ' hidden') + '">' + escHtml(ln.es) + '</div></div>';
         }).join('');
@@ -5459,8 +5675,10 @@ function pzCounterUpdate() {
             '<div class="lq-story-foot">' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-es">🇪🇸 Español: ' + (verEs ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-pinyin">🔤 Pinyin: OFF</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-story-speed">⚡ …</button>' +
             '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">🎯 Practicar ' + l.quiz.length + '</button>' +
             '</div>';
+        bindSpeedChip(body.querySelector('#lq-story-speed'));
         body.querySelector('#lq-story-practice').addEventListener('click', () => openQuiz(l));
         body.querySelector('#lq-story-es').addEventListener('click', (e) => {
             setVerEs(!verEs);
@@ -5476,6 +5694,11 @@ function pzCounterUpdate() {
             });
         });
         body.querySelector('.lq-lines').addEventListener('click', (e) => {
+            // v9.3: 🔊 de la línea (escucha) · carácter tocado (ficha) · resto de la línea (escucha)
+            const say = e.target.closest('.lq-line-say');
+            if (say) { speakZh(say.dataset.zh, say); return; }
+            const chEl = e.target.closest('.lq-ch');
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); return; }
             const line = e.target.closest('.lq-line');
             if (!line) return;
             const ln = l.lines[+line.dataset.i];
@@ -5699,6 +5922,28 @@ function pzCounterUpdate() {
         catch (e) { return ''; }
     };
 
+    // v9.3: mismos helpers que lessonsInit — carácter tocable + chip ⚡
+    const CR_RE_HANZI = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+    function zhCharsHtml(zh) {
+        return String(zh == null ? '' : zh).split('').map(ch =>
+            CR_RE_HANZI.test(ch)
+                ? '<span class="lq-ch" data-ch="' + escHtml(ch) + '">' + escHtml(ch) + '</span>'
+                : escHtml(ch)
+        ).join('');
+    }
+    function speedLabel() {
+        return '⚡ ' + ((typeof playbackSpeed === 'number') ? playbackSpeed : 1) + 'x';
+    }
+    function bindSpeedChip(btn) {
+        if (!btn) return;
+        btn.textContent = speedLabel();
+        btn.title = 'Velocidad de la lectura: la MISMA que elegís con ⚡ en la tarjeta';
+        btn.addEventListener('click', () => {
+            if (typeof cycleSpeed === 'function') cycleSpeed();
+            btn.textContent = speedLabel();
+        });
+    }
+
     // ── matcher: oración practicada → bloque/línea del texto original ──
     // 1) normaliza (solo Han) · 2) alias de citas abreviadas · 3) contención
     // 4) respaldo: solapamiento de pares de caracteres (Dice ≥ 0.55).
@@ -5760,7 +6005,13 @@ function pzCounterUpdate() {
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
             crAudio = new Audio(url);
+            // v9.3: preservesPitch (voz natural a 0.85x/0.7x) + re-afirmar el
+            // rate en 'playing' (iOS Safari puede resetearlo al cargar).
+            try { crAudio.preservesPitch = true; crAudio.webkitPreservesPitch = true; } catch (e2) { }
             crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            crAudio.addEventListener('playing', () => {
+                try { crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
+            }, { once: true });
             await crAudio.play();
             crAudio.onended = () => { URL.revokeObjectURL(url); crAudio = null; if (el) el.classList.remove('lq-speaking'); };
         } catch (e) {
@@ -5796,6 +6047,7 @@ function pzCounterUpdate() {
         pop.classList.add('hidden');
         try { document.body.style.overflow = ''; } catch (e) { }
         CR.mod = null;
+        CQ.items = null; CQ.idx = 0; // v9.3: resetea la práctica inline
     }
 
     // ── vista: un bloque del texto original ──
@@ -5816,8 +6068,9 @@ function pzCounterUpdate() {
             // CON pinyin (antes quedaban vacías/ocultas hasta re-tocar el botón)
             const pyCls = CR.pinyin ? 'lq-line-py' : 'lq-line-py hidden';
             return '<div class="lq-line' + (i === hitLine ? ' cr-flash' : '') + '" data-i="' + i + '"' +
-                (i === hitLine ? ' id="cr-hit"' : '') + ' role="button" tabindex="0" title="Tocá para escuchar">' +
-                '<div class="lq-line-zh">' + escHtml(zh) + '</div>' +
+                (i === hitLine ? ' id="cr-hit"' : '') + ' role="button" tabindex="0" title="Tocá un carácter para verlo · 🔊 para escuchar la línea">' +
+                '<div class="lq-line-zh">' + zhCharsHtml(zh) + '</div>' +
+                '<button type="button" class="lq-line-say" data-zh="' + escHtml(zh) + '" aria-label="Escuchar la línea">🔊</button>' +
                 '<div class="' + pyCls + '" data-zh="' + escHtml(zh) + '">' + (CR.pinyin ? escHtml(pyLine(zh)) : '') + '</div>' +
                 '<div class="lq-line-es' + (esPref() ? '' : ' hidden') + '">' + escHtml(pair[1]) + '</div></div>';
         }).join('');
@@ -5837,6 +6090,7 @@ function pzCounterUpdate() {
             '<div class="lq-story-foot">' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-es">🇪🇸 Español: ' + (esPref() ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-py">🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF') + '</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-speed">⚡ …</button>' +
             '<button type="button" class="lq-btn lq-primary" id="cr-practice">🎯 Practicar este clásico</button>' +
             '</div>' +
             '<div class="cr-nav">' +
@@ -5859,7 +6113,12 @@ function pzCounterUpdate() {
                 el.classList.toggle('hidden', !CR.pinyin);
             });
         });
+        bindSpeedChip(body.querySelector('#cr-speed'));
         body.querySelector('#cr-practice').addEventListener('click', () => {
+            // v9.3: la práctica de clásicos es un multiple choice DENTRO del
+            // lector (misma piel que las lecciones HSK) — no cambia de ventana
+            // ni interrumpe la lectura. Sin datos embebidos queda el salto viejo.
+            if (openCq(mod)) return;
             closeCrPop();
             if (typeof setModule === 'function') setModule(mod);
             const card = $('sentence-card');
@@ -5878,6 +6137,11 @@ function pzCounterUpdate() {
             renderBlock(-1);
         });
         body.querySelector('#cr-lines').addEventListener('click', (e) => {
+            // v9.3: 🔊 de la línea · carácter tocado (ficha del popup) · resto (escucha)
+            const say = e.target.closest('.lq-line-say');
+            if (say) { speakCr(say.dataset.zh, say); return; }
+            const chEl = e.target.closest('.lq-ch');
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); return; }
             const line = e.target.closest('.lq-line');
             if (!line) return;
             const i = +line.dataset.i;
@@ -5909,6 +6173,210 @@ function pzCounterUpdate() {
         }
         return openCr(mod, block, line);
     };
+
+    // ── v9.3: PRÁCTICA INLINE del clásico — multiple choice como las lecciones ──
+    // Los ítems vienen de los datos embebidos del módulo (mismos que la
+    // práctica tipeada). La correcta es chinese_simp_answer; los 2
+    // distractores salen del MISMO clásico (largo parecido) y, si faltaran,
+    // de los otros clásicos. Mezcla Fisher-Yates por pregunta, igual que las
+    // lecciones: la posición visible de la correcta nunca es predecible.
+    const CQ = { items: null, idx: 0, results: null, built: null, tmap: null, answered: false };
+
+    function cqItemsFor(mod) {
+        try {
+            const rows = (typeof EMBEDDED_MODULE_DATA !== 'undefined') ? EMBEDDED_MODULE_DATA[mod] : null;
+            return (rows && rows.length >= 2) ? rows : null;
+        } catch (e) { return null; }
+    }
+    function cqOptions(items, idx) {
+        const it = items[idx];
+        const correct = String(it.chinese_simp_answer || '').trim();
+        const seen = new Set([correct]);
+        const pool = [];
+        const rest = items.map((x, i) => i).filter(i => i !== idx)
+            .sort((a, b) =>
+                Math.abs(String(items[a].chinese_simp_answer || '').length - correct.length) -
+                Math.abs(String(items[b].chinese_simp_answer || '').length - correct.length));
+        for (const i of rest) {
+            const a = String(items[i].chinese_simp_answer || '').trim();
+            if (!a || seen.has(a)) continue;
+            seen.add(a); pool.push(a);
+            if (pool.length >= 2) break;
+        }
+        if (pool.length < 2 && typeof EMBEDDED_MODULE_DATA !== 'undefined') {
+            outer: for (const key of Object.keys(EMBEDDED_MODULE_DATA)) {
+                if (key === mod || key.indexOf('Clasicos-') !== 0) continue;
+                for (const x of EMBEDDED_MODULE_DATA[key]) {
+                    const a = String(x.chinese_simp_answer || '').trim();
+                    if (!a || seen.has(a)) continue;
+                    seen.add(a); pool.push(a);
+                    if (pool.length >= 2) break outer;
+                }
+            }
+        }
+        const opts = [correct].concat(pool.slice(0, 2));
+        const d = [0, 1, 2];
+        for (let i = d.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [d[i], d[j]] = [d[j], d[i]];
+        }
+        return { opts: opts, order: d };
+    }
+    function openCq(mod) {
+        const items = cqItemsFor(mod);
+        if (!items) return false;
+        CR.mod = mod;
+        CQ.items = items; CQ.idx = 0;
+        CQ.results = new Array(items.length).fill(null);
+        CQ.built = items.map((_, i) => cqOptions(items, i));
+        // mapa simp→trad de las respuestas para el modo 繁
+        CQ.tmap = {};
+        items.forEach(it => {
+            const s = String(it.chinese_simp_answer || '').trim();
+            const t = String(it.chinese_trad_answer || '').trim();
+            if (s && t) CQ.tmap[s] = t;
+        });
+        openCrPop();
+        renderCq();
+        return true;
+    }
+    function cqTrad(a) {
+        return (zhKey() === 'trad' && CQ.tmap && CQ.tmap[a]) ? CQ.tmap[a] : a;
+    }
+    function cqCardHtml(label, zhTxt, cls, it) {
+        const py = it && it.pinyin ? it.pinyin : '';
+        const meaning = it && it.spanish_answer ? it.spanish_answer : '';
+        const full = it && it.spanish_full ? it.spanish_full : '';
+        const li = (t) => t ? '<li>' + escHtml(t) + '</li>' : '';
+        return '<div class="lq-card ' + cls + '"><div class="lq-card-label">' + label + '</div>' +
+            '<div class="lq-card-zh" lang="zh">' + escHtml(zhTxt) + '</div>' +
+            (py ? '<div class="lq-card-py">' + escHtml(py) + '</div>' : '') +
+            '<ul class="lq-card-es">' + li(meaning || full) + (meaning && full && full !== meaning ? li(full) : '') + '</ul></div>';
+    }
+    function renderCq() {
+        const items = CQ.items, it = items[CQ.idx], built = CQ.built[CQ.idx];
+        CQ.answered = false;
+        progNum.textContent = (CQ.idx + 1) + '/' + items.length;
+        const segsEl = $('cr-segments');
+        if (segsEl) segsEl.innerHTML = CQ.results.map(r =>
+            '<span class="lq-seg' + (r === true ? ' ok' : r === false ? ' bad' : '') + '"></span>').join('');
+        const info = DATA[CR.mod];
+        const cinfo = (typeof CLASSICS_INFO !== 'undefined') ? CLASSICS_INFO[CR.mod] : null;
+        const title = (cinfo ? ((zhKey() === 'trad' ? cinfo.zhT : cinfo.zh) + ' · ') : '') + info.es;
+        const cloze = String((zhKey() === 'trad' && it.chinese_trad_cloze) ? it.chinese_trad_cloze : it.chinese_simp_cloze || '');
+        const parts = cloze.split('___');
+        const ord = built.order;
+        const opts = ord.map((dataIdx, pos) =>
+            '<button type="button" class="lq-opt" data-pos="' + pos + '"><span class="lq-opt-letter">' +
+            'ABC'[pos] + '</span><span class="lq-opt-zh" lang="zh">' + escHtml(cqTrad(built.opts[dataIdx])) + '</span></button>'
+        ).join('');
+        body.innerHTML =
+            '<div class="lq-tag-row"><div class="lq-lesson-tag">📜 ' + escHtml(title) + '</div>' +
+            '<button type="button" class="lq-btn lq-ghost lq-mini" id="cq-es">🇪🇸 Traducción: ' + (esPref() ? 'ON' : 'OFF') + '</button></div>' +
+            '<div class="lq-zh" id="cq-zh">' + escHtml(parts[0] || '') + '<span class="lq-blank" id="cq-blank">？</span>' + escHtml(parts[1] || '') + '</div>' +
+            '<div class="lq-es-box' + (esPref() ? '' : ' hidden') + '" id="cq-es-box">' + escHtml(it.spanish_full || '') + '</div>' +
+            '<div class="lq-opts" id="cq-opts">' + opts + '</div>' +
+            '<div class="lq-feedback hidden" id="cq-feedback"></div>' +
+            '<div class="lq-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="cq-speak">🔊 Escuchar</button>' +
+            '<button type="button" class="lq-btn lq-primary hidden" id="cq-next">Siguiente ▶</button>' +
+            '</div>';
+        body.querySelector('#cq-es').addEventListener('click', (e) => {
+            const v = !esPref(); setEsPref(v);
+            e.target.textContent = '🇪🇸 Traducción: ' + (v ? 'ON' : 'OFF');
+            const box = body.querySelector('#cq-es-box');
+            if (box) box.classList.toggle('hidden', !v);
+        });
+        body.querySelector('#cq-speak').addEventListener('click', (e) => {
+            const full = String((zhKey() === 'trad' && it.chinese_trad_full) ? it.chinese_trad_full : it.chinese_simp_full || '');
+            speakCr(full, e.target);
+        });
+        body.querySelector('#cq-opts').addEventListener('click', (e) => {
+            const b = e.target.closest('.lq-opt');
+            if (b && !CQ.answered) cqAnswer(+b.dataset.pos);
+        });
+        body.querySelector('#cq-next').addEventListener('click', cqNext);
+    }
+    function cqAnswer(pos) {
+        CQ.answered = true;
+        const it = CQ.items[CQ.idx], built = CQ.built[CQ.idx];
+        const dataIdx = built.order[pos];
+        const ok = dataIdx === 0;
+        CQ.results[CQ.idx] = ok;
+        // segmentos del encabezado (ok/bad/null) — igual que las lecciones
+        const segsEl2 = $('cr-segments');
+        if (segsEl2) segsEl2.innerHTML = CQ.results.map(r =>
+            '<span class="lq-seg' + (r === true ? ' ok' : r === false ? ' bad' : '') + '"></span>').join('');
+        const chosen = built.opts[dataIdx], right = built.opts[0];
+        const blank = body.querySelector('#cq-blank');
+        if (blank) {
+            blank.textContent = cqTrad(chosen);
+            blank.classList.add(ok ? 'fill-ok' : 'fill-bad');
+        }
+        body.querySelectorAll('.lq-opt').forEach((b, bi) => {
+            b.disabled = true;
+            if (bi === built.order.indexOf(0)) b.classList.add('is-right');
+            else if (bi === pos) b.classList.add('is-wrong');
+        });
+        let fb;
+        if (ok) {
+            fb = '<div class="lq-verdict ok">✓ ¡Correcto!</div>' + cqCardHtml('LA FRASE', cqTrad(right), 'lq-card-green', it);
+        } else {
+            fb = '<div class="lq-verdict bad">✗ Casi — repasala en tu mazo</div>' +
+                '<div class="lq-cards">' + cqCardHtml('TU RESPUESTA', cqTrad(chosen), 'lq-card-red', it) +
+                cqCardHtml('RESPUESTA CORRECTA', cqTrad(right), 'lq-card-green', it) + '</div>';
+        }
+        const fbel = body.querySelector('#cq-feedback');
+        fbel.innerHTML = fb;
+        fbel.classList.remove('hidden');
+        // bookkeeping idéntico al motor principal (identidad = hanzi simplificado)
+        if (ok) {
+            if (typeof state !== 'undefined') {
+                state.knownWords.add(right);
+                state.newWords.delete(right);
+            }
+        } else {
+            if (typeof state !== 'undefined') state.newWords.add(right);
+            if (typeof window.acSrsMiss === 'function') {
+                window.acSrsMiss({
+                    w: 1, module: 'Clásico ' + ((typeof CLASSICS_INFO !== 'undefined' && CLASSICS_INFO[CR.mod]) ? CLASSICS_INFO[CR.mod].es : CR.mod),
+                    level: 0,
+                    chinese_simp_answer: right, chinese_trad_answer: (CQ.tmap && CQ.tmap[right]) || right,
+                    spanish_answer: it.spanish_answer, spanish_alternatives: it.spanish_alternatives || null,
+                    spanish_full: it.spanish_full, chinese_simp_full: it.chinese_simp_full,
+                    pinyin: it.pinyin || ''
+                });
+            }
+        }
+        try { saveProgress(); updateStats(); updateVocabularyPanel(); } catch (e) { }
+        const nx = body.querySelector('#cq-next');
+        nx.classList.remove('hidden');
+        if (CQ.idx === CQ.items.length - 1) nx.textContent = 'Ver resultado 🏁';
+    }
+    function cqNext() {
+        if (CQ.idx < CQ.items.length - 1) { CQ.idx++; renderCq(); return; }
+        const score = CQ.results.filter(Boolean).length;
+        progNum.textContent = '🏁';
+        const segsEl = $('cr-segments');
+        if (segsEl) segsEl.innerHTML = '';
+        const total = CQ.items.length;
+        const msg = score === total ? '¡Perfecto! El clásico ya es tuyo.' :
+            score >= Math.ceil(total * 0.7) ? '¡Muy bien! Seguí así.' :
+                'Buen intento. Leé el texto otra vez y repetí.';
+        body.innerHTML =
+            '<div class="lq-final">' +
+            '<div class="lq-final-emoji">📜</div>' +
+            '<div class="lq-final-score">' + score + '/' + total + '</div>' +
+            '<div class="lq-final-msg">' + msg + '</div>' +
+            '<div class="lq-final-actions">' +
+            '<button type="button" class="lq-btn lq-ghost" id="cq-final-read">📖 Leer el clásico</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="cq-final-retry">🔁 Repetir práctica</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="cq-final-close">Seguir ✕</button>' +
+            '</div></div>';
+        body.querySelector('#cq-final-read').addEventListener('click', () => renderBlock(-1));
+        body.querySelector('#cq-final-retry').addEventListener('click', () => openCq(CR.mod));
+        body.querySelector('#cq-final-close').addEventListener('click', closeCrPop);
+    }
 
     // ── lista directa en la pestaña Clásicos ──
     function renderCrList() {
@@ -5975,6 +6443,7 @@ function pzCounterUpdate() {
     window.CR_DEBUG = {
         get mods() { return Object.keys(DATA).length; },
         get view() { return { mod: CR.mod, block: CR.block, open: !pop.classList.contains('hidden') }; },
-        get flash() { return !!body.querySelector('.cr-flash'); }
+        get flash() { return !!body.querySelector('.cr-flash'); },
+        get quiz() { return { active: !!CQ.items, items: CQ.items ? CQ.items.length : 0, idx: CQ.idx, answered: CQ.answered, results: CQ.results ? CQ.results.slice() : null }; }
     };
 })();
