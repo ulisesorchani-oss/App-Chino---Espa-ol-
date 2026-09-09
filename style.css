@@ -4104,3 +4104,98 @@ body.grand-mode .lq-line-say { width: 34px; height: 34px; font-size: 15px; }
     .lq-line { padding-right: 38px; }
     body.grand-mode .sentence { font-size: 1.6rem; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v9.4 — KARAOKE DE LECTURA (✨, desactivado por defecto)
+   Los .lq-ch de la línea activa se van "rellenando" con un marcador
+   ámbar al ritmo del audio (clase .k-on asignada por KARA en app.js).
+   ════════════════════════════════════════════════════════════════ */
+.lq-line.kara-active .lq-ch {
+    transition: color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+.lq-line.kara-active .lq-ch.k-on {
+    background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+    color: #78350f;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, .22), 0 0 12px rgba(251, 191, 36, .45);
+    border-radius: 4px;
+}
+body.dark-mode .lq-line.kara-active .lq-ch.k-on {
+    background: linear-gradient(180deg, rgba(251, 191, 36, .38) 0%, rgba(245, 158, 11, .46) 100%);
+    color: #fff7e6;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, .30), 0 0 14px rgba(251, 191, 36, .35);
+}
+body.paper-mode .lq-line.kara-active .lq-ch.k-on {
+    background: linear-gradient(180deg, #fde9b8 0%, #fbdc8e 100%);
+    color: #7c4a03;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   v9.4 — MODO PAPEL DE ARROZ 🏮 (tema cálido crema/ámbar)
+   Tercer estado del botón de tema: claro → papel → oscuro. Redefine
+   las variables globales y cubre las superficies con color fijo
+   (paneles de práctica, lectores lq/cr, popups, inputs, botones)
+   para descansar la vista en sesiones largas.
+   ════════════════════════════════════════════════════════════════ */
+body.paper-mode {
+    --bg-light: #f7efdd;
+    --bg-card: #fdf8ec;
+    --text-primary: #43382a;
+    --text-secondary: #8a7a5f;
+    --border: #e6dabf;
+    background: linear-gradient(135deg, #ecdfc0 0%, #f6ecd7 55%, #eddeb9 100%);
+}
+body.paper-mode .card,
+body.paper-mode .vocabulary-panel {
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 10px -2px rgba(140, 112, 60, .18);
+}
+body.paper-mode #answer-input {
+    background-color: #fffdf6;
+    color: #43382a;
+    border-color: #d9c9a3;
+}
+body.paper-mode .btn-secondary {
+    background: #efe4c9;
+    color: #43382a;
+}
+/* lectores de lecciones y clásicos (superficies fijas → override) */
+body.paper-mode .lq-inner { background: #f7efdd; }
+body.paper-mode .lq-header { background: #fdf8ec; border-color: #e6dabf; }
+body.paper-mode .lq-progress-num { color: #8a7a5f; }
+body.paper-mode .lq-seg { background: #e6dabf; }
+body.paper-mode .lq-x { background: #f0e6cd; color: #8a7a5f; }
+body.paper-mode .lq-line { background: #fffdf6; border-color: #e6dabf; }
+body.paper-mode .lq-line:active { border-color: #b45309; }
+body.paper-mode .lq-line-zh { color: #3d3327; }
+body.paper-mode .lq-story-zh { color: #3d3327; }
+body.paper-mode .lq-ghost { background: #f0e6cd; color: #6b5b40; }
+body.paper-mode .lq-btn.lq-loading { opacity: .6; }
+body.paper-mode .lq-opt { background: #fffdf6; border-color: #e6dabf; color: #43382a; }
+body.paper-mode .lq-opt-letter { color: #b45309; }
+body.paper-mode .lq-zh { color: #3d3327; }
+body.paper-mode .lq-es-box { background: #f3ead2; color: #6b5b40; }
+body.paper-mode .lq-feedback { background: #f3ead2; }
+/* popups generales (fichas, repaso, colocación, respaldo) */
+body.paper-mode .vocab-pop,
+body.paper-mode #placement-pop,
+body.paper-mode #srs-pop,
+body.paper-mode .backup-pop {
+    background: #fdf8ec;
+    color: #43382a;
+    border: 1px solid #e6dabf;
+}
+/* v9.4 papel: textos que nacieron blancos sobre el fondo morado —
+   en el tema cálido pasan a tonos café/tinta para mantener contraste */
+body.paper-mode .header h1,
+body.paper-mode .header .subtitle,
+body.paper-mode .header { color: #4a3f2e; }
+body.paper-mode .section-title { color: #7a5b23; }
+body.paper-mode .hsk-level-selector { color: #6b5b40; }
+body.paper-mode .level-dropdown,
+body.paper-mode .pz-label select.level-dropdown {
+    background: #fffdf6;
+    color: #43382a;
+    border-color: #d9c9a3;
+}
+body.paper-mode .level-dropdown option { background: #fffdf6; color: #43382a; }
+body.paper-mode .reader-lang { color: #8a7a5f; }

@@ -855,10 +855,17 @@ const SPEED_LABELS = { '0.85': '🐢 0.85x', '1': '⚡ 1.0x', '0.7': '🐌 0.7x'
 let playbackSpeed = parseFloat(localStorage.getItem('ac_speed'));
 if (SPEED_STEPS.indexOf(playbackSpeed) === -1) playbackSpeed = 0.85;
 
-// ===== Voz TTS (persistente: 'f' = femenina, 'm' = masculina) =====
-const VOICE_ICONS = { f: '👩', m: '👨' };
-let voiceZh = localStorage.getItem('ac_voice_zh') === 'm' ? 'm' : 'f';
-let voiceEs = localStorage.getItem('ac_voice_es') === 'm' ? 'm' : 'f';
+// ===== Voz TTS (persistente) =====
+// v9.4: el chino pasa de 2 a 4 voces — f (Xiaoxiao), m (Yunjian),
+// f2 (Xiaoyi, joven) y m2 (Yunxi, joven). El botón 🇨🇳 cicla las cuatro;
+// el español mantiene f/m. Las nuevas claves viajan al API igual que f/m.
+const VOICE_ICONS = { f: '👩', m: '👨', f2: '👩‍🦰', m2: '👱‍♂️' };
+const VOICE_NAMES = { f: 'femenina', m: 'masculina', f2: 'femenina 2 · Xiaoyi', m2: 'masculina 2 · Yunxi' };
+const VOICE_ZH_SEQ = ['f', 'm', 'f2', 'm2'];
+const VOICE_ES_SEQ = ['f', 'm'];
+function voiceValid(v, seq) { return seq.indexOf(v) !== -1 ? v : seq[0]; }
+let voiceZh = voiceValid(localStorage.getItem('ac_voice_zh'), VOICE_ZH_SEQ);
+let voiceEs = voiceValid(localStorage.getItem('ac_voice_es'), VOICE_ES_SEQ);
 const VOICE_SAMPLES = {
     zh: '你好！我们一起练习吧。',
     es: '¡Hola! Vamos a practicar juntos.'
@@ -1231,11 +1238,11 @@ function applySavedUI() {
         btnSpeed.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
     }
 
-    // Botones de voz (F/M por idioma)
+    // Botones de voz (v9.4: el chino cicla 4 voces; el español f/m)
     const btnVoiceZh = document.getElementById('btn-voice-zh');
     if (btnVoiceZh) {
         btnVoiceZh.textContent = '🇨🇳 ' + VOICE_ICONS[voiceZh];
-        btnVoiceZh.title = 'Voz china: ' + (voiceZh === 'f' ? 'femenina' : 'masculina') + ' (clic para cambiar)';
+        btnVoiceZh.title = 'Voz china: ' + (VOICE_NAMES[voiceZh] || voiceZh) + ' (clic para cambiar)';
     }
     const btnVoiceEs = document.getElementById('btn-voice-es');
     if (btnVoiceEs) {
@@ -3344,6 +3351,8 @@ async function playAudio(lang) {
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.lang = langCode; u.rate = playbackSpeed;
+            const sv = sysVoiceFor(langCode, voiceGender); // v9.4: voz sistema acorde a la elegida
+            if (sv) u.voice = sv;
             u.onend = restoreButton; u.onerror = restoreButton;
             speechSynthesis.speak(u);
         } else { restoreButton(); }
@@ -3374,17 +3383,30 @@ function cycleSpeed() {
     if ('speechSynthesis' in window) speechSynthesis.cancel(); // el próximo TTS usará la nueva velocidad
 }
 
-// ===== Botones de voz: 👩/👨 por idioma (persistente + muestra de audio) =====
+// ===== Botones de voz (persistente + muestra de audio) =====
+// v9.4: el chino cicla 4 voces (👩 → 👨 → 👩‍🦰 → 👱‍♂️); el español mantiene f/m.
 function cycleVoice(lang) {
     if (lang === 'es') {
-        voiceEs = voiceEs === 'f' ? 'm' : 'f';
+        voiceEs = VOICE_ES_SEQ[(VOICE_ES_SEQ.indexOf(voiceEs) + 1) % VOICE_ES_SEQ.length];
         try { localStorage.setItem('ac_voice_es', voiceEs); } catch (e) { /* sin storage */ }
     } else {
-        voiceZh = voiceZh === 'f' ? 'm' : 'f';
+        voiceZh = VOICE_ZH_SEQ[(VOICE_ZH_SEQ.indexOf(voiceZh) + 1) % VOICE_ZH_SEQ.length];
         try { localStorage.setItem('ac_voice_zh', voiceZh); } catch (e) { /* sin storage */ }
     }
     applySavedUI();
     playVoiceSample(lang); // reproduce una frase corta para escuchar la voz nueva
+}
+
+// v9.4: voz del SISTEMA coherente con la elegida (fallback sin red).
+// Devuelve una voz zh*/es* distinta según f/m/f2/m2 (si hay varias).
+function sysVoiceFor(langCode, v) {
+    try {
+        const pref = String(langCode || '').slice(0, 2).toLowerCase();
+        const vs = speechSynthesis.getVoices().filter(x => x.lang && String(x.lang).toLowerCase().indexOf(pref) === 0);
+        if (!vs.length) return null;
+        const idx = ({ f: 0, m: 1, f2: 2, m2: 3 })[v] || 0;
+        return vs[idx % vs.length];
+    } catch (e) { return null; }
 }
 
 function playVoiceSample(lang) {
@@ -3836,20 +3858,31 @@ function renderReaderPreview() {
     }
 }
 
-// ===== Modo Oscuro =====
+// ===== Tema: claro · papel de arroz · oscuro (v9.4) =====
+// Ciclo 🌙 → 🏮 → ☀️ : el botón muestra el ícono del PRÓXIMO tema.
+// 'paper' redefine las variables CSS con crema/ámbar (cálido, para
+// sesiones largas) sin perder legibilidad ni los colores de tonos.
+const THEME_SEQ = ['light', 'paper', 'dark'];
+const THEME_NEXT_ICON = { light: '🏮', paper: '🌙', dark: '☀️' }; // ícono del tema al que se pasa
+const THEME_NAME = { light: 'claro', paper: 'papel de arroz 🏮', dark: 'oscuro' };
 const themeBtn = document.getElementById('btn-theme');
-if (themeBtn) {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeBtn.textContent = '☀️';
+function applyTheme(t) {
+    document.body.classList.toggle('dark-mode', t === 'dark');
+    document.body.classList.toggle('paper-mode', t === 'paper');
+    if (themeBtn) {
+        const nxt = THEME_SEQ[(THEME_SEQ.indexOf(t) + 1) % THEME_SEQ.length];
+        themeBtn.textContent = THEME_NEXT_ICON[t] || '🌙';
+        themeBtn.title = 'Tema: ' + (THEME_NAME[t] || t) + ' (clic → ' + (THEME_NAME[nxt] || nxt) + ')';
     }
+}
+let curTheme = voiceValid(localStorage.getItem('theme'), THEME_SEQ); // reutiliza validador genérico
+applyTheme(curTheme);
+if (themeBtn) {
     themeBtn.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        themeBtn.textContent = isDark ? '☀️' : '🌙';
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        applyToneScheme(); // v7.11: los esquemas preset tienen variante oscura (Okabe-Ito)
+        curTheme = THEME_SEQ[(THEME_SEQ.indexOf(curTheme) + 1) % THEME_SEQ.length];
+        try { localStorage.setItem('theme', curTheme); } catch (e) { /* sin storage */ }
+        applyTheme(curTheme);
+        applyToneScheme(); // los esquemas preset tienen variante oscura (Okabe-Ito)
     });
 }
 
@@ -4097,7 +4130,10 @@ const PZ_SHEET_CSS = [
     '.pz-cell svg path { stroke-linejoin: round; }',
     '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }',
     // ── v9.1 estilo CUADERNO (筆順 + 寫字, como el modelo de la referencia) ──
-    '.pz2-block { display: grid; grid-template-columns: 24mm 17mm 1fr; gap: 2.5mm 2.5mm; align-items: center;',
+    // v9.4: SIN las etiquetas repetidas por bloque (筆順/寫字) — la fila de
+    // progresión y los casilleros se entienden solos; queda más ancho para
+    // practicar. Grid de 2 columnas: tarjeta + contenido.
+    '.pz2-block { display: grid; grid-template-columns: 24mm 1fr; gap: 2.5mm 2.5mm; align-items: center;',
     '  margin-bottom: 4mm; break-inside: avoid; page-break-inside: avoid; }',
     '.pz2-card { grid-row: span 2; border: 0.3mm solid #64748b; border-radius: 1.5mm; padding: 2mm 1mm;',
     '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5mm; min-height: 24mm; }',
@@ -4105,8 +4141,6 @@ const PZ_SHEET_CSS = [
     '.pz2-card .pz2-hz span.pz2-fallback { font-size: 30pt; line-height: 1; color: #1f2937;',
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     '.pz2-card .pz2-py { font-size: 9pt; color: #475569; }',
-    '.pz2-lab { font-size: 7.5pt; color: #475569; text-align: center; line-height: 1.3; }',
-    '.pz2-lab b { display: block; font-size: 10pt; color: #16a085; }',
     '.pz2-strokes { display: flex; flex-wrap: wrap; gap: 0.6mm; align-items: center; }',
     '.pz2-strokes svg { width: 9.5mm; height: 9.5mm; display: block; }',
     '.pz2-cells { display: flex; gap: 1.2mm; }',
@@ -4139,8 +4173,8 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
     const esCuaderno = (style === 'cuaderno');
     if (esCuaderno) {
         // ── estilo CUADERNO (v9.1): tarjeta del carácter + fila 筆順
-        // (Orden de los trazos, progresión sin casilleros) + fila 寫字
-        // (calco + casilleros) — como el modelo de la referencia. ──
+        // (progresión de trazos) + fila 寫字 (calco + casilleros).
+        // v9.4: sin rótulos por bloque — se entienden solos. ──
         let blocks = '';
         chars.forEach((ch, i) => {
             const d = datas[i];
@@ -4168,9 +4202,7 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
             blocks += '<div class="pz2-block">'
                 + '<div class="pz2-card"><div class="pz2-hz">' + hz + '</div>'
                 + (py ? '<div class="pz2-py">' + py + '</div>' : '') + '</div>'
-                + '<div class="pz2-lab"><b>筆順</b>Orden de los trazos</div>'
                 + trazosHtml
-                + '<div class="pz2-lab"><b>寫字</b>Practicar</div>'
                 + '<div class="pz2-cells">' + cellsHtml + '</div>'
                 + '</div>';
         });
@@ -5452,6 +5484,117 @@ function pzCounterUpdate() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════
+// v9.4 — KARAOKE DE LECTURA (estilo Du Chinese, DESACTIVADO por defecto)
+// -------------------------------------------------------------------
+// Al escuchar una línea del lector (lecciones o clásicos), los caracteres
+// se van iluminando con un "marcador" ámbar al ritmo del audio. Se activa
+// con el botón ✨ Karaoke del lector (persistente 'ac_karaoke').
+//  · Audio del API (blob): progreso eveno currentTime/duration (RAF) —
+//    el playbackRate no afecta: currentTime recorre el medio completo.
+//  · Voz del sistema (fallback): onboundary (charIndex → span) y, si el
+//    navegador no dispara boundary (Safari a veces), temporizador eveno
+//    estimado (≈290 ms/carácter ajustado por la velocidad elegida).
+// API: prepare(line) → withAudio(audio, text) | withTts(u, text, rate) → stop().
+// ═══════════════════════════════════════════════════════════════════
+const KARA = (function () {
+    'use strict';
+    const RE_HAN = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+    const MS_PER_CHAR = 290; // zh hablado ~3.5 car/s a 1x (estimación evena)
+    let act = null;          // { line, spans, raf, timer }
+
+    function on() {
+        try { return localStorage.getItem('ac_karaoke') === '1'; } catch (e) { return false; }
+    }
+    function spansOf(line) {
+        return line ? Array.prototype.slice.call(line.querySelectorAll('.lq-ch')) : [];
+    }
+    function paint(spans, upto) {
+        for (let i = 0; i < spans.length; i++) spans[i].classList.toggle('k-on', i <= upto);
+    }
+    function stop() {
+        if (!act) return;
+        if (act.raf) cancelAnimationFrame(act.raf);
+        if (act.timer) clearInterval(act.timer);
+        act.spans.forEach(sp => sp.classList.remove('k-on'));
+        if (act.line) act.line.classList.remove('kara-active');
+        act = null;
+    }
+    // Registra la línea que va a sonar. No-op si el karaoke está OFF o la
+    // línea no tiene spans de caracteres (ej.: botón 🔊 de la práctica).
+    function prepare(line) {
+        if (!on()) return null;
+        stop();
+        const spans = spansOf(line);
+        if (!spans.length) return null;
+        act = { line: line, spans: spans, raf: 0, timer: 0 };
+        line.classList.add('kara-active');
+        return act;
+    }
+    // Variante A: audio del API → iluminación evena según el avance real.
+    function withAudio(audio, text) {
+        if (!act || !audio) return;
+        const n = act.spans.length;
+        let finished = false;
+        const done = () => {
+            if (finished || !act) return;
+            finished = true;
+            if (act.raf) cancelAnimationFrame(act.raf);
+            paint(act.spans, n - 1);        // destello final: línea iluminada
+            setTimeout(stop, 450);
+        };
+        const tick = () => {
+            if (!act || finished) return;
+            const d = audio.duration;
+            if (isFinite(d) && d > 0) {
+                const p = Math.min(1, audio.currentTime / d);
+                paint(act.spans, Math.min(n - 1, Math.floor(p * n)));
+            }
+            act.raf = requestAnimationFrame(tick);
+        };
+        act.raf = requestAnimationFrame(tick);
+        audio.addEventListener('ended', done, { once: true });
+        audio.addEventListener('error', done, { once: true });
+    }
+    // Variante B: voz del sistema → boundary si existe; si no, estimado.
+    function withTts(u, text, rate) {
+        if (!act || !u) return;
+        const n = act.spans.length;
+        const rateN = (typeof rate === 'number' && rate > 0) ? rate : 1;
+        const hanziIdx = [];
+        let i = 0;
+        const src = String(text == null ? '' : text);
+        for (const ch of src) { if (RE_HAN.test(ch)) hanziIdx.push(i); i++; }
+        let boundaryMode = false, finished = false, elapsed = 0;
+        const estMs = Math.max(1200, n * MS_PER_CHAR / rateN);
+        const done = () => {
+            if (finished || !act) return;
+            finished = true;
+            if (act.timer) clearInterval(act.timer);
+            paint(act.spans, n - 1);
+            setTimeout(stop, 450);
+        };
+        u.addEventListener('boundary', (ev) => {
+            if (!act || finished) return;
+            boundaryMode = true;
+            if (act.timer) { clearInterval(act.timer); act.timer = 0; }
+            const c = (ev && ev.charIndex) || 0;
+            let j = 0;
+            while (j < hanziIdx.length && hanziIdx[j] <= c) j++;
+            paint(act.spans, Math.max(0, Math.min(n - 1, j - 1)));
+        });
+        u.addEventListener('end', done);
+        u.addEventListener('error', done);
+        act.timer = setInterval(() => { // estimación evena (cede ante boundary)
+            if (!act || finished) { if (act && act.timer) clearInterval(act.timer); return; }
+            if (boundaryMode) { clearInterval(act.timer); act.timer = 0; return; }
+            elapsed += 100;
+            paint(act.spans, Math.min(n - 1, Math.floor((elapsed / estMs) * n)));
+        }, 100);
+    }
+    return { prepare: prepare, withAudio: withAudio, withTts: withTts, stop: stop, on: on };
+})();
+
+// ═══════════════════════════════════════════════════════════════════
 // v9.0 — LECCIONES GRADUADAS (Huayu Diario 日常華語)
 // -------------------------------------------------------------------
 // Mini-dramas HSK 3.0 (window.GRADED_LESSONS, datos en lessons.js):
@@ -5529,14 +5672,18 @@ function pzCounterUpdate() {
     };
 
     // TTS: reutiliza fetchTTS/Vercel con fallback speechSynthesis (patrón SRS)
+    // v9.4: si ✨ Karaoke está ON y la lectura sale de una línea del lector,
+    // KARA ilumina sus caracteres al ritmo del audio (prepare → with*).
     let lqAudio = null;
     async function speakZh(text, btn) {
+        const karaLine = (btn && btn.closest) ? btn.closest('.lq-line') : null;
         try {
             if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
                 globalAudioPlayer.pause();
                 if (typeof isPlaying !== 'undefined') isPlaying = false;
             }
             if (lqAudio) { lqAudio.pause(); lqAudio = null; }
+            KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
             const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
@@ -5555,17 +5702,24 @@ function pzCounterUpdate() {
             lqAudio.addEventListener('playing', () => {
                 try { lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
             }, { once: true });
+            KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
             await lqAudio.play();
+            KARA.withAudio(lqAudio, text);
             lqAudio.onended = () => { URL.revokeObjectURL(url); lqAudio = null; };
         } catch (e) {
             // fallback: voz del sistema
+            KARA.stop(); // el audio del API no arrancó → limpia el estado
             try {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(text);
                     u.lang = 'zh-CN';
                     u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
+                    if (sv) u.voice = sv;
+                    KARA.prepare(karaLine); // v9.4: karaoke también con la voz del sistema
                     speechSynthesis.speak(u);
+                    KARA.withTts(u, text, u.rate);
                 }
             } catch (e2) { /* silencioso */ }
         } finally {
@@ -5575,6 +5729,7 @@ function pzCounterUpdate() {
     function stopSpeak() {
         if (lqAudio) { lqAudio.pause(); lqAudio = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+        KARA.stop(); // v9.4: apaga el resaltado al cortar la lectura
     }
 
     // ── lista de lecciones ──
@@ -5676,9 +5831,18 @@ function pzCounterUpdate() {
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-es">🇪🇸 Español: ' + (verEs ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-pinyin">🔤 Pinyin: OFF</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-speed">⚡ …</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-story-kara">✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">🎯 Practicar ' + l.quiz.length + '</button>' +
             '</div>';
         bindSpeedChip(body.querySelector('#lq-story-speed'));
+        body.querySelector('#lq-story-kara').addEventListener('click', (e) => {
+            // v9.4: karaoke de lectura — apagado por defecto, persistente;
+            // el cambio vale para la próxima línea escuchada.
+            const v = !KARA.on();
+            try { localStorage.setItem('ac_karaoke', v ? '1' : '0'); } catch (e2) { }
+            if (!v) KARA.stop();
+            e.target.textContent = '✨ Karaoke: ' + (v ? 'ON' : 'OFF');
+        });
         body.querySelector('#lq-story-practice').addEventListener('click', () => openQuiz(l));
         body.querySelector('#lq-story-es').addEventListener('click', (e) => {
             setVerEs(!verEs);
@@ -5987,14 +6151,17 @@ function pzCounterUpdate() {
     }
 
     // ── TTS: mismo pipeline que el lector de lecciones ──
+    // v9.4: karaoke de lectura disponible también acá (mismo KARA).
     let crAudio = null;
     async function speakCr(text, el) {
+        const karaLine = (el && el.closest) ? el.closest('.lq-line') : null;
         try {
             if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
                 globalAudioPlayer.pause();
                 if (typeof isPlaying !== 'undefined') isPlaying = false;
             }
             if (crAudio) { crAudio.pause(); crAudio = null; }
+            KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (el) el.classList.add('lq-speaking');
             const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
@@ -6012,16 +6179,23 @@ function pzCounterUpdate() {
             crAudio.addEventListener('playing', () => {
                 try { crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
             }, { once: true });
+            KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
             await crAudio.play();
+            KARA.withAudio(crAudio, text);
             crAudio.onended = () => { URL.revokeObjectURL(url); crAudio = null; if (el) el.classList.remove('lq-speaking'); };
         } catch (e) {
+            KARA.stop(); // el audio del API no arrancó → limpia el estado
             try {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(text);
                     u.lang = 'zh-CN';
                     u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
+                    if (sv) u.voice = sv;
+                    KARA.prepare(karaLine); // v9.4: karaoke con la voz del sistema
                     speechSynthesis.speak(u);
+                    KARA.withTts(u, text, u.rate);
                 }
             } catch (e2) { /* silencioso */ }
             if (el) el.classList.remove('lq-speaking');
@@ -6030,6 +6204,7 @@ function pzCounterUpdate() {
     function stopCrSpeak() {
         if (crAudio) { crAudio.pause(); crAudio = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+        KARA.stop(); // v9.4: apaga el resaltado al cortar la lectura
         body.querySelectorAll('.lq-speaking').forEach(el => el.classList.remove('lq-speaking'));
     }
 
@@ -6091,6 +6266,7 @@ function pzCounterUpdate() {
             '<button type="button" class="lq-btn lq-ghost" id="cr-es">🇪🇸 Español: ' + (esPref() ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-py">🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-speed">⚡ …</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="cr-kara">✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-primary" id="cr-practice">🎯 Practicar este clásico</button>' +
             '</div>' +
             '<div class="cr-nav">' +
@@ -6114,6 +6290,13 @@ function pzCounterUpdate() {
             });
         });
         bindSpeedChip(body.querySelector('#cr-speed'));
+        body.querySelector('#cr-kara').addEventListener('click', (e) => {
+            // v9.4: karaoke de lectura en clásicos — misma preferencia compartida
+            const v = !KARA.on();
+            try { localStorage.setItem('ac_karaoke', v ? '1' : '0'); } catch (e2) { }
+            if (!v) KARA.stop();
+            e.target.textContent = '✨ Karaoke: ' + (v ? 'ON' : 'OFF');
+        });
         body.querySelector('#cr-practice').addEventListener('click', () => {
             // v9.3: la práctica de clásicos es un multiple choice DENTRO del
             // lector (misma piel que las lecciones HSK) — no cambia de ventana

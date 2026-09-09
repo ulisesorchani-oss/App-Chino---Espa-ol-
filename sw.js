@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v49'; // v9.3: fix corrección (espacios IME/puntuación, 明明德), quiz multiple choice inline en clásicos, velocidad TTS en lecturas, toque por carácter → repaso (LingQ), respaldo JSON + exportar Anki, modo abuelo — invalida shell
+const VERSION = 'v50'; // v9.4: karaoke de lectura (✨, off por defecto) en lecciones y clásicos, 4 voces chinas (Xiaoxiao/Yunjian/Xiaoyi/Yunxi), tema papel de arroz 🏮, planilla cuaderno sin rótulos repetidos — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
