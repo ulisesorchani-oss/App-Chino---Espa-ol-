@@ -5810,7 +5810,7 @@ const KARA = (function () {
 // ═══════════════════════════════════════════════════════════════════
 // v9.0 — LECCIONES GRADUADAS (Huayu Diario 日常華語)
 // -------------------------------------------------------------------
-// Mini-dramas HSK 3.0 (window.GRADED_LESSONS, datos en lessons.js):
+// Mini-dramas HSK 3.0 + TOCFL 華測 (window.GRADED_LESSONS; lessons.js + lessons-tocfl.js):
 //  · Lector de la historia con pinyin interlineal opcional y TTS por línea.
 //  · Práctica estilo test: 10 oraciones del texto con un hueco ___ y 3
 //    opciones (1 correcta + 2 distractores del mismo nivel), con ficha
@@ -5950,8 +5950,15 @@ const KARA = (function () {
         const wrap = $('lesson-list');
         if (!wrap) return;
         const filt = wrap.dataset.level || 'all';
+        // v9.6b: accesos paralelos HSK / TOCFL. Los chips 'tocfl:XX' filtran
+        // por examen+nivel (A1/A2/B1/B2/C1); los chips HSK muestran SOLO
+        // lecciones sin exam — cada examen tiene su propia fila de accesos.
+        const tocflLvl = filt.indexOf('tocfl:') === 0 ? filt.slice(6) : null;
         wrap.innerHTML = '';
-        LESSONS.filter(l => filt === 'all' || String(l.hsk) === filt).forEach(l => {
+        LESSONS.filter(l => filt === 'all' ||
+            (tocflLvl
+                ? (l.exam === 'TOCFL' && String(l.examLvl || '') === tocflLvl)
+                : (!l.exam && String(l.hsk) === filt))).forEach(l => {
             const p = progOf(l.id);
             const best = (p.best != null) ? p.best + '/10' : '—';
             const flag = p.completed ? ' <span class="lq-done">✓ completada</span>' : '';
@@ -5970,6 +5977,42 @@ const KARA = (function () {
                 '<button type="button" class="lq-btn lc-practice" data-act="practice" data-id="' + l.id + '">🎯 Practicar</button>' +
                 '</div>';
             wrap.appendChild(card);
+        });
+    }
+
+    // v9.6b: accesos TOCFL junto a los de HSK — un chip por nivel TOCFL
+    // presente en los datos (A1 → C1), tras un separador · que divide la
+    // fila HSK de la fila TOCFL. Se generan SOLO los niveles con lecciones:
+    // agregar un mini-drama nuevo con examLvl 'B2' crea su chip solo,
+    // sin tocar el HTML. Si no hay lecciones TOCFL, no se dibuja nada.
+    const TOCFL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    function buildTocflChips() {
+        const chips = $('lesson-levels');
+        if (!chips) return;
+        const lvls = [];
+        LESSONS.forEach(l => {
+            if (!l || l.exam !== 'TOCFL' || !l.examLvl) return;
+            const v = String(l.examLvl);
+            if (lvls.indexOf(v) === -1) lvls.push(v);
+        });
+        if (!lvls.length) return;
+        lvls.sort((a, b) => {
+            const ia = TOCFL_ORDER.indexOf(a), ib = TOCFL_ORDER.indexOf(b);
+            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        });
+        const sep = document.createElement('span');
+        sep.className = 'lv-sep';
+        sep.setAttribute('aria-hidden', 'true');
+        sep.textContent = '·';
+        chips.appendChild(sep);
+        lvls.forEach(v => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'lv-chip lv-chip-tocfl';
+            b.dataset.level = 'tocfl:' + v;
+            b.setAttribute('aria-label', 'Filtrar lecciones TOCFL ' + v);
+            b.textContent = 'TOCFL ' + v;
+            chips.appendChild(b);
         });
     }
 
@@ -6247,6 +6290,7 @@ const KARA = (function () {
 
     // ── arranque ──
     function boot() {
+        buildTocflChips(); // v9.6b: crea los accesos TOCFL junto a los HSK
         bindList();
         bindPop();
         renderList();

@@ -4199,3 +4199,32 @@ body.paper-mode .pz-label select.level-dropdown {
 }
 body.paper-mode .level-dropdown option { background: #fffdf6; color: #43382a; }
 body.paper-mode .reader-lang { color: #8a7a5f; }
+
+/* ════════════════════════════════════════════════════════════════
+   v9.6b — Accesos TOCFL en LECCIONES GRADUADAS
+   Chips gemelos de los HSK con acento teal (verde Taiwán). El
+   separador · divide la fila HSK de la fila TOCFL. Los tamaños
+   responsive (@media .lv-chip) aplican igual por la clase base.
+   ════════════════════════════════════════════════════════════════ */
+.lv-sep {
+    align-self: center; color: #cbd5e1; font-size: .75rem; font-weight: 800;
+    user-select: none; padding: 0 2px;
+}
+.lv-chip-tocfl { background: #f0fdfa; border-color: #99f6e4; color: #0f766e; }
+.lv-chip-tocfl.active {
+    background: linear-gradient(135deg, #0d9488, #059669);
+    color: #fff; border-color: transparent;
+}
+body.dark-mode .lv-sep { color: #475569; }
+body.dark-mode .lv-chip-tocfl { background: #1e293b; border-color: #115e59; color: #5eead4; }
+body.dark-mode .lv-chip-tocfl.active {
+    background: linear-gradient(135deg, #0d9488, #059669);
+    color: #fff; border-color: transparent;
+}
+/* tema papel: chips integrados a la paleta café/tinta, acento teal más profundo */
+body.paper-mode .lv-sep { color: #d9c9a3; }
+body.paper-mode .lv-chip-tocfl { background: #fffdf6; border-color: #d9c9a3; color: #0f766e; }
+body.paper-mode .lv-chip-tocfl.active {
+    background: linear-gradient(135deg, #0f766e, #047857);
+    color: #fff; border-color: transparent;
+}

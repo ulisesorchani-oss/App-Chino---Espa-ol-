@@ -48,7 +48,7 @@
    ⚠️ Al cambiar app.js / index.html / style.css / datos:
       subí VERSION (ej. 'v27') para que todos reciban el update.
    ============================================================ */
-const VERSION = 'v51'; // v9.5: karaoke por PALABRA completa (Intl.Segmenter), f2 = femenina adulta Xiaobei (api/tts.py nuevo), TOCFL Band B completa (N3 進階 1091 + N4 高階 2194) — invalida shell
+const VERSION = 'v52'; // v9.6b: accesos TOCFL en Lecciones (chips desde datos) + lessons-tocfl.js en precache — invalida shell // v9.5: karaoke por PALABRA completa (Intl.Segmenter), f2 = femenina adulta Xiaobei (api/tts.py nuevo), TOCFL Band B completa (N3 進階 1091 + N4 高階 2194) — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
@@ -67,6 +67,7 @@ const PRECACHE = [
   './style.css',
   './dict-mini.js',         // v7.12: Capa 4 — diccionario offline zh↔es (CC-BY-SA 4.0)
   './lessons.js',           // v7.14: textos completos de las lecciones (📖 Leer lección)
+  './lessons-tocfl.js',     // v9.6: mini-dramas TOCFL (se concatenan a GRADED_LESSONS)
   './classics.js',          // v9.2: TEXTO ORIGINAL de los 9 clásicos por bloques (lector de clásicos)
   './hanzi-writer.min.js',  // v7.13: orden de trazos (MIT) — se inyecta LAZY pero precacheado p/ offline
   './pinyin-pro.min.js',
