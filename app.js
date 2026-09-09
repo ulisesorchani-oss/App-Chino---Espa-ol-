@@ -5959,7 +5959,7 @@ const KARA = (function () {
             card.className = 'lesson-card';
             card.innerHTML =
                 '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + l.emoji + '</span>' +
-                '<span class="lc-hsk">HSK ' + l.hsk + '</span>' +
+                '<span class="lc-hsk">' + (l.exam ? escHtml(l.exam + ' ' + (l.examLvl || l.hsk)) : 'HSK ' + l.hsk) + '</span>' +
                 '<span class="lc-best">🎯 ' + best + flag + '</span></div>' +
                 '<div class="lc-titles"><span class="lc-zh">' + escHtml(l.titleZh) + '</span>' +
                 '<span class="lc-es">' + escHtml(l.titleEs) + '</span></div>' +
@@ -6037,7 +6037,7 @@ const KARA = (function () {
         body.innerHTML =
             '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
             '<div><div class="lq-story-zh">' + escHtml(k === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</div>' +
-            '<div class="lq-story-es">' + escHtml(l.titleEs) + ' · HSK ' + l.hsk + '</div></div></div>' +
+            '<div class="lq-story-es">' + escHtml(l.titleEs) + ' · ' + (l.exam ? escHtml(l.exam + ' ' + (l.examLvl || l.hsk)) : 'HSK ' + l.hsk) + '</div></div></div>' +
             '<p class="lq-blurb">' + escHtml(l.blurb) + '</p>' +
             '<div class="lq-lines">' + lines + '</div>' +
             '<div class="lq-story-foot">' +
