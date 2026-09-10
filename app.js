@@ -1196,7 +1196,7 @@ function getFiltered() {
 const UI_STRINGS = {
   'es-cn': {
     appTitle: 'Huayu Diario',
-    appSlogan: 'Aprende chino, vive el idioma · 華語',
+    appSlogan: 'Vive el idioma, una frase al día · 日常華語',
     langSwitchBtn: '🇪🇸 ES',
     langSwitchTitle: 'Cambiar a “Aprendo Español” (interfaz en chino)',
     tabDaily: '📚 Diaria', tabExams: '🎓 Exámenes', tabLessons: '📖 Lecciones', tabClassics: '📜 Clásicos',
