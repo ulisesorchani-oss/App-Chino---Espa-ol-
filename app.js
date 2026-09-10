@@ -1294,10 +1294,12 @@ function updateUILanguage(mode) {
     //    (简/繁 SIGUE visible: el público TW/HK prefiere 繁體 también en cn-es)
     ['btn-pinyin', 'btn-tones', 'btn-tone-info'].forEach((id) => show(id, !cnMode));
 
-    // 6) v9.10: el audio español (🔊 ES) solo existe en modo español (es-cn).
-    //    En cn-es la tarjeta ya muestra la oración en español como texto
-    //    principal, así que ahí queda solo 🔊 CN (traducción) + 🎤.
-    show('btn-play-es', !cnMode);
+    // 6) v9.11: UN solo botón de audio — siempre el idioma que se aprende.
+    //    Aprendiendo chino (es-cn): 🔊 CN suena la oración china; 🔊 ES oculto.
+    //    Aprendiendo español (cn-es): 🔊 ES suena la oración española; 🔊 CN oculto.
+    //    (playAudio('es'/'cn') ya elige el texto correcto por idioma.)
+    show('btn-play-es', cnMode);
+    show('btn-play-cn', !cnMode);
 }
 /* v9.9 I18N-END */
 
@@ -6020,17 +6022,50 @@ const KARA = (function () {
     // v9.4: si ✨ Karaoke está ON y la lectura sale de una línea del lector,
     // KARA ilumina sus caracteres al ritmo del audio (prepare → with*).
     let lqAudio = null;
+    // v9.11: play/pausa del parlante de lecciones — el 2.º toque sobre el
+    // MISMO botón pausa, el 3.º reanuda. Icono: 🔊 reposo · ⏸ sonando · ▶️ pausado.
+    // lqTok descarta respuestas TTS viejas si mientras tanto sonó otra línea.
+    let lqTtsU = null;                                   // utterance activa (fallback voz sistema)
+    let lqPlay = { text: '', btn: null, state: 'idle' }; // 'idle' | 'playing' | 'paused'
+    let lqTok = 0;
+    function setSayIcon(btn, st) {
+        if (!btn) return;
+        if (btn.id === 'lq-speak') btn.textContent = st === 'playing' ? '⏸ Pausar' : (st === 'paused' ? '▶️ Seguir' : '🔊 Escuchar');
+        else btn.textContent = st === 'playing' ? '⏸' : (st === 'paused' ? '▶️' : '🔊');
+    }
     async function speakZh(text, btn) {
         const karaLine = (btn && btn.closest) ? btn.closest('.lq-line') : null;
+        // v9.11: mismo botón + mismo texto → 2.º toque pausa, 3.º reanuda
+        if (btn && btn === lqPlay.btn && lqPlay.text === text && lqPlay.state !== 'idle') {
+            if (lqPlay.state === 'playing') {
+                if (lqAudio) lqAudio.pause();
+                else if (lqTtsU) { try { speechSynthesis.pause(); } catch (e0) { } }
+                lqPlay.state = 'paused';
+                setSayIcon(btn, 'paused');
+            } else {
+                if (lqAudio) {
+                    try { await lqAudio.play(); lqPlay.state = 'playing'; } catch (e0) { lqPlay.state = 'idle'; }
+                } else if (lqTtsU) {
+                    try { speechSynthesis.resume(); lqPlay.state = 'playing'; } catch (e0) { }
+                }
+                setSayIcon(btn, lqPlay.state === 'playing' ? 'playing' : 'idle');
+            }
+            return;
+        }
+        const myTok = ++lqTok;
         try {
             if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
                 globalAudioPlayer.pause();
                 if (typeof isPlaying !== 'undefined') isPlaying = false;
             }
             if (lqAudio) { lqAudio.pause(); lqAudio = null; }
+            lqTtsU = null;
+            if (lqPlay.btn && lqPlay.btn !== btn) setSayIcon(lqPlay.btn, 'idle'); // apaga el ícono del botón anterior
+            lqPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
             const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            if (myTok !== lqTok) return; // mientras tanto sonó otra línea → descartar
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
             if (!data.audio) throw new Error('TTS sin audio');
@@ -6048,12 +6083,18 @@ const KARA = (function () {
                 try { lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
             }, { once: true });
             KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
+            lqPlay = { text, btn, state: 'playing' };
             await lqAudio.play();
-            KARA.withAudio(lqAudio, text);
-            lqAudio.onended = () => { URL.revokeObjectURL(url); lqAudio = null; };
+            if (myTok !== lqTok) { lqAudio.pause(); return; }
+            setSayIcon(btn, 'playing');
+            KARA.withAudio(lqAudio, text); // pausar el <audio> congela el resaltado; al reanudar sigue
+            const finLq = () => { URL.revokeObjectURL(url); lqAudio = null; if (lqPlay.btn === btn) { lqPlay.state = 'idle'; setSayIcon(btn, 'idle'); } };
+            lqAudio.onended = finLq;
+            lqAudio.onerror = finLq;
         } catch (e) {
             // fallback: voz del sistema
             KARA.stop(); // el audio del API no arrancó → limpia el estado
+            if (myTok !== lqTok) return;
             try {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
@@ -6063,6 +6104,10 @@ const KARA = (function () {
                     const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
                     if (sv) u.voice = sv;
                     KARA.prepare(karaLine); // v9.4: karaoke también con la voz del sistema
+                    lqPlay = { text, btn, state: 'playing' };
+                    lqTtsU = u;
+                    setSayIcon(btn, 'playing');
+                    u.onend = () => { if (lqTtsU === u) lqTtsU = null; if (lqPlay.btn === btn) { lqPlay.state = 'idle'; setSayIcon(btn, 'idle'); } };
                     speechSynthesis.speak(u);
                     KARA.withTts(u, text, u.rate);
                 }
@@ -6074,6 +6119,10 @@ const KARA = (function () {
     function stopSpeak() {
         if (lqAudio) { lqAudio.pause(); lqAudio = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+        lqTtsU = null;
+        lqTok++; // descarta cualquier descarga TTS en vuelo (cambió la vista)
+        if (lqPlay.btn) setSayIcon(lqPlay.btn, 'idle');
+        lqPlay = { text: '', btn: null, state: 'idle' };
         KARA.stop(); // v9.4: apaga el resaltado al cortar la lectura
     }
 
@@ -6246,15 +6295,13 @@ const KARA = (function () {
             });
         });
         body.querySelector('.lq-lines').addEventListener('click', (e) => {
-            // v9.3: 🔊 de la línea (escucha) · carácter tocado (ficha) · resto de la línea (escucha)
+            // v9.11: SOLO el botón 🔊 de la línea reproduce audio — tocar el
+            // panel de la oración ya NO dispara lectura (pedido del usuario).
+            // Los caracteres tocados siguen abriendo su ficha en el popup.
             const say = e.target.closest('.lq-line-say');
             if (say) { speakZh(say.dataset.zh, say); return; }
             const chEl = e.target.closest('.lq-ch');
-            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); return; }
-            const line = e.target.closest('.lq-line');
-            if (!line) return;
-            const ln = l.lines[+line.dataset.i];
-            speakZh(k === 'trad' ? ln.zhT : ln.zh, line.querySelector('.lq-line-zh'));
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); }
         });
     }
     // ── vista PRÁCTICA ──
@@ -6542,17 +6589,56 @@ const KARA = (function () {
     // ── TTS: mismo pipeline que el lector de lecciones ──
     // v9.4: karaoke de lectura disponible también acá (mismo KARA).
     let crAudio = null;
+    // v9.11: play/pausa en clásicos — espejo exacto del parlante de lecciones:
+    // 2.º toque sobre el MISMO botón pausa, 3.º reanuda; icono 🔊/⏸/▶️.
+    let crTtsU = null;
+    let crPlay = { text: '', btn: null, state: 'idle' };
+    let crTok = 0;
+    function setCrIcon(btn, st) {
+        if (!btn) return;
+        if (btn.id === 'cq-speak') btn.textContent = st === 'playing' ? '⏸ Pausar' : (st === 'paused' ? '▶️ Seguir' : '🔊 Escuchar');
+        else btn.textContent = st === 'playing' ? '⏸' : (st === 'paused' ? '▶️' : '🔊');
+    }
     async function speakCr(text, el) {
         const karaLine = (el && el.closest) ? el.closest('.lq-line') : null;
+        // v9.11: mismo botón + mismo texto → 2.º toque pausa, 3.º reanuda
+        if (el && el === crPlay.btn && crPlay.text === text && crPlay.state !== 'idle') {
+            if (crPlay.state === 'playing') {
+                if (crAudio) crAudio.pause();
+                else if (crTtsU) { try { speechSynthesis.pause(); } catch (e0) { } }
+                crPlay.state = 'paused';
+                if (el.classList && el.classList.contains) el.classList.remove('lq-speaking');
+                setCrIcon(el, 'paused');
+            } else {
+                if (crAudio) {
+                    try { await crAudio.play(); crPlay.state = 'playing'; } catch (e0) { crPlay.state = 'idle'; }
+                } else if (crTtsU) {
+                    try { speechSynthesis.resume(); crPlay.state = 'playing'; } catch (e0) { }
+                }
+                if (crPlay.state === 'playing') {
+                    if (el.classList && el.classList.add) el.classList.add('lq-speaking');
+                    setCrIcon(el, 'playing');
+                } else setCrIcon(el, 'idle');
+            }
+            return;
+        }
+        const myTok = ++crTok;
         try {
             if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) {
                 globalAudioPlayer.pause();
                 if (typeof isPlaying !== 'undefined') isPlaying = false;
             }
             if (crAudio) { crAudio.pause(); crAudio = null; }
+            crTtsU = null;
+            if (crPlay.btn && crPlay.btn !== el) {
+                if (crPlay.btn.classList && crPlay.btn.classList.remove) crPlay.btn.classList.remove('lq-speaking');
+                setCrIcon(crPlay.btn, 'idle');
+            }
+            crPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (el) el.classList.add('lq-speaking');
             const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            if (myTok !== crTok) { if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); return; }
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
             if (!data.audio) throw new Error('TTS sin audio');
@@ -6569,11 +6655,17 @@ const KARA = (function () {
                 try { crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
             }, { once: true });
             KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
+            crPlay = { text, btn: el, state: 'playing' };
             await crAudio.play();
+            if (myTok !== crTok) { crAudio.pause(); if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); return; }
+            setCrIcon(el, 'playing');
             KARA.withAudio(crAudio, text);
-            crAudio.onended = () => { URL.revokeObjectURL(url); crAudio = null; if (el) el.classList.remove('lq-speaking'); };
+            const finCr = () => { URL.revokeObjectURL(url); crAudio = null; if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); if (crPlay.btn === el) { crPlay.state = 'idle'; setCrIcon(el, 'idle'); } };
+            crAudio.onended = finCr;
+            crAudio.onerror = finCr;
         } catch (e) {
             KARA.stop(); // el audio del API no arrancó → limpia el estado
+            if (myTok !== crTok) { if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); return; }
             try {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
@@ -6583,16 +6675,24 @@ const KARA = (function () {
                     const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
                     if (sv) u.voice = sv;
                     KARA.prepare(karaLine); // v9.4: karaoke con la voz del sistema
+                    crPlay = { text, btn: el, state: 'playing' };
+                    crTtsU = u;
+                    setCrIcon(el, 'playing');
+                    u.onend = () => { if (crTtsU === u) crTtsU = null; if (crPlay.btn === el) { crPlay.state = 'idle'; setCrIcon(el, 'idle'); } };
                     speechSynthesis.speak(u);
                     KARA.withTts(u, text, u.rate);
                 }
             } catch (e2) { /* silencioso */ }
-            if (el) el.classList.remove('lq-speaking');
+            if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking');
         }
     }
     function stopCrSpeak() {
         if (crAudio) { crAudio.pause(); crAudio = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { }
+        crTtsU = null;
+        crTok++; // descarta descargas TTS en vuelo (se cerró el lector)
+        if (crPlay.btn) { if (crPlay.btn.classList && crPlay.btn.classList.remove) crPlay.btn.classList.remove('lq-speaking'); setCrIcon(crPlay.btn, 'idle'); }
+        crPlay = { text: '', btn: null, state: 'idle' };
         KARA.stop(); // v9.4: apaga el resaltado al cortar la lectura
         body.querySelectorAll('.lq-speaking').forEach(el => el.classList.remove('lq-speaking'));
     }
@@ -6709,16 +6809,13 @@ const KARA = (function () {
             renderBlock(-1);
         });
         body.querySelector('#cr-lines').addEventListener('click', (e) => {
-            // v9.3: 🔊 de la línea · carácter tocado (ficha del popup) · resto (escucha)
+            // v9.11: SOLO el botón 🔊 de la línea reproduce audio — tocar el
+            // panel ya no dispara lectura (mismo criterio que las lecciones).
+            // Los caracteres tocados siguen abriendo la ficha del popup.
             const say = e.target.closest('.lq-line-say');
             if (say) { speakCr(say.dataset.zh, say); return; }
             const chEl = e.target.closest('.lq-ch');
-            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); return; }
-            const line = e.target.closest('.lq-line');
-            if (!line) return;
-            const i = +line.dataset.i;
-            const pair = blk.l[i];
-            speakCr(trad ? (tlines[flatBase + i] || pair[0]) : pair[0], line.querySelector('.lq-line-zh'));
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); }
         });
         if (hitLine >= 0) {
             const hit = body.querySelector('#cr-hit');

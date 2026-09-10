@@ -56,9 +56,12 @@
 // v9.10: tarjeta limpia — panel de herramientas colapsado tras el engranaje
 //       ⚙ (#btn-tools-toggle, cerrado por defecto), 🔊/🎤 más grandes en la
 //       cabecera, 🔊 ES solo en modo es-cn, 📲 Instalar al pie de la página
+// v9.11: audio según dirección de estudio (es-cn → solo 🔊 CN; cn-es → solo
+//       🔊 ES), en lecciones/clásicos el audio solo con el botón 🔊 (no el
+//       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v56'; // — invalida shell
+const VERSION = 'v57'; // — invalida shell
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
