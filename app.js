@@ -1217,6 +1217,7 @@ const UI_STRINGS = {
     libraryOpt: '📚 Biblioteca de lecturas…', libraryLoad: 'Cargar',
     readerClear: '🗑️ Limpiar', readerPlay: '🔊 Leer',
     btnReset: '🗑️ Borrar progreso', installApp: '📲 Instalar app',
+    toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
     needAnswer: 'Escribe una respuesta antes de verificar.',
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
     lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario'
@@ -1244,6 +1245,7 @@ const UI_STRINGS = {
     libraryOpt: '📚 朗读文库…', libraryLoad: '载入',
     readerClear: '🗑️ 清空', readerPlay: '🔊 朗读',
     btnReset: '🗑️ 清除学习记录', installApp: '📲 安装应用',
+    toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
     needAnswer: '请先输入答案再检查。',
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
     lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙'
@@ -1274,6 +1276,7 @@ function updateUILanguage(mode) {
     set('answer-input', 'placeholder', S.inputPlaceholder);
     set('reader-input', 'placeholder', S.readerPlaceholder);
     set('srs-bar-label', 'textContent', S.srsIdle);
+    set('btn-tools-toggle', 'title', S.toolsGearTitle); // v9.10: engranaje de herramientas
 
     // 3) Textos que app.js escribe dinámicamente → refrescarlos con uiT()
     if (typeof updateStats === 'function') updateStats();
@@ -1290,6 +1293,11 @@ function updateUILanguage(mode) {
     // 5) Herramientas del alfabeto: pinyin/tonos solo al aprender chino.
     //    (简/繁 SIGUE visible: el público TW/HK prefiere 繁體 también en cn-es)
     ['btn-pinyin', 'btn-tones', 'btn-tone-info'].forEach((id) => show(id, !cnMode));
+
+    // 6) v9.10: el audio español (🔊 ES) solo existe en modo español (es-cn).
+    //    En cn-es la tarjeta ya muestra la oración en español como texto
+    //    principal, así que ahí queda solo 🔊 CN (traducción) + 🎤.
+    show('btn-play-es', !cnMode);
 }
 /* v9.9 I18N-END */
 
@@ -1668,6 +1676,18 @@ function setupEventListeners() {
     // Audio
     safeAdd('btn-play-es', () => playAudio('es'));
     safeAdd('btn-play-cn', () => playAudio('cn'));
+
+    // v9.10: engranaje de herramientas — abre/cierra el panel de controles
+    // de la tarjeta (简/繁, pinyin, tonos, velocidad, voces, grande, respaldo).
+    // Cerrado por defecto: la clase .tools-open vive en .card-tools-header y
+    // el CSS decide qué se ve. aria-expanded para lectores de pantalla.
+    safeAdd('btn-tools-toggle', () => {
+        const head = document.querySelector('.card-tools-header');
+        if (!head) return;
+        const open = head.classList.toggle('tools-open');
+        const t = document.getElementById('btn-tools-toggle');
+        if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
     
     // Filtros y Selects
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {

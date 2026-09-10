@@ -13,13 +13,14 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260910h">
+    <link rel="stylesheet" href="style.css?v=20260910i">
 </head>
 <body>
     <div class="container">
         <!-- v9.8 Header de marca: sello 日常華語 + nombre + slogan (identidad visual).
-             El sello va a la izquierda y el texto a la derecha (QA v9.8). Los botones
-             📲 Instalar / 🌙 tema conservan sus IDs — app.js no cambia. -->
+             El sello va a la izquierda y el texto a la derecha (QA v9.8).
+             v9.10: 📲 Instalar se mudó al pie de la página (mismo ID, app.js intacto);
+             el header queda con el cambio de idioma y el tema. -->
         <header class="header header-branded">
             <div class="header-row">
                 <div class="brand-block">
@@ -33,7 +34,6 @@
                     <!-- v9.9: cambio de modo discreto (Español-First: por defecto es-cn).
                          i18n: updateUILanguage() le pone texto/título según el modo. -->
                     <button id="btn-toggle-lang-mode" class="lang-switch-btn" type="button" title="Cambiar idioma de la interfaz">🇪🇸 ES</button>
-                    <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
                     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
                 </div>
             </div>
@@ -61,17 +61,19 @@
              Cabecera de herramientas integrada: modos + controles de visualización. -->
         <!-- Tarjeta de Oración -->
         <div class="card" id="sentence-card">
-            <!-- v8.1: CABECERA DE HERRAMIENTAS DE LA TARJETA. Los IDs no cambian
-                 (los listeners usan safeAdd por ID) — solo se reubicaron bloques.
-                 Modos: decisión de nivel de app, siempre visibles. Herramientas:
-                 controles de visualización de la tarjeta (简/繁, pinyin, tonos,
-                 velocidad, voces) — afectan lo que el alumno ve acá y ahora. -->
+            <!-- v8.1/v9.10: CABECERA DE HERRAMIENTAS DE LA TARJETA. Los IDs no
+                 cambian (los listeners usan safeAdd por ID). v9.10: TODO el panel
+                 de controles (简/繁, pinyin, tonos, velocidad, voces, letras
+                 grandes, respaldo) vive colapsado detrás del engranaje ⚙ —
+                 cerrado por defecto, se abre tocándolo. En la tarjeta quedan
+                 a la vista solo 🔊 audio y 🎤 grabar (más grandes). -->
             <div class="card-tools-header">
-                <!-- v9.9: el selector de modo (CN→ES / ES→CN) se quitó de la
-                     tarjeta. El modo se cambia con el botón discreto del header
-                     (#btn-toggle-lang-mode); updateUILanguage() aplica i18n y
-                     la lógica condicional (DELE solo en modo Español). -->
-                <div class="tools-row">
+                <div class="tools-gear-row">
+                    <button id="btn-tools-toggle" class="tools-gear" type="button"
+                            aria-expanded="false" aria-controls="tools-row"
+                            title="Herramientas de estudio: 简/繁, pinyin, tonos, velocidad, voces…">⚙️</button>
+                </div>
+                <div class="tools-row" id="tools-row">
                     <div class="script-toggle">
                         <button id="btn-simplified" class="script-btn active">简 简体</button>
                         <button id="btn-traditional" class="script-btn">繁 繁體</button>
@@ -400,6 +402,15 @@
             <button id="btn-reset" class="btn-reset" data-i18n="btnReset">🗑️ Borrar progreso</button>
         </div>
 
+        <!-- v9.10: PIE DE APP — el botón 📲 Instalar vive acá abajo (antes
+             ocupaba lugar en el header). Mismo ID → setupPWA() no cambia:
+             aparece solo cuando la app es instalable o tras el delay, y
+             abre la guía de instalación si no hay diálogo nativo. -->
+        <footer class="app-footer" id="app-footer">
+            <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
+            <span class="app-footer-brand">日常華語 · Huayu Diario</span>
+        </footer>
+
     </div>
 
     <div id="offline-pill" class="offline-pill hidden" role="status">📴 Sin conexión · uso la voz del sistema</div>
@@ -585,7 +596,7 @@
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
     <script src="classics.js?v=20260910c"></script>
-    <script src="app.js?v=20260910h"></script>
+    <script src="app.js?v=20260910i"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
