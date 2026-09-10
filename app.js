@@ -1189,6 +1189,110 @@ function getFiltered() {
 }
 
 // ===== Init =====
+/* v9.9 I18N-BEGIN — UX Español-First: internacionalización ligera.
+   'es-cn' = alumno hispanohablante (interfaz en español, por defecto).
+   'cn-es' = alumno sinohablante (interfaz en chino) → DELE visible,
+   herramientas de pinyin/tonos ocultas, HSK/TOCFL ocultos. */
+const UI_STRINGS = {
+  'es-cn': {
+    appTitle: 'Huayu Diario',
+    appSlogan: 'Aprende chino, vive el idioma · 華語',
+    langSwitchBtn: '🇪🇸 ES',
+    langSwitchTitle: 'Cambiar a “Aprendo Español” (interfaz en chino)',
+    tabDaily: '📚 Diaria', tabExams: '🎓 Exámenes', tabLessons: '📖 Lecciones', tabClassics: '📜 Clásicos',
+    dailyTitle: '📚 PRÁCTICA DIARIA', dailyCurrent: 'Práctica Diaria',
+    examsTitle: '🎓 EXÁMENES INTERNACIONALES',
+    lessonsTitle: '📖 LECCIONES GRADUADAS', classicsTitle: '📜 CLÁSICOS ANTIGUOS',
+    srsIdle: 'Repaso inteligente', srsDue: 'Repaso del día', srsOk: 'Repaso · todo al día',
+    inputPlaceholder: 'Escribe la palabra faltante...',
+    btnCheck: 'Verificar', btnReveal: '👁️ Revelar', btnKnow: '✅ La sé', btnRepeat: '🔄 Repetir',
+    readLesson: '📖 Leer lección',
+    recordHint: '👆 Tocá 🎤 para grabar tu pronunciación',
+    recMy: '▶️ Escuchar mi grabación', recRef: '🔊 Referencia', recAgain: '🔁 Grabar de nuevo',
+    statsKnown: '✅ Conocidas: ', statsNew: '🎖️ Nuevas: ',
+    vocabTitle: '📚 Palabras aprendidas',
+    vocabHint: 'Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción',
+    readerTitle: '🗣️ Lector de texto',
+    readerPlaceholder: 'Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida',
+    libraryOpt: '📚 Biblioteca de lecturas…', libraryLoad: 'Cargar',
+    readerClear: '🗑️ Limpiar', readerPlay: '🔊 Leer',
+    btnReset: '🗑️ Borrar progreso', installApp: '📲 Instalar app',
+    needAnswer: 'Escribe una respuesta antes de verificar.',
+    correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
+    lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario'
+  },
+  'cn-es': {
+    appTitle: '日常華語',
+    appSlogan: '每天一句，活学活用',
+    langSwitchBtn: '🇨🇳 中文',
+    langSwitchTitle: '切换回“学中文”（界面为西班牙语）',
+    tabDaily: '📚 每日', tabExams: '🎓 考试', tabLessons: '📖 课文', tabClassics: '📜 古文',
+    dailyTitle: '📚 每日练习', dailyCurrent: '每日练习',
+    examsTitle: '🎓 国际考试',
+    lessonsTitle: '📖 分级课文', classicsTitle: '📜 古代经典',
+    srsIdle: '智能复习', srsDue: '今日复习', srsOk: '复习 · 全部完成',
+    inputPlaceholder: '请输入缺少的词语…',
+    btnCheck: '检查', btnReveal: '👁️ 显示答案', btnKnow: '✅ 我会了', btnRepeat: '🔄 再练一次',
+    readLesson: '📖 阅读课文',
+    recordHint: '👆 点击 🎤 录制你的发音',
+    recMy: '▶️ 听我的录音', recRef: '🔊 参考音频', recAgain: '🔁 重新录音',
+    statsKnown: '✅ 已掌握：', statsNew: '🎖️ 新词：',
+    vocabTitle: '📚 已学词语',
+    vocabHint: '关闭浏览器时自动保存 · 点击词语查看翻译',
+    readerTitle: '🗣️ 文本朗读',
+    readerPlaceholder: '在此粘贴中文或西班牙语文本…我会用所选语音朗读',
+    libraryOpt: '📚 朗读文库…', libraryLoad: '载入',
+    readerClear: '🗑️ 清空', readerPlay: '🔊 朗读',
+    btnReset: '🗑️ 清除学习记录', installApp: '📲 安装应用',
+    needAnswer: '请先输入答案再检查。',
+    correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
+    lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙'
+  }
+};
+
+function uiT(key) {
+    const pack = UI_STRINGS[(state && state.mode)] || UI_STRINGS['es-cn'];
+    const v = pack[key];
+    return typeof v === 'string' ? v : (UI_STRINGS['es-cn'][key] || '');
+}
+
+function updateUILanguage(mode) {
+    const m = mode || (typeof state !== 'undefined' && state.mode) || 'es-cn';
+    const S = UI_STRINGS[m] || UI_STRINGS['es-cn'];
+    const cnMode = m === 'cn-es';
+
+    // 1) Textos estáticos marcados con data-i18n en index.html
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const k = el.getAttribute('data-i18n');
+        if (S[k] !== undefined) el.textContent = S[k];
+    });
+
+    // 2) Placeholders / títulos puntuales (atributos, no textContent)
+    const set = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
+    set('btn-toggle-lang-mode', 'textContent', S.langSwitchBtn);
+    set('btn-toggle-lang-mode', 'title', S.langSwitchTitle);
+    set('answer-input', 'placeholder', S.inputPlaceholder);
+    set('reader-input', 'placeholder', S.readerPlaceholder);
+    set('srs-bar-label', 'textContent', S.srsIdle);
+
+    // 3) Textos que app.js escribe dinámicamente → refrescarlos con uiT()
+    if (typeof updateStats === 'function') updateStats();
+    if (typeof updateDailyBtnLabel === 'function') updateDailyBtnLabel();
+
+    // 4) Lógica condicional estricta: exámenes según el sentido del estudio
+    const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
+    show('dele-dropdown', cnMode);        // DELE solo aprendiendo ESPAÑOL
+    show('tocfl-dropdown', !cnMode);      // TOCFL solo aprendiendo chino
+    show('hsk-selector', !cnMode);        // selector de nivel HSK ídem
+    show('btn-placement', !cnMode);       // test de colocación HSK (exámenes)
+    show('btn-placement-daily', !cnMode); // test de colocación (diaria)
+
+    // 5) Herramientas del alfabeto: pinyin/tonos solo al aprender chino.
+    //    (简/繁 SIGUE visible: el público TW/HK prefiere 繁體 también en cn-es)
+    ['btn-pinyin', 'btn-tones', 'btn-tone-info'].forEach((id) => show(id, !cnMode));
+}
+/* v9.9 I18N-END */
+
 document.addEventListener('DOMContentLoaded', async () => {
     loadProgress();
     applyToneScheme(); // v7.11: restaurar esquema de tonos guardado (respeta dark ya aplicado)
@@ -1196,6 +1300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     buildReaderLibrary(); // v7.15: poblar la Biblioteca de Lecturas (lessons.js)
     applySavedUI();
+    updateUILanguage(); // v9.9: idioma de UI + condicional DELE/herramientas
     // v7.8 (spec v4.0): sincronizar el MODO con el evaluador de voz lo
     // antes posible. No bloquea el render: si tarda, la evaluación de
     // voz espera la transición antes de analizar (VE._setModePromise).
@@ -1362,6 +1467,8 @@ function setupEventListeners() {
     // Modo ES/CN
     safeAdd('btn-es-cn', () => setMode('es-cn'));
     safeAdd('btn-cn-es', () => setMode('cn-es'));
+    // v9.9: botón discreto del header (los del modo se quitaron de la tarjeta)
+    safeAdd('btn-toggle-lang-mode', () => setMode(state.mode === 'es-cn' ? 'cn-es' : 'es-cn'));
     
     // Tipo de carácter (Simplificado/Tradicional)
     safeAdd('btn-simplified', () => setCharType('simp'));
@@ -1598,8 +1705,12 @@ async function setMode(mode) {
         }
     }
     state.mode = mode;
-    document.getElementById('btn-es-cn').classList.toggle('active', mode === 'es-cn');
-    document.getElementById('btn-cn-es').classList.toggle('active', mode === 'cn-es');
+    // v9.9: null-guards (los botones del modo ya no están en la tarjeta) + i18n
+    const bEsCn = document.getElementById('btn-es-cn');
+    if (bEsCn) bEsCn.classList.toggle('active', mode === 'es-cn');
+    const bCnEs = document.getElementById('btn-cn-es');
+    if (bCnEs) bCnEs.classList.toggle('active', mode === 'cn-es');
+    updateUILanguage(mode);
     saveProgress();
     renderCurrentSentence();
 }
@@ -1656,7 +1767,7 @@ function updateDailyBtnLabel() {
     if (DAILY_MODULES.includes(state.activeModule) && state.activeModule !== 'todas') {
         lbl.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
     } else {
-        lbl.textContent = 'Práctica Diaria';
+        lbl.textContent = uiT('dailyCurrent');
     }
 }
 
@@ -2116,7 +2227,7 @@ function renderCurrentSentence() {
     state.answered = false;
     state.filledAnswer = null;   // v7.2: oración nueva → hueco otra vez vacío
     const btnCheck = document.getElementById('btn-check');
-    if (btnCheck) btnCheck.textContent = 'Verificar';
+    if (btnCheck) btnCheck.textContent = uiT('btnCheck');
 
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
@@ -2125,10 +2236,11 @@ function renderCurrentSentence() {
     const deleInfo = DELE_INFO[s.module];
     const tocflInfo = TOCFL_INFO[s.module]; // v8.2: vocabulario TOCFL Band A
     document.getElementById('card-level').textContent =
-        (s.module || '').startsWith('Clasicos-') ? '📜 Clásico' :
+        (s.module || '').startsWith('Clasicos-') ? uiT('lvlClassic') :
         (deleInfo ? '🇪🇸 DELE ' + deleInfo.badge :
         (tocflInfo ? '🇹🇼 TOCFL ' + tocflInfo.badge :
-        (s.w ? 'Nivel ' + s.level + ' · vocabulario' : 'Nivel ' + s.level)));
+        (s.w ? uiT('lvlPre') + s.level + uiT('lvlSuf') + uiT('lvlVocabSuf')
+             : uiT('lvlPre') + s.level + uiT('lvlSuf'))));
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
     // 1-3. Texto de la oración (hueco posicionado por cloze + tonos + relleno)
@@ -2408,7 +2520,7 @@ function checkAnswer() {
     const k = ck();
 
     if (!input) {
-        showFeedback('Escribe una respuesta antes de verificar.', 'incorrect');
+        showFeedback(uiT('needAnswer'), 'incorrect');
         return;
     }
 
@@ -2450,7 +2562,7 @@ function checkAnswer() {
     const allOptions = validAnswers.join(' / ');
 
     if (isCorrect) {
-        showFeedback('✅ ¡Correcto! "' + allOptions + '"', 'correct');
+        showFeedback(uiT('correctWord') + '"' + allOptions + '"', 'correct');
         // v8.1: palabras → se registra el hanzi canónico (no las glosas)
         if (wordKey) {
             state.knownWords.add(wordKey);
@@ -2470,7 +2582,7 @@ function checkAnswer() {
         rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
         refillBlank('correct');   // v7.2: la oración queda completa (verde)
     } else {
-        showFeedback('❌ Respuestas válidas: "' + allOptions + '"', 'incorrect');
+        showFeedback(uiT('validWrong') + '"' + allOptions + '"', 'incorrect');
         state.newWords.add(wordKey || validAnswers[0]);
         rememberWordContext(wordKey ? [wordKey] : [validAnswers[0]], s); // v7.13
         if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s); // v7.21: alimenta el mazo de repaso
@@ -2497,7 +2609,7 @@ function revealAnswer() {
     // v8.1: identidad canónica de palabra = hanzi (coherente con checkAnswer)
     const wordKey = s.w ? String(s.chinese_simp_answer || validAnswers[0] || '').trim() : null;
     showFullTranslation();
-    showFeedback('💡 Respuestas válidas: "' + validAnswers.join(' / ') + '"', 'correct');
+    showFeedback(uiT('validReveal') + '"' + validAnswers.join(' / ') + '"', 'correct');
     refillBlank('reveal');       // v7.2: oración completa con la respuesta (ámbar)
 
     if (wordKey) {
@@ -2565,8 +2677,8 @@ function hideFeedback() {
 }
 
 function updateStats() {
-    document.getElementById('stats-known').textContent = 'Conocidas: ' + state.knownWords.size;
-    document.getElementById('stats-new').textContent = 'Nuevas: ' + state.newWords.size;
+    document.getElementById('stats-known').textContent = uiT('statsKnown') + state.knownWords.size;
+    document.getElementById('stats-new').textContent = uiT('statsNew') + state.newWords.size;
 }
 
 function updateVocabularyPanel() {
@@ -4021,7 +4133,7 @@ function splitGroupedPinyin(word) {
                     if (choice && choice.outcome) outcome = choice.outcome;
                 } catch (err) { /* usuario canceló o diálogo no disponible */ }
                 deferredPrompt = null;
-                btn.textContent = '📲 Instalar app';
+                btn.textContent = uiT('installApp');
                 if (outcome !== 'timeout') btn.classList.add('hidden');
                 return;
             }
@@ -5393,8 +5505,8 @@ function pzCounterUpdate() {
             else badge.classList.add('hidden');
         }
         if (label) {
-            label.textContent = total === 0 ? 'Repaso inteligente'
-                : (due > 0 ? 'Repaso del día' : 'Repaso · todo al día');
+            label.textContent = total === 0 ? uiT('srsIdle')
+                : (due > 0 ? uiT('srsDue') : uiT('srsOk'));
         }
         btn.title = 'Repaso con repetición espaciada' +
             (total ? ' · ' + total + ' en el mazo' : '') + (due ? ' · ' + due + ' vencen hoy' : '');

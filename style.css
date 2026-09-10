@@ -4297,3 +4297,48 @@ body.paper-mode .app-logo-img { border: 1px solid #e7dcc3; box-shadow: 0 1px 6px
     .header .app-title { font-size: 1.16rem; }
     .header .app-slogan { font-size: 0.68rem; margin-top: 2px; }
 }
+
+/* ============================================================
+   v9.9: UX Español-First — botón de idioma + utilidad de ocultamiento
+   (Regla 6.2: variantes dark y paper duplicadas + móvil)
+   ============================================================ */
+.hidden-force { display: none !important; }
+
+.lang-switch-btn {
+    min-height: 42px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 21px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: background 0.25s ease, transform 0.15s ease;
+}
+
+.lang-switch-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); }
+.lang-switch-btn:active { transform: scale(0.97); }
+
+/* Oscuro: vidrio más oscuro sobre el gradiente */
+body.dark-mode .lang-switch-btn {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #e2e8f0;
+}
+body.dark-mode .lang-switch-btn:hover { background: rgba(0, 0, 0, 0.5); }
+
+/* Papel: tinta sepia sobre la textura del header */
+body.paper-mode .lang-switch-btn {
+    background: rgba(74, 63, 46, 0.08);
+    border-color: #d9c9a3;
+    color: #4a3f2e;
+}
+body.paper-mode .lang-switch-btn:hover { background: rgba(74, 63, 46, 0.16); }
+
+/* Móvil: chip más chico para no empujar el título (≤480px) */
+@media (max-width: 480px) {
+    .lang-switch-btn { min-height: 36px; padding: 4px 10px; font-size: 0.72rem; }
+}

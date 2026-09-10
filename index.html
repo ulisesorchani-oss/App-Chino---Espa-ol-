@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260910g">
+    <link rel="stylesheet" href="style.css?v=20260910h">
 </head>
 <body>
     <div class="container">
@@ -25,12 +25,15 @@
                 <div class="brand-block">
                     <img src="icons/logo-sello.png" alt="Sello 日常華語 — Huayu Diario" class="app-logo-img" width="58" height="58">
                     <div class="brand-text">
-                        <h1 class="app-title">Huayu Diario</h1>
-                        <p class="app-slogan">Aprende chino, vive el idioma · 華語</p>
+                        <h1 class="app-title" data-i18n="appTitle">Huayu Diario</h1>
+                        <p class="app-slogan" data-i18n="appSlogan">Aprende chino, vive el idioma · 華語</p>
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC">📲 Instalar</button>
+                    <!-- v9.9: cambio de modo discreto (Español-First: por defecto es-cn).
+                         i18n: updateUILanguage() le pone texto/título según el modo. -->
+                    <button id="btn-toggle-lang-mode" class="lang-switch-btn" type="button" title="Cambiar idioma de la interfaz">🇪🇸 ES</button>
+                    <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
                     <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
                 </div>
             </div>
@@ -64,15 +67,10 @@
                  controles de visualización de la tarjeta (简/繁, pinyin, tonos,
                  velocidad, voces) — afectan lo que el alumno ve acá y ahora. -->
             <div class="card-tools-header">
-                <!-- v8.1: en "Aprendo Chino" el vocabulario HSK muestra el HANZI
-                     (+ pinyin) y se responde en español; "Aprendo Español" es el
-                     modo espejo (ves español, produces chino). Las flechas
-                     describen el recorrido de estudio (del material que ves hacia
-                     la lengua que producís). -->
-                <div class="mode-selector" role="group" aria-label="Modo de estudio">
-                    <button id="btn-es-cn" class="mode-btn active"><b>CN→ES</b><small>Aprendo Chino</small></button>
-                    <button id="btn-cn-es" class="mode-btn"><b>ES→CN</b><small>Aprendo Español</small></button>
-                </div>
+                <!-- v9.9: el selector de modo (CN→ES / ES→CN) se quitó de la
+                     tarjeta. El modo se cambia con el botón discreto del header
+                     (#btn-toggle-lang-mode); updateUILanguage() aplica i18n y
+                     la lógica condicional (DELE solo en modo Español). -->
                 <div class="tools-row">
                     <div class="script-toggle">
                         <button id="btn-simplified" class="script-btn active">简 简体</button>
@@ -115,7 +113,7 @@
             <!-- Input para respuesta -->
             <div class="answer-section" id="answer-section">
                 <input type="text" id="answer-input" placeholder="Escribe la palabra faltante...">
-                <button id="btn-check" class="btn-primary">Verificar</button>
+                <button id="btn-check" class="btn-primary" data-i18n="btnCheck">Verificar</button>
             </div>
 
             <!-- Feedback -->
@@ -128,10 +126,10 @@
                 <!-- v7.14: aparece solo cuando la oración pertenece a un texto
                      continuo (Clásicos...) y el modo es "Aprendo Chino" -->
                 <button id="btn-read-lesson" class="btn-secondary btn-lesson hidden" type="button"
-                        title="Leer el texto completo de esta lección en el Lector">📖 Leer lección</button>
-                <button id="btn-reveal" class="btn-secondary">👁️ Revelar</button>
-                <button id="btn-know" class="btn-success">✅ La sé</button>
-                <button id="btn-not-know" class="btn-warning">🔄 Repetir</button>
+                        title="Leer el texto completo de esta lección en el Lector" data-i18n="readLesson">📖 Leer lección</button>
+                <button id="btn-reveal" class="btn-secondary" data-i18n="btnReveal">👁️ Revelar</button>
+                <button id="btn-know" class="btn-success" data-i18n="btnKnow">✅ La sé</button>
+                <button id="btn-not-know" class="btn-warning" data-i18n="btnRepeat">🔄 Repetir</button>
             </div>
         </div>
 
@@ -140,28 +138,28 @@
             <canvas id="record-wave" class="record-wave" height="34" aria-hidden="true"></canvas>
             <!-- v7.6: barra de progreso de la descarga del motor Whisper (1.ª vez) -->
             <div id="rec-dl" class="rec-dl hidden" aria-hidden="true"><div id="rec-dl-fill" class="rec-dl-fill"></div></div>
-            <p id="record-hint" class="record-hint">👆 Tocá 🎤 para grabar tu pronunciación</p>
+            <p id="record-hint" class="record-hint" data-i18n="recordHint">👆 Tocá 🎤 para grabar tu pronunciación</p>
             <div id="record-result" class="record-result hidden" aria-live="polite"></div>
             <div id="record-row-actions" class="record-row hidden">
-                <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button">▶️ Escuchar mi grabación</button>
-                <button id="btn-play-ref" class="btn-secondary rec-action hidden" type="button">🔊 Referencia</button>
-                <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button">🔁 Grabar de nuevo</button>
+                <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button" data-i18n="recMy">▶️ Escuchar mi grabación</button>
+                <button id="btn-play-ref" class="btn-secondary rec-action hidden" type="button" data-i18n="recRef">🔊 Referencia</button>
+                <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button" data-i18n="recAgain">🔁 Grabar de nuevo</button>
             </div>
             <p class="record-privacy" id="record-privacy-note">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
         </div>
 
         <!-- v7.18: TABS de selectores de contenido (debajo de la práctica; 1 panel visible) -->
         <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
-            <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button">📚 Diaria</button>
-            <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button">🎓 Exámenes</button>
-            <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button">📖 Lecciones</button>
-            <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button">📜 Clásicos</button>
+            <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
+            <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button" data-i18n="tabExams">🎓 Exámenes</button>
+            <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button" data-i18n="tabLessons">📖 Lecciones</button>
+            <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button" data-i18n="tabClassics">📜 Clásicos</button>
         </nav>
 
         <div class="tab-panels">
             <!-- Panel Diaria -->
             <div class="tab-panel section-daily" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
-                <h3 class="section-title"> PRÁCTICA DIARIA</h3>
+                <h3 class="section-title" data-i18n="dailyTitle"> PRÁCTICA DIARIA</h3>
                 <div class="category-filter daily-filter">
                     <div class="daily-dropdown" id="daily-dropdown">
                         <button id="btn-daily-toggle" class="daily-main-btn" type="button"
@@ -197,8 +195,8 @@
 
             <!-- Panel Exámenes -->
             <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
-                <h3 class="section-title">🎓 EXÁMENES INTERNACIONALES</h3>
-                <div class="hsk-level-selector">
+                <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
+                <div class="hsk-level-selector" id="hsk-selector">
                     <label for="select-hsk-level">Nivel HSK:</label>
                     <select id="select-hsk-level" class="level-dropdown">
                         <!-- v7.19: HSK 3.0 (GF0025-2021) — 9 niveles, conteos de palabras NUEVAS únicas -->
@@ -273,7 +271,7 @@
 
             <!-- Panel Lecciones graduadas (v9.0) -->
             <div class="tab-panel section-lessons hidden" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
-                <h3 class="section-title lessons-title">📖 LECCIONES GRADUADAS <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
+                <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
                 <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
                 <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
                     <button type="button" class="lv-chip active" data-level="all">Todo</button>
@@ -289,7 +287,7 @@
 
             <!-- Panel Clásicos -->
             <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
-                <h3 class="section-title classics-title">📜 CLÁSICOS ANTIGUOS <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
+                <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
                 <div class="classics-dropdown" id="classics-dropdown">
                     <button id="btn-classics-toggle" class="classics-main-btn" type="button"
                             aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
@@ -333,15 +331,15 @@
 
         <!-- Panel de Vocabulario -->
         <div class="vocabulary-panel">
-            <h3>📚 Palabras aprendidas</h3>
-            <p class="vocab-hint">Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción</p>
+            <h3 data-i18n="vocabTitle">📚 Palabras aprendidas</h3>
+            <p class="vocab-hint" data-i18n="vocabHint">Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción</p>
             <div id="vocab-list"></div>
         </div>
 
         <!-- BANNER: LECTOR DE TEXTO LIBRE (abajo de todo, feedback de alumnos) -->
         <div class="reader-banner" id="reader-banner">
             <div class="reader-head">
-                <h3 class="section-title">🗣️ Lector de texto</h3>
+                <h3 class="section-title" data-i18n="readerTitle">🗣️ Lector de texto</h3>
                 <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
             </div>
             <!-- v7.14: maxlength 1200 — las lecciones (lessons.js) cargan textos completos -->
@@ -351,14 +349,14 @@
                  plantadas (planned) aparecen como "· próximamente". -->
             <div class="reader-library">
                 <select id="reader-library" class="reader-library-select" aria-label="Biblioteca de lecturas">
-                    <option value="">📚 Biblioteca de lecturas…</option>
+                    <option value="" data-i18n="libraryOpt">📚 Biblioteca de lecturas…</option>
                 </select>
-                <button id="btn-library-load" class="btn-secondary" type="button" title="Cargar la lectura elegida en el Lector">Cargar</button>
+                <button id="btn-library-load" class="btn-secondary" type="button" title="Cargar la lectura elegida en el Lector" data-i18n="libraryLoad">Cargar</button>
             </div>
             <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
             <div class="reader-actions">
-                <button id="btn-reader-clear" class="btn-secondary" type="button">🗑️ Limpiar</button>
-                <button id="btn-reader-play" class="btn-primary" type="button">🔊 Leer</button>
+                <button id="btn-reader-clear" class="btn-secondary" type="button" data-i18n="readerClear">🗑️ Limpiar</button>
+                <button id="btn-reader-play" class="btn-primary" type="button" data-i18n="readerPlay">🔊 Leer</button>
             </div>
         </div>
 
@@ -399,7 +397,7 @@
 
         <!-- v7.18: acción destructiva al final, discreta -->
         <div class="danger-zone">
-            <button id="btn-reset" class="btn-reset">🗑️ Borrar progreso</button>
+            <button id="btn-reset" class="btn-reset" data-i18n="btnReset">🗑️ Borrar progreso</button>
         </div>
 
     </div>
@@ -587,7 +585,7 @@
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
     <script src="classics.js?v=20260910c"></script>
-    <script src="app.js?v=20260910e"></script>
+    <script src="app.js?v=20260910h"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
