@@ -61,8 +61,11 @@
 //       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v58'; // — invalida shell
+const VERSION = 'v59'; // — invalida shell
 
+// v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
+//        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
+//        + slogan v9.13 "Vive el idioma, una frase al día - 日常華語".
 // v9.12: dict-mini.js ampliado (+742 glosas de clásicos/lecciones; 電=electricidad;
 //        讀/道/孝 sin "No tengo la traducción") + desglose por carácter usa el
 //        diccionario como respaldo. app.js: lookupVocab capa 'chars' con dict-mini.
