@@ -61,7 +61,13 @@
 //       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v57'; // — invalida shell
+const VERSION = 'v58'; // — invalida shell
+
+// v9.12: dict-mini.js ampliado (+742 glosas de clásicos/lecciones; 電=electricidad;
+//        讀/道/孝 sin "No tengo la traducción") + desglose por carácter usa el
+//        diccionario como respaldo. app.js: lookupVocab capa 'chars' con dict-mini.
+// v9.11: audio según dirección; play/pausa con ícono en lecciones/clásicos; panel
+//        de oración sin audio (solo botón parlante).
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra

@@ -1196,7 +1196,7 @@ function getFiltered() {
 const UI_STRINGS = {
   'es-cn': {
     appTitle: 'Huayu Diario',
-    appSlogan: 'Vive el idioma, una frase al día · 日常華語',
+    appSlogan: 'Aprende chino, vive el idioma · 華語',
     langSwitchBtn: '🇪🇸 ES',
     langSwitchTitle: 'Cambiar a “Aprendo Español” (interfaz en chino)',
     tabDaily: '📚 Diaria', tabExams: '🎓 Exámenes', tabLessons: '📖 Lecciones', tabClassics: '📜 Clásicos',
@@ -2937,12 +2937,18 @@ function lookupVocab(word) {
             if (cand !== lw && wordHitDict.has(cand)) return { level: 'hit', lemma: cand, rec: wordHitDict.get(cand) };
         }
     }
-    // 4) ZH: desglose carácter a carácter — solo si ALGÚN carácter tiene
-    // ficha real (si no, mejor el mensaje honesto; el pinyin ya está arriba)
+    // 4) ZH: desglose carácter a carácter — con ficha de lección o, desde
+    // v9.12, entrada del diccionario (dict-mini) como respaldo: antes los
+    // caracteres clásicos (讀, 電, 道…) quedaban sin glosa en el desglose.
     if (zh) {
         const chars = [];
         for (const ch of w) if (READER_HANZI.test(ch) && chars.indexOf(ch) === -1) chars.push(ch);
-        const parts = chars.map(ch => ({ ch: ch, py: wordPinyin(ch), rec: vocabDict.get(ch) || wordHitDict.get(ch) || null }));
+        const parts = chars.map(ch => {
+            const d = dictMiniLookup(ch);
+            const rec = vocabDict.get(ch) || wordHitDict.get(ch)
+                || (d ? { es: d.def, zhSimp: ch, zhTrad: ch, pinyin: d.py, fullEs: '', fullZhSimp: '', fullZhTrad: '' } : null);
+            return { ch: ch, py: (d && d.py) || wordPinyin(ch), rec: rec };
+        });
         if (parts.length && parts.some(p => p.rec)) return { level: 'chars', parts: parts };
     }
     return { level: 'none' };
