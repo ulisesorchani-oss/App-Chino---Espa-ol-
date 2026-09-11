@@ -61,7 +61,7 @@
 //       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v62'; // — invalida shell (v9.16: oración propia al sumar al repaso)
+const VERSION = 'v64'; // — invalida shell (v9.17.1: pinyin-pro.min.js autohospedado → offline desde la 1.ª instalación)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

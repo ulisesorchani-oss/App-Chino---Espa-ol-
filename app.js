@@ -5502,13 +5502,14 @@ function pzCounterUpdate() {
     }
 
     // ---- sesión ----
-    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false };
+    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false, prodOk: 0, prodTried: 0 };
 
     function startSession() {
         SR.queue = dueList().slice(0, SESSION_MAX);
         if (!SR.queue.length) return renderIntro();
         SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
         SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
+        SR.prodOk = 0; SR.prodTried = 0; // v9.17: contadores de producción
         renderQuiz();
     }
     function aheadSession() {
@@ -5520,7 +5521,87 @@ function pzCounterUpdate() {
         if (!SR.queue.length) return renderStats();
         SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
         SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
+        SR.prodOk = 0; SR.prodTried = 0; // v9.17
         renderQuiz();
+    }
+
+    // ===== v9.17 — RECUPERACIÓN ACTIVA: modo producción (opcional) =====
+    // Antes de revelar, la app pide ESCRIBIR el hanzi (producir, no solo
+    // reconocer): C — cloze de tu propia oración (v9.16) con la palabra
+    // tapada + pista 🇪🇸; B — sin oración, pista 🇪🇸 y a escribir.
+    // Acepta 简 o 繁 (card.zt + alias de dict-mini) y normaliza espacios/
+    // puntuación que el IME meta de más. El ✅/❌ SOLO informa: la nota la
+    // pone siempre el alumno (cajas/intervalos intactos). Toggle apagado
+    // por defecto, persistido en DB.prod (ac_srs).
+    // ===== fin v9.17 (marcadores para tests) =====
+    function prodNormalize(s) {
+        return String(s || '')
+            .toLowerCase()
+            .normalize('NFC')
+            .replace(/[^0-9a-z\u4e00-\u9fff\u3400-\u4dbf]/g, ''); // solo hanzi + latín/dígitos
+    }
+    function dictSimpToTrad(w) {
+        // dictMiniAlias (v7.12) mapea trad→simp; invertimos UNA sola vez
+        if (!dictSimpToTrad._rev) {
+            dictSimpToTrad._rev = new Map();
+            try {
+                dictMiniAlias.forEach((simp, trad) => {
+                    if (!dictSimpToTrad._rev.has(simp)) dictSimpToTrad._rev.set(simp, trad);
+                });
+            } catch (e) { /* sin dict-mini */ }
+        }
+        const w2 = String(w || '');
+        if (!w2) return '';
+        if (dictSimpToTrad._rev.has(w2)) return dictSimpToTrad._rev.get(w2);
+        let out = '', hits = 0;
+        for (const ch of w2) { const t = dictSimpToTrad._rev.get(ch); if (t) { out += t; hits++; } else out += ch; }
+        return hits ? out : ''; // solo per-char si hay al menos un mapeo
+    }
+    function prodVariants(item) {
+        const card = item.card || {};
+        const set = [];
+        const push = (w) => { const n = prodNormalize(w); if (n && set.indexOf(n) === -1) set.push(n); };
+        push(item.zh);                  // clave canónica (simplificado)
+        push(card.zt);                  // tradicional guardado en la tarjeta
+        push(dictSimpToTrad(item.zh));  // tradicional desde alias dict-mini
+        return set;
+    }
+    function prodPlan(item) {
+        const card = item.card || {};
+        const trad = ck() === 'trad';
+        const wordSimp = item.zh;
+        const wordTrad = card.zt || dictSimpToTrad(wordSimp) || '';
+        const es = srsGloss(item.zh, card);
+        const sentRaw = String((trad ? (card.ctxZt || card.ctxZh) : card.ctxZh) || '');
+        const blankWord = [wordSimp, wordTrad].find(w => w && sentRaw.indexOf(w) !== -1) || '';
+        if (sentRaw && blankWord) {
+            return { mode: 'cloze', sent: sentRaw.replace(blankWord, '＿＿＿'), es: es, answer: blankWord };
+        }
+        if (es) return { mode: 'word', es: es };
+        return null; // sin pista posible → tarjeta clásica
+    }
+    // ===== fin v9.17 =====
+
+    // v9.17: bloque de respuesta compartido (tarjeta clásica y producción).
+    // withHanzi agrega el hanzi grande DENTRO de la respuesta: en producción
+    // el hanzi no se muestra como pista porque es justo lo que se pide.
+    function srsAnsHtml(item, card, withHanzi) {
+        const nextGood = Math.min(card.b + 1, 6);
+        const nextEasy = Math.min(card.b + 2, 6);
+        const hintB = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
+        const zhAns = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
+        return (withHanzi ? '<div class="srs-ans-zh" lang="zh">' + escHtml(zhAns) + '</div>' : '') +
+            (card.py ? '<div class="srs-py">📖 ' + escHtml(card.py) + '</div>' : '') +
+            '<div class="srs-es">🇪🇸 ' + (srsGloss(item.zh, card)
+                ? escHtml(srsGloss(item.zh, card)) : '<span class="srs-es-missing">—</span>') + '</div>' +
+            ((card.ctxZh || card.ctxEs) ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
+                (card.ctxZh ? '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' : '') +
+                (card.ctxEs ? '<div class="srs-ctx-es">“' + escHtml(card.ctxEs) + '”</div>' : '') + '</div>' : '') +
+            '<div class="srs-grades">' +
+                '<button type="button" class="srs-grade srs-g-again" data-k="again">😵 Otra vez<small>' + hintB(1) + '</small></button>' +
+                '<button type="button" class="srs-grade srs-g-good" data-k="good">🙂 Bien<small>' + hintB(nextGood) + '</small></button>' +
+                '<button type="button" class="srs-grade srs-g-easy" data-k="easy">😎 Fácil<small>' + hintB(nextEasy) + '</small></button>' +
+            '</div>';
     }
 
     function renderQuiz() {
@@ -5532,39 +5613,74 @@ function pzCounterUpdate() {
         const card = item.card;
         const zh = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
         const box = card.b;
-        const nextGood = Math.min(box + 1, 6);
-        const nextEasy = Math.min(box + 2, 6);
-        const hintB = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
+
+        // v9.17: plan de producción para esta tarjeta (null → clásica)
+        const plan = DB.prod ? prodPlan(item) : null;
+
         body.innerHTML =
             '<div class="srs-meta">' +
                 '<span class="srs-chip">Repaso</span>' +
+                (plan ? '<span class="srs-chip srs-chip-prod">✍️ producción</span>' : '') +
                 '<span class="srs-count">' + (SR.i + 1) + ' / ' + SR.total + '</span>' +
                 (card.lv ? '<span class="srs-lv">HSK ' + card.lv + '</span>' : '') +
                 '<span class="srs-box">caja ' + box + '</span>' +
             '</div>' +
-            '<div class="srs-card" lang="zh">' + escHtml(zh) + '</div>' +
-            '<div class="srs-tools">' +
-                '<button type="button" class="srs-tool srs-speak" title="Escuchar la palabra">🔊</button>' +
-                '<button type="button" class="srs-tool srs-write" title="Practicar los trazos">✍</button>' +
-            '</div>' +
-            '<button type="button" class="btn-primary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
-            '<div id="srs-ans" class="srs-ans hidden">' +
-                (card.py ? '<div class="srs-py">📖 ' + escHtml(card.py) + '</div>' : '') +
-                '<div class="srs-es">🇪🇸 ' + (srsGloss(item.zh, card)
-                    ? escHtml(srsGloss(item.zh, card)) : '<span class="srs-es-missing">—</span>') + '</div>' +
-                // v9.16: el bloque aparece con ctxZh O ctxEs — la oración propia
-                // del alumno en español (sin han) también merece "Tu ejemplo".
-                ((card.ctxZh || card.ctxEs) ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
-                    (card.ctxZh ? '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' : '') +
-                    (card.ctxEs ? '<div class="srs-ctx-es">“' + escHtml(card.ctxEs) + '”</div>' : '') + '</div>' : '') +
-                '<div class="srs-grades">' +
-                    '<button type="button" class="srs-grade srs-g-again" data-k="again">😵 Otra vez<small>' + hintB(1) + '</small></button>' +
-                    '<button type="button" class="srs-grade srs-g-good" data-k="good">🙂 Bien<small>' + hintB(nextGood) + '</small></button>' +
-                    '<button type="button" class="srs-grade srs-g-easy" data-k="easy">😎 Fácil<small>' + hintB(nextEasy) + '</small></button>' +
-                '</div>' +
-            '</div>';
+            (plan
+                ? // — producción: hanzi OCULTO hasta revelar —
+                  (plan.mode === 'cloze'
+                    ? '<div class="srs-card srs-card-cloze" lang="zh">' + escHtml(plan.sent) + '</div>'
+                    : '') +
+                  (plan.es ? '<div class="srs-prod-hint">' + (plan.mode === 'cloze' ? '💡 ' : '🇪🇸 ') +
+                      escHtml(plan.es) + '</div>' : '') +
+                  '<div class="srs-prod-tools">' +
+                      '<button type="button" class="srs-tool srs-speak" title="Pista de audio">🔊</button>' +
+                  '</div>' +
+                  '<div class="srs-prod-row">' +
+                      '<input type="text" class="srs-prod-input" maxlength="20" autocomplete="off" ' +
+                          'autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Escribí el hanzi…">' +
+                      '<button type="button" class="btn-primary srs-prod-check">Comprobar</button>' +
+                  '</div>' +
+                  '<div id="srs-prod-fb" class="srs-prod-fb" aria-live="polite"></div>' +
+                  '<button type="button" class="btn-secondary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
+                  '<div id="srs-ans" class="srs-ans hidden">' + srsAnsHtml(item, card, true) + '</div>'
+                : // — clásica: hanzi a la vista, reconocimiento —
+                  '<div class="srs-card" lang="zh">' + escHtml(zh) + '</div>' +
+                  '<div class="srs-tools">' +
+                      '<button type="button" class="srs-tool srs-speak" title="Escuchar la palabra">🔊</button>' +
+                      '<button type="button" class="srs-tool srs-write" title="Practicar los trazos">✍</button>' +
+                  '</div>' +
+                  '<button type="button" class="btn-primary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
+                  '<div id="srs-ans" class="srs-ans hidden">' + srsAnsHtml(item, card, false) + '</div>');
         const ans = document.getElementById('srs-ans');
         if (ans) ans.classList.add('hidden');
+        const pin = document.querySelector('#srs-body .srs-prod-input');
+        if (pin) {
+            try { pin.focus(); } catch (e) { /* sin foco disponible */ }
+            pin.addEventListener('keydown', (ev) => {
+                if (ev.isComposing || ev.keyCode === 229) return; // IME: elegir candidato ≠ enviar
+                if (ev.key === 'Enter') { ev.preventDefault(); prodCheck(); }
+            });
+        }
+    }
+
+    function prodCheck() {
+        const item = SR.cur;
+        if (!item || SR.revealed) return;
+        const inp = document.querySelector('#srs-body .srs-prod-input');
+        if (!inp || inp.disabled) return;
+        const typed = prodNormalize(inp.value);
+        if (!typed) { try { inp.focus(); } catch (e) { /* vacío → ignorar */ } return; }
+        const ok = prodVariants(item).indexOf(typed) !== -1;
+        SR.prodTried++; if (ok) SR.prodOk++;
+        const fb = document.getElementById('srs-prod-fb');
+        if (fb) fb.innerHTML = ok
+            ? '<span class="srs-prod-ok">✅ ¡Correcto!</span>'
+            : '<span class="srs-prod-bad">❌ Era: <b lang="zh">' +
+              escHtml(ck() === 'trad' ? (item.card.zt || item.zh) : item.zh) + '</b></span>';
+        inp.disabled = true;
+        const chk = document.querySelector('#srs-body .srs-prod-check');
+        if (chk) chk.disabled = true;
+        doReveal();
     }
 
     function doReveal() {
@@ -5573,6 +5689,11 @@ function pzCounterUpdate() {
         const btn = document.querySelector('#srs-body .srs-reveal-btn');
         if (btn) btn.classList.add('hidden');
         if (ans) ans.classList.remove('hidden');
+        // v9.17: congelar el input de producción (venga de ✅/❌ o del escape)
+        const pin = document.querySelector('#srs-body .srs-prod-input');
+        if (pin) pin.disabled = true;
+        const pchk = document.querySelector('#srs-body .srs-prod-check');
+        if (pchk) pchk.disabled = true;
     }
 
     function doGrade(kind) {
@@ -5604,6 +5725,8 @@ function pzCounterUpdate() {
             '<p class="srs-sum-line">' + SR.done + ' respuesta' + (SR.done === 1 ? '' : 's') +
                 ' · ' + SR.unique + ' tarjeta' + (SR.unique === 1 ? '' : 's') +
                 (SR.again ? ' · ' + SR.again + ' para volver a ver' : '') + '</p>' +
+            (SR.prodTried ? '<p class="srs-sum-line">✍️ ' + SR.prodOk + ' de ' + SR.prodTried +
+                ' escrita' + (SR.prodTried === 1 ? '' : 's') + ' bien antes de revelar</p>' : '') +
             '<p class="srs-sum-next">' + nextTxt + '</p>' +
             '<div class="srs-actions">' +
                 (left > 0 ? '<button type="button" class="btn-primary srs-start">▶ Seguir repaso (' + left + ')</button>' : '') +
@@ -5632,6 +5755,9 @@ function pzCounterUpdate() {
             '<div class="srs-stat-row"><span class="srs-stat-k">Vencen hoy</span><span class="srs-stat-v">' + due + '</span></div>' +
             (rows || '<p class="srs-sum-line">El mazo se llena solo: cada palabra que fallás en la práctica o marcás con 🔄 Repetir entra acá.</p>') +
             (isFinite(nxt) && fut > 0 ? '<p class="srs-sum-next">Próxima tarjeta ' + fmtRel(nxt - Date.now()) + '</p>' : '') +
+            (total > 0 ? '<button type="button" class="srs-prod-toggle' + (DB.prod ? ' on' : '') + '">' +
+                (DB.prod ? '✍️ Modo producción: activo' : '✍️ Modo producción: apagado') + '</button>' +
+                '<p class="srs-prod-note">Te pide escribir el hanzi antes de revelar (acepta 简 o 繁).</p>' : '') +
             '<div class="srs-actions">' +
                 (due > 0 ? '<button type="button" class="btn-primary srs-start">▶ Empezar repaso (' + due + ')</button>' : '') +
                 (fut > 0 ? '<button type="button" class="btn-secondary srs-ahead">🌅 Adelantar (hasta 10)</button>' : '') +
@@ -5669,6 +5795,9 @@ function pzCounterUpdate() {
                 '<div class="srs-hero-due">' + due + '</div>' +
                 '<p class="srs-sum-line">tarjeta' + (due === 1 ? '' : 's') + ' vencida' + (due === 1 ? '' : 's') + ' de un mazo de ' + total + '</p>' +
                 (due > SESSION_MAX ? '<p class="srs-sum-next">Esta tanda: ' + SESSION_MAX + ' · el resto sigue mañana</p>' : '') +
+                '<button type="button" class="srs-prod-toggle' + (DB.prod ? ' on' : '') + '">' +
+                    (DB.prod ? '✍️ Modo producción: activo' : '✍️ Modo producción: apagado') + '</button>' +
+                '<p class="srs-prod-note">Te pide escribir el hanzi antes de revelar (acepta 简 o 繁, sin tonos que tipear).</p>' +
                 '<div class="srs-actions">' +
                     '<button type="button" class="btn-primary srs-start">▶ Empezar repaso (' + Math.min(due, SESSION_MAX) + ')</button>' +
                     '<button type="button" class="btn-secondary srs-stats-btn">📊 Ver mi mazo</button>' +
@@ -5727,6 +5856,11 @@ function pzCounterUpdate() {
             if (!b) return;
             if (b.classList.contains('srs-start')) startSession();
             else if (b.classList.contains('srs-reveal')) doReveal();
+            else if (b.classList.contains('srs-prod-check')) prodCheck(); // v9.17
+            else if (b.classList.contains('srs-prod-toggle')) {           // v9.17
+                DB.prod = !DB.prod; save();
+                if (SR.phase === 'stats') renderStats(); else renderIntro();
+            }
             else if (b.classList.contains('srs-grade')) doGrade(b.dataset.k);
             else if (b.classList.contains('srs-seed')) {
                 const n = seedFromPlacement();
