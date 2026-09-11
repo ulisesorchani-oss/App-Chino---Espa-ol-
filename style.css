@@ -4617,3 +4617,24 @@ body.paper-mode .bottom-app-actions .utility-btn { border-color: #d9c9a3; }
     .answer-section { flex-wrap: wrap; }
     #btn-check { width: 100%; }
 }
+
+/* ===== v9.15: práctica intercalada — estado activo del toggle =====
+   Botón #btn-interleaving (tools-row). Apagado se ve como los demás chips;
+   encendido queda verde (se distingue del violeta de Pinyin y del azul de
+   简/繁) para que el alumno siempre sepa si está practicando mezclado. */
+#btn-interleaving.active {
+    background: #059669;
+    color: #ffffff;
+    font-weight: 600;
+    border-color: #059669;
+}
+body.dark-mode #btn-interleaving.active {
+    background: #059669;
+    color: #ffffff;
+    border-color: #34d399;
+}
+body.paper-mode #btn-interleaving.active {
+    background: #2f6b4f;
+    color: #fffdf5;
+    border-color: #2f6b4f;
+}

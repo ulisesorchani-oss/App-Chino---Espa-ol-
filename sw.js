@@ -61,7 +61,7 @@
 //       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v60'; // — invalida shell (v9.14: tarjeta/exámenes/fuente/guardar)
+const VERSION = 'v61'; // — invalida shell (v9.15: práctica intercalada)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

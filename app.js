@@ -851,7 +851,14 @@ let state = {
     // v7.13: contexto guardado al marcar una palabra → wordContexts[palabra] =
     // { zh: oración simplificada, zt: oración tradicional, es: oración española,
     //   py: pinyin de la PALABRA }. Se muestra en el popup ("tu ejemplo").
-    wordContexts: {}
+    wordContexts: {},
+    // v9.15: PRÁCTICA INTERCALADA (interleaving). false = orden original del
+    // módulo (bloque/narrativa); true = orden mezclado con Fisher-Yates
+    // determinista. La semilla se persiste: al recargar, el orden mezclado es
+    // el MISMO y el índice guardado sigue apuntando a la misma frase.
+    interleaving: false,
+    interleaveSeed: 0,   // semilla del shuffle actual (persistida)
+    _shufCache: null     // cache interno del orden mezclado (no se persiste)
 };
 
 // Variable global para el botón de colores
@@ -904,7 +911,10 @@ function saveProgress() {
             toneCustomColors: state.toneCustomColors,
             toneLegendSeen: state.toneLegendSeen,
             // v7.13: contexto de las palabras marcadas
-            wordContexts: state.wordContexts
+            wordContexts: state.wordContexts,
+            // v9.15: práctica intercalada (modo + semilla sobreviven al reload)
+            interleaving: state.interleaving,
+            interleaveSeed: state.interleaveSeed
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -1131,6 +1141,11 @@ function loadProgress() {
             }
             state.wordContexts = clean;
         }
+        // v9.15: práctica intercalada (validado — localStorage puede venir viejo)
+        if (data.interleaving !== undefined) state.interleaving = !!data.interleaving;
+        if (typeof data.interleaveSeed === 'number' && data.interleaveSeed >= 0) {
+            state.interleaveSeed = data.interleaveSeed;
+        }
     } catch (e) { /* silencioso */ }
 }
 
@@ -1183,9 +1198,58 @@ function getToneClass(syllable) {
     return 'tone-0';
 }
 
+// ===== v9.15: PRÁCTICA INTERCALADA (interleaving) =====
+// PRNG determinista (mulberry32): misma semilla → misma secuencia. Permite
+// persistir la semilla junto al progreso y reproducir el orden mezclado al
+// recargar la página (el currentIndex guardado sigue apuntando a la misma
+// frase). Cada setModule siembra una semilla nueva → orden fresco al
+// re-entrar a un módulo.
+function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+// Fisher-Yates sembrado. Devuelve una COPIA mezclada (no muta el original).
+function seededShuffle(arr, seed) {
+    const out = arr.slice();
+    const rnd = mulberry32(seed || 1);
+    for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        const tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+    }
+    return out;
+}
+
+function newInterleaveSeed() {
+    state.interleaveSeed = (Math.random() * 0x7fffffff) | 0;
+}
+
+// v9.15: misma lista que siempre (lógica original intacta), pero si el modo
+// intercalado está activo devuelve el pool MEZCLADO. Todos los consumidores
+// (render, verificar, revelar, marcar, navegar, audio) leen la MISMA lista
+// vía filtered[state.currentIndex], así que el orden es consistente.
+// El cache evita re-mezclar en cada llamada (getFiltered se consulta ~10×
+// por interacción) y se invalida cuando cambian módulo, datos (loadSentences
+// pone _shufCache = null), semilla o largo. El SRS / Repaso inteligente NO
+// pasa por acá: tiene mazo y popup propios (IIFE srsInit).
 function getFiltered() {
-    if (state.activeModule === 'todas') return state.sentences;
-    return state.sentences.filter(s => s.module === state.activeModule);
+    const base = state.activeModule === 'todas'
+        ? state.sentences
+        : state.sentences.filter(s => s.module === state.activeModule);
+    if (!state.interleaving) return base;
+    const c = state._shufCache;
+    if (c && c.mod === state.activeModule && c.seed === state.interleaveSeed &&
+        c.src === state.sentences && c.n === base.length) {
+        return c.data;
+    }
+    const data = seededShuffle(base, state.interleaveSeed);
+    state._shufCache = { mod: state.activeModule, seed: state.interleaveSeed, src: state.sentences, n: base.length, data: data };
+    return data;
 }
 
 // ===== Init =====
@@ -1221,6 +1285,12 @@ const UI_STRINGS = {
     placementTest: '🎯 Test de colocación — descubrí tu nivel',
     saveProgress: '💾 Guardar progreso', savedOk: '✅ Progreso guardado en este dispositivo',
     fontButtonTitle: 'Cambiar fuente china: por defecto ↔ 楷体 (caligrafía)',
+    // v9.15: práctica intercalada
+    interleave: '🔀 Intercalar',
+    interleaveOn: '🔀 Intercalando',
+    interleaveTitle: 'Práctica intercalada: mezcla el orden de las frases del módulo activo (apagado = orden original)',
+    interOn: '🔀 Práctica intercalada: orden mezclado',
+    interOff: '📚 Orden original del módulo',
     toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
     needAnswer: 'Escribe una respuesta antes de verificar.',
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
@@ -1253,6 +1323,12 @@ const UI_STRINGS = {
     placementTest: '🎯 分级测试 —— 测测你的水平',
     saveProgress: '💾 保存进度', savedOk: '✅ 进度已保存在本设备',
     fontButtonTitle: '切换中文字体：默认 ↔ 楷体（书法风格）',
+    // v9.15: práctica intercalada
+    interleave: '🔀 交错练习',
+    interleaveOn: '🔀 交错中',
+    interleaveTitle: '交错练习：打乱当前模块句子的顺序（关闭 = 原始顺序）',
+    interOn: '🔀 交错模式 · 顺序已打乱',
+    interOff: '📚 原始顺序',
     toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
     needAnswer: '请先输入答案再检查。',
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
@@ -1286,10 +1362,12 @@ function updateUILanguage(mode) {
     set('srs-bar-label', 'textContent', S.srsIdle);
     set('btn-tools-toggle', 'title', S.toolsGearTitle); // v9.10: engranaje de herramientas
     set('btn-font-mode', 'title', S.fontButtonTitle);   // v9.14: fuente de estudio
+    set('btn-interleaving', 'title', S.interleaveTitle); // v9.15: práctica intercalada
 
     // 3) Textos que app.js escribe dinámicamente → refrescarlos con uiT()
     if (typeof updateStats === 'function') updateStats();
     if (typeof updateDailyBtnLabel === 'function') updateDailyBtnLabel();
+    if (typeof applyInterleaveUI === 'function') applyInterleaveUI(); // v9.15: re-etiquetar según idioma
 
     // 4) Lógica condicional estricta: exámenes según el sentido del estudio
     const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
@@ -1341,6 +1419,7 @@ function applySavedUI() {
     if (btnCnEs) btnCnEs.classList.toggle('active', state.mode === 'cn-es');
 
     applyGrand(); // v9.3: restaurar modo abuelo (letras grandes)
+    applyInterleaveUI(); // v9.15: restaurar estado del toggle intercalado
 
         // Actualizar estado visual de botones simp/trad
     const btnSimp = document.getElementById('btn-simplified');
@@ -1429,6 +1508,7 @@ async function loadSentences() {
         } catch (e) { console.warn('⚠️ Sin datos externos para ' + label + ':', e.message); }
     }
     state.sentences = Array.isArray(data) ? data : [];
+    state._shufCache = null; // v9.15: datos nuevos → invalidar el orden mezclado
     indexSentencesForVocab(state.sentences); // amplía el diccionario de traducciones
     if (state.sentences.length) {
         // v8.2: los módulos de vocabulario TOCFL también cuentan en palabras
@@ -1462,6 +1542,33 @@ function toggleFontMode() {
     try { localStorage.setItem('ac_font_mode', fontMode); } catch (e) { }
     applyFontMode();
     moduleStatus(fontMode === 'kaiti' ? '✍️ 楷体 KaiTi · fuente de caligrafía' : '✍️ Fuente por defecto · 默认字体', false);
+}
+
+// ===== v9.15: PRÁCTICA INTERCALADA — toggle del panel de herramientas =====
+// ON: mezcla el orden del módulo activo (discriminación activa, práctica
+// fuera de contexto). OFF: orden original (narrativa de los mini-dramas,
+// orden correlativo del nivel). Al alternar se siembra una semilla nueva,
+// se reinicia a la primera tarjeta y se re-renderiza. Las LECCIONES
+// graduadas y los lectores no pasan por getFiltered(): quedan intactos.
+// El SRS (Repaso inteligente) tampoco: tiene mazo y popup propios.
+function applyInterleaveUI() {
+    const btn = document.getElementById('btn-interleaving');
+    if (!btn) return;
+    btn.classList.toggle('active', state.interleaving);
+    btn.textContent = state.interleaving ? uiT('interleaveOn') : uiT('interleave');
+}
+
+function toggleInterleaving() {
+    state.interleaving = !state.interleaving;
+    if (state.interleaving) newInterleaveSeed(); // orden nuevo al activar
+    state._shufCache = null;
+    state.currentIndex = 0;      // arrancar desde el inicio del nuevo orden
+    state.translationRevealed = false;
+    saveProgress();
+    applyInterleaveUI();
+    renderCurrentSentence();
+    updateStats();
+    moduleStatus(state.interleaving ? uiT('interOn') : uiT('interOff'), false);
 }
 
 // ===== Eventos =====
@@ -1529,6 +1636,7 @@ function setupEventListeners() {
 
     // v9.14: fuente de estudio (默认/楷体) + Guardar progreso del pie
     safeAdd('btn-font-mode', toggleFontMode);
+    safeAdd('btn-interleaving', toggleInterleaving); // v9.15: práctica intercalada
     safeAdd('btn-save-progress', () => {
         saveProgress();
         moduleStatus(uiT('savedOk'), false);
@@ -1812,6 +1920,7 @@ function setModule(mod) {
     state.activeModule = mod;
     state.currentIndex = 0;
     state.translationRevealed = false;
+    if (state.interleaving) newInterleaveSeed(); // v9.15: orden nuevo al re-entrar al módulo
     
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(b => {
         b.classList.toggle('active', b.dataset.module === mod);
