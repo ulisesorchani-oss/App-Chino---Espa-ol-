@@ -1217,6 +1217,10 @@ const UI_STRINGS = {
     libraryOpt: '📚 Biblioteca de lecturas…', libraryLoad: 'Cargar',
     readerClear: '🗑️ Limpiar', readerPlay: '🔊 Leer',
     btnReset: '🗑️ Borrar progreso', installApp: '📲 Instalar app',
+    // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
+    placementTest: '🎯 Test de colocación — descubrí tu nivel',
+    saveProgress: '💾 Guardar progreso', savedOk: '✅ Progreso guardado en este dispositivo',
+    fontButtonTitle: 'Cambiar fuente china: por defecto ↔ 楷体 (caligrafía)',
     toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
     needAnswer: 'Escribe una respuesta antes de verificar.',
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
@@ -1245,6 +1249,10 @@ const UI_STRINGS = {
     libraryOpt: '📚 朗读文库…', libraryLoad: '载入',
     readerClear: '🗑️ 清空', readerPlay: '🔊 朗读',
     btnReset: '🗑️ 清除学习记录', installApp: '📲 安装应用',
+    // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
+    placementTest: '🎯 分级测试 —— 测测你的水平',
+    saveProgress: '💾 保存进度', savedOk: '✅ 进度已保存在本设备',
+    fontButtonTitle: '切换中文字体：默认 ↔ 楷体（书法风格）',
     toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
     needAnswer: '请先输入答案再检查。',
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
@@ -1277,6 +1285,7 @@ function updateUILanguage(mode) {
     set('reader-input', 'placeholder', S.readerPlaceholder);
     set('srs-bar-label', 'textContent', S.srsIdle);
     set('btn-tools-toggle', 'title', S.toolsGearTitle); // v9.10: engranaje de herramientas
+    set('btn-font-mode', 'title', S.fontButtonTitle);   // v9.14: fuente de estudio
 
     // 3) Textos que app.js escribe dinámicamente → refrescarlos con uiT()
     if (typeof updateStats === 'function') updateStats();
@@ -1310,6 +1319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     buildReaderLibrary(); // v7.15: poblar la Biblioteca de Lecturas (lessons.js)
     applySavedUI();
+    applyFontMode(); // v9.14: restaurar fuente de estudio 默认/楷体 guardada
     updateUILanguage(); // v9.9: idioma de UI + condicional DELE/herramientas
     // v7.8 (spec v4.0): sincronizar el MODO con el evaluador de voz lo
     // antes posible. No bloquea el render: si tarda, la evaluación de
@@ -1432,6 +1442,28 @@ async function loadSentences() {
     }
 }
 
+// ===== v9.14: FUENTE DE ESTUDIO (por defecto ↔ KaiTi 楷体) =====
+// Preferencia persistente 'ac_font_mode' ('default' | 'kaiti'). El prefijo
+// ac_ hace que el respaldo (backupCollect) la incluya automáticamente.
+// Solo cambia la tipografía del texto chino de ESTUDIO (frase de práctica,
+// lecciones, clásicos, lector); la interfaz sigue con la fuente del sistema.
+let fontMode = 'default';
+try { fontMode = localStorage.getItem('ac_font_mode') || 'default'; } catch (e) { }
+
+function applyFontMode() {
+    document.body.classList.toggle('font-kaiti', fontMode === 'kaiti');
+    const label = fontMode === 'kaiti' ? '楷体' : '默认';
+    const btn = document.getElementById('btn-font-mode');
+    if (btn) btn.textContent = label;
+}
+
+function toggleFontMode() {
+    fontMode = fontMode === 'kaiti' ? 'default' : 'kaiti';
+    try { localStorage.setItem('ac_font_mode', fontMode); } catch (e) { }
+    applyFontMode();
+    moduleStatus(fontMode === 'kaiti' ? '✍️ 楷体 KaiTi · fuente de caligrafía' : '✍️ Fuente por defecto · 默认字体', false);
+}
+
 // ===== Eventos =====
 // v7.18: TABS de selectores de contenido — un solo panel visible, tab activo
 // persistido. Solo mueve clases 'hidden'/'active': los dropdowns internos
@@ -1494,6 +1526,21 @@ function setupEventListeners() {
     safeAdd('btn-reset', resetProgress);
     safeAdd('btn-pinyin', togglePinyin);
     safeAdd('btn-tones', toggleToneColors);
+
+    // v9.14: fuente de estudio (默认/楷体) + Guardar progreso del pie
+    safeAdd('btn-font-mode', toggleFontMode);
+    safeAdd('btn-save-progress', () => {
+        saveProgress();
+        moduleStatus(uiT('savedOk'), false);
+        // confirmación junto al dedo: el propio botón lo dice 1.8 s
+        const b = document.getElementById('btn-save-progress');
+        if (b && !b.dataset.busy) {
+            b.dataset.busy = '1';
+            const prev = b.textContent;
+            b.textContent = uiT('savedOk');
+            setTimeout(() => { b.textContent = prev; delete b.dataset.busy; }, 1800);
+        }
+    });
 
     // ── v7.11: leyenda de tonos + esquema de colores ──
     safeAdd('btn-tone-info', showToneLegend);

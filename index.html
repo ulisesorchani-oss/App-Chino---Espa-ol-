@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260910i">
+    <link rel="stylesheet" href="style.css?v=20260911a">
 </head>
 <body>
     <div class="container">
@@ -86,25 +86,35 @@
                     <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
                     <button id="btn-grand" class="speed-btn" type="button" title="Letras grandes para leer cómodo (modo abuelo)">🅰 Grande</button>
                     <button id="btn-backup" class="speed-btn" type="button" title="Respaldo: guardar tu progreso en un archivo o exportarlo a Anki">💾</button>
+                    <!-- v9.14: fuente de estudio 默认/楷体 -->
+                    <button id="btn-font-mode" class="speed-btn" type="button" title="Cambiar fuente china">字体</button>
                 </div>
             </div>
 
-            <div class="card-header">
-                <span class="card-level" id="card-level">Nivel 1</span>
-
-                <!-- Audio controls dentro del header -->
-                <div class="audio-controls-inline">
-                    <button id="btn-play-es" class="btn-audio-mini">🔊 ES</button>
-                    <button id="btn-play-cn" class="btn-audio-mini">🔊 CN</button>
-                    <button id="btn-record" class="btn-audio-mini btn-record" type="button"
-                            title="Tocá para grabar tu pronunciación" aria-label="Grabar mi pronunciación">🎤</button>
+            <!-- v9.14: cabecera de práctica reordenada — nivel+contador a la
+                 izquierda, barra de progreso integrada al centro (llena el
+                 espacio libre), audio+micrófono a la derecha. Mismos IDs:
+                 app.js sigue conectando todo por ID sin cambios. -->
+            <div class="card-header practice-top-row">
+                <div class="practice-meta">
+                    <span class="card-level" id="card-level">Nivel 1</span>
+                    <span class="card-number" id="card-number">1/20</span>
                 </div>
 
-                <span class="card-number" id="card-number">1/20</span>
-            </div>
+                <div class="practice-progress-slot">
+                    <!-- Barra de progreso (movida acá, mismo ID único) -->
+                    <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
+                </div>
 
-            <!-- Barra de progreso -->
-            <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
+                <div class="practice-audio-actions">
+                    <div class="audio-controls-inline">
+                        <button id="btn-play-es" class="btn-audio-mini">🔊 ES</button>
+                        <button id="btn-play-cn" class="btn-audio-mini">🔊 CN</button>
+                        <button id="btn-record" class="btn-audio-mini btn-record" type="button"
+                                title="Tocá para grabar tu pronunciación" aria-label="Grabar mi pronunciación">🎤</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="sentence-container">
                 <p class="sentence" id="sentence-text"></p>
@@ -129,9 +139,10 @@
                      continuo (Clásicos...) y el modo es "Aprendo Chino" -->
                 <button id="btn-read-lesson" class="btn-secondary btn-lesson hidden" type="button"
                         title="Leer el texto completo de esta lección en el Lector" data-i18n="readLesson">📖 Leer lección</button>
-                <button id="btn-reveal" class="btn-secondary" data-i18n="btnReveal">👁️ Revelar</button>
-                <button id="btn-know" class="btn-success" data-i18n="btnKnow">✅ La sé</button>
+                <!-- v9.14: orden nuevo Repetir → La sé → Revelar (mismos IDs) -->
                 <button id="btn-not-know" class="btn-warning" data-i18n="btnRepeat">🔄 Repetir</button>
+                <button id="btn-know" class="btn-success" data-i18n="btnKnow">✅ La sé</button>
+                <button id="btn-reveal" class="btn-secondary" data-i18n="btnReveal">👁️ Revelar</button>
             </div>
         </div>
 
@@ -198,9 +209,17 @@
             <!-- Panel Exámenes -->
             <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                 <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
+                <!-- v9.14: Test de colocación PRIMERO, debajo el selector de nivel.
+                     La etiqueta visible “Nivel HSK” se retiró: queda solo el
+                     dropdown, con aria-label para accesibilidad. -->
+                <button id="btn-placement" class="placement-btn" type="button"
+                        title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
+                        data-i18n="placementTest">
+                    🎯 Test de colocación — descubrí tu nivel
+                </button>
+                <p id="placement-status" class="placement-status hidden" role="status"></p>
                 <div class="hsk-level-selector" id="hsk-selector">
-                    <label for="select-hsk-level">Nivel HSK:</label>
-                    <select id="select-hsk-level" class="level-dropdown">
+                    <select id="select-hsk-level" class="level-dropdown" aria-label="Nivel HSK">
                         <!-- v7.19: HSK 3.0 (GF0025-2021) — 9 niveles, conteos de palabras NUEVAS únicas -->
                         <option value="HSK1">HSK 1 · Elemental (497 palabras)</option>
                         <option value="HSK2">HSK 2 · Elemental (747 nuevas)</option>
@@ -213,12 +232,6 @@
                         <option value="HSK9">HSK 9 · Superior III (1871 nuevas)</option>
                     </select>
                 </div>
-                <!-- v7.20: Test de Colocación HSK 3.0 — junto al selector de nivel, su ubicación natural -->
-                <button id="btn-placement" class="placement-btn" type="button"
-                        title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy">
-                    🎯 Test de colocación — descubrí tu nivel
-                </button>
-                <p id="placement-status" class="placement-status hidden" role="status"></p>
                 <div class="category-filter exams-filters">
                     <!-- v8.3: dropdown TOCFL — Band A 100% lista oficial vigente (華語八千詞表 2023):
                          392 + 344 + 483 = 1.219 palabras + las 20 oraciones de muestra.
@@ -407,7 +420,11 @@
              aparece solo cuando la app es instalable o tras el delay, y
              abre la guía de instalación si no hay diálogo nativo. -->
         <footer class="app-footer" id="app-footer">
-            <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
+            <!-- v9.14: Guardar progreso vive abajo, junto a Instalar app -->
+            <div class="bottom-app-actions">
+                <button id="btn-save-progress" class="speed-btn utility-btn" type="button" title="Guarda tu progreso ahora mismo en este dispositivo" data-i18n="saveProgress">💾 Guardar progreso</button>
+                <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
+            </div>
             <span class="app-footer-brand">日常華語 · Huayu Diario</span>
         </footer>
 
@@ -596,7 +613,7 @@
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
     <script src="classics.js?v=20260910c"></script>
-    <script src="app.js?v=20260910l"></script>
+    <script src="app.js?v=20260911a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

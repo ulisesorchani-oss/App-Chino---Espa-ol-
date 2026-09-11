@@ -4467,3 +4467,153 @@ body.dark-mode .app-footer-brand { color: #94a3b8; }
 
 body.paper-mode .app-footer { border-top-color: #d9c9a3; }
 body.paper-mode .app-footer-brand { color: #6b5b40; }
+
+/* ===================================================================
+   v9.14 — Ajustes estéticos: jerarquía de la tarjeta de práctica,
+   Verificar cómodo en móvil, exámenes reordenados, selector de
+   fuente de estudio 默认/楷体, Guardar progreso en el pie.
+   (Se agrega al final: gana sobre reglas anteriores de igual peso.)
+   =================================================================== */
+
+/* --- 1) Cabecera de práctica: meta | progreso | audio --- */
+.practice-top-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.practice-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* el contador vuelve a pegarse al nivel (antes: margin-left:auto para
+   empujarlo a la derecha de la fila) */
+.practice-meta .card-number { margin-left: 0; text-align: left; }
+
+.practice-progress-slot { min-width: 0; }
+
+/* la barra vive DENTRO de la cabecera: sin su margen propio */
+.practice-progress-slot .progress-track { margin-bottom: 0; }
+
+.practice-audio-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.practice-audio-actions button { flex: 0 0 auto; }
+
+/* --- 2) Frase principal: protagonista de la tarjeta --- */
+.sentence {
+    font-size: clamp(1.9rem, 6vw, 2.9rem);
+    line-height: 1.4;
+    text-align: center;
+    min-height: 1.5em;
+}
+
+/* el modo abuelo (v9.3) sigue ganando: más grande que el clamp normal */
+body.grand-mode .sentence { font-size: 3.2rem; line-height: 1.45; }
+
+/* --- 3) Verificar: píldora cómoda, nunca cortada --- */
+#btn-check { white-space: nowrap; }
+
+/* --- 4) Exámenes: colocación arriba, selector de nivel sin etiqueta --- */
+#btn-placement { margin-bottom: 12px; }
+
+.hsk-level-selector { justify-content: stretch; }
+.hsk-level-selector .level-dropdown { width: 100%; }
+
+/* --- 5) Fuente de estudio hanzi: default ↔ 楷体 (KaiTi) --- */
+/* Solo el texto chino de ESTUDIO: la interfaz (botones, menús, español)
+   mantiene la fuente del sistema para seguir siendo compacta y legible. */
+body.font-kaiti .sentence,
+body.font-kaiti #sentence-text,
+body.font-kaiti .lq-line-zh,
+body.font-kaiti .lq-ch,
+body.font-kaiti .lq-story-zh,
+body.font-kaiti .lq-zh,
+body.font-kaiti .lq-opt-zh,
+body.font-kaiti .reader-preview .reader-hz {
+    font-family: KaiTi, "Kaiti SC", "STKaiti", "KaiTi_GB2312", "BiauKai",
+                 "DFKai-SB", "AR PL UKai CN", "楷体",
+                 "Noto Serif CJK SC", "Noto Serif CJK TC", serif;
+}
+
+/* móvil: un poco más de aire entre caracteres en KaiTi */
+@media (max-width: 480px) {
+    body.font-kaiti .sentence,
+    body.font-kaiti .lq-line-zh,
+    body.font-kaiti .reader-preview .reader-hz { letter-spacing: 0.02em; }
+}
+
+/* --- 6) Pie: Guardar progreso + Instalar app juntos --- */
+.bottom-app-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bottom-app-actions .utility-btn {
+    min-height: 48px;
+    padding: 10px 20px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    border-radius: 24px;
+}
+
+body.dark-mode .bottom-app-actions .utility-btn { border-color: rgba(255, 255, 255, 0.18); }
+body.paper-mode .bottom-app-actions .utility-btn { border-color: #d9c9a3; }
+
+/* --- 7) Móvil: cabecera en 2 renglones + Verificar píldora --- */
+@media (max-width: 480px) {
+    /* meta arriba-izquierda, audio arriba-derecha, progreso abajo a lo ancho */
+    .practice-top-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "meta actions"
+            "progress progress";
+        gap: 8px;
+    }
+
+    .practice-meta { grid-area: meta; }
+    .practice-progress-slot { grid-area: progress; }
+    .practice-audio-actions { grid-area: actions; }
+
+    /* neutraliza la fila propia del audio de v9.10: ahora va a la derecha */
+    .practice-audio-actions .audio-controls-inline {
+        order: 0;
+        flex: 0 0 auto;
+        justify-content: flex-end;
+    }
+
+    /* frase aún más grande en el celular */
+    .sentence { font-size: clamp(2rem, 9vw, 2.9rem); }
+    body.grand-mode .sentence { font-size: 2.6rem; }
+
+    /* Verificar: píldora compacta que acompaña al input */
+    #btn-check {
+        border-radius: 999px;
+        padding: 10px 16px;
+        min-width: 96px;
+        font-size: 0.95rem;
+        flex: 0 0 auto;
+    }
+
+    .answer-section { gap: 8px; }
+    #answer-input { min-width: 0; flex: 1 1 auto; }
+
+    .bottom-app-actions { gap: 8px; }
+    .bottom-app-actions .utility-btn { flex: 1 1 auto; min-width: 130px; }
+}
+
+/* pantallas muy angostas: Verificar baja debajo del input */
+@media (max-width: 380px) {
+    .answer-section { flex-wrap: wrap; }
+    #btn-check { width: 100%; }
+}
