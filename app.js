@@ -858,7 +858,9 @@ let state = {
     // el MISMO y el índice guardado sigue apuntando a la misma frase.
     interleaving: false,
     interleaveSeed: 0,   // semilla del shuffle actual (persistida)
-    _shufCache: null     // cache interno del orden mezclado (no se persiste)
+    _shufCache: null,    // cache interno del orden mezclado (no se persiste)
+    // v9.19: SOLO OÍDO — audio primero, texto oculto hasta responder (es-cn)
+    listenFirst: false
 };
 
 // Variable global para el botón de colores
@@ -914,7 +916,9 @@ function saveProgress() {
             wordContexts: state.wordContexts,
             // v9.15: práctica intercalada (modo + semilla sobreviven al reload)
             interleaving: state.interleaving,
-            interleaveSeed: state.interleaveSeed
+            interleaveSeed: state.interleaveSeed,
+            // v9.19: solo oído (persistente como el resto de los toggles)
+            listenFirst: state.listenFirst
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) { /* silencioso */ }
@@ -1146,6 +1150,8 @@ function loadProgress() {
         if (typeof data.interleaveSeed === 'number' && data.interleaveSeed >= 0) {
             state.interleaveSeed = data.interleaveSeed;
         }
+        // v9.19: solo oído (validado — localStorage puede venir viejo)
+        if (data.listenFirst !== undefined) state.listenFirst = !!data.listenFirst;
     } catch (e) { /* silencioso */ }
 }
 
@@ -1368,6 +1374,7 @@ function updateUILanguage(mode) {
     if (typeof updateStats === 'function') updateStats();
     if (typeof updateDailyBtnLabel === 'function') updateDailyBtnLabel();
     if (typeof applyInterleaveUI === 'function') applyInterleaveUI(); // v9.15: re-etiquetar según idioma
+    if (typeof applyListenUI === 'function') applyListenUI(); // v9.19: re-etiquetar solo oído
 
     // 4) Lógica condicional estricta: exámenes según el sentido del estudio
     const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
@@ -1379,7 +1386,8 @@ function updateUILanguage(mode) {
 
     // 5) Herramientas del alfabeto: pinyin/tonos solo al aprender chino.
     //    (简/繁 SIGUE visible: el público TW/HK prefiere 繁體 también en cn-es)
-    ['btn-pinyin', 'btn-tones', 'btn-tone-info'].forEach((id) => show(id, !cnMode));
+    // v9.19: el modo "solo oído" también es exclusivo de Aprendo Chino
+    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen'].forEach((id) => show(id, !cnMode));
 
     // 6) v9.11: UN solo botón de audio — siempre el idioma que se aprende.
     //    Aprendiendo chino (es-cn): 🔊 CN suena la oración china; 🔊 ES oculto.
@@ -1420,6 +1428,7 @@ function applySavedUI() {
 
     applyGrand(); // v9.3: restaurar modo abuelo (letras grandes)
     applyInterleaveUI(); // v9.15: restaurar estado del toggle intercalado
+    applyListenUI(); // v9.19: restaurar estado del toggle solo oído
 
         // Actualizar estado visual de botones simp/trad
     const btnSimp = document.getElementById('btn-simplified');
@@ -1571,6 +1580,188 @@ function toggleInterleaving() {
     moduleStatus(state.interleaving ? uiT('interOn') : uiT('interOff'), false);
 }
 
+// ===== v9.19 — SOLO OÍDO: escucha antes que lectura (solo es-cn) =====
+// El flujo clásico muestra el texto y el audio es opcional. Acá es al revés:
+// el audio SUENA SOLO al entrar a la tarjeta, el texto queda tapado y el
+// alumno elige entre opciones la palabra que falta (o el significado de la
+// palabra que oyó, en tarjetas de vocabulario) ANTES de ver los caracteres.
+// Entrena comprensión auditiva real en vez de lectura con apoyo sonoro.
+// - Reutiliza fetchTTS() vía playAudio('zh') y TODA la corrección de
+//   checkAnswer() (normalización, knownWords, mazo SRS): al elegir una
+//   opción se llena el input y se llama checkAnswer() tal cual.
+// - Opciones: la respuesta correcta + hasta 3 distractores del POOL ACTIVO
+//   (mismo módulo y longitud parecida primero). Sin distractores la tarjeta
+//   cae a la vista clásica (mazos muy chicos).
+// - Toggle en el panel ⚙, apagado por defecto, persistido (ac_storage).
+//   Solo existe aprendiendo chino (es-cn); el cloze de siempre queda intacto.
+function applyListenUI() {
+    const btn = document.getElementById('btn-listen');
+    if (!btn) return;
+    btn.classList.toggle('active', state.listenFirst);
+    btn.textContent = state.listenFirst ? '🎧 Solo oído ✓' : '🎧 Solo oído';
+}
+
+function toggleListenFirst() {
+    state.listenFirst = !state.listenFirst;
+    saveProgress();
+    applyListenUI();
+    renderCurrentSentence();
+    moduleStatus(state.listenFirst
+        ? '🎧 Solo oído: el audio suena primero, el texto aparece al responder'
+        : '🎧 Solo oído: apagado — texto a la vista con audio opcional', false);
+}
+
+// Opciones de escucha (FUNCIÓN PURA, testeable en sandbox):
+// devuelve [{val, ok}] mezcladas, la correcta incluida. null → no se pudo.
+// s: tarjeta actual · pool: getFiltered() · k: 'simp'|'trad'
+function listenOptions(s, pool, k) {
+    try {
+        if (!s) return null;
+        const isWord = !!s.w; // es-cn palabra → opciones en español; oración → en chino
+        const correct = isWord
+            ? String(s.spanish_answer || '').trim()
+            : String(s['chinese_' + k + '_answer'] || '').trim();
+        if (!correct) return null;
+        const normZh = (t) => String(t == null ? '' : t).normalize('NFC')
+            .replace(/[\s\u00A0\u3000]+/g, '')
+            .replace(/[。，、！？：；「」『』《》（）〈〉·…―—–\-.!?;:,"'“”‘’()\[\]{}]/g, '');
+        const normEs = (t) => String(t == null ? '' : t).normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '').toLowerCase()
+            .replace(/^[¿¡"'“”(\[\s]+/, '').replace(/[.!?,;:)"“”'\]\s]+$/g, '')
+            .replace(/\s+/g, ' ').trim();
+        const norm = isWord ? normEs : normZh;
+        // respuestas válidas de ESTA tarjeta → jamás valen como distractores
+        // (así un sinónimo aceptado nunca se presenta como opción trampa)
+        const valid = new Set([norm(correct)]);
+        if (isWord) {
+            const alts = s.spanish_alternatives;
+            (Array.isArray(alts) ? alts : String(alts || '').split('|')).forEach(a => {
+                const n = normEs(a); if (n) valid.add(n);
+            });
+        } else {
+            ['simp', 'trad'].forEach(sc => {
+                const n = normZh(s['chinese_' + sc + '_answer']); if (n) valid.add(n);
+            });
+        }
+        const cand = [];
+        (Array.isArray(pool) ? pool : []).forEach(o => {
+            if (!o || o === s) return;
+            if (!!o.w !== isWord) return; // mismo tipo de tarjeta
+            const c = isWord
+                ? String(o.spanish_answer || '').trim()
+                : String(o['chinese_' + k + '_answer'] || '').trim();
+            if (!c) return;
+            const n = norm(c);
+            if (!n || valid.has(n)) return;
+            cand.push({ val: c, n: n, same: o.module === s.module,
+                        dl: Math.abs(String(c).length - String(correct).length) });
+        });
+        if (!cand.length) return null; // sin distractores → tarjeta clásica
+        // mismos módulos y longitud parecida primero; de los 8 finalistas, 3 al azar
+        cand.sort((a, b) => ((b.same ? 1 : 0) - (a.same ? 1 : 0)) || (a.dl - b.dl));
+        const top = cand.slice(0, 8);
+        for (let i = top.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = top[i]; top[i] = top[j]; top[j] = t;
+        }
+        const opts = [{ val: correct, ok: true }]
+            .concat(top.slice(0, 3).map(p => ({ val: p.val, ok: false })));
+        for (let i = opts.length - 1; i > 0; i--) { // la correcta, entre todas
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = opts[i]; opts[i] = opts[j]; opts[j] = t;
+        }
+        return opts;
+    } catch (e) { return null; }
+}
+
+// Monta (o desmonta) la caja de escucha sobre la tarjeta ya renderizada.
+// Se llama al FINAL de renderCurrentSentence: en modo normal solo limpia.
+function applyListenCard() {
+    const cardEl = document.getElementById('sentence-card');
+    if (!cardEl) return;
+    const prev = document.getElementById('listen-box');
+    if (prev) prev.remove();
+    cardEl.classList.remove('listen-mode');
+    const st = document.getElementById('sentence-text');
+    const inp = document.getElementById('answer-input');
+    const chk = document.getElementById('btn-check');
+    if (st) st.classList.remove('hidden');
+    if (inp) inp.classList.remove('hidden');
+    if (chk) chk.classList.remove('hidden');
+    if (!(state.mode === 'es-cn' && state.listenFirst)) return; // modo clásico
+    const filtered = getFiltered();
+    const s = filtered ? filtered[state.currentIndex] : null;
+    if (!s) return;
+    const opts = listenOptions(s, filtered, ck());
+    if (!opts) return; // mazo muy chico → tarjeta clásica de siempre
+    // tapar TODO lo que delata la respuesta
+    cardEl.classList.add('listen-mode');
+    if (st) st.classList.add('hidden');
+    const py = document.getElementById('pinyin-display');
+    if (py) py.classList.add('hidden');
+    if (inp) inp.classList.add('hidden');
+    if (chk) chk.classList.add('hidden');
+    const lesson = document.getElementById('btn-read-lesson');
+    if (lesson) lesson.classList.add('hidden'); // el lector mostraría la oración
+    // caja de escucha al tope del contenedor de la oración
+    const box = document.createElement('div');
+    box.id = 'listen-box';
+    box.className = 'listen-box';
+    const hint = document.createElement('div');
+    hint.className = 'listen-hint';
+    hint.textContent = s.w ? '🎧 Escuchá la palabra y elegí su significado'
+                           : '🎧 Escuchá y elegí la palabra que falta';
+    const play = document.createElement('button');
+    play.type = 'button';
+    play.className = 'listen-play';
+    play.textContent = '🔊 Escuchar';
+    const optsEl = document.createElement('div');
+    optsEl.className = 'listen-opts';
+    opts.forEach(o => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'listen-opt';
+        b.textContent = o.val;
+        b.dataset.ok = o.ok ? '1' : '0';
+        b.setAttribute('lang', s.w ? 'es' : 'zh');
+        optsEl.appendChild(b);
+    });
+    box.appendChild(hint);
+    box.appendChild(play);
+    box.appendChild(optsEl);
+    const cont = document.querySelector('#sentence-card .sentence-container') || cardEl;
+    cont.insertBefore(box, cont.firstChild);
+    // el audio MANDA: suena solo al entrar (si el navegador bloquea el
+    // autoplay queda el botón 🔊, igual que en la tarjeta clásica)
+    playAudio('zh');
+}
+
+// Elegir opción = responder: reutiliza checkAnswer() entero (normalización,
+// knownWords, mazo SRS, refill) con el texto de la opción en el input.
+function listenPick(optBtn) {
+    if (!optBtn || state.answered) return;
+    const val = String(optBtn.textContent || '').trim();
+    if (!val) return;
+    const box = document.getElementById('listen-box');
+    if (box) {
+        box.querySelectorAll('.listen-opt').forEach(b => {
+            b.disabled = true;
+            if (b.dataset.ok === '1') b.classList.add('listen-ok');
+            else if (b === optBtn) b.classList.add('listen-bad');
+        });
+    }
+    const st = document.getElementById('sentence-text');
+    if (st) st.classList.remove('hidden'); // el texto aparece AHORA (con su hueco)
+    const inp = document.getElementById('answer-input');
+    if (inp) inp.value = val;
+    checkAnswer();
+    const chk = document.getElementById('btn-check');
+    if (chk) chk.classList.remove('hidden'); // pasa a "Siguiente ▶"
+}
+
+function listenReplay() { playAudio('zh'); }
+// ===== fin v9.19 =====
+
 // ===== Eventos =====
 // v7.18: TABS de selectores de contenido — un solo panel visible, tab activo
 // persistido. Solo mueve clases 'hidden'/'active': los dropdowns internos
@@ -1637,6 +1828,7 @@ function setupEventListeners() {
     // v9.14: fuente de estudio (默认/楷体) + Guardar progreso del pie
     safeAdd('btn-font-mode', toggleFontMode);
     safeAdd('btn-interleaving', toggleInterleaving); // v9.15: práctica intercalada
+    safeAdd('btn-listen', toggleListenFirst); // v9.19: solo oído (escucha antes que lectura)
     safeAdd('btn-save-progress', () => {
         saveProgress();
         moduleStatus(uiT('savedOk'), false);
@@ -1769,6 +1961,16 @@ function setupEventListeners() {
         vocabList.addEventListener('click', (e) => {
             const chip = e.target.closest('.vocab-item');
             if (chip && chip.dataset.word) showVocabPop(chip.dataset.word);
+        });
+    }
+    // v9.19: opciones del modo "solo oído" — delegado en la tarjeta (estática):
+    // la caja #listen-box se re-arma en cada tarjeta, el listener sobrevive.
+    const scard19 = document.getElementById('sentence-card');
+    if (scard19) {
+        scard19.addEventListener('click', (e) => {
+            const opt = e.target.closest('.listen-opt');
+            if (opt) { listenPick(opt); return; }
+            if (e.target.closest('.listen-play')) listenReplay();
         });
     }
     safeAdd('btn-vocab-pop-close', hideVocabPop);
@@ -2500,6 +2702,9 @@ function renderCurrentSentence() {
         const target = esMode ? (s.spanish_full || '') : s['chinese_' + k + '_full'];
         window.VR.setTarget(target, esMode ? '' : (s.pinyin || ''), k, esMode ? 'es' : 'zh');
     }
+
+    // 10. v9.19: modo "solo oído" — tapa el texto, arma opciones y manda el audio
+    applyListenCard();
 } // <--- ¡CIERRE DE LA FUNCIÓN!
 
 // ===== Hueco clicable: tocar el "___" lleva al banner de escritura =====
@@ -2789,6 +2994,18 @@ function revealAnswer() {
     showFullTranslation();
     showFeedback(uiT('validReveal') + '"' + validAnswers.join(' / ') + '"', 'correct');
     refillBlank('reveal');       // v7.2: oración completa con la respuesta (ámbar)
+    // v9.19: en "solo oído", Revelar también destapa la oración y cierra opciones
+    if (state.mode === 'es-cn' && state.listenFirst) {
+        const stl = document.getElementById('sentence-text');
+        if (stl) stl.classList.remove('hidden');
+        const pyl = document.getElementById('pinyin-display');
+        if (pyl && state.showPinyin && s.pinyin) pyl.classList.remove('hidden');
+        const boxl = document.getElementById('listen-box');
+        if (boxl) boxl.querySelectorAll('.listen-opt').forEach(b => {
+            b.disabled = true;
+            if (b.dataset.ok === '1') b.classList.add('listen-ok');
+        });
+    }
 
     if (wordKey) {
         state.newWords.add(wordKey);
@@ -3620,6 +3837,12 @@ async function playAudio(lang) {
     let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
     let langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
     let voiceGender = lang === 'es' ? voiceEs : voiceZh;
+
+    // v9.19: si un playAudio anterior dejó su botón esperando ('...'), restaurarlo
+    // ANTES de capturar el nuevo — al tocar Siguiente (o cambiar de tarjeta en el
+    // modo 🎧 solo oído) con el TTS aún en vuelo, el botón anterior quedaba
+    // colgado deshabilitado (su onended se pierde al resetear el player).
+    if (activeBtn) restoreButton();
 
     activeBtn = btn;
     originalBtnText = activeBtn ? activeBtn.innerText : '';

@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260912a">
+    <link rel="stylesheet" href="style.css?v=20260912b">
 </head>
 <body>
     <div class="container">
@@ -91,6 +91,10 @@
                     <!-- v9.15: práctica intercalada — mezcla el orden del módulo
                          activo (Fisher-Yates sembrado). OFF = orden original. -->
                     <button id="btn-interleaving" class="speed-btn" type="button" title="Práctica intercalada">🔀 Intercalar</button>
+                    <!-- v9.19: "solo oído" — el audio suena primero, el texto queda
+                         oculto y el alumno elige entre opciones ANTES de ver los
+                         caracteres (comprensión auditiva real). Solo en es-cn. -->
+                    <button id="btn-listen" class="speed-btn" type="button" title="Escucha antes que lectura: el audio suena solo y el texto aparece al responder">🎧 Solo oído</button>
                 </div>
             </div>
 
@@ -616,7 +620,7 @@
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
     <script src="classics.js?v=20260910c"></script>
-    <script src="app.js?v=20260912a"></script>
+    <script src="app.js?v=20260912b"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

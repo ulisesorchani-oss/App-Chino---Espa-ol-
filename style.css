@@ -4767,3 +4767,55 @@ body.paper-mode .srs-prod-ok { color: #2f6b4f; }
 body.paper-mode .srs-prod-bad { color: #a03d2e; }
 body.paper-mode .srs-ans-zh { color: #3a3128; }
 body.paper-mode .srs-prod-hint { color: #3a3128; }
+
+/* ===== v9.19 — SOLO OÍDO: audio primero, opciones antes del texto ===== */
+.listen-box { text-align: center; margin: 4px 0 10px; }
+.listen-hint {
+    font-size: 0.92rem; font-weight: 700;
+    color: var(--text-secondary); margin-bottom: 10px;
+}
+.listen-play {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 150px; padding: 12px 22px;
+    border-radius: 999px; border: 2px solid var(--primary);
+    background: var(--primary); color: #fff;
+    font-size: 1.05rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    animation: listen-pulse 2.2s ease-in-out infinite;
+}
+.listen-play:active { transform: scale(0.97); }
+@keyframes listen-pulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); }
+    50% { box-shadow: 0 4px 22px rgba(37, 99, 235, 0.5); }
+}
+.listen-opts {
+    display: flex; flex-direction: column; gap: 10px;
+    max-width: 440px; margin: 14px auto 0;
+}
+.listen-opt {
+    padding: 14px 16px; border-radius: var(--radius);
+    border: 1.5px solid var(--border); background: var(--bg-card);
+    color: var(--text-primary); font-size: 1.35rem; font-weight: 700;
+    font-family: inherit; cursor: pointer; text-align: center;
+    letter-spacing: 0.06em;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.listen-opt:active { transform: scale(0.985); }
+.listen-opt:disabled { cursor: default; opacity: 0.55; }
+.listen-opt.listen-ok {
+    border-color: #059669; background: rgba(5, 150, 105, 0.12);
+    color: #047857; opacity: 1; font-size: 1.5rem;
+}
+.listen-opt.listen-bad {
+    border-color: var(--danger); background: rgba(220, 38, 38, 0.10);
+    color: var(--danger); opacity: 1;
+}
+/* tarjetas de palabra: opciones en español → letra normal, no hanzi grande */
+.listen-opt[lang="es"] { letter-spacing: normal; font-size: 1.1rem; }
+body.dark-mode .listen-hint { color: #94a3b8; }
+body.dark-mode .listen-opt { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+body.dark-mode .listen-opt.listen-ok { border-color: #34d399; background: rgba(52, 211, 153, 0.12); color: #34d399; }
+body.dark-mode .listen-opt.listen-bad { border-color: #f87171; background: rgba(248, 113, 113, 0.12); color: #f87171; }
+body.paper-mode .listen-opt { background: #fffdf5; border-color: #b7a98f; color: #3a3128; }
+body.paper-mode .listen-opt.listen-ok { border-color: #2f6b4f; background: rgba(47, 107, 79, 0.10); color: #2f6b4f; }
+body.paper-mode .listen-opt.listen-bad { border-color: #a03d2e; background: rgba(160, 61, 46, 0.10); color: #a03d2e; }

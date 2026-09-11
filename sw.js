@@ -68,7 +68,10 @@
 //       (qué/que, sí/si, 20/veinte ya no generan falsos «Revisá: …») y
 //       bitácora de calibración ve_es_conf_log. El modo chino NO cambia
 //       (0.65 tono + 0.35 contenido intacto).
-const VERSION = 'v65'; // — invalida shell (v9.18: evaluador de español afinado)
+// v9.19: modo "solo oído" (es-cn) — el audio suena primero, el texto queda
+//       tapado y el alumno elige la palabra entre opciones ANTES de ver los
+//       caracteres (comprensión auditiva real; reutiliza fetchTTS/checkAnswer).
+const VERSION = 'v66'; // — invalida shell (v9.19: solo oído — escucha antes que lectura)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
