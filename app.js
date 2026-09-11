@@ -5552,8 +5552,10 @@ function pzCounterUpdate() {
                 (card.py ? '<div class="srs-py">📖 ' + escHtml(card.py) + '</div>' : '') +
                 '<div class="srs-es">🇪🇸 ' + (srsGloss(item.zh, card)
                     ? escHtml(srsGloss(item.zh, card)) : '<span class="srs-es-missing">—</span>') + '</div>' +
-                (card.ctxZh ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
-                    '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' +
+                // v9.16: el bloque aparece con ctxZh O ctxEs — la oración propia
+                // del alumno en español (sin han) también merece "Tu ejemplo".
+                ((card.ctxZh || card.ctxEs) ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
+                    (card.ctxZh ? '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' : '') +
                     (card.ctxEs ? '<div class="srs-ctx-es">“' + escHtml(card.ctxEs) + '”</div>' : '') + '</div>' : '') +
                 '<div class="srs-grades">' +
                     '<button type="button" class="srs-grade srs-g-again" data-k="again">😵 Otra vez<small>' + hintB(1) + '</small></button>' +
@@ -5750,32 +5752,80 @@ function pzCounterUpdate() {
     }
 
     // Botón "🔁 Sumar a mi repaso" del popup de vocabulario (delegado)
+    // v9.16: EFECTO DE GENERACIÓN — al sumar una palabra se ofrece un input
+    // opcional para que el alumno escriba SU propia oración con la palabra
+    // ANTES de guardarla (se retiene mejor lo que se produce que lo que se
+    // consume). La oración propia viaja en los campos ctx que ya existían:
+    // con caracteres han → ctxZh (ejemplo en chino); solo latín → ctxEs.
+    // El formulario se inserta IN-SITU (v7.20: nunca re-renderizar el body
+    // del popup — el botón quedaría descolgado y el clic-afuera lo cerraría).
     const vpop = document.getElementById('vocab-pop');
     if (vpop) {
         vpop.addEventListener('click', (e) => {
             const btnEl = e.target.closest ? e.target.closest('.vp-srs-add') : null;
-            if (!btnEl) return;
+            if (!btnEl || btnEl.classList.contains('is-in')) return;
             const vb = document.getElementById('vocab-pop-body');
             const w = (vb && vb.dataset ? vb.dataset.word : '') || '';
             const zh = String(w).trim();
             if (!zh || DB.cards[zh]) return;
-            let es = '', zt = '';
-            try {
-                const hit = lookupVocab(zh);
-                if (hit && hit.rec) { es = hit.rec.es || ''; zt = hit.rec.zhTrad || ''; }
-            } catch (err) { /* sin módulo cargado */ }
-            try {
-                if (!es) { const d = dictMiniLookup(zh); if (d && d.def) es = d.def; }
-            } catch (err) { /* sin diccionario */ }
-            const added = addCard({ zh: zh, zt: zt, es: es, py: wordPinyin(zh), dueNow: true });
-            if (added === true) {
-                // Actualización IN SITU (sin re-render): si re-renderizáramos el
-                // body, este botón quedaría descolgado del DOM y el listener
-                // "clic fuera" de vocab-pop (pop.contains) cerraría el popup
-                // justo después de responder — el mismo falso positivo v7.20.
-                btnEl.classList.add('is-in');
-                btnEl.textContent = '✓ Ya está en tu repaso';
-            }
+
+            // mostrar el formulario de generación (el botón vuelve al guardar)
+            btnEl.style.display = 'none';
+            const form = document.createElement('div');
+            form.className = 'vp-own-form';
+            form.innerHTML =
+                '<div class="vp-own-title">✍️ Tu propia oración <small>(opcional)</small></div>' +
+                '<div class="vp-own-hint">Escribila vos y la vas a recordar mejor. También podés guardarla sin oración.</div>' +
+                '<input type="text" class="vp-own-input" maxlength="120" autocomplete="off" ' +
+                    'placeholder="Mi oración con ' + escHtml(zh) + '…">' +
+                '<div class="vp-own-actions">' +
+                    '<button type="button" class="vp-own-save">✅ Guardar en mi repaso</button>' +
+                    '<button type="button" class="vp-own-skip">⤵ Sin oración</button>' +
+                '</div>';
+            btnEl.after(form);
+            const inp = form.querySelector('.vp-own-input');
+            try { inp.focus(); } catch (err) { /* sin foco disponible */ }
+
+            // glosa ES y tradicional del diccionario (igual que v7.21)
+            const resolveGloss = () => {
+                let es = '', zt = '';
+                try {
+                    const hit = lookupVocab(zh);
+                    if (hit && hit.rec) { es = hit.rec.es || ''; zt = hit.rec.zhTrad || ''; }
+                } catch (err) { /* sin módulo cargado */ }
+                try {
+                    if (!es) { const d = dictMiniLookup(zh); if (d && d.def) es = d.def; }
+                } catch (err) { /* sin diccionario */ }
+                return { es: es, zt: zt };
+            };
+            const doAdd = (own) => {
+                const g = resolveGloss();
+                const hasHan = READER_HANZI.test(own || '');
+                return addCard({
+                    zh: zh, zt: g.zt, es: g.es, py: wordPinyin(zh), dueNow: true,
+                    ctxZh: hasHan ? own : '',
+                    ctxZt: '',
+                    ctxEs: hasHan ? '' : own
+                });
+            };
+            const finish = (added) => {
+                form.remove();
+                btnEl.style.display = '';
+                if (added === true) {
+                    // Actualización IN SITU (sin re-render): ver nota v7.20 arriba
+                    btnEl.classList.add('is-in');
+                    btnEl.textContent = '✓ Ya está en tu repaso';
+                }
+            };
+            form.querySelector('.vp-own-save').addEventListener('click', () => {
+                finish(doAdd(String(inp.value || '').trim()));
+            });
+            form.querySelector('.vp-own-skip').addEventListener('click', () => {
+                finish(doAdd('')); // alta clásica v7.21, sin ctx propio
+            });
+            inp.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') { ev.preventDefault(); finish(doAdd(String(inp.value || '').trim())); }
+            });
         });
     }
 

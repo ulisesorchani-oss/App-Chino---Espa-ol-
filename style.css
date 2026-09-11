@@ -4638,3 +4638,40 @@ body.paper-mode #btn-interleaving.active {
     color: #fffdf5;
     border-color: #2f6b4f;
 }
+
+/* ===== v9.16: efecto de generación — oración propia al sumar al repaso =====
+   Formulario insertado IN-SITU bajo el botón "Sumar a mi repaso" del popup
+   de vocabulario (v7.20: sin re-render del body). Paleta del popup: azul. */
+.vp-own-form { margin-top: 10px; text-align: left; }
+.vp-own-title { font-size: 0.92rem; font-weight: 700; color: #1e3a8a; margin-bottom: 2px; }
+.vp-own-title small { font-weight: 400; color: #64748b; }
+.vp-own-hint { font-size: 0.78rem; color: #64748b; margin-bottom: 8px; }
+.vp-own-input {
+    width: 100%; box-sizing: border-box; padding: 9px 12px;
+    border: 2px solid #93b4ff; border-radius: 10px; font-size: 1rem;
+    font-family: inherit; background: #ffffff; color: #1e293b; outline: none;
+}
+.vp-own-input:focus { border-color: #2563eb; }
+.vp-own-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.vp-own-save {
+    flex: 1 1 auto; padding: 9px 14px; border: none; border-radius: 999px;
+    background: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer;
+}
+.vp-own-save:active { transform: scale(0.98); }
+.vp-own-skip {
+    flex: 0 0 auto; padding: 9px 12px; border: 1.5px solid #94a3b8;
+    border-radius: 999px; background: transparent; color: #475569;
+    font-size: 0.82rem; cursor: pointer;
+}
+body.dark-mode .vp-own-title { color: #93b4ff; }
+body.dark-mode .vp-own-title small, body.dark-mode .vp-own-hint { color: #94a3b8; }
+body.dark-mode .vp-own-input { background: rgba(147, 180, 255, 0.08); border-color: #3b5baf; color: #e2e8f0; }
+body.dark-mode .vp-own-input:focus { border-color: #93b4ff; }
+body.dark-mode .vp-own-skip { border-color: #64748b; color: #cbd5e1; }
+body.paper-mode .vp-own-title { color: #4a3f35; }
+body.paper-mode .vp-own-title small, body.paper-mode .vp-own-hint { color: #7a6f61; }
+body.paper-mode .vp-own-input { background: #fffdf5; border-color: #b7a98f; color: #3a3128; }
+body.paper-mode .vp-own-input:focus { border-color: #8b5e34; }
+body.paper-mode .vp-own-save { background: #8b5e34; color: #fffdf5; }
+body.paper-mode .vp-own-skip { border-color: #9c8a70; color: #5c5041; }
