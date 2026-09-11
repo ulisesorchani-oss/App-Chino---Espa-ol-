@@ -57,6 +57,24 @@
      SharedArrayBuffer → ONNX Runtime Web corre con
      numThreads = 1 (compatibilidad total, algo más lento pero
      estable en gama baja, que es justamente el objetivo).
+   ------------------------------------------------------------
+   v9.18 — AFINADO DEL EVALUADOR DE ESPAÑOL (cn-es):
+     · La confianza de Whisper es SEÑAL, no VETO: un match
+       textual exacto (dist === 0) ya no cae a 'doubt' por el
+       umbral duro 0.85 (volátil en frases cortas con tiny);
+       solo baja con confianza MUY baja (< SOFT, default 0.5,
+       configurable en config.js: SPANISH_CONFIDENCE_SOFT).
+     · Comparador plega tildes y números en ambos lados
+       (esFoldWord): qué/que, sí/si, 20/veinte ya no generan
+       falsos «Revisá: …». Ñ se conserva (fonema propio).
+     · Bitácora de calibración ve_es_conf_log (localStorage,
+       últimas 24): JSON.parse(localStorage.getItem(
+       've_es_conf_log')) → para afinar SOFT con datos reales.
+     · VERIFICADO en el bundle: @huggingface/transformers@3.8.1
+       DECLARA prompt_ids (WhisperGenerationConfig) pero NO lo
+       implementa (1 sola ocurrencia). Condicionar generate()
+       con la frase objetivo queda DIFERIDO hasta migrar de lib
+       (4.2.0 tampoco lo conecta para Whisper estándar).
    ============================================================ */
 (function () {
 'use strict';
@@ -665,6 +683,51 @@ class LocalToneAnalyzer {
 }
 
 /* ============================================================
+   v9.18 — COMPARADOR TOLERANTE DEL MODO ESPAÑOL (puras, tests)
+   ------------------------------------------------------------
+   esFoldWord(w): forma canónica SOLO para comparar (la UI
+   sigue mostrando la palabra real):
+     · minúsculas + sin tildes/diéresis (á→a, ü→u): Whisper
+       tiny las marca u omite al azar y NO distinguen
+       pronunciación (qué y que suenan igual). Ñ se conserva:
+       es un fonema propio (año ≠ ano).
+     · números comunes → palabra (20 → veinte): tiny a veces
+       escribe la palabra donde el target usa la cifra.
+   Los DOS lados (objetivo y transcripción) pasan por el mismo
+   plegado → plegar jamás penaliza al alumno.
+
+   esVerdict18(dist, confidence, soft, maxD): veredicto con la
+   confianza como SEÑAL y no como VETO (v7.8 usaba un umbral
+   duro 0.85 que castigaba matches exactos de tiny en frases
+   cortas: el promedio de log-probs por token es volátil).
+   ============================================================ */
+function esFoldWord(w) {
+    let s = String(w || '').toLowerCase();
+    const DIG = { '0': 'cero', '1': 'uno', '2': 'dos', '3': 'tres', '4': 'cuatro',
+                  '5': 'cinco', '6': 'seis', '7': 'siete', '8': 'ocho', '9': 'nueve',
+                  '10': 'diez', '11': 'once', '12': 'doce', '13': 'trece',
+                  '14': 'catorce', '15': 'quince', '16': 'dieciseis',
+                  '17': 'diecisiete', '18': 'dieciocho', '19': 'diecinueve',
+                  '20': 'veinte', '30': 'treinta', '40': 'cuarenta', '50': 'cincuenta',
+                  '60': 'sesenta', '70': 'setenta', '80': 'ochenta', '90': 'noventa',
+                  '100': 'cien', '1000': 'mil' };
+    if (Object.prototype.hasOwnProperty.call(DIG, s)) return DIG[s];
+    if (/^\d+$/.test(s)) return s;   // otra cifra (200, 2026): igual en ambos lados
+    return s.replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+            .replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/ü/g, 'u');
+}
+
+function esVerdict18(dist, confidence, soft, maxD) {
+    if (dist === 0) {
+        // match textual exacto: la confianza SOLO baja el veredicto
+        // cuando es tan baja que delata audio ruidoso/ilegible
+        return (confidence !== null && confidence < soft) ? 'doubt' : 'perfect';
+    }
+    if (dist <= maxD) return 'close';
+    return 'mismatch';
+}
+
+/* ============================================================
    EVALUADOR LOCAL — LocalEvaluator (Whisper + Tono compuestos)
    ------------------------------------------------------------
    Un MISMO Float32Array alimenta ambos pipelines EN PARALELO.
@@ -874,31 +937,56 @@ class LocalEvaluator {
 
         // Comparación tolerante (spec §3): normalización → Levenshtein
         // por palabra → umbral dinámico getMaxAcceptableDistance().
+        // v9.18: ENCIMA de la normalización, el comparador plega tildes
+        // y números (esFoldWord) en LOS DOS lados: tiny marca/omite
+        // tildes al azar (qué/que, sí/si suenan igual) y puede escribir
+        // "veinte" donde el target dice "20". La UI sigue mostrando las
+        // palabras reales (twD/hwD sin plegar).
         const heardN = window.TextUtils.normalizeText(w.text, 'es');
         const targetN = window.TextUtils.normalizeText(targetText, 'es');
-        const tw = targetN.split(' ').filter(Boolean);
-        const hw = heardN.split(' ').filter(Boolean);
+        const twD = targetN.split(' ').filter(Boolean);
+        const hwD = heardN.split(' ').filter(Boolean);
+        const tw = twD.map(esFoldWord);   // v9.18: copia plegada SOLO para comparar
+        const hw = hwD.map(esFoldWord);
         const al = window.TextUtils.levenshteinWords(tw, hw);
         const maxD = window.TextUtils.getMaxAcceptableDistance(tw.length);
 
         let okWords = 0;
         al.ops.forEach((o) => { if (o.ti >= 0 && o.ok) okWords++; });
 
-        let verdict;
-        if (al.dist === 0) {
-            // coincidencia textual → decide la CONFIANZA (spec §3)
-            verdict = (w.confidence !== null && w.confidence < THRESH) ? 'doubt' : 'perfect';
-        } else if (al.dist <= maxD) {
-            verdict = 'close';
-        } else {
-            verdict = 'mismatch';
-        }
+        // ===== v9.18: la confianza es una SEÑAL, no un VETO =====
+        // Antes (v7.8): dist===0 + conf<0.85 → 'doubt' (nota 78). En
+        // frases cortas el promedio de log-probs de tiny es volátil:
+        // transcripciones EXACTAS caían en "dudosa" por el modelo, no
+        // por el alumno. Ahora el match exacto solo baja a 'doubt' con
+        // confianza MUY baja (< SOFT): eso delata audio ruidoso o
+        // ilegible, no pronunciación imperfecta. El umbral duro THRESH
+        // (config.js) queda informativo: se muestra junto a la conf.
+        const SOFT = (typeof cfg.SPANISH_CONFIDENCE_SOFT === 'number')
+            ? cfg.SPANISH_CONFIDENCE_SOFT : 0.5;
+        const verdict = esVerdict18(al.dist, w.confidence, SOFT, maxD);
+
+        // ===== v9.18: bitácora de calibración (privada, últimas 24) =====
+        // Datos reales para afinar SPANISH_CONFIDENCE_SOFT sin tocar
+        // código: consola del navegador →
+        //   JSON.parse(localStorage.getItem('ve_es_conf_log'))
+        try {
+            const veLog = JSON.parse(localStorage.getItem('ve_es_conf_log') || '[]');
+            veLog.push({ ts: Date.now(),
+                         conf: (typeof w.confidence === 'number') ? Math.round(w.confidence * 1000) / 1000 : null,
+                         dist: al.dist, ok: okWords, total: tw.length, verdict: verdict });
+            while (veLog.length > 24) veLog.shift();
+            localStorage.setItem('ve_es_conf_log', JSON.stringify(veLog));
+        } catch (eLog) { /* noop */ }
+        console.debug('[VE-ES] conf=' + w.confidence + ' · dist=' + al.dist +
+                      '/' + maxD + ' · SOFT=' + SOFT + ' → ' + verdict);
 
         // palabras divergentes (para "Revisá: ...")
         const divs = [];
         al.ops.forEach((o) => {
             if (o.ti >= 0 && !o.ok) {
-                divs.push({ expected: tw[o.ti], heard: (o.hi >= 0 ? hw[o.hi] : '') });
+                // v9.18: se muestran las palabras REALES (sin plegar)
+                divs.push({ expected: twD[o.ti], heard: (o.hi >= 0 ? hwD[o.hi] : '') });
             }
         });
 
@@ -914,10 +1002,10 @@ class LocalEvaluator {
         else
             score = Math.max(0, Math.min(59, Math.round(100 * okWords / Math.max(1, tw.length))));
 
-        const esWords = tw.map((word, i) => {
+        const esWords = twD.map((word, i) => {   // v9.18: palabras REALES (sin plegar)
             let op = null;
             for (let q = 0; q < al.ops.length; q++) if (al.ops[q].ti === i) { op = al.ops[q]; break; }
-            return { word: word, ok: !!(op && op.ok), heard: (op && op.hi >= 0) ? hw[op.hi] : '' };
+            return { word: word, ok: !!(op && op.ok), heard: (op && op.hi >= 0) ? hwD[op.hi] : '' };
         });
 
         // referencia para comparar con el oído: TTS ES de la frase
@@ -939,7 +1027,8 @@ class LocalEvaluator {
             esWords: esWords,
             esVerdict: verdict,                   // 'perfect' | 'doubt' | 'close' | 'mismatch'
             confidence: w.confidence,             // se MUESTRA en pantalla (spec §5)
-            confidenceThreshold: THRESH,
+            confidenceThreshold: THRESH,          // umbral duro histórico (informativo)
+            softThreshold: SOFT,                  // v9.18: el que DECIDE el match exacto
             esMismatch: (verdict === 'mismatch')
                 ? { heard: heardN, expected: targetN, distance: al.dist, maxDistance: maxD }
                 : null,
@@ -1529,6 +1618,8 @@ window.LocalWhisperProvider = LocalWhisperProvider;       // transcripción loca
 window.LocalToneAnalyzer = LocalToneAnalyzer;             // F0 + DTW local
 window.LocalEvaluator = LocalEvaluator;                   // composición (spec v2)
 window.CloudSpeechProvider = CloudSpeechProvider;         // placeholder documentado
+window.VoiceEvalEsFold = esFoldWord;                      // v9.18: plegado comparador ES (tests/QA)
+window.VoiceEvalEsVerdict = esVerdict18;                  // v9.18: veredicto ES (tests/QA)
 window.VE = new PronunciationEvaluator();                 // instancia única que usa VR
 
 })();

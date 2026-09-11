@@ -61,7 +61,14 @@
 //       panel de la línea) y play/pausa con ícono ⏸ en el 2.º toque
 // v9.8: identidad visual — header con sello (icons/logo-sello.png), manifest.json
 //       real e iconos nuevos: logo-192/512 (lockup), maskable-icon, favicon
-const VERSION = 'v64'; // — invalida shell (v9.17.1: pinyin-pro.min.js autohospedado → offline desde la 1.ª instalación)
+// v9.18: voice-evaluator.js afinado — el evaluador de español (cn-es) con la
+//       confianza de Whisper como SEÑAL y no como VETO (un match textual exacto
+//       ya no cae a 'doubt' por el umbral duro 0.85; solo con conf MUY baja
+//       < SOFT 0.5), comparador que plega tildes/números en ambos lados
+//       (qué/que, sí/si, 20/veinte ya no generan falsos «Revisá: …») y
+//       bitácora de calibración ve_es_conf_log. El modo chino NO cambia
+//       (0.65 tono + 0.35 contenido intacto).
+const VERSION = 'v65'; // — invalida shell (v9.18: evaluador de español afinado)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
