@@ -5725,14 +5725,14 @@ function pzCounterUpdate() {
     }
 
     // ---- sesión ----
-    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false, prodOk: 0, prodTried: 0 };
+    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false, prodOk: 0, prodTried: 0, recOk: 0, recTried: 0, recall: null }; // v9.21: recOk/recTried/recall
 
     function startSession() {
         SR.queue = dueList().slice(0, SESSION_MAX);
         if (!SR.queue.length) return renderIntro();
         SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
         SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
-        SR.prodOk = 0; SR.prodTried = 0; // v9.17: contadores de producción
+        SR.prodOk = 0; SR.prodTried = 0; SR.recOk = 0; SR.recTried = 0; // v9.17 producción + v9.21 retrieval
         renderQuiz();
     }
     function aheadSession() {
@@ -5744,7 +5744,7 @@ function pzCounterUpdate() {
         if (!SR.queue.length) return renderStats();
         SR.phase = 'quiz'; SR.i = 0; SR.total = SR.queue.length; SR.unique = SR.queue.length;
         SR.done = 0; SR.again = 0; SR.cur = null; SR.revealed = false;
-        SR.prodOk = 0; SR.prodTried = 0; // v9.17
+        SR.prodOk = 0; SR.prodTried = 0; SR.recOk = 0; SR.recTried = 0; // v9.17 + v9.21
         renderQuiz();
     }
 
@@ -5805,6 +5805,109 @@ function pzCounterUpdate() {
     }
     // ===== fin v9.17 =====
 
+    // ===== v9.21 — RETRIEVAL ANTES DE REVELAR (tarjeta clásica del mazo) =====
+    // El "👁️ Ver respuesta" deja de estar disponible de entrada: la tarjeta
+    // clásica pide PRIMERO el pinyin (sin tonos — escribir ǔ en teclado ES es
+    // irreal) o el significado en español, tolerante a typos pequeños.
+    // Correcto → habilita revelar. Error → feedback SIN mostrar la respuesta
+    // (se puede reintentar) + escape "🤷 No lo sé" tras el 1.er fallo: nunca
+    // dead-end, pero obliga a intentar al menos una vez. El resultado es SOLO
+    // informativo (contador en el resumen): la nota la pone siempre el alumno
+    // — cajas/intervalos de Leitner intactos. Tarjeta sin py verificable NI
+    // glosa → sin gate (comportamiento anterior). El modo producción (v9.17)
+    // NO cambia: su reveal sigue libre porque sin IME chino quedarías trabado.
+    // ===== v9.21 PURE (inicio) =====
+    function srsRecallNorm(s) {
+        return String(s || '').toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // tonos + tildes fuera
+            .replace(/[^0-9a-z\s]/g, ' ')                     // puntuación → espacio
+            .replace(/\s+/g, ' ').trim();
+    }
+    function srsRecallLev(a, b) {
+        const m = a.length, n = b.length;
+        if (!m) return n;
+        if (!n) return m;
+        let prev = new Array(n + 1), cur = new Array(n + 1);
+        for (let j = 0; j <= n; j++) prev[j] = j;
+        for (let i = 1; i <= m; i++) {
+            cur[0] = i;
+            for (let j = 1; j <= n; j++) {
+                cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
+                    prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            }
+            const t = prev; prev = cur; cur = t;
+        }
+        return prev[n];
+    }
+    // clave pinyin: sin tildes/espacios/dígitos de tono; v/lü → u ("lv" = "lü")
+    function srsRecallPyKey(s) {
+        return srsRecallNorm(s).replace(/[^a-z]/g, '').replace(/v/g, 'u');
+    }
+    function srsRecallPyList(py) {
+        const out = [];
+        String(py || '').split(/[;,\/·|]+/).forEach((sg) => {
+            const k = srsRecallPyKey(sg);
+            if (k && out.indexOf(k) === -1) out.push(k);
+        });
+        return out;
+    }
+    function srsRecallEsList(gloss) {
+        const raw = String(gloss || '');
+        if (!raw.trim()) return [];
+        const out = [srsRecallNorm(raw)];
+        raw.split(/[;,\/·|]+/).forEach((sg) => {
+            const n = srsRecallNorm(sg);
+            if (n && out.indexOf(n) === -1) out.push(n);
+        });
+        return out;
+    }
+    function srsRecallFuzzy(typed, cand) {
+        if (!typed || !cand) return false;
+        if (typed === cand) return true;
+        const tol = cand.length >= 10 ? 2 : (cand.length >= 5 ? 1 : 0);
+        if (!tol || Math.abs(typed.length - cand.length) > tol) return false;
+        return srsRecallLev(typed, cand) <= tol;
+    }
+    // → 'py' | 'es' | '' — el orden importa: pinyin primero (es lo natural
+    // delante de hanzi), español después con subset de tokens ("comprar"
+    // cuenta frente a glosa "comprar algo"). Defensivo: acepta candidatos
+    // crudos (mǎi / Comprar algo) o ya procesados (mai / comprar algo).
+    function srsRecallHit(typedRaw, pyList, esList) {
+        const norm = srsRecallNorm(typedRaw);
+        if (!norm) return '';
+        const pyTyped = srsRecallPyKey(typedRaw);
+        for (const k of (pyList || [])) {
+            const kk = srsRecallPyKey(k);
+            if (kk && (pyTyped === kk || srsRecallFuzzy(pyTyped, kk))) return 'py';
+        }
+        for (const c of (esList || [])) {
+            const cc = srsRecallNorm(c);
+            if (!cc) continue;
+            if (cc === norm || srsRecallFuzzy(norm, cc)) return 'es';
+            const toks = norm.split(' ').filter((t) => t.length > 1);
+            const gtoks = cc.split(' ');
+            if (toks.length && gtoks.length >= toks.length &&
+                toks.every((t) => gtoks.indexOf(t) !== -1)) return 'es';
+        }
+        return '';
+    }
+    // ===== v9.21 PURE (fin) =====
+    // Datos del gate: py de la tarjeta + fallback pinyin-pro (wordPinyin) y
+    // glosa vía srsGloss (que ya cae a lookupVocab/dict-mini). null → sin gate.
+    function recallData(item) {
+        const card = item.card || {};
+        const py = String(card.py || '') || String((item.zh && wordPinyin(item.zh)) || '');
+        const pyList = srsRecallPyList(py);
+        const esList = srsRecallEsList(srsGloss(item.zh, card));
+        if (!pyList.length && !esList.length) return null;
+        return {
+            pyList: pyList, esList: esList,
+            ph: (pyList.length && esList.length) ? 'Pinyin o significado…'
+                : (pyList.length ? 'Escribí el pinyin…' : 'Escribí el significado…')
+        };
+    }
+    // ===== fin v9.21 (marcadores para tests) =====
+
     // v9.17: bloque de respuesta compartido (tarjeta clásica y producción).
     // withHanzi agrega el hanzi grande DENTRO de la respuesta: en producción
     // el hanzi no se muestra como pista porque es justo lo que se pide.
@@ -5839,6 +5942,9 @@ function pzCounterUpdate() {
 
         // v9.17: plan de producción para esta tarjeta (null → clásica)
         const plan = DB.prod ? prodPlan(item) : null;
+        // v9.21: gate de retrieval para la tarjeta clásica (null → sin gate)
+        const gate = plan ? null : recallData(item);
+        SR.recall = gate;
 
         body.innerHTML =
             '<div class="srs-meta">' +
@@ -5866,13 +5972,23 @@ function pzCounterUpdate() {
                   '<div id="srs-prod-fb" class="srs-prod-fb" aria-live="polite"></div>' +
                   '<button type="button" class="btn-secondary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
                   '<div id="srs-ans" class="srs-ans hidden">' + srsAnsHtml(item, card, true) + '</div>'
-                : // — clásica: hanzi a la vista, reconocimiento —
+                : // — clásica: hanzi a la vista + retrieval ANTES de revelar (v9.21) —
                   '<div class="srs-card" lang="zh">' + escHtml(zh) + '</div>' +
                   '<div class="srs-tools">' +
                       '<button type="button" class="srs-tool srs-speak" title="Escuchar la palabra">🔊</button>' +
                       '<button type="button" class="srs-tool srs-write" title="Practicar los trazos">✍</button>' +
                   '</div>' +
-                  '<button type="button" class="btn-primary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>' +
+                  (gate ? // v9.21: retrieval gate + reveal deshabilitado + escape tras 1 fallo
+                      '<div class="srs-recall-row">' +
+                          '<input type="text" class="srs-recall-input" maxlength="60" autocomplete="off" ' +
+                              'autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="' + gate.ph + '">' +
+                          '<button type="button" class="btn-primary srs-recall-check">Comprobar</button>' +
+                      '</div>' +
+                      '<div class="srs-recall-fb" aria-live="polite"></div>' +
+                      '<button type="button" class="btn-primary srs-reveal-btn srs-reveal" disabled>👁️ Ver respuesta</button>' +
+                      '<button type="button" class="btn-secondary srs-reveal-btn srs-recall-giveup hidden">🤷 No lo sé, ver respuesta</button>'
+                  : // sin py ni glosa verificables → reveal directo (comportamiento anterior)
+                      '<button type="button" class="btn-primary srs-reveal-btn srs-reveal">👁️ Ver respuesta</button>') +
                   '<div id="srs-ans" class="srs-ans hidden">' + srsAnsHtml(item, card, false) + '</div>');
         const ans = document.getElementById('srs-ans');
         if (ans) ans.classList.add('hidden');
@@ -5882,6 +5998,15 @@ function pzCounterUpdate() {
             pin.addEventListener('keydown', (ev) => {
                 if (ev.isComposing || ev.keyCode === 229) return; // IME: elegir candidato ≠ enviar
                 if (ev.key === 'Enter') { ev.preventDefault(); prodCheck(); }
+            });
+        }
+        // v9.21: Enter en el input de retrieval (SIN autofocus a propósito:
+        // primero mirá el hanzi y pensá — el teclado no tapa la tarjeta)
+        const rin = document.querySelector('#srs-body .srs-recall-input');
+        if (rin) {
+            rin.addEventListener('keydown', (ev) => {
+                if (ev.isComposing || ev.keyCode === 229) return;
+                if (ev.key === 'Enter') { ev.preventDefault(); recallCheck(); }
             });
         }
     }
@@ -5906,17 +6031,52 @@ function pzCounterUpdate() {
         doReveal();
     }
 
+    // v9.21: comprobar el intento de retrieval (tarjeta clásica). SOLO informa:
+    // ✅ habilita "Ver respuesta"; ❌ deja reintentar y muestra el escape
+    // "No lo sé" — sin revelar la respuesta (a diferencia del modo producción).
+    function recallCheck() {
+        const item = SR.cur;
+        if (!item || SR.revealed) return;
+        const inp = document.querySelector('#srs-body .srs-recall-input');
+        if (!inp || inp.disabled) return;
+        const typed = String(inp.value || '');
+        if (!typed.trim()) { try { inp.focus(); } catch (e) { /* vacío → ignorar */ } return; }
+        const g = SR.recall || { pyList: [], esList: [] };
+        const hit = srsRecallHit(typed, g.pyList, g.esList);
+        SR.recTried++; if (hit) SR.recOk++;
+        const fb = document.querySelector('#srs-body .srs-recall-fb');
+        if (fb) fb.innerHTML = hit
+            ? '<span class="srs-prod-ok">✅ ¡Bien! Ahora compará con la respuesta.</span>'
+            : '<span class="srs-prod-bad">❌ No coincide — probá de nuevo.</span>';
+        const giveup = document.querySelector('#srs-body .srs-recall-giveup');
+        if (hit) {
+            inp.disabled = true;
+            const chk = document.querySelector('#srs-body .srs-recall-check');
+            if (chk) chk.disabled = true;
+            const btn = document.querySelector('#srs-body .srs-reveal');
+            if (btn) { btn.disabled = false; btn.classList.add('srs-reveal-ready'); }
+            if (giveup) giveup.classList.add('hidden');
+        } else if (giveup) {
+            giveup.classList.remove('hidden');
+        }
+    }
+
     function doReveal() {
         SR.revealed = true;
         const ans = document.getElementById('srs-ans');
-        const btn = document.querySelector('#srs-body .srs-reveal-btn');
-        if (btn) btn.classList.add('hidden');
+        // v9.21: esconder TODOS los botones de revelado (reveal + escape)
+        document.querySelectorAll('#srs-body .srs-reveal-btn').forEach((b) => b.classList.add('hidden'));
         if (ans) ans.classList.remove('hidden');
         // v9.17: congelar el input de producción (venga de ✅/❌ o del escape)
         const pin = document.querySelector('#srs-body .srs-prod-input');
         if (pin) pin.disabled = true;
         const pchk = document.querySelector('#srs-body .srs-prod-check');
         if (pchk) pchk.disabled = true;
+        // v9.21: congelar el gate de retrieval
+        const rin2 = document.querySelector('#srs-body .srs-recall-input');
+        if (rin2) rin2.disabled = true;
+        const rchk2 = document.querySelector('#srs-body .srs-recall-check');
+        if (rchk2) rchk2.disabled = true;
     }
 
     function doGrade(kind) {
@@ -5950,6 +6110,8 @@ function pzCounterUpdate() {
                 (SR.again ? ' · ' + SR.again + ' para volver a ver' : '') + '</p>' +
             (SR.prodTried ? '<p class="srs-sum-line">✍️ ' + SR.prodOk + ' de ' + SR.prodTried +
                 ' escrita' + (SR.prodTried === 1 ? '' : 's') + ' bien antes de revelar</p>' : '') +
+            (SR.recTried ? '<p class="srs-sum-line">🧠 ' + SR.recOk + ' de ' + SR.recTried +
+                ' recordada' + (SR.recTried === 1 ? '' : 's') + ' antes de mirar</p>' : '') +
             '<p class="srs-sum-next">' + nextTxt + '</p>' +
             '<div class="srs-actions">' +
                 (left > 0 ? '<button type="button" class="btn-primary srs-start">▶ Seguir repaso (' + left + ')</button>' : '') +
@@ -6080,6 +6242,8 @@ function pzCounterUpdate() {
             if (b.classList.contains('srs-start')) startSession();
             else if (b.classList.contains('srs-reveal')) doReveal();
             else if (b.classList.contains('srs-prod-check')) prodCheck(); // v9.17
+            else if (b.classList.contains('srs-recall-check')) recallCheck(); // v9.21
+            else if (b.classList.contains('srs-recall-giveup')) doReveal(); // v9.21: escape
             else if (b.classList.contains('srs-prod-toggle')) {           // v9.17
                 DB.prod = !DB.prod; save();
                 if (SR.phase === 'stats') renderStats(); else renderIntro();

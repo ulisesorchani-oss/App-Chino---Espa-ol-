@@ -75,7 +75,11 @@
 //       ("¿cuál escuchaste?", HSK 1-2: 买/卖, 十/是…), 10 rondas, opciones
 //       SOLO AUDIO hasta responder; IIFE propia + overlay #mp-pop (piel lq),
 //       reutiliza fetchTTS con cache de blobs; no toca el flujo de oraciones.
-const VERSION = 'v67'; // — invalida shell (v9.20: pares mínimos — discriminación tonal)
+// v9.21: retrieval antes de revelar en el mazo SRS — la tarjeta clásica pide
+//       el pinyin (sin tonos) o el significado antes de habilitar "Ver
+//       respuesta"; error no revela (reintento + escape "No lo sé"); contador
+//       informativo en el resumen; cajas de Leitner intactas.
+const VERSION = 'v68'; // — invalida shell (v9.21: retrieval antes de revelar — mazo SRS)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
