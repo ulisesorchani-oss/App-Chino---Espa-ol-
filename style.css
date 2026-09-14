@@ -4819,3 +4819,67 @@ body.dark-mode .listen-opt.listen-bad { border-color: #f87171; background: rgba(
 body.paper-mode .listen-opt { background: #fffdf5; border-color: #b7a98f; color: #3a3128; }
 body.paper-mode .listen-opt.listen-ok { border-color: #2f6b4f; background: rgba(47, 107, 79, 0.10); color: #2f6b4f; }
 body.paper-mode .listen-opt.listen-bad { border-color: #a03d2e; background: rgba(160, 61, 46, 0.10); color: #a03d2e; }
+
+/* ═══════════════ v9.20 · PARES MÍNIMOS — discriminación tonal ═══════════════
+   Ejercicio "¿cuál escuchaste?": opciones SOLO AUDIO hasta responder; al
+   responder se revela hanzi + pinyin + glosa + tono. Vive dentro del overlay
+   #mp-pop (piel lq-pop heredada de lecciones/clásicos). */
+.mp-tag { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; margin-bottom: 12px; }
+.mp-q { font-size: 1.5rem; font-weight: 800; margin: 2px 0 14px; }
+.mp-target { display: block; width: 100%; padding: 15px; font-size: 1.25rem; font-weight: 700; border: 2px solid #0ea5e9; border-radius: 16px; background: #e0f2fe; color: #0369a1; cursor: pointer; margin-bottom: 12px; transition: transform .12s ease; }
+.mp-target:active { transform: scale(.98); }
+.mp-target:disabled, .mp-target.mp-busy { opacity: .65; animation: listen-pulse 1.2s ease-in-out infinite; }
+.mp-hint { font-size: .8rem; color: #64748b; text-align: center; margin: 12px 0 2px; }
+.mp-opts { display: flex; flex-direction: column; gap: 10px; }
+.mp-opt { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 16px; background: #fff; cursor: pointer; text-align: left; transition: border-color .12s ease; }
+.mp-opt:hover { border-color: #0ea5e9; }
+.mp-opt-letter { font-size: 1.05rem; font-weight: 800; color: #0ea5e9; min-width: 22px; }
+.mp-opt-play { margin-left: auto; font-size: 1.05rem; padding: 9px 14px; border-radius: 999px; border: 1.5px solid #cbd5e1; background: #f8fafc; cursor: pointer; }
+.mp-opt-play:disabled, .mp-opt-play.mp-busy { opacity: .55; animation: listen-pulse 1.2s ease-in-out infinite; }
+.mp-opt.mp-reveal { cursor: default; flex-wrap: wrap; row-gap: 2px; }
+.mp-opt.mp-reveal .mp-zh { min-width: 100%; }
+.mp-zh { font-size: 1.9rem; font-weight: 700; line-height: 1.15; }
+.mp-py { font-size: .95rem; color: #475569; }
+.mp-es { font-size: .85rem; color: #64748b; }
+.mp-tone { font-size: .72rem; font-weight: 700; color: #0ea5e9; background: #e0f2fe; border-radius: 999px; padding: 2px 10px; margin-left: auto; white-space: nowrap; }
+.mp-opt.mp-ok { border-color: #22c55e; background: #f0fdf4; }
+.mp-opt.mp-ok .mp-opt-letter, .mp-opt.mp-ok .mp-tone { color: #16a34a; }
+.mp-opt.mp-ok .mp-tone { background: #dcfce7; }
+.mp-opt.mp-bad { border-color: #ef4444; background: #fef2f2; }
+.mp-opt.mp-bad .mp-opt-letter { color: #dc2626; }
+.mp-opt.mp-dim { opacity: .55; }
+.mp-fb { margin-top: 14px; padding: 12px 14px; border-radius: 12px; font-size: .95rem; font-weight: 600; line-height: 1.45; }
+.mp-fb.ok { background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; }
+.mp-fb.bad { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca; }
+.mp-actions { display: flex; gap: 10px; margin-top: 16px; }
+.mp-next { flex: 1; padding: 14px; font-size: 1rem; font-weight: 700; border: none; border-radius: 14px; background: #0ea5e9; color: #fff; cursor: pointer; }
+.mp-next.mp-ghost { background: #f1f5f9; color: #334155; }
+.mp-score-big { font-size: 3.4rem; font-weight: 800; text-align: center; margin: 10px 0 2px; }
+.mp-score-big span { font-size: 1.4rem; color: #94a3b8; font-weight: 700; }
+.mp-end-msg { text-align: center; color: #475569; margin-bottom: 6px; }
+/* — dark — */
+body.dark-mode .mp-q { color: #f1f5f9; }
+body.dark-mode .mp-target { background: #0c4a6e; color: #bae6fd; border-color: #0284c7; }
+body.dark-mode .mp-opt { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+body.dark-mode .mp-opt:hover { border-color: #0ea5e9; }
+body.dark-mode .mp-opt-play { background: #0f172a; border-color: #475569; }
+body.dark-mode .mp-py, body.dark-mode .mp-es { color: #94a3b8; }
+body.dark-mode .mp-fb.ok { background: #052e16; color: #4ade80; border-color: #166534; }
+body.dark-mode .mp-fb.bad { background: #450a0a; color: #f87171; border-color: #7f1d1d; }
+body.dark-mode .mp-next { background: #0284c7; }
+body.dark-mode .mp-next.mp-ghost { background: #1e293b; color: #cbd5e1; }
+body.dark-mode .mp-tone { background: #0c4a6e; color: #7dd3fc; }
+body.dark-mode .mp-end-msg { color: #94a3b8; }
+/* — paper — */
+body.paper-mode .mp-target { background: #fdf6e3; color: #8a5a00; border-color: #d97706; }
+body.paper-mode .mp-opt { background: #fffdf5; border-color: #e6dabf; color: #3a3128; }
+body.paper-mode .mp-opt:hover { border-color: #d97706; }
+body.paper-mode .mp-opt-play { background: #f7efdc; border-color: #d8c9a3; }
+body.paper-mode .mp-py, body.paper-mode .mp-es { color: #7c6f57; }
+body.paper-mode .mp-fb.ok { background: #f0f7e6; color: #2f6b4f; border-color: #cde3b8; }
+body.paper-mode .mp-fb.bad { background: #fbeaea; color: #a03d2e; border-color: #ecc8c0; }
+body.paper-mode .mp-next { background: #b45309; }
+body.paper-mode .mp-next.mp-ghost { background: #efe6cf; color: #5c5142; }
+body.paper-mode .mp-tone { background: #fde8c8; color: #92400e; }
+body.paper-mode .mp-end-msg { color: #7c6f57; }
+body.paper-mode .mp-tag { color: #a08c5f; }

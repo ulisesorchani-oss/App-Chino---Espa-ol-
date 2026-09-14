@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260912b">
+    <link rel="stylesheet" href="style.css?v=20260914a">
 </head>
 <body>
     <div class="container">
@@ -95,6 +95,10 @@
                          oculto y el alumno elige entre opciones ANTES de ver los
                          caracteres (comprensión auditiva real). Solo en es-cn. -->
                     <button id="btn-listen" class="speed-btn" type="button" title="Escucha antes que lectura: el audio suena solo y el texto aparece al responder">🎧 Solo oído</button>
+                    <!-- v9.20: PARES MÍNIMOS — ejercicio aislado de discriminación
+                         tonal por audio: ¿cuál escuchaste? (买/卖, 十/是…). No
+                         interfiere con el flujo de oraciones. -->
+                    <button id="btn-mp-pairs" class="speed-btn" type="button" title="Entrenamiento de oído: palabras que solo difieren en el tono (HSK 1-2). ¿Cuál escuchaste?">🎯 Pares mínimos</button>
                 </div>
             </div>
 
@@ -555,6 +559,20 @@
         </div>
     </div>
 
+    <!-- v9.20: PARES MÍNIMOS — discriminación tonal por audio ("¿cuál escuchaste?").
+         Misma piel que lecciones/clásicos (lq-pop); el cuerpo lo renderiza app.js
+         (IIFE aislada). Opciones SOLO AUDIO hasta responder. -->
+    <div id="mp-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Pares mínimos: discriminación tonal">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span id="mp-progress-num" class="lq-progress-num">🎯</span>
+                <div id="mp-segments" class="lq-segments" aria-hidden="true"></div>
+                <button id="mp-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="mp-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -620,7 +638,7 @@
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
     <script src="classics.js?v=20260910c"></script>
-    <script src="app.js?v=20260912b"></script>
+    <script src="app.js?v=20260914a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

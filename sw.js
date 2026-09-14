@@ -71,7 +71,11 @@
 // v9.19: modo "solo oído" (es-cn) — el audio suena primero, el texto queda
 //       tapado y el alumno elige la palabra entre opciones ANTES de ver los
 //       caracteres (comprensión auditiva real; reutiliza fetchTTS/checkAnswer).
-const VERSION = 'v66'; // — invalida shell (v9.19: solo oído — escucha antes que lectura)
+// v9.20: pares mínimos — ejercicio aislado de discriminación tonal por audio
+//       ("¿cuál escuchaste?", HSK 1-2: 买/卖, 十/是…), 10 rondas, opciones
+//       SOLO AUDIO hasta responder; IIFE propia + overlay #mp-pop (piel lq),
+//       reutiliza fetchTTS con cache de blobs; no toca el flujo de oraciones.
+const VERSION = 'v67'; // — invalida shell (v9.20: pares mínimos — discriminación tonal)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
