@@ -79,7 +79,11 @@
 //       el pinyin (sin tonos) o el significado antes de habilitar "Ver
 //       respuesta"; error no revela (reintento + escape "No lo sé"); contador
 //       informativo en el resumen; cajas de Leitner intactas.
-const VERSION = 'v68'; // — invalida shell (v9.21: retrieval antes de revelar — mazo SRS)
+// v9.22: onboarding.js NUEVO (guía interactiva bilingüe: cómo usar la app, SRS,
+//       cajas de Leitner, 10-15 min/día, motivación 千里之行). Auto-contenido:
+//       no toca app.js/style.css; se auto-inyecta (botón 📖 + overlay #guide-pop
+//       con piel vocab-pop). Auto-show en 1.ª visita (ac_onboarding_done_v1).
+const VERSION = 'v69'; // — invalida shell (v9.22: guía interactiva de bienvenida)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
@@ -110,6 +114,7 @@ const PRECACHE = [
   './lessons-tocfl.js',     // v9.6: mini-dramas TOCFL (se concatenan a GRADED_LESSONS)
   './lessons-extra.js',     // v9.6c: mini-dramas HSK extra (+2 por nivel)
   './classics.js',          // v9.2: TEXTO ORIGINAL de los 9 clásicos por bloques (lector de clásicos)
+  './onboarding.js',        // v9.22: guía interactiva de bienvenida (bilingüe según modo)
   './hanzi-writer.min.js',  // v7.13: orden de trazos (MIT) — se inyecta LAZY pero precacheado p/ offline
   './pinyin-pro.min.js',
   './html2canvas.min.js',  // v7.1: PDF directo de planillas (carga perezosa)
