@@ -39,6 +39,14 @@
      NUNCA escribe: si algo falla devuelve null y el que llama degrada
      con gracia (la guía queda con su texto por defecto).
 
+   v9.26 · FIX CRÍTICO DE CAPTURA: el guard del wrapper vivía en una
+     propiedad de localStorage (`__hsWrap`) — pero asignar propiedades a
+     localStorage crea ITEMS REALES y persistentes → tras el primer reload
+     installCapture() hacía early-return y la actividad dejaba de
+     capturarse (racha congelada para quien recargara la app). Ahora el
+     guard vive en window (solo del realm) y se limpia el item legado.
+     Detectado y verificado por el QA de v9.26 (reload + acierto).
+
    NO toca: Leitner/doGrade, cloze, solo oído, pares mínimos, lecciones,
    clásicos, evaluador de voz, pinyin-pro, guía. Sin dependencias. Si
    algo falla, la app sigue funcionando igual (todo con try/catch).
@@ -285,7 +293,16 @@
     }
     function installCapture() {
         try {
-            if (localStorage.__hsWrap) return;
+            // v9.26 FIX CRÍTICO: el guard era `localStorage.__hsWrap` — pero
+            // ASIGNAR una propiedad a localStorage crea un ITEM REAL y
+            // persistente (setter de propiedades con nombre del Storage), así
+            // que tras el PRIMER reload este early-return volaba para siempre:
+            // la captura moría y la racha se congelaba (detectado por el QA de
+            // v9.26 con reload + acierto: days:{}). El guard ahora vive en
+            // window (propiedad de realm: muere con la página, nunca viaja a
+            // disco) y de paso se limpia el item legado si existiera.
+            if (window.__hsWrap) return;
+            try { localStorage.removeItem('__hsWrap'); } catch (e2) { /* legado */ }
             _origSet = localStorage.setItem.bind(localStorage);
             // Baselines: valor guardado, o 0 si todavía no hay estado. 0 es
             // seguro: en perfil fresco la 1.ª escritura puede ser directamente
@@ -295,7 +312,7 @@
             _lastScore = (sc0 === null) ? 0 : sc0;
             var s0 = hsReadSrsSum(lsGet(SRS_KEY));
             _lastSrs = s0 ? s0.sum : 0;
-            localStorage.__hsWrap = true;
+            window.__hsWrap = true;
             localStorage.setItem = function (k, v) {
                 try { capture(k, v); } catch (e) { /* jamás bloquear */ }
                 return _origSet(k, v);

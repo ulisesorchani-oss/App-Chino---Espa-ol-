@@ -643,12 +643,16 @@
          v9.24: el paso motivación enlaza con la racha (HuayuStats.open).
          v9.25: paso nuevo «mapa completo» (lector, planillas 写字, etc.), el paso
          «tu día» abre el repaso SRS real (#btn-srs) y el callout 🔥 muestra la
-         racha EN VIVO vía HuayuStats.getSummary(). -->
+         racha EN VIVO vía HuayuStats.getSummary().
+         v9.26: el pack chino de la guía tiene variante 繁體 (toggle 简/繁 con
+         preferencia en ac_guide_script_v1); + fix de captura en stats.js. -->
     <!-- v9.23: rachas y estadísticas (stats.js se auto-inyecta: botón 📊 +
          overlay #stats-pop con piel vocab-pop). Envuelve localStorage.setItem
-         para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura). -->
-    <script src="onboarding.js?v=20260915c"></script>
-    <script src="stats.js?v=20260915c"></script>
+         para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura).
+         v9.26: fix crítico — el guard del wrapper vivía en localStorage (item
+         persistente) y tras el 1.er reload la captura moría; ahora en window. -->
+    <script src="onboarding.js?v=20260915d"></script>
+    <script src="stats.js?v=20260915d"></script>
     <script src="app.js?v=20260914b"></script>
     <script>
     // Registro del Service Worker (PWA offline)

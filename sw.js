@@ -100,7 +100,17 @@
 //       cierra la guía SIN marcarla vista); (3) el callout 🔥 muestra la
 //       racha EN VIVO (stats.js expone HuayuStats.getSummary(), solo
 //       lectura). Toca onboarding.js + stats.js; app.js/style.css intactos.
-const VERSION = 'v72'; // — invalida shell (v9.25: guía completa + racha en vivo)
+// v9.26: la guía ahora también en 繁體 — el pack chino del onboarding suma
+//       la variante TRADICIONAL 'cn-hant' (espejo 1:1: mismos 7 pasos, ids,
+//       quiz y cajas) con toggle 简/繁 visible solo en modo chino, que
+//       conserva el paso actual y persiste la preferencia en
+//       ac_guide_script_v1. Además FIX CRÍTICO en stats.js: el guard del
+//       wrapper de captura usaba localStorage.__hsWrap (item PERSISTENTE —
+//       asignar props a localStorage crea claves reales), así que tras el
+//       primer reload la actividad dejaba de contarse y la racha quedaba
+//       congelada; el guard ahora vive en window (por realm). Toca
+//       onboarding.js + stats.js; app.js/style.css intactos.
+const VERSION = 'v73'; // — invalida shell (v9.26: guía 繁體 + fix de racha)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

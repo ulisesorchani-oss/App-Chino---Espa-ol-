@@ -1,5 +1,5 @@
 /* =====================================================================
-   v9.22 · GUÍA INTERACTIVA DE BIENVENIDA (onboarding) — Huayu Diario
+   v9.22-v9.26 · GUÍA INTERACTIVA DE BIENVENIDA (onboarding) — Huayu Diario
    =====================================================================
    QUÉ ES
    · Recorrido de 7 pasos (~2-3 minutos): cómo usar la app, qué es el SRS
@@ -10,6 +10,12 @@
    · BILINGÜE según el modo: 'es-cn' (aprendo chino) → guía en español;
      'cn-es' (aprendo español) → guía en chino simplificado, igual que el
      pack de UI de app.js (UI_STRINGS['cn-es'] usa 简体).
+   · v9.26 · 繁體: el pack chino tiene variante TRADICIONAL ('cn-hant'):
+     mismo tour de 7 pasos, quiz, cajas y callouts con los MISMOS ids. El
+     toggle 简/繁 (arriba a la derecha del cuerpo, solo visible en modo
+     chino) alterna al vuelo conservando el paso actual; la preferencia
+     persiste en localStorage 'ac_guide_script_v1' ('hans' por defecto).
+     El modo es-cn no cambia: la guía en español sigue idéntica.
    · INTERACTIVA: mini-quiz con feedback (¿cuándo conviene repasar?) y
      cajas de Leitner tocables (tap en cada caja → cuándo vuelve la
      palabra).
@@ -46,6 +52,14 @@
      paso motivación muestra la racha EN VIVO vía HuayuStats.getSummary()
      (función pura obStreakLive; sin stats.js o racha 0 → texto por
      defecto). Todo defensivo: si algo falta, queda como antes.
+   · v9.26 · 繁體 (IMPLEMENTACIÓN): tercera pack 'cn-hant' — espejo 1:1 de
+     PACK_ZH con guion tradicional (mismos ids: #ob-srs-btn, #ob-streak-*
+     , #ob-quiz, #ob-boxes, #ob-detail; mismo quiz/cajas/callouts). Nuevos
+     helpers getScriptPref() y langForMode() (leen 'ac_guide_script_v1');
+     obStreakLive() acepta 3.º parámetro hant (2 args = comportamiento
+     anterior intacto); OB_BOXES suma zhH/zhHD por caja. El toggle vive en
+     renderStep (solo lang !== 'es-cn'), alterna con toggleScript()
+     conservando el paso, y expone _toggleScript/_scriptPref/_langForMode.
    · NO toca: Leitner/doGrade, cloze, SRS, lecciones, clásicos, evaluador
      de voz, pinyin-pro. Sin dependencias. Si algo falla, la app sigue
      funcionando igual (todo el init con try/catch).
@@ -56,6 +70,7 @@
 
     // ---------------- helpers ----------------
     var LS_DONE = 'ac_onboarding_done_v1';      // 1 = guía ya vista
+    var LS_SCRIPT = 'ac_guide_script_v1';       // v9.26: 'hant' = pack chino en 繁體
     var MODE_KEY = 'chino-espanol-app-v2';      // SOLO LECTURA (misma clave de app.js)
     var AUTO_DELAY = 1400;                      // ms hasta el auto-show de 1.ª visita
 
@@ -91,32 +106,42 @@
 
     // Cajas de Leitner con los intervalos REALES del mazo (app.js: AGAIN_MS =
     // 10 min y BOX_DAYS = {2:1, 3:3, 4:7, 5:14, 6:30}). days: 0 = misma sesión.
+    // v9.26: zhH/zhHD = etiqueta y detalle en 繁體 (caja 4/5 usan 週, no 周).
     var OB_BOXES = [
-        { b: 1, days: 0,  es: '10 minutos', zh: '10 分钟',
+        { b: 1, days: 0,  es: '10 minutos', zh: '10 分钟', zhH: '10 分鐘',
           esD: 'Recién fallada (o nueva): vuelve en <b>10 minutos</b>, dentro de esta misma sesión.',
-          zhD: '刚答错（或新词）：<b>10 分钟</b>后回来，就在本次学习里。' },
-        { b: 2, days: 1,  es: '1 día', zh: '1 天',
+          zhD: '刚答错（或新词）：<b>10 分钟</b>后回来，就在本次学习里。',
+          zhHD: '剛答錯（或新詞）：<b>10 分鐘</b>後回來，就在本次學習裡。' },
+        { b: 2, days: 1,  es: '1 día', zh: '1 天', zhH: '1 天',
           esD: 'Mañana vuelve a aparecer: ya empezó a quedarse. Vence en <b>1 día</b>.',
-          zhD: '明天会再出现：它开始住进你的记忆了。<b>1 天</b>后到期。' },
-        { b: 3, days: 3,  es: '3 días', zh: '3 天',
+          zhD: '明天会再出现：它开始住进你的记忆了。<b>1 天</b>后到期。',
+          zhHD: '明天會再出現：它開始住進你的記憶了。<b>1 天</b>後到期。' },
+        { b: 3, days: 3,  es: '3 días', zh: '3 天', zhH: '3 天',
           esD: 'La próxima cita es en <b>3 días</b>: si la recordás, ya es memoria de mediano plazo.',
-          zhD: '下次见面是 <b>3 天</b>后：如果还想得起来，它已经进入中期记忆。' },
-        { b: 4, days: 7,  es: '1 semana', zh: '1 周',
+          zhD: '下次见面是 <b>3 天</b>后：如果还想得起来，它已经进入中期记忆。',
+          zhHD: '下次見面是 <b>3 天</b>後：如果還想得起來，它已經進入中期記憶。' },
+        { b: 4, days: 7,  es: '1 semana', zh: '1 周', zhH: '1 週',
           esD: 'Vuelve en <b>1 semana</b>. Una semana sin verla y sigue ahí: buen trabajo.',
-          zhD: '<b>1 周</b>后才回来。一周不见它还在：干得漂亮。' },
-        { b: 5, days: 14, es: '2 semanas', zh: '2 周',
+          zhD: '<b>1 周</b>后才回来。一周不见它还在：干得漂亮。',
+          zhHD: '<b>1 週</b>後才回來。一週不見它還在：幹得漂亮。' },
+        { b: 5, days: 14, es: '2 semanas', zh: '2 周', zhH: '2 週',
           esD: 'Vuelve en <b>2 semanas</b>: ya casi no hace falta pensarla.',
-          zhD: '<b>2 周</b>后回来：几乎不用刻意想它了。' },
-        { b: 6, days: 30, es: '1 mes 🎉', zh: '1 个月 🎉',
+          zhD: '<b>2 周</b>后回来：几乎不用刻意想它了。',
+          zhHD: '<b>2 週</b>後回來：幾乎不用刻意想它了。' },
+        { b: 6, days: 30, es: '1 mes 🎉', zh: '1 个月 🎉', zhH: '1 個月 🎉',
           esD: 'La cita final: <b>1 mes</b>. Si la recordás acá, la palabra es tuya. 🎉',
-          zhD: '最后一站：<b>1 个月</b>。这时候还记得，这个词就是你的了。🎉' }
+          zhD: '最后一站：<b>1 个月</b>。这时候还记得，这个词就是你的了。🎉',
+          zhHD: '最後一站：<b>1 個月</b>。這時候還記得，這個詞就是你的了。🎉' }
     ];
 
     // v9.25: título/estado EN VIVO del callout de racha, a partir del
     // resumen de HuayuStats.getSummary(). Devuelve null si no hay datos
     // o la racha es 0 (el pack ya trae el texto por defecto "empieza hoy").
     // PURA: sin DOM, testeable en sandbox.
-    function obStreakLive(sum, zhMode) {
+    // v9.26: 3.er parámetro hant → estados en 繁體 (el título 你的打卡：N 天
+    // es idéntico en ambos guiones; solo cambian los estados). Con 2 args
+    // el comportamiento queda exactamente como en v9.25.
+    function obStreakLive(sum, zhMode, hant) {
         if (!sum || typeof sum !== 'object') return null;
         if (typeof sum.streak !== 'number' || !isFinite(sum.streak) || sum.streak <= 0) return null;
         var n = sum.streak;
@@ -126,11 +151,15 @@
             status: ''
         };
         if (sum.todayPracticed) {
-            out.status = zhMode ? ('今天已经打卡 ✓ 连续第 ' + n + ' 天。')
-                                : ('Hoy ya practicaste ✓ — día ' + n + ' de la cadena.');
+            out.status = zhMode
+                ? (hant ? ('今天已經打卡 ✓ 連續第 ' + n + ' 天。')
+                        : ('今天已经打卡 ✓ 连续第 ' + n + ' 天。'))
+                : ('Hoy ya practicaste ✓ — día ' + n + ' de la cadena.');
         } else {
-            out.status = zhMode ? ('⚠ 今天还没打卡：练一下，别断链。')
-                                : ('⚠ Hoy falta practicar: una sesión y la cadena sigue.');
+            out.status = zhMode
+                ? (hant ? ('⚠ 今天還沒打卡：練一下，別斷鏈。')
+                        : ('⚠ 今天还没打卡：练一下，别断链。'))
+                : ('⚠ Hoy falta practicar: una sesión y la cadena sigue.');
         }
         return out;
     }
@@ -162,6 +191,9 @@
         '.ob-streak .ob-text{margin-bottom:0;}',
         '.ob-streak-btn{min-width:186px;margin-top:11px;}',
         '.ob-srs-btn{min-width:172px;margin-top:9px;padding:8px 12px;font-size:.86rem;}',
+        '.ob-script-row{display:flex;justify-content:flex-end;margin:0 0 8px;}',
+        '.ob-script-btn{border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);border-radius:999px;padding:3px 11px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.5;transition:border-color .15s,color .15s;}',
+        '.ob-script-btn:hover{border-color:var(--primary);color:var(--primary);}',
         '.ob-tip{font-size:.84rem;color:var(--text-secondary);background:var(--bg-light);border-radius:10px;padding:9px 11px;line-height:1.5;margin-top:10px;}',
         '.ob-quiz-q{font-weight:700;color:var(--text-primary);margin:12px 0 8px;font-size:.95rem;}',
         '.ob-opt{display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:8px;border-radius:11px;border:2px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:.92rem;line-height:1.4;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;}',
@@ -349,7 +381,93 @@
         ]
     };
 
-    var PACKS = { 'es-cn': PACK_ES, 'cn-es': PACK_ZH };
+    // ---------------- contenido: pack CHINO 繁體 (v9.26 · variante tradicional) ----------------
+    // Espejo 1:1 de PACK_ZH: mismos 7 pasos, mismos ids y misma estructura;
+    // solo cambia el guion (简体 → 繁體). El toggle 简/繁 alterna entre ambos
+    // conservando el paso actual. Conversión a mano (no automática): 複習,
+    // 這, 學習, 時間, 開始, 導覽, 週, 於, 計劃, 資料, 列印, 貼上 (uso TW).
+    var PACK_ZH_HANT = {
+        btnLabel: '📖 指南',
+        btnTitle: '快速指南：怎麼用這個 App、什麼是 SRS、每天學多久',
+        aria: '應用互動指南',
+        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就開始！', dots: '第' },
+        steps: [
+            {
+                ico: '🌏', center: true,
+                title: '歡迎來到 Huayu Diario!',
+                html:
+                    '<div class="ob-hero">🌏</div>' +
+                    '<p class="ob-text ob-center"><b>你的每日西班牙語日記</b></p>' +
+                    '<p class="ob-text">這款 App 用真實的日常句子教你西班牙語：聽、寫、說。最重要的是，它有一套系統，<b>替你安排每天該複習什麼</b>，讓你學過的東西不再溜走。</p>' +
+                    '<p class="ob-text">這份小導覽只要 <b>2 分鐘</b>，看完你就知道怎麼用了 💪</p>' +
+                    '<div class="ob-tip">💡 導覽隨時可以再看：點右上角的 <b>📖 指南</b> 就行。</div>'
+            },
+            {
+                ico: '🧭',
+                title: '每天怎麼用（10 分鐘）',
+                html:
+                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">每日練習</span><br><span class="ob-item-desc">一句缺了一個詞的西語句子。填上它，點檢查——這樣就算完成今天的學習了。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🔊</span><span><span class="ob-item-title">聽錄音、跟讀</span><br><span class="ob-item-desc">🔊 ES 播放句子；在 ⚙️ 裡可以調速、換音色。點 🎤 錄下自己的發音，和原音對比。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🔁</span><span><span class="ob-item-title">聰明複習</span><br><span class="ob-item-desc">頂部的按鈕會告訴你今天有幾張卡片到期。這個複習是整個 App 最有價值的部分。</span><br><button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">看看怎麼用</button></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">想要更多？</span><br><span class="ob-item-desc">上方的標籤頁：🎓 DELE 考試、📖 課文、📜 經典閱讀，隨時可以探索。</span></span></div>' +
+                    '<p class="ob-text">剛開始？<b>每日一句 + 聰明複習</b>就夠了，其他慢慢來。</p>'
+            },
+            {
+                ico: '🧠',
+                title: '什麼是間隔重複（SRS）?',
+                html:
+                    '<p class="ob-text">SRS = <b>間隔重複</b>（Spaced Repetition System）。人的遺忘是有規律的——著名的<b>遺忘曲線</b>。SRS 的訣竅就是：在每個詞<b>快要被忘掉的那一刻</b>安排複習。</p>' +
+                    '<p class="ob-quiz-q">🤔 什麼時候複習一個詞最有效？</p>' +
+                    '<div id="ob-quiz"></div>'
+            },
+            {
+                ico: '📫',
+                title: '萊特納盒子',
+                html:
+                    '<p class="ob-text">你的詞卡像一組抽屜，一共 <b>6 盒</b>。點每個盒子，看看這個詞什麼時候回來：</p>' +
+                    '<div id="ob-boxes" class="ob-boxes"></div>' +
+                    '<p class="ob-detail" id="ob-detail"></p>' +
+                    '<p class="ob-text">✅ 答對了 → 往前跳一盒，複習間隔<b>越來越長</b>。❌ 答錯了 → 回到盒 1。這不是懲罰，<b>而是方法本身</b>。點「我會」還能一次跳兩盒，獎勵你已掌握的詞。</p>'
+            },
+            {
+                ico: '⏱️',
+                title: '每天學多久？',
+                html:
+                    '<div class="ob-stat">10–15 分鐘</div>' +
+                    '<p class="ob-text ob-center">真的不用更多：<b>一句新句子 + 今天的複習</b> = 完成。</p>' +
+                    '<p class="ob-text">堅持 &gt; 強度：每天 10 分鐘，勝過週日突擊 2 小時。大腦是在學習<b>之間</b>鞏固記憶的（尤其是睡覺的時候）。</p>' +
+                    '<div class="ob-tip">📅 <b>10 分鐘 × 90 天 ≈ 15 小時的有效學習。</b>三個月後，你的大部分卡片已經進入遠期盒子：維持起來越來越輕鬆。</div>'
+            },
+            {
+                ico: '🗺️',
+                title: '整個 App 的地圖',
+                html:
+                    '<p class="ob-text">一張圖看全 App——想學更多的時候，這些都在眼前：</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🗣️</span><span><span class="ob-item-title">文本朗讀</span><br><span class="ob-item-desc">貼上任何中文（或西語）文本，用你選的音色讀出來。自帶閱讀庫，隨時開讀。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">✍️</span><span><span class="ob-item-title">寫字練習紙</span><br><span class="ob-item-desc">輸入想練的漢字，生成帶筆順的 A4 字帖，列印就能寫。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">課文與經典閱讀</span><br><span class="ob-item-desc">分級小短劇和帶註釋的經典文本：點任何詞都能看釋義。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">發音評測</span><br><span class="ob-item-desc">用 🎤 錄下自己的發音，和原音對比，還能拿到評測反饋。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎧</span><span><span class="ob-item-title">聽力特訓</span><br><span class="ob-item-desc">🎧 只聽不看（先聽後看）和 🎯 最小對立組（磨耳朵辨聲調）。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📊</span><span><span class="ob-item-title">你的進度</span><br><span class="ob-item-desc">📊 打卡和學習日曆；💾 備份，把資料隨身帶走。</span></span></div>' +
+                    '<p class="ob-text">都不是必須的：<b>每日一句 + 複習</b>就已經在學習了。其他功能，想用的時候都在。🧭</p>'
+            },
+            {
+                ico: '💪', center: true,
+                title: '第一步，就是今天',
+                html:
+                    '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始於足下</div><div class="ob-quote-src">——老子《道德經》· 第一步，就是今天</div></div>' +
+                    '<p class="ob-text">你一定會大量出錯。這正是設計的一部分：每一次錯誤都在告訴系統該複習什麼。回到盒 1 的卡片不是失敗——<b>那就是你明天的學習計劃</b>。📅</p>' +
+                    '<p class="ob-text">別拿自己的第 1 天去比別人的第 100 天。每天 10 分鐘，3 個月後你會重讀最初的課文……<b>並且看得懂</b>。目標不是學會一切，而是<b>不斷鏈</b>。</p>' +
+                    '<div class="ob-streak">' +
+                        '<div class="ob-streak-title" id="ob-streak-title">🔥 你的打卡，今天開始</div>' +
+                        '<p class="ob-text">那條「不能斷的鏈」，App 會替你記著：連續天數、學習日曆、掌握詞彙和練習時長。每次學完看一眼——<b>看著它一天天長大，就是最好的動力</b>。</p>' +
+                        '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 看看我的打卡</button>' +
+                    '</div>'
+            }
+        ]
+    };
+
+    var PACKS = { 'es-cn': PACK_ES, 'cn-es': PACK_ZH, 'cn-hant': PACK_ZH_HANT };
     // El quiz también es contenido (lo consumen los tests): 1 correcta + feedback.
     var OB_QUIZ = {
         'es-cn': {
@@ -369,12 +487,21 @@
                 { t: '快要忘记的那一刻', ok: true,
                   fb: '✅ 这种「用力想起来」的过程，正是把词写进长期记忆的关键。这就是 SRS 的核心。' }
             ]
+        },
+        'cn-hant': {
+            q: '什麼時候複習一個詞最有效？',
+            opts: [
+                { t: '同一天連續背很多遍', ok: false,
+                  fb: '❌ 感覺很高效，但只是短期記憶：明天就忘了。' },
+                { t: '快要忘記的那一刻', ok: true,
+                  fb: '✅ 這種「用力想起來」的過程，正是把詞寫進長期記憶的關鍵。這就是 SRS 的核心。' }
+            ]
         }
     };
 
     // ---------------- estado ----------------
-    var lang = 'es-cn';   // idioma de contenido en uso
-    var cur = 0;          // paso actual (0..5)
+    var lang = 'es-cn';   // idioma de contenido en uso ('es-cn'|'cn-es'|'cn-hant')
+    var cur = 0;          // paso actual (0..6)
     var quizOk = {};      // clave lang+':'+idx → true (quiz acertado, queda verde)
     var boxSel = 0;       // caja seleccionada en el paso Leitner
 
@@ -385,10 +512,20 @@
         m = obStoredMode(lsGet(MODE_KEY));
         return m || 'es-cn';
     }
+    // v9.26: guion del pack chino ('hans' | 'hant'), persistente y defensivo:
+    // cualquier valor inesperado → 'hans' (comportamiento idéntico al anterior).
+    function getScriptPref() { return lsGet(LS_SCRIPT) === 'hant' ? 'hant' : 'hans'; }
+    // Idioma de contenido para un modo, aplicando la preferencia 简/繁:
+    // 'es-cn' → 'es-cn' (sin toggle); 'cn-es' → 'cn-hant' si el usuario
+    // eligió 繁體. Es la ÚNICA puerta de entrada al pack tradicional.
+    function langForMode(mode) {
+        var l = obLangFor(mode);
+        return (l === 'cn-es' && getScriptPref() === 'hant') ? 'cn-hant' : l;
+    }
     function applyLabel() {
         var btn = $('btn-guide');
         if (!btn) return;
-        var P = PACKS[obLangFor(currentMode())];
+        var P = PACKS[langForMode(currentMode())]; // v9.26: refleja 简/繁
         btn.textContent = P.btnLabel;
         btn.title = P.btnTitle;
     }
@@ -433,7 +570,7 @@
         pop.className = 'vocab-pop hidden';
         pop.setAttribute('role', 'dialog');
         pop.setAttribute('aria-modal', 'true');
-        var P = PACKS[obLangFor(currentMode())];
+        var P = PACKS[langForMode(currentMode())]; // v9.26: aria con 简/繁
         pop.setAttribute('aria-label', P.aria);
         var x = document.createElement('button');
         x.id = 'btn-guide-close';
@@ -464,6 +601,29 @@
             if (!hero) { // steps centrados sin hero explícito
                 body.insertAdjacentHTML('afterbegin', '<div class="ob-hero">' + st.ico + '</div>');
             }
+        }
+        // v9.26: toggle 简/繁 arriba a la derecha — SOLO en el pack chino
+        // (es-cn no lo tiene: la guía en español no cambia). Alternar
+        // conserva el paso actual (cur no se toca).
+        if (lang !== 'es-cn') {
+            var srow = document.createElement('div');
+            srow.className = 'ob-script-row';
+            var sb = document.createElement('button');
+            sb.id = 'ob-script-btn';
+            sb.type = 'button';
+            sb.className = 'ob-script-btn';
+            sb.textContent = (lang === 'cn-hant') ? '简体' : '繁體';
+            sb.setAttribute('aria-label', (lang === 'cn-hant')
+                ? 'Cambiar a chino simplificado'
+                : 'Cambiar a chino tradicional (繁體)');
+            sb.addEventListener('click', function (ev) {
+                // corta la burbuja: el click queda DENTRO de #guide-pop, pero
+                // por simetría con bindSrs ningún handler externo reacciona.
+                if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
+                toggleScript();
+            });
+            srow.appendChild(sb);
+            body.insertBefore(srow, body.firstChild);
         }
         // widgets
         if ($('ob-quiz')) renderQuiz();
@@ -548,7 +708,9 @@
             b.type = 'button';
             b.className = 'ob-box' + (i === boxSel ? ' sel' : '');
             b.setAttribute('data-i', String(i));
-            b.textContent = (lang === 'cn-es' ? '盒' : 'Caja') + ' ' + bx.b + ' · ' + (lang === 'cn-es' ? bx.zh : bx.es);
+            // v9.26: etiqueta según guion (zhH = 繁體, con fallback defensivo)
+            b.textContent = (lang === 'es-cn' ? 'Caja' : '盒') + ' ' + bx.b + ' · ' +
+                (lang === 'es-cn' ? bx.es : (lang === 'cn-hant' ? (bx.zhH || bx.zh) : bx.zh));
             b.addEventListener('click', function () {
                 boxSel = i;
                 host.querySelectorAll('.ob-box').forEach(function (x) { x.classList.remove('sel'); });
@@ -562,7 +724,8 @@
     function showBoxDetail() {
         var d = $('ob-detail');
         var bx = OB_BOXES[boxSel];
-        if (d && bx) d.innerHTML = (lang === 'cn-es' ? bx.zhD : bx.esD);
+        // v9.26: detalle según guion (zhHD = 繁體, con fallback defensivo)
+        if (d && bx) d.innerHTML = (lang === 'es-cn' ? bx.esD : (lang === 'cn-hant' ? (bx.zhHD || bx.zhD) : bx.zhD));
     }
 
     // ---------------- enlace con el popup de racha (v9.24) ----------------
@@ -630,7 +793,8 @@
                 S = window.HuayuStats.getSummary();
             }
         } catch (e) { S = null; }
-        var live = obStreakLive(S, lang === 'cn-es');
+        // v9.26: zhMode = todo pack chino; hant = variante tradicional
+        var live = obStreakLive(S, lang !== 'es-cn', lang === 'cn-hant');
         if (!live) return;
         t.textContent = live.title;
         var old = $('ob-streak-status');
@@ -653,7 +817,7 @@
             injectStyles(); buildOverlay();
             var pop = $('guide-pop');
             if (!pop) return;
-            lang = obLangFor(currentMode());  // idioma SIEMPRE al abrir
+            lang = langForMode(currentMode()); // idioma SIEMPRE al abrir (+ pref 简/繁 v9.26)
             cur = 0;
             boxSel = 0;
             pop.setAttribute('aria-label', PACKS[lang].aria);
@@ -665,6 +829,23 @@
         var pop = $('guide-pop');
         if (pop) pop.classList.add('hidden');
         if (markDone) lsSet(LS_DONE, '1');
+    }
+
+    // ---------------- toggle 简/繁 del pack chino (v9.26) ----------------
+    // Alterna entre PACK_ZH (简体) y PACK_ZH_HANT (繁體) conservando el paso
+    // actual, guarda la preferencia y re-etiqueta el botón 📖 del header.
+    // En modo es-cn no existe el toggle (la guía en español no cambia).
+    // Defensivo: si el render falla, la preferencia ya quedó guardada y el
+    // próximo open() muestra el guion elegido; la app sigue igual.
+    function toggleScript() {
+        try {
+            lang = (lang === 'cn-hant') ? 'cn-es' : 'cn-hant';
+            lsSet(LS_SCRIPT, lang === 'cn-hant' ? 'hant' : 'hans');
+            var pop = $('guide-pop');
+            if (pop && PACKS[lang]) pop.setAttribute('aria-label', PACKS[lang].aria);
+            applyLabel();
+            renderStep();
+        } catch (e) { console.warn('[guía] no se pudo alternar 简/繁:', e); }
     }
 
     // ---------------- init ----------------
@@ -694,8 +875,11 @@
     window.HuayuGuide = {
         open: open,
         close: close,
-        _streakGo: streakGo,   // v9.24: enlace guía → popup de racha (QA/tests)
-        _srsGo: srsGo,         // v9.25: enlace guía → repaso SRS real (QA/tests)
+        _streakGo: streakGo,       // v9.24: enlace guía → popup de racha (QA/tests)
+        _srsGo: srsGo,             // v9.25: enlace guía → repaso SRS real (QA/tests)
+        _toggleScript: toggleScript, // v9.26: alterna 简⇄繁 (QA/tests)
+        _scriptPref: getScriptPref,  // v9.26: 'hans' | 'hant' (QA/tests)
+        _langForMode: langForMode,   // v9.26: modo + preferencia → pack (tests)
         _pure: {
             probeMode: obProbeMode,
             storedMode: obStoredMode,
