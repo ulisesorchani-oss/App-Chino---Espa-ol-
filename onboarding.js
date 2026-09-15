@@ -2,7 +2,7 @@
    v9.22 · GUÍA INTERACTIVA DE BIENVENIDA (onboarding) — Huayu Diario
    =====================================================================
    QUÉ ES
-   · Recorrido de 6 pasos (~2 minutos): cómo usar la app, qué es el SRS
+   · Recorrido de 7 pasos (~2-3 minutos): cómo usar la app, qué es el SRS
      (curva del olvido + mini-quiz interactivo), las cajas de Leitner con
      los intervalos REALES del mazo (BOX_DAYS: 10 min, 1, 3, 7, 14 y 30
      días — mismos valores de app.js), cuánto practicar por día (10-15
@@ -36,6 +36,16 @@
      vista, patrón openBackup de stats.js) y abre el popup #stats-pop vía
      window.HuayuStats.open(). Defensivo: si stats.js no cargó, no pasa
      nada (filosofía del módulo: si algo falla, la app sigue igual).
+   · v9.25 · GUÍA COMPLETA: (1) paso nuevo «El mapa completo» — un
+     pantallazo de toda la app: 🗣️ lector de texto, ✍️ planillas de
+     escritura 写字 (A4 con orden de trazos), 📖 lecciones y clásicos,
+     🎤 pronunciación, 🎧 oído, 📊 progreso y 💾 respaldo. (2) El paso
+     «Tu día» enlaza con el repaso real: botón que cierra la guía SIN
+     marcarla vista (close(false), paso intermedio) y hace click en
+     #btn-srs — patrón openBackup() de stats.js. (3) El callout 🔥 del
+     paso motivación muestra la racha EN VIVO vía HuayuStats.getSummary()
+     (función pura obStreakLive; sin stats.js o racha 0 → texto por
+     defecto). Todo defensivo: si algo falta, queda como antes.
    · NO toca: Leitner/doGrade, cloze, SRS, lecciones, clásicos, evaluador
      de voz, pinyin-pro. Sin dependencias. Si algo falla, la app sigue
      funcionando igual (todo el init con try/catch).
@@ -102,6 +112,29 @@
           zhD: '最后一站：<b>1 个月</b>。这时候还记得，这个词就是你的了。🎉' }
     ];
 
+    // v9.25: título/estado EN VIVO del callout de racha, a partir del
+    // resumen de HuayuStats.getSummary(). Devuelve null si no hay datos
+    // o la racha es 0 (el pack ya trae el texto por defecto "empieza hoy").
+    // PURA: sin DOM, testeable en sandbox.
+    function obStreakLive(sum, zhMode) {
+        if (!sum || typeof sum !== 'object') return null;
+        if (typeof sum.streak !== 'number' || !isFinite(sum.streak) || sum.streak <= 0) return null;
+        var n = sum.streak;
+        var out = {
+            title: zhMode ? ('🔥 你的打卡：' + n + ' 天')
+                          : ('🔥 Tu racha: ' + n + (n === 1 ? ' día' : ' días')),
+            status: ''
+        };
+        if (sum.todayPracticed) {
+            out.status = zhMode ? ('今天已经打卡 ✓ 连续第 ' + n + ' 天。')
+                                : ('Hoy ya practicaste ✓ — día ' + n + ' de la cadena.');
+        } else {
+            out.status = zhMode ? ('⚠ 今天还没打卡：练一下，别断链。')
+                                : ('⚠ Hoy falta practicar: una sesión y la cadena sigue.');
+        }
+        return out;
+    }
+
     /* ===== OB-PURE-END ===== */
 
     // ---------------- estilos (auto-inyectados, respetan los 3 temas) ----------------
@@ -125,8 +158,10 @@
         '.ob-quote-src{color:var(--text-secondary);font-size:.84rem;margin-top:6px;font-style:italic;}',
         '.ob-streak{margin-top:12px;padding:13px 12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg-light);text-align:center;}',
         '.ob-streak-title{font-weight:800;color:var(--text-primary);font-size:1rem;margin-bottom:5px;}',
+        '.ob-streak-status{font-weight:700;color:var(--primary);font-size:.9rem;margin:0 0 8px;}',
         '.ob-streak .ob-text{margin-bottom:0;}',
         '.ob-streak-btn{min-width:186px;margin-top:11px;}',
+        '.ob-srs-btn{min-width:172px;margin-top:9px;padding:8px 12px;font-size:.86rem;}',
         '.ob-tip{font-size:.84rem;color:var(--text-secondary);background:var(--bg-light);border-radius:10px;padding:9px 11px;line-height:1.5;margin-top:10px;}',
         '.ob-quiz-q{font-weight:700;color:var(--text-primary);margin:12px 0 8px;font-size:.95rem;}',
         '.ob-opt{display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:8px;border-radius:11px;border:2px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:.92rem;line-height:1.4;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;}',
@@ -173,7 +208,7 @@
                 html:
                     '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">Práctica diaria</span><br><span class="ob-item-desc">Una frase con una palabra faltante. Escribila y tocá Verificar: con eso ya estudiaste algo real.</span></span></div>' +
                     '<div class="ob-item"><span class="ob-item-ico">🔊</span><span><span class="ob-item-title">Escuchá y repetí</span><br><span class="ob-item-desc">🔊 CN suena la frase; con ⚙️ cambiás velocidad y voz. Tocá 🎤 y grabate para comparar tu pronunciación.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🔁</span><span><span class="ob-item-title">Repaso inteligente</span><br><span class="ob-item-desc">El botón de arriba te avisa cuántas tarjetas vencen hoy. Ese repaso es lo más valioso de la app.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🔁</span><span><span class="ob-item-title">Repaso inteligente</span><br><span class="ob-item-desc">El botón de arriba te avisa cuántas tarjetas vencen hoy. Ese repaso es lo más valioso de la app.</span><br><button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">👁 Ver cómo funciona</button></span></div>' +
                     '<div class="ob-item"><span class="ob-item-ico">🎧</span><span><span class="ob-item-title">Cuando quieras más</span><br><span class="ob-item-desc">🎧 Solo oído (escuchás antes de leer), 🎯 Pares mínimos (afiná el oído con los tonos), 📖 Lecciones y 📜 Clásicos para leer de verdad.</span></span></div>' +
                     '<p class="ob-text">¿Recién empezás? Con la <b>frase del día + el repaso inteligente</b> ya está. De a poco descubrís el resto.</p>'
             },
@@ -204,6 +239,19 @@
                     '<div class="ob-tip">📅 <b>10 min × 90 días ≈ 15 horas de chino real.</b> Y a los 3 meses la mayoría de tu mazo ya vive en las cajas lejanas: cada vez cuesta menos mantenerlo.</div>'
             },
             {
+                ico: '🗺️',
+                title: 'El mapa completo de la app',
+                html:
+                    '<p class="ob-text">Un pantallazo de todo lo que tenés a mano, para cuando quieras más que la frase del día:</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🗣️</span><span><span class="ob-item-title">Lector de texto</span><br><span class="ob-item-desc">Pegá cualquier texto en chino (o español) y escuchalo con la voz elegida. Trae una biblioteca de lecturas para empezar ya.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">✍️</span><span><span class="ob-item-title">Planillas de escritura 写字</span><br><span class="ob-item-desc">Escribí los caracteres que querés practicar y generá hojas A4 para imprimir, con el orden de trazos.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">Lecciones y Clásicos</span><br><span class="ob-item-desc">Mini-dramas por nivel HSK y textos clásicos con glosas: tocá cualquier palabra y ves su ficha.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">Tu pronunciación</span><br><span class="ob-item-desc">Grabate con 🎤 y compará con la original; el evaluador de voz te da una devolución clara.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎧</span><span><span class="ob-item-title">Entrenamiento de oído</span><br><span class="ob-item-desc">🎧 Solo oído (escuchás antes de leer) y 🎯 Pares mínimos (afinás los tonos).</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📊</span><span><span class="ob-item-title">Tu progreso</span><br><span class="ob-item-desc">📊 Racha y calendario de constancia; 💾 Respaldo para llevar todo a otro dispositivo.</span></span></div>' +
+                    '<p class="ob-text">Nada de esto es obligatorio: <b>frase del día + repaso</b> y ya aprendiste algo real. El resto está cuando lo necesites. 🧭</p>'
+            },
+            {
                 ico: '💪', center: true,
                 title: 'El primer paso',
                 html:
@@ -211,7 +259,7 @@
                     '<p class="ob-text">Vas a equivocarte <b>muchísimo</b>. Está diseñado así: cada error le enseña al sistema qué repasarte. Las tarjetas que vuelven a la caja 1 no son fracasos — <b>son tu plan de estudio de mañana</b>. 📅</p>' +
                     '<p class="ob-text">No compares tu día 1 con el día 100 de nadie. Con 10 minutos diarios, en 3 meses vas a releer tus primeras lecciones… <b>y las vas a entender</b>. El objetivo no es saberlo todo: es <b>no romper la cadena</b>.</p>' +
                     '<div class="ob-streak">' +
-                        '<div class="ob-streak-title">🔥 Tu racha empieza hoy</div>' +
+                        '<div class="ob-streak-title" id="ob-streak-title">🔥 Tu racha empieza hoy</div>' +
                         '<p class="ob-text">Esa «cadena» que no hay que romper, la app la mide por vos: días seguidos, calendario de constancia, palabras dominadas y minutos practicados. Mirala al terminar cada sesión — <b>verla crecer es el mejor combustible</b>.</p>' +
                         '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 Ver mi racha</button>' +
                     '</div>'
@@ -242,7 +290,7 @@
                 html:
                     '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">每日练习</span><br><span class="ob-item-desc">一句缺了一个词的西语句子。填上它，点检查——这样就算完成今天的学习了。</span></span></div>' +
                     '<div class="ob-item"><span class="ob-item-ico">🔊</span><span><span class="ob-item-title">听录音、跟读</span><br><span class="ob-item-desc">🔊 ES 播放句子；在 ⚙️ 里可以调速、换音色。点 🎤 录下自己的发音，和原音对比。</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🔁</span><span><span class="ob-item-title">聪明复习</span><br><span class="ob-item-desc">顶部的按钮会告诉你今天有几张卡片到期。这个复习是整个 App 最有价值的部分。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🔁</span><span><span class="ob-item-title">聪明复习</span><br><span class="ob-item-desc">顶部的按钮会告诉你今天有几张卡片到期。这个复习是整个 App 最有价值的部分。</span><br><button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">看看怎么用</button></span></div>' +
                     '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">想要更多？</span><br><span class="ob-item-desc">上方的标签页：🎓 DELE 考试、📖 课文、📜 经典阅读，随时可以探索。</span></span></div>' +
                     '<p class="ob-text">刚开始？<b>每日一句 + 聪明复习</b>就够了，其他慢慢来。</p>'
             },
@@ -273,6 +321,19 @@
                     '<div class="ob-tip">📅 <b>10 分钟 × 90 天 ≈ 15 小时的有效学习。</b>三个月后，你的大部分卡片已经进入远期盒子：维持起来越来越轻松。</div>'
             },
             {
+                ico: '🗺️',
+                title: '整个 App 的地图',
+                html:
+                    '<p class="ob-text">一张图看全 App——想学更多的时候，这些都在眼前：</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🗣️</span><span><span class="ob-item-title">文本朗读</span><br><span class="ob-item-desc">粘贴任何中文（或西语）文本，用你选的音色读出来。自带阅读库，随时开读。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">✍️</span><span><span class="ob-item-title">写字练习纸</span><br><span class="ob-item-desc">输入想练的汉字，生成带笔顺的 A4 字帖，打印就能写。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">课文与经典阅读</span><br><span class="ob-item-desc">分级小短剧和带注释的经典文本：点任何词都能看释义。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">发音评测</span><br><span class="ob-item-desc">用 🎤 录下自己的发音，和原音对比，还能拿到评测反馈。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎧</span><span><span class="ob-item-title">听力特训</span><br><span class="ob-item-desc">🎧 只听不看（先听后看）和 🎯 最小对立组（磨耳朵辨声调）。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📊</span><span><span class="ob-item-title">你的进度</span><br><span class="ob-item-desc">📊 打卡和学习日历；💾 备份，把数据随身带走。</span></span></div>' +
+                    '<p class="ob-text">都不是必须的：<b>每日一句 + 复习</b>就已经在学习了。其他功能，想用的时候都在。🧭</p>'
+            },
+            {
                 ico: '💪', center: true,
                 title: '第一步，就是今天',
                 html:
@@ -280,7 +341,7 @@
                     '<p class="ob-text">你一定会大量出错。这正是设计的一部分：每一次错误都在告诉系统该复习什么。回到盒 1 的卡片不是失败——<b>那就是你明天的学习计划</b>。📅</p>' +
                     '<p class="ob-text">别拿自己的第 1 天去比别人的第 100 天。每天 10 分钟，3 个月后你会重读最初的课文……<b>并且看得懂</b>。目标不是学会一切，而是<b>不断链</b>。</p>' +
                     '<div class="ob-streak">' +
-                        '<div class="ob-streak-title">🔥 你的打卡，今天开始</div>' +
+                        '<div class="ob-streak-title" id="ob-streak-title">🔥 你的打卡，今天开始</div>' +
                         '<p class="ob-text">那条「不能断的链」，App 会替你记着：连续天数、学习日历、掌握词汇和练习时长。每次学完看一眼——<b>看着它一天天长大，就是最好的动力</b>。</p>' +
                         '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 看看我的打卡</button>' +
                     '</div>'
@@ -407,6 +468,8 @@
         // widgets
         if ($('ob-quiz')) renderQuiz();
         if ($('ob-boxes')) renderBoxes();
+        if ($('ob-srs-btn')) bindSrs();              // v9.25: paso "tu día" → repaso SRS real
+        if ($('ob-streak-title')) renderStreakLive(); // v9.25: callout con racha en vivo
         if ($('ob-streak-btn')) bindStreak();   // v9.24: paso motivación → racha
         // nav
         var nav = document.createElement('div');
@@ -524,6 +587,66 @@
         if (b) b.addEventListener('click', streakGo);
     }
 
+    // ---------------- enlace con el repaso inteligente (v9.25) ----------------
+    // El paso «Tu día» muestra el botón "Ver cómo funciona": cierra la
+    // guía SIN marcarla como vista (paso intermedio — el tour sigue
+    // pendiente y volverá a auto-mostrarse hasta completarse) y abre el
+    // popup REAL del SRS haciendo click en #btn-srs, el mismo botón de la
+    // barra (patrón openBackup() de stats.js con #btn-backup). Cero
+    // conocimiento del DOM interno del SRS: solo su botón público.
+    // Defensivo: sin el botón NO pasa nada y la guía queda abierta.
+    function srsGo() {
+        try {
+            var b = $('btn-srs');
+            if (b) { close(false); b.click(); return true; }
+        } catch (e) { console.warn('[guía] no se pudo abrir el repaso:', e); }
+        return false;
+    }
+    function bindSrs() {
+        var b = $('ob-srs-btn');
+        if (b) b.addEventListener('click', function (ev) {
+            // El click ORIGINAL sobre ob-srs-btn burbujea a document y el
+            // handler "clic fuera cierra" de app.js (v7.20) vería el popup
+            // ya abierto con un target fuera de #srs-pop → lo cerraría al
+            // instante. Cortamos la burbuja acá: el click SINTÉTICO en
+            // #btn-srs (mismo tick) ya está exento por su propio guard
+            // (e.target.closest('#btn-srs') → return).
+            if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
+            srsGo();
+        });
+    }
+
+    // ---------------- racha en vivo en el callout (v9.25) ----------------
+    // El callout del último paso muestra la racha REAL al momento de
+    // renderizar el paso, vía HuayuStats.getSummary() (solo lectura).
+    // Sin stats.js, con racha 0 o con cualquier error → queda el texto
+    // por defecto del pack (degradación grácil, filosofía del módulo).
+    function renderStreakLive() {
+        var t = $('ob-streak-title');
+        if (!t) return;
+        var S = null;
+        try {
+            if (window.HuayuStats && typeof window.HuayuStats.getSummary === 'function') {
+                S = window.HuayuStats.getSummary();
+            }
+        } catch (e) { S = null; }
+        var live = obStreakLive(S, lang === 'cn-es');
+        if (!live) return;
+        t.textContent = live.title;
+        var old = $('ob-streak-status');
+        if (live.status) {
+            if (!old) {
+                old = document.createElement('p');
+                old.id = 'ob-streak-status';
+                t.insertAdjacentElement('afterend', old);
+            }
+            old.className = 'ob-streak-status';
+            old.textContent = live.status;
+        } else if (old) {
+            old.parentNode.removeChild(old);
+        }
+    }
+
     // ---------------- open / close ----------------
     function open() {
         try {
@@ -572,13 +695,15 @@
         open: open,
         close: close,
         _streakGo: streakGo,   // v9.24: enlace guía → popup de racha (QA/tests)
+        _srsGo: srsGo,         // v9.25: enlace guía → repaso SRS real (QA/tests)
         _pure: {
             probeMode: obProbeMode,
             storedMode: obStoredMode,
             langFor: obLangFor,
             boxes: OB_BOXES,
             quiz: OB_QUIZ,
-            packs: PACKS
+            packs: PACKS,
+            streakLive: obStreakLive   // v9.25: racha en vivo (pura)
         }
     };
 })();

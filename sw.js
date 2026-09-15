@@ -93,7 +93,14 @@
 //       de racha — callout 🔥 "Tu racha empieza hoy" + botón "Ver mi racha"
 //       (看看我的打卡 en cn-es) que cierra la guía marcándola vista y abre
 //       #stats-pop vía window.HuayuStats.open(). Solo toca onboarding.js.
-const VERSION = 'v71'; // — invalida shell (v9.24: guía → racha)
+// v9.25: guía completa — (1) paso nuevo «El mapa completo» (pantallazo de
+//       toda la app: 🗣️ lector de texto, ✍️ planillas de escritura 写字 A4
+//       con trazos, 📖 lecciones/clásicos, 🎤 voz, 🎧 oído, 📊 progreso);
+//       (2) el paso «Tu día» abre el repaso SRS REAL (click en #btn-srs,
+//       cierra la guía SIN marcarla vista); (3) el callout 🔥 muestra la
+//       racha EN VIVO (stats.js expone HuayuStats.getSummary(), solo
+//       lectura). Toca onboarding.js + stats.js; app.js/style.css intactos.
+const VERSION = 'v72'; // — invalida shell (v9.25: guía completa + racha en vivo)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

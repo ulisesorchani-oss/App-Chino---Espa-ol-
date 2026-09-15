@@ -1,5 +1,5 @@
 /* =====================================================================
-   v9.23 · RACHAS Y ESTADÍSTICAS — Huayu Diario
+   v9.23 · RACHAS Y ESTADÍSTICAS — Huayu Diario  (v9.25: + getSummary())
    =====================================================================
    QUÉ ES
    · Popup #stats-pop (piel .vocab-pop, mismo estilo que SRS / colocación
@@ -31,6 +31,13 @@
    · Día activo = ≥1 acierto, ≥1 repaso SRS o ≥1 minuto activo.
    · RACHA: días activos consecutivos hasta hoy (o hasta ayer si hoy
      todavía no practicaste → queda "en riesgo", nunca se rompe sola).
+
+   v9.25 · LECTURA PARA OTROS MÓDULOS: HuayuStats.getSummary() devuelve
+     un resumen de solo lectura {streak, streakRisk, todayPracticed,
+     best, todayA, todayR, minutesToday, minutesTotal} — lo usa la guía
+     (onboarding.js) para mostrar la racha EN VIVO en su callout 🔥.
+     NUNCA escribe: si algo falla devuelve null y el que llama degrada
+     con gracia (la guía queda con su texto por defecto).
 
    NO toca: Leitner/doGrade, cloze, solo oído, pares mínimos, lecciones,
    clásicos, evaluador de voz, pinyin-pro, guía. Sin dependencias. Si
@@ -662,6 +669,29 @@
         } catch (e) { /* cae al aviso */ }
     }
 
+    // ---------------- lectura pública (v9.25: racha en vivo de la guía) ----------------
+    // Resumen de SOLO LECTURA de lo ya calculado para el popup. Sin DOM,
+    // sin escrituras: los mismos datos del hero, en forma de objeto.
+    // El que llama debe tratar null como "sin datos" (degradar con gracia).
+    function getSummary() {
+        try {
+            var days = readDays();
+            var todayKey = hsDayKey();
+            var streak = hsStreak(days, todayKey);
+            var today = days[todayKey] || { a: 0, r: 0, s: 0 };
+            return {
+                streak: streak.n,                     // días seguidos (0 = todavía nada)
+                streakRisk: !!streak.risk,            // viva pero hoy no practicó
+                todayPracticed: hsIsActive(today),    // ¿ya hubo actividad hoy?
+                best: Math.max(hsBest(days), streak.n),
+                todayA: today.a || 0,                 // aciertos hoy
+                todayR: today.r || 0,                 // repasos SRS hoy
+                minutesToday: Math.round((today.s || 0) / 60),
+                minutesTotal: Math.round(hsTotals(days).s / 60)
+            };
+        } catch (e) { return null; }
+    }
+
     // ---------------- open / close ----------------
     function open() {
         try {
@@ -694,10 +724,11 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
-    // API pública mínima (QA y tests)
+    // API pública mínima (QA, tests y otros módulos)
     window.HuayuStats = {
         open: open,
         close: close,
+        getSummary: getSummary,   // v9.25: resumen de solo lectura (racha en vivo de la guía)
         _pure: {
             dayKey: hsDayKey,
             shiftKey: hsShiftKey,
