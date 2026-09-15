@@ -653,7 +653,15 @@
          vista); style.css suma el estilo .listen-mode pendiente desde
          v9.19; app.js (pares mínimos: contenedor .mp-opts, botón oculto
          en cn-es, Escape/clic afuera de #mp-pop; doBackupImport marca
-         la importación para stats.js). -->
+         la importación para stats.js).
+         v9.29: fix de regresión v9.28 — responder pares mínimos o navegar
+         la guía re-renderiza el cuerpo y el botón clicado queda
+         descolgado del DOM al burbujear → contains() daba falso
+         negativo y el overlay se cerraba justo después del clic
+         (pares mínimos: al acertar te sacaba de la práctica; guía: se
+         cerraba y se marcaba vista al pasar de paso). Mismo fix v7.20
+         de placement/SRS: e.composedPath() en los 3 overlays nuevos
+         (app.js, onboarding.js, stats.js). -->
     <!-- v9.23: rachas y estadísticas (stats.js se auto-inyecta: botón 📊 +
          overlay #stats-pop con piel vocab-pop). Envuelve localStorage.setItem
          para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura).
@@ -663,10 +671,12 @@
          deltas como aciertos de hoy (flush con _origSet, capture respeta
          escrituras externas a su clave, flag __hsImporting de app.js); minutos
          a disco cada ~60 s en vez de cada 15 s; #stats-pop cierra con Escape
-         y clic afuera. -->
-    <script src="onboarding.js?v=20260916a"></script>
-    <script src="stats.js?v=20260916a"></script>
-    <script src="app.js?v=20260916b"></script>
+         y clic afuera. v9.29: el handler de clic afuera usa
+         e.composedPath() (los clics internos re-renderizan y contains()
+         daba falso negativo). -->
+    <script src="onboarding.js?v=20260916b"></script>
+    <script src="stats.js?v=20260916b"></script>
+    <script src="app.js?v=20260916c"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

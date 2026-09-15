@@ -850,7 +850,13 @@
     document.addEventListener('click', function (e) {
         var pop = $('guide-pop');
         if (!pop || pop.classList.contains('hidden')) return;
-        if (pop.contains(e.target)) return;
+        // v9.29: composedPath y NO contains() (mismo fix v7.20 de placement/
+        // SRS): atrás/siguiente re-renderizan el paso y el botón queda
+        // descolgado del DOM al burbujear; contains() daría falso negativo y
+        // la guía se cerraba (¡marcándose como vista!) justo después de
+        // navegar.
+        var path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+        if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
         if (e.target.closest && e.target.closest('#btn-guide')) return;
         close(true);
     });

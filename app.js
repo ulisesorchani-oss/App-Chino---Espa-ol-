@@ -8240,7 +8240,15 @@ const KARA = (function () {
     });
     document.addEventListener('click', function (e) {
         if (pop.classList.contains('hidden')) return;
-        if (pop.contains(e.target)) return;
+        // v9.29: composedPath y NO pop.contains(e.target) — regreso de v9.28.
+        // Responder (mpAnswer) o avanzar (mpNext) re-renderizan #mp-body y la
+        // tarjeta clicada queda descolgada del DOM antes de que el evento
+        // llegue a document → contains() daba falso negativo y el popup se
+        // cerraba justo después de responder. Mismo fix v7.20 de placement/
+        // SRS: composedPath es el camino congelado al iniciar el despacho,
+        // inmune a mutaciones posteriores del DOM.
+        const path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+        if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
         if (e.target.closest && e.target.closest('#btn-mp-pairs')) return;
         mpClose();
     });

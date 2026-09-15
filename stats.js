@@ -799,7 +799,12 @@
     document.addEventListener('click', function (e) {
         var pop = $('stats-pop');
         if (!pop || pop.classList.contains('hidden')) return;
-        if (pop.contains(e.target)) return;
+        // v9.29: composedPath y NO contains() (mismo fix v7.20 de placement/
+        // SRS): si un clic interno re-renderiza el cuerpo, el botón queda
+        // descolgado del DOM al burbujear y contains() daría falso negativo
+        // (cerraría el popup justo después del clic).
+        var path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+        if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
         if (e.target.closest && e.target.closest('#btn-stats')) return;
         close();
     });

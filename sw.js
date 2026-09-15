@@ -141,7 +141,19 @@
 //       vez de cada 15 s; (6) style.css: la tarjeta en modo "solo oído"
 //       por fin destaca (regla .listen-mode pendiente desde v9.19).
 //       Toca app.js, stats.js, onboarding.js, style.css, index.html.
-const VERSION = 'v75'; // — invalida shell (v9.28: ronda QA 2 — pares mínimos, overlays, import de respaldo)
+// v9.29: fix de regresión v9.28 — el handler de "clic afuera" de los 3
+//       overlays nuevos usaba pop.contains(e.target), pero responder pares
+//       mínimos (mpAnswer), avanzar (mpNext) o navegar la guía
+//       re-renderizan el cuerpo del popup: el botón clicado queda
+//       descolgado del DOM antes de que el evento llegue a document →
+//       contains() daba falso negativo y el overlay se cerraba justo
+//       después del clic (síntoma: "al acertar me saca de la práctica";
+//       la guía además se marcaba como vista al pasar de paso). Fix:
+//       e.composedPath() como el v7.20 de placement/SRS (camino congelado
+//       al iniciar el despacho, inmune a mutaciones del DOM), con
+//       contains() como fallback. Toca app.js, onboarding.js, stats.js,
+//       index.html; style.css intacto.
+const VERSION = 'v76'; // — invalida shell (v9.29: composedPath en clic afuera de mp/guide/stats — regreso v9.28)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
