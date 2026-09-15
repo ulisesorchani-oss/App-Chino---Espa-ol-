@@ -110,7 +110,23 @@
 //       primer reload la actividad dejaba de contarse y la racha quedaba
 //       congelada; el guard ahora vive en window (por realm). Toca
 //       onboarding.js + stats.js; app.js/style.css intactos.
-const VERSION = 'v73'; // — invalida shell (v9.26: guía 繁體 + fix de racha)
+// v9.27: 5 fixes de calidad en app.js (secciones v9.15-v9.21): (1) Revelar
+//       en "solo oído" dejaba la tarjeta a medio restaurar (answer-input y
+//       btn-check seguían ocultos → camino muerto visual; ahora marca
+//       respondido y pasa a "Siguiente ▶" sin contar como acierto); (2) el
+//       cloze de producción filtraba la respuesta si la oración propia
+//       repetía la palabra (String.replace solo tocaba la 1.ª ocurrencia →
+//       split/join global); (3) el alta al repaso con el mazo lleno o clave
+//       inválida fallaba en silencio y PERDÍA la oración escrita (ahora el
+//       formulario queda abierto con aviso inline; 'dup' trata como éxito);
+//       (4) el gate de retrieval aceptaba cualquier token de la glosa ("algo"
+//       ⊂ "comprar algo", "en" ⊂ "tener en común") — ahora exige el NÚCLEO
+//       (1.er término no-stopword) vía srsRecallNeedTok + RECALL_STOP;
+//       (5) curación de pares mínimos: fuera los falsos mínimos 中国/水果,
+//       洗/西瓜, 衣服/椅子, 昨天/左边, 游泳/右边 (se distinguían sin
+//       escuchar el tono) → reemplazos de sílaba idéntica 洗/西, 衣/椅,
+//       左/坐, 有/又, 书/树. Toca SOLO app.js; onboarding/stats/style intactos.
+const VERSION = 'v74'; // — invalida shell (v9.27: 5 fixes de calidad en app.js)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

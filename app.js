@@ -3005,6 +3005,17 @@ function revealAnswer() {
             b.disabled = true;
             if (b.dataset.ok === '1') b.classList.add('listen-ok');
         });
+        // v9.27: restaurar la tarjeta COMPLETA (igual que listenPick). Antes
+        // answer-input y btn-check quedaban ocultos → camino muerto visual.
+        // Como la respuesta ya se vio, "Verificar" no tiene sentido: se marca
+        // respondido y el botón pasa a "Siguiente ▶" (checkAnswer →
+        // nextSentence) SIN contar como acierto — revelar no es practicar.
+        state.answered = true;
+        const chkl = document.getElementById('btn-check');
+        if (chkl) {
+            chkl.textContent = 'Siguiente ▶';
+            chkl.classList.remove('hidden');
+        }
     }
 
     if (wordKey) {
@@ -5798,7 +5809,11 @@ function pzCounterUpdate() {
         const sentRaw = String((trad ? (card.ctxZt || card.ctxZh) : card.ctxZh) || '');
         const blankWord = [wordSimp, wordTrad].find(w => w && sentRaw.indexOf(w) !== -1) || '';
         if (sentRaw && blankWord) {
-            return { mode: 'cloze', sent: sentRaw.replace(blankWord, '＿＿＿'), es: es, answer: blankWord };
+            // v9.27: split/join = reemplazo GLOBAL. String.replace solo tocaba
+            // la 1.ª ocurrencia → si la oración propia repite la palabra
+            // ("我喜欢学习，学习很有用") la respuesta quedaba a la vista junto
+            // al hueco. Ahora TODAS las ocurrencias se tapan.
+            return { mode: 'cloze', sent: sentRaw.split(blankWord).join('＿＿＿'), es: es, answer: blankWord };
         }
         if (es) return { mode: 'word', es: es };
         return null; // sin pista posible → tarjeta clásica
@@ -5868,10 +5883,25 @@ function pzCounterUpdate() {
         if (!tol || Math.abs(typed.length - cand.length) > tol) return false;
         return srsRecallLev(typed, cand) <= tol;
     }
+    // v9.27: NÚCLEO de una glosa normalizada — el 1.er token significativo,
+    // fuera stopwords de glosa (artículos/preposiciones/conectivos que el
+    // subset dejaba pasar: "el" ⊂ "el libro", "en" ⊂ "tener en común").
+    // Si TODO es stopword/tiny → fallback al 1.er token crudo (que exista).
+    const RECALL_STOP = ['el', 'la', 'los', 'las', 'un', 'una', 'de', 'del', 'al', 'a',
+        'en', 'con', 'por', 'para', 'que', 'y', 'o', 'u', 'se', 'su', 'sus', 'es', 'son'];
+    function srsRecallNeedTok(cc) {
+        const toks = String(cc || '').split(' ').filter(Boolean);
+        const core = toks.filter((t) => t.length > 1 && RECALL_STOP.indexOf(t) === -1);
+        return core.length ? core[0] : (toks.length ? toks[0] : '');
+    }
     // → 'py' | 'es' | '' — el orden importa: pinyin primero (es lo natural
-    // delante de hanzi), español después con subset de tokens ("comprar"
-    // cuenta frente a glosa "comprar algo"). Defensivo: acepta candidatos
-    // crudos (mǎi / Comprar algo) o ya procesados (mai / comprar algo).
+    // delante de hanzi), español después. v9.27: el subset de tokens ya no
+    // basta — el intento tiene que contener el NÚCLEO de la glosa (ver
+    // srsRecallNeedTok): "comprar" cuenta frente a "comprar algo", pero
+    // tipear solo "algo" o "en" ya NO. Defensivo: cada candidato se
+    // SEGMENTA (un crudo "comprar; vender" aporta sus tramos igual que una
+    // lista ya procesada por srsRecallEsList) y acepta crudos (mǎi) o
+    // procesados (mai).
     function srsRecallHit(typedRaw, pyList, esList) {
         const norm = srsRecallNorm(typedRaw);
         if (!norm) return '';
@@ -5880,12 +5910,17 @@ function pzCounterUpdate() {
             const kk = srsRecallPyKey(k);
             if (kk && (pyTyped === kk || srsRecallFuzzy(pyTyped, kk))) return 'py';
         }
-        for (const c of (esList || [])) {
-            const cc = srsRecallNorm(c);
-            if (!cc) continue;
+        const segs = [];
+        (esList || []).forEach((c) => srsRecallEsList(c).forEach((s) => {
+            if (s && segs.indexOf(s) === -1) segs.push(s);
+        }));
+        for (const cc of segs) {
             if (cc === norm || srsRecallFuzzy(norm, cc)) return 'es';
             const toks = norm.split(' ').filter((t) => t.length > 1);
             const gtoks = cc.split(' ');
+            // v9.27: sin el núcleo de la glosa no hay acierto informativo
+            const need = srsRecallNeedTok(cc);
+            if (need && toks.indexOf(need) === -1) continue;
             if (toks.length && gtoks.length >= toks.length &&
                 toks.every((t) => gtoks.indexOf(t) !== -1)) return 'es';
         }
@@ -6330,13 +6365,31 @@ function pzCounterUpdate() {
                 });
             };
             const finish = (added) => {
-                form.remove();
-                btnEl.style.display = '';
-                if (added === true) {
+                if (added === true || added === 'dup') {
+                    // dup: ya estaba en el mazo → mismo resultado que el alta
+                    // (v9.27: antes 'dup' también moría en silencio)
+                    form.remove();
+                    btnEl.style.display = '';
                     // Actualización IN SITU (sin re-render): ver nota v7.20 arriba
                     btnEl.classList.add('is-in');
                     btnEl.textContent = '✓ Ya está en tu repaso';
+                    return;
                 }
+                // v9.27: false (mazo lleno o clave inválida) ya NO es silencioso.
+                // El formulario QUEDA abierto con la oración del alumno intacta
+                // (puede reintentar o copiarla) y un aviso inline reutiliza
+                // .vp-own-hint (los 3 temas gratis, cero cambios de CSS).
+                const msg = (totalCount() >= MAX_CARDS)
+                    ? '⚠ Tu mazo está lleno (' + MAX_CARDS + ' tarjetas). Repasá y limpiá las que ya domines.'
+                    : '⚠ No se pudo guardar esta palabra. Revisá el texto e intentá de nuevo.';
+                let fb = form.querySelector('.vp-own-fb');
+                if (!fb) {
+                    fb = document.createElement('div');
+                    fb.className = 'vp-own-hint vp-own-fb';
+                    const acts = form.querySelector('.vp-own-actions');
+                    if (acts) acts.before(fb); else form.appendChild(fb);
+                }
+                fb.textContent = msg;
             };
             form.querySelector('.vp-own-save').addEventListener('click', () => {
                 finish(doAdd(String(inp.value || '').trim()));
@@ -7875,6 +7928,12 @@ const KARA = (function () {
 
     /* v9.20-PURE-BEGIN (datos + funciones puras: extraíbles para tests) */
     // ── datos curados HSK 1-2: {zh, py (con marcas de tono), es (glosa corta)} ──
+    // v9.27: curación de rigurosidad — TODOS los grupos comparten la MISMA
+    // sílaba (solo cambia el tono). Fuera los "falsos mínimos" que se
+    // distinguían sin escuchar el tono: 中国/水果 (zhōng vs shuǐ), 洗/西瓜
+    // (1 sílaba vs 2), 衣服/椅子 y 昨天/左边 y 游泳/右边 (la 2.ª sílaba
+    // delataba cuál era). Reemplazos de sílaba idéntica: 洗/西, 衣/椅,
+    // 左/坐, 有/又, 书/树.
     const MP_DATA = [
         { id: 'mai',    words: [{ zh: '买', py: 'mǎi', es: 'comprar' }, { zh: '卖', py: 'mài', es: 'vender' }] },
         { id: 'shi-shi', words: [{ zh: '十', py: 'shí', es: 'diez' }, { zh: '是', py: 'shì', es: 'ser; es' }] },
@@ -7888,13 +7947,13 @@ const KARA = (function () {
         { id: 'xie',    words: [{ zh: '写', py: 'xiě', es: 'escribir' }, { zh: '谢', py: 'xiè', es: 'gracias' }] },
         { id: 'xiao',   words: [{ zh: '小', py: 'xiǎo', es: 'pequeño' }, { zh: '笑', py: 'xiào', es: 'reír' }] },
         { id: 'xue',    words: [{ zh: '雪', py: 'xuě', es: 'nieve' }, { zh: '学', py: 'xué', es: 'estudiar' }] },
-        { id: 'zuo',    words: [{ zh: '昨天', py: 'zuó tiān', es: 'ayer' }, { zh: '左边', py: 'zuǒ bian', es: 'izquierda' }] },
+        { id: 'zuo',    words: [{ zh: '左', py: 'zuǒ', es: 'izquierda' }, { zh: '坐', py: 'zuò', es: 'sentarse' }] },
         { id: 'na',     words: [{ zh: '哪', py: 'nǎ', es: '¿dónde? ¿cuál?' }, { zh: '那', py: 'nà', es: 'eso; allí' }] },
         { id: 'tang',   words: [{ zh: '汤', py: 'tāng', es: 'sopa' }, { zh: '糖', py: 'táng', es: 'azúcar' }] },
         { id: 'tian',   words: [{ zh: '天', py: 'tiān', es: 'día; cielo' }, { zh: '甜', py: 'tián', es: 'dulce' }] },
         { id: 'shou',   words: [{ zh: '手', py: 'shǒu', es: 'mano' }, { zh: '瘦', py: 'shòu', es: 'flaco' }] },
         { id: 'ke',     words: [{ zh: '渴', py: 'kě', es: 'tener sed' }, { zh: '课', py: 'kè', es: 'clase' }] },
-        { id: 'xi',     words: [{ zh: '洗', py: 'xǐ', es: 'lavar' }, { zh: '西瓜', py: 'xī guā', es: 'sandía' }] },
+        { id: 'xi',     words: [{ zh: '洗', py: 'xǐ', es: 'lavar' }, { zh: '西', py: 'xī', es: 'oeste' }] },
         { id: 'san',    words: [{ zh: '三', py: 'sān', es: 'tres' }, { zh: '伞', py: 'sǎn', es: 'paraguas' }] },
         { id: 'li',     words: [{ zh: '里', py: 'lǐ', es: 'dentro' }, { zh: '离', py: 'lí', es: 'lejos de' }] },
         { id: 'dian',   words: [{ zh: '点', py: 'diǎn', es: 'hora; punto' }, { zh: '店', py: 'diàn', es: 'tienda' }] },
@@ -7902,19 +7961,19 @@ const KARA = (function () {
         { id: 'jiao',   words: [{ zh: '教', py: 'jiāo', es: 'enseñar' }, { zh: '叫', py: 'jiào', es: 'llamarse' }] },
         { id: 'jie',    words: [{ zh: '姐', py: 'jiě', es: 'hermana mayor' }, { zh: '借', py: 'jiè', es: 'prestar' }] },
         { id: 'xin',    words: [{ zh: '新', py: 'xīn', es: 'nuevo' }, { zh: '信', py: 'xìn', es: 'carta' }] },
-        { id: 'yi-yi',  words: [{ zh: '衣服', py: 'yī fu', es: 'ropa' }, { zh: '椅子', py: 'yǐ zi', es: 'silla' }] },
-        { id: 'you',    words: [{ zh: '游泳', py: 'yóu yǒng', es: 'nadar' }, { zh: '右边', py: 'yòu bian', es: 'derecha' }] },
+        { id: 'yi-yi',  words: [{ zh: '衣', py: 'yī', es: 'ropa' }, { zh: '椅', py: 'yǐ', es: 'silla' }] },
+        { id: 'you',    words: [{ zh: '有', py: 'yǒu', es: 'tener' }, { zh: '又', py: 'yòu', es: 'otra vez' }] },
         { id: 'yuan',   words: [{ zh: '元', py: 'yuán', es: 'yuan (moneda)' }, { zh: '远', py: 'yuǎn', es: 'lejos' }] },
         { id: 'xing',   words: [{ zh: '星', py: 'xīng', es: 'estrella' }, { zh: '姓', py: 'xìng', es: 'apellido' }] },
         { id: 'ting',   words: [{ zh: '听', py: 'tīng', es: 'escuchar' }, { zh: '停', py: 'tíng', es: 'parar' }] },
-        { id: 'guo',    words: [{ zh: '中国', py: 'Zhōngguó', es: 'China' }, { zh: '水果', py: 'shuǐ guǒ', es: 'fruta' }] },
+        { id: 'shu-shu', words: [{ zh: '书', py: 'shū', es: 'libro' }, { zh: '树', py: 'shù', es: 'árbol' }] },
         { id: 'ma-triada', words: [{ zh: '妈', py: 'mā', es: 'mamá' }, { zh: '马', py: 'mǎ', es: 'caballo' }, { zh: '骂', py: 'mà', es: 'regañar' }] }
     ];
     /* v9.20-PURE-DATA-END */
 
-    // ── puro: secuencia de tonos desde pinyin con marcas ('mǎi'→[3], 'Zhōngguó'→[1,2];
-    //    cada vocal marcada suma un tono (así Zhōngguó sin espacio = 1-2);
-    //    sílabas sin marca (fu/zi/bian) = tono neutro 0 y no se anuncian) ──
+    // ── puro: secuencia de tonos desde pinyin con marcas ('mǎi'→[3]);
+    //    cada vocal marcada suma un tono (así "xiāng" = 1 y "nǐhǎo" sin
+    //    espacio = 3-3); sílabas sin marca = tono neutro 0 y no se anuncian ──
     const MP_TONE_MAP = { 'ā': 1, 'á': 2, 'ǎ': 3, 'à': 4, 'ē': 1, 'é': 2, 'ě': 3, 'è': 4, 'ī': 1, 'í': 2, 'ǐ': 3, 'ì': 4, 'ō': 1, 'ó': 2, 'ǒ': 3, 'ò': 4, 'ū': 1, 'ú': 2, 'ǔ': 3, 'ù': 4, 'ǖ': 1, 'ǘ': 2, 'ǚ': 3, 'ǜ': 4 };
     function mpToneSeq(py) {
         const out = [];

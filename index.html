@@ -645,7 +645,10 @@
          «tu día» abre el repaso SRS real (#btn-srs) y el callout 🔥 muestra la
          racha EN VIVO vía HuayuStats.getSummary().
          v9.26: el pack chino de la guía tiene variante 繁體 (toggle 简/繁 con
-         preferencia en ac_guide_script_v1); + fix de captura en stats.js. -->
+         preferencia en ac_guide_script_v1); + fix de captura en stats.js.
+         v9.27: 5 fixes de calidad en app.js (revelar en solo oído, cloze
+         global, aviso si falla el alta al repaso, gate de retrieval con
+         núcleo de glosa, pares mínimos curados). -->
     <!-- v9.23: rachas y estadísticas (stats.js se auto-inyecta: botón 📊 +
          overlay #stats-pop con piel vocab-pop). Envuelve localStorage.setItem
          para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura).
@@ -653,7 +656,7 @@
          persistente) y tras el 1.er reload la captura moría; ahora en window. -->
     <script src="onboarding.js?v=20260915d"></script>
     <script src="stats.js?v=20260915d"></script>
-    <script src="app.js?v=20260914b"></script>
+    <script src="app.js?v=20260916a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
