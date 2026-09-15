@@ -30,6 +30,12 @@
    · 1.ª VISITA: si localStorage 'ac_onboarding_done_v1' != '1', la guía
      se abre sola a los ~1.4 s (si no hay otro popup abierto y la pestaña
      está visible). Cualquier cierre (✕ o final) marca "vista".
+   · v9.24 · ENLACE CON LA RACHA: el paso de motivación cierra el círculo
+     ("no romper la cadena" → la app la mide por vos) con un callout 🔥 y
+     el botón "Ver mi racha" que cierra la guía (último paso → marca
+     vista, patrón openBackup de stats.js) y abre el popup #stats-pop vía
+     window.HuayuStats.open(). Defensivo: si stats.js no cargó, no pasa
+     nada (filosofía del módulo: si algo falla, la app sigue igual).
    · NO toca: Leitner/doGrade, cloze, SRS, lecciones, clásicos, evaluador
      de voz, pinyin-pro. Sin dependencias. Si algo falla, la app sigue
      funcionando igual (todo el init con try/catch).
@@ -117,6 +123,10 @@
         '.ob-quote{margin:12px 0;padding:14px 10px;border-radius:12px;background:var(--bg-light);border:1px dashed var(--border);text-align:center;}',
         '.ob-quote-zh{font-size:1.45rem;font-weight:800;color:var(--primary);letter-spacing:2px;}',
         '.ob-quote-src{color:var(--text-secondary);font-size:.84rem;margin-top:6px;font-style:italic;}',
+        '.ob-streak{margin-top:12px;padding:13px 12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg-light);text-align:center;}',
+        '.ob-streak-title{font-weight:800;color:var(--text-primary);font-size:1rem;margin-bottom:5px;}',
+        '.ob-streak .ob-text{margin-bottom:0;}',
+        '.ob-streak-btn{min-width:186px;margin-top:11px;}',
         '.ob-tip{font-size:.84rem;color:var(--text-secondary);background:var(--bg-light);border-radius:10px;padding:9px 11px;line-height:1.5;margin-top:10px;}',
         '.ob-quiz-q{font-weight:700;color:var(--text-primary);margin:12px 0 8px;font-size:.95rem;}',
         '.ob-opt{display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:8px;border-radius:11px;border:2px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:.92rem;line-height:1.4;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;}',
@@ -199,7 +209,12 @@
                 html:
                     '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始于足下</div><div class="ob-quote-src">«Un camino de mil kilómetros empieza con un primer paso» · Lao zi, 道德经</div></div>' +
                     '<p class="ob-text">Vas a equivocarte <b>muchísimo</b>. Está diseñado así: cada error le enseña al sistema qué repasarte. Las tarjetas que vuelven a la caja 1 no son fracasos — <b>son tu plan de estudio de mañana</b>. 📅</p>' +
-                    '<p class="ob-text">No compares tu día 1 con el día 100 de nadie. Con 10 minutos diarios, en 3 meses vas a releer tus primeras lecciones… <b>y las vas a entender</b>. El objetivo no es saberlo todo: es <b>no romper la cadena</b>.</p>'
+                    '<p class="ob-text">No compares tu día 1 con el día 100 de nadie. Con 10 minutos diarios, en 3 meses vas a releer tus primeras lecciones… <b>y las vas a entender</b>. El objetivo no es saberlo todo: es <b>no romper la cadena</b>.</p>' +
+                    '<div class="ob-streak">' +
+                        '<div class="ob-streak-title">🔥 Tu racha empieza hoy</div>' +
+                        '<p class="ob-text">Esa «cadena» que no hay que romper, la app la mide por vos: días seguidos, calendario de constancia, palabras dominadas y minutos practicados. Mirala al terminar cada sesión — <b>verla crecer es el mejor combustible</b>.</p>' +
+                        '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 Ver mi racha</button>' +
+                    '</div>'
             }
         ]
     };
@@ -263,7 +278,12 @@
                 html:
                     '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始于足下</div><div class="ob-quote-src">——老子《道德经》· 第一步，就是今天</div></div>' +
                     '<p class="ob-text">你一定会大量出错。这正是设计的一部分：每一次错误都在告诉系统该复习什么。回到盒 1 的卡片不是失败——<b>那就是你明天的学习计划</b>。📅</p>' +
-                    '<p class="ob-text">别拿自己的第 1 天去比别人的第 100 天。每天 10 分钟，3 个月后你会重读最初的课文……<b>并且看得懂</b>。目标不是学会一切，而是<b>不断链</b>。</p>'
+                    '<p class="ob-text">别拿自己的第 1 天去比别人的第 100 天。每天 10 分钟，3 个月后你会重读最初的课文……<b>并且看得懂</b>。目标不是学会一切，而是<b>不断链</b>。</p>' +
+                    '<div class="ob-streak">' +
+                        '<div class="ob-streak-title">🔥 你的打卡，今天开始</div>' +
+                        '<p class="ob-text">那条「不能断的链」，App 会替你记着：连续天数、学习日历、掌握词汇和练习时长。每次学完看一眼——<b>看着它一天天长大，就是最好的动力</b>。</p>' +
+                        '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 看看我的打卡</button>' +
+                    '</div>'
             }
         ]
     };
@@ -387,6 +407,7 @@
         // widgets
         if ($('ob-quiz')) renderQuiz();
         if ($('ob-boxes')) renderBoxes();
+        if ($('ob-streak-btn')) bindStreak();   // v9.24: paso motivación → racha
         // nav
         var nav = document.createElement('div');
         nav.className = 'ob-nav';
@@ -481,6 +502,28 @@
         if (d && bx) d.innerHTML = (lang === 'cn-es' ? bx.zhD : bx.esD);
     }
 
+    // ---------------- enlace con el popup de racha (v9.24) ----------------
+    // El paso de motivación cierra el círculo: "no romper la cadena" → la
+    // app la mide por vos. Un solo lugar para la acción (patrón openBackup
+    // de stats.js): cierra la guía marcándola como vista (es el último
+    // paso; reabrible con 📖) y abre el popup #stats-pop de stats.js.
+    // Defensivo: sin stats.js (no cargó / bloqueado) NO hace nada y la
+    // guía queda abierta — la app sigue igual, filosofía del módulo.
+    function streakGo() {
+        try {
+            if (window.HuayuStats && typeof window.HuayuStats.open === 'function') {
+                close(true);
+                window.HuayuStats.open();
+                return true;
+            }
+        } catch (e) { console.warn('[guía] no se pudo abrir la racha:', e); }
+        return false;
+    }
+    function bindStreak() {
+        var b = $('ob-streak-btn');
+        if (b) b.addEventListener('click', streakGo);
+    }
+
     // ---------------- open / close ----------------
     function open() {
         try {
@@ -528,6 +571,7 @@
     window.HuayuGuide = {
         open: open,
         close: close,
+        _streakGo: streakGo,   // v9.24: enlace guía → popup de racha (QA/tests)
         _pure: {
             probeMode: obProbeMode,
             storedMode: obStoredMode,

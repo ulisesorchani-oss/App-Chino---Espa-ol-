@@ -89,7 +89,11 @@
 //       Auto-contenido: envuelve localStorage.setItem ANTES de app.js para
 //       capturar actividad (score/ac_srs); persiste en ac_stats_v1 (viaja
 //       con el respaldo). No toca app.js/style.css.
-const VERSION = 'v70'; // — invalida shell (v9.23: rachas y estadísticas)
+// v9.24: la guía (onboarding.js) enlaza su paso de motivación con el popup
+//       de racha — callout 🔥 "Tu racha empieza hoy" + botón "Ver mi racha"
+//       (看看我的打卡 en cn-es) que cierra la guía marcándola vista y abre
+//       #stats-pop vía window.HuayuStats.open(). Solo toca onboarding.js.
+const VERSION = 'v71'; // — invalida shell (v9.24: guía → racha)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
