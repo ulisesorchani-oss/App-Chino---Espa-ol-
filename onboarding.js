@@ -831,6 +831,30 @@
         if (markDone) lsSet(LS_DONE, '1');
     }
 
+    // v9.28: Escape y clic afuera cierran la guía — convención del resto de
+    // los overlays (vocab-pop, placement, SRS, quiz, clásicos, stats).
+    // Ambos gestos equivalen al ✕ → close(true): salir a medias TAMBIÉN
+    // marca la guía como vista, igual que hoy lo hace el botón ✕ (si no,
+    // el auto-open del primer visitaría la re-abriría en cada recarga y
+    // sería pesado). #btn-guide es el launcher: el MISMO clic que abre
+    // burbujea hasta document y no debe re-cerrarla. Los enlaces internos
+    // (_srsGo → #btn-srs, _streakGo → stats) ya cierran con close(false)
+    // ANTES de disparar su click sintético: cuando ese click llegue a
+    // document, el pop ya está hidden → este handler no toca nada.
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var pop = $('guide-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        close(true);
+    });
+    document.addEventListener('click', function (e) {
+        var pop = $('guide-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('#btn-guide')) return;
+        close(true);
+    });
+
     // ---------------- toggle 简/繁 del pack chino (v9.26) ----------------
     // Alterna entre PACK_ZH (简体) y PACK_ZH_HANT (繁體) conservando el paso
     // actual, guarda la preferencia y re-etiqueta el botón 📖 del header.

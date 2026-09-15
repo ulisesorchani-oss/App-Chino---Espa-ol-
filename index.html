@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260914b">
+    <link rel="stylesheet" href="style.css?v=20260916a">
 </head>
 <body>
     <div class="container">
@@ -648,15 +648,25 @@
          preferencia en ac_guide_script_v1); + fix de captura en stats.js.
          v9.27: 5 fixes de calidad en app.js (revelar en solo oído, cloze
          global, aviso si falla el alta al repaso, gate de retrieval con
-         núcleo de glosa, pares mínimos curados). -->
+         núcleo de glosa, pares mínimos curados).
+         v9.28: la guía cierra con Escape y clic afuera (≈ el ✕: marca
+         vista); style.css suma el estilo .listen-mode pendiente desde
+         v9.19; app.js (pares mínimos: contenedor .mp-opts, botón oculto
+         en cn-es, Escape/clic afuera de #mp-pop; doBackupImport marca
+         la importación para stats.js). -->
     <!-- v9.23: rachas y estadísticas (stats.js se auto-inyecta: botón 📊 +
          overlay #stats-pop con piel vocab-pop). Envuelve localStorage.setItem
          para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura).
          v9.26: fix crítico — el guard del wrapper vivía en localStorage (item
-         persistente) y tras el 1.er reload la captura moría; ahora en window. -->
-    <script src="onboarding.js?v=20260915d"></script>
-    <script src="stats.js?v=20260915d"></script>
-    <script src="app.js?v=20260916a"></script>
+         persistente) y tras el 1.er reload la captura moría; ahora en window.
+         v9.28: el import de respaldo NO pisa el historial de rachas ni cuenta
+         deltas como aciertos de hoy (flush con _origSet, capture respeta
+         escrituras externas a su clave, flag __hsImporting de app.js); minutos
+         a disco cada ~60 s en vez de cada 15 s; #stats-pop cierra con Escape
+         y clic afuera. -->
+    <script src="onboarding.js?v=20260916a"></script>
+    <script src="stats.js?v=20260916a"></script>
+    <script src="app.js?v=20260916b"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

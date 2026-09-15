@@ -47,6 +47,24 @@
      guard vive en window (solo del realm) y se limpia el item legado.
      Detectado y verificado por el QA de v9.26 (reload + acierto).
 
+   v9.28 · 4 MEJORAS DE LA RONDA QA 2 (cruce app.js ↔ stats.js):
+     (1) flush() escribe con _origSet (el setItem SIN envolver): antes
+         reentraba por capture() y, durante una importación de respaldo,
+         podía pisar el LOG recién importado con el LOG en memoria
+         (el orden de las claves del respaldo no es determinista).
+     (2) capture() respeta escrituras EXTERNAS a la propia clave
+         (k === LS_KEY → LOG = hsParseLog(v)): importar un respaldo
+         actualiza el historial en memoria en vez de ser pisado.
+     (3) capture() honra window.__hsImporting (flag de doBackupImport en
+         app.js): una importación re-basa baselines y NO cuenta los
+         deltas como aciertos/repasos de hoy.
+     (4) el latido de minutos acumula en memoria y va a disco cada ~60 s
+         (4 ticks) en vez de un setItem sincrónico cada 15 s: mismo
+         corte de día activo (hsIsActive usa 60 s) con 4× menos
+         escrituras durante la práctica.
+     + #stats-pop ahora cierra con Escape y clic afuera (convención del
+     resto de los overlays).
+
    NO toca: Leitner/doGrade, cloze, solo oído, pares mínimos, lecciones,
    clásicos, evaluador de voz, pinyin-pro, guía. Sin dependencias. Si
    algo falla, la app sigue funcionando igual (todo con try/catch).
@@ -208,7 +226,7 @@
     function hsTotals(days) {
         var a = 0, r = 0, s = 0;
         for (var k in days) {
-            if (!hsIsActive(days[k]) && !days[k]) continue;
+            if (!days[k]) continue; // v9.28: basta con esto (hsIsActive no filtraba nada aquí y despistaba al leer)
             var d = days[k] || {};
             a += d.a || 0; r += d.r || 0; s += d.s || 0;
         }
@@ -263,7 +281,15 @@
     var _origSet = null;
 
     function flush() {
-        try { localStorage.setItem(LS_KEY, JSON.stringify(LOG)); } catch (e) { /* lleno/privado */ }
+        // v9.28: escribe con _origSet (el setItem SIN envolver). Antes pasaba
+        // por el wrapper → capture() reentraba por la propia clave; durante
+        // una importación de respaldo ese reingreso podía pisar el LOG
+        // recién importado con el LOG en memoria (orden de claves no
+        // determinista: a veces ganaba el import, a veces no).
+        try {
+            if (_origSet) _origSet(LS_KEY, JSON.stringify(LOG));
+            else localStorage.setItem(LS_KEY, JSON.stringify(LOG));
+        } catch (e) { /* lleno/privado */ }
     }
     // Acepta deltas chicos (respuesta a respuesta). Saltos grandes o
     // negativos = importación de respaldo / reset → re-base sin contar.
@@ -274,6 +300,30 @@
         } catch (e) { /* nunca romper la app */ }
     }
     function capture(k, v) {
+        // v9.28: escritura EXTERNA a la propia clave (import de respaldo,
+        // restauración, otra versión) → se RESPETA: el LOG en memoria se
+        // recarga del valor recién escrito. flush() ya no pasa por acá
+        // (usa _origSet), así que toda escritura de LS_KEY que llega es
+        // genuinamente externa.
+        if (k === LS_KEY) {
+            try { LOG = hsParseLog(v); } catch (e) { /* valor raro → LOG intacto */ }
+            return;
+        }
+        // v9.28: importación de respaldo en curso (flag de doBackupImport,
+        // app.js) → re-base de baselines SIN contar nada: el log importado
+        // ya trae su propia historia y esos deltas no son práctica de hoy.
+        var importing = false;
+        try { importing = !!window.__hsImporting; } catch (e) { /* sin flag */ }
+        if (importing) {
+            if (k === MODE_KEY) {
+                var scI = hsReadScore(v);
+                if (scI !== null) _lastScore = scI;
+            } else if (k === SRS_KEY) {
+                var smI = hsReadSrsSum(v);
+                if (smI !== null) _lastSrs = smI.sum;
+            }
+            return;
+        }
         if (k === MODE_KEY) {
             var sc = hsReadScore(v);
             if (sc === null) return;
@@ -333,9 +383,19 @@
                 else poke();
             });
             window.addEventListener('pagehide', flush);
+            // v9.28: los segundos se acumulan EN MEMORIA y van a disco cada
+            // ~60 s (4 latidos) en vez de un setItem sincrónico cada 15 s
+            // durante toda la práctica. Mismo corte de "día activo":
+            // hsIsActive ya usa granularidad de 60 s. visibilitychange y
+            // pagehide siguen vaciando lo pendiente al ocultar/salir.
+            var _pend = 0;
             setInterval(function () {
                 try {
-                    if (!document.hidden && Date.now() - _lastAct <= ACT_WIN_MS) logAdd('s', TICK_MS / 1000);
+                    if (!document.hidden && Date.now() - _lastAct <= ACT_WIN_MS) {
+                        _pend += TICK_MS / 1000;
+                        hsAddDay(LOG.days, hsDayKey(), 's', TICK_MS / 1000); // solo memoria
+                        if (_pend >= 60) { _pend = 0; flush(); }             // disco ~1×/min
+                    }
                 } catch (e) { /* silencioso */ }
             }, TICK_MS);
         } catch (e) { /* silencioso */ }
@@ -724,6 +784,25 @@
         var pop = $('stats-pop');
         if (pop) pop.classList.add('hidden');
     }
+
+    // v9.28: Escape y clic afuera cierran el popup — convención del resto de
+    // los overlays (vocab-pop, placement, SRS, quiz, clásicos). #btn-stats es
+    // el launcher: el MISMO clic que abre burbujea hasta document y no debe
+    // re-cerrarlo. ⚠ #btn-stats-backup vive DENTRO del pop → contains() lo
+    // protege; su handler hace close() antes de abrir el respaldo.
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var pop = $('stats-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        close();
+    });
+    document.addEventListener('click', function (e) {
+        var pop = $('stats-pop');
+        if (!pop || pop.classList.contains('hidden')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('#btn-stats')) return;
+        close();
+    });
 
     // ---------------- init ----------------
     function init() {

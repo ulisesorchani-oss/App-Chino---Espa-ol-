@@ -4856,6 +4856,22 @@ body.paper-mode .listen-opt { background: #fffdf5; border-color: #b7a98f; color:
 body.paper-mode .listen-opt.listen-ok { border-color: #2f6b4f; background: rgba(47, 107, 79, 0.10); color: #2f6b4f; }
 body.paper-mode .listen-opt.listen-bad { border-color: #a03d2e; background: rgba(160, 61, 46, 0.10); color: #a03d2e; }
 
+/* ═══════════════ v9.28 · TARJETA EN MODO "SOLO OÍDO" (v9.19) ═══════════════
+   applyListenCard() le pone la clase .listen-mode a #sentence-card desde
+   v9.19, pero la regla CSS nunca existió (código muerto). Estilo previsto:
+   DESTACAR la tarjeta mientras dura el modo escucha — anillo azul cielo
+   (la paleta del ejercicio) + halo suave. Con box-shadow, CERO shift de
+   layout al entrar/salir del modo (la tarjeta no tiene borde propio). */
+#sentence-card.listen-mode {
+    box-shadow: 0 0 0 2px #0ea5e9, 0 0 20px rgba(14, 165, 233, .20), var(--shadow);
+}
+body.dark-mode #sentence-card.listen-mode {
+    box-shadow: 0 0 0 2px #0284c7, 0 0 20px rgba(2, 132, 199, .30), var(--shadow);
+}
+body.paper-mode #sentence-card.listen-mode {
+    box-shadow: 0 0 0 2px #d97706, 0 0 20px rgba(217, 119, 6, .18), var(--shadow);
+}
+
 /* ═══════════════ v9.20 · PARES MÍNIMOS — discriminación tonal ═══════════════
    Ejercicio "¿cuál escuchaste?": opciones SOLO AUDIO hasta responder; al
    responder se revela hanzi + pinyin + glosa + tono. Vive dentro del overlay

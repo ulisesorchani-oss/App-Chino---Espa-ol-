@@ -971,9 +971,16 @@ function doBackupImport(file) {
             const obj = JSON.parse(String(rd.result || ''));
             if (!obj || obj.app !== 'huayu-diario' || !obj.data || typeof obj.data !== 'object') throw new Error('formato');
             let n = 0;
+            // v9.28: marca IMPORTACIÓN para el wrapper de stats.js — los
+            // deltas de score/repasos escritos acá NO son práctica de hoy
+            // (el log importado ya trae su propia historia): re-base solo,
+            // sin contar nada. Sin el flag, restaurar un respaldo con pocos
+            // aciertos de diferencia los contaba como aciertos del día.
+            try { window.__hsImporting = true; } catch (e) { }
             Object.keys(obj.data).forEach(k => {
                 try { localStorage.setItem(k, String(obj.data[k])); n++; } catch (e) { }
             });
+            try { window.__hsImporting = false; } catch (e) { }
             showBackupMsg('✅ Importado (' + n + ' bloques). Recargando…');
             setTimeout(() => { try { location.reload(); } catch (e) { } }, 900);
         } catch (e) {
@@ -1387,7 +1394,9 @@ function updateUILanguage(mode) {
     // 5) Herramientas del alfabeto: pinyin/tonos solo al aprender chino.
     //    (简/繁 SIGUE visible: el público TW/HK prefiere 繁體 también en cn-es)
     // v9.19: el modo "solo oído" también es exclusivo de Aprendo Chino
-    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen'].forEach((id) => show(id, !cnMode));
+    // v9.28: ídem los pares mínimos — discriminación tonal del CHINO con
+    //    glosas en español: para el alumno cn-es no pintan nada.
+    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen', 'btn-mp-pairs'].forEach((id) => show(id, !cnMode));
 
     // 6) v9.11: UN solo botón de audio — siempre el idioma que se aprende.
     //    Aprendiendo chino (es-cn): 🔊 CN suena la oración china; 🔊 ES oculto.
@@ -8135,7 +8144,13 @@ const KARA = (function () {
             '<div class="mp-tag">🎯 Pares mínimos</div>' +
             '<div class="mp-q">¿Qué escuchaste?</div>' +
             '<button type="button" class="mp-target" data-mp-act="target">🔊 Escuchar</button>' +
+            // v9.28: contenedor .mp-opts — la regla CSS (flex column + gap)
+            // existía desde v9.20 pero las opciones se inyectaban sueltas
+            // dentro de #mp-body, así que el gap nunca aplicaba y las
+            // tarjetas quedaban pegadas entre sí.
+            '<div class="mp-opts">' +
             c.options.map(function (w, i) { return mpOptHtml(i, w, c); }).join('') +
+            '</div>' +
             (S.answered
                 ? '<div class="mp-fb ' + (last === true ? 'ok' : 'bad') + '">' +
                     (last === true
@@ -8215,6 +8230,20 @@ const KARA = (function () {
     if (btnEntry) btnEntry.addEventListener('click', mpOpen);
     const btnClose = $('mp-close');
     if (btnClose) btnClose.addEventListener('click', mpClose);
+    // v9.28: Escape y clic afuera cierran el popup — misma convención que el
+    // resto de los overlays (vocab-pop, placement, SRS, quiz, clásicos).
+    // El clic sobre el botón de entrada no cuenta como "afuera": es el MISMO
+    // clic que abre y, al burbujear hasta document, no debe re-cerrarlo.
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || pop.classList.contains('hidden')) return;
+        mpClose();
+    });
+    document.addEventListener('click', function (e) {
+        if (pop.classList.contains('hidden')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('#btn-mp-pairs')) return;
+        mpClose();
+    });
 
     // exports para tests/QA (sin efecto en la UI)
     window.MPDebug = { data: MP_DATA, toneSeq: mpToneSeq, toneLabel: mpToneLabel, shuffle: mpShuffle, buildRound: mpBuildRound };

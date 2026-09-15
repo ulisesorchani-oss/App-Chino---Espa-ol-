@@ -126,7 +126,22 @@
 //       洗/西瓜, 衣服/椅子, 昨天/左边, 游泳/右边 (se distinguían sin
 //       escuchar el tono) → reemplazos de sílaba idéntica 洗/西, 衣/椅,
 //       左/坐, 有/又, 书/树. Toca SOLO app.js; onboarding/stats/style intactos.
-const VERSION = 'v74'; // — invalida shell (v9.27: 5 fixes de calidad en app.js)
+// v9.28: ronda QA 2 (cruce de archivos) — (1) pares mínimos: las opciones
+//       van ahora dentro de <div class="mp-opts"> (la regla CSS con gap
+//       existía desde v9.20 pero las tarjetas se inyectaban sueltas y
+//       quedaban pegadas); (2) #btn-mp-pairs se oculta en modo cn-es
+//       (discriminación tonal del chino: para el alumno de español no
+//       pinta nada); (3) #mp-pop, #stats-pop y #guide-pop ya cierran con
+//       Escape y clic afuera, como todos los demás overlays (la guía
+//       marca vista, igual que el ✕); (4) stats.js: importar un respaldo
+//       ya NO pisa el historial de rachas ni cuenta sus deltas como
+//       aciertos de hoy (flush con el setItem original, capture respeta
+//       escrituras externas a ac_stats_v1, flag window.__hsImporting de
+//       doBackupImport); (5) minutos de actividad a disco cada ~60 s en
+//       vez de cada 15 s; (6) style.css: la tarjeta en modo "solo oído"
+//       por fin destaca (regla .listen-mode pendiente desde v9.19).
+//       Toca app.js, stats.js, onboarding.js, style.css, index.html.
+const VERSION = 'v75'; // — invalida shell (v9.28: ronda QA 2 — pares mínimos, overlays, import de respaldo)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
