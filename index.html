@@ -644,10 +644,15 @@
     <script src="lessons-extra.js?v=20260910f"></script>
     <!-- v9.30: mini-dramas DELE (aprendices de español, modo cn-es) — archivo
          aditivo y autocontenido: toma #panel-lessons cuando el modo es cn-es
-         (chips propios A1 / A2-B1 + overlay #dele-pop con piel .lq-pop) y en
-         es-cn deja el panel HSK/TOCFL exactamente como estaba. Carga ANTES de
-         app.js (usa globals de app.js solo al hacer clic, con guardas). -->
-    <script src="lessons-dele.js?v=20260917a"></script>
+         (chips propios + overlay #dele-pop con piel .lq-pop) y en es-cn deja
+         el panel HSK/TOCFL exactamente como estaba. Carga ANTES de app.js
+         (usa globals de app.js solo al hacer clic, con guardas).
+         v9.31: 10 dramas nuevos pista Argentina (adolescentes/adultos,
+         A2/B1→C2: provincias, culturas originarias), chips de pista, fix de
+         "Escuchar todo" (solo sonaba la 1.ª frase: stopSpeak apagaba la cola
+         dentro de speakEs) y panel DELE-only desde el primer cuadro (pista de
+         modo en localStorage, sin flasheo HSK en cn-es). -->
+    <script src="lessons-dele.js?v=20260917b"></script>
     <script src="classics.js?v=20260910c"></script>
     <!-- v9.22: guía interactiva de bienvenida (bilingüe según modo; se auto-inyecta:
          botón 📖 Guía + overlay #guide-pop). Auto-contenida, NO toca app.js.

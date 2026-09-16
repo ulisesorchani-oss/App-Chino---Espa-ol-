@@ -1,13 +1,20 @@
 // ═══════════════════════════════════════════════════════════════════
-// lessons-dele.js — v9.30 · MINI-DRAMAS DELE (aprendices de español)
+// lessons-dele.js — v9.31 · MINI-DRAMAS DELE (aprendices de español)
 // -------------------------------------------------------------------
-// Espejo escolar de lessons-tocfl.js: mini-dramas graduados por el
-// DELE (Diploma de Español como Lengua Extranjera) para el modo cn-es
-// (chino → español), pista Escolares — la misma que ya ofrece el
-// dropdown DELE de oraciones diarias (DELE-A1-Escolares,
-// DELE-A2B1-Escolares).
-//   · DELE A1 Escolares        → dramas de vida escolar básica
-//   · DELE A2/B1 Escolares     → mismos ámbitos, más gramática
+// Mini-dramas graduados por el DELE (Diploma de Español como Lengua
+// Extranjera) para el modo cn-es (chino → español), en DOS PISTAS:
+//   · Escolares (v9.30)  → espejo del dropdown DELE de oraciones:
+//     DELE A1 y A2/B1 de vida escolar (niños)
+//   · Argentina (v9.31)  → adolescentes y adultos: contextos locales,
+//     viajes a las provincias y culturas originarias (A2/B1 → C2):
+//     mate porteño, terminal de Retiro, peña salteña, tren a las
+//     nubes, Iguazú y el guaraní, Vendimia mendocina, glaciar
+//     Perito Moreno, telar mapuche, Pachamama jujeña y un debate
+//     de radio sobre turismo y pueblos originarios.
+// v9.31 filtro de pista: chips Todas / Escolares / Argentina sobre la
+// fila de niveles DELE (A1 · A2/B1 · B1 · B2 · C1 · C2).
+// v9.31 fix "Escuchar todo": stopSpeak() apagaba la cola dentro del
+// propio speakEs() → solo sonaba la 1.ª línea (reporte del usuario).
 // Es ARCHIVO ADITIVO Y AUTOCONTENIDO (patrón onboarding.js/mpInit):
 // inyecta su lista dentro de #panel-lessons cuando el modo es cn-es
 // (la pestaña 📖 Lecciones muestra HSK/TOCFL solo en es-cn) y abre su
@@ -258,6 +265,412 @@
                 { sp: 'No llegues ___.', zh: '请别迟到。',
                   opts: [{ w: 'tarde', e: '迟到、晚' }, { w: 'temprano', e: '早' }, { w: 'lento', e: '慢' }] }
             ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 7 · 🧉 El primer mate — DELE A2/B1 · Argentina (v9.31)
+        //     Buenos Aires, adolescente; voseo suave, la casa,
+        //     compartir (mate = amistad)
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a2b1-mate',
+            dele: 'A2/B1', track: 'Argentina',
+            emoji: '🧉',
+            titleEs: 'El primer mate',
+            titleZh: '第一次喝马黛茶',
+            blurb: 'Wei, un estudiante chino en Buenos Aires, prueba por primera vez el mate con la familia de Camila: la yerba, la bombilla, el agua caliente y la ronda de amigos. Vocabulario de la casa y el voseo argentino (querés, vos).',
+            blurbZh: '在布宜诺斯艾利斯的中国学生魏第一次和卡米拉一家喝马黛茶：马黛茶叶、金属吸管、热水和朋友间的分享轮。家庭词汇和阿根廷的 voseo（querés、vos）称呼。',
+            lines: [
+                { who: 'Camila', sp: 'Wei, ¿querés probar el mate? Es la bebida típica de acá.', zh: '魏，你想尝尝马黛茶吗？这是我们这儿的特色饮品。' },
+                { who: 'Wei', sp: 'Sí, gracias. ¿Es igual que el té de mi país?', zh: '好，谢谢。它和我老家的茶一样吗？' },
+                { who: 'Camila', sp: 'No exactamente. Se toma con una calabaza y una bombilla.', zh: '不完全一样。它用一个小葫芦和一根金属吸管来喝。' },
+                { who: 'Hernán', sp: 'La yerba va acá, dentro del mate. Y el agua no debe hervir.', zh: '茶叶放在这里，马黛壶里面。水不能烧开。' },
+                { who: 'Wei', sp: '¿Amargo o dulce?', zh: '是苦的还是甜的？' },
+                { who: 'Hernán', sp: 'Los argentinos lo tomamos amargo. Pero podemos ponerle azúcar.', zh: '我们阿根廷人喝苦的。不过也可以加糖。' },
+                { who: 'Camila', sp: 'El mismo mate se comparte entre todos. Primero yo, después vos.', zh: '同一个壶大家轮流喝。先我，然后你。' },
+                { who: 'Wei', sp: '¡Qué interesante! Es como una ronda de amistad.', zh: '真有意思！就像一个友谊的圆圈。' },
+                { who: 'Hernán', sp: 'Eso es. El mate se comparte y se conversa. Sentate con nosotros.', zh: '就是这样。喝马黛茶就要聊天。坐下来和我们一起吧。' },
+                { who: 'Wei', sp: 'Gracias. En China también compartimos el té con la familia.', zh: '谢谢。在中国我们也和家人一起喝茶。' },
+                { who: 'Camila', sp: 'Entonces tenemos algo en común. ¡Bienvenido a Buenos Aires!', zh: '那我们有共同点啦。欢迎来到布宜诺斯艾利斯！' }
+            ],
+            quiz: [
+                { sp: '¿Querés ___ el mate?', zh: '你想尝尝马黛茶吗？',
+                  opts: [{ w: 'probar', e: '尝、试' }, { w: 'comer', e: '吃' }, { w: 'dormir', e: '睡觉' }] },
+                { sp: 'Se toma con una calabaza y una ___.', zh: '用小葫芦和一根吸管来喝。',
+                  opts: [{ w: 'bombilla', e: '（马黛茶）金属吸管' }, { w: 'ventana', e: '窗户' }, { w: 'bicicleta', e: '自行车' }] },
+                { sp: 'El agua no debe ___.', zh: '水不能烧开。',
+                  opts: [{ w: 'hervir', e: '煮沸' }, { w: 'cantar', e: '唱歌' }, { w: 'llegar', e: '到达' }] },
+                { sp: 'El mismo mate se ___ entre todos.', zh: '同一个马黛壶大家轮流喝。',
+                  opts: [{ w: 'comparte', e: '分享' }, { w: 'vende', e: '卖' }, { w: 'pierde', e: '丢' }] },
+                { sp: '___ con nosotros. (voseo)', zh: '坐下来和我们一起吧。（阿根廷式说法）',
+                  opts: [{ w: 'Sentate', e: '坐下（voseo）' }, { w: 'Sentar', e: '使坐下（原形）' }, { w: 'Sentamos', e: '我们坐下' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 8 · 🎫 Pasajes a Bariloche — DELE A2/B1 · Argentina (v9.31)
+        //     Terminal de Retiro; números, precios, pesos, viaje
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a2b1-bariloche',
+            dele: 'A2/B1', track: 'Argentina',
+            emoji: '🎫',
+            titleEs: 'Pasajes a Bariloche',
+            titleZh: '去巴里洛切的车票',
+            blurb: 'Mei y Vale compran en la terminal de Retiro los pasajes a Bariloche: colectivo cama, horarios, pesos argentinos y el consejo de llegar con tiempo. Números, precios y viajes en ómnibus por la Patagonia.',
+            blurbZh: '梅伊和瓦莱在雷蒂罗长途汽车站买去巴里洛切的车票：卧铺长途车、班次、阿根廷比索，以及“提前到站”的建议。数字、价格和去巴塔哥尼亚的长途汽车旅行。',
+            lines: [
+                { who: 'Mei', sp: 'Quiero conocer Bariloche en las vacaciones de invierno. ¿Vamos juntas?', zh: '寒假我想去巴里洛切看看。我们一起去吗？' },
+                { who: 'Vale', sp: '¡Sí! Vamos a la terminal de Retiro a comprar los pasajes.', zh: '好啊！我们去雷蒂罗汽车站买车票。' },
+                { who: 'Empleado', sp: 'Buenas, ¿a dónde viajan?', zh: '您好，你们去哪儿？' },
+                { who: 'Mei', sp: 'A Bariloche, por favor. ¿Qué horarios hay?', zh: '去巴里洛切，麻烦了。有哪些班次？' },
+                { who: 'Empleado', sp: 'Tenemos un colectivo cama a las ocho de la tarde.', zh: '晚上八点有一班卧铺长途车。' },
+                { who: 'Vale', sp: '¿Colectivo cama? ¿Qué es eso?', zh: '卧铺长途车？那是什么？' },
+                { who: 'Empleado', sp: 'Los asientos se reclinan como camas. El viaje son veinte horas.', zh: '座椅可以放平当床用。全程二十个小时。' },
+                { who: 'Mei', sp: '¿Veinte horas? ¿Y cuánto cuesta el pasaje?', zh: '二十个小时？那车票多少钱？' },
+                { who: 'Empleado', sp: 'Cincuenta mil pesos, ida y vuelta, con descuento de estudiante.', zh: '五万比索往返，有学生折扣。' },
+                { who: 'Mei', sp: 'Aquí está el pago. ¿De qué andén sale el ómnibus?', zh: '给您钱。长途车从几号站台出发？' },
+                { who: 'Empleado', sp: 'Del andén doce, a las ocho en punto. Lleguen con tiempo.', zh: '十二号站台，八点整发车。请提前一点到。' },
+                { who: 'Vale', sp: '¡Listo! El sábado arrancamos la aventura en la Patagonia.', zh: '搞定！周六我们的巴塔哥尼亚之旅就出发啦。' }
+            ],
+            quiz: [
+                { sp: 'Compramos los ___ en la terminal.', zh: '我们在汽车站买车票。',
+                  opts: [{ w: 'pasajes', e: '车票' }, { w: 'libros', e: '书' }, { w: 'pasteles', e: '糕点' }] },
+                { sp: 'El ___ cama es más cómodo para viajar de noche.', zh: '卧铺长途车晚上坐更舒服。',
+                  opts: [{ w: 'colectivo', e: '长途车、公交' }, { w: 'mercado', e: '市场' }, { w: 'jugo', e: '果汁' }] },
+                { sp: '¿De qué ___ sale el ómnibus?', zh: '长途车从几号站台出发？',
+                  opts: [{ w: 'andén', e: '站台' }, { w: 'año', e: '年' }, { w: 'hora', e: '小时' }] },
+                { sp: 'Cincuenta mil ___, ida y vuelta.', zh: '五万比索，往返票。',
+                  opts: [{ w: 'pesos', e: '比索' }, { w: 'euros', e: '欧元' }, { w: 'minutos', e: '分钟' }] },
+                { sp: 'Lleguen con ___ a la terminal.', zh: '请提前一点到汽车站。',
+                  opts: [{ w: 'tiempo', e: '提前（字面：带着时间来）' }, { w: 'hambre', e: '饿' }, { w: 'frío', e: '冷' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 9 · 🏜 Una peña en Salta — DELE B1 · Argentina (v9.31)
+        //     adulto joven; folklore, pretérito, planes
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b1-pena-salta',
+            dele: 'B1', track: 'Argentina',
+            emoji: '🏜️',
+            titleEs: 'Una peña en Salta',
+            titleZh: '萨尔塔的民俗酒馆',
+            blurb: 'Huang visita Salta y Diego le presenta una peña folclórica: chacarera, zamba, bombo legüero y empanadas salteñas. Para mañana, el cerro San Bernardo y el teleférico. Folklore y sabores del norte argentino.',
+            blurbZh: '黄到萨尔塔旅游，迭戈带她去民俗酒馆：恰卡雷拉舞曲、桑巴舞曲、羊皮大鼓和萨尔塔烤饺。明天的计划：圣贝尔纳多山和缆车。阿根廷北部的民俗与美食。',
+            lines: [
+                { who: 'Huang', sp: 'Diego, ¿qué se hace a la noche en Salta?', zh: '迭戈，萨尔塔的晚上有什么好玩的？' },
+                { who: 'Diego', sp: 'Hoy hay una peña folclórica. Vas a escuchar chacarera y zamba en vivo.', zh: '今晚有一家民俗酒馆有活动。你能现场听到恰卡雷拉和桑巴舞曲。' },
+                { who: 'Huang', sp: '¿Qué es una peña, exactamente?', zh: '“peña”到底是什么？' },
+                { who: 'Diego', sp: 'Un lugar donde se come, se toma vino y se baila folklore.', zh: '就是一个能吃饭、喝酒、跳民俗舞的地方。' },
+                { who: 'Huang', sp: 'Me encanta la idea. ¿La música se parece a la de otros países?', zh: '太合我意了。这种音乐和别的国家的像吗？' },
+                { who: 'Diego', sp: 'Tiene bombo legüero y guitarras. Cada provincia tiene su propio ritmo.', zh: '有羊皮大鼓和吉他。每个省都有自己的节奏。' },
+                { who: 'Huang', sp: 'Ayer probé las empanadas salteñas. Estaban riquísimas.', zh: '昨天我尝了萨尔塔烤饺，太好吃了。' },
+                { who: 'Diego', sp: 'Aquí las hacemos brillantes, con repulgue. Si vas al norte, probá también los tamales.', zh: '我们这儿的烤饺捏了花边，特别漂亮。你要是再往北走，还可以尝尝玉米粽。' },
+                { who: 'Huang', sp: '¿Y el cerro San Bernardo? Quiero una vista de toda la ciudad.', zh: '那圣贝尔纳多山呢？我想看全城的景色。' },
+                { who: 'Diego', sp: 'Subís en teleférico o a pie. Desde arriba, Salta es preciosa.', zh: '你可以坐缆车或者步行上去。从山顶看，萨尔塔美极了。' },
+                { who: 'Huang', sp: 'Entonces mañana subo temprano y a la noche vamos a la peña.', zh: '那我明天一早上山，晚上我们去酒馆。' },
+                { who: 'Diego', sp: 'Perfecto. Avísame y te paso a buscar por el hotel.', zh: '好极了。跟我说一声，我去酒店接你。' }
+            ],
+            quiz: [
+                { sp: 'En la ___ se baila folklore y se come bien.', zh: '在民俗酒馆里跳舞、吃美食。',
+                  opts: [{ w: 'peña', e: '民俗酒馆' }, { w: 'biblioteca', e: '图书馆' }, { w: 'farmacia', e: '药房' }] },
+                { sp: 'Vas a escuchar chacarera y ___ en vivo.', zh: '你能现场听到恰卡雷拉和桑巴舞曲。',
+                  opts: [{ w: 'zamba', e: '桑巴舞曲（阿根廷）' }, { w: 'ópera', e: '歌剧' }, { w: 'jazz', e: '爵士乐' }] },
+                { sp: 'Ayer ___ las empanadas salteñas.', zh: '昨天我尝了萨尔塔烤饺。',
+                  opts: [{ w: 'probé', e: '我尝了（过去时）' }, { w: 'pruebo', e: '我尝（现在时）' }, { w: 'probaré', e: '我将尝（将来时）' }] },
+                { sp: 'Subís en ___ o a pie.', zh: '你坐缆车或者步行上去。',
+                  opts: [{ w: 'teleférico', e: '缆车' }, { w: 'ascensor', e: '电梯' }, { w: 'barco', e: '船' }] },
+                { sp: '___ y te paso a buscar por el hotel.', zh: '跟我说一声，我去酒店接你。',
+                  opts: [{ w: 'Avísame', e: '通知我' }, { w: 'Olvídame', e: '忘了我吧' }, { w: 'Mírame', e: '看我' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 10 · 🚂 El tren a las nubes — DELE B1 · Argentina (v9.31)
+        //      Salta → San Antonio de los Cobres; altura, andes,
+        //      vicuñas, consejos (impersonal se + imperativo)
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b1-tren-nubes',
+            dele: 'B1', track: 'Argentina',
+            emoji: '🚂',
+            titleEs: 'El tren a las nubes',
+            titleZh: '云端列车',
+            blurb: 'El tren a las nubes sube desde Salta a más de cuatro mil metros: el mal de altura, el mate de coca de los pueblos andinos, las vicuñas de la puna y un pueblo entre montañas. Consejos para viajar en el altiplano.',
+            blurbZh: '“云端列车”从萨尔塔攀升到海拔四千米以上：高原反应、安第斯民族的古柯茶、高原上的小羊驼，还有群山之间的小镇。高原旅行的实用建议。',
+            lines: [
+                { who: 'Rosa', sp: 'Bienvenidos al tren a las nubes. Hoy vamos a estar a más de cuatro mil metros de altura.', zh: '欢迎乘坐云端列车。今天我们要到海拔四千多米的地方。' },
+                { who: 'Liu', sp: '¿Cuatro mil? ¿Es seguro para la salud?', zh: '四千米？对健康安全吗？' },
+                { who: 'Rosa', sp: 'Tranquilo. El tren sube despacio y por eso el cuerpo se adapta.', zh: '放心。火车慢慢往上爬，所以身体能适应。' },
+                { who: 'Marta', sp: 'Mi abuela decía que hay que mascar hojas de coca para el mal de altura.', zh: '我奶奶常说，有高原反应要嚼古柯叶。' },
+                { who: 'Rosa', sp: 'Es un consejo tradicional de los pueblos andinos. También se toma mate de coca.', zh: '这是安第斯民族的传统偏方。也可以喝古柯茶。' },
+                { who: 'Liu', sp: '¿Y esos animales? Parecen camellos pequeños.', zh: '那些动物是什么？看起来像小骆驼。' },
+                { who: 'Rosa', sp: 'Son vicuñas y guanacos, parientes del llama. Viven libres en la puna.', zh: '是小羊驼和原驼，大羊驼的亲戚。它们自由地生活在高原上。' },
+                { who: 'Marta', sp: 'Qué silencio... Solo se escucha el viento entre las montañas.', zh: '真安静……只听得见风在群山间穿行的声音。' },
+                { who: 'Rosa', sp: 'En San Antonio de los Cobres almorzamos y conocemos el pueblo.', zh: '到圣安东尼奥-德洛斯科布雷斯后，我们吃午饭，逛逛小镇。' },
+                { who: 'Liu', sp: '¿Hace mucho frío ahí arriba?', zh: '上面很冷吗？' },
+                { who: 'Rosa', sp: 'Sí. Traigan abrigo y gorro: la temperatura baja mucho en la tarde.', zh: '冷。带上厚衣服和帽子：下午温度会降很多。' },
+                { who: 'Marta', sp: 'Nunca vi paisajes así. Vale cada hora de viaje.', zh: '我从没见过这样的风景。路上的每一小时都值。' }
+            ],
+            quiz: [
+                { sp: 'Hoy vamos a estar a más de cuatro mil ___ de altura.', zh: '今天我们要到海拔四千多米的地方。',
+                  opts: [{ w: 'metros', e: '米' }, { w: 'años', e: '年' }, { w: 'litros', e: '升' }] },
+                { sp: 'Hay que ___ hojas de coca para el mal de altura.', zh: '有高原反应要嚼古柯叶。',
+                  opts: [{ w: 'mascar', e: '咀嚼' }, { w: 'comprar', e: '买' }, { w: 'romper', e: '撕破' }] },
+                { sp: 'Son ___, parientes del llama.', zh: '那是小羊驼，大羊驼的亲戚。',
+                  opts: [{ w: 'vicuñas', e: '小羊驼（vicuña）' }, { w: 'gallinas', e: '母鸡' }, { w: 'ovejas', e: '绵羊' }] },
+                { sp: '___ abrigo y gorro: hace mucho frío.', zh: '带上厚衣服和帽子：很冷。',
+                  opts: [{ w: 'Traigan', e: '带上（你们）' }, { w: 'Tiren', e: '扔掉' }, { w: 'Vendan', e: '卖掉' }] },
+                { sp: 'El tren sube despacio y el cuerpo se ___.', zh: '火车慢慢爬升，身体就能适应。',
+                  opts: [{ w: 'adapta', e: '适应' }, { w: 'duerme', e: '睡觉' }, { w: 'pierde', e: '迷失' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 11 · 💦 Iguazú y la memoria guaraní — DELE B2 · Argentina (v9.31)
+        //      Misiones; subjuntivo de recomendación, el guaraní,
+        //      naturaleza y comunidades originarias
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b2-iguazu',
+            dele: 'B2', track: 'Argentina',
+            emoji: '💦',
+            titleEs: 'Iguazú y la memoria guaraní',
+            titleZh: '伊瓜苏与瓜拉尼的记忆',
+            blurb: 'En el parque nacional Iguazú, el guía Benítez presenta la Garganta del Diablo, la lengua guaraní y las comunidades mbya de Misiones: la yerba mate (ka\'a) nació acá. Subjuntivo para recomendar y describir la selva.',
+            blurbZh: '在伊瓜苏国家公园，贝尼特斯导游介绍“魔鬼喉咙”、瓜拉尼语和米西奥内斯的姆比亚原住民社区：马黛茶（ka\'a）就发源于此。用虚拟式表达建议，描写米西奥内斯丛林。',
+            lines: [
+                { who: 'Benítez', sp: 'Antes de entrar al parque, una recomendación: lleven repelente y agua, porque la selva es intensa.', zh: '进公园之前先提醒一句：带上驱蚊液和水，丛林里可不轻松。' },
+                { who: 'Sofía', sp: '¿Es cierto que los saltos son más anchos que las cataratas del Niágara?', zh: '这些瀑布真的比尼亚加拉大瀑布还宽吗？' },
+                { who: 'Benítez', sp: 'El sistema del Iguazú tiene doscientos setenta saltos. La Garganta del Diablo cae desde ochenta metros.', zh: '伊瓜苏水系有两百七十个瀑布。“魔鬼喉咙”从八十米高处落下。' },
+                { who: 'Tomás', sp: 'Increíble. ¿Y de dónde viene el nombre Iguazú?', zh: '难以置信。“伊瓜苏”这个名字是怎么来的？' },
+                { who: 'Benítez', sp: 'Del guaraní: igüá significa agua y guazú, grande. "Agua grande".', zh: '来自瓜拉尼语：igüá 意思是水，guazú 意思是大，就是“大水”。' },
+                { who: 'Sofía', sp: '¿Los guaraníes siguen viviendo en la región?', zh: '瓜拉尼人还生活在这个地区吗？' },
+                { who: 'Benítez', sp: 'Sí, hay comunidades mbya en Misiones. Ellos enseñaron al mundo la yerba mate: la ka\'a.', zh: '在，米西奥内斯有姆比亚社区。是他们把马黛茶——ka\'a——介绍给了全世界。' },
+                { who: 'Tomás', sp: 'O sea que el mate que tomamos en todo el país empieza acá.', zh: '也就是说，我们全国都在喝的马黛茶是从这儿起源的。' },
+                { who: 'Benítez', sp: 'Exacto. Y recomiendo que visiten la reserva: es posible que vean tucanes y monos.', zh: '没错。我建议你们去保护区看看：有可能看到巨嘴鸟和猴子。' },
+                { who: 'Sofía', sp: '¿Se puede nadar en el río?', zh: '可以在河里游泳吗？' },
+                { who: 'Benítez', sp: 'No dentro del parque: las corrientes son peligrosas. Prefiero que disfruten las pasarelas.', zh: '公园里不行：水流很危险。我更希望你们好好走一走栈道。' },
+                { who: 'Tomás', sp: 'Hecho. Hoy la selva nos cuenta su historia.', zh: '一言为定。今天让丛林给我们讲讲它的历史。' }
+            ],
+            quiz: [
+                { sp: '___ que lleven repelente y agua.', zh: '我建议你们带上驱蚊液和水。',
+                  opts: [{ w: 'Recomiendo', e: '我建议' }, { w: 'Niego', e: '我否认' }, { w: 'Olvido', e: '我忘记' }] },
+                { sp: 'La Garganta del Diablo ___ ochenta metros de caída.', zh: '“魔鬼喉咙”落差八十米。',
+                  opts: [{ w: 'mide', e: '高（量度）为' }, { w: 'pesa', e: '重' }, { w: 'cuesta', e: '花费' }] },
+                { sp: '"Iguazú" significa "agua ___" en guaraní.', zh: '在瓜拉尼语里“伊瓜苏”意思是“大水”。',
+                  opts: [{ w: 'grande', e: '大' }, { w: 'chico', e: '小' }, { w: 'frío', e: '冷' }] },
+                { sp: 'Es posible que ___ tucanes y monos.', zh: '有可能看到巨嘴鸟和猴子。',
+                  opts: [{ w: 'vean', e: '看到（虚拟式）' }, { w: 'ven', e: '看到（陈述式）' }, { w: 'vieron', e: '看到了（过去时）' }] },
+                { sp: 'Ellos enseñaron al mundo la yerba mate: la ___.', zh: '是他们把马黛茶——ka\'a——教给了世界。',
+                  opts: [{ w: "ka'a", e: '瓜拉尼语“马黛茶”' }, { w: 'pizza', e: '披萨' }, { w: 'quinoa', e: '藜麦' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 12 · 🍷 Vendimia en Mendoza — DELE B2 · Argentina (v9.31)
+        //      adultos; cosecha, vino, fiesta; porcentajes,
+        //      conectores, futuro
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b2-vendimia',
+            dele: 'B2', track: 'Argentina',
+            emoji: '🍷',
+            titleEs: 'Vendimia en Mendoza',
+            titleZh: '门多萨的葡萄收获节',
+            blurb: 'Nadia llega a Mendoza en marzo: cosecha de uva, pisada tradicional en la bodega, Malbec y la Fiesta de la Vendimia con su reina. Conectores, porcentajes y la cultura del vino al pie de los Andes.',
+            blurbZh: '娜迪亚三月来到门多萨：葡萄采收、酒庄里的传统踩葡萄、马尔贝克葡萄酒，以及选出“葡萄女王”的葡萄收获节。连接词、百分比和安第斯山脚下的葡萄酒文化。',
+            lines: [
+                { who: 'Carlos', sp: 'Si venís en marzo, agarrás la Vendimia: la cosecha de la uva y la fiesta más grande de Mendoza.', zh: '你要是三月份来，就赶上收获节了：葡萄采收，还有门多萨最盛大的节日。' },
+                { who: 'Nadia', sp: 'Me lo confirmaron en el hostal. ¿Los visitantes pueden participar?', zh: '青旅的人跟我说过了。游客可以参加吗？' },
+                { who: 'Carlos', sp: 'Claro. Hay quien corta uvas un día en las fincas y después todos vamos al acto central.', zh: '当然。有人会在庄园里采摘一天葡萄，然后大家一起去看主会场庆典。' },
+                { who: 'Nadia', sp: '¿Y qué se hace en la bodega durante la cosecha?', zh: '收获季酒庄里都做什么？' },
+                { who: 'Carlos', sp: 'Pisamos la uva como antes, cantamos y después probamos el vino nuevo.', zh: '我们像从前一样踩葡萄、唱歌，然后品尝新酒。' },
+                { who: 'Nadia', sp: '¿El Malbec se da bien por acá?', zh: '马尔贝克在这里长得好吗？' },
+                { who: 'Carlos', sp: 'Mendoza produce el setenta por ciento del vino argentino. El clima seco y la altura hacen su magia.', zh: '门多萨出产阿根廷百分之七十的葡萄酒。干燥的气候和海拔自有它的魔力。' },
+                { who: 'Nadia', sp: 'Leí que la Fiesta de la Vendimia elige a una reina cada año.', zh: '我看到资料说，收获节每年会选出一位“葡萄女王”。' },
+                { who: 'Carlos', sp: 'Sí, cada departamento presenta a su candidata. Es tradición desde hace casi cien años.', zh: '对，每个县都推出自己的候选人。这个传统快一百年了。' },
+                { who: 'Nadia', sp: 'Además del vino, ¿qué no me puedo perder?', zh: '除了酒，还有什么我不能错过的？' },
+                { who: 'Carlos', sp: 'Un asado con vista a los Andes. Y si te gustan las aguas calientes, las termas de Cacheuta.', zh: '对着安第斯山吃一顿烤肉。要是喜欢泡温泉，就去卡舒埃塔温泉。' },
+                { who: 'Nadia', sp: 'Ya tengo el viaje armado: uvas, montañas y un buen Malbec.', zh: '这趟旅行安排齐了：葡萄、群山，再来一杯好喝的马尔贝克。' }
+            ],
+            quiz: [
+                { sp: 'Si ___ en marzo, agarrás la Vendimia.', zh: '你要是三月份来，就赶上收获节。',
+                  opts: [{ w: 'venís', e: '你来（voseo）' }, { w: 'vas', e: '你去' }, { w: 'sales', e: '你出发' }] },
+                { sp: 'Mendoza produce el ___ por ciento del vino argentino.', zh: '门多萨出产阿根廷百分之七十的葡萄酒。',
+                  opts: [{ w: 'setenta', e: '七十' }, { w: 'dos', e: '二' }, { w: 'mil', e: '千' }] },
+                { sp: 'Cada departamento presenta a su ___.', zh: '每个县都推出自己的候选人。',
+                  opts: [{ w: 'candidata', e: '候选人（女）' }, { w: 'maestra', e: '女教师' }, { w: 'vecina', e: '女邻居' }] },
+                { sp: 'Además del vino, ¿qué no me puedo ___?', zh: '除了酒，还有什么我不能错过的？',
+                  opts: [{ w: 'perder', e: '错过' }, { w: 'comer', e: '吃' }, { w: 'beber', e: '喝' }] },
+                { sp: 'La ___ de la uva se celebra en marzo.', zh: '葡萄的收获在三月庆祝。',
+                  opts: [{ w: 'cosecha', e: '收获' }, { w: 'siembra', e: '播种' }, { w: 'lluvia', e: '下雨' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 13 · 🧊 El glaciar Perito Moreno — DELE B2 · Argentina (v9.31)
+        //      Patagonia austral; condicionales, descripciones,
+        //      clima y paisaje
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b2-glaciar',
+            dele: 'B2', track: 'Argentina',
+            emoji: '🧊',
+            titleEs: 'El glaciar Perito Moreno',
+            titleZh: '莫雷诺大冰川',
+            blurb: 'En el parque nacional Los Glaciares, Fernanda explica el desprendimiento del Perito Moreno, el azul del hielo antiguo y el clima patagónico. Condicionales, descripciones y el paisaje del sur profundo.',
+            blurbZh: '在冰川国家公园，费尔南达讲解莫雷诺冰川的冰崩、古老冰体的蓝色和巴塔哥尼亚多变的天气。条件句、描写和南方尽头的壮美风景。',
+            lines: [
+                { who: 'Fernanda', sp: 'Bienvenidos a las pasarelas. Si escuchan un trueno, es el hielo rompiéndose: no se asusten.', zh: '欢迎来到观景栈道。要是听到雷声，那是冰在断裂：别害怕。' },
+                { who: 'Gómez', sp: 'El frente del glaciar, ¿cuántos metros tiene de alto?', zh: '冰川的冰壁有多高？' },
+                { who: 'Fernanda', sp: 'Sesenta metros sobre el lago, y se extiende treinta kilómetros por la cordillera.', zh: '湖面以上六十米，沿着安第斯山绵延三十公里。' },
+                { who: 'Gómez', sp: '¿Y por qué es tan famoso este glaciar?', zh: '那这座冰川为什么这么有名？' },
+                { who: 'Fernanda', sp: 'Porque avanza y corta el lago. Cada tantos años el agua rompe el hielo: es el desprendimiento.', zh: '因为它会不断推进、拦住湖水。每隔几年，湖水冲破冰墙：那就是冰崩。' },
+                { who: 'Gómez', sp: 'La última vez que hubo desprendimiento, miles de personas viajaron para verlo.', zh: '上次冰崩的时候，成千上万的人专门赶来看。' },
+                { who: 'Fernanda', sp: 'Exacto. Es uno de los pocos glaciares del mundo que no retrocede.', zh: '是的。它是世界上少数没有退缩的冰川之一。' },
+                { who: 'Gómez', sp: '¿Y por qué el hielo tiene ese color azul?', zh: '那冰为什么是那种蓝色？' },
+                { who: 'Fernanda', sp: 'El hielo antiguo absorbe los otros colores y devuelve el azul. Por eso lo vemos así.', zh: '古老的冰吸收其他颜色，只把蓝色反射出来。所以我们看到的就是蓝色。' },
+                { who: 'Gómez', sp: 'Hace viento y sol al mismo tiempo. El clima patagónico es impredecible.', zh: '又是风又是太阳。巴塔哥尼亚的天气真是说不准。' },
+                { who: 'Fernanda', sp: 'Por eso recomiendo ir por capas: remera, abrigo y una campera impermeable.', zh: '所以我建议分层穿衣：打底衫、保暖层，再来一件防水外套。' },
+                { who: 'Gómez', sp: 'La naturaleza acá te recuerda que sos chico. Y es hermoso sentirlo.', zh: '这里的自然让你想起自己的渺小。这种感觉还挺美好的。' }
+            ],
+            quiz: [
+                { sp: 'Si ___ un trueno, es el hielo rompiéndose.', zh: '要是听到雷声，那是冰在断裂。',
+                  opts: [{ w: 'escuchan', e: '他们听到' }, { w: 'comen', e: '他们吃' }, { w: 'compran', e: '他们买' }] },
+                { sp: 'El frente ___ sesenta metros sobre el lago.', zh: '冰壁在湖面以上六十米。',
+                  opts: [{ w: 'mide', e: '高（量度）为' }, { w: 'paga', e: '支付' }, { w: 'lee', e: '读' }] },
+                { sp: 'Es uno de los pocos glaciares que no ___.', zh: '它是少数没有退缩的冰川之一。',
+                  opts: [{ w: 'retrocede', e: '退缩' }, { w: 'avanza', e: '推进' }, { w: 'existe', e: '存在' }] },
+                { sp: 'Recomiendo ir por ___ de ropa.', zh: '我建议分层穿衣。',
+                  opts: [{ w: 'capas', e: '层（分层穿）' }, { w: 'cajas', e: '箱子' }, { w: 'sillas', e: '椅子' }] },
+                { sp: 'El hielo antiguo ___ el azul.', zh: '古老的冰把蓝色反射出来。',
+                  opts: [{ w: 'devuelve', e: '反射出、还给' }, { w: 'desayuna', e: '吃早餐' }, { w: 'enseña', e: '教' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 14 · 🧶 El telar de la abuela mapuche — DELE C1 (v9.31)
+        //      Neuquén; subjuntivo pasado, condicional, identidad
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-c1-telar-mapuche',
+            dele: 'C1', track: 'Argentina',
+            emoji: '🧶',
+            titleEs: 'El telar de la abuela mapuche',
+            titleZh: '马普切外婆的织机',
+            blurb: 'En una comunidad mapuche del sur, la artesana Rosa Ancalao explica su telar: los ñimin, la lana hilada a mano, el mapudungun y la memoria familiar. Subjuntivo pasado, condicional y una charla sobre identidad.',
+            blurbZh: '在南方的马普切社区，织工罗莎·安卡拉奥讲解她的织机：ñimin 图案、手工纺线、马普切语（马普敦贡语）和家族记忆。过去虚拟式、条件式，以及一场关于身份认同的谈话。',
+            lines: [
+                { who: 'Valentina', sp: 'Doña Rosa, ¿me permite preguntarle cómo aprendió a tejer?', zh: '罗莎大妈，能问问您是怎么学会织布的吗？' },
+                { who: 'Rosa', sp: 'No me lo enseñó nadie en un colegio: aprendí mirando a mi ñuke, mi madre. El telar es memoria.', zh: '不是在学校学的：我是看着我 ñuke——我妈妈——织布学会的。织机就是记忆。' },
+                { who: 'Valentina', sp: 'Los dibujos tienen significado, ¿verdad?', zh: '这些图案都有含义，对吗？' },
+                { who: 'Rosa', sp: 'Cada ñimin cuenta algo: la lluvia, la montaña, la familia. Si yo me callara, el hilo no hablaría.', zh: '每一个 ñimin 都在讲述：雨、山、家人。我要是不说了，线就不会说话了。' },
+                { who: 'Valentina', sp: '¿Y la lana? Supongo que la preparan ustedes desde el principio.', zh: '那毛线呢？我猜从头到尾都是你们自己准备的。' },
+                { who: 'Rosa', sp: 'Oveja por medio, hilo por medio. Lavamos, hilamos y teñimos con plantas de aquí. Nada de fábrica.', zh: '一只羊一只羊地来，一根线一根线地纺。洗、纺、再用本地植物染色。工厂的东西一点都不用。' },
+                { who: 'Valentina', sp: 'He leído que la palabra mapuche significa "gente de la tierra".', zh: '我读到过，mapuche 这个词的意思是“大地的人们”。' },
+                { who: 'Rosa', sp: 'Mapu es tierra, che es gente. Si la tierra está bien, nosotros estamos bien. Es una misma cosa.', zh: 'Mapu 是大地，che 是人。大地好，我们才好。这是一回事。' },
+                { who: 'Valentina', sp: '¿Los jóvenes de la comunidad siguen hablando mapudungun?', zh: '社区里的年轻人还说马普切语吗？' },
+                { who: 'Rosa', sp: 'Algunos lo hablan y otros lo están recuperando. Una lengua que se calla se apaga; una que se habla, vive.', zh: '有些人说，有些人正在重新学。一门语言没人说了就会熄灭；有人说了，它就活着。' },
+                { who: 'Valentina', sp: '¿Y qué espera usted para las próximas generaciones?', zh: '那您对下一代有什么期望？' },
+                { who: 'Rosa', sp: 'Que nadie tenga vergüenza de su apellido. Tejer es eso también: no olvidarse de quién uno es.', zh: '希望没有人再为自己的姓氏感到羞耻。织布也是这个意思：别忘了自己是谁。' }
+            ],
+            quiz: [
+                { sp: 'Aprendí mirando a mi ___, mi madre.', zh: '我是看着我的 ñuke，也就是我妈妈，学会的。',
+                  opts: [{ w: 'ñuke', e: '马普切语“妈妈”' }, { w: 'vecina', e: '邻居' }, { w: 'profesora', e: '老师' }] },
+                { sp: 'Si yo me ___, el hilo no hablaría.', zh: '我要是不说了，线就不会说话。',
+                  opts: [{ w: 'callara', e: '沉默（过去虚拟式）' }, { w: 'calla', e: '沉默（现在时）' }, { w: 'calló', e: '沉默了（过去时）' }] },
+                { sp: '___ con plantas de aquí, nada de fábrica.', zh: '用这里的植物染色，不用工厂的东西。',
+                  opts: [{ w: 'Teñimos', e: '我们染色' }, { w: 'Comemos', e: '我们吃' }, { w: 'Rompemos', e: '我们打破' }] },
+                { sp: 'Una lengua que se ___ se apaga.', zh: '一门没人说的语言会熄灭。',
+                  opts: [{ w: 'calla', e: '不被说出口' }, { w: 'lava', e: '洗' }, { w: 'vende', e: '卖' }] },
+                { sp: 'Que nadie tenga ___ de su apellido.', zh: '希望没有人再为自己的姓氏感到羞耻。',
+                  opts: [{ w: 'vergüenza', e: '羞耻' }, { w: 'hambre', e: '饿' }, { w: 'suerte', e: '运气' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 15 · 🌽 La Pachamama en Tilcara — DELE C1 (v9.31)
+        //      Jujuy, Quebrada de Humahuaca; voz pasiva con se,
+        //      discurso indirecto, espiritualidad andina
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-c1-pachamama',
+            dele: 'C1', track: 'Argentina',
+            emoji: '🌽',
+            titleEs: 'La Pachamama en Tilcara',
+            titleZh: '蒂尔卡拉的大地母亲节',
+            blurb: 'Agosto en Tilcara, Jujuy: la ceremonia de la Pachamama, la poza con sus ofrendas, la challa antes de beber y la paciencia de la Quebrada de Humahuaca. Voz pasiva con se, discurso indirecto y espiritualidad andina.',
+            blurbZh: '八月，胡胡伊省蒂尔卡拉：帕查玛玛（大地母亲）仪式、埋供品的土坑、喝酒前的 challa 洒酒礼，以及乌马瓦卡峡谷教人的耐心。无人称被动句、间接引语和安第斯的灵性文化。',
+            lines: [
+                { who: 'Javier', sp: 'Doña Elvira, en agosto veo pozos en la tierra y gente brindando en la calle... ¿qué se celebra?', zh: '埃尔维拉大妈，八月里我看到地上挖了坑，人们还在街上举杯敬酒……这是在庆祝什么？' },
+                { who: 'Elvira', sp: 'La Pachamama, la Madre Tierra. Todo agosto la esperamos con comida, vino y hojas de coca.', zh: '是帕查玛玛，大地母亲。整个八月我们用食物、酒和古柯叶迎接她。' },
+                { who: 'Javier', sp: '¿Puedo participar en la ceremonia o es solo para la familia?', zh: '我可以参加仪式吗，还是只限家里人？' },
+                { who: 'Elvira', sp: 'Acá todos son bienvenidos si llegan con respeto. Primero se cava la poza, el hoyo en la tierra.', zh: '只要心怀敬意，这里欢迎所有人。先挖好土坑，就是地上的那个坑。' },
+                { who: 'Javier', sp: '¿Y qué se entierra en la poza?', zh: '那坑里埋什么？' },
+                { who: 'Elvira', sp: 'Ofrendas: coca, chicha, hojas de maíz, todo lo que la tierra nos da. Después se tapa con flores.', zh: '供品：古柯叶、奇恰酒、玉米叶，都是大地给我们的东西。然后用花盖上。' },
+                { who: 'Javier', sp: 'He oído hablar de la challa. ¿Es lo mismo?', zh: '我听说过 challa。是同一回事吗？' },
+                { who: 'Elvira', sp: 'La challa es el brindis: se echan unas gotas a la tierra antes de tomar. Pachamama toma primero.', zh: 'challa 是敬酒：喝之前先往地上洒几滴。帕查玛玛先喝。' },
+                { who: 'Javier', sp: 'Qué forma tan hermosa de agradecer. En mi ciudad casi nadie piensa en la tierra que pisa.', zh: '这是多美的感恩方式啊。在我的城市，几乎没人想过脚下踩着的土地。' },
+                { who: 'Elvira', sp: 'Por eso venís: la Quebrada enseña paciencia. Aquí el maíz crece a su tiempo, no al tiempo de nosotros.', zh: '所以你来了：峡谷教会人耐心。这里的玉米按自己的时节生长，不按我们的时间表。' },
+                { who: 'Javier', sp: '¿Los jóvenes siguen la tradición o se está perdiendo?', zh: '年轻人还延续这个传统吗，还是正在丢失？' },
+                { who: 'Elvira', sp: 'Los que se van, vuelven en agosto. La Pachamama sabe esperar, como toda madre.', zh: '走出去的人，八月都会回来。帕查玛玛懂得等待，就像所有的母亲一样。' }
+            ],
+            quiz: [
+                { sp: 'La Pachamama es la ___ Tierra.', zh: '帕查玛玛就是大地母亲。',
+                  opts: [{ w: 'Madre', e: '母亲' }, { w: 'Nueva', e: '新的' }, { w: 'Lejana', e: '遥远的' }] },
+                { sp: 'Primero se ___ la poza, el hoyo en la tierra.', zh: '先挖好土坑。',
+                  opts: [{ w: 'cava', e: '挖' }, { w: 'compra', e: '买' }, { w: 'pinta', e: '画' }] },
+                { sp: 'Se echan unas gotas a la tierra antes de ___.', zh: '喝之前先往地上洒几滴。',
+                  opts: [{ w: 'tomar', e: '喝' }, { w: 'dormir', e: '睡觉' }, { w: 'salir', e: '出门' }] },
+                { sp: 'Todo lo que la tierra ___ da.', zh: '都是大地给我们的东西。',
+                  opts: [{ w: 'nos', e: '给我们' }, { w: 'te', e: '给你' }, { w: 'los', e: '把它们' }] },
+                { sp: 'El maíz crece a su tiempo, no al tiempo de ___.', zh: '玉米按自己的时节生长，不按我们的时间表。',
+                  opts: [{ w: 'nosotros', e: '我们' }, { w: 'yo', e: '我' }, { w: 'ellos', e: '他们' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 16 · 📻 Debate: ¿turismo para quién? — DELE C2 (v9.31)
+        //      radio provincial, adultos; conectores discursivos,
+        //      condicional compuesto, argumentación
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-c2-radio-turismo',
+            dele: 'C2', track: 'Argentina',
+            emoji: '📻',
+            titleEs: 'Debate: ¿turismo para quién?',
+            titleZh: '辩论：旅游业为了谁？',
+            blurb: 'En una radio provincial, una empresaria turística y un antropólogo debaten: empleo frente a territorio, miradores y comunidades originarias, postales y personas. Conectores discursivos, condicional compuesto y argumentación de nivel C2.',
+            blurbZh: '在省级广播电台，旅游企业主与人类学家展开辩论：就业与领地、观景台与原住民社区、风景明信片与真实的人。话语连接词、复合条件式和 C2 级议论文体。',
+            lines: [
+                { who: 'Mabel', sp: 'Buenas noches. Hoy: el turismo en el norte argentino, ¿oportunidad compartida o negocio de pocos? Los acompaño, Mabel Ríos.', zh: '晚上好。今天的话题：阿根廷北部的旅游业，是大家共享的机会，还是少数人的生意？我是梅布尔·里奥斯，陪伴各位。' },
+                { who: 'Ibarra', sp: 'Sin hoteles no hay empleo. El año pasado recibimos cuarenta mil visitantes y el pueblo vivió de eso todo el invierno.', zh: '没有酒店就没有就业。去年我们接待了四万名游客，整个冬天镇上都靠这个过日子。' },
+                { who: 'Quipildor', sp: 'Nadie discute los empleos, señora. Lo que cuestiono es quién decide: las comunidades originarias llevan décadas esperando ser consultadas.', zh: '没有人否认就业，女士。我质疑的是由谁来做决定：原住民社区等别人来征求意见已经等了几十年。' },
+                { who: 'Ibarra', sp: 'Pero si las comunidades ya ofrecen sus servicios: guías, hospedajes, artesanías...', zh: '可社区现在已经在提供他们的服务了：导游、住宿、手工艺品……' },
+                { who: 'Quipildor', sp: 'Ofrecen lo que pueden, no lo que quieren. No obstante, cuando un lugar se vuelve postal, su gente termina trabajando para la foto.', zh: '他们提供的是他们能提供的，而不是他们想提供的。然而，当一个地方变成明信片，住在那里的人最后就成了给照片打工的。' },
+                { who: 'Mabel', sp: '¿Podríamos poner números sobre la mesa?', zh: '我们能不能摆一摆数字？' },
+                { who: 'Quipildor', sp: 'Con gusto: si se hubiera consultado a las comunidades antes de construir el mirador, otro sería hoy el debate.', zh: '很乐意：要是当年建观景台之前征求过社区的意见，今天的辩论就不是这个样子了。' },
+                { who: 'Ibarra', sp: 'Aun así, el mirador trae visitantes, y los visitantes traen clientes a los talleres.', zh: '即便如此，观景台带来了游客，游客给工坊带来了客人。' },
+                { who: 'Quipildor', sp: 'Traen también agua embotellada y basura a un territorio frágil. No en vano los ancianos hablan de "visitar" la montaña, nunca de "conquistarla".', zh: '可他们也给脆弱的土地带来了瓶装水和垃圾。难怪长者们说的是“拜访”大山，从来不说“征服”大山。' },
+                { who: 'Mabel', sp: 'Señora Ibarra, ¿cómo responde?', zh: '伊巴拉女士，您怎么回应？' },
+                { who: 'Ibarra', sp: 'Reconozco que nos falta diálogo. Habría propuesto mesas de gestión si hubiera tenido interlocutores claros; desde ya, acepto coordinarlas.', zh: '我承认我们缺少对话。要是一开始就有明确的对话方，我早就提议建立共管协商桌了；从现在起，我愿意来协调。' },
+                { who: 'Quipildor', sp: 'Es un comienzo. En definitiva, la pregunta no es cuántos turistas podemos recibir, sino quiénes escribimos la historia del lugar.', zh: '这是个开始。归根结底，问题不在于我们能接待多少游客，而在于由谁来书写这个地方的历史。' }
+            ],
+            quiz: [
+                { sp: 'Lo que cuestiono es ___ decide.', zh: '我质疑的是由谁来做决定。',
+                  opts: [{ w: 'quién', e: '谁' }, { w: 'qué hora', e: '几点' }, { w: 'cuánto cuesta', e: '多少钱' }] },
+                { sp: '___, cuando un lugar se vuelve postal, su gente trabaja para la foto.', zh: '然而，当一个地方变成明信片，那里的人就成了给照片打工的。',
+                  opts: [{ w: 'No obstante', e: '然而' }, { w: 'Por supuesto', e: '当然' }, { w: 'A menudo', e: '经常' }] },
+                { sp: 'Si se ___ a las comunidades antes, otro sería el debate.', zh: '要是当年征求过社区的意见，今天的辩论就不是这个样子。',
+                  opts: [{ w: 'hubiera consultado', e: '征求意见（过去虚拟式）' }, { w: 'consulta', e: '征求意见（现在时）' }, { w: 'consultará', e: '将征求意见（将来时）' }] },
+                { sp: 'Reconozco que ___ falta diálogo.', zh: '我承认我们缺少对话。',
+                  opts: [{ w: 'nos', e: '我们' }, { w: 'le', e: '他/她' }, { w: 'os', e: '你们（西班牙用法）' }] },
+                { sp: 'La pregunta no es cuántos recibimos, ___ quiénes escribimos la historia.', zh: '问题不在于我们接待多少，而在于由谁来书写历史。',
+                  opts: [{ w: 'sino', e: '而是' }, { w: 'si no', e: '否则' }, { w: 'pero', e: '但是' }] }
+            ]
         }
     ];
     /* ══════════════ fin de datos ══════════════ */
@@ -284,6 +697,7 @@
     // ── estado de la sesión abierta ──
     const S = { drama: null, view: null, idx: 0, results: [], order: [], answered: false };
     let curLevel = 'all';
+    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina'
 
     // ── TTS español: mismos motores globales de app.js con guardas ──
     // (este archivo carga ANTES de app.js: los globals solo se tocan al
@@ -292,6 +706,13 @@
     let dPlay = { text: '', btn: null, state: 'idle' }; // 'idle' | 'playing' | 'paused'
     let dQueue = null, dQIdx = 0;   // reproducción continua (▶️ Escuchar todo)
 
+    // v9.31: la cola terminó sola (última línea) → restaurar el botón
+    function resetPlayAll() {
+        dQueue = null; dQIdx = 0;
+        const b = $('dele-playall');
+        if (b) b.textContent = '▶️ Escuchar todo';
+    }
+
     function setSayIcon(btn, st) {
         if (!btn) return;
         btn.textContent = st === 'playing' ? '⏸' : (st === 'paused' ? '▶️' : '🔊');
@@ -299,6 +720,10 @@
     function stopSpeak() {
         dTok++; // invalida respuestas TTS en vuelo
         dQueue = null; dQIdx = 0;
+        // v9.31: oJO — stopSpeak NO toca el rótulo de #dele-playall: speakEs
+        // lo llama en CADA paso de la cola ▶️ y el botón parpadearía a '▶️'
+        // durante la reproducción (lo detectó la QA). Cada camino de parada
+        // explícito (playAll 2.º toque, resetPlayAll) restaura su etiqueta.
         if (dAudio) { try { dAudio.pause(); } catch (e) { } dAudio = null; }
         try { if (typeof globalAudioPlayer !== 'undefined' && globalAudioPlayer.src) globalAudioPlayer.pause(); } catch (e) { }
         if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) { } }
@@ -321,8 +746,14 @@
             return;
         }
         const myTok = ++dTok;
+        // v9.31 FIX "el audio solo reproduce la primera frase y se para":
+        // stopSpeak() apaga la cola ▶️ (dQueue = null); si ESTA lectura es
+        // un paso de la cola hay que preservarla para que la 2.ª línea y
+        // las siguientes encadenen (v9.30 la mataba acá mismo).
+        const keepQ = dQueue, keepI = dQIdx;
         stopSpeak();
         dTok = myTok; // stopSpeak lo avanzó: restaurar el token de ESTA lectura
+        dQueue = keepQ; dQIdx = keepI; // ▶️ continúa tras la línea actual
         dPlay = { text: text, btn: btn, state: 'loading' };
         if (btn) { btn.disabled = true; btn.textContent = '…'; }
         // un solo audio a la vez: corta el player global y el lector
@@ -360,7 +791,10 @@
             dAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
             const onGone = () => {
                 if (myTok !== dTok) return;
-                if (dQueue && dQIdx < dQueue.length) { playQueueStep(); return; } // ▶️ continua
+                if (dQueue) {
+                    if (dQIdx < dQueue.length) { playQueueStep(); return; } // ▶️ continua
+                    resetPlayAll(); // cola terminada: botón a '▶️' (v9.31)
+                }
                 dPlay.state = 'idle';
                 setSayIcon(dPlay.btn, 'idle');
             };
@@ -382,7 +816,10 @@
             } catch (e3) { }
             u.onend = () => {
                 if (myTok !== dTok) return;
-                if (dQueue && dQIdx < dQueue.length) { playQueueStep(); return; }
+                if (dQueue) {
+                    if (dQIdx < dQueue.length) { playQueueStep(); return; }
+                    resetPlayAll(); // cola terminada: botón a '▶️' (v9.31)
+                }
                 dPlay.state = 'idle'; setSayIcon(dPlay.btn, 'idle');
             };
             dPlay.state = 'playing';
@@ -419,7 +856,7 @@
     }
 
     // ── chips + lista del panel ──
-    const DELE_ORDER = ['A1', 'A2/B1'];
+    const DELE_ORDER = ['A1', 'A2/B1', 'B1', 'B2', 'C1', 'C2']; // v9.31: hasta C2
     function levelLabel(v) { return 'DELE ' + v; }
     function renderChips() {
         const chips = $('dele-levels');
@@ -443,6 +880,25 @@
         });
         lvls.forEach(v => mk(levelLabel(v), v));
     }
+    // v9.31: chips de PISTA (Todas · Escolares · Argentina) — se generan de
+    // los datos, igual que los de nivel, para que agregar un drama nuevo
+    // con otra pista cree su chip solo.
+    function renderTrackChips() {
+        const chips = $('dele-tracks');
+        if (!chips) return;
+        chips.innerHTML = '';
+        const mk = (label, value) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'lv-chip lv-chip-dele' + (curTrack === value ? ' active' : '');
+            b.dataset.track = value;
+            b.textContent = label;
+            b.setAttribute('aria-label', 'Filtrar dramas de pista ' + label);
+            chips.appendChild(b);
+        };
+        mk('Todas', 'all');
+        DRAMAS.forEach(d => { if (d.track && !$('dele-tracks').querySelector('[data-track="' + d.track + '"]')) mk(d.track, d.track); });
+    }
     function bestLabel(d) {
         const p = progOf(d.id);
         const best = (p.best != null) ? p.best + '/' + d.quiz.length : '—';
@@ -452,7 +908,15 @@
         const wrap = $('dele-list');
         if (!wrap) return;
         wrap.innerHTML = '';
-        DRAMAS.filter(d => curLevel === 'all' || d.dele === curLevel).forEach(d => {
+        const shown = DRAMAS.filter(d =>
+            (curLevel === 'all' || d.dele === curLevel) &&
+            (curTrack === 'all' || d.track === curTrack));
+        if (!shown.length) {
+            // v9.31: nivel+pista sin dramas (p. ej. DELE C1 × Escolares)
+            wrap.innerHTML = '<div class="dl-empty">Todavía no hay dramas de ese nivel en esta pista — probá otra combinación 🧭</div>';
+            return;
+        }
+        shown.forEach(d => {
             const card = document.createElement('div');
             card.className = 'lesson-card';
             card.innerHTML =
@@ -484,9 +948,17 @@
         const chips = $('dele-levels');
         if (chips) chips.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
-            if (!chip) return;
+            if (!chip || !chip.dataset.level) return; // (los de pista van en #dele-tracks)
             curLevel = chip.dataset.level;
             renderChips();
+            renderList();
+        });
+        const tracks = $('dele-tracks');
+        if (tracks) tracks.addEventListener('click', (e) => {
+            const chip = e.target.closest('.lv-chip');
+            if (!chip || !chip.dataset.track) return;
+            curTrack = chip.dataset.track; // v9.31: filtro por pista
+            renderTrackChips();
             renderList();
         });
     }
@@ -535,6 +1007,7 @@
     // ── vista LECTURA ──
     function openStory(d) {
         S.drama = d; S.view = 'story';
+        stopSpeak(); // v9.31: cambiar de vista corta la lectura (convención lecciones)
         openPop();
         progNum.textContent = '📖';
         segs.innerHTML = '';
@@ -578,7 +1051,14 @@
         $('dele-playall').addEventListener('click', (e) => playAll(e.target));
         body.querySelector('.lq-lines').addEventListener('click', (e) => {
             const say = e.target.closest('.lq-line-say');
-            if (say) speakEs(say.dataset.say, say);
+            if (!say) return;
+            // v9.31: con la cola activa, tocar una línea continúa desde ella
+            if (dQueue) {
+                const row = say.closest('.dl-line');
+                const i = row ? parseInt(row.dataset.i, 10) : NaN;
+                if (!isNaN(i)) dQIdx = i + 1;
+            }
+            speakEs(say.dataset.say, say);
         });
         body.scrollTop = 0;
     }
@@ -594,6 +1074,7 @@
     }
     function openQuiz(d) {
         S.drama = d; S.view = 'quiz'; S.idx = 0; S.answered = false;
+        stopSpeak(); // v9.31: que "Escuchar todo" no siga sonando sobre el quiz
         S.results = new Array(d.quiz.length).fill(null);
         // mezcla por sesión: opts[0] = correcta en los datos; el orden visible
         // se baraja acá para que la posición no sea predecible (patrón lecciones)
@@ -703,17 +1184,38 @@
         if (intro && INTRO_ORIG === null) INTRO_ORIG = intro.textContent;
         if (cnMode) {
             if (sub) sub.textContent = '(mini-dramas DELE · 学西班牙语)';
-            if (intro) intro.textContent = 'Leé un diálogo corto al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Niveles A1 y A2/B1 (Escolares), el mismo camino que tus oraciones diarias.';
+            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Dos pistas: Escolares (A1 y A2/B1) y Argentina para adolescentes y adultos — viajes a las provincias y culturas originarias (de A2/B1 a C2).';
         } else {
             if (sub && SUB_ORIG !== null) sub.textContent = SUB_ORIG;
             if (intro && INTRO_ORIG !== null) intro.textContent = INTRO_ORIG;
         }
     }
+    // v9.31: ¿estamos en modo español (cn-es)? Señal fuerte: app.js OCULTA
+    // #btn-play-es con .hidden-force al estar en es-cn. Si aún no dio señal
+    // (arranque: el DOMContentLoaded de app.js corre después del nuestro),
+    // se usa el modo guardado en localStorage como pista — así el panel
+    // nace DELE-only desde el primer cuadro, sin flasheo de las lecciones
+    // de chino (petición del usuario: "en modo español que se vea solo
+    // las de DELE"). Sin storage y sin señal → es-cn (default de la app).
+    const MODE_KEY = 'chino-espanol-app-v2';
+    function storedModeHint() {
+        try {
+            const st = JSON.parse(localStorage.getItem(MODE_KEY) || '{}');
+            if (st && st.mode === 'cn-es') return true;
+            if (st && st.mode === 'es-cn') return false;
+        } catch (e) { }
+        return null;
+    }
+    function cnModeNow() {
+        const esBtn = $('btn-play-es');
+        if (esBtn && esBtn.classList.contains('hidden-force')) return false; // app.js: es-cn
+        const hint = storedModeHint();
+        return hint === null ? false : hint;
+    }
     function applyMode() {
         const wrap = $('dele-wrap');
         if (!wrap) return;
-        const esBtn = $('btn-play-es');
-        const cnMode = esBtn ? !esBtn.classList.contains('hidden-force') : false;
+        const cnMode = cnModeNow();
         const ll = $('lesson-levels'), lst = $('lesson-list');
         if (cnMode) {
             wrap.classList.remove('hidden');
@@ -735,12 +1237,15 @@
         wrap.id = 'dele-wrap';
         wrap.className = 'hidden'; // se muestra solo en cn-es (applyMode)
         wrap.innerHTML =
+            '<div class="lesson-levels dele-tracks-row" id="dele-tracks" role="group" aria-label="Filtrar por pista"></div>' +
             '<div class="lesson-levels" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
             '<div class="lesson-list" id="dele-list" data-level="all"></div>';
         panel.appendChild(wrap);
+        renderTrackChips();
         renderChips();
         renderList();
         bindList();
+        applyMode(); // v9.31: estado correcto desde el primer cuadro (sin esperar app.js)
     }
     function injectStyles() {
         if ($('dele-styles')) return;
@@ -777,7 +1282,12 @@
             'body.dark-mode .dl-opt.ok{background:#052e16}',
             'body.dark-mode .dl-opt.bad{background:#450a0a}',
             'body.dark-mode .dl-fb.ok{background:#052e16;color:#bbf7d0}',
-            'body.dark-mode .dl-fb.bad{background:#450a0a;color:#fecaca}'
+            'body.dark-mode .dl-fb.bad{background:#450a0a;color:#fecaca}',
+            // v9.31: fila de pistas + estado vacío
+            '.dele-tracks-row{margin-bottom:6px}',
+            '.dele-tracks-row .lv-chip{opacity:.92}',
+            '.dl-empty{padding:18px 10px;text-align:center;color:#64748b;font-size:.92rem;border:1.5px dashed rgba(100,116,139,.35);border-radius:12px;margin-top:4px}',
+            'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}'
         ].join('\n');
         document.head.appendChild(st);
     }
@@ -814,6 +1324,11 @@
         state: S,
         progOf: progOf,
         applyMode: applyMode,
-        renderList: renderList
+        renderList: renderList,
+        // v9.31: ganchos de test para la cola ▶️ y el filtro de modo
+        playAll: playAll,
+        speakEs: speakEs,
+        queue: function () { return { q: dQueue, i: dQIdx }; },
+        cnModeNow: cnModeNow
     };
 })();

@@ -168,7 +168,23 @@
 //       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
 //       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
 //       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
-const VERSION = 'v77'; // — invalida shell (v9.30: grabación cancelable + mini-dramas DELE)
+// v9.31: cn-es lecciones — (1) FIX "el audio solo reproduce la primera
+//       frase y se para": speakEs() llama a stopSpeak() y stopSpeak()
+//       apagaba dQueue → la cola de "▶️ Escuchar todo" moría antes de la
+//       2.ª línea. Ahora speakEs preserva la cola (keepQ/keepI) y onGone
+//       resetea el botón al terminar sola. Además: cambiar de vista
+//       (lectura↔quiz) corta la lectura y tocar una línea con la cola
+//       activa reanuda desde esa línea. (2) 10 mini-dramas NUEVOS pista
+//       Argentina (adolescentes y adultos): mate porteño, terminal de
+//       Retiro, peña salteña, tren a las nubes, Iguazú y el guaraní,
+//       Vendimia mendocina, glaciar Perito Moreno, telar mapuche,
+//       Pachamama jujeña y debate de radio sobre turismo y pueblos
+//       originarios (A2/B1 → C2; 16 dramas en total). Chips de pista
+//       (Todas/Escolares/Argentina) + estados vacíos. (3) El panel
+//       nace DELE-only desde el primer cuadro en cn-es (pista de modo
+//       en localStorage mientras app.js no dé señal; sin flasheo de
+//       las lecciones de chino). Toca lessons-dele.js, index.html.
+const VERSION = 'v78'; // — invalida shell (v9.31: cola ▶️ + dramas Argentina + DELE-only instantáneo)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
