@@ -2759,6 +2759,36 @@ body.dark-mode .wp-hint { color: #94a3b8; }
 }
 
 /* ======================================================================
+   v9.34 — RESPUESTA A MANO (✍️ junto al input de respuesta)
+   El banner #handwrite-banner REUTILIZA las clases .wp-banner/.wp-top/
+   .wp-body/.wp-canvas/.wp-controls/.wp-hint/.wp-close del banner de
+   práctica v7.16 (incluido su dark-mode y su media query) → solo se
+   agregan el contador, el botón ✍️ del panel y el ✍️ del quiz SRS.
+   ====================================================================== */
+.btn-handwrite {
+    flex: 0 0 auto;          /* en la fila .answer-section: no se achica */
+    padding: 12px 14px;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+.srs-prod-hw {
+    flex: 0 0 auto;          /* en la fila .srs-prod-row del quiz de repaso */
+    padding: 8px 14px;
+    font-size: 1.15rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+.hw-count {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+body.dark-mode .hw-count { color: #94a3b8; }
+body.grand-mode .btn-handwrite { font-size: 1.3rem; padding: 14px 18px; }
+
+/* ======================================================================
    v7.18 MOBILE-FIRST: la práctica primero, la configuración después
    Orden: header compacto → barra de estudio sticky → TARJETA → tabs de
    módulos → stats + vocabulario → lector/planillas → borrar progreso.

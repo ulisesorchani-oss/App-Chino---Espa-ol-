@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260917a">
+    <link rel="stylesheet" href="style.css?v=20260917f">
 </head>
 <body>
     <div class="container">
@@ -136,6 +136,10 @@
             <!-- Input para respuesta -->
             <div class="answer-section" id="answer-section">
                 <input type="text" id="answer-input" placeholder="Escribe la palabra faltante...">
+                <!-- v9.34: ✍️ respuesta a mano — se muestra solo cuando la
+                     respuesta esperada es china (renderCurrentSentence) -->
+                <button id="btn-handwrite" class="btn-secondary btn-handwrite hidden" type="button"
+                        title="Escribir a mano (trazar con el dedo)" aria-label="Escribir la respuesta a mano">✍️</button>
                 <button id="btn-check" class="btn-primary" data-i18n="btnCheck">Verificar</button>
             </div>
 
@@ -473,6 +477,28 @@
         </div>
     </div>
 
+    <!-- v9.34: BANNER de respuesta a mano. Se abre con ✍️ junto al input
+         (panel diario y quiz de repaso en modo producción). A diferencia
+         del banner de práctica (v7.16), acá el carácter está OCULTO:
+         se escribe de MEMORIA y Hanzi Writer valida trazo por trazo;
+         💡 Pista lo anima cuando no sale. Al completar, el input queda
+         rellenado y el flujo de corrección existente sigue igual. -->
+    <div id="handwrite-banner" class="wp-banner hidden" role="dialog" aria-modal="true" aria-label="Escribir la respuesta a mano">
+        <div class="wp-top">
+            <h3 id="hw-title">✍ Tu respuesta a mano</h3>
+            <button id="btn-hw-close" type="button" class="wp-close" aria-label="Cerrar escritura a mano">✕</button>
+        </div>
+        <div class="wp-body">
+            <div id="hw-target" class="wp-canvas"></div>
+            <p class="hw-count" id="hw-count">1 / 1</p>
+            <div class="wp-controls">
+                <button id="btn-hw-hint" type="button" class="btn-secondary" title="Mirar cómo se escribe">💡 Pista</button>
+                <button id="btn-hw-keyboard" type="button" class="btn-secondary" title="Volver al teclado sin rellenar">⌨️ Teclado</button>
+            </div>
+            <p class="wp-hint" id="hw-hint">Escribí el carácter de memoria (no lo vas a ver)</p>
+        </div>
+    </div>
+
     <!-- v7.11: POPUP leyenda de tonos + esquema de colores (mismo patrón que #vocab-pop) -->
     <div id="tone-legend-pop" class="vocab-pop hidden" role="dialog" aria-label="Leyenda de tonos y colores">
         <button id="btn-tone-legend-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -699,7 +725,7 @@
          daba falso negativo). -->
     <script src="onboarding.js?v=20260916b"></script>
     <script src="stats.js?v=20260916b"></script>
-    <script src="app.js?v=20260916c"></script>
+    <script src="app.js?v=20260917e"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

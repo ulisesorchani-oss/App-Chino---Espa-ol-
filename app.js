@@ -2005,12 +2005,40 @@ function setupEventListeners() {
     // v7.16: primero el banner de práctica (está siempre encima).
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
+        // v9.34: el banner de respuesta a mano está un nivel más arriba:
+        // cierra SIN rellenar nada (el teclado sigue siendo el camino).
+        const hwb = document.getElementById('handwrite-banner');
+        if (hwb && !hwb.classList.contains('hidden')) { closeHandwrite(); return; }
         const wpb = document.getElementById('writer-practice-banner');
         if (wpb && !wpb.classList.contains('hidden')) { closeWriterPractice(); return; }
         const tl = document.getElementById('tone-legend-pop');
         if (tl && !tl.classList.contains('hidden')) { hideToneLegend(); return; }
         hideVocabPop();
     });
+    // v9.34: ✍️ del panel diario → respuesta a mano con el hanzi del
+    // guion activo (简/繁 ya resuelto por ck()); la respuesta se recala
+    // en el clic (nunca queda desincronizada de la tarjeta visible).
+    safeAdd('btn-handwrite', () => {
+        const filtered = getFiltered();
+        const s = filtered && filtered[state.currentIndex];
+        if (!s) return;
+        const learningChinese = state.mode === 'es-cn';
+        const answerIsZh = s.w ? !learningChinese : learningChinese;
+        const zh = answerIsZh ? String(s['chinese_' + ck() + '_answer'] || '').trim() : '';
+        if (!zh) return;
+        const ok = openHandwriteAnswer(zh, (word) => {
+            const inp = document.getElementById('answer-input');
+            if (inp && !inp.disabled) {
+                inp.value = word;
+                try { inp.focus(); } catch (e) { /* sin foco disponible */ }
+            }
+        });
+        if (!ok) moduleStatus('ℹ️ Escribí la respuesta con el teclado.', true);
+    });
+    // v9.34: botones del banner de respuesta a mano (HTML estático → safeAdd)
+    safeAdd('btn-hw-close', closeHandwrite);
+    safeAdd('btn-hw-keyboard', closeHandwrite); // volver al teclado SIN rellenar
+    safeAdd('btn-hw-hint', hwHint);
     // v7.16: botones del banner de práctica (HTML estático → safeAdd sirve)
     safeAdd('btn-wp-close', closeWriterPractice);
     safeAdd('btn-wp-animate', () => {
@@ -2026,9 +2054,18 @@ function setupEventListeners() {
     // lienzo al tamaño nuevo (debounce; solo si hay writer activo).
     window.addEventListener('resize', () => {
         const wpb = document.getElementById('writer-practice-banner');
-        if (!wpb || wpb.classList.contains('hidden') || !wpPractice.writer) return;
-        clearTimeout(wpPractice.resizeT);
-        wpPractice.resizeT = setTimeout(() => wpShowChar({}), 250);
+        if (wpb && !wpb.classList.contains('hidden') && wpPractice.writer) {
+            clearTimeout(wpPractice.resizeT);
+            wpPractice.resizeT = setTimeout(() => wpShowChar({}), 250);
+        }
+        // v9.34: rotación con el banner de respuesta abierto → remonta el
+        // carácter actual (los ya completados quedan registrados en hwAns).
+        // Independiente del bloque de arriba: los banners nunca conviven.
+        const hwb = document.getElementById('handwrite-banner');
+        if (hwb && !hwb.classList.contains('hidden') && hwAns.writer) {
+            clearTimeout(hwAns.resizeT);
+            hwAns.resizeT = setTimeout(() => hwShowChar(), 250);
+        }
     });
     document.addEventListener('click', (e) => {
         const pop = document.getElementById('vocab-pop');
@@ -2665,6 +2702,17 @@ function renderCurrentSentence() {
         input.placeholder = 'Escribe en chino (' + charLabel + ')...';
     } else {
         input.placeholder = 'Escribe en español (conjugado)... 用西班牙语写';
+    }
+
+    // v9.34: ✍️ "respuesta a mano" — visible SOLO cuando la respuesta
+    // esperada es CHINA (palabras en cn-es u oraciones en es-cn, misma
+    // regla expectChineseAns de checkAnswer) y el hanzi del guion activo
+    // existe. En los otros caminos el teclado es el único camino.
+    const btnHw = document.getElementById('btn-handwrite');
+    if (btnHw) {
+        const answerIsZh = s.w ? !learningChinese : learningChinese;
+        const zhAns = answerIsZh ? String(s['chinese_' + k + '_answer'] || '').trim() : '';
+        btnHw.classList.toggle('hidden', !(answerIsZh && zhAns));
     }
 
     // 6b. Instrucciones bilingües en modo "Aprendo español" (CN→ES):
@@ -3788,6 +3836,182 @@ function closeWriterPractice() {
     const banner = document.getElementById('writer-practice-banner');
     if (banner) banner.classList.add('hidden');
     const target = document.getElementById('wp-target');
+    if (target) target.innerHTML = ''; // libera el SVG
+    document.body.style.overflow = ''; // restaura el scroll de la app
+}
+
+// ============================================================
+// v9.34 — RESPUESTA A MANO (✍️ junto al input de respuesta).
+//  El paso pedagógico que faltaba: PRODUCIR el carácter de memoria.
+//  A diferencia del banner de práctica (v7.16), acá el hanzi NO se
+//  ve (showOutline: false): el alumno traza de memoria y Hanzi
+//  Writer valida trazo por trazo; la pista 💡 anima el carácter
+//  cuando no sale. Al completar TODOS los caracteres, el input
+//  queda rellenado con la respuesta y el flujo de corrección
+//  existente (checkAnswer / prodCheck) sigue exactamente igual —
+//  NADA de la lógica de puntuación cambia. Si el motor o los datos
+//  no cargan (offline la 1.ª vez), el teclado siempre está: la app
+//  no se rompe (filosofía de la casa).
+//  Reutiliza el motor v7.13: loadHanziWriter() (librería local +
+//  fallback CDN), vpStrokeColors() (colores por tema) y la caché
+//  persistente de datos por carácter (chino-es-hanzi-v1, offline
+//  desde la 2.ª vez). Palabras de varios caracteres → quiz
+//  secuencial auto-encadenado (patrón wpPractice); caracteres
+//  repetidos (爸爸) se trazan UNA sola vez y el input recibe la
+//  palabra completa.
+// ============================================================
+const hwAns = { gen: 0, word: '', chars: [], idx: 0, writer: null, fill: null, misses: 0, resizeT: null };
+
+function hwSetHint(msg) {
+    const h = document.getElementById('hw-hint');
+    if (h) h.textContent = msg;
+}
+
+function hwUpdateCount() {
+    const c = document.getElementById('hw-count');
+    if (c) c.textContent = (hwAns.idx + 1) + ' / ' + hwAns.chars.length;
+}
+
+// Quiz del carácter actual (sin verlo). onMistake acumula para
+// sugerir la pista; onComplete encadena el siguiente carácter y, al
+// terminar la palabra, rellena el input y cierra (patrón gen de
+// wpStartQuiz: el closure compara contra el gen VIGENTE).
+function hwStartQuiz(myGen) {
+    const wr = hwAns.writer;
+    if (!wr) return;
+    if (typeof myGen === 'number' && myGen !== hwAns.gen) return;
+    const gen = typeof myGen === 'number' ? myGen : hwAns.gen;
+    try { wr.cancelQuiz(); } catch (e) { }
+    hwAns.misses = 0;
+    wr.quiz({
+        onMistake: () => {
+            if (gen !== hwAns.gen) return;
+            hwAns.misses++;
+            if (hwAns.misses >= 3) hwSetHint('🤔 Tranquilo — tocá 💡 Pista y mirá cómo se escribe.');
+        },
+        onComplete: () => {
+            if (gen !== hwAns.gen) return; // cerró el banner mientras tanto
+            const total = hwAns.chars.length;
+            if (hwAns.idx < total - 1) {
+                hwAns.idx++;
+                hwSetHint('👏 ¡Bien! Ahora el carácter ' + (hwAns.idx + 1) + ' de ' + total + ' (de memoria)');
+                hwShowChar(); // racha: monta el siguiente y arranca su quiz
+            } else {
+                hwSetHint('🎉 ¡Completado! Tu respuesta ya está en el campo.');
+                const fill = hwAns.fill;
+                setTimeout(() => {
+                    if (gen !== hwAns.gen) return; // cerró durante el retardo
+                    closeHandwrite();
+                    if (typeof fill === 'function') fill(hwAns.word);
+                }, 550);
+            }
+        }
+    });
+}
+
+// Monta el carácter actual SIN contorno (producción de memoria) y
+// arranca el quiz cuando los datos del carácter están listos.
+function hwShowChar() {
+    const target = document.getElementById('hw-target');
+    if (!target) return;
+    const myGen = ++hwAns.gen; // invalida montaje/callbacks anteriores
+    const ch = hwAns.chars[hwAns.idx];
+    if (!ch) return;
+    if (hwAns.writer) { try { hwAns.writer.cancelQuiz(); } catch (e) { } }
+    hwAns.writer = null;
+    target.innerHTML = ''; // nunca dos SVG montados (memoria)
+    target.classList.add('loading');
+    hwUpdateCount();
+    loadHanziWriter().then(() => {
+        if (myGen !== hwAns.gen) return; // cerró el banner mientras tanto
+        const cols = vpStrokeColors();
+        const size = target.offsetWidth || 300; // el banner ya está visible
+        try {
+            hwAns.writer = HanziWriter.create(target, ch, {
+                width: size,
+                height: size,
+                padding: 16,
+                showOutline: false,   // ← LA diferencia con la práctica v7.16: de memoria
+                strokeColor: cols.stroke,
+                outlineColor: cols.outline,
+                highlightColor: cols.highlight,
+                drawingColor: cols.drawing,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 220,
+                showHintAfterMisses: 3, // tras 3 errores: resalta el próximo trazo
+                onLoadCharDataSuccess: () => {
+                    if (myGen !== hwAns.gen) return;
+                    target.classList.remove('loading');
+                    setTimeout(() => { if (myGen === hwAns.gen) hwStartQuiz(myGen); }, 350);
+                },
+                onLoadCharDataError: () => {
+                    if (myGen !== hwAns.gen) return;
+                    target.classList.remove('loading');
+                    hwSetHint('⚠ No pude cargar los datos del carácter (¿sin conexión la primera vez?) — usá ⌨️ Teclado.');
+                }
+            });
+        } catch (e) {
+            target.classList.remove('loading');
+            hwSetHint('⚠ No se pudo montar el carácter — usá ⌨️ Teclado.');
+        }
+    }).catch(() => {
+        if (myGen !== hwAns.gen) return;
+        target.classList.remove('loading');
+        hwSetHint('⚠ Sin motor de trazos (¿sin conexión la primera vez?) — usá ⌨️ Teclado.');
+    });
+}
+
+// 💡 Pista: anima el carácter actual (se ve la forma y el orden de
+// los trazos) y al terminar vuelve a pedir el quiz del MISMO
+// carácter — aprendizaje por imitación, sin penalización.
+function hwHint() {
+    const wr = hwAns.writer;
+    if (!wr) return;
+    try { wr.cancelQuiz(); } catch (e) { }
+    const gen = hwAns.gen;
+    hwSetHint('▶ Mirá cómo se escribe y volvé a trazarlo…');
+    Promise.resolve(wr.animateCharacter()).then(() => {
+        if (gen !== hwAns.gen || hwAns.writer !== wr) return;
+        hwSetHint('✍ Ahora trazalo vos, de memoria');
+        hwStartQuiz(gen);
+    }).catch(() => {
+        if (gen !== hwAns.gen) return;
+        hwStartQuiz(gen); // la animación falló: el quiz vuelve a estar activo
+    });
+}
+
+// Punto de entrada: word = la respuesta china esperada (guion 简/繁
+// ya resuelto por el caller), fill(word) = cómo rellenar el input.
+// Devuelve false si no hay hanzi o banner → el caller deja seguir
+// con el teclado. Los caracteres se trazan en orden de aparición,
+// sin duplicados, con el mismo tope de la práctica (VP_STROKES_MAX).
+function openHandwriteAnswer(word, fill) {
+    const w = String(word || '').trim();
+    const chars = [];
+    for (const ch of w) if (READER_HANZI.test(ch) && chars.indexOf(ch) === -1) chars.push(ch);
+    const banner = document.getElementById('handwrite-banner');
+    if (!chars.length || !banner) return false;
+    hwAns.gen++;
+    hwAns.word = w;
+    hwAns.chars = chars.slice(0, VP_STROKES_MAX);
+    hwAns.idx = 0;
+    hwAns.fill = fill || null;
+    hwAns.misses = 0;
+    banner.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // fullscreen: sin scroll detrás
+    hwSetHint('✍ Escribí de memoria: ' + hwAns.chars.length +
+        (hwAns.chars.length > 1 ? ' caracteres' : ' carácter'));
+    hwShowChar();
+    return true;
+}
+
+function closeHandwrite() {
+    hwAns.gen++; // invalida callbacks en vuelo (carga, quiz, animación, retardo)
+    if (hwAns.writer) { try { hwAns.writer.cancelQuiz(); } catch (e) { } }
+    hwAns.writer = null;
+    const banner = document.getElementById('handwrite-banner');
+    if (banner) banner.classList.add('hidden');
+    const target = document.getElementById('hw-target');
     if (target) target.innerHTML = ''; // libera el SVG
     document.body.style.overflow = ''; // restaura el scroll de la app
 }
@@ -6011,6 +6235,8 @@ function pzCounterUpdate() {
                   '<div class="srs-prod-row">' +
                       '<input type="text" class="srs-prod-input" maxlength="20" autocomplete="off" ' +
                           'autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Escribí el hanzi…">' +
+                      // v9.34: ✍️ escribir el hanzi a mano (producción de memoria)
+                      '<button type="button" class="btn-secondary srs-prod-hw" title="Escribir a mano">✍️</button>' +
                       '<button type="button" class="btn-primary srs-prod-check">Comprobar</button>' +
                   '</div>' +
                   '<div id="srs-prod-fb" class="srs-prod-fb" aria-live="polite"></div>' +
@@ -6303,6 +6529,18 @@ function pzCounterUpdate() {
             else if (b.classList.contains('srs-close-btn')) srsClose();
             else if (b.classList.contains('srs-speak')) {
                 if (SR.cur) srsSpeak(ck() === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh);
+            }
+            else if (b.classList.contains('srs-prod-hw')) { // v9.34: ✍️ a mano
+                if (SR.cur) {
+                    const zh = ck() === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh;
+                    openHandwriteAnswer(zh, (word) => {
+                        const pin = document.querySelector('#srs-body .srs-prod-input');
+                        if (pin && !pin.disabled) {
+                            pin.value = word;
+                            try { pin.focus(); } catch (e) { /* sin foco disponible */ }
+                        }
+                    });
+                }
             }
             else if (b.classList.contains('srs-write')) {
                 if (SR.cur) openWriterPractice(SR.cur.zh); // banner grande de trazos (v7.16)

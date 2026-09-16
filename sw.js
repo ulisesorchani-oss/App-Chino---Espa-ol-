@@ -168,6 +168,26 @@
 //       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
 //       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
 //       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
+// v9.34: es-cn — RESPUESTA A MANO (✍️ escribiendo el hanzi con el dedo).
+//       El paso pedagógico que faltaba en las respuestas en chino: PRODUCIR
+//       el carácter de memoria en vez de tipearlo. Botón ✍️ junto al input
+//       de respuesta del panel diario (visible SOLO cuando la respuesta
+//       esperada es china: oraciones en es-cn y palabras en cn-es, misma
+//       regla expectChineseAns de checkAnswer) y botón ✍️ en el quiz de
+//       repaso modo producción ("Escribí el hanzi…"). Abre un banner
+//       fullscreen (#handwrite-banner) reutilizando el motor v7.13
+//       (hanzi-writer.min.js ya precacheado + caché persistente de datos
+//       por carácter) pero con showOutline: false: el carácter NO se ve,
+//       Hanzi Writer valida trazo por trazo; 💡 Pista anima el carácter
+//       cuando no sale (aprendizaje por imitación); ⌨️ Teclado vuelve al
+//       input sin rellenar nada. Palabras multi-carácter → quiz secuencial
+//       auto-encadenado (爸爸 se traza una vez). Al completar, el input
+//       queda rellenado con la respuesta (guion 简/繁 del usuario) y la
+//       corrección existente sigue EXACTAMENTE igual — la lógica de
+//       puntuación no cambia ni una línea. Si el motor o los datos no
+//       cargan (offline la 1.ª vez), el banner avisa y el teclado sigue
+//       siendo el camino: la app no se rompe. Toca app.js, index.html,
+//       style.css.
 // v9.33: cn-es lecciones — PULIDO DEL PANEL DELE + más Argentina básica.
 //       (1) El panel no era intuitivo: había DOS botones "mostrar todo"
 //       ("Todas" en la fila de pista y "Todo" en la de nivel). Ahora hay
@@ -213,7 +233,7 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
-const VERSION = 'v80'; // — invalida shell (v9.33: panel DELE pulido — un solo "Todas", toggle de pista, niveles separados + 8 dramas Argentina A1-B2)
+const VERSION = 'v81'; // — invalida shell (v9.34: respuesta a mano ✍️ — escribir el hanzi de memoria en el panel y en el quiz de repaso)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
