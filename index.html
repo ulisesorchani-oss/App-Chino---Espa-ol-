@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260916a">
+    <link rel="stylesheet" href="style.css?v=20260917a">
 </head>
 <body>
     <div class="container">
@@ -623,13 +623,18 @@
     <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
          Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
     <script src="text-utils.js?v=20260910c"></script>
-    <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget) -->
-    <script src="VoiceRecorder.js?v=20260910c"></script>
+    <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget)
+         v9.30: el análisis se puede CANCELAR con un toque (antes pointer-events:
+         none + clics ignorados = "funciona como play pero no como stop") y el
+         hint muestra los segundos de análisis sin pisar el % de descarga. -->
+    <script src="VoiceRecorder.js?v=20260917a"></script>
     <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
          voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
          alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
-    <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local -->
-    <script src="voice-evaluator.js?v=20260912a"></script>
+    <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local
+         v9.30: + cancelEval() público (aborta la evaluación en vuelo; lo llama
+         VoiceRecorder.js cuando el usuario cancela durante el análisis). -->
+    <script src="voice-evaluator.js?v=20260917a"></script>
     <script src="dict-mini.js?v=20260910k"></script>
     <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
     <script src="lessons.js?v=20260910c"></script>
@@ -637,6 +642,12 @@
     <script src="lessons-tocfl.js?v=20260910e"></script>
     <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
+    <!-- v9.30: mini-dramas DELE (aprendices de español, modo cn-es) — archivo
+         aditivo y autocontenido: toma #panel-lessons cuando el modo es cn-es
+         (chips propios A1 / A2-B1 + overlay #dele-pop con piel .lq-pop) y en
+         es-cn deja el panel HSK/TOCFL exactamente como estaba. Carga ANTES de
+         app.js (usa globals de app.js solo al hacer clic, con guardas). -->
+    <script src="lessons-dele.js?v=20260917a"></script>
     <script src="classics.js?v=20260910c"></script>
     <!-- v9.22: guía interactiva de bienvenida (bilingüe según modo; se auto-inyecta:
          botón 📖 Guía + overlay #guide-pop). Auto-contenida, NO toca app.js.

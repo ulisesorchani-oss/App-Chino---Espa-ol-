@@ -153,7 +153,22 @@
 //       al iniciar el despacho, inmune a mutaciones del DOM), con
 //       contains() como fallback. Toca app.js, onboarding.js, stats.js,
 //       index.html; style.css intacto.
-const VERSION = 'v76'; // — invalida shell (v9.29: composedPath en clic afuera de mp/guide/stats — regreso v9.28)
+// v9.30: cn-es — (1) FIX del botón de grabación ("funciona como play pero
+//       no como stop"): durante el análisis el botón tenía pointer-events:
+//       none y los clics se ignoraban; la 1.ª evaluación descarga el motor
+//       (~40 MB) y WASM transcribe en un hilo → el botón quedaba mudo hasta
+//       2 min (maxWaitMs). Ahora el toque durante "processing" CANCELA
+//       (VR._cancelProcessing + VE.cancelEval, resultado tardío descartado
+//       por token) y el hint lleva ticker de segundos sin pisar el % de
+//       descarga. Toca VoiceRecorder.js, voice-evaluator.js, style.css.
+//       (2) Mini-dramas DELE (lessons-dele.js NUEVO): 6 diálogos escolares
+//       (3×DELE A1 + 3×A2/B1, pista Escolares) con lectura línea a línea en
+//       voz 🇪🇸 es-ES (fetchTTS + fallback sistema), "Escuchar todo" en
+//       cola, traducción 中文 opcional (ac_dele_zh) y quiz de completar con
+//       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
+//       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
+//       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
+const VERSION = 'v77'; // — invalida shell (v9.30: grabación cancelable + mini-dramas DELE)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
@@ -183,6 +198,7 @@ const PRECACHE = [
   './lessons.js',           // v7.14: textos completos de las lecciones (📖 Leer lección)
   './lessons-tocfl.js',     // v9.6: mini-dramas TOCFL (se concatenan a GRADED_LESSONS)
   './lessons-extra.js',     // v9.6c: mini-dramas HSK extra (+2 por nivel)
+  './lessons-dele.js',      // v9.30: mini-dramas DELE para cn-es (aprendices de español)
   './classics.js',          // v9.2: TEXTO ORIGINAL de los 9 clásicos por bloques (lector de clásicos)
   './onboarding.js',        // v9.22: guía interactiva de bienvenida (bilingüe según modo)
   './stats.js',             // v9.23: rachas y estadísticas (bilingüe según modo)

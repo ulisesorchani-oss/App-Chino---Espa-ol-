@@ -1426,6 +1426,15 @@ class PronunciationEvaluator {
         }
     }
 
+    /** v9.30 — cancela la EVALUACIÓN en vuelo (no la captura): el toque
+     *  durante "processing" de VoiceRecorder.js llega acá y aborta el
+     *  AbortController del Promise.race de _evalLocal → la promesa rechaza
+     *  con 'eval-aborted' → stopAndEvaluate cae a _manual → VR la descarta
+     *  por token. JAMÁS lanza: seguro de llamar desde cualquier estado. */
+    cancelEval() {
+        this._abortEval();
+    }
+
     /* ---------- corte + evaluación → objeto estandarizado SIEMPRE ---------- */
     async stopAndEvaluate(targetText) {
         // v7.8: si hay una transición de modo en vuelo (clic llegó mientras

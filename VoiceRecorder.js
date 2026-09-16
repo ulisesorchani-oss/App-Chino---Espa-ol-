@@ -103,7 +103,14 @@ const T = {
     confLabel: 'Confianza del reconocimiento:',
     esNote: 'El feedback fonético fino (rr, b/v…) llega en la Fase 2 — por ahora compará con la referencia y con tu oído.',
     charByEs: 'Palabras:',
-    charByEsT: '詞語：'
+    charByEsT: '詞語：',
+
+    // v9.30 — el análisis se puede CANCELAR (antes el botón quedaba
+    // intocable hasta 2 min en la 1.ª descarga del motor → "no funciona
+    // como stop"). Ticker de segundos en el hint + cancel con un toque.
+    hintCancelEs: '🧠 Analizando… 正在分析 · toca el botón para cancelar / 點按按鈕取消',
+    cancelEs: '✋ Análisis cancelado — tocá 🎤 para grabar de nuevo / 已取消，可重新錄音',
+    procSecEs: (s) => '🧠 Analizando… ' + s + ' s 正在分析 · toca para cancelar / 點按取消'
 };
 
 /* ============================================================
@@ -622,12 +629,15 @@ const VR = {
     },
 
     /** v7.6 — estado del motor local: texto bilingüe + barra de descarga.
-     *  pct null → oculta la barra. Lo llama window.VE. */
+     *  pct null → oculta la barra. Lo llama window.VE.
+     *  v9.30: mientras procesa, el mensaje del motor se vuelve el "base"
+     *  del ticker (segundos) en vez de ser pisado por él cada 1 s. */
     setVoiceStatus(es, zh, pct) {
         this._setDl(pct);
         if (es) {
             this.hint.textContent = zh ? (es + ' ' + zh) : es;
             this.hint.classList.remove('hidden');
+            if (this.state === 'processing') this._startProcTicker(this.hint.textContent); // v9.30
         }
     },
     /** v7.6 — solo barra (mientras graba: no tapar el texto "Grabando…"). */
@@ -648,6 +658,7 @@ const VR = {
      *  objetivo es la oración ESPAÑOLA y la UI nunca muestra tonos. */
     setTarget(zhText, pinyinText, script, targetLang) {
         this._evalTok++; // invalida evaluaciones en vuelo (anti-carrera)
+        this._stopProcTicker(); // v9.30: navegar a otra oración mata el ticker
         this._targetLang = (targetLang === 'es') ? 'es' : 'zh';
         if (this.state === 'recording') {
             if (this._veActive()) window.VE.abort();
@@ -683,7 +694,12 @@ const VR = {
     /* ---------- flujo principal ---------- */
     async _onBtnClick() {
         if (this.state === 'recording') { this._finishRecording(); return; }
-        if (this.state !== 'idle') return; // processing: ignorar clics
+        // v9.30: durante el análisis, un toque CANCELA. Antes el CSS tenía
+        // pointer-events:none y los clics se ignoraban → en la 1.ª descarga
+        // del motor (hasta 2 min) el botón quedaba mudo y el usuario
+        // percibía "funciona como play pero no como stop".
+        if (this.state === 'processing') { this._cancelProcessing(); return; }
+        if (this.state !== 'idle') return; // cualquier otro estado: ignorar
 
         // Soporte del navegador (MediaRecorder/getUserMedia)
         if (!VoiceRecorder.supported()) {
@@ -767,6 +783,7 @@ const VR = {
         this._setBtn('', 'is-processing');      // spinner CSS (texto vacío)
         this.hint.textContent = !this._veActive() ? T.hintProc
             : (this._targetLang === 'es' ? T.hintProcLocalEs : T.hintProcLocal);
+        this._startProcTicker(this.hint.textContent + ' · toca para cancelar / 點按取消'); // v9.30
 
         // ── v7.6: motor local Whisper WASM (voice-evaluator.js) ──
         // stopAndEvaluate SIEMPRE devuelve el objeto estandarizado
@@ -820,13 +837,54 @@ const VR = {
     },
 
     _backToIdle() {
+        this._stopProcTicker(); // v9.30
         this.state = 'idle';
         this.panel.classList.remove('is-recording');
         this._setBtn('🎤', '');
+        this.btn.title = 'Tocá para grabar tu pronunciación'; // v9.30: restaura el title
         this.hint.textContent = T.hintTap;
     },
 
+    /* ── v9.30: análisis CANCELABLE ──────────────────────────────
+       Un toque durante "processing" corta la evaluación y vuelve a 🎤.
+       El resultado que llegue tarde se descarta solo: _evalTok avanza y
+       el guard de _finishRecording (tok !== _evalTok) lo ignora. El motor
+       nunca se rompe: VE.cancelEval solo aborta el AbortController. */
+    _cancelProcessing() {
+        this._evalTok++; // invalida la evaluación en vuelo (anti-carrera)
+        this._stopProcTicker();
+        if (this._veActive() && window.VE && typeof window.VE.cancelEval === 'function') {
+            try { window.VE.cancelEval(); } catch (e) { /* noop */ }
+        }
+        // camino legado (webspeech): cortar capturas si quedó algo vivo
+        try { if (this._recorder && this._recorder.abort) this._recorder.abort(); } catch (e) { }
+        try { if (this._recognizer && this._recognizer.abort) this._recognizer.abort(); } catch (e) { }
+        this._backToIdle();
+        this.hint.textContent = T.cancelEs;
+    },
+
+    /* v9.30 — ticker de segundos mientras analiza. `base` se refresca desde
+       setVoiceStatus (progreso de descarga %, luego "Analizando…") para NO
+       pelear con los mensajes del motor: el ticker añade los segundos y
+       mantiene el recordatorio de cancelación al alcance de un toque. */
+    _startProcTicker(base) {
+        this._stopProcTicker();
+        const t0 = Date.now();
+        this._procBase = base || T.hintCancelEs;
+        this.hint.textContent = this._procBase;
+        this.hint.classList.remove('hidden');
+        this._procTimer = setInterval(() => {
+            const s = Math.floor((Date.now() - t0) / 1000);
+            this.hint.textContent = this._procBase + (s >= 3 ? (' · ' + s + ' s') : '');
+        }, 1000);
+    },
+    _stopProcTicker() {
+        if (this._procTimer) { clearInterval(this._procTimer); this._procTimer = null; }
+        this._procBase = '';
+    },
+
     _showError(msg) {
+        this._stopProcTicker(); // v9.30: por si algún camino de error llegara con el ticker vivo
         this.result.innerHTML = '';
         const p = document.createElement('p');
         p.className = 'rec-error';

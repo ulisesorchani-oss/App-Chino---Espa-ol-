@@ -1876,11 +1876,15 @@ body.dark-mode .dele-group-label {
     100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
 
-/* PROCESANDO: spinner CSS (texto vacío) */
+/* PROCESANDO: spinner CSS (texto vacío).
+   v9.30: FUERA pointer-events:none — era la raíz del "no funciona como
+   stop": el 1.er análisis descarga el motor (~40 MB, solo la 1.ª vez) y
+   el botón quedaba intocable hasta 2 min (maxWaitMs). Ahora el clic
+   durante el análisis CANCELA y vuelve a 🎤 (lo maneja VoiceRecorder.js). */
 .btn-record.is-processing {
     color: transparent;
     position: relative;
-    pointer-events: none;
+    cursor: pointer;
 }
 
 .btn-record.is-processing::after {
