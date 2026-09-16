@@ -168,6 +168,20 @@
 //       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
 //       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
 //       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
+// v9.32: cn-es lecciones — FIX "se siguen viendo las chinas + los chips
+//       de español quedaron todos abajo". CAUSA RAÍZ: applyMode() ocultaba
+//       #lesson-levels/#lesson-list con .hidden (display:none, línea 410 de
+//       style.css) pero .lesson-levels/.lesson-list definen display:flex
+//       MÁS ABAJO (3694/3702) → misma especificidad, gana la última → el
+//       CSS real nunca escondió las lecciones de chino (el QA v9.31 medía
+//       solo classList, no display computado). FIX: (1) .hidden-force
+//       (display:none !important, convención app.js) en los dos contenedores;
+//       (2) clase 'dele-only' a nivel de #panel-lessons con regla CSS propia
+//       (cinturón y tirantes: sobrevive a re-creación de hijos por
+//       renderList/boot); (3) #dele-wrap ahora se inyecta con insertBefore
+//       ANTES de #lesson-levels → los chips DELE nacen ARRIBA del bloque
+//       chino (antes: appendChild al final). En es-cn todo igual que antes.
+//       Toca lessons-dele.js, index.html.
 // v9.31: cn-es lecciones — (1) FIX "el audio solo reproduce la primera
 //       frase y se para": speakEs() llama a stopSpeak() y stopSpeak()
 //       apagaba dQueue → la cola de "▶️ Escuchar todo" moría antes de la
@@ -184,7 +198,7 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
-const VERSION = 'v78'; // — invalida shell (v9.31: cola ▶️ + dramas Argentina + DELE-only instantáneo)
+const VERSION = 'v79'; // — invalida shell (v9.32: DELE-only real, hidden-force + dele-only + chips arriba)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

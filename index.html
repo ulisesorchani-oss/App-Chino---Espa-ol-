@@ -651,8 +651,12 @@
          A2/B1→C2: provincias, culturas originarias), chips de pista, fix de
          "Escuchar todo" (solo sonaba la 1.ª frase: stopSpeak apagaba la cola
          dentro de speakEs) y panel DELE-only desde el primer cuadro (pista de
-         modo en localStorage, sin flasheo HSK en cn-es). -->
-    <script src="lessons-dele.js?v=20260917b"></script>
+         modo en localStorage, sin flasheo HSK en cn-es).
+         v9.32: fix "se siguen viendo las chinas" (.hidden perdía contra
+         display:flex de .lesson-levels/.lesson-list → ahora .hidden-force +
+         clase panel dele-only) y chips DELE arriba (insertBefore, no
+         appendChild). -->
+    <script src="lessons-dele.js?v=20260917c"></script>
     <script src="classics.js?v=20260910c"></script>
     <!-- v9.22: guía interactiva de bienvenida (bilingüe según modo; se auto-inyecta:
          botón 📖 Guía + overlay #guide-pop). Auto-contenida, NO toca app.js.

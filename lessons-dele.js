@@ -1217,15 +1217,25 @@
         if (!wrap) return;
         const cnMode = cnModeNow();
         const ll = $('lesson-levels'), lst = $('lesson-list');
+        const panel = $('panel-lessons');
         if (cnMode) {
             wrap.classList.remove('hidden');
-            if (ll) ll.classList.add('hidden');
-            if (lst) lst.classList.add('hidden');
+            // v9.32: .hidden NO alcanzaba — .lesson-levels/.lesson-list definen
+            // display:flex MÁS ABAJO en style.css (3694/3702) que .hidden (410);
+            // misma especificidad → gana la última y las lecciones de chino
+            // quedaban visibles ("se siguen viendo las chinas", report v9.31).
+            // Fix doble: .hidden-force (display:none !important, convención de
+            // app.js) + clase 'dele-only' a nivel de panel (cinturón y tirantes:
+            // sobrevive a que app.js re-cree los hijos con renderList/boot).
+            if (ll) ll.classList.add('hidden-force');
+            if (lst) lst.classList.add('hidden-force');
+            if (panel) panel.classList.add('dele-only');
             swapPanelTexts(true);
         } else {
             wrap.classList.add('hidden');
-            if (ll) ll.classList.remove('hidden');
-            if (lst) lst.classList.remove('hidden');
+            if (ll) ll.classList.remove('hidden-force');
+            if (lst) lst.classList.remove('hidden-force');
+            if (panel) panel.classList.remove('dele-only');
             swapPanelTexts(false);
             stopSpeak(); // por si quedó sonando un drama
         }
@@ -1240,7 +1250,12 @@
             '<div class="lesson-levels dele-tracks-row" id="dele-tracks" role="group" aria-label="Filtrar por pista"></div>' +
             '<div class="lesson-levels" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
             '<div class="lesson-list" id="dele-list" data-level="all"></div>';
-        panel.appendChild(wrap);
+        // v9.32: ARRIBA del bloque chino (después del intro) y no al final —
+        // report v9.31: "los chips de lecciones en español quedaron todos
+        // abajo". Con appendChild el wrap nacía bajo #lesson-list.
+        const llFirst = $('lesson-levels');
+        if (llFirst && llFirst.parentNode === panel) panel.insertBefore(wrap, llFirst);
+        else panel.appendChild(wrap);
         renderTrackChips();
         renderChips();
         renderList();
@@ -1287,7 +1302,11 @@
             '.dele-tracks-row{margin-bottom:6px}',
             '.dele-tracks-row .lv-chip{opacity:.92}',
             '.dl-empty{padding:18px 10px;text-align:center;color:#64748b;font-size:.92rem;border:1.5px dashed rgba(100,116,139,.35);border-radius:12px;margin-top:4px}',
-            'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}'
+            'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}',
+            // v9.32: ocultación a nivel de panel — gana al display:flex de
+            // .lesson-levels/.lesson-list aunque app.js re-cree los hijos
+            '#panel-lessons.dele-only #lesson-levels,' +
+            '#panel-lessons.dele-only #lesson-list{display:none !important}'
         ].join('\n');
         document.head.appendChild(st);
     }
