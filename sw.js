@@ -168,6 +168,21 @@
 //       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
 //       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
 //       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
+// v9.33: cn-es lecciones — PULIDO DEL PANEL DELE + más Argentina básica.
+//       (1) El panel no era intuitivo: había DOS botones "mostrar todo"
+//       ("Todas" en la fila de pista y "Todo" en la de nivel). Ahora hay
+//       UNO SOLO: "Todas" vive en la fila de niveles; los chips de pista
+//       ya no lo llevan — ver todas las pistas = tocar de nuevo el chip
+//       activo (toggle). Niveles SEPARADOS (desaparece 'A2/B1'): Todas ·
+//       A1 · A2 · B1 · B2 · C1 · C2 con labels cortos (los 5 dramas
+//       A2/B1 pasan a A2 o B1; ids intactos → progreso seguro). Nuevo
+//       contador de resultados ("18 de 24") a la derecha de la fila de
+//       pistas + intro del panel reescrito. (2) 8 dramas NUEVOS pista
+//       Argentina en niveles básicos: A1 café con medialunas y
+//       colectivo/SUBE, A2 feria del barrio y asado de cumpleaños,
+//       B1 la cancha (Boca) y milonga de San Telmo, B2 asado del
+//       domingo y entrevista de trabajo (24 dramas en total: 6
+//       Escolares + 18 Argentina). Toca lessons-dele.js, index.html.
 // v9.32: cn-es lecciones — FIX "se siguen viendo las chinas + los chips
 //       de español quedaron todos abajo". CAUSA RAÍZ: applyMode() ocultaba
 //       #lesson-levels/#lesson-list con .hidden (display:none, línea 410 de
@@ -198,7 +213,7 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
-const VERSION = 'v79'; // — invalida shell (v9.32: DELE-only real, hidden-force + dele-only + chips arriba)
+const VERSION = 'v80'; // — invalida shell (v9.33: panel DELE pulido — un solo "Todas", toggle de pista, niveles separados + 8 dramas Argentina A1-B2)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)

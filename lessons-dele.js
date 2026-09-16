@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// lessons-dele.js — v9.31 · MINI-DRAMAS DELE (aprendices de español)
+// lessons-dele.js — v9.33 · MINI-DRAMAS DELE (aprendices de español)
 // -------------------------------------------------------------------
 // Mini-dramas graduados por el DELE (Diploma de Español como Lengua
 // Extranjera) para el modo cn-es (chino → español), en DOS PISTAS:
@@ -11,8 +11,20 @@
 //     nubes, Iguazú y el guaraní, Vendimia mendocina, glaciar
 //     Perito Moreno, telar mapuche, Pachamama jujeña y un debate
 //     de radio sobre turismo y pueblos originarios.
-// v9.31 filtro de pista: chips Todas / Escolares / Argentina sobre la
-// fila de niveles DELE (A1 · A2/B1 · B1 · B2 · C1 · C2).
+// v9.33 panel pulido ("no es tan intuitivo, hay 'Todas' y 'todo'"):
+//   · UN SOLO botón "mostrar todo": "Todas" en la fila de niveles; los
+//     chips de pista ya NO tienen "Todas" — ver todas las pistas = tocar
+//     de nuevo el chip activo (toggle). Niveles SEPARADOS (adiós A2/B1):
+//     Todas · A1 · A2 · B1 · B2 · C1 · C2, con labels cortos y re-tap que
+//     vuelve a "Todas". Contador de resultados ("18 de 24") a la derecha
+//     de la fila de pistas.
+//   · 8 dramas NUEVOS pista Argentina en niveles básicos (petición del
+//     usuario): A1 café con medialunas + colectivo/SUBE, A2 feria del
+//     barrio + asado de cumpleaños, B1 la cancha (fútbol) + milonga de
+//     San Telmo, B2 asado del domingo + entrevista de trabajo.
+//     24 dramas en total (6 Escolares + 18 Argentina).
+// v9.31 filtro de pista (hoy superado): chips Todas/Escolares/Argentina
+// sobre la fila de niveles DELE.
 // v9.31 fix "Escuchar todo": stopSpeak() apagaba la cola dentro del
 // propio speakEs() → solo sonaba la 1.ª línea (reporte del usuario).
 // Es ARCHIVO ADITIVO Y AUTOCONTENIDO (patrón onboarding.js/mpInit):
@@ -154,12 +166,12 @@
         },
 
         // ─────────────────────────────────────────────────────────
-        // 4 · 🚌 La excursión al museo — DELE A2/B1 Escolares
+        // 4 · 🚌 La excursión al museo — DELE A2 Escolares (v9.33: A2/B1→A2)
         //     tener que + hay que, poder, pretérito (pude)
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-excursion',
-            dele: 'A2/B1', track: 'Escolares',
+            dele: 'A2', track: 'Escolares',
             emoji: '🚌',
             titleEs: 'La excursión al museo',
             titleZh: '博物馆远足',
@@ -193,12 +205,12 @@
         },
 
         // ─────────────────────────────────────────────────────────
-        // 5 · 🩹 En la enfermería — DELE A2/B1 Escolares
+        // 5 · 🩹 En la enfermería — DELE A2 Escolares (v9.33: A2/B1→A2)
         //     doler, sentirse, el cuerpo, consejos (toma/descansa)
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-enfermeria',
-            dele: 'A2/B1', track: 'Escolares',
+            dele: 'A2', track: 'Escolares',
             emoji: '🩹',
             titleEs: 'En la enfermería',
             titleZh: '在医务室',
@@ -230,12 +242,12 @@
         },
 
         // ─────────────────────────────────────────────────────────
-        // 6 · 🎤 El festival de talento — DELE A2/B1 Escolares
+        // 6 · 🎤 El festival de talento — DELE B1 Escolares (v9.33: A2/B1→B1)
         //     opinions (creo que), ir a + infinitivo, condición
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-talento',
-            dele: 'A2/B1', track: 'Escolares',
+            dele: 'B1', track: 'Escolares',
             emoji: '🎤',
             titleEs: 'El festival de talento',
             titleZh: '才艺节',
@@ -268,13 +280,13 @@
         },
 
         // ─────────────────────────────────────────────────────────
-        // 7 · 🧉 El primer mate — DELE A2/B1 · Argentina (v9.31)
+        // 7 · 🧉 El primer mate — DELE A2 · Argentina (v9.31; v9.33: A2/B1→A2)
         //     Buenos Aires, adolescente; voseo suave, la casa,
         //     compartir (mate = amistad)
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-mate',
-            dele: 'A2/B1', track: 'Argentina',
+            dele: 'A2', track: 'Argentina',
             emoji: '🧉',
             titleEs: 'El primer mate',
             titleZh: '第一次喝马黛茶',
@@ -308,12 +320,12 @@
         },
 
         // ─────────────────────────────────────────────────────────
-        // 8 · 🎫 Pasajes a Bariloche — DELE A2/B1 · Argentina (v9.31)
+        // 8 · 🎫 Pasajes a Bariloche — DELE A2 · Argentina (v9.31; v9.33: A2/B1→A2)
         //     Terminal de Retiro; números, precios, pesos, viaje
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-bariloche',
-            dele: 'A2/B1', track: 'Argentina',
+            dele: 'A2', track: 'Argentina',
             emoji: '🎫',
             titleEs: 'Pasajes a Bariloche',
             titleZh: '去巴里洛切的车票',
@@ -671,6 +683,314 @@
                 { sp: 'La pregunta no es cuántos recibimos, ___ quiénes escribimos la historia.', zh: '问题不在于我们接待多少，而在于由谁来书写历史。',
                   opts: [{ w: 'sino', e: '而是' }, { w: 'si no', e: '否则' }, { w: 'pero', e: '但是' }] }
             ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 17 · ☕ Café con medialunas — DELE A1 · Argentina (v9.33)
+        //      desayuno porteño; pedir, precios, cortesía básica
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a1-cafe',
+            dele: 'A1', track: 'Argentina',
+            emoji: '☕',
+            titleEs: 'Café con medialunas',
+            titleZh: '咖啡配牛角面包',
+            blurb: 'Wei desayuna por primera vez en un café porteño con Camila: café con leche, medialunas y el mozo que apunta el pedido. Pedir en voz alta, preguntar el precio y dar las gracias como en Buenos Aires.',
+            blurbZh: '魏第一次和卡米拉在布宜诺斯艾利斯的咖啡馆吃早餐：牛奶咖啡、牛角面包，还有记单的服务员。大声点单、问价格，像本地人一样道谢。',
+            lines: [
+                { who: 'Camila', sp: 'Wei, hoy te invito a desayunar como un porteño.', zh: '魏，今天我请你像布宜诺斯艾利斯人一样吃早餐。' },
+                { who: 'Wei', sp: '¿Qué desayunan los porteños?', zh: '布宜诺斯艾利斯人早餐吃什么？' },
+                { who: 'Camila', sp: 'Café con leche y medialunas. Aquí llegamos.', zh: '牛奶咖啡和牛角面包。我们到了。' },
+                { who: 'Mozo', sp: 'Buenos días. ¿Qué van a tomar?', zh: '早上好。你们想喝点什么？' },
+                { who: 'Camila', sp: 'Dos cafés con leche y cuatro medialunas, por favor.', zh: '请给我们两杯牛奶咖啡和四个牛角面包。' },
+                { who: 'Mozo', sp: '¿Algo más? También hay tostadas.', zh: '还要别的吗？我们也有吐司。' },
+                { who: 'Wei', sp: 'No, gracias. Por ahora esto está bien.', zh: '不用了，谢谢。这些就够了。' },
+                { who: 'Mozo', sp: 'Marchando. Ya vuelvo.', zh: '马上就来。我很快回来。' },
+                { who: 'Wei', sp: '¡Qué rico! ¿Y cuánto cuesta el desayuno?', zh: '太好吃了！这顿早餐多少钱？' },
+                { who: 'Camila', sp: 'Barato: cinco mil pesos por los dos. Aquí se desayuna todos los días.', zh: '很便宜：我们俩一共五千比索。这里可以天天来吃早餐。' }
+            ],
+            quiz: [
+                { sp: 'Dos cafés con leche y cuatro ___, por favor.', zh: '请给我们两杯牛奶咖啡和四个牛角面包。',
+                  opts: [{ w: 'medialunas', e: '牛角面包（阿根廷）' }, { w: 'manzanas', e: '苹果' }, { w: 'sillas', e: '椅子' }] },
+                { sp: 'Buenos días. ¿Qué van a ___?', zh: '早上好。你们想喝点什么？',
+                  opts: [{ w: 'tomar', e: '点、喝' }, { w: 'cantar', e: '唱歌' }, { w: 'comprar', e: '买' }] },
+                { sp: '___, gracias. Eso es todo.', zh: '不用了，谢谢。就这些。',
+                  opts: [{ w: 'No', e: '不用' }, { w: 'Sí', e: '是的' }, { w: 'Hoy', e: '今天' }] },
+                { sp: '¿Y ___ cuesta el desayuno?', zh: '这顿早餐多少钱？',
+                  opts: [{ w: 'cuánto', e: '多少（钱）' }, { w: 'quién', e: '谁' }, { w: 'cómo', e: '怎样' }] },
+                { sp: 'Barato: cinco mil pesos por los ___.', zh: '很便宜：两个人一共五千比索。',
+                  opts: [{ w: 'dos', e: '二、两' }, { w: 'tres', e: '三' }, { w: 'diez', e: '十' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 18 · 🚏 El colectivo a Palermo — DELE A1 · Argentina (v9.33)
+        //      transporte básico: parada, SUBE, preguntar el camino
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a1-colectivo',
+            dele: 'A1', track: 'Argentina',
+            emoji: '🚏',
+            titleEs: 'El colectivo a Palermo',
+            titleZh: '去巴勒莫的公交车',
+            blurb: 'Wei quiere conocer Palermo y Camila le enseña lo básico de Buenos Aires: el colectivo, la parada de la esquina y la tarjeta SUBE. Preguntar dónde está, cuántas paradas hay y cómo pagar el viaje.',
+            blurbZh: '魏想去巴勒莫逛逛，卡米拉教他布宜诺斯艾利斯的出行基础：公交车、街角的站台和 SUBE 交通卡。问在哪里、坐几站、怎么付车费。',
+            lines: [
+                { who: 'Wei', sp: 'Camila, quiero conocer Palermo. ¿Está lejos?', zh: '卡米拉，我想去巴勒莫看看。远吗？' },
+                { who: 'Camila', sp: 'Un poco. Pero es fácil: puedes tomar el colectivo 152.', zh: '有一点远。不过很简单：你可以坐 152 路公交车。' },
+                { who: 'Wei', sp: '¿Colectivo? ¿Qué es un colectivo?', zh: 'colectivo？那是什么？' },
+                { who: 'Camila', sp: 'El autobús. Aquí al autobús le decimos colectivo.', zh: '就是公交车。在这儿我们管公交车叫 colectivo。' },
+                { who: 'Wei', sp: 'Perfecto. ¿Dónde está la parada?', zh: '太好了。车站在哪里？' },
+                { who: 'Camila', sp: 'Muy cerca: en la esquina, al lado del kiosco.', zh: '很近：就在街角，小卖部旁边。' },
+                { who: 'Wei', sp: '¿Y cómo pago el viaje?', zh: '那坐车怎么付钱？' },
+                { who: 'Camila', sp: 'Con la tarjeta SUBE. Se carga en el kiosco de la esquina.', zh: '用 SUBE 卡。在街角的小卖部充值。' },
+                { who: 'Wei', sp: '¿Cuántas paradas son hasta Palermo?', zh: '到巴勒莫有多少站？' },
+                { who: 'Camila', sp: 'Como doce. Te aviso cuando bajemos. ¡Vamos!', zh: '大概十二站。我们下车的时候我提醒你。走吧！' }
+            ],
+            quiz: [
+                { sp: 'Puedes tomar el ___ 152.', zh: '你可以坐 152 路公交车。',
+                  opts: [{ w: 'colectivo', e: '公交车（阿根廷说法）' }, { w: 'avión', e: '飞机' }, { w: 'bote', e: '小船' }] },
+                { sp: 'Aquí al autobús le decimos ___.', zh: '在这儿我们管公交车叫 colectivo。',
+                  opts: [{ w: 'colectivo', e: 'colectivo（公交车）' }, { w: 'lápiz', e: '铅笔' }, { w: 'ventana', e: '窗户' }] },
+                { sp: '¿Dónde está la ___?', zh: '车站在哪里？',
+                  opts: [{ w: 'parada', e: '车站' }, { w: 'puerta', e: '门' }, { w: 'carne', e: '肉' }] },
+                { sp: 'Pago el viaje con la tarjeta ___.', zh: '我用 SUBE 卡付车费。',
+                  opts: [{ w: 'SUBE', e: 'SUBE 卡（布市交通卡）' }, { w: 'verde', e: '绿色的' }, { w: 'libros', e: '书' }] },
+                { sp: '¿Cuántas ___ son hasta Palermo?', zh: '到巴勒莫有多少站？',
+                  opts: [{ w: 'paradas', e: '（公交）站' }, { w: 'semanas', e: '星期' }, { w: 'puertas', e: '门' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 19 · 🍅 La feria del barrio — DELE A2 · Argentina (v9.33)
+        //      compras al aire libre; kilo, precios, frutillas
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a2-feria',
+            dele: 'A2', track: 'Argentina',
+            emoji: '🍅',
+            titleEs: 'La feria del barrio',
+            titleZh: '社区集市',
+            blurb: 'Vale descubre con Mei la feria del sábado: verduras frescas, precios por kilo y la vendedora que regala el perejil. Comprar al aire libre, preguntar cuánto sale y agradecer como los vecinos.',
+            blurbZh: '瓦莱和梅伊一起逛周六的社区集市：新鲜蔬菜、按公斤计价，还有送欧芹的女摊主。在露天市场买东西、问价，像邻居们一样道谢。',
+            lines: [
+                { who: 'Mei', sp: 'Vale, los sábados hay una feria en la plaza. ¿Vamos?', zh: '瓦莱，周六广场上有集市。我们去吗？' },
+                { who: 'Vale', sp: '¿Feria? ¿Es como un supermercado?', zh: '集市？跟超市一样吗？' },
+                { who: 'Mei', sp: 'Al aire libre y más barato. Los vecinos venden lo que cultivan.', zh: '在露天，而且更便宜。邻居们卖自己种的东西。' },
+                { who: 'Verdulera', sp: 'Buenos días. Los tomates están re frescos hoy.', zh: '早上好。今天的西红柿特别新鲜。' },
+                { who: 'Mei', sp: 'Un kilo de tomates y medio de frutillas, por favor.', zh: '麻烦来一公斤西红柿和半公斤草莓。' },
+                { who: 'Vale', sp: '¿Cuánto sale el kilo de tomates?', zh: '西红柿一公斤多少钱？' },
+                { who: 'Verdulera', sp: 'Tres mil pesos. ¿Algo más? Le regalo un poco de perejil.', zh: '三千比索。还要别的吗？送您一点欧芹。' },
+                { who: 'Mei', sp: 'Sí, también seis huevos y una lechuga.', zh: '好，再来六个鸡蛋和一棵生菜。' },
+                { who: 'Verdulera', sp: 'Son seis mil quinientos. Acá tiene la bolsita.', zh: '一共六千五百。袋子在这儿。' },
+                { who: 'Vale', sp: '¡Qué barato! Acá la comida cuesta la mitad que en el súper.', zh: '真便宜！这里的菜比超市便宜一半。' }
+            ],
+            quiz: [
+                { sp: 'Los sábados hay una ___ en la plaza.', zh: '周六广场上有集市。',
+                  opts: [{ w: 'feria', e: '集市' }, { w: 'escuela', e: '学校' }, { w: 'flor', e: '花' }] },
+                { sp: 'Un kilo de tomates y ___ de frutillas.', zh: '一公斤西红柿和半公斤草莓。',
+                  opts: [{ w: 'medio', e: '一半' }, { w: 'doble', e: '两倍' }, { w: 'resto', e: '剩余部分' }] },
+                { sp: '¿Cuánto ___ el kilo de tomates?', zh: '西红柿一公斤多少钱？',
+                  opts: [{ w: 'sale', e: '卖（价格，¿cuánto sale?）' }, { w: 'entra', e: '进入' }, { w: 'baja', e: '下降' }] },
+                { sp: 'Le regalo un poco de ___.', zh: '送您一点欧芹。',
+                  opts: [{ w: 'perejil', e: '欧芹' }, { w: 'azúcar', e: '糖' }, { w: 'vino', e: '酒' }] },
+                { sp: 'Acá la comida cuesta la ___ que en el súper.', zh: '这里的菜比超市便宜一半。',
+                  opts: [{ w: 'mitad', e: '一半' }, { w: 'doble', e: '两倍' }, { w: 'semana', e: '星期' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 20 · 🎂 El cumpleaños de Sofía — DELE A2 · Argentina (v9.33)
+        //      invitación al asado; ofrecer, aceptar, hora flexible
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-a2-cumple',
+            dele: 'A2', track: 'Argentina',
+            emoji: '🎂',
+            titleEs: 'El cumpleaños de Sofía',
+            titleZh: '索菲亚的生日',
+            blurb: 'Sofía invita a sus amigos a un asado de cumpleaños: traer algo para tomar, carne a la parrilla y la hora flexible argentina — a las ocho, más o menos. Invitar, ofrecer y aceptar con naturalidad.',
+            blurbZh: '索菲亚邀请朋友们参加生日烤肉会：带点喝的、烤架上的肉，还有阿根廷式的弹性时间——八点“左右”到。自然地邀请、提供和接受。',
+            lines: [
+                { who: 'Sofía', sp: 'Chicos, el sábado cumplo años y hago un asado en casa. ¿Vienen?', zh: '朋友们，周六我过生日，在家里办一场烤肉会。你们来吗？' },
+                { who: 'Wei', sp: '¡Claro! ¿A qué hora llegamos?', zh: '当然来！我们几点到？' },
+                { who: 'Sofía', sp: 'A las ocho. O un poco después: acá nadie llega en punto.', zh: '八点。或者晚一点点：这儿没人准点到。' },
+                { who: 'Vale', sp: '¿Llevamos algo?', zh: '我们要带点什么吗？' },
+                { who: 'Sofía', sp: 'Pueden traer una ensalada o algo para tomar. Yo me encargo de la carne.', zh: '你们可以带一份沙拉或者喝的东西。肉我来负责。' },
+                { who: 'Wei', sp: '¿Y el asado qué es? ¿Una sopa grande?', zh: '那“asado”是什么？是一种大汤吗？' },
+                { who: 'Sofía', sp: '¡No! Es carne cocinada a la parrilla, al fuego. Es la comida de los domingos y de los cumpleaños.', zh: '不是！是在烤架上用炭火烤的肉。是周日和生日必吃的大餐。' },
+                { who: 'Vale', sp: '¿Puedo llevar a mi hermano menor?', zh: '我可以带我弟弟去吗？' },
+                { who: 'Sofía', sp: 'Obvio, cuanto más, mejor. Y el domingo sobra comida para todos.', zh: '当然，人越多越好。周日剩下的肉够所有人吃。' },
+                { who: 'Wei', sp: 'Entonces ya estamos. ¡Feliz cumpleaños, Sofía!', zh: '那就说定了。生日快乐，索菲亚！' }
+            ],
+            quiz: [
+                { sp: 'El sábado cumplo ___ y hago un asado.', zh: '周六我过生日，办一场烤肉会。',
+                  opts: [{ w: 'años', e: '岁（cumplir años：过生日）' }, { w: 'libros', e: '书' }, { w: 'frío', e: '冷' }] },
+                { sp: 'Acá nadie llega ___.', zh: '这儿没人准点到。',
+                  opts: [{ w: 'en punto', e: '准点、整点' }, { w: 'temprano', e: '早' }, { w: 'verdad', e: '真的' }] },
+                { sp: 'Es carne cocinada a la ___.', zh: '是在烤架上烤的肉。',
+                  opts: [{ w: 'parrilla', e: '烤架' }, { w: 'mesa', e: '桌子' }, { w: 'cocina', e: '厨房' }] },
+                { sp: 'Yo me encargo de la ___.', zh: '肉由我来负责。',
+                  opts: [{ w: 'carne', e: '肉' }, { w: 'semana', e: '星期' }, { w: 'lluvia', e: '雨' }] },
+                { sp: 'Cuanto más, ___.', zh: '人越多越好。',
+                  opts: [{ w: 'mejor', e: '更好' }, { w: 'menor', e: '更小' }, { w: 'peor', e: '更糟' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 21 · 🏟 Ir a la cancha — DELE B1 · Argentina (v9.33)
+        //      fútbol: platea/popular, la hinchada, planes
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b1-cancha',
+            dele: 'B1', track: 'Argentina',
+            emoji: '🏟️',
+            titleEs: 'Ir a la cancha',
+            titleZh: '去球场看球',
+            blurb: 'Diego invita a Huang a ver a Boca en la Bombonera: platea o popular, la hinchada que canta noventa minutos y llegar dos horas antes. El fútbol como se vive en Argentina.',
+            blurbZh: '迭戈邀请黄去糖果盒球场看博卡青年：看台座还是站立区，唱满九十分钟的球迷，以及提前两小时到场。在阿根廷，足球是这样被体验的。',
+            lines: [
+                { who: 'Diego', sp: 'Huang, el domingo juega Boca. ¿Te animás a venir a la cancha con nosotros?', zh: '黄，周日博卡有比赛。敢不敢跟我们一起去球场？' },
+                { who: 'Huang', sp: '¿La cancha? Yo pensé que ir a la cancha era ir a correr.', zh: '球场？我原以为去 cancha 是去跑步呢。' },
+                { who: 'Diego', sp: 'Jaja, no. En Argentina la cancha es el estadio de fútbol.', zh: '哈哈，不是。在阿根廷，cancha 指的是足球场。' },
+                { who: 'Huang', sp: '¡Me encantaría! Pero nunca vi un partido ahí. ¿Cómo conseguimos entradas?', zh: '太想去啦！可我从没在那儿看过比赛。我们怎么买票？' },
+                { who: 'Diego', sp: 'Yo las compro por internet. Hay dos opciones: platea o popular.', zh: '我在网上买。有两种选择：看台座或者站立区。' },
+                { who: 'Huang', sp: '¿Y cuál es la diferencia?', zh: '有什么区别？' },
+                { who: 'Diego', sp: 'En la platea estás sentado y pagás más. La popular es de pie, con la hinchada entera.', zh: '看台座有座位，贵一些。站立区站着看，和所有球迷挤在一起。' },
+                { who: 'Huang', sp: 'Prefiero sentado. Me contaron que cantan todo el tiempo.', zh: '我还是坐着吧。听说他们从头到尾都在唱歌。' },
+                { who: 'Diego', sp: 'Noventa minutos sin parar. Los hinchas llevan bombos y banderas gigantes.', zh: '九十分钟不停。球迷们带着大鼓和巨大的旗帜。' },
+                { who: 'Huang', sp: '¿Y a qué hora hay que llegar?', zh: '那需要几点到？' },
+                { who: 'Diego', sp: 'El partido es a las cinco, pero llegamos dos horas antes: acá el fútbol se vive desde temprano.', zh: '比赛五点开始，但我们提前两小时到：在这儿，看球从一大早就开始了。' }
+            ],
+            quiz: [
+                { sp: '¿Te animás a venir a la ___ con nosotros?', zh: '敢不敢跟我们一起去球场？',
+                  opts: [{ w: 'cancha', e: '球场（阿根廷说法）' }, { w: 'peluquería', e: '理发店' }, { w: 'pileta', e: '泳池' }] },
+                { sp: 'Hay dos opciones: platea o ___.', zh: '有两种选择：看台座或者站立区。',
+                  opts: [{ w: 'popular', e: '站立区（无座）' }, { w: 'privada', e: '私人的' }, { w: 'lejana', e: '远的' }] },
+                { sp: 'La popular es de pie, con la ___ entera.', zh: '站立区站着看，和所有球迷在一起。',
+                  opts: [{ w: 'hinchada', e: '球迷群体' }, { w: 'bicicleta', e: '自行车' }, { w: 'ventana', e: '窗户' }] },
+                { sp: 'Los ___ llevan bombos y banderas gigantes.', zh: '球迷们带着大鼓和巨大的旗帜。',
+                  opts: [{ w: 'hinchas', e: '球迷' }, { w: 'maestros', e: '老师' }, { w: 'niños', e: '孩子们' }] },
+                { sp: 'Acá el fútbol se ___ desde temprano.', zh: '在这儿，看球从一大早就开始了。',
+                  opts: [{ w: 'vive', e: '体验、感受' }, { w: 'vende', e: '卖' }, { w: 'olvida', e: '忘记' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 22 · 💃 Una milonga en San Telmo — DELE B1 · Argentina (v9.33)
+        //      feria dominical, tango, la milonga; pasado simple
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b1-milonga',
+            dele: 'B1', track: 'Argentina',
+            emoji: '💃',
+            titleEs: 'Una milonga en San Telmo',
+            titleZh: '圣特尔莫的探戈舞会',
+            blurb: 'Después de la feria dominical de San Telmo, Diego lleva a Huang a una milonga: bailarines callejeros, tango abrazado y una mesa para principiantes. La noche porteña de la mano del tango.',
+            blurbZh: '逛完圣特尔莫的周日集市，迭戈带黄去探戈舞会：街头的舞者、紧紧相拥的探戈，还有新手桌。跟随探戈，感受布宜诺斯艾利斯的夜晚。',
+            lines: [
+                { who: 'Huang', sp: 'Diego, hoy fui a la feria de San Telmo. ¡Es enorme!', zh: '迭戈，我今天去了圣特尔莫集市。大得惊人！' },
+                { who: 'Diego', sp: 'Los domingos llena toda la plaza: antigüedades, artesanías, música.', zh: '周日整个广场都摆满了：古董、手工艺品、音乐。' },
+                { who: 'Huang', sp: 'Y en una esquina vi una pareja bailando tango. La gente le tiraba monedas.', zh: '在一个街角我看到一对舞者跳探戈，人们往他们那儿扔硬币。' },
+                { who: 'Diego', sp: 'Los bailarines callejeros son buenos, pero esta noche te muestro el tango de verdad.', zh: '街头舞者很棒，不过今晚我带你看真正的探戈。' },
+                { who: 'Huang', sp: '¿A dónde vamos?', zh: '我们去哪儿？' },
+                { who: 'Diego', sp: 'A una milonga en San Telmo. ¿Sabés qué es una milonga?', zh: '去圣特尔莫的一家探戈舞会。你知道 milonga 是什么吗？' },
+                { who: 'Huang', sp: '¿Es un baile o un lugar? Nunca lo escuché.', zh: '是一种舞还是一个地方？我从没听过这个词。' },
+                { who: 'Diego', sp: 'Las dos cosas: el lugar donde la gente va a bailar tango... y también un ritmo parecido.', zh: '两个意思都有：是大家跳探戈的地方……也是一种相似的舞曲节奏。' },
+                { who: 'Huang', sp: '¿Y yo puedo bailar si no sé nada?', zh: '那我一点也不会，也能跳吗？' },
+                { who: 'Diego', sp: 'Claro. Hay mesas para principiantes y antes te tomo una clase express.', zh: '当然。有新手桌，之前我先给你上一节速成课。' },
+                { who: 'Huang', sp: 'Entonces me pongo los zapatos cómodos. Esta noche aprendo tango.', zh: '那我穿上舒服的鞋子。今晚我要学探戈。' }
+            ],
+            quiz: [
+                { sp: 'Los domingos llena toda la ___: antigüedades y artesanías.', zh: '周日整个广场都摆满了：古董和手工艺品。',
+                  opts: [{ w: 'plaza', e: '广场' }, { w: 'cocina', e: '厨房' }, { w: 'fábrica', e: '工厂' }] },
+                { sp: 'Vi una pareja ___ tango en la esquina.', zh: '在街角我看到一对舞者跳探戈。',
+                  opts: [{ w: 'bailando', e: '跳舞（正在）' }, { w: 'comiendo', e: '吃饭（正在）' }, { w: 'durmiendo', e: '睡觉（正在）' }] },
+                { sp: 'La milonga es el lugar donde la gente va a ___.', zh: 'milonga 是大家去跳舞的地方。',
+                  opts: [{ w: 'bailar tango', e: '跳探戈' }, { w: 'comprar pan', e: '买面包' }, { w: 'ver películas', e: '看电影' }] },
+                { sp: 'Hay mesas para ___ y una clase express.', zh: '有新手桌，还有速成课。',
+                  opts: [{ w: 'principiantes', e: '初学者' }, { w: 'profesores', e: '老师' }, { w: 'extranjeros', e: '外国人' }] },
+                { sp: 'Me pongo los zapatos ___.', zh: '我穿上舒服的鞋子。',
+                  opts: [{ w: 'cómodos', e: '舒服的' }, { w: 'nuevos', e: '新的' }, { w: 'caros', e: '贵的' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 23 · 🥩 El asado del domingo — DELE B2 · Argentina (v9.33)
+        //      el ritual completo: cortes, asador, sobremesa
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b2-asado',
+            dele: 'B2', track: 'Argentina',
+            emoji: '🥩',
+            titleEs: 'El asado del domingo',
+            titleZh: '周日的烤肉',
+            blurb: 'Hernán es el asador y Wei ya aprendió la ley no escrita: nadie toca la carne sin permiso. Cortes, provoleta de entrada y sobremesa eterna: el ritual argentino completo, con humor de familia.',
+            blurbZh: '埃尔南是主烤人，魏已经学会了那条不成文的规矩：没有得到允许，谁也不能碰肉。各种部位、开场的前菜烤奶酪、没完没了的饭后闲聊——完整的阿根廷仪式，配上家庭式的玩笑。',
+            lines: [
+                { who: 'Hernán', sp: 'Hoy aso yo: vacío, entraña, chorizos y provoleta para empezar.', zh: '今天我来烤：牛腩排、牛横膈膜排、香肠，开场先烤奶酪。' },
+                { who: 'Wei', sp: 'Desde el cumpleaños de Sofía aprendí una cosa: el asador manda.', zh: '从索菲亚的生日那以后，我记住了一件事：主烤人说了算。' },
+                { who: 'Hernán', sp: 'Jaja, es verdad. Y la primera ley es que nadie toca la carne sin permiso.', zh: '哈哈，没错。第一条规矩就是：没有得到允许，谁也不能碰肉。' },
+                { who: 'Camila', sp: 'El año pasado mi primo la pinchó para ver si estaba lista. Aún lo recordamos.', zh: '去年我表哥戳了一下肉想看看熟没熟。我们还记着这事呢。' },
+                { who: 'Wei', sp: '¿Tan grave es? Parece una ceremonia religiosa.', zh: '有那么严重吗？这简直像一场宗教仪式。' },
+                { who: 'Hernán', sp: 'Para nosotros sí. Cada corte tiene su tiempo: el vacío lento, la entraña rápida al fuego.', zh: '对我们来说就是。每种肉有自己的火候：牛腩排要慢，牛横膈膜排要在火上快速烤。' },
+                { who: 'Camila', sp: 'Y mientras esperamos, provoleta y un buen vino. El hambre se hace larga.', zh: '等待的时候，先吃烤奶酪，配点好酒。等肉的时候人特别容易饿。' },
+                { who: 'Wei', sp: '¿Y es verdad que el asado no termina cuando uno termina de comer?', zh: '听说烤肉会不会在吃完的那一刻就结束，是真的吗？' },
+                { who: 'Camila', sp: 'Jamás. Después viene la sobremesa: charla, café, mate y risas por un par de horas más.', zh: '绝不会。接下来是饭后闲聊：聊天、咖啡、马黛茶和笑声，还要再持续好几个小时。' },
+                { who: 'Wei', sp: 'En China también nos quedamos en la mesa, pero dos horas me parece un récord.', zh: '在中国我们也喜欢饭后坐着聊，但两小时在我看来算纪录了。' },
+                { who: 'Hernán', sp: 'Acá se dice que la carne es la excusa: lo importante es la mesa.', zh: '这儿有句话说，肉只是个由头：重要的是围坐在一起的这一桌人。' }
+            ],
+            quiz: [
+                { sp: 'Hoy aso yo: vacío, entraña, chorizos y ___.', zh: '今天我来烤：牛腩排、牛横膈膜排、香肠和烤奶酪。',
+                  opts: [{ w: 'provoleta', e: '烤奶酪（前菜）' }, { w: 'paella', e: '西班牙海鲜饭' }, { w: 'ensalada', e: '沙拉' }] },
+                { sp: 'Nadie toca la carne sin ___.', zh: '没有得到允许，谁也不能碰肉。',
+                  opts: [{ w: 'permiso', e: '允许' }, { w: 'hambre', e: '饿' }, { w: 'sal', e: '盐' }] },
+                { sp: 'Cada corte tiene su ___: el vacío lento, la entraña rápida.', zh: '每种肉有自己的火候：牛腩排慢，牛横膈膜排快。',
+                  opts: [{ w: 'tiempo', e: '火候、时间' }, { w: 'precio', e: '价格' }, { w: 'tamaño', e: '大小' }] },
+                { sp: 'Después viene la ___: charla, café y mate.', zh: '接下来是饭后闲聊：聊天、咖啡和马黛茶。',
+                  opts: [{ w: 'sobremesa', e: '饭后闲聊' }, { w: 'sobrecarga', e: '超载' }, { w: 'sobrina', e: '侄女' }] },
+                { sp: 'La carne es la excusa: lo importante es la ___.', zh: '肉只是个由头：重要的是这一桌人。',
+                  opts: [{ w: 'mesa', e: '桌子、一桌人' }, { w: 'carne', e: '肉' }, { w: 'parrilla', e: '烤架' }] }
+            ]
+        },
+
+        // ─────────────────────────────────────────────────────────
+        // 24 · 💼 La entrevista de trabajo — DELE B2 · Argentina (v9.33)
+        //      español profesional; voseo formal, plazos, equipo
+        // ─────────────────────────────────────────────────────────
+        {
+            id: 'dele-b2-entrevista',
+            dele: 'B2', track: 'Argentina',
+            emoji: '💼',
+            titleEs: 'La entrevista de trabajo',
+            titleZh: '求职面试',
+            blurb: 'Mei entrevista en una empresa de Buenos Aires: presentarse con el voseo de por medio, hablar de plazos, del equipo y de lo que uno aporta. El español profesional con acento argentino.',
+            blurbZh: '梅在布宜诺斯艾利斯的一家公司面试：用阿根廷式称呼自我介绍，谈工期、团队和自己能带来什么。带着阿根廷口音的职场西班牙语。',
+            lines: [
+                { who: 'Entrevistadora', sp: 'Mei, gracias por venir. Pasá y sentate, hacé como en tu casa.', zh: '梅，谢谢你来。进来坐吧，别拘束。' },
+                { who: 'Mei', sp: 'Gracias por recibirme. Estoy muy interesada en el puesto.', zh: '谢谢您接待我。我对这个职位非常感兴趣。' },
+                { who: 'Entrevistadora', sp: 'Contame un poco de vos: experiencia, estudios, qué te motiva.', zh: '跟我介绍一下你自己吧：经历、学历，还有你的动力是什么。' },
+                { who: 'Mei', sp: 'Trabajé tres años en atención al cliente en un banco de Shanghái y quiero sumarme a un equipo con proyectos internacionales.', zh: '我在上海的一家银行做了三年客户服务，想加入一个有国际项目的团队。' },
+                { who: 'Entrevistadora', sp: 'El puesto pide manejar cuentas en chino y en español. ¿Te sentís segura con eso?', zh: '这个职位要求用中文和西班牙语管理客户。你对此有把握吗？' },
+                { who: 'Mei', sp: 'El idioma es mi punto fuerte. Lo que me cuesta es el voseo: todavía lo estudio.', zh: '语言是我的强项。难的是阿根廷式称呼：我还在学。' },
+                { who: 'Entrevistadora', sp: 'Tranquila, acá lo aprendés rápido. ¿Y cómo trabajás con plazos ajustados?', zh: '别担心，在这儿很快就能学会。那工期很紧的时候你怎么工作？' },
+                { who: 'Mei', sp: 'Organizo prioridades y aviso con tiempo si algo se complica. No me gusta improvisar a último momento.', zh: '我会理清优先级，如果情况有变就提前沟通。我不喜欢最后一刻才临时应付。' },
+                { who: 'Entrevistadora', sp: 'Perfecto. ¿Tenés alguna pregunta sobre el equipo?', zh: '很好。关于团队你有什么问题吗？' },
+                { who: 'Mei', sp: 'Sí: ¿cómo es el ambiente de trabajo y cuántos seríamos?', zh: '有：工作氛围怎么样？团队会有多少人？' },
+                { who: 'Entrevistadora', sp: 'Somos ocho, muy buena onda. La próxima semana te contamos la decisión.', zh: '我们八个人，氛围特别好。下周我们告诉你结果。' }
+            ],
+            quiz: [
+                { sp: 'Pasá y ___, hacé como en tu casa.', zh: '进来坐吧，别拘束。',
+                  opts: [{ w: 'sentate', e: '坐下（voseo）' }, { w: 'sentar', e: '使坐下（原形）' }, { w: 'sentamos', e: '我们坐下' }] },
+                { sp: 'Quiero ___ a un equipo con proyectos internacionales.', zh: '我想加入一个有国际项目的团队。',
+                  opts: [{ w: 'sumarme', e: '加入' }, { w: 'dormirme', e: '睡着' }, { w: 'levantarme', e: '起床' }] },
+                { sp: 'El idioma es mi punto ___.', zh: '语言是我的强项。',
+                  opts: [{ w: 'fuerte', e: '强项（punto fuerte）' }, { w: 'débil', e: '弱项' }, { w: 'medio', e: '中等' }] },
+                { sp: 'Aviso con ___ si algo se complica.', zh: '如果情况有变，我会提前沟通。',
+                  opts: [{ w: 'tiempo', e: '提前（con tiempo）' }, { w: 'retraso', e: '延误' }, { w: 'miedo', e: '害怕' }] },
+                { sp: 'Somos ocho, muy buena ___.', zh: '我们八个人，氛围特别好。',
+                  opts: [{ w: 'onda', e: '氛围（muy buena onda）' }, { w: 'cara', e: '脸' }, { w: 'suerte', e: '运气' }] }
+            ]
         }
     ];
     /* ══════════════ fin de datos ══════════════ */
@@ -856,7 +1176,9 @@
     }
 
     // ── chips + lista del panel ──
-    const DELE_ORDER = ['A1', 'A2/B1', 'B1', 'B2', 'C1', 'C2']; // v9.31: hasta C2
+    // v9.33: niveles SEPARADOS — 'A2/B1' desaparece como nivel de chip
+    // (los 5 dramas que lo usaban pasan a A2 o B1 según su contenido).
+    const DELE_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     function levelLabel(v) { return 'DELE ' + v; }
     function renderChips() {
         const chips = $('dele-levels');
@@ -868,25 +1190,33 @@
             b.className = 'lv-chip lv-chip-dele' + (curLevel === value ? ' active' : '');
             b.dataset.level = value;
             b.textContent = label;
-            b.setAttribute('aria-label', 'Filtrar mini-dramas ' + label);
+            b.setAttribute('aria-label', value === 'all' ? 'Mostrar todos los niveles' : 'Filtrar mini-dramas DELE ' + label);
             chips.appendChild(b);
         };
-        mk('Todo', 'all');
+        // v9.33: UN solo botón "mostrar todo" y va AQUÍ, en niveles; el
+        // redundante "Todas" de pistas desaparece de renderTrackChips.
+        mk('Todas', 'all');
         const lvls = [];
         DRAMAS.forEach(d => { if (lvls.indexOf(d.dele) === -1) lvls.push(d.dele); });
         lvls.sort((a, b) => {
             const ia = DELE_ORDER.indexOf(a), ib = DELE_ORDER.indexOf(b);
             return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
         });
-        lvls.forEach(v => mk(levelLabel(v), v));
+        // labels cortos (A1…C2): el "DELE X" completo ya viaja en cada
+        // tarjeta y en el aria-label — la fila queda compacta en móvil.
+        lvls.forEach(v => mk(v, v));
     }
-    // v9.31: chips de PISTA (Todas · Escolares · Argentina) — se generan de
-    // los datos, igual que los de nivel, para que agregar un drama nuevo
-    // con otra pista cree su chip solo.
+    // v9.33: chips de pista SIN "Todas" — solo las pistas reales, con emoji
+    // para distinguir la fila de la de niveles de un golpe de vista. "Ver
+    // todas las pistas" = tocar de nuevo el chip activo (toggle, v9.33) o
+    // tocar "Todas" en la fila de niveles. Se generan de los datos, igual
+    // que los de nivel, para que una pista nueva cree su chip solo.
     function renderTrackChips() {
         const chips = $('dele-tracks');
         if (!chips) return;
+        const cnt = $('dele-count'); // v9.33: el contador viaja en esta fila
         chips.innerHTML = '';
+        const meta = { 'Escolares': '🏫 Escolares', 'Argentina': '🇦🇷 Argentina' };
         const mk = (label, value) => {
             const b = document.createElement('button');
             b.type = 'button';
@@ -896,8 +1226,8 @@
             b.setAttribute('aria-label', 'Filtrar dramas de pista ' + label);
             chips.appendChild(b);
         };
-        mk('Todas', 'all');
-        DRAMAS.forEach(d => { if (d.track && !$('dele-tracks').querySelector('[data-track="' + d.track + '"]')) mk(d.track, d.track); });
+        DRAMAS.forEach(d => { if (d.track && !chips.querySelector('[data-track="' + d.track + '"]')) mk(meta[d.track] || d.track, d.track); });
+        if (cnt) chips.appendChild(cnt); // re-anclaje tras el re-render
     }
     function bestLabel(d) {
         const p = progOf(d.id);
@@ -911,6 +1241,12 @@
         const shown = DRAMAS.filter(d =>
             (curLevel === 'all' || d.dele === curLevel) &&
             (curTrack === 'all' || d.track === curTrack));
+        // v9.33: contador de resultados — cuántos dramas se ven del total
+        // (estado inicial: "24 mini-dramas"; filtrado: "5 de 24").
+        const cnt = $('dele-count');
+        if (cnt) cnt.textContent = (shown.length === DRAMAS.length)
+            ? DRAMAS.length + ' mini-dramas'
+            : shown.length + ' de ' + DRAMAS.length;
         if (!shown.length) {
             // v9.31: nivel+pista sin dramas (p. ej. DELE C1 × Escolares)
             wrap.innerHTML = '<div class="dl-empty">Todavía no hay dramas de ese nivel en esta pista — probá otra combinación 🧭</div>';
@@ -949,7 +1285,8 @@
         if (chips) chips.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
             if (!chip || !chip.dataset.level) return; // (los de pista van en #dele-tracks)
-            curLevel = chip.dataset.level;
+            // v9.33: re-tap en el nivel activo vuelve a "Todas" (toggle)
+            curLevel = (curLevel === chip.dataset.level) ? 'all' : chip.dataset.level;
             renderChips();
             renderList();
         });
@@ -957,7 +1294,9 @@
         if (tracks) tracks.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
             if (!chip || !chip.dataset.track) return;
-            curTrack = chip.dataset.track; // v9.31: filtro por pista
+            // v9.31: filtro por pista · v9.33: re-tap = ver TODAS las pistas
+            // (por eso esta fila ya no necesita un chip "Todas" propio)
+            curTrack = (curTrack === chip.dataset.track) ? 'all' : chip.dataset.track;
             renderTrackChips();
             renderList();
         });
@@ -1184,7 +1523,7 @@
         if (intro && INTRO_ORIG === null) INTRO_ORIG = intro.textContent;
         if (cnMode) {
             if (sub) sub.textContent = '(mini-dramas DELE · 学西班牙语)';
-            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Dos pistas: Escolares (A1 y A2/B1) y Argentina para adolescentes y adultos — viajes a las provincias y culturas originarias (de A2/B1 a C2).';
+            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Dos pistas — 🏫 Escolares (A1 a B1) y 🇦🇷 Argentina (A1 a C2) — con niveles separados. Elegí pista y nivel con los chips; el contador te dice cuántos dramas hay.';
         } else {
             if (sub && SUB_ORIG !== null) sub.textContent = SUB_ORIG;
             if (intro && INTRO_ORIG !== null) intro.textContent = INTRO_ORIG;
@@ -1247,7 +1586,9 @@
         wrap.id = 'dele-wrap';
         wrap.className = 'hidden'; // se muestra solo en cn-es (applyMode)
         wrap.innerHTML =
-            '<div class="lesson-levels dele-tracks-row" id="dele-tracks" role="group" aria-label="Filtrar por pista"></div>' +
+            '<div class="lesson-levels dele-tracks-row" id="dele-tracks" role="group" aria-label="Filtrar por pista">' +
+            '<span id="dele-count" class="dele-count" aria-live="polite"></span>' +
+            '</div>' +
             '<div class="lesson-levels" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
             '<div class="lesson-list" id="dele-list" data-level="all"></div>';
         // v9.32: ARRIBA del bloque chino (después del intro) y no al final —
@@ -1301,6 +1642,10 @@
             // v9.31: fila de pistas + estado vacío
             '.dele-tracks-row{margin-bottom:6px}',
             '.dele-tracks-row .lv-chip{opacity:.92}',
+            // v9.33: contador de resultados a la derecha de la fila de pistas
+            '.dele-tracks-row{align-items:center}',
+            '.dele-count{margin-left:auto;font-size:.78rem;font-weight:600;color:#64748b;white-space:nowrap}',
+            'body.dark-mode .dele-count{color:#94a3b8}',
             '.dl-empty{padding:18px 10px;text-align:center;color:#64748b;font-size:.92rem;border:1.5px dashed rgba(100,116,139,.35);border-radius:12px;margin-top:4px}',
             'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}',
             // v9.32: ocultación a nivel de panel — gana al display:flex de
