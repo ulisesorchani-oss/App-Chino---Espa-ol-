@@ -212,7 +212,12 @@
         '.ob-dots{flex:1;display:flex;gap:5px;justify-content:center;}',
         '.ob-dot{width:7px;height:7px;border-radius:4px;background:var(--border);transition:all .2s;}',
         '.ob-dot.on{background:var(--primary);width:18px;}',
-        '.ob-next{min-width:112px;}',
+        '.ob-next{min-width:112px;min-height:44px;}',
+        '.ob-back{min-height:44px;}',
+        '.ob-skip{background:transparent;border:0;color:var(--text-secondary);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;font-size:.85rem;min-height:44px;padding:6px 10px;border-radius:8px;}',
+        '.ob-skip:hover{color:var(--primary);}',
+        '.ob-nav{flex-wrap:wrap;}',
+        '#btn-guide-close{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;}',
         'body.dark-mode .ob-fb-ok{color:#4ade80;}',
         'body.dark-mode .ob-fb-bad{color:#f87171;}'
     ].join('\n');
@@ -222,7 +227,7 @@
         btnLabel: '📖 Guía',
         btnTitle: 'Guía rápida: cómo usar la app, qué es el SRS y cuánto practicar',
         aria: 'Guía interactiva de la app',
-        ui: { back: '◀ Atrás', next: 'Siguiente ▶', done: '🚀 ¡Empezar hoy!', dots: 'Paso' },
+        ui: { back: '◀ Atrás', next: 'Siguiente ▶', done: '🚀 ¡Empezar hoy!', dots: 'Paso', skip: 'Saltar guía' },
         steps: [
             {
                 ico: '🌏', center: true,
@@ -304,7 +309,7 @@
         btnLabel: '📖 指南',
         btnTitle: '快速指南：怎么用这个 App、什么是 SRS、每天学多久',
         aria: '应用互动指南',
-        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就开始！', dots: '第' },
+        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就开始！', dots: '第', skip: '跳过导览' },
         steps: [
             {
                 ico: '🌏', center: true,
@@ -390,7 +395,7 @@
         btnLabel: '📖 指南',
         btnTitle: '快速指南：怎麼用這個 App、什麼是 SRS、每天學多久',
         aria: '應用互動指南',
-        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就開始！', dots: '第' },
+        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就開始！', dots: '第', skip: '跳過導覽' },
         steps: [
             {
                 ico: '🌏', center: true,
@@ -659,6 +664,18 @@
         nav.appendChild(dots);
         nav.appendChild(next);
         body.appendChild(nav);
+        // v10 UX: "Saltar guía" en todos los pasos (además de la ✕)
+        if (cur < P.steps.length - 1) {
+            var skipRow = document.createElement('div');
+            skipRow.style.textAlign = 'center';
+            var skip = document.createElement('button');
+            skip.type = 'button';
+            skip.className = 'ob-skip';
+            skip.textContent = P.ui.skip || 'Saltar guía';
+            skip.addEventListener('click', function () { close(true); });
+            skipRow.appendChild(skip);
+            body.appendChild(skipRow);
+        }
         body.scrollTop = 0;
     }
     function renderQuiz() {

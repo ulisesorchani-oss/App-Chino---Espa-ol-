@@ -860,7 +860,12 @@ let state = {
     interleaveSeed: 0,   // semilla del shuffle actual (persistida)
     _shufCache: null,    // cache interno del orden mezclado (no se persiste)
     // v9.19: SOLO OÍDO — audio primero, texto oculto hasta responder (es-cn)
-    listenFirst: false
+    listenFirst: false,
+    // v10 UX: intentos por tarjeta, resultado, sesión diaria
+    attempts: 0,
+    lastResult: null,      // 'correct' | 'wrong' | 'reveal'
+    sessionDone: 0, sessionGoal: 10, sessionTarget: 10, sessionDate: '',
+    _uiReady: false
 };
 
 // Variable global para el botón de colores
@@ -1274,15 +1279,32 @@ const UI_STRINGS = {
   'es-cn': {
     appTitle: 'Huayu Diario',
     appSlogan: 'Vive el idioma, una frase al día - 日常華語',
-    langSwitchBtn: '🇪🇸 ES',
-    langSwitchTitle: 'Cambiar a “Aprendo Español” (interfaz en chino)',
+    langSwitchBtn: '🇨🇳 Chino · cambiar a Español',
+    langSwitchTitle: 'Ahora estás aprendiendo chino. Tocá para pasar a “Aprendo Español” (interfaz en chino)',
     tabDaily: '📚 Diaria', tabExams: '🎓 Exámenes', tabLessons: '📖 Lecciones', tabClassics: '📜 Clásicos',
     dailyTitle: '📚 PRÁCTICA DIARIA', dailyCurrent: 'Práctica Diaria',
     examsTitle: '🎓 EXÁMENES INTERNACIONALES',
     lessonsTitle: '📖 LECCIONES GRADUADAS', classicsTitle: '📜 CLÁSICOS ANTIGUOS',
     srsIdle: 'Repaso inteligente', srsDue: 'Repaso del día', srsOk: 'Repaso · todo al día',
     inputPlaceholder: 'Escribe la palabra faltante...',
-    btnCheck: 'Verificar', btnReveal: '👁️ Revelar', btnKnow: '✅ La sé', btnRepeat: '🔄 Repetir',
+    btnCheck: 'Verificar', btnReveal: 'No la sé, mostrar respuesta', btnKnow: 'Fácil', btnRepeat: 'Otra vez', btnGood: 'Bien', btnPrev: '‹ Anterior',
+    // v10 UX: navegación, vistas, sesión, pistas
+    navHoy: 'Hoy', navAprender: 'Aprender', navEntrenar: 'Entrenar', navYo: 'Yo',
+    viewAprender: 'Aprender', viewAprenderSub: 'Elegí qué practicar. Al elegir un módulo volvés a Hoy.',
+    viewEntrenar: 'Entrenar', viewEntrenarSub: 'Ejercicios sueltos para el oído, la voz y la mano.',
+    viewYo: 'Yo', viewYoSub: 'Tu progreso, tu repaso y los ajustes de la app.',
+    yoProgress: '📈 Progreso', yoSettings: '⚙️ Ajustes',
+    setMode: 'Estoy aprendiendo', setTheme: 'Tema', setAudio: 'Audio', setSession: 'Meta diaria', setData: 'Datos',
+    sessionLabel: 'Sesión de hoy', sessionDoneTitle: '¡Sesión completa!', sessionDoneText: 'Practicaste {n} frases hoy.',
+    sessionStreak: 'Racha: {n} días 🔥', sessionMore: '{n} más', sessionClose: 'Listo por hoy',
+    srsEmpty: 'Empezá a practicar y armo tu repaso', srsDueN: '{n} para repasar hoy',
+    srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
+    gradeNoReturn: 'no vuelve',
+    hintTone: 'Casi: revisá el tono.', hintHomophone: 'El sonido está bien, el carácter no.',
+    hintPinyinOk: 'El pinyin está bien: ahora escribilo en caracteres.',
+    hintAccent: 'Casi: revisá los acentos.', hintOneChar: 'Un carácter no coincide:', hintOneLetter: 'Una letra no coincide:',
+    hintGeneric: 'No es esa. Probá de nuevo o tocá “No la sé”.',
+    diffYou: 'Escribiste', diffAns: 'Respuesta',
     readLesson: '📖 Leer lección',
     recordHint: '👆 Tocá 🎤 para grabar tu pronunciación',
     recMy: '▶️ Escuchar mi grabación', recRef: '🔊 Referencia', recAgain: '🔁 Grabar de nuevo',
@@ -1312,15 +1334,31 @@ const UI_STRINGS = {
   'cn-es': {
     appTitle: '日常華語',
     appSlogan: '每天一句，活学活用',
-    langSwitchBtn: '🇨🇳 中文',
-    langSwitchTitle: '切换回“学中文”（界面为西班牙语）',
+    langSwitchBtn: '🇪🇸 西班牙语 · 改学中文',
+    langSwitchTitle: '你现在在学西班牙语。点击切换回“学中文”（界面为西班牙语）',
     tabDaily: '📚 每日', tabExams: '🎓 考试', tabLessons: '📖 课文', tabClassics: '📜 古文',
     dailyTitle: '📚 每日练习', dailyCurrent: '每日练习',
     examsTitle: '🎓 国际考试',
     lessonsTitle: '📖 分级课文', classicsTitle: '📜 古代经典',
     srsIdle: '智能复习', srsDue: '今日复习', srsOk: '复习 · 全部完成',
     inputPlaceholder: '请输入缺少的词语…',
-    btnCheck: '检查', btnReveal: '👁️ 显示答案', btnKnow: '✅ 我会了', btnRepeat: '🔄 再练一次',
+    btnCheck: '检查', btnReveal: '不会，显示答案', btnKnow: '简单', btnRepeat: '再来', btnGood: '记得', btnPrev: '‹ 上一句',
+    navHoy: '今天', navAprender: '学习', navEntrenar: '训练', navYo: '我',
+    viewAprender: '学习', viewAprenderSub: '选择要练什么。选好模块后回到“今天”。',
+    viewEntrenar: '训练', viewEntrenarSub: '听力、发音和书写的单项练习。',
+    viewYo: '我', viewYoSub: '你的进度、复习和应用设置。',
+    yoProgress: '📈 进度', yoSettings: '⚙️ 设置',
+    setMode: '我在学', setTheme: '主题', setAudio: '语音', setSession: '每日目标', setData: '数据',
+    sessionLabel: '今日练习', sessionDoneTitle: '今日练习完成！', sessionDoneText: '今天练了 {n} 句。',
+    sessionStreak: '连续 {n} 天 🔥', sessionMore: '再来 {n} 句', sessionClose: '今天到此为止',
+    srsEmpty: '开始练习，我来安排复习', srsDueN: '今天要复习 {n} 张',
+    srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
+    gradeNoReturn: '不再出现',
+    hintTone: '差一点：注意声调。', hintHomophone: '读音对了，字不对。',
+    hintPinyinOk: '拼音对了：请写汉字。',
+    hintAccent: '差一点：注意重音符号。', hintOneChar: '有一个字不对：', hintOneLetter: '有一个字母不对：',
+    hintGeneric: '不对。再试一次，或点“不会”。',
+    diffYou: '你写的', diffAns: '答案',
     readLesson: '📖 阅读课文',
     recordHint: '👆 点击 🎤 录制你的发音',
     recMy: '▶️ 听我的录音', recRef: '🔊 参考音频', recAgain: '🔁 重新录音',
@@ -1372,7 +1410,7 @@ function updateUILanguage(mode) {
     set('btn-toggle-lang-mode', 'title', S.langSwitchTitle);
     set('answer-input', 'placeholder', S.inputPlaceholder);
     set('reader-input', 'placeholder', S.readerPlaceholder);
-    set('srs-bar-label', 'textContent', S.srsIdle);
+    if (typeof window.acSrsRefreshBar === 'function') window.acSrsRefreshBar(); // v10: estados concretos
     set('btn-tools-toggle', 'title', S.toolsGearTitle); // v9.10: engranaje de herramientas
     set('btn-font-mode', 'title', S.fontButtonTitle);   // v9.14: fuente de estudio
     set('btn-interleaving', 'title', S.interleaveTitle); // v9.15: práctica intercalada
@@ -1426,6 +1464,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCurrentSentence();
     updateStats();
     updateVocabularyPanel();
+    state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
 });
 
 function applySavedUI() {
@@ -1607,7 +1646,12 @@ function applyListenUI() {
     const btn = document.getElementById('btn-listen');
     if (!btn) return;
     btn.classList.toggle('active', state.listenFirst);
-    btn.textContent = state.listenFirst ? '🎧 Solo oído ✓' : '🎧 Solo oído';
+    btn.setAttribute('aria-pressed', state.listenFirst ? 'true' : 'false');
+    const sub = btn.querySelector('.tc-sub');
+    if (sub) sub.textContent = state.listenFirst
+        ? 'Activado: en Hoy la frase suena antes de verse'
+        : 'La frase suena antes de verse (modo de la tarjeta)';
+    else btn.textContent = state.listenFirst ? '🎧 Solo oído ✓' : '🎧 Solo oído';
 }
 
 function toggleListenFirst() {
@@ -1763,9 +1807,8 @@ function listenPick(optBtn) {
     if (st) st.classList.remove('hidden'); // el texto aparece AHORA (con su hueco)
     const inp = document.getElementById('answer-input');
     if (inp) inp.value = val;
+    state.attempts = 1; // v10: elegir una opción es el único intento
     checkAnswer();
-    const chk = document.getElementById('btn-check');
-    if (chk) chk.classList.remove('hidden'); // pasa a "Siguiente ▶"
 }
 
 function listenReplay() { playAudio('zh'); }
@@ -1787,6 +1830,7 @@ function setupModuleTabs() {
             const on = b.dataset.tab === name;
             b.classList.toggle('active', on);
             b.setAttribute('aria-selected', on ? 'true' : 'false');
+            b.tabIndex = on ? 0 : -1; // v10 UX: roving tabindex
         });
         Object.keys(panels).forEach(k => {
             const p = document.getElementById(panels[k]);
@@ -1826,8 +1870,26 @@ function setupEventListeners() {
     // Acciones principales
     safeAdd('btn-check', checkAnswer);
     safeAdd('btn-reveal', revealAnswer);
-    safeAdd('btn-know', () => markWord(true));
-    safeAdd('btn-not-know', () => markWord(false));
+    // v10 UX: calificación en dos etapas (Otra vez / Bien / Fácil) + Anterior
+    safeAdd('btn-know', () => gradeCard('easy'));
+    safeAdd('btn-good', () => gradeCard('good'));
+    safeAdd('btn-not-know', () => gradeCard('again'));
+    safeAdd('btn-prev', prevSentence);
+    setupAppNav();
+    setupSessionUI();
+    safeAdd('header-streak', () => { const b = document.getElementById('btn-stats'); if (b) b.click(); });
+    safeAdd('btn-record', () => { const d = document.getElementById('record-details'); if (d) d.open = true; });
+    safeAdd('btn-train-record', () => {
+        showView('hoy');
+        const d = document.getElementById('record-details'); if (d) d.open = true;
+        const r = document.getElementById('btn-record');
+        if (r) { try { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); r.focus({ preventScroll: true }); } catch (e) { r.focus(); } }
+    });
+    safeAdd('btn-train-write', () => {
+        showView('hoy');
+        const h = document.getElementById('btn-handwrite');
+        if (h && !h.classList.contains('hidden')) h.click(); else focusAnswerInput();
+    });
     safeAdd('btn-read-lesson', readCurrentLesson); // v7.14: leer lección completa
     safeAdd('btn-library-load', loadLibraryLesson); // v7.15: Biblioteca de Lecturas
     safeAdd('btn-reset', resetProgress);
@@ -1948,7 +2010,7 @@ function setupEventListeners() {
         input.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                checkAnswer();
+                if (state.answered) confirmDefaultGrade(); else checkAnswer();
             }
         });
     }
@@ -2183,6 +2245,7 @@ function setModule(mod) {
     loadSentences().then(() => {
         renderCurrentSentence();
         updateStats();
+        if (state._uiReady) showView('hoy'); // v10 UX: elegir un módulo vuelve a practicar
     });
 }
 
@@ -2652,8 +2715,11 @@ function renderCurrentSentence() {
 
     state.answered = false;
     state.filledAnswer = null;   // v7.2: oración nueva → hueco otra vez vacío
+    state.attempts = 0;          // v10 UX: dos intentos por tarjeta
+    state.lastResult = null;
     const btnCheck = document.getElementById('btn-check');
     if (btnCheck) btnCheck.textContent = uiT('btnCheck');
+    setAnswerStage('pre');
 
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
@@ -2715,20 +2781,7 @@ function renderCurrentSentence() {
         btnHw.classList.toggle('hidden', !(answerIsZh && zhAns));
     }
 
-    // 6b. Instrucciones bilingües en modo "Aprendo español" (CN→ES):
-    // los alumnos suman la traducción al chino en Revelar / La sé / Repetir
-    const btnReveal = document.getElementById('btn-reveal');
-    const btnKnow = document.getElementById('btn-know');
-    const btnNotKnow = document.getElementById('btn-not-know');
-    if (!learningChinese) {
-        if (btnReveal) btnReveal.textContent = '👁️ Revelar 显示';
-        if (btnKnow) btnKnow.textContent = '✅ La sé 我会';
-        if (btnNotKnow) btnNotKnow.textContent = '🔄 Repetir 再练';
-    } else {
-        if (btnReveal) btnReveal.textContent = '👁️ Revelar';
-        if (btnKnow) btnKnow.textContent = '✅ La sé';
-        if (btnNotKnow) btnNotKnow.textContent = '🔄 Repetir';
-    }
+    // 6b. v10 UX: las etiquetas de acción las pone updateUILanguage (data-i18n).
 
     // v7.14: botón "📖 Leer lección" — SOLO si la oración pertenece a un
     // texto continuo (p. ej. Clásicos) y el modo es "Aprendo Chino" (es-cn).
@@ -2742,6 +2795,7 @@ function renderCurrentSentence() {
     // 7. Barra de progreso
     const bar = document.getElementById('progress-bar');
     if (bar) bar.style.width = ((state.currentIndex + 1) / filtered.length * 100) + '%';
+    updateSessionUI(); // v10 UX: anillo de sesión
 
     // 8. Hacer el hueco "___" clicable (los alumnos intentan tocarlo para escribir)
     makeBlanksClickable();
@@ -2965,7 +3019,6 @@ function checkAnswer() {
     }
 
     const validAnswers = getValidAnswers(s, learningChinese, k);
-    showFullTranslation();
 
     // v8.1: identidad canónica de una tarjeta de palabra = el hanzi
     // (el panel de vocabulario, las stats y el popup usan el hanzi como clave)
@@ -3001,7 +3054,20 @@ function checkAnswer() {
 
     const allOptions = validAnswers.join(' / ');
 
+    // v10 UX: primer error → pista graduada sin revelar; segundo → respuesta + diff
+    if (!isCorrect) {
+        state.attempts = (state.attempts || 0) + 1;
+        if (state.attempts < 2) {
+            showFeedback(answerHint(input, validAnswers, expectChineseAns), 'hint');
+            const inpEl = document.getElementById('answer-input');
+            if (inpEl) { try { inpEl.focus({ preventScroll: true }); inpEl.select(); } catch (e) { /* noop */ } }
+            return;
+        }
+    }
+    showFullTranslation();
+
     if (isCorrect) {
+        state.lastResult = 'correct';
         showFeedback(uiT('correctWord') + '"' + allOptions + '"', 'correct');
         // v8.1: palabras → se registra el hanzi canónico (no las glosas)
         if (wordKey) {
@@ -3022,7 +3088,9 @@ function checkAnswer() {
         rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
         refillBlank('correct');   // v7.2: la oración queda completa (verde)
     } else {
-        showFeedback(uiT('validWrong') + '"' + allOptions + '"', 'incorrect');
+        state.lastResult = 'wrong';
+        showFeedback(uiT('validWrong') + '"' + allOptions + '"', 'incorrect',
+            answerDiffHtml(input, validAnswers[0], expectChineseAns));
         state.newWords.add(wordKey || validAnswers[0]);
         rememberWordContext(wordKey ? [wordKey] : [validAnswers[0]], s); // v7.13
         if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s); // v7.21: alimenta el mazo de repaso
@@ -3030,8 +3098,7 @@ function checkAnswer() {
     }
 
     state.answered = true;
-    const btnCheck = document.getElementById('btn-check');
-    if (btnCheck) btnCheck.textContent = 'Siguiente ▶';
+    setAnswerStage('post'); // v10 UX: Otra vez / Bien / Fácil
 
     saveProgress();
     updateStats();
@@ -3048,8 +3115,12 @@ function revealAnswer() {
     const validAnswers = getValidAnswers(s, learningChinese, k);
     // v8.1: identidad canónica de palabra = hanzi (coherente con checkAnswer)
     const wordKey = s.w ? String(s.chinese_simp_answer || validAnswers[0] || '').trim() : null;
+    if (state.answered && state.lastResult) return; // ya respondida: nada que revelar
     showFullTranslation();
-    showFeedback(uiT('validReveal') + '"' + validAnswers.join(' / ') + '"', 'correct');
+    // v10 UX: revelar NO es acertar → clase propia (ámbar) y entra al repaso
+    showFeedback(uiT('validReveal') + '"' + validAnswers.join(' / ') + '"', 'reveal');
+    if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s);
+    state.lastResult = 'reveal';
     refillBlank('reveal');       // v7.2: oración completa con la respuesta (ámbar)
     // v9.19: en "solo oído", Revelar también destapa la oración y cierra opciones
     if (state.mode === 'es-cn' && state.listenFirst) {
@@ -3067,12 +3138,6 @@ function revealAnswer() {
         // Como la respuesta ya se vio, "Verificar" no tiene sentido: se marca
         // respondido y el botón pasa a "Siguiente ▶" (checkAnswer →
         // nextSentence) SIN contar como acierto — revelar no es practicar.
-        state.answered = true;
-        const chkl = document.getElementById('btn-check');
-        if (chkl) {
-            chkl.textContent = 'Siguiente ▶';
-            chkl.classList.remove('hidden');
-        }
     }
 
     if (wordKey) {
@@ -3085,10 +3150,306 @@ function revealAnswer() {
         state.newWords.add(canon);
     }
     rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
+    state.answered = true;
+    setAnswerStage('post'); // v10 UX: calificación (Otra vez preseleccionado)
     saveProgress();
     updateStats();
     updateVocabularyPanel();
 }
+
+// ===== v10 UX: calificación en dos etapas, pistas, diff, sesión, navegación =====
+function gradeCard(kind) {
+    const filtered = getFiltered();
+    if (!filtered.length || !state.answered) return;
+    const s = filtered[state.currentIndex];
+    const learningChinese = state.mode === 'es-cn';
+    const k = ck();
+    const answer = s.w
+        ? String(s.chinese_simp_answer || s['chinese_' + k + '_answer']).trim()
+        : (learningChinese ? String(s.chinese_simp_answer || s['chinese_' + k + '_answer']).trim() : s.spanish_answer);
+    if (kind === 'again') {
+        state.newWords.add(answer);
+        state.knownWords.delete(answer);
+        // tras error o revelar la tarjeta YA está en caja 1 (checkAnswer/revealAnswer)
+        if (state.lastResult === 'correct' && typeof window.acSrsMiss === 'function') window.acSrsMiss(s);
+    } else {
+        state.knownWords.add(answer);
+        state.newWords.delete(answer);
+        if (typeof window.acSrsGrade === 'function') window.acSrsGrade(s, kind);
+    }
+    rememberWordContext([answer], s);
+    sessionTick();
+    saveProgress();
+    updateStats();
+    updateVocabularyPanel();
+    nextSentence();
+}
+
+function setAnswerStage(stage) {
+    const post = stage === 'post';
+    const pre = document.getElementById('pre-answer-row');
+    const row = document.getElementById('grade-row');
+    const chk = document.getElementById('btn-check');
+    const inp = document.getElementById('answer-input');
+    const hw = document.getElementById('btn-handwrite');
+    if (pre) pre.classList.toggle('hidden', post);
+    if (row) row.classList.toggle('hidden', !post);
+    if (chk) chk.classList.toggle('hidden', post);
+    if (inp) inp.readOnly = post;
+    if (hw && post) hw.classList.add('hidden');
+    if (post && row) {
+        updateGradeIntervals();
+        const def = state.lastResult === 'correct' ? 'good' : 'again';
+        row.querySelectorAll('.btn-grade').forEach(b => b.classList.toggle('is-default', b.dataset.grade === def));
+        const d = row.querySelector('.btn-grade.is-default');
+        if (d) { try { d.focus({ preventScroll: true }); } catch (e) { d.focus(); } }
+    }
+}
+
+function confirmDefaultGrade() {
+    const b = document.querySelector('#grade-row .btn-grade.is-default');
+    if (b) b.click();
+}
+
+function updateGradeIntervals() {
+    const filtered = getFiltered();
+    const s = filtered && filtered[state.currentIndex];
+    if (!s) return;
+    const p = (typeof window.acSrsPreview === 'function') ? window.acSrsPreview(s) : null;
+    const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    set('g-int-again', p ? p.again : '10 min');
+    set('g-int-good', p ? p.good : uiT('gradeNoReturn'));
+    set('g-int-easy', p ? p.easy : uiT('gradeNoReturn'));
+}
+
+function prevSentence() {
+    const filtered = getFiltered();
+    if (!filtered.length) return;
+    state.currentIndex = (state.currentIndex - 1 + filtered.length) % filtered.length;
+    saveProgress();
+    renderCurrentSentence(); // no toca el repaso: solo vuelve a mostrar la frase
+}
+
+// ---- pistas graduadas (primer error) ----
+function stripAccents(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+function pinyinOf(zh, tone) {
+    try {
+        if (typeof pinyinPro !== 'undefined' && zh) {
+            return pinyinPro.pinyin(zh, { toneType: tone ? 'symbol' : 'none' }).replace(/\s+/g, '').toLowerCase();
+        }
+    } catch (e) { /* sin pinyin */ }
+    return '';
+}
+function levArr(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n; if (!n) return m;
+    let prev = new Array(n + 1), cur = new Array(n + 1);
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+        cur[0] = i;
+        for (let j = 1; j <= n; j++) {
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        }
+        [prev, cur] = [cur, prev];
+    }
+    return prev[n];
+}
+// La respuesta del alumno con "_" en la posición que difiere (no revela la correcta)
+function maskDiffPos(a, b) {
+    const A = Array.from(a), B = Array.from(b);
+    let out = '';
+    for (let i = 0; i < A.length; i++) out += (A[i] === B[i]) ? A[i] : '_';
+    return out;
+}
+function answerHint(input, validAnswers, expectZh) {
+    const inp = String(input || '').trim();
+    const ans = String(validAnswers[0] || '').trim();
+    if (expectZh) {
+        const cIn = inp.replace(/[\s\u3000]+/g, '');
+        const cAns = ans.replace(/[\s\u3000]+/g, '');
+        const hasHan = /[\u3400-\u9fff]/.test(cIn);
+        if (!hasHan && cIn) {
+            // escribió latino: ¿es el pinyin de la respuesta?
+            const pIn = stripAccents(cIn.toLowerCase()).replace(/[0-9]/g, '');
+            const pAns = pinyinOf(cAns, false);
+            if (pAns && pIn === pAns) {
+                const tIn = cIn.toLowerCase(), tAns = pinyinOf(cAns, true);
+                return (tAns && tIn !== tAns && stripAccents(tIn) === stripAccents(tAns) && /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(tIn))
+                    ? uiT('hintTone') : uiT('hintPinyinOk');
+            }
+            return uiT('hintGeneric');
+        }
+        const tl = pinyinOf(cIn, false), ta = pinyinOf(cAns, false);
+        if (tl && ta && tl === ta && cIn !== cAns) return uiT('hintHomophone');
+        const A = Array.from(cIn), B = Array.from(cAns);
+        if (A.length === B.length && A.length > 1 && levArr(A, B) === 1) return uiT('hintOneChar') + ' ' + maskDiffPos(cIn, cAns);
+        return uiT('hintGeneric');
+    }
+    const a = inp.toLowerCase(), b = ans.toLowerCase();
+    if (a !== b && stripAccents(a) === stripAccents(b)) return uiT('hintAccent');
+    if (a.length === b.length && a.length > 2 && levArr(a.split(''), b.split('')) === 1) return uiT('hintOneLetter') + ' ' + maskDiffPos(a, b);
+    return uiT('hintGeneric');
+}
+// Diff visual (segundo error): lo escrito vs. la respuesta, carácter a carácter
+function answerDiffHtml(input, answer, expectZh) {
+    const A = Array.from(String(input || '').trim());
+    const B = Array.from(String(answer || '').trim());
+    if (!A.length || !B.length) return '';
+    const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const cmp = (x, y) => expectZh ? x === y : stripAccents(x).toLowerCase() === stripAccents(y).toLowerCase();
+    let you = '', want = '';
+    const L = Math.max(A.length, B.length);
+    for (let i = 0; i < L; i++) {
+        const same = A[i] !== undefined && B[i] !== undefined && cmp(A[i], B[i]);
+        if (A[i] !== undefined) you += '<span class="' + (same ? 'd-ok' : 'd-no') + '">' + esc(A[i]) + '</span>';
+        if (B[i] !== undefined) want += '<span class="' + (same ? 'd-ok' : 'd-want') + '">' + esc(B[i]) + '</span>';
+    }
+    const lang = expectZh ? ' lang="zh"' : '';
+    return '<span class="fb-diff-row"><span class="fb-diff-lbl">' + esc(uiT('diffYou')) + '</span><span class="fb-diff-txt"' + lang + '>' + you + '</span></span>' +
+           '<span class="fb-diff-row"><span class="fb-diff-lbl">' + esc(uiT('diffAns')) + '</span><span class="fb-diff-txt"' + lang + '>' + want + '</span></span>';
+}
+
+// ---- sesión diaria ----
+const SESSION_KEY = 'ac_session_v1';
+function sessionToday() { return new Date().toISOString().slice(0, 10); }
+function loadSession() {
+    state.sessionDate = sessionToday();
+    try {
+        const r = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+        if (r && typeof r === 'object') {
+            state.sessionGoal = [5, 10, 20].indexOf(r.goal) !== -1 ? r.goal : 10;
+            const sameDay = r.date === sessionToday();
+            state.sessionDone = sameDay ? (r.done | 0) : 0;
+            state.sessionTarget = sameDay && r.target >= state.sessionGoal ? (r.target | 0) : state.sessionGoal;
+        }
+    } catch (e) { /* sin sesión */ }
+    if (!state.sessionTarget) state.sessionTarget = state.sessionGoal;
+}
+function saveSession() {
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ date: sessionToday(), done: state.sessionDone, goal: state.sessionGoal, target: state.sessionTarget })); } catch (e) { /* noop */ }
+}
+function sessionTick() {
+    if (state.sessionDate !== sessionToday()) { state.sessionDone = 0; state.sessionDate = sessionToday(); state.sessionTarget = state.sessionGoal; }
+    state.sessionDone++;
+    saveSession();
+    updateSessionUI();
+    updateHeaderStreak();
+    if (state.sessionDone === state.sessionTarget) showSessionDone();
+}
+function updateSessionUI() {
+    const t = state.sessionTarget || state.sessionGoal || 10;
+    const pct = Math.min(100, Math.round((state.sessionDone || 0) / t * 100));
+    const ring = document.getElementById('session-ring');
+    if (ring) ring.style.setProperty('--pct', pct + '%');
+    const txt = document.getElementById('session-ring-txt');
+    if (txt) txt.textContent = Math.min(state.sessionDone || 0, t) + '/' + t;
+    const lbl = document.getElementById('session-label');
+    if (lbl) lbl.textContent = uiT('sessionLabel');
+    document.querySelectorAll('#session-goal-group .goal-btn').forEach(b => b.classList.toggle('active', +b.dataset.goal === state.sessionGoal));
+}
+function showSessionDone() {
+    const d = document.getElementById('session-done');
+    const c = document.getElementById('sentence-card');
+    if (!d) return;
+    const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+    set('sd-title', uiT('sessionDoneTitle'));
+    let txt = uiT('sessionDoneText').replace('{n}', state.sessionDone);
+    try {
+        const s = window.HuayuStats && HuayuStats.getSummary && HuayuStats.getSummary();
+        if (s && s.streak > 0) txt += ' ' + uiT('sessionStreak').replace('{n}', s.streak).replace('días', s.streak === 1 ? 'día' : 'días');
+    } catch (e) { /* sin stats */ }
+    set('sd-text', txt);
+    set('btn-session-more', uiT('sessionMore').replace('{n}', state.sessionGoal));
+    set('btn-session-done', uiT('sessionClose'));
+    d.classList.remove('hidden');
+    if (c) c.classList.add('hidden');
+    try { d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* noop */ }
+    const m = document.getElementById('btn-session-more');
+    if (m) { try { m.focus({ preventScroll: true }); } catch (e) { m.focus(); } }
+}
+function hideSessionDone(more) {
+    const d = document.getElementById('session-done');
+    const c = document.getElementById('sentence-card');
+    if (more) state.sessionTarget = (state.sessionTarget || state.sessionGoal) + state.sessionGoal;
+    saveSession();
+    if (d) d.classList.add('hidden');
+    if (c) c.classList.remove('hidden');
+    updateSessionUI();
+    if (more) focusAnswerInput();
+}
+function setupSessionUI() {
+    loadSession();
+    document.querySelectorAll('#session-goal-group .goal-btn').forEach(b => b.addEventListener('click', () => {
+        state.sessionGoal = +b.dataset.goal;
+        if (state.sessionDone < state.sessionGoal || state.sessionTarget < state.sessionGoal) state.sessionTarget = state.sessionGoal;
+        saveSession();
+        updateSessionUI();
+    }));
+    const m = document.getElementById('btn-session-more');
+    if (m) m.addEventListener('click', () => hideSessionDone(true));
+    const dn = document.getElementById('btn-session-done');
+    if (dn) dn.addEventListener('click', () => hideSessionDone(false));
+    updateSessionUI();
+    updateHeaderStreak();
+}
+function updateHeaderStreak() {
+    try {
+        const s = window.HuayuStats && HuayuStats.getSummary && HuayuStats.getSummary();
+        const el = document.getElementById('header-streak');
+        const n = document.getElementById('header-streak-n');
+        if (!el || !n) return;
+        if (s && s.streak > 0) {
+            n.textContent = s.streak;
+            el.classList.remove('hidden');
+            el.classList.toggle('at-risk', !!s.streakRisk);
+        } else el.classList.add('hidden');
+    } catch (e) { /* sin stats */ }
+}
+
+// ---- navegación inferior (4 vistas) ----
+const APP_VIEWS = ['hoy', 'aprender', 'entrenar', 'yo'];
+function showView(name, save) {
+    if (APP_VIEWS.indexOf(name) === -1) name = 'hoy';
+    APP_VIEWS.forEach(v => { const sec = document.getElementById('view-' + v); if (sec) sec.classList.toggle('hidden', v !== name); });
+    document.querySelectorAll('#app-nav .nav-btn').forEach(b => {
+        const on = b.dataset.view === name;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+    });
+    if (save !== false) {
+        try { localStorage.setItem('ac_view_v1', name); } catch (e) { /* noop */ }
+        try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
+    }
+}
+function rovingTabs(container, sel, activate) {
+    container.addEventListener('keydown', (e) => {
+        const tabs = Array.from(container.querySelectorAll(sel)).filter(t => t.offsetParent !== null);
+        const i = tabs.indexOf(document.activeElement);
+        if (i === -1) return;
+        let j = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') j = 0;
+        else if (e.key === 'End') j = tabs.length - 1;
+        if (j === null) return;
+        e.preventDefault();
+        tabs[j].focus();
+        activate(tabs[j]);
+    });
+}
+function setupAppNav() {
+    const nav = document.getElementById('app-nav');
+    if (!nav) return;
+    nav.addEventListener('click', (e) => { const b = e.target.closest('.nav-btn'); if (b) showView(b.dataset.view); });
+    rovingTabs(nav, '.nav-btn', (b) => showView(b.dataset.view));
+    const mt = document.getElementById('module-tabs');
+    if (mt) rovingTabs(mt, '.mtab', (b) => b.click());
+    let saved = null;
+    try { saved = localStorage.getItem('ac_view_v1'); } catch (e) { /* noop */ }
+    showView(saved || 'hoy', false);
+}
+// ===== fin v10 UX =====
 
 function markWord(known) {
     const filtered = getFiltered();
@@ -3128,9 +3489,16 @@ function nextSentence() {
     renderCurrentSentence();
 }
 
-function showFeedback(msg, type) {
+function showFeedback(msg, type, extraHtml) {
     const el = document.getElementById('feedback');
-    el.textContent = msg; 
+    if (!el) return;
+    el.textContent = msg;
+    if (extraHtml) {
+        const d = document.createElement('div');
+        d.className = 'fb-diff';
+        d.innerHTML = extraHtml;
+        el.appendChild(d);
+    }
     el.className = 'feedback ' + type;
     el.classList.remove('hidden');
 }
@@ -4451,15 +4819,18 @@ function buildReaderLibrary() {
         if (!byGroup[g]) { byGroup[g] = []; groups.push(g); }
         byGroup[g].push(L);
     });
+    // v10 UX: las plantadas (status 'planned') van juntas al final, en un
+    // solo grupo "En preparación (N)", para no ocupar espacio de decisión.
+    const planned = [];
     groups.forEach(g => {
         const og = document.createElement('optgroup');
         og.label = g;
         byGroup[g].forEach(L => {
+            if (L.status === 'planned') { planned.push(L); return; }
             const o = document.createElement('option');
             o.value = L.id;
-            if (L.status === 'planned') {
-                o.disabled = true;
-                o.textContent = (L.label || L.title) + ' · próximamente';
+            if (false) {
+                /* planned: agrupadas abajo */
             } else if (L.module && String(L.module).indexOf('Clasicos-') === 0) {
                 // v9.2: los clásicos abren el lector de clásicos (texto original)
                 o.textContent = '📖 Leer el texto original (lector de clásicos)';
@@ -4468,8 +4839,20 @@ function buildReaderLibrary() {
             }
             og.appendChild(o);
         });
-        sel.appendChild(og);
+        if (og.childElementCount) sel.appendChild(og);
     });
+    if (planned.length) {
+        const pg = document.createElement('optgroup');
+        pg.label = '🔜 En preparación (' + planned.length + ')';
+        planned.forEach(L => {
+            const o = document.createElement('option');
+            o.value = L.id;
+            o.disabled = true;
+            o.textContent = (L.label || L.title) + ' · próximamente';
+            pg.appendChild(o);
+        });
+        sel.appendChild(pg);
+    }
 }
 
 // Carga en el Lector la lectura elegida en la Biblioteca
@@ -5880,6 +6263,27 @@ function pzCounterUpdate() {
     window.acSrsAdd = function (o) { return addCard(o); };
     window.acSrsHas = function (w) { return !!DB.cards[String(w || '').trim()]; };
     window.acSrsReset = function () { DB = { v: 1, cards: {} }; save(); updateBar(); };
+    // v10 UX: calificación desde la tarjeta de práctica + intervalos reales
+    window.acSrsGrade = function (s, kind) {
+        if (!s) return false;
+        const zh = String(s.chinese_simp_answer || '').trim();
+        if (!DB.cards[zh]) return false;
+        grade(zh, kind === 'easy' ? 'easy' : 'good');
+        return true;
+    };
+    window.acSrsPreview = function (s) {
+        const zh = s ? String(s.chinese_simp_answer || '').trim() : '';
+        const c = DB.cards[zh];
+        const lbl = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
+        if (!c) return { again: '10 min', good: uiT('gradeNoReturn'), easy: uiT('gradeNoReturn'), inDeck: false };
+        return { again: '10 min', good: lbl(Math.min(c.b + 1, 6)), easy: lbl(Math.min(c.b + 2, 6)), inDeck: true };
+    };
+    window.acSrsRefreshBar = function () { updateBar(); };
+    function relearnCount() {
+        const now = Date.now(); let n = 0;
+        for (const zh in DB.cards) { const c = DB.cards[zh]; if (c && c.b === 1 && c.d > now) n++; }
+        return n;
+    }
 
     // Glosa de respaldo para tarjetas sin es guardado (módulos de oraciones)
     function srsGloss(zh, card) {
@@ -6475,8 +6879,12 @@ function pzCounterUpdate() {
             else badge.classList.add('hidden');
         }
         if (label) {
-            label.textContent = total === 0 ? uiT('srsIdle')
-                : (due > 0 ? uiT('srsDue') : uiT('srsOk'));
+            // v10 UX: estado concreto — nunca "al día" con tarjetas en caja 1
+            const relearn = relearnCount();
+            label.textContent = total === 0 ? uiT('srsEmpty')
+                : (due > 0 ? uiT('srsDueN').replace('{n}', due)
+                : (relearn > 0 ? uiT('srsRelearn').replace('{n}', relearn) : uiT('srsOkNew')));
+            btn.classList.toggle('has-relearn', due === 0 && relearn > 0);
         }
         btn.title = 'Repaso con repetición espaciada' +
             (total ? ' · ' + total + ' en el mazo' : '') + (due ? ' · ' + due + ' vencen hoy' : '');

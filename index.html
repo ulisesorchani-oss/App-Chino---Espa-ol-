@@ -13,14 +13,15 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260917f">
+    <link rel="stylesheet" href="style.css?v=20260916ux3">
 </head>
 <body>
+    <!-- v10 UX: skip link — primer elemento focusable del body -->
+    <a class="skip-link" href="#main">Ir al contenido</a>
+
     <div class="container">
-        <!-- v9.8 Header de marca: sello 日常華語 + nombre + slogan (identidad visual).
-             El sello va a la izquierda y el texto a la derecha (QA v9.8).
-             v9.10: 📲 Instalar se mudó al pie de la página (mismo ID, app.js intacto);
-             el header queda con el cambio de idioma y el tema. -->
+        <!-- v10 UX: header reducido a la marca + racha. Guía, Racha (botón),
+             cambio de modo y tema viven en la vista "Yo". -->
         <header class="header header-branded">
             <div class="header-row">
                 <div class="brand-block">
@@ -30,418 +31,516 @@
                         <p class="app-slogan" data-i18n="appSlogan">Vive el idioma, una frase al día - 日常華語</p>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <!-- v9.9: cambio de modo discreto (Español-First: por defecto es-cn).
-                         i18n: updateUILanguage() le pone texto/título según el modo. -->
-                    <button id="btn-toggle-lang-mode" class="lang-switch-btn" type="button" title="Cambiar idioma de la interfaz">🇪🇸 ES</button>
-                    <button id="btn-theme" class="theme-toggle" aria-label="Cambiar tema">🌙</button>
-                </div>
+                <!-- racha en vivo (HuayuStats.getSummary) — solo lectura -->
+                <button id="header-streak" class="header-streak hidden" type="button" title="Días seguidos practicando">🔥 <span id="header-streak-n">0</span></button>
             </div>
         </header>
 
-        <!-- v8.1 BARRA DE ESTUDIO (sticky en móvil): queda solo el Repaso SRS.
-             Los modos y las herramientas de visualización viven ahora DENTRO de
-             la tarjeta (#sentence-card > .card-tools-header), pegados a lo que
-             controlan — antes llenaban esta barra y empujaban la tarjeta abajo. -->
-        <div class="control-panel study-bar" id="control-panel">
-            <!-- v7.21: REPASO SRS — botón del día en la barra sticky.
-                 El badge naranja muestra cuántas tarjetas vencen hoy. -->
-            <button id="btn-srs" class="srs-bar-btn" type="button"
-                    title="Repaso con repetición espaciada: las palabras que fallaste o marcaste vuelven justo antes de olvidarlas">
-                <span class="srs-bar-ico" aria-hidden="true">🔁</span>
-                <span id="srs-bar-label">Repaso inteligente</span>
-                <span id="srs-bar-badge" class="srs-bar-badge hidden">0</span>
-            </button>
-        </div>
+        <main id="main">
 
-        <!-- Estado del módulo (cargando / sin datos / info) — v7.18: pegado a la tarjeta -->
-        <div id="module-status" class="module-status hidden" role="status"></div>
+        <!-- ============================================================
+             VISTA HOY — practicar. Única pantalla con la tarjeta.
+             ============================================================ -->
+        <section class="view" id="view-hoy" role="tabpanel" aria-labelledby="nav-hoy">
+            <h2 class="sr-only">Hoy</h2>
 
-        <!-- v8.1: TARJETA DE PRÁCTICA — protagonista absoluta, lo primero visible en móvil.
-             Cabecera de herramientas integrada: modos + controles de visualización. -->
-        <!-- Tarjeta de Oración -->
-        <div class="card" id="sentence-card">
-            <!-- v8.1/v9.10: CABECERA DE HERRAMIENTAS DE LA TARJETA. Los IDs no
-                 cambian (los listeners usan safeAdd por ID). v9.10: TODO el panel
-                 de controles (简/繁, pinyin, tonos, velocidad, voces, letras
-                 grandes, respaldo) vive colapsado detrás del engranaje ⚙ —
-                 cerrado por defecto, se abre tocándolo. En la tarjeta quedan
-                 a la vista solo 🔊 audio y 🎤 grabar (más grandes). -->
-            <div class="card-tools-header">
-                <div class="tools-gear-row">
-                    <button id="btn-tools-toggle" class="tools-gear" type="button"
-                            aria-expanded="false" aria-controls="tools-row"
-                            title="Herramientas de estudio: 简/繁, pinyin, tonos, velocidad, voces…">⚙️</button>
-                </div>
-                <div class="tools-row" id="tools-row">
-                    <div class="script-toggle">
-                        <button id="btn-simplified" class="script-btn active">简 简体</button>
-                        <button id="btn-traditional" class="script-btn">繁 繁體</button>
-                    </div>
-                    <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
-                    <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
-                    <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores">ℹ️</button>
-                    <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
-                    <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
-                    <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
-                    <button id="btn-grand" class="speed-btn" type="button" title="Letras grandes para leer cómodo (modo abuelo)">🅰 Grande</button>
-                    <button id="btn-backup" class="speed-btn" type="button" title="Respaldo: guardar tu progreso en un archivo o exportarlo a Anki">💾</button>
-                    <!-- v9.14: fuente de estudio 默认/楷体 -->
-                    <button id="btn-font-mode" class="speed-btn" type="button" title="Cambiar fuente china">字体</button>
-                    <!-- v9.15: práctica intercalada — mezcla el orden del módulo
-                         activo (Fisher-Yates sembrado). OFF = orden original. -->
-                    <button id="btn-interleaving" class="speed-btn" type="button" title="Práctica intercalada">🔀 Intercalar</button>
-                    <!-- v9.19: "solo oído" — el audio suena primero, el texto queda
-                         oculto y el alumno elige entre opciones ANTES de ver los
-                         caracteres (comprensión auditiva real). Solo en es-cn. -->
-                    <button id="btn-listen" class="speed-btn" type="button" title="Escucha antes que lectura: el audio suena solo y el texto aparece al responder">🎧 Solo oído</button>
-                    <!-- v9.20: PARES MÍNIMOS — ejercicio aislado de discriminación
-                         tonal por audio: ¿cuál escuchaste? (买/卖, 十/是…). No
-                         interfiere con el flujo de oraciones. -->
-                    <button id="btn-mp-pairs" class="speed-btn" type="button" title="Entrenamiento de oído: palabras que solo difieren en el tono (HSK 1-2). ¿Cuál escuchaste?">🎯 Pares mínimos</button>
-                </div>
-            </div>
-
-            <!-- v9.14: cabecera de práctica reordenada — nivel+contador a la
-                 izquierda, barra de progreso integrada al centro (llena el
-                 espacio libre), audio+micrófono a la derecha. Mismos IDs:
-                 app.js sigue conectando todo por ID sin cambios. -->
-            <div class="card-header practice-top-row">
-                <div class="practice-meta">
-                    <span class="card-level" id="card-level">Nivel 1</span>
-                    <span class="card-number" id="card-number">1/20</span>
-                </div>
-
-                <div class="practice-progress-slot">
-                    <!-- Barra de progreso (movida acá, mismo ID único) -->
-                    <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
-                </div>
-
-                <div class="practice-audio-actions">
-                    <div class="audio-controls-inline">
-                        <button id="btn-play-es" class="btn-audio-mini">🔊 ES</button>
-                        <button id="btn-play-cn" class="btn-audio-mini">🔊 CN</button>
-                        <button id="btn-record" class="btn-audio-mini btn-record" type="button"
-                                title="Tocá para grabar tu pronunciación" aria-label="Grabar mi pronunciación">🎤</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sentence-container">
-                <p class="sentence" id="sentence-text"></p>
-                <p class="pinyin-text hidden" id="pinyin-display"></p>
-                <p class="translation" id="translation-text"></p>
-            </div>
-
-            <!-- Input para respuesta -->
-            <div class="answer-section" id="answer-section">
-                <input type="text" id="answer-input" placeholder="Escribe la palabra faltante...">
-                <!-- v9.34: ✍️ respuesta a mano — se muestra solo cuando la
-                     respuesta esperada es china (renderCurrentSentence) -->
-                <button id="btn-handwrite" class="btn-secondary btn-handwrite hidden" type="button"
-                        title="Escribir a mano (trazar con el dedo)" aria-label="Escribir la respuesta a mano">✍️</button>
-                <button id="btn-check" class="btn-primary" data-i18n="btnCheck">Verificar</button>
-            </div>
-
-            <!-- Feedback -->
-            <div class="feedback hidden" id="feedback">
-                <p id="feedback-text"></p>
-            </div>
-
-            <!-- Botones de navegación -->
-            <div class="card-actions">
-                <!-- v7.14: aparece solo cuando la oración pertenece a un texto
-                     continuo (Clásicos...) y el modo es "Aprendo Chino" -->
-                <button id="btn-read-lesson" class="btn-secondary btn-lesson hidden" type="button"
-                        title="Leer el texto completo de esta lección en el Lector" data-i18n="readLesson">📖 Leer lección</button>
-                <!-- v9.14: orden nuevo Repetir → La sé → Revelar (mismos IDs) -->
-                <button id="btn-not-know" class="btn-warning" data-i18n="btnRepeat">🔄 Repetir</button>
-                <button id="btn-know" class="btn-success" data-i18n="btnKnow">✅ La sé</button>
-                <button id="btn-reveal" class="btn-secondary" data-i18n="btnReveal">👁️ Revelar</button>
-            </div>
-        </div>
-
-        <!-- v7.5: GRABACIÓN Y EVALUACIÓN DE PRONUNCIACIÓN (panel bajo la tarjeta) -->
-        <div id="record-panel" class="record-panel" role="region" aria-label="Grabación y evaluación de pronunciación">
-            <canvas id="record-wave" class="record-wave" height="34" aria-hidden="true"></canvas>
-            <!-- v7.6: barra de progreso de la descarga del motor Whisper (1.ª vez) -->
-            <div id="rec-dl" class="rec-dl hidden" aria-hidden="true"><div id="rec-dl-fill" class="rec-dl-fill"></div></div>
-            <p id="record-hint" class="record-hint" data-i18n="recordHint">👆 Tocá 🎤 para grabar tu pronunciación</p>
-            <div id="record-result" class="record-result hidden" aria-live="polite"></div>
-            <div id="record-row-actions" class="record-row hidden">
-                <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button" data-i18n="recMy">▶️ Escuchar mi grabación</button>
-                <button id="btn-play-ref" class="btn-secondary rec-action hidden" type="button" data-i18n="recRef">🔊 Referencia</button>
-                <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button" data-i18n="recAgain">🔁 Grabar de nuevo</button>
-            </div>
-            <p class="record-privacy" id="record-privacy-note">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
-        </div>
-
-        <!-- v7.18: TABS de selectores de contenido (debajo de la práctica; 1 panel visible) -->
-        <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
-            <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
-            <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button" data-i18n="tabExams">🎓 Exámenes</button>
-            <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button" data-i18n="tabLessons">📖 Lecciones</button>
-            <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button" data-i18n="tabClassics">📜 Clásicos</button>
-        </nav>
-
-        <div class="tab-panels">
-            <!-- Panel Diaria -->
-            <div class="tab-panel section-daily" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
-                <h3 class="section-title" data-i18n="dailyTitle"> PRÁCTICA DIARIA</h3>
-                <div class="category-filter daily-filter">
-                    <div class="daily-dropdown" id="daily-dropdown">
-                        <button id="btn-daily-toggle" class="daily-main-btn" type="button"
-                                aria-haspopup="menu" aria-expanded="false" aria-controls="daily-menu"
-                                title="Elegí una categoría de práctica diaria">
-                            <span aria-hidden="true">📚</span> <span id="daily-current">Práctica Diaria</span>
-                            <span class="daily-caret" aria-hidden="true">▾</span>
-                        </button>
-                        <ul id="daily-menu" class="daily-menu hidden" role="menu" aria-labelledby="btn-daily-toggle">
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="todas">📖 Todas</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Saludos">👋 Saludos</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Supermercado">🛒 Supermercado</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Migraciones">🛂 Migraciones</button></li>
-                            <li role="separator" class="daily-menu-sep" aria-hidden="true"></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En un restaurante">🍜 En un restaurante</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el colectivo">🚌 En el colectivo</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el subterráneo">🚇 En el subterráneo</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En la clase de idioma">🏫 En la clase de idioma</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el shopping">🛍️ En el shopping</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el cine">🎬 En el cine</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el gimnasio">🏋️ En el gimnasio</button></li>
-                            <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Barrio chino">🏮 Barrio chino</button></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- v7.20: Test de Colocación también en Diaria (pestaña por defecto) -->
-                <button id="btn-placement-daily" class="placement-daily-btn" type="button"
-                        title="Unas pocas preguntas y te ubicamos en tu nivel de HSK 3.0">
-                    🎯 ¿No sabés qué nivel tenés? Hacé el <b>test de colocación</b>
+            <!-- v10 UX: fila de estado (ya no es sticky). El texto lo escribe
+                 updateBar() del SRS: "N para repasar hoy" / "N para repetir en
+                 esta sesión" / "Repaso al día · volvé mañana" / mazo vacío. -->
+            <div class="control-panel study-bar" id="control-panel">
+                <button id="btn-srs" class="srs-bar-btn" type="button"
+                        title="Repaso con repetición espaciada: las palabras que fallaste o marcaste vuelven justo antes de olvidarlas">
+                    <span class="srs-bar-ico" aria-hidden="true">🔁</span>
+                    <span id="srs-bar-label">Repaso inteligente</span>
+                    <span id="srs-bar-badge" class="srs-bar-badge hidden">0</span>
                 </button>
             </div>
 
-            <!-- Panel Exámenes -->
-            <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
-                <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
-                <!-- v9.14: Test de colocación PRIMERO, debajo el selector de nivel.
-                     La etiqueta visible “Nivel HSK” se retiró: queda solo el
-                     dropdown, con aria-label para accesibilidad. -->
-                <button id="btn-placement" class="placement-btn" type="button"
-                        title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
-                        data-i18n="placementTest">
-                    🎯 Test de colocación — descubrí tu nivel
-                </button>
-                <p id="placement-status" class="placement-status hidden" role="status"></p>
-                <div class="hsk-level-selector" id="hsk-selector">
-                    <select id="select-hsk-level" class="level-dropdown" aria-label="Nivel HSK">
-                        <!-- v7.19: HSK 3.0 (GF0025-2021) — 9 niveles, conteos de palabras NUEVAS únicas -->
-                        <option value="HSK1">HSK 1 · Elemental (497 palabras)</option>
-                        <option value="HSK2">HSK 2 · Elemental (747 nuevas)</option>
-                        <option value="HSK3">HSK 3 · Elemental (949 nuevas)</option>
-                        <option value="HSK4">HSK 4 · Intermedio (973 nuevas)</option>
-                        <option value="HSK5">HSK 5 · Intermedio (1057 nuevas)</option>
-                        <option value="HSK6">HSK 6 · Intermedio (1119 nuevas)</option>
-                        <option value="HSK7">HSK 7 · Superior I (1865 nuevas)</option>
-                        <option value="HSK8">HSK 8 · Superior II (1866 nuevas)</option>
-                        <option value="HSK9">HSK 9 · Superior III (1871 nuevas)</option>
-                    </select>
-                </div>
-                <div class="category-filter exams-filters">
-                    <!-- v8.3: dropdown TOCFL — Band A 100% lista oficial vigente (華語八千詞表 2023):
-                         392 + 344 + 483 = 1.219 palabras + las 20 oraciones de muestra.
-                         v9.5: Band B completa — Nivel 3 進階 (B1, 1091) + Nivel 4 高階 (B2, 2194) = 3.285 palabras nuevas -->
-                    <div class="tocfl-dropdown" id="tocfl-dropdown">
-                        <button id="btn-tocfl-toggle" class="tocfl-main-btn" type="button"
-                                aria-haspopup="menu" aria-expanded="false" aria-controls="tocfl-menu"
-                                title="Elegí un nivel TOCFL">
-                            <span aria-hidden="true">🇹🇼</span> <span id="tocfl-current">TOCFL</span>
-                            <span class="daily-caret" aria-hidden="true">▾</span>
-                        </button>
-                        <ul id="tocfl-menu" class="tocfl-menu hidden" role="menu" aria-labelledby="btn-tocfl-toggle">
-                            <li class="dele-group-label" role="none">🎯 Band A (Novice → A2)</li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Preparación, Novice 1 y 2">
-                                <span class="ci-zh">準備</span><span class="ci-py">pre-A1</span><span class="ci-es">Preparación · 392 palabras</span></button></li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL Nivel 1, 入門級">
-                                <span class="ci-zh">入門</span><span class="ci-py">A1</span><span class="ci-es">Nivel 1 · 344 palabras</span></button></li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL Nivel 2, 基礎級">
-                                <span class="ci-zh">基礎</span><span class="ci-py">A2</span><span class="ci-es">Nivel 2 · 483 palabras</span></button></li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, oraciones de muestra">
-                                <span class="ci-zh">示例</span><span class="ci-py">muestra</span><span class="ci-es">Oraciones de examen · 20</span></button></li>
-                            <li class="dele-group-label" role="none">🚀 Band B (B1 → B2)</li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B3" aria-label="TOCFL Nivel 3, 進階級">
-                                <span class="ci-zh">進階</span><span class="ci-py">B1</span><span class="ci-es">Nivel 3 · 1091 palabras</span></button></li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B4" aria-label="TOCFL Nivel 4, 高階級">
-                                <span class="ci-zh">高階</span><span class="ci-py">B2</span><span class="ci-es">Nivel 4 · 2194 palabras</span></button></li>
-                            <li class="dele-group-label" role="none">💫 Band C (próximamente)</li>
-                            <li role="none"><button type="button" class="cat-btn tocfl-item dele-soon" role="menuitem" disabled aria-disabled="true">
-                                <span class="ci-zh">流利</span><span class="ci-py">en camino</span><span class="ci-es">Nivel 5 · C1</span></button></li>
-                        </ul>
+            <!-- Estado del módulo (cargando / sin datos / info) -->
+            <div id="module-status" class="module-status hidden" role="status"></div>
+
+            <!-- Tarjeta de Oración -->
+            <div class="card" id="sentence-card">
+                <!-- v10 UX: la cabecera de herramientas conserva SOLO lo que
+                     cambia cómo se ve la frase (hoja "Ver"). Audio, modos de
+                     práctica, ejercicios y respaldo se mudaron a sus vistas. -->
+                <div class="card-tools-header">
+                    <div class="tools-gear-row">
+                        <!-- v10: sesión del día (anillo) + contador real del módulo -->
+                        <div class="session-meta" id="session-meta">
+                            <span class="session-ring" id="session-ring" aria-hidden="true"><span id="session-ring-txt">0/10</span></span>
+                            <span class="session-label" id="session-label">Sesión de hoy</span>
+                        </div>
+                        <button id="btn-tools-toggle" class="tools-gear" type="button"
+                                aria-expanded="false" aria-controls="tools-row"
+                                title="Cómo ver la frase: 简/繁, pinyin, tonos, letra grande, fuente">👁 Ver</button>
                     </div>
-                    <div class="dele-dropdown" id="dele-dropdown">
-                        <button id="btn-dele-toggle" class="dele-main-btn" type="button"
-                                aria-haspopup="menu" aria-expanded="false" aria-controls="dele-menu"
-                                title="Elegí un examen DELE">
-                            <span aria-hidden="true">🇪🇸</span> <span id="dele-current">DELE</span>
-                            <span class="daily-caret" aria-hidden="true">▾</span>
+                    <div class="tools-row" id="tools-row">
+                        <div class="script-toggle">
+                            <button id="btn-simplified" class="script-btn active">简 简体</button>
+                            <button id="btn-traditional" class="script-btn">繁 繁體</button>
+                        </div>
+                        <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
+                        <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
+                        <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores" aria-label="Leyenda de colores por tono">ℹ️</button>
+                        <button id="btn-grand" class="speed-btn" type="button" title="Letras grandes para leer cómodo (modo abuelo)">🅰 Grande</button>
+                        <button id="btn-font-mode" class="speed-btn" type="button" title="Cambiar fuente china">字体</button>
+                    </div>
+                </div>
+
+                <div class="card-header practice-top-row">
+                    <div class="practice-meta">
+                        <span class="card-level" id="card-level">Nivel 1</span>
+                        <span class="card-number" id="card-number">1/20</span>
+                    </div>
+
+                    <div class="practice-progress-slot">
+                        <div class="progress-track" aria-hidden="true"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
+                    </div>
+
+                    <div class="practice-audio-actions">
+                        <div class="audio-controls-inline">
+                            <button id="btn-play-es" class="btn-audio-mini" aria-label="Escuchar en español">🔊 ES</button>
+                            <button id="btn-play-cn" class="btn-audio-mini" aria-label="Escuchar en chino">🔊 CN</button>
+                            <button id="btn-record" class="btn-audio-mini btn-record" type="button"
+                                    title="Tocá para grabar tu pronunciación" aria-label="Grabar mi pronunciación">🎤</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sentence-container">
+                    <p class="sentence" id="sentence-text"></p>
+                    <p class="pinyin-text hidden" id="pinyin-display"></p>
+                    <p class="translation" id="translation-text"></p>
+                </div>
+
+                <!-- Input para respuesta -->
+                <div class="answer-section" id="answer-section">
+                    <label for="answer-input" class="sr-only">Tu respuesta</label>
+                    <input type="text" id="answer-input" placeholder="Escribe la palabra faltante..." autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <button id="btn-handwrite" class="btn-secondary btn-handwrite hidden" type="button"
+                            title="Escribir a mano (trazar con el dedo)" aria-label="Escribir la respuesta a mano">✍️</button>
+                    <button id="btn-check" class="btn-primary" data-i18n="btnCheck">Verificar</button>
+                </div>
+
+                <!-- v10 UX: feedback anunciado por lectores de pantalla -->
+                <div class="feedback hidden" id="feedback" role="status" aria-live="polite" aria-atomic="true">
+                    <p id="feedback-text"></p>
+                </div>
+
+                <!-- v10 UX: acciones en DOS etapas.
+                     Antes de responder: "No la sé" (revela + califica Otra vez).
+                     Después de responder: Otra vez / Bien / Fácil con el
+                     intervalo real del repaso debajo. -->
+                <div class="card-actions">
+                    <button id="btn-read-lesson" class="btn-secondary btn-lesson hidden" type="button"
+                            title="Leer el texto completo de esta lección en el Lector" data-i18n="readLesson">📖 Leer lección</button>
+
+                    <div class="pre-answer-row" id="pre-answer-row">
+                        <button id="btn-reveal" class="btn-link" type="button" data-i18n="btnReveal">No la sé, mostrar respuesta</button>
+                    </div>
+
+                    <div class="grade-row hidden" id="grade-row" role="group" aria-label="¿Cómo te fue con esta frase?">
+                        <button id="btn-not-know" class="btn-grade btn-warning" type="button" data-grade="again">
+                            <span class="g-label" data-i18n="btnRepeat">Otra vez</span><small class="g-int" id="g-int-again">10 min</small>
                         </button>
-                        <ul id="dele-menu" class="dele-menu hidden" role="menu" aria-labelledby="btn-dele-toggle">
-                            <li class="dele-group-label" role="none">🎒 Escolares (11 a 17 años)</li>
-                            <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A1-Escolares" aria-label="DELE A1 para escolares">
-                                <span class="ci-zh">A1</span><span class="ci-py">inicial</span><span class="ci-es">Escolares</span></button></li>
-                            <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A2B1-Escolares" aria-label="DELE A2/B1 para escolares">
-                                <span class="ci-zh">A2/B1</span><span class="ci-py">intermedio</span><span class="ci-es">Escolares</span></button></li>
-                            <li class="dele-group-label" role="none">🌍 Adultos (próximamente)</li>
-                            <li role="none"><button type="button" class="cat-btn dele-item dele-soon" role="menuitem" disabled aria-disabled="true">
-                                <span class="ci-zh">A1–C2</span><span class="ci-py">en camino</span><span class="ci-es">para adultos</span></button></li>
-                        </ul>
+                        <button id="btn-good" class="btn-grade btn-good" type="button" data-grade="good">
+                            <span class="g-label" data-i18n="btnGood">Bien</span><small class="g-int" id="g-int-good">1 día</small>
+                        </button>
+                        <button id="btn-know" class="btn-grade btn-success" type="button" data-grade="easy">
+                            <span class="g-label" data-i18n="btnKnow">Fácil</span><small class="g-int" id="g-int-easy">3 días</small>
+                        </button>
+                    </div>
+
+                    <div class="nav-row">
+                        <button id="btn-prev" class="btn-link btn-prev" type="button" title="Volver a la frase anterior (no cambia el repaso)" data-i18n="btnPrev">‹ Anterior</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Lecciones graduadas (v9.0) -->
-            <div class="tab-panel section-lessons hidden" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
-                <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
-                <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
-                <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
-                    <button type="button" class="lv-chip active" data-level="all">Todo</button>
-                    <button type="button" class="lv-chip" data-level="1">HSK 1</button>
-                    <button type="button" class="lv-chip" data-level="2">HSK 2</button>
-                    <button type="button" class="lv-chip" data-level="3">HSK 3</button>
-                    <button type="button" class="lv-chip" data-level="4">HSK 4</button>
-                    <button type="button" class="lv-chip" data-level="5">HSK 5</button>
-                    <button type="button" class="lv-chip" data-level="6">HSK 6</button>
+            <!-- v10 UX: cierre de sesión (se muestra al completar la meta del día) -->
+            <div id="session-done" class="card session-done hidden" role="status" aria-live="polite">
+                <div class="sd-hero">🎉</div>
+                <h3 class="sd-title" id="sd-title">¡Sesión completa!</h3>
+                <p class="sd-text" id="sd-text">Practicaste 10 frases hoy.</p>
+                <div class="sd-actions">
+                    <button id="btn-session-more" class="btn-primary" type="button">10 más</button>
+                    <button id="btn-session-done" class="btn-secondary" type="button">Listo por hoy</button>
                 </div>
-                <div class="lesson-list" id="lesson-list" data-level="all"></div>
             </div>
 
-            <!-- Panel Clásicos -->
-            <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
-                <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
-                <div class="classics-dropdown" id="classics-dropdown">
-                    <button id="btn-classics-toggle" class="classics-main-btn" type="button"
-                            aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
-                            title="Elegí un clásico para practicar">
-                        <span aria-hidden="true">📜</span> <span id="classics-current">Clásicos Antiguos</span>
-                        <span class="daily-caret" aria-hidden="true">▾</span>
+            <!-- v7.5: GRABACIÓN Y EVALUACIÓN DE PRONUNCIACIÓN — v10: colapsado,
+                 se abre solo al tocar 🎤 -->
+            <details class="record-details" id="record-details">
+                <summary class="record-summary">🎤 Pronunciación <span class="record-summary-sub">grabá y compará con la referencia</span></summary>
+                <div id="record-panel" class="record-panel" role="region" aria-label="Grabación y evaluación de pronunciación">
+                    <canvas id="record-wave" class="record-wave" height="34" aria-hidden="true"></canvas>
+                    <div id="rec-dl" class="rec-dl hidden" aria-hidden="true"><div id="rec-dl-fill" class="rec-dl-fill"></div></div>
+                    <p id="record-hint" class="record-hint" data-i18n="recordHint">👆 Tocá 🎤 para grabar tu pronunciación</p>
+                    <div id="record-result" class="record-result hidden" aria-live="polite"></div>
+                    <div id="record-row-actions" class="record-row hidden">
+                        <button id="btn-play-my-rec" class="btn-secondary rec-action hidden" type="button" data-i18n="recMy">▶️ Escuchar mi grabación</button>
+                        <button id="btn-play-ref" class="btn-secondary rec-action hidden" type="button" data-i18n="recRef">🔊 Referencia</button>
+                        <button id="btn-rec-again" class="btn-secondary rec-action hidden" type="button" data-i18n="recAgain">🔁 Grabar de nuevo</button>
+                    </div>
+                    <p class="record-privacy" id="record-privacy-note">🔒 Tu voz se procesa localmente y no se guarda · 你的声音只在设备上处理，不会保存</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- ============================================================
+             VISTA APRENDER — elegir qué estudiar (catálogo).
+             ============================================================ -->
+        <section class="view hidden" id="view-aprender" role="tabpanel" aria-labelledby="nav-aprender">
+            <div class="view-head">
+                <h2 class="view-title" data-i18n="viewAprender">Aprender</h2>
+                <p class="view-sub" data-i18n="viewAprenderSub">Elegí qué practicar. Al elegir un módulo volvés a Hoy.</p>
+            </div>
+
+            <div class="aprender-tools">
+                <button id="btn-interleaving" class="speed-btn" type="button" title="Práctica intercalada">🔀 Intercalar</button>
+            </div>
+
+            <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
+                <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
+                <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button" data-i18n="tabExams">🎓 Exámenes</button>
+                <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button" data-i18n="tabLessons">📖 Lecciones</button>
+                <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button" data-i18n="tabClassics">📜 Clásicos</button>
+            </nav>
+
+            <div class="tab-panels">
+                <!-- Panel Diaria -->
+                <div class="tab-panel section-daily" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
+                    <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
+                    <div class="category-filter daily-filter">
+                        <div class="daily-dropdown" id="daily-dropdown">
+                            <button id="btn-daily-toggle" class="daily-main-btn" type="button"
+                                    aria-haspopup="menu" aria-expanded="false" aria-controls="daily-menu"
+                                    title="Elegí una categoría de práctica diaria">
+                                <span aria-hidden="true">📚</span> <span id="daily-current">Práctica Diaria</span>
+                                <span class="daily-caret" aria-hidden="true">▾</span>
+                            </button>
+                            <ul id="daily-menu" class="daily-menu hidden" role="menu" aria-labelledby="btn-daily-toggle">
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="todas">📖 Todas</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Saludos">👋 Saludos</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Supermercado">🛒 Supermercado</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Migraciones">🛂 Migraciones</button></li>
+                                <li role="separator" class="daily-menu-sep" aria-hidden="true"></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En un restaurante">🍜 En un restaurante</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el colectivo">🚌 En el colectivo</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el subterráneo">🚇 En el subterráneo</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En la clase de idioma">🏫 En la clase de idioma</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el shopping">🛍️ En el shopping</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el cine">🎬 En el cine</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el gimnasio">🏋️ En el gimnasio</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Barrio chino">🏮 Barrio chino</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Exámenes -->
+                <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
+                    <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
+                    <!-- v10: único punto de entrada al test de colocación -->
+                    <button id="btn-placement" class="placement-btn" type="button"
+                            title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
+                            data-i18n="placementTest">
+                        🎯 Test de colocación — descubrí tu nivel
                     </button>
-                    <ul id="classics-menu" class="classics-menu hidden" role="menu" aria-labelledby="btn-classics-toggle">
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daxue" aria-label="Gran Estudio, Dàxué">
-                            <span class="ci-zh" lang="zh">大学</span><span class="ci-py">Dàxué</span><span class="ci-es">Gran Estudio</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Lunyu" aria-label="Analectas, Lúnyǔ">
-                            <span class="ci-zh" lang="zh">论语</span><span class="ci-py">Lúnyǔ</span><span class="ci-es">Analectas</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Zhongyong" aria-label="Doctrina del Medio, Zhōngyōng">
-                            <span class="ci-zh" lang="zh">中庸</span><span class="ci-py">Zhōngyōng</span><span class="ci-es">Doctrina del Medio</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Mengzi" aria-label="Mencio, Mèngzǐ">
-                            <span class="ci-zh" lang="zh">孟子</span><span class="ci-py">Mèngzǐ</span><span class="ci-es">Mencio</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Sanzijing" aria-label="Clásico de los Tres Caracteres, Sānzìjīng">
-                            <span class="ci-zh" lang="zh">三字经</span><span class="ci-py">Sānzìjīng</span><span class="ci-es">Tres Caracteres</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xiaojing" aria-label="Clásico de la Piedad Filial, Xiàojīng">
-                            <span class="ci-zh" lang="zh">孝经</span><span class="ci-py">Xiàojīng</span><span class="ci-es">Piedad Filial</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daodejing" aria-label="Tao Te King, Dàodéjīng">
-                            <span class="ci-zh" lang="zh">道德经</span><span class="ci-py">Dàodéjīng</span><span class="ci-es">Tao Te King</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xinjing" aria-label="Sutra del Corazón, Xīnjīng">
-                            <span class="ci-zh" lang="zh">心经</span><span class="ci-py">Xīnjīng</span><span class="ci-es">Sutra del Corazón</span></button></li>
-                        <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
-                            <span class="ci-zh" lang="zh">金刚经</span><span class="ci-py">Jīngāngjīng</span><span class="ci-es">Sutra del Diamante</span></button></li>
-                    </ul>
+                    <p id="placement-status" class="placement-status hidden" role="status"></p>
+                    <div class="hsk-level-selector" id="hsk-selector">
+                        <select id="select-hsk-level" class="level-dropdown" aria-label="Nivel HSK">
+                            <option value="HSK1">HSK 1 · Elemental (497 palabras)</option>
+                            <option value="HSK2">HSK 2 · Elemental (747 nuevas)</option>
+                            <option value="HSK3">HSK 3 · Elemental (949 nuevas)</option>
+                            <option value="HSK4">HSK 4 · Intermedio (973 nuevas)</option>
+                            <option value="HSK5">HSK 5 · Intermedio (1057 nuevas)</option>
+                            <option value="HSK6">HSK 6 · Intermedio (1119 nuevas)</option>
+                            <option value="HSK7">HSK 7 · Superior I (1865 nuevas)</option>
+                            <option value="HSK8">HSK 8 · Superior II (1866 nuevas)</option>
+                            <option value="HSK9">HSK 9 · Superior III (1871 nuevas)</option>
+                        </select>
+                    </div>
+                    <div class="category-filter exams-filters">
+                        <div class="tocfl-dropdown" id="tocfl-dropdown">
+                            <button id="btn-tocfl-toggle" class="tocfl-main-btn" type="button"
+                                    aria-haspopup="menu" aria-expanded="false" aria-controls="tocfl-menu"
+                                    title="Elegí un nivel TOCFL">
+                                <span aria-hidden="true">🇹🇼</span> <span id="tocfl-current">TOCFL</span>
+                                <span class="daily-caret" aria-hidden="true">▾</span>
+                            </button>
+                            <ul id="tocfl-menu" class="tocfl-menu hidden" role="menu" aria-labelledby="btn-tocfl-toggle">
+                                <li class="dele-group-label" role="none">🎯 Band A (Novice → A2)</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Preparación, Novice 1 y 2">
+                                    <span class="ci-zh">準備</span><span class="ci-py">pre-A1</span><span class="ci-es">Preparación · 392 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL Nivel 1, 入門級">
+                                    <span class="ci-zh">入門</span><span class="ci-py">A1</span><span class="ci-es">Nivel 1 · 344 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL Nivel 2, 基礎級">
+                                    <span class="ci-zh">基礎</span><span class="ci-py">A2</span><span class="ci-es">Nivel 2 · 483 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, oraciones de muestra">
+                                    <span class="ci-zh">示例</span><span class="ci-py">muestra</span><span class="ci-es">Oraciones de examen · 20</span></button></li>
+                                <li class="dele-group-label" role="none">🚀 Band B (B1 → B2)</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B3" aria-label="TOCFL Nivel 3, 進階級">
+                                    <span class="ci-zh">進階</span><span class="ci-py">B1</span><span class="ci-es">Nivel 3 · 1091 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B4" aria-label="TOCFL Nivel 4, 高階級">
+                                    <span class="ci-zh">高階</span><span class="ci-py">B2</span><span class="ci-es">Nivel 4 · 2194 palabras</span></button></li>
+                                <li class="dele-group-label" role="none">💫 Band C (próximamente)</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item dele-soon" role="menuitem" disabled aria-disabled="true">
+                                    <span class="ci-zh">流利</span><span class="ci-py">en camino</span><span class="ci-es">Nivel 5 · C1</span></button></li>
+                            </ul>
+                        </div>
+                        <div class="dele-dropdown" id="dele-dropdown">
+                            <button id="btn-dele-toggle" class="dele-main-btn" type="button"
+                                    aria-haspopup="menu" aria-expanded="false" aria-controls="dele-menu"
+                                    title="Elegí un examen DELE">
+                                <span aria-hidden="true">🇪🇸</span> <span id="dele-current">DELE</span>
+                                <span class="daily-caret" aria-hidden="true">▾</span>
+                            </button>
+                            <ul id="dele-menu" class="dele-menu hidden" role="menu" aria-labelledby="btn-dele-toggle">
+                                <li class="dele-group-label" role="none">🎒 Escolares (11 a 17 años)</li>
+                                <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A1-Escolares" aria-label="DELE A1 para escolares">
+                                    <span class="ci-zh">A1</span><span class="ci-py">inicial</span><span class="ci-es">Escolares</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A2B1-Escolares" aria-label="DELE A2/B1 para escolares">
+                                    <span class="ci-zh">A2/B1</span><span class="ci-py">intermedio</span><span class="ci-es">Escolares</span></button></li>
+                                <li class="dele-group-label" role="none">🌍 Adultos (próximamente)</li>
+                                <li role="none"><button type="button" class="cat-btn dele-item dele-soon" role="menuitem" disabled aria-disabled="true">
+                                    <span class="ci-zh">A1–C2</span><span class="ci-py">en camino</span><span class="ci-es">para adultos</span></button></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <!-- v9.2: LEER EL TEXTO ORIGINAL — los clásicos se tratan como las
-                     lecciones: se elige el clásico directamente y se lee por
-                     bloques (capítulos/pasajes del texto real, no las oraciones
-                     de práctica). La lista la arma classics.js + app.js. -->
-                <h4 class="cread-head">📖 Leer el texto original <span class="cread-sub">por bloques, como las lecciones</span></h4>
-                <div class="cread-list" id="cread-list" role="group" aria-label="Leer el texto original de un clásico"></div>
-            </div>
-        </div>
-        <div class="stats stats-bottom">
-            <span id="stats-known">✅ Conocidas: 0</span>
-            <span id="stats-new">🎖️ Nuevas: 0</span>
-        </div>
 
-        <!-- Panel de Vocabulario -->
-        <div class="vocabulary-panel">
-            <h3 data-i18n="vocabTitle">📚 Palabras aprendidas</h3>
-            <p class="vocab-hint" data-i18n="vocabHint">Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción</p>
-            <div id="vocab-list"></div>
-        </div>
+                <!-- Panel Lecciones graduadas (v9.0) -->
+                <div class="tab-panel section-lessons hidden" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
+                    <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
+                    <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
+                    <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
+                        <button type="button" class="lv-chip active" data-level="all">Todo</button>
+                        <button type="button" class="lv-chip" data-level="1">HSK 1</button>
+                        <button type="button" class="lv-chip" data-level="2">HSK 2</button>
+                        <button type="button" class="lv-chip" data-level="3">HSK 3</button>
+                        <button type="button" class="lv-chip" data-level="4">HSK 4</button>
+                        <button type="button" class="lv-chip" data-level="5">HSK 5</button>
+                        <button type="button" class="lv-chip" data-level="6">HSK 6</button>
+                    </div>
+                    <div class="lesson-list" id="lesson-list" data-level="all"></div>
+                </div>
 
-        <!-- BANNER: LECTOR DE TEXTO LIBRE (abajo de todo, feedback de alumnos) -->
-        <div class="reader-banner" id="reader-banner">
-            <div class="reader-head">
-                <h3 class="section-title" data-i18n="readerTitle">🗣️ Lector de texto</h3>
-                <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
+                <!-- Panel Clásicos -->
+                <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
+                    <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
+                    <div class="classics-dropdown" id="classics-dropdown">
+                        <button id="btn-classics-toggle" class="classics-main-btn" type="button"
+                                aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
+                                title="Elegí un clásico para practicar">
+                            <span aria-hidden="true">📜</span> <span id="classics-current">Clásicos Antiguos</span>
+                            <span class="daily-caret" aria-hidden="true">▾</span>
+                        </button>
+                        <ul id="classics-menu" class="classics-menu hidden" role="menu" aria-labelledby="btn-classics-toggle">
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daxue" aria-label="Gran Estudio, Dàxué">
+                                <span class="ci-zh" lang="zh">大学</span><span class="ci-py">Dàxué</span><span class="ci-es">Gran Estudio</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Lunyu" aria-label="Analectas, Lúnyǔ">
+                                <span class="ci-zh" lang="zh">论语</span><span class="ci-py">Lúnyǔ</span><span class="ci-es">Analectas</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Zhongyong" aria-label="Doctrina del Medio, Zhōngyōng">
+                                <span class="ci-zh" lang="zh">中庸</span><span class="ci-py">Zhōngyōng</span><span class="ci-es">Doctrina del Medio</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Mengzi" aria-label="Mencio, Mèngzǐ">
+                                <span class="ci-zh" lang="zh">孟子</span><span class="ci-py">Mèngzǐ</span><span class="ci-es">Mencio</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Sanzijing" aria-label="Clásico de los Tres Caracteres, Sānzìjīng">
+                                <span class="ci-zh" lang="zh">三字经</span><span class="ci-py">Sānzìjīng</span><span class="ci-es">Tres Caracteres</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xiaojing" aria-label="Clásico de la Piedad Filial, Xiàojīng">
+                                <span class="ci-zh" lang="zh">孝经</span><span class="ci-py">Xiàojīng</span><span class="ci-es">Piedad Filial</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Daodejing" aria-label="Tao Te King, Dàodéjīng">
+                                <span class="ci-zh" lang="zh">道德经</span><span class="ci-py">Dàodéjīng</span><span class="ci-es">Tao Te King</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Xinjing" aria-label="Sutra del Corazón, Xīnjīng">
+                                <span class="ci-zh" lang="zh">心经</span><span class="ci-py">Xīnjīng</span><span class="ci-es">Sutra del Corazón</span></button></li>
+                            <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
+                                <span class="ci-zh" lang="zh">金刚经</span><span class="ci-py">Jīngāngjīng</span><span class="ci-es">Sutra del Diamante</span></button></li>
+                        </ul>
+                    </div>
+                    <h4 class="cread-head">📖 Leer el texto original <span class="cread-sub">por bloques, como las lecciones</span></h4>
+                    <div class="cread-list" id="cread-list" role="group" aria-label="Leer el texto original de un clásico"></div>
+                </div>
             </div>
-            <!-- v7.14: maxlength 1200 — las lecciones (lessons.js) cargan textos completos -->
-            <textarea id="reader-input" class="reader-input" rows="3" maxlength="1200" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
-            <!-- v7.15: BIBLIOTECA DE LECTURAS — cargar por secciones/capítulos
-                 desde lessons.js sin estar estudiando ese módulo. Las
-                 plantadas (planned) aparecen como "· próximamente". -->
-            <div class="reader-library">
-                <select id="reader-library" class="reader-library-select" aria-label="Biblioteca de lecturas">
-                    <option value="" data-i18n="libraryOpt">📚 Biblioteca de lecturas…</option>
-                </select>
-                <button id="btn-library-load" class="btn-secondary" type="button" title="Cargar la lectura elegida en el Lector" data-i18n="libraryLoad">Cargar</button>
-            </div>
-            <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
-            <div class="reader-actions">
-                <button id="btn-reader-clear" class="btn-secondary" type="button" data-i18n="readerClear">🗑️ Limpiar</button>
-                <button id="btn-reader-play" class="btn-primary" type="button" data-i18n="readerPlay">🔊 Leer</button>
-            </div>
-        </div>
+        </section>
 
-        <!-- BANNER: PLANILLAS DE ESCRITURA 写字 -->
-        <div class="reader-banner writer-banner" id="writer-banner">
-            <div class="reader-head">
-                <h3 class="section-title">✍️ Planillas de escritura 写字</h3>
-                <span class="reader-lang">hojas A4 para imprimir, con orden de trazos</span>
+        <!-- ============================================================
+             VISTA ENTRENAR — habilidades sueltas (el gimnasio).
+             ============================================================ -->
+        <section class="view hidden" id="view-entrenar" role="tabpanel" aria-labelledby="nav-entrenar">
+            <div class="view-head">
+                <h2 class="view-title" data-i18n="viewEntrenar">Entrenar</h2>
+                <p class="view-sub" data-i18n="viewEntrenarSub">Ejercicios sueltos para el oído, la voz y la mano.</p>
             </div>
-            <textarea id="pz-input" class="reader-input" rows="2" maxlength="80" placeholder="Pegá los caracteres a practicar, ej.: 你是哪国人"></textarea>
-            <div class="pz-options">
-                <button id="btn-pz-trazos" class="speed-btn active" type="button" title="Mostrar (o no) la secuencia de trazos de cada carácter">✍️ Trazos: ON</button>
-                <label class="pz-label" for="select-pz-style">Estilo de hoja
-                    <select id="select-pz-style" class="level-dropdown">
-                        <option value="clasica" selected>Clásica (celdas)</option>
-                        <option value="cuaderno">Cuaderno 筆順 + 寫字</option>
+
+            <div class="train-grid">
+                <button id="btn-mp-pairs" class="train-card" type="button" title="Entrenamiento de oído: palabras que solo difieren en el tono (HSK 1-2). ¿Cuál escuchaste?">
+                    <span class="tc-ico" aria-hidden="true">🎯</span>
+                    <span class="tc-title">Pares mínimos</span>
+                    <span class="tc-sub">¿买 o 卖? Distinguí tonos de oído</span>
+                </button>
+                <button id="btn-listen" class="train-card" type="button" title="Escucha antes que lectura: el audio suena solo y el texto aparece al responder">
+                    <span class="tc-ico" aria-hidden="true">🎧</span>
+                    <span class="tc-title">Solo oído</span>
+                    <span class="tc-sub">La frase suena antes de verse (modo de la tarjeta)</span>
+                </button>
+                <button id="btn-train-record" class="train-card" type="button" title="Grabá tu pronunciación de la frase actual y compará">
+                    <span class="tc-ico" aria-hidden="true">🎤</span>
+                    <span class="tc-title">Pronunciación</span>
+                    <span class="tc-sub">Grabá la frase de Hoy y compará con la referencia</span>
+                </button>
+                <button id="btn-train-write" class="train-card" type="button" title="Escribí a mano la respuesta de la frase actual">
+                    <span class="tc-ico" aria-hidden="true">✍️</span>
+                    <span class="tc-title">Escribir a mano</span>
+                    <span class="tc-sub">Trazá de memoria la respuesta de la frase de Hoy</span>
+                </button>
+            </div>
+
+            <!-- LECTOR DE TEXTO LIBRE -->
+            <div class="reader-banner" id="reader-banner">
+                <div class="reader-head">
+                    <h3 class="section-title" data-i18n="readerTitle">🗣️ Lector de texto</h3>
+                    <span id="reader-lang" class="reader-lang">🌐 Detectado: —</span>
+                </div>
+                <label for="reader-input" class="sr-only">Texto para leer en voz alta</label>
+                <textarea id="reader-input" class="reader-input" rows="3" maxlength="1200" placeholder="Pegá acá texto en chino 你好 o en español... y lo leo en voz alta con la voz elegida"></textarea>
+                <div class="reader-library">
+                    <select id="reader-library" class="reader-library-select" aria-label="Biblioteca de lecturas">
+                        <option value="" data-i18n="libraryOpt">📚 Biblioteca de lecturas…</option>
                     </select>
-                </label>
-                <label class="pz-label" for="select-pz-cells">Celdas por fila
-                    <select id="select-pz-cells" class="level-dropdown">
-                        <option value="10">10 (celdas grandes)</option>
-                        <option value="12" selected>12 (normal)</option>
-                        <option value="14">14 (más repaso)</option>
-                    </select>
-                </label>
-                <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
+                    <button id="btn-library-load" class="btn-secondary" type="button" title="Cargar la lectura elegida en el Lector" data-i18n="libraryLoad">Cargar</button>
+                </div>
+                <div id="reader-preview" class="reader-preview hidden" aria-live="polite"></div>
+                <div class="reader-actions">
+                    <button id="btn-reader-clear" class="btn-secondary" type="button" data-i18n="readerClear">🗑️ Limpiar</button>
+                    <button id="btn-reader-play" class="btn-primary" type="button" data-i18n="readerPlay">🔊 Leer</button>
+                </div>
             </div>
-            <!-- v9.2: contador de caracteres por hoja A4 según 10/12/14 celdas -->
-            <div id="pz-counter" class="pz-counter" role="status">📊 Hoja A4…</div>
-            <div id="pz-status" class="module-status hidden" role="status"></div>
-            <div class="reader-actions">
-                <button id="btn-pz-generate" class="btn-primary" type="button">📄 Generar hoja</button>
-                <button id="btn-pz-pdf" class="btn-success hidden" type="button">⬇️ Descargar PDF</button>
-                <button id="btn-pz-print" class="btn-secondary hidden" type="button" title="Imprimir en papel (abre el diálogo del sistema)">🖨️</button>
-            </div>
-            <div id="pz-preview" class="pz-preview hidden"></div>
-        </div>
 
-        <!-- v7.18: acción destructiva al final, discreta -->
-        <div class="danger-zone">
-            <button id="btn-reset" class="btn-reset" data-i18n="btnReset">🗑️ Borrar progreso</button>
-        </div>
-
-        <!-- v9.10: PIE DE APP — el botón 📲 Instalar vive acá abajo (antes
-             ocupaba lugar en el header). Mismo ID → setupPWA() no cambia:
-             aparece solo cuando la app es instalable o tras el delay, y
-             abre la guía de instalación si no hay diálogo nativo. -->
-        <footer class="app-footer" id="app-footer">
-            <!-- v9.14: Guardar progreso vive abajo, junto a Instalar app -->
-            <div class="bottom-app-actions">
-                <button id="btn-save-progress" class="speed-btn utility-btn" type="button" title="Guarda tu progreso ahora mismo en este dispositivo" data-i18n="saveProgress">💾 Guardar progreso</button>
-                <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
+            <!-- PLANILLAS DE ESCRITURA 写字 -->
+            <div class="reader-banner writer-banner" id="writer-banner">
+                <div class="reader-head">
+                    <h3 class="section-title">✍️ Planillas de escritura 写字</h3>
+                    <span class="reader-lang">hojas A4 para imprimir, con orden de trazos</span>
+                </div>
+                <label for="pz-input" class="sr-only">Caracteres para la planilla</label>
+                <textarea id="pz-input" class="reader-input" rows="2" maxlength="80" placeholder="Pegá los caracteres a practicar, ej.: 你是哪国人"></textarea>
+                <div class="pz-options">
+                    <button id="btn-pz-trazos" class="speed-btn active" type="button" title="Mostrar (o no) la secuencia de trazos de cada carácter">✍️ Trazos: ON</button>
+                    <label class="pz-label" for="select-pz-style">Estilo de hoja
+                        <select id="select-pz-style" class="level-dropdown">
+                            <option value="clasica" selected>Clásica (celdas)</option>
+                            <option value="cuaderno">Cuaderno 筆順 + 寫字</option>
+                        </select>
+                    </label>
+                    <label class="pz-label" for="select-pz-cells">Celdas por fila
+                        <select id="select-pz-cells" class="level-dropdown">
+                            <option value="10">10 (celdas grandes)</option>
+                            <option value="12" selected>12 (normal)</option>
+                            <option value="14">14 (más repaso)</option>
+                        </select>
+                    </label>
+                    <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
+                </div>
+                <div id="pz-counter" class="pz-counter" role="status">📊 Hoja A4…</div>
+                <div id="pz-status" class="module-status hidden" role="status"></div>
+                <div class="reader-actions">
+                    <button id="btn-pz-generate" class="btn-primary" type="button">📄 Generar hoja</button>
+                    <button id="btn-pz-pdf" class="btn-success hidden" type="button">⬇️ Descargar PDF</button>
+                    <button id="btn-pz-print" class="btn-secondary hidden" type="button" title="Imprimir en papel (abre el diálogo del sistema)" aria-label="Imprimir">🖨️</button>
+                </div>
+                <div id="pz-preview" class="pz-preview hidden"></div>
             </div>
-            <span class="app-footer-brand">日常華語 · Huayu Diario</span>
-        </footer>
+        </section>
+
+        <!-- ============================================================
+             VISTA YO — progreso y ajustes.
+             ============================================================ -->
+        <section class="view hidden" id="view-yo" role="tabpanel" aria-labelledby="nav-yo">
+            <div class="view-head">
+                <h2 class="view-title" data-i18n="viewYo">Yo</h2>
+                <p class="view-sub" data-i18n="viewYoSub">Tu progreso, tu repaso y los ajustes de la app.</p>
+            </div>
+
+            <div class="card yo-card yo-progress">
+                <h3 class="yo-h" data-i18n="yoProgress">📈 Progreso</h3>
+                <div class="stats stats-bottom">
+                    <span id="stats-known">✅ Conocidas: 0</span>
+                    <span id="stats-new">🎖️ Nuevas: 0</span>
+                </div>
+                <!-- onboarding.js inyecta 📖 Guía y stats.js 📊 Racha acá -->
+                <div class="header-actions yo-actions"></div>
+            </div>
+
+            <!-- Panel de Vocabulario -->
+            <div class="vocabulary-panel">
+                <h3 data-i18n="vocabTitle">📚 Palabras aprendidas</h3>
+                <p class="vocab-hint" data-i18n="vocabHint">Se guardan automáticamente al cerrar el navegador · tocá una palabra para ver su traducción</p>
+                <div id="vocab-list"></div>
+            </div>
+
+            <div class="card yo-card yo-settings">
+                <h3 class="yo-h" data-i18n="yoSettings">⚙️ Ajustes</h3>
+
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setMode">Estoy aprendiendo</span>
+                    <button id="btn-toggle-lang-mode" class="lang-switch-btn set-ctrl" type="button" title="Cambiar la dirección de aprendizaje">🇨🇳 Chino · cambiar a Español</button>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setTheme">Tema</span>
+                    <button id="btn-theme" class="theme-toggle set-ctrl" aria-label="Cambiar tema">🌙</button>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setAudio">Audio</span>
+                    <div class="set-ctrl set-group">
+                        <button id="btn-speed" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
+                        <button id="btn-voice-zh" class="speed-btn voice-btn" type="button" title="Voz china (clic para cambiar)">🇨🇳 👩</button>
+                        <button id="btn-voice-es" class="speed-btn voice-btn" type="button" title="Voz española (clic para cambiar)">🇪🇸 👩</button>
+                    </div>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setSession">Meta diaria</span>
+                    <div class="set-ctrl set-group" id="session-goal-group" role="group" aria-label="Frases por sesión">
+                        <button type="button" class="speed-btn goal-btn" data-goal="5">5</button>
+                        <button type="button" class="speed-btn goal-btn active" data-goal="10">10</button>
+                        <button type="button" class="speed-btn goal-btn" data-goal="20">20</button>
+                    </div>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setData">Datos</span>
+                    <div class="set-ctrl set-group">
+                        <button id="btn-backup" class="speed-btn" type="button" title="Respaldo: guardar tu progreso en un archivo o exportarlo a Anki">💾 Respaldo y Anki</button>
+                        <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="danger-zone">
+                <button id="btn-reset" class="btn-reset" data-i18n="btnReset">🗑️ Borrar progreso</button>
+            </div>
+
+            <footer class="app-footer" id="app-footer">
+                <span class="app-footer-brand">日常華語 · Huayu Diario</span>
+            </footer>
+        </section>
+
+        </main>
+
+        <!-- v10 UX: barra de navegación inferior (roving tabindex en app.js) -->
+        <nav class="app-nav" id="app-nav" role="tablist" aria-label="Secciones de la app">
+            <button class="nav-btn active" id="nav-hoy" role="tab" aria-selected="true" aria-controls="view-hoy" data-view="hoy" type="button" tabindex="0">
+                <span class="nav-ico" aria-hidden="true">🀄</span><span class="nav-txt" data-i18n="navHoy">Hoy</span>
+            </button>
+            <button class="nav-btn" id="nav-aprender" role="tab" aria-selected="false" aria-controls="view-aprender" data-view="aprender" type="button" tabindex="-1">
+                <span class="nav-ico" aria-hidden="true">📚</span><span class="nav-txt" data-i18n="navAprender">Aprender</span>
+            </button>
+            <button class="nav-btn" id="nav-entrenar" role="tab" aria-selected="false" aria-controls="view-entrenar" data-view="entrenar" type="button" tabindex="-1">
+                <span class="nav-ico" aria-hidden="true">🎯</span><span class="nav-txt" data-i18n="navEntrenar">Entrenar</span>
+            </button>
+            <button class="nav-btn" id="nav-yo" role="tab" aria-selected="false" aria-controls="view-yo" data-view="yo" type="button" tabindex="-1">
+                <span class="nav-ico" aria-hidden="true">🙂</span><span class="nav-txt" data-i18n="navYo">Yo</span>
+            </button>
+        </nav>
 
     </div>
 
@@ -453,10 +552,7 @@
         <div id="vocab-pop-body"></div>
     </div>
 
-    <!-- v7.16: BANNER de práctica de trazos (pantalla completa). Se abre con
-         ✍ Practicar del popup de vocabulario; el popup queda para CONSULTA
-         (traducción + pinyin + ejemplo) y aquí se TRAZA con el dedo sobre
-         un lienzo grande. Motor Hanzi Writer v7.13 reutilizado (lazy). -->
+    <!-- v7.16: BANNER de práctica de trazos (pantalla completa) -->
     <div id="writer-practice-banner" class="wp-banner hidden" role="dialog" aria-modal="true" aria-label="Práctica de trazos">
         <div class="wp-top">
             <h3 id="wp-title">Practicar</h3>
@@ -477,12 +573,7 @@
         </div>
     </div>
 
-    <!-- v9.34: BANNER de respuesta a mano. Se abre con ✍️ junto al input
-         (panel diario y quiz de repaso en modo producción). A diferencia
-         del banner de práctica (v7.16), acá el carácter está OCULTO:
-         se escribe de MEMORIA y Hanzi Writer valida trazo por trazo;
-         💡 Pista lo anima cuando no sale. Al completar, el input queda
-         rellenado y el flujo de corrección existente sigue igual. -->
+    <!-- v9.34: BANNER de respuesta a mano -->
     <div id="handwrite-banner" class="wp-banner hidden" role="dialog" aria-modal="true" aria-label="Escribir la respuesta a mano">
         <div class="wp-top">
             <h3 id="hw-title">✍ Tu respuesta a mano</h3>
@@ -499,7 +590,7 @@
         </div>
     </div>
 
-    <!-- v7.11: POPUP leyenda de tonos + esquema de colores (mismo patrón que #vocab-pop) -->
+    <!-- v7.11: POPUP leyenda de tonos + esquema de colores -->
     <div id="tone-legend-pop" class="vocab-pop hidden" role="dialog" aria-label="Leyenda de tonos y colores">
         <button id="btn-tone-legend-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
         <div id="tone-legend-body">
@@ -530,13 +621,13 @@
         </div>
     </div>
 
-    <!-- v7.20: POPUP Test de Colocación (mismo patrón que #vocab-pop) -->
+    <!-- v7.20: POPUP Test de Colocación -->
     <div id="placement-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Test de colocación HSK">
         <button id="btn-placement-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
         <div id="placement-body"></div>
     </div>
 
-    <!-- v7.21: POPUP Repaso SRS (mismo patrón que #placement-pop) -->
+    <!-- v7.21: POPUP Repaso SRS -->
     <div id="srs-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Repaso con repetición espaciada">
         <button id="btn-srs-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
         <div id="srs-body"></div>
@@ -553,6 +644,7 @@
             <div class="bk-actions">
                 <button id="btn-backup-export" class="btn-primary" type="button">⬇️ Descargar respaldo (.json)</button>
                 <button id="btn-backup-import" class="btn-secondary" type="button">⬆️ Importar respaldo</button>
+                <label for="backup-file" class="sr-only">Archivo de respaldo</label>
                 <input type="file" id="backup-file" accept=".json,application/json" class="hidden">
                 <button id="btn-anki-export" class="btn-secondary" type="button">📤 Exportar a Anki (.txt)</button>
             </div>
@@ -560,7 +652,7 @@
         </div>
     </div>
 
-    <!-- v9.0: LECCIONES GRADUADAS — overlay de lectura + práctica (estilo pantalla completa) -->
+    <!-- v9.0: LECCIONES GRADUADAS — overlay de lectura + práctica -->
     <div id="lesson-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Lección graduada">
         <div class="lq-inner">
             <div class="lq-header">
@@ -572,8 +664,7 @@
         </div>
     </div>
 
-    <!-- v9.2: LECTOR DE CLÁSICOS — texto original por bloques (misma piel que
-         las lecciones; bloque actual en #cr-progress-num como X/N) -->
+    <!-- v9.2: LECTOR DE CLÁSICOS -->
     <div id="cread-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Leer clásico">
         <div class="lq-inner">
             <div class="lq-header">
@@ -585,9 +676,7 @@
         </div>
     </div>
 
-    <!-- v9.20: PARES MÍNIMOS — discriminación tonal por audio ("¿cuál escuchaste?").
-         Misma piel que lecciones/clásicos (lq-pop); el cuerpo lo renderiza app.js
-         (IIFE aislada). Opciones SOLO AUDIO hasta responder. -->
+    <!-- v9.20: PARES MÍNIMOS -->
     <div id="mp-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Pares mínimos: discriminación tonal">
         <div class="lq-inner">
             <div class="lq-header">
@@ -599,7 +688,7 @@
         </div>
     </div>
 
-    <!-- GUÍA DE INSTALACIÓN (se abre si el navegador no muestra el diálogo nativo) -->
+    <!-- GUÍA DE INSTALACIÓN -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
             <button id="btn-install-help-close" class="install-help-close" type="button" aria-label="Cerrar">✕</button>
@@ -612,7 +701,7 @@
                         <li>Tocá <b>“Instalar aplicación”</b> o <b>“Añadir a pantalla de inicio”</b></li>
                         <li>Confirmá ✅</li>
                     </ol>
-                    <p class="install-help-note">ℹ️ No se descarga ningún APK: la instalación es instantánea y crea el ícono violeta 中 en tu pantalla de inicio. En Brave el ícono puede quedar solo ahí (no en el cajón de apps) — funciona igual.</p>
+                    <p class="install-help-note">ℹ️ No se descarga ningún APK: la instalación es instantánea y crea el ícono en tu pantalla de inicio. En Brave el ícono puede quedar solo ahí (no en el cajón de apps) — funciona igual.</p>
                 </div>
                 <div data-platform="desktop">
                     <h4>💻 PC / Mac (Chrome, Edge o Brave)</h4>
@@ -642,90 +731,22 @@
             <p class="install-help-tip">💡 ¿No aparece el ícono en la barra? Recargá la página (F5) — Chrome lo habilita desde la segunda visita, cuando el Service Worker ya estaba registrado. Si usás Opera en la PC, mirá su columna: ese navegador no ofrece instalación tipo app.</p>
         </div>
     </div>
+
     <!-- pinyin-pro autohospedado (funciona offline); si falta, fallback a CDN -->
     <script src="pinyin-pro.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/pinyin-pro';document.head.appendChild(s);"></script>
-    <!-- v7.8: constantes calibrables del evaluador (spec v4.0 §3) — antes de todo el módulo -->
     <script src="config.js?v=20260910c"></script>
-    <!-- v7.8: utilitario compartido de comparación de texto (normalizeText por idioma,
-         Levenshtein por palabra, validación segmental) — spec v4.0 §2/§3 -->
     <script src="text-utils.js?v=20260910c"></script>
-    <!-- v7.5: módulo de pronunciación (antes de app.js: app.js llama VR.setTarget)
-         v9.30: el análisis se puede CANCELAR con un toque (antes pointer-events:
-         none + clics ignorados = "funciona como play pero no como stop") y el
-         hint muestra los segundos de análisis sin pisar el % de descarga. -->
     <script src="VoiceRecorder.js?v=20260917a"></script>
-    <!-- v7.8 (spec v4.0 §4 LAZY): pitch-analyzer.js ya NO se carga al iniciar la app.
-         voice-evaluator.js lo inyecta solo al entrar al modo Chino (es-cn); si el
-         alumno nunca practica chino, el script y su Worker de DSP NUNCA existen. -->
-    <!-- v7.6/7.7/7.8: orquestador Whisper WASM (contenido) + tono F0/DTW — 100% local
-         v9.30: + cancelEval() público (aborta la evaluación en vuelo; lo llama
-         VoiceRecorder.js cuando el usuario cancela durante el análisis). -->
     <script src="voice-evaluator.js?v=20260917a"></script>
     <script src="dict-mini.js?v=20260910k"></script>
-    <!-- v7.14: lecciones completas (solo datos) — ANTES de app.js -->
     <script src="lessons.js?v=20260910c"></script>
-    <!-- v9.6: lecciones TOCFL (aditivas, se concatenan a GRADED_LESSONS) -->
     <script src="lessons-tocfl.js?v=20260910e"></script>
-    <!-- v9.6c: mini-dramas HSK extra (+2 por nivel, aditivos) -->
     <script src="lessons-extra.js?v=20260910f"></script>
-    <!-- v9.30: mini-dramas DELE (aprendices de español, modo cn-es) — archivo
-         aditivo y autocontenido: toma #panel-lessons cuando el modo es cn-es
-         (chips propios + overlay #dele-pop con piel .lq-pop) y en es-cn deja
-         el panel HSK/TOCFL exactamente como estaba. Carga ANTES de app.js
-         (usa globals de app.js solo al hacer clic, con guardas).
-         v9.31: 10 dramas nuevos pista Argentina (adolescentes/adultos,
-         A2/B1→C2: provincias, culturas originarias), chips de pista, fix de
-         "Escuchar todo" (solo sonaba la 1.ª frase: stopSpeak apagaba la cola
-         dentro de speakEs) y panel DELE-only desde el primer cuadro (pista de
-         modo en localStorage, sin flasheo HSK en cn-es).
-         v9.32: fix "se siguen viendo las chinas" (.hidden perdía contra
-         display:flex de .lesson-levels/.lesson-list → ahora .hidden-force +
-         clase panel dele-only) y chips DELE arriba (insertBefore, no
-         appendChild).
-         v9.33: panel pulido — un solo "Todas" (en niveles), chips de pista
-         con toggle (re-tap = todas), niveles separados A2|B1, contador de
-         resultados y 8 dramas nuevos Argentina (A1-B2; total 24). -->
     <script src="lessons-dele.js?v=20260917d"></script>
     <script src="classics.js?v=20260910c"></script>
-    <!-- v9.22: guía interactiva de bienvenida (bilingüe según modo; se auto-inyecta:
-         botón 📖 Guía + overlay #guide-pop). Auto-contenida, NO toca app.js.
-         v9.24: el paso motivación enlaza con la racha (HuayuStats.open).
-         v9.25: paso nuevo «mapa completo» (lector, planillas 写字, etc.), el paso
-         «tu día» abre el repaso SRS real (#btn-srs) y el callout 🔥 muestra la
-         racha EN VIVO vía HuayuStats.getSummary().
-         v9.26: el pack chino de la guía tiene variante 繁體 (toggle 简/繁 con
-         preferencia en ac_guide_script_v1); + fix de captura en stats.js.
-         v9.27: 5 fixes de calidad en app.js (revelar en solo oído, cloze
-         global, aviso si falla el alta al repaso, gate de retrieval con
-         núcleo de glosa, pares mínimos curados).
-         v9.28: la guía cierra con Escape y clic afuera (≈ el ✕: marca
-         vista); style.css suma el estilo .listen-mode pendiente desde
-         v9.19; app.js (pares mínimos: contenedor .mp-opts, botón oculto
-         en cn-es, Escape/clic afuera de #mp-pop; doBackupImport marca
-         la importación para stats.js).
-         v9.29: fix de regresión v9.28 — responder pares mínimos o navegar
-         la guía re-renderiza el cuerpo y el botón clicado queda
-         descolgado del DOM al burbujear → contains() daba falso
-         negativo y el overlay se cerraba justo después del clic
-         (pares mínimos: al acertar te sacaba de la práctica; guía: se
-         cerraba y se marcaba vista al pasar de paso). Mismo fix v7.20
-         de placement/SRS: e.composedPath() en los 3 overlays nuevos
-         (app.js, onboarding.js, stats.js). -->
-    <!-- v9.23: rachas y estadísticas (stats.js se auto-inyecta: botón 📊 +
-         overlay #stats-pop con piel vocab-pop). Envuelve localStorage.setItem
-         para capturar actividad; NO toca app.js. v9.25: + getSummary() (lectura).
-         v9.26: fix crítico — el guard del wrapper vivía en localStorage (item
-         persistente) y tras el 1.er reload la captura moría; ahora en window.
-         v9.28: el import de respaldo NO pisa el historial de rachas ni cuenta
-         deltas como aciertos de hoy (flush con _origSet, capture respeta
-         escrituras externas a su clave, flag __hsImporting de app.js); minutos
-         a disco cada ~60 s en vez de cada 15 s; #stats-pop cierra con Escape
-         y clic afuera. v9.29: el handler de clic afuera usa
-         e.composedPath() (los clics internos re-renderizan y contains()
-         daba falso negativo). -->
-    <script src="onboarding.js?v=20260916b"></script>
+    <script src="onboarding.js?v=20260916ux1"></script>
     <script src="stats.js?v=20260916b"></script>
-    <script src="app.js?v=20260917e"></script>
+    <script src="app.js?v=20260916ux3"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
