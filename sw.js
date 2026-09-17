@@ -255,7 +255,21 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
-const VERSION = 'v82'; // — invalida shell (v9.35: sensibilidad ✍️ + planillas: PDF por páginas y sin filas vacías)
+// v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
+//       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
+//       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
+//       contenido, skip-link de accesibilidad y “Saltar guía” en el
+//       onboarding (targets táctiles de 44px). Base entregada por el
+//       usuario y validada contra el estado v9.34 (la zona de
+//       planillas/manuscrito quedó intacta). (2) FIXES v9.35
+//       re-aplicados sobre esa base: sensibilidad del reconocimiento
+//       a mano (leniency 2 + trazos en dirección inversa + pista al
+//       2.º error en respuestas; leniency 1.6 en la práctica v7.16) y
+//       planillas (PDF página por página seguro en iOS con cruces
+//       guía visibles, sin filas casi vacías con fórmula compartida
+//       contador=hoja, ancho fijo de celdas). Toca app.js, style.css,
+//       onboarding.js, index.html.
+const VERSION = 'v83'; // — invalida shell (v9.36: v10 UX integrada + fixes v9.35 re-aplicados)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
