@@ -3736,6 +3736,10 @@ function wpShowChar(opts) {
                 drawingColor: cols.drawing,
                 strokeAnimationSpeed: 1,
                 delayBetweenStrokes: 220,
+                // v9.35 — SENSIBILIDAD: misma política que la respuesta a mano,
+                // con leniency 1.6 (acá hay contorno visible → copiar es más fácil).
+                leniency: 1.6,
+                acceptBackwardsStrokes: true,
                 showHintAfterMisses: 2,
                 onLoadCharDataSuccess: () => {
                     if (myGen !== wpPractice.gen) return;
@@ -3887,7 +3891,10 @@ function hwStartQuiz(myGen) {
         onMistake: () => {
             if (gen !== hwAns.gen) return;
             hwAns.misses++;
-            if (hwAns.misses >= 3) hwSetHint('🤔 Tranquilo — tocá 💡 Pista y mirá cómo se escribe.');
+            // v9.35: aviso temprano (el orden y la dirección de los trazos importan)
+            // y sugerencia de pista al 2.º error en vez del 3.º — menos frustación.
+            if (hwAns.misses === 1) hwSetHint('💡 El ORDEN y la DIRECCIÓN de los trazos importan — no pasa nada, seguí probando.');
+            else if (hwAns.misses >= 2) hwSetHint('🤔 Tranquilo — tocá 💡 Pista y mirá cómo se escribe.');
         },
         onComplete: () => {
             if (gen !== hwAns.gen) return; // cerró el banner mientras tanto
@@ -3938,7 +3945,14 @@ function hwShowChar() {
                 drawingColor: cols.drawing,
                 strokeAnimationSpeed: 1,
                 delayBetweenStrokes: 220,
-                showHintAfterMisses: 3, // tras 3 errores: resalta el próximo trazo
+                // v9.35 — SENSIBILIDAD (el quiz hace merge sobre estas opciones):
+                // leniency 2 = duplica la tolerancia de distancia del matcher
+                // (350·leniency px en espacio de datos); acceptBackwardsStrokes
+                // acepta trazos bien hechos pero en dirección inversa — con el
+                // dedo en el celular es el error más común y antes fallaba TODO.
+                leniency: 2,
+                acceptBackwardsStrokes: true,
+                showHintAfterMisses: 2, // tras 2 errores: resalta el próximo trazo
                 onLoadCharDataSuccess: () => {
                     if (myGen !== hwAns.gen) return;
                     target.classList.remove('loading');
@@ -4000,7 +4014,7 @@ function openHandwriteAnswer(word, fill) {
     banner.classList.remove('hidden');
     document.body.style.overflow = 'hidden'; // fullscreen: sin scroll detrás
     hwSetHint('✍ Escribí de memoria: ' + hwAns.chars.length +
-        (hwAns.chars.length > 1 ? ' caracteres' : ' carácter'));
+        (hwAns.chars.length > 1 ? ' caracteres' : ' carácter') + ' — trazo por trazo, en orden');
     hwShowChar();
     return true;
 }
@@ -4963,6 +4977,26 @@ function pzPinyinOf(ch) {
     return _pzPyMap[ch] || '';
 }
 
+// v9.35 — FILAS POR CARÁCTER (estilo clásico): las celdas de práctica
+// completan la fila ACTUAL y nada más; solo si el bloque cae justo en el
+// borde (base % C === 0) se abre una fila parcial con 2 celdas. Antes
+// ceil((base+2)/C) inflaba SIEMPRE a fila completa → un carácter de 8
+// trazos con 10 celdas sumaba una fila VACÍA de 10 ("suma espacios cuando
+// no los hay"). La usa TAMBIÉN el contador (v9.2) para que ambos coincidan.
+function pzClassicRows(base, C) {
+    const rem = base % C;
+    const total = (rem === 0) ? base + 2 : base + (C - rem);
+    return Math.ceil(total / C);
+}
+
+// v9.35 — ancho FIJO de celda clásica: antes eran flex:1 1 0 (solo funcionaba
+// si TODAS las filas tenían exactamente C celdas); con filas parciales las 2
+// celdas de práctica se estiraban a todo el ancho. Con ancho fijo cualquier
+// fila queda uniforme, en vista previa, impresión y PDF.
+function pzCellWidthCss(C) {
+    return '.pz-row .pz-cell{flex:0 0 auto;width:calc((100% - ' + ((C - 1) * 1.2).toFixed(2) + 'mm)/' + C + ');}';
+}
+
 function pzSheetHTML(chars, datas, trazos, cells, style) {
     const fecha = new Date().toLocaleDateString('es-AR');
     const C = Math.min(20, Math.max(6, parseInt(cells, 10) || 12));
@@ -5019,13 +5053,14 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
             // v9.1: el trazo NUEVO de cada etapa va más oscuro — se ve qué trazo se agrega
             for (let k = 1; k <= n; k++) celdas.push('<div class="pz-cell">' + pzSvg(d, k, PZ_PREV_FILL, PZ_CUR_FILL) + '</div>');
         }
-        // Todas las filas de la hoja tienen EXACTAMENTE C celdas → tamaño
-        // uniforme (en v6.5 un carácter de 20 trazos agrandaba la fila y
-        // se mezclaban cuadrados grandes y diminutos). Siempre quedan al
-        // menos 2 celdas vacías para practicar.
+        // v9.35 — relleno compacto: las celdas de práctica completan la fila
+        // ACTUAL del carácter y nada más (antes la fila extra casi vacía).
+        // Solo si el bloque cae justo en el borde (base % C === 0) se abre
+        // una fila parcial con 2 celdas de práctica — con ancho fijo
+        // (pzCellWidthCss) las filas parciales no se estiran.
         const base = celdas.length;
-        const filas = Math.ceil((base + 2) / C);
-        const total = filas * C;
+        const rem = base % C;
+        const total = (rem === 0) ? base + 2 : base + (C - rem);
         while (celdas.length < total) celdas.push('<div class="pz-cell"></div>');
         for (let r = 0; r < total; r += C) {
             rows += '<div class="pz-row">' + celdas.slice(r, r + C).join('') + '</div>';
@@ -5035,7 +5070,7 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
     const nota = faltan.length ? '<p class="pz-note">Sin datos de trazos para: ' + faltan.join(' ') + ' — el carácter modelo usa la fuente del sistema.</p>' : '';
     const hz = chars.map((c) => '<span>' + c + '</span>').join(' ');
     return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Planilla de práctica 写字</title>'
-        + '<style>' + PZ_SHEET_CSS + '</style></head><body>'
+        + '<style>' + PZ_SHEET_CSS + pzCellWidthCss(C) + '</style></head><body>'
         + '<div class="pz-title">Planilla de práctica · Caracteres <span class="pz-hz">' + hz + '</span></div>'
         + '<div class="pz-meta">Nombre: ____________________________ &nbsp;&nbsp; Curso: ______________ &nbsp;&nbsp; Fecha: ' + fecha + '</div>'
         + rows + nota + '</body></html>';
@@ -5137,6 +5172,33 @@ function pzHolderCss() {
         .replace('@media screen {  }', '');
 }
 
+// v9.35 — Estilo del holder PDF (compartido por el holder de medición y el
+// de cada página): alto explícito de celda (.pz-cell usa aspect-ratio, que
+// html2canvas no soporta), ancho fijo de celda clásica y cruces guía.
+// Las cruces van a 1px — antes 0.22mm ≈ 0.83px y html2canvas creaba el
+// patrón con un canvas de 0px → InvalidStateError en createPattern
+// (el bug "No se pudo generar el PDF"). En impresión/preview sigue la
+// línea fina de 0.22mm que el navegador pinta de forma nativa.
+function pzPdfHolderStyle(C, cw) {
+    return pzHolderCss()
+        + '.pz-cell{height:' + cw.toFixed(2) + 'px;}'
+        + '#pz-pdf-holder .pz-row .pz-cell{width:' + cw.toFixed(2) + 'px;flex:0 0 auto;}'
+        + '#pz-pdf-holder .pz-cell::before{content:"";position:absolute;inset:0;'
+        + 'background-image:linear-gradient(#a7d9c4,#a7d9c4),linear-gradient(#a7d9c4,#a7d9c4);'
+        + 'background-size:100% 1px,1px 100%;'
+        + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}';
+}
+
+// Holder fuera de pantalla: 794px = A4 a 96dpi; padding 42px ≈ 11mm
+// (igual que el margen @page de la versión impresa).
+function pzPdfHolder() {
+    const holder = document.createElement('div');
+    holder.id = 'pz-pdf-holder';
+    holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;'
+        + 'background:#fff;font-family:"Segoe UI",Arial,"Helvetica Neue",sans-serif;padding:42px;';
+    return holder;
+}
+
 async function pzDownloadPDF() {
     if (!pzLastSheet) return;
     const btn = document.getElementById('btn-pz-pdf');
@@ -5145,56 +5207,72 @@ async function pzDownloadPDF() {
         await pzEnsurePdfLibs();
         pzStatus('⏳ Generando PDF…');
 
-        // Holder fuera de pantalla: 794px = A4 a 96dpi; padding 42px ≈ 11mm
-        // (igual que el margen @page de la versión impresa).
         const doc = new DOMParser().parseFromString(pzLastSheet, 'text/html');
-        const holder = document.createElement('div');
-        holder.id = 'pz-pdf-holder';
-        holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;'
-            + 'background:#fff;font-family:"Segoe UI",Arial,"Helvetica Neue",sans-serif;padding:42px;';
-        const st = document.createElement('style');
-        // .pz-cell usa aspect-ratio (que html2canvas no soporta) → alto
-        // explícito = mismo cuadrado que en pantalla/impresión.
         const C = Math.min(20, Math.max(6, parseInt(pzCells, 10) || 12));
         const GAP = 1.2 * 96 / 25.4;
         const cw = (794 - 84 - (C - 1) * GAP) / C;
-        // Guía en cruz de cada celda: el ::before original usa un shorthand
-        // repeating-linear-gradient que html2canvas no pinta → equivalente
-        // con gradientes simples (línea sólida 0.22mm horizontal + vertical,
-        // v9.1: más finita igual que la hoja impresa).
-        const mm = (x) => (x * 96 / 25.4).toFixed(2) + 'px';
-        st.textContent = pzHolderCss() + '.pz-cell{height:' + cw.toFixed(2) + 'px;}'
-            + '#pz-pdf-holder .pz-cell::before{content:"";position:absolute;inset:0;'
-            + 'background-image:linear-gradient(#a7d9c4,#a7d9c4),linear-gradient(#a7d9c4,#a7d9c4);'
-            + 'background-size:100% ' + mm(0.22) + ',' + mm(0.22) + ' 100%;'
-            + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}';
-        holder.appendChild(st);
-        while (doc.body.firstChild) holder.appendChild(doc.body.firstChild);
-        document.body.appendChild(holder);
 
-        const canvas = await window.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff', logging: false });
-        holder.remove();
+        // ── 1) Holder de MEDICIÓN: mismo CSS que el render final ──
+        const meas = pzPdfHolder();
+        const st = document.createElement('style');
+        st.textContent = pzPdfHolderStyle(C, cw);
+        meas.appendChild(st);
+        while (doc.body.firstChild) meas.appendChild(doc.body.firstChild);
+        document.body.appendChild(meas);
 
-        // Troceo en páginas A4 (1123px × escala 2) con fondo blanco
-        const A4H = 1123 * 2;
+        // Clasificar bloques: filas (lo paginable), cabecera y nota final
+        const esCuad = (pzStyle === 'cuaderno');
+        const rowCls = esCuad ? 'pz2-block' : 'pz-row';
+        const header = [], tail = [], rowsArr = [];
+        Array.prototype.forEach.call(meas.children, (n) => {
+            if (n.tagName === 'STYLE') return;
+            if (n.classList && n.classList.contains(rowCls)) rowsArr.push(n);
+            else if (n.classList && n.classList.contains('pz-note')) tail.push(n);
+            else header.push(n);
+        });
+
+        // ── 2) Partir en páginas A4 midiendo bloques REALES (misma lógica
+        // de flujo que la impresión nativa: cada página arranca a 11mm) ──
+        const gapY = (esCuad ? 4 : 1.8) * 96 / 25.4;      // margen inferior del bloque
+        const headerH = rowsArr.length ? rowsArr[0].offsetTop : 42;
+        const pages = [[]];
+        let y = headerH;
+        rowsArr.forEach((r) => {
+            const h = r.offsetHeight + gapY;
+            if (y + h > 1123 - 42 && pages[pages.length - 1].length) {
+                pages.push([]);
+                y = 42;
+            }
+            pages[pages.length - 1].push(r);
+            y += h;
+        });
+        meas.remove(); // los nodos quedan vivos: se re-montan por página
+
+        // ── 3) Render página por página: cada canvas es 1588×2246 ≈ 3.6MP.
+        // Antes se rasterizaba TODA la hoja en un solo canvas — con hojas
+        // largas reventaba el límite de memoria de canvas de iOS/Safari. ──
         const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-        const paginas = Math.max(1, Math.ceil(canvas.height / A4H));
-        for (let p = 0; p < paginas; p++) {
-            const h = Math.min(A4H, canvas.height - p * A4H);
-            const c2 = document.createElement('canvas');
-            c2.width = canvas.width; c2.height = A4H;
-            const ctx = c2.getContext('2d');
-            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c2.width, c2.height);
-            ctx.drawImage(canvas, 0, p * A4H, canvas.width, h, 0, 0, canvas.width, h);
+        for (let p = 0; p < pages.length; p++) {
+            pzStatus('⏳ Generando PDF… página ' + (p + 1) + ' de ' + pages.length);
+            const holder = pzPdfHolder();
+            const st2 = document.createElement('style');
+            st2.textContent = pzPdfHolderStyle(C, cw);
+            holder.appendChild(st2);
+            if (p === 0) header.forEach((n) => holder.appendChild(n));
+            pages[p].forEach((n) => holder.appendChild(n));
+            if (p === pages.length - 1) tail.forEach((n) => holder.appendChild(n));
+            document.body.appendChild(holder);
+            const canvas = await window.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            holder.remove();
             if (p > 0) pdf.addPage();
-            pdf.addImage(c2.toDataURL('image/png'), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
         }
         const t = new Date();
         const pad = (x) => String(x).padStart(2, '0');
         const nombre = 'planilla-hanzi-' + t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate())
             + '-' + pad(t.getHours()) + pad(t.getMinutes()) + '.pdf';
         pdf.save(nombre);
-        pzStatus('✅ PDF descargado: ' + nombre + (paginas > 1 ? ' (' + paginas + ' páginas)' : ''));
+        pzStatus('✅ PDF descargado: ' + nombre + (pages.length > 1 ? ' (' + pages.length + ' páginas)' : ''));
     } catch (err) {
         console.warn('[Planillas] descarga de PDF falló:', err);
         pzStatus('⚠ No se pudo generar el PDF. Probá el botón 🖨️ para imprimir y elegir "Guardar como PDF".', true);
@@ -5339,15 +5417,17 @@ function pzCounterCompute() {
         const rowsAvail = Math.floor((PZ_PAGE_LIMIT - headerH) / rowH);
         if (!chars.length) {
             // capacidad genérica: carácter de referencia de 10 trazos
-            const rows1 = Math.ceil((1 + (pzTrazos ? 10 : 0) + 2) / C);
+            const rows1 = pzClassicRows(1 + (pzTrazos ? 10 : 0), C);
             capOnly = Math.floor(rowsAvail / Math.max(1, rows1));
         } else {
             let acc = 0;
-            while (fit < chars.length && acc + Math.ceil((1 + estN(fit) + 2) / C) <= rowsAvail) {
-                acc += Math.ceil((1 + estN(fit) + 2) / C);
+            // v9.35: misma fórmula de filas que pzSheetHTML (pzClassicRows) —
+            // el contador y la hoja real nunca difieren.
+            while (fit < chars.length && acc + pzClassicRows(1 + estN(fit), C) <= rowsAvail) {
+                acc += pzClassicRows(1 + estN(fit), C);
                 fit++;
             }
-            capOnly = Math.floor(rowsAvail / Math.max(1, Math.ceil((1 + (pzTrazos ? 10 : 0) + 2) / C)));
+            capOnly = Math.floor(rowsAvail / Math.max(1, pzClassicRows(1 + (pzTrazos ? 10 : 0), C)));
         }
     }
     return { chars: chars.length, rawHan, fit, capOnly, unknown, est: unknown > 0 && chars.length > 0 };

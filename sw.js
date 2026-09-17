@@ -168,6 +168,28 @@
 //       progreso ac_dele_v1. En cn-es toma #panel-lessons (chips propios);
 //       en es-cn el panel HSK/TOCFL queda intacto (MutationObserver sobre
 //       #btn-play-es, patrón onboarding.js). Toca index.html, sw.js.
+// v9.35: (1) SENSIBILIDAD del reconocimiento de trazos ✍️ — "por más que se
+//       hagan los trazos no los reconoce". El quiz de Hanzi Writer usaba
+//       leniency 1 (default) y acceptBackwardsStrokes false: con el dedo en
+//       el celular, un trazo bien dibujado pero en dirección inversa o un
+//       poco desviado fallaba SIEMPRE. Ahora la respuesta a mano usa
+//       leniency 2 (duplica la tolerancia de distancia del matcher) +
+//       acceptBackwardsStrokes true + pista automática al 2.º error (antes
+//       3.º) + aviso pedagógico al 1.er error (el orden y la dirección
+//       importan). La práctica grande v7.16 sube a leniency 1.6 + backwards.
+//       (2) PLANILLAS: fix "no genera el PDF" — html2canvas explotaba con
+//       InvalidStateError en createPattern (las cruces guía de 0.22mm ≈
+//       0.83px creaban un patrón de canvas 0×0; ahora 1px en el holder de
+//       PDF, la hoja impresa conserva la línea fina) Y el render es página
+//       por página (antes TODO el PDF salía de un solo canvas gigante que
+//       reventaba el límite de memoria de canvas en iOS/Safari). Fix "suma
+//       espacios cuando no los hay": las celdas de práctica ya no inflan a
+//       una fila extra casi vacía (ceil((base+2)/C) → fila actual completa;
+//       solo si el bloque cae justo en el borde se abren 2 celdas en fila
+//       parcial) + celdas de ancho fijo (las filas parciales no se estiran).
+//       El contador de "cuántos entran por hoja" usa la MISMA fórmula
+//       (pzClassicRows) → contador y hoja real nunca difieren. Toca app.js,
+//       index.html, sw.js (libs html2canvas/jspdf ya estaban en el repo).
 // v9.34: es-cn — RESPUESTA A MANO (✍️ escribiendo el hanzi con el dedo).
 //       El paso pedagógico que faltaba en las respuestas en chino: PRODUCIR
 //       el carácter de memoria en vez de tipearlo. Botón ✍️ junto al input
@@ -233,7 +255,7 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
-const VERSION = 'v81'; // — invalida shell (v9.34: respuesta a mano ✍️ — escribir el hanzi de memoria en el panel y en el quiz de repaso)
+const VERSION = 'v82'; // — invalida shell (v9.35: sensibilidad ✍️ + planillas: PDF por páginas y sin filas vacías)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
