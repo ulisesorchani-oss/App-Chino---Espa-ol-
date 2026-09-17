@@ -786,9 +786,12 @@
     }
 
     // v9.28: Escape y clic afuera cierran el popup — convención del resto de
-    // los overlays (vocab-pop, placement, SRS, quiz, clásicos). #btn-stats es
-    // el launcher: el MISMO clic que abre burbujea hasta document y no debe
-    // re-cerrarlo. ⚠ #btn-stats-backup vive DENTRO del pop → contains() lo
+    // los overlays (vocab-pop, placement, SRS, quiz, clásicos). #btn-stats y
+    // #header-streak (chip 🔥 de racha, launcher doble desde v9.37) abren el
+    // pop: el MISMO clic que abre burbujea hasta document y no debe
+    // re-cerrarlo (v9.37: el chip quedaba fuera de la lista blanca → el pop
+    // se cerraba instantáneo tras abrirse = "el botón 🔥 no funciona").
+    // ⚠ #btn-stats-backup vive DENTRO del pop → contains() lo
     // protege; su handler hace close() antes de abrir el respaldo.
     document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
@@ -805,7 +808,7 @@
         // (cerraría el popup justo después del clic).
         var path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
         if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
-        if (e.target.closest && e.target.closest('#btn-stats')) return;
+        if (e.target.closest && (e.target.closest('#btn-stats') || e.target.closest('#header-streak'))) return;
         close();
     });
 

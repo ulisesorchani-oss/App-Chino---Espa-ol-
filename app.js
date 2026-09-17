@@ -5557,7 +5557,11 @@ function pzPdfHolderStyle(C, cw) {
         + '#pz-pdf-holder .pz-cell::before{content:"";position:absolute;inset:0;'
         + 'background-image:linear-gradient(#a7d9c4,#a7d9c4),linear-gradient(#a7d9c4,#a7d9c4);'
         + 'background-size:100% 1px,1px 100%;'
-        + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}';
+        + 'background-position:0 50%,50% 0;background-repeat:no-repeat,no-repeat;}'
+        // v9.37: en CUADERNO las celdas viven en .pz2-cells (grid 24mm+1fr) →
+        // su ancho NO es cw: forzarles height:cw las deformaba (rectángulos).
+        // El ancho lo resuelve el flex del bloque; aspect-ratio re-cuadra.
+        + '#pz-pdf-holder .pz2-cells .pz-cell{height:auto;aspect-ratio:1/1;}';
 }
 function pzPdfHolder() {
     const holder = document.createElement('div');
@@ -5623,6 +5627,12 @@ async function pzDownloadPDF() {
         for (let p = 0; p < pages.length; p++) {
             pzStatus('⏳ Generando PDF… página ' + (p + 1) + ' de ' + pages.length);
             const holder = pzPdfHolder();
+            // v9.37: página SIEMPRE con proporción A4 (794×1123 @96dpi). Antes
+            // el holder medía solo lo que ocupaba su contenido y addImage lo
+            // estiraba a 210×297 mm completos: la ÚLTIMA página (poco
+            // contenido) salía con celdas y caracteres deformadísimos —
+            // "se desconfiguran los caracteres al final del PDF".
+            holder.style.minHeight = '1123px';
             const st2 = document.createElement('style');
             st2.textContent = pzPdfHolderStyle(C, cw);
             holder.appendChild(st2);
@@ -5633,7 +5643,11 @@ async function pzDownloadPDF() {
             const canvas = await window.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff', logging: false });
             holder.remove();
             if (p > 0) pdf.addPage();
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+            // v9.37: alto en mm derivado del PROPIO canvas (defensa pasiva:
+            // si el canvas no es exactamente A4, se conserva el aspecto en
+            // vez de estirar). Con minHeight 1123 → mmH ≈ 297 siempre.
+            const mmH = Math.min(297, 210 * canvas.height / canvas.width);
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, mmH, undefined, 'FAST');
         }
         const t = new Date();
         const pad = (x) => String(x).padStart(2, '0');

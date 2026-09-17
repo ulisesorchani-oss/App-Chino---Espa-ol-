@@ -255,6 +255,28 @@
 //       nace DELE-only desde el primer cuadro en cn-es (pista de modo
 //       en localStorage mientras app.js no dé señal; sin flasheo de
 //       las lecciones de chino). Toca lessons-dele.js, index.html.
+// v9.37: (1) FIX planillas "se desconfiguran los caracteres al final del
+//       PDF": el rasterizado por página medía solo el contenido y addImage
+//       estiraba SIEMPRE a 210×297 mm — la última página (poco contenido)
+//       salía con celdas y glifos deformados (distorsión vertical hasta
+//       ~3.4x; QA reproducido con canvas 794×327). Ahora cada holder de
+//       página lleva min-height 1123px (proporción A4 exacta) y el alto en
+//       mm se deriva del propio canvas (defensa pasiva de aspecto).
+//       (2) FIX celdas de práctica del estilo CUADERNO en PDF: vivían en
+//       .pz2-cells (grid 24mm+1fr) → el ancho no es cw y forzarles
+//       height:cw las volvía rectángulos; ahora height:auto + aspect-ratio
+//       1/1 (QA: 46.7×46.7). (3) FIX chip de racha 🔥 del header "no
+//       funciona": el clic que abre el popup de estadísticas burbujea hasta
+//       document y el cerrador de clic-afuera de stats.js (v9.28) solo
+//       protegía #btn-stats → el pop se cerraba instantáneo tras abrirse.
+//       #header-streak entra a la lista blanca (mismo patrón que el fix
+//       v7.20/v9.29 de los overlays). Tooltip y aria-label aclaran la
+//       utilidad ("Tu racha... toca para ver tu calendario y progreso").
+//       (4) QA end-to-end del modo 🎧 solo oído (E1-E9) y barrido de
+//       funcionalidad (F1-F5): tarjeta tapada, opciones, acierto→destape,
+//       calificación y avance, Revelar, re-arma por tarjeta — sin errores
+//       JS. Toca app.js, stats.js, index.html.
+const VERSION = 'v84'; // — invalida shell (v9.37: PDF planillas sin deformar + chip 🔥 arreglado)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -269,7 +291,6 @@
 //       guía visibles, sin filas casi vacías con fórmula compartida
 //       contador=hoja, ancho fijo de celdas). Toca app.js, style.css,
 //       onboarding.js, index.html.
-const VERSION = 'v83'; // — invalida shell (v9.36: v10 UX integrada + fixes v9.35 re-aplicados)
 
 // v9.13: dict-mini.js cobertura TOTAL (+1948 glosas de práctica diaria: 到/看/打/请/
 //        吃/做… y 2736 chars del corpus completo → 0 sin glosa; polifónicos a mano)
