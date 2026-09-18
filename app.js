@@ -1299,7 +1299,7 @@ const UI_STRINGS = {
     sessionStreak: 'Racha: {n} días 🔥', sessionMore: '{n} más', sessionClose: 'Listo por hoy',
     srsEmpty: 'Empezá a practicar y armo tu repaso', srsDueN: '{n} para repasar hoy',
     srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
-    gradeNoReturn: 'no vuelve',
+    gradeNoReturn: 'no vuelve', gradeTomorrow: 'mañana', // v9.38: subtítulos diferenciados Bien/Fácil
     hintTone: 'Casi: revisá el tono.', hintHomophone: 'El sonido está bien, el carácter no.',
     hintPinyinOk: 'El pinyin está bien: ahora escribilo en caracteres.',
     hintAccent: 'Casi: revisá los acentos.', hintOneChar: 'Un carácter no coincide:', hintOneLetter: 'Una letra no coincide:',
@@ -1353,7 +1353,7 @@ const UI_STRINGS = {
     sessionStreak: '连续 {n} 天 🔥', sessionMore: '再来 {n} 句', sessionClose: '今天到此为止',
     srsEmpty: '开始练习，我来安排复习', srsDueN: '今天要复习 {n} 张',
     srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
-    gradeNoReturn: '不再出现',
+    gradeNoReturn: '不再出现', gradeTomorrow: '明天', // v9.38: 中文副标题
     hintTone: '差一点：注意声调。', hintHomophone: '读音对了，字不对。',
     hintPinyinOk: '拼音对了：请写汉字。',
     hintAccent: '差一点：注意重音符号。', hintOneChar: '有一个字不对：', hintOneLetter: '有一个字母不对：',
@@ -3218,7 +3218,7 @@ function updateGradeIntervals() {
     const p = (typeof window.acSrsPreview === 'function') ? window.acSrsPreview(s) : null;
     const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
     set('g-int-again', p ? p.again : '10 min');
-    set('g-int-good', p ? p.good : uiT('gradeNoReturn'));
+    set('g-int-good', p ? p.good : uiT('gradeTomorrow')); // v9.38: Bien → mañana (antes igual que Fácil)
     set('g-int-easy', p ? p.easy : uiT('gradeNoReturn'));
 }
 
@@ -6239,11 +6239,12 @@ function pzCounterUpdate() {
 // ======================================================================
 // v7.21 — REPASO SRS (repetición espaciada · Leitner de 6 cajas)
 // ======================================================================
-// El mazo se llena SOLO con las palabras que cuestan:
+// El mazo se llena con las palabras que cuestan y con las que el usuario decide repasar:
 //   · ❌ respuesta incorrecta en la práctica   (hook en checkAnswer)
 //   · 🔄 botón "Repetir" de la tarjeta         (hook en markWord)
 //   · 🔁 "Sumar a mi repaso" del popup de vocabulario
 //   · 🌱 semilla opcional desde el nivel del test de colocación
+//   · 🟢 "Bien" sobre palabra nueva → alta suave en caja 2, vuelve mañana (v9.38)
 // Algoritmo: 6 cajas — 1 = relearning (10 min, re-encola en la sesión),
 // 2..6 = 1 / 3 / 7 / 14 / 30 días. Botones Otra vez / Bien / Fácil
 // (estilo Anki-lite). Todo persiste en localStorage 'ac_srs' (clave =
@@ -6311,8 +6312,10 @@ function pzCounterUpdate() {
         if (DB.cards[zh]) return 'dup';
         if (totalCount() >= MAX_CARDS) return false;
         const now = Date.now();
+        // v9.38: alta directa en caja 2..6 (p.ej. "Bien" sobre palabra nueva → vuelve mañana)
+        const box = (o.box >= 2 && o.box <= 6) ? o.box : 1;
         DB.cards[zh] = {
-            b: 1, d: o.dueNow ? now : now + AGAIN_MS, a: now, r: 0, l: 0,
+            b: box, d: o.dueNow ? now : (box === 1 ? now + AGAIN_MS : now + (BOX_DAYS[box] || 1) * DAY), a: now, r: 0, l: 0,
             es: o.es || '', py: o.py || '', zt: o.zt || '',
             m: o.m || '', lv: o.lv || 0,
             ctxZh: o.ctxZh || '', ctxZt: o.ctxZt || '', ctxEs: o.ctxEs || ''
@@ -6343,18 +6346,37 @@ function pzCounterUpdate() {
     window.acSrsHas = function (w) { return !!DB.cards[String(w || '').trim()]; };
     window.acSrsReset = function () { DB = { v: 1, cards: {} }; save(); updateBar(); };
     // v10 UX: calificación desde la tarjeta de práctica + intervalos reales
+    // v9.38: "Bien" sobre palabra NUEVA → alta suave en caja 2 (vuelve mañana);
+    // "Fácil" sobre palabra nueva → solo conocidas (no vuelve): ahora los subtítulos
+    // y el efecto de los tres botones son distintos y coinciden con lo prometido.
     window.acSrsGrade = function (s, kind) {
         if (!s) return false;
         const zh = String(s.chinese_simp_answer || '').trim();
-        if (!DB.cards[zh]) return false;
+        if (!DB.cards[zh]) {
+            if (kind !== 'good') return false; // Fácil sin mazo: queda en conocidas, nada más
+            const added = addCard({
+                zh: zh,
+                zt: s.chinese_trad_answer || '',
+                es: s.w ? (s.spanish_full || '') : '',
+                py: '', m: s.module || '', lv: s.level || 0,
+                ctxZh: s.w ? '' : (s.chinese_simp_full || ''),
+                ctxZt: s.w ? '' : (s.chinese_trad_full || ''),
+                ctxEs: s.w ? '' : (s.spanish_full || ''),
+                box: 2
+            });
+            if (added === true) return true;
+            if (added === 'dup') { grade(zh, 'good'); return true; } // v9.38: ya estaba (‹ Anterior) → sube de caja
+            return false;
+        }
         grade(zh, kind === 'easy' ? 'easy' : 'good');
         return true;
     };
     window.acSrsPreview = function (s) {
         const zh = s ? String(s.chinese_simp_answer || '').trim() : '';
         const c = DB.cards[zh];
-        const lbl = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
-        if (!c) return { again: '10 min', good: uiT('gradeNoReturn'), easy: uiT('gradeNoReturn'), inDeck: false };
+        const cnUI = (typeof state !== 'undefined' && state && state.mode === 'cn-es');
+        const lbl = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? (cnUI ? '1 天' : '1 día') : (cnUI ? BOX_DAYS[n] + ' 天' : BOX_DAYS[n] + ' días')));
+        if (!c) return { again: '10 min', good: uiT('gradeTomorrow'), easy: uiT('gradeNoReturn'), inDeck: false }; // v9.38: diferenciados
         return { again: '10 min', good: lbl(Math.min(c.b + 1, 6)), easy: lbl(Math.min(c.b + 2, 6)), inDeck: true };
     };
     window.acSrsRefreshBar = function () { updateBar(); };

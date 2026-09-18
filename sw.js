@@ -276,7 +276,16 @@
 //       funcionalidad (F1-F5): tarjeta tapada, opciones, acierto→destape,
 //       calificación y avance, Revelar, re-arma por tarjeta — sin errores
 //       JS. Toca app.js, stats.js, index.html.
-const VERSION = 'v84'; // — invalida shell (v9.37: PDF planillas sin deformar + chip 🔥 arreglado)
+// v9.38: FIX calificación SRS — "fácil dice no vuelve y 'bien' no vuelve,
+//       están en lo mismo": acSrsPreview devolvía el MISMO fallback
+//       ('no vuelve') para Bien y Fácil cuando la palabra no estaba en el
+//       mazo, y acSrsGrade no registraba nada en ese caso (mismo efecto).
+//       Ahora los 3 botones prometen cosas distintas y la cumplen:
+//       Otra vez → 10 min (ya estaba); Bien → 'mañana' con alta suave en
+//       caja 2 (addCard soporta box 2..6; 'dup' por ‹ Anterior sube de
+//       caja); Fácil → 'no vuelve' (solo conocidas). Subtítulos i18n
+//       gradeTomorrow ('mañana'/'明天') y días en 天 para cn-es. Toca app.js.
+const VERSION = 'v85'; // — invalida shell (v9.38: Bien/Fácil diferenciados de verdad)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
