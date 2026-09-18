@@ -4436,6 +4436,33 @@ function fetchTTS(body, timeoutMs) {
     }).finally(() => clearTimeout(timer));
 }
 
+// ===== v9.40: velocidad en el SERVIDOR (fin del eco a 0.85x) =====
+// Antes: el api/tts.py sintetizaba a velocidad normal y el cliente ESTIRABA
+// el audio con playbackRate + preservesPitch → a 0.85x/0.7x quedaba un eco
+// artificial. Ahora el body lleva `speed` y edge-tts sintetiza YA lento
+// (rate="-15%"): sin post-proceso no hay eco y el tono queda intacto
+// (lo maneja el modelo neuronal, no un algoritmo de estiramiento).
+// COMPATIBILIDAD (red de contención): si la respuesta NO trae `speed`
+// (api/tts.py viejo sin actualizar), applyTtsSpeed aplica el playbackRate
+// de siempre → la app funciona igual antes y después de subir el api,
+// y NUNCA se aplican los dos efectos a la vez.
+let ttsServerSpeed = false; // alguna respuesta ya vino sintetizada a pedido
+function ttsBody(text, lang, voice) {
+    return { text: text, lang: lang, voice: voice,
+             speed: (typeof playbackSpeed === 'number') ? playbackSpeed : 1 };
+}
+function applyTtsSpeed(audio, data) {
+    const want = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+    let rate = want; // fallback: api viejo sin speed → comportamiento clásico
+    if (data && typeof data.speed === 'number' && data.speed > 0) {
+        ttsServerSpeed = true; // el server ya sintetizó a la velocidad pedida
+        rate = want / data.speed; // ≈1 — solo compensa si el server clampeó
+    }
+    if (!(rate >= 0.5 && rate <= 2)) rate = want; // defensa numérica
+    try { audio.playbackRate = rate; } catch (e) { /* audio sin rate */ }
+    return rate;
+}
+
 async function playAudio(lang) {
     const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
     if (isPlaying && btn && btn.innerText.includes('⏳')) {
@@ -4479,7 +4506,7 @@ async function playAudio(lang) {
     }
 
     try {
-        const response = await fetchTTS({ text, lang: langCode, voice: voiceGender });
+        const response = await fetchTTS(ttsBody(text, langCode, voiceGender)); // v9.40: +speed
 
         if (!response.ok) throw new Error('Error en servidor');
         const data = await response.json();
@@ -4492,7 +4519,7 @@ async function playAudio(lang) {
         const blob = new Blob([bytes], { type: data.mime || 'audio/wav' });
         const url = URL.createObjectURL(blob);
         globalAudioPlayer.src = url;
-        globalAudioPlayer.playbackRate = playbackSpeed; // velocidad elegida, voz natural
+        applyTtsSpeed(globalAudioPlayer, data); // v9.40: velocidad en el server → sin eco
 
         try {
             isPlaying = true;
@@ -4539,8 +4566,10 @@ function cycleSpeed() {
         btn.textContent = SPEED_LABELS[String(playbackSpeed)];
         btn.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
     }
-    // Aplicar en vivo si hay audio reproduciéndose
-    globalAudioPlayer.playbackRate = playbackSpeed;
+    // v9.40: en vivo SOLO en fallback (api sin speed). Con el server nuevo el
+    // audio en curso ya salió sintetizado a la velocidad anterior y el PRÓXIMO
+    // pedido sale a la nueva — tocar el rate acá sería doble efecto.
+    if (!ttsServerSpeed) globalAudioPlayer.playbackRate = playbackSpeed;
     if ('speechSynthesis' in window) speechSynthesis.cancel(); // el próximo TTS usará la nueva velocidad
 }
 
@@ -4594,7 +4623,7 @@ function playVoiceSample(lang) {
         fetch(TTS_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, lang: langCode, voice: gender })
+            body: JSON.stringify(ttsBody(text, langCode, gender)) // v9.40: +speed
         })
             .then(r => r.ok ? r.json() : null)
             .then(d => {
@@ -4605,7 +4634,7 @@ function playVoiceSample(lang) {
                 for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
                 const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
                 const a = new Audio(url);
-                a.playbackRate = playbackSpeed;
+                applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
                 a.onended = () => URL.revokeObjectURL(url);
                 a.play().catch(() => { /* autoplay bloqueado */ });
             })
@@ -4677,7 +4706,7 @@ async function toggleReaderPlay() {
     try {
         // v7.14: timeout escalado con el largo — una lección completa tarda
         // más de 15 s en sintetizarse (15 s base + 50 ms por carácter).
-        const response = await fetchTTS({ text, lang: langCode, voice: gender }, Math.max(15000, text.length * 50));
+        const response = await fetchTTS(ttsBody(text, langCode, gender), Math.max(15000, text.length * 50)); // v9.40: +speed
         if (!response.ok) throw new Error('Error en servidor');
         const data = await response.json();
         if (!data.audio) throw new Error('Sin audio');
@@ -4687,7 +4716,7 @@ async function toggleReaderPlay() {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
         readerAudio.src = url;
-        readerAudio.playbackRate = playbackSpeed;
+        applyTtsSpeed(readerAudio, data); // v9.40: velocidad en el server → sin eco
 
         readerPlaying = true;
         btn.textContent = '⏹ Detener';
@@ -6457,7 +6486,7 @@ function pzCounterUpdate() {
             u.lang = 'zh-CN'; u.rate = playbackSpeed;
             speechSynthesis.speak(u);
         };
-        fetchTTS({ text: t, lang: 'zh-CN', voice: voiceZh })
+        fetchTTS(ttsBody(t, 'zh-CN', voiceZh)) // v9.40: +speed
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (!d || !d.audio) return speakFallback();
@@ -6466,7 +6495,7 @@ function pzCounterUpdate() {
                 for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
                 const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
                 const a = new Audio(url);
-                a.playbackRate = playbackSpeed;
+                applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
                 a.onended = () => URL.revokeObjectURL(url);
                 a.play().catch(() => { speakFallback(); });
             })
@@ -7606,7 +7635,7 @@ const KARA = (function () {
             lqPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
-            const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
             if (myTok !== lqTok) return; // mientras tanto sonó otra línea → descartar
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
@@ -7620,9 +7649,12 @@ const KARA = (function () {
             // preservesPitch la voz sigue natural a 0.85x/0.7x. Se re-afirma
             // en 'playing' porque iOS Safari puede resetear el rate al cargar.
             try { lqAudio.preservesPitch = true; lqAudio.webkitPreservesPitch = true; } catch (e2) { }
-            lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            // v9.40: el server sintetiza la velocidad (sin eco); con api viejo
+            // applyTtsSpeed cae al playbackRate clásico. Se re-afirma en 'playing'
+            // porque iOS Safari puede resetear el rate al cargar.
+            applyTtsSpeed(lqAudio, data);
             lqAudio.addEventListener('playing', () => {
-                try { lqAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
+                applyTtsSpeed(lqAudio, data);
             }, { once: true });
             KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
             lqPlay = { text, btn, state: 'playing' };
@@ -8179,7 +8211,7 @@ const KARA = (function () {
             crPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (el) el.classList.add('lq-speaking');
-            const resp = await fetchTTS({ text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
             if (myTok !== crTok) { if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); return; }
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
@@ -8192,9 +8224,10 @@ const KARA = (function () {
             // v9.3: preservesPitch (voz natural a 0.85x/0.7x) + re-afirmar el
             // rate en 'playing' (iOS Safari puede resetearlo al cargar).
             try { crAudio.preservesPitch = true; crAudio.webkitPreservesPitch = true; } catch (e2) { }
-            crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            // v9.40: igual que lq — velocidad en el server, re-afirmada en 'playing'.
+            applyTtsSpeed(crAudio, data);
             crAudio.addEventListener('playing', () => {
-                try { crAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1; } catch (e3) { }
+                applyTtsSpeed(crAudio, data);
             }, { once: true });
             KARA.prepare(karaLine); // v9.4: karaoke (no-op si está OFF)
             crPlay = { text, btn: el, state: 'playing' };
@@ -8791,7 +8824,7 @@ const KARA = (function () {
     const S = { round: 0, score: 0, results: [], cur: null, answered: false, pick: -1, lastId: null };
     let mpTimer = null;
     let mpBusyBtn = null, mpBusyHtml = '';
-    const MP_CACHE = new Map(); // zh → blob-URL (repetir palabra = instantáneo)
+    const MP_CACHE = new Map(); // v9.40: 'texto@velocidad' → { url, data } (repetir = instantáneo)
 
     function mpRestore() { // v9.19-style anti-huérfano: un solo botón esperando
         if (mpBusyBtn) {
@@ -8820,10 +8853,12 @@ const KARA = (function () {
         mpStopGlobal();
         if (btn) { mpBusyBtn = btn; mpBusyHtml = btn.innerHTML; btn.disabled = true; btn.classList.add('mp-busy'); }
         const finish = function () { if (btn && mpBusyBtn === btn) mpRestore(); };
-        if (MP_CACHE.has(text)) {
+        const mpKey = text + '@' + playbackSpeed; // v9.40: la velocidad en la clave
+        if (MP_CACHE.has(mpKey)) {
             try {
-                globalAudioPlayer.src = MP_CACHE.get(text);
-                globalAudioPlayer.playbackRate = playbackSpeed;
+                const mpHit = MP_CACHE.get(mpKey);
+                globalAudioPlayer.src = mpHit.url;
+                applyTtsSpeed(globalAudioPlayer, mpHit.data); // v9.40
                 await globalAudioPlayer.play();
                 globalAudioPlayer.onended = finish;
                 globalAudioPlayer.onerror = finish;
@@ -8831,7 +8866,7 @@ const KARA = (function () {
             return;
         }
         try {
-            const resp = await fetchTTS({ text: text, lang: 'zh-CN', voice: voiceZh }, 12000);
+            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
             if (!resp.ok) throw new Error('TTS ' + resp.status);
             const data = await resp.json();
             if (!data.audio) throw new Error('sin audio');
@@ -8839,9 +8874,9 @@ const KARA = (function () {
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
-            MP_CACHE.set(text, url);
+            MP_CACHE.set(mpKey, { url: url, data: data });
             globalAudioPlayer.src = url;
-            globalAudioPlayer.playbackRate = playbackSpeed;
+            applyTtsSpeed(globalAudioPlayer, data); // v9.40: velocidad en el server → sin eco
             try { await globalAudioPlayer.play(); } catch (pe) { console.warn('[MP] autoplay bloqueado', pe); finish(); return; }
             globalAudioPlayer.onended = finish;
             globalAudioPlayer.onerror = finish;

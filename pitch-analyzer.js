@@ -286,9 +286,20 @@ function classifyTone(seg) {
     end /= tail;
 
     // mínimo del valle (para el 3.er tono)
-    let minV = Infinity, minPos = 0, maxV = -Infinity;
+    // v9.40: mínimo ROBUSTO — percentil bajo en vez del mínimo crudo. Un solo
+    // frame ruidoso (jitter de la voz, glotalización, un pedazo de voz creaky
+    // que a YIN le sale bajo) ya NO inventa un valle: para disparar el 3.er
+    // tono tienen que coincidir VARIOS frames bajos. El índice del orden tiene
+    // piso en 1 (nunca toma el frame más bajo) para que la protección valga
+    // también en segmentos cortos; minPos es el frame real más cercano a ese
+    // valor (la posición del valle sigue siendo válida).
+    const sortedSeg = Array.prototype.slice.call(seg).sort(function (a, b) { return a - b; });
+    const robustIdx = Math.min(n - 1, Math.max(1, Math.round((n - 1) * 0.10)));
+    const minV = sortedSeg[robustIdx];
+    let minPos = 0, bestGap = Infinity, maxV = -Infinity;
     for (let i = 0; i < n; i++) {
-        if (seg[i] < minV) { minV = seg[i]; minPos = i / (n - 1); }
+        const gap = Math.abs(seg[i] - minV);
+        if (gap < bestGap) { bestGap = gap; minPos = i / (n - 1); }
         if (seg[i] > maxV) maxV = seg[i];
     }
     const range = percentileOf(seg, 0.9) - percentileOf(seg, 0.1);

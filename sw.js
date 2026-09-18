@@ -298,7 +298,20 @@
 //       ahora en el paso de las 4 vistas). Mantiene: Saltar guía, 44px,
 //       Escape/clic afuera, toggle 简/繁, enlaces defensivos. Toca
 //       onboarding.js + index.html (sello 20260919b).
-const VERSION = 'v86'; // — invalida shell (v9.39: onboarding sintético de 4 pasos)
+// v9.40: VELOCIDAD EN EL SERVIDOR (fin del eco a 0.85x) — el body de TTS
+//       lleva `speed` y edge-tts sintetiza YA lento (rate="-15%"): sin
+//       estiramiento por playbackRate del cliente no hay eco y el tono
+//       queda intacto. (1) app.js: ttsBody()/applyTtsSpeed() centralizan —
+//       si la respuesta no trae `speed` (api/tts.py viejo) cae al
+//       playbackRate clásico, NUNCA doble efecto; (2) esta clave de caché
+//       TTS ahora incluye la velocidad (texto|lang|voz ya no identifican
+//       al audio); (3) tolerancia de frases ≤3 palabras 0→1 (config.js,
+//       colchón anti falsos negativos de whisper-tiny); (4) classifyTone
+//       con mínimo robusto por percentil (pitch-analyzer.js) — un solo
+//       frame ruidoso ya no dispara un falso 3.er tono en un 1.er tono
+//       plano. Toca app.js + lessons-dele.js + config.js + text-utils.js
+//       + pitch-analyzer.js + index.html (sello 20260919c) + api/tts.py.
+const VERSION = 'v87'; // — invalida shell (v9.40: velocidad TTS en el server + calibraciones)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -495,7 +508,11 @@ async function handleTTS(req) {
   let key = null;
   try {
     const body = await req.clone().json();
-    const raw = `${body.text || ''}|${body.lang || ''}|${body.voice || ''}`;
+    // v9.40: la velocidad viaja al server (body.speed) → entra en la clave.
+    // Sin esto, cambiar 0.85x ↔ 1.0x↔0.7x serviría el audio cacheado a la
+    // otra velocidad (texto+voz ya no identifican al audio). Las claves
+    // viejas (sin speed) quedan huérfanas y las limpia trimTTS (LRU).
+    const raw = `${body.text || ''}|${body.lang || ''}|${body.voice || ''}|${body.speed || 1}`;
     key = self.location.origin + '/__tts__/' + djb2(raw);
   } catch (e) { /* body no-JSON → sin caché, pasa a red */ }
 

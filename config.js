@@ -63,15 +63,21 @@ const SPANISH_CONFIDENCE_THRESHOLD = 0.85;
    difícil que 3/3, y una frase corta mal dicha es un error
    garrafal mientras que en una larga se perdona un tropiezo.
 
-     ≤ 3 palabras  → 0    (frases cortas: cero tolerancia)
+     ≤ 3 palabras  → 1    (v9.40: 1 palabra de margen — ver NOTA abajo)
      ≤ 6 palabras  → 1    (frases medias: 1 palabra de margen)
      > 6 palabras  → 20 % redondeado abajo
 
    (spec v4.0 §6, caso QA #7: 3 palabras con 1 error → distancia
-   1 > umbral 0 → rojo. Si la QA real muestra que es demasiado
-   estricto, se ajusta SOLO acá.) */
+   1 > umbral 0 → rojo. NOTA v9.40 — ese caso resultó demasiado
+   estricto en la práctica: whisper-tiny comete errores ocasionales
+   de transcripción (marca/omite un artículo, confunde una palabra)
+   y con tolerancia 0 las frases cortas — justo las que más
+   practica un principiante — salían rojas con pronunciación
+   correcta (falsos negativos). En las largas ya había 20 % de
+   tolerancia; las cortas quedaban sin colchón → ahora comparten
+   el mismo margen de 1 palabra que las medias.) */
 function getMaxAcceptableDistance(wordCount) {
-    if (wordCount <= 3) return 0;        // frases cortas: cero tolerancia
+    if (wordCount <= 3) return 1;        // v9.40: colchón anti falsos negativos de tiny
     if (wordCount <= 6) return 1;        // frases medias: 1 palabra
     return Math.floor(wordCount * 0.2);  // frases largas: 20 %
 }

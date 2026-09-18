@@ -1089,7 +1089,7 @@
         try {
             if (typeof fetchTTS === 'function') {
                 const vEs = (typeof voiceEs !== 'undefined') ? voiceEs : 'f';
-                const resp = await fetchTTS({ text: text, lang: 'es-ES', voice: vEs }, 12000);
+                const resp = await fetchTTS((typeof ttsBody === 'function') ? ttsBody(text, 'es-ES', vEs) : { text: text, lang: 'es-ES', voice: vEs }, 12000); // v9.40: +speed
                 if (myTok !== dTok) return; // mientras tanto sonó otra línea
                 if (!resp.ok) throw new Error('TTS http ' + resp.status);
                 const data = await resp.json();
@@ -1108,7 +1108,10 @@
         if (url) {
             dAudio = new Audio(url);
             try { dAudio.preservesPitch = true; dAudio.webkitPreservesPitch = true; } catch (e2) { }
-            dAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+            // v9.40: el server sintetiza la velocidad (sin eco a 0.85x); si la
+            // respuesta no trae `speed` (api viejo), cae al playbackRate clásico.
+            if (typeof applyTtsSpeed === 'function') applyTtsSpeed(dAudio, data);
+            else dAudio.playbackRate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
             const onGone = () => {
                 if (myTok !== dTok) return;
                 if (dQueue) {

@@ -140,7 +140,7 @@ function getMaxAcceptableDistance(wordCount) {
     const C = (typeof root !== 'undefined' && root.PronunciationConfig) ||
               (typeof globalThis !== 'undefined' && globalThis.PronunciationConfig);
     if (C && typeof C.getMaxAcceptableDistance === 'function') return C.getMaxAcceptableDistance(wordCount);
-    if (wordCount <= 3) return 0;
+    if (wordCount <= 3) return 1;   // v9.40: igualado a config.js (colchón frases cortas)
     if (wordCount <= 6) return 1;
     return Math.floor(wordCount * 0.2);
 }
