@@ -285,7 +285,20 @@
 //       caja 2 (addCard soporta box 2..6; 'dup' por ‹ Anterior sube de
 //       caja); Fácil → 'no vuelve' (solo conocidas). Subtítulos i18n
 //       gradeTomorrow ('mañana'/'明天') y días en 天 para cn-es. Toca app.js.
-const VERSION = 'v85'; // — invalida shell (v9.38: Bien/Fácil diferenciados de verdad)
+// v9.39: ONBOARDING SINTÉTICO — la guía de bienvenida pasa de 7 pasos a 4
+//       (~1 minuto) y explica la app ACTUAL: (1) bienvenida con el modo
+//       activo (chino ⇄ español) y dónde reabrirla (🙂 Yo → 📖 Guía, su
+//       ubicación real desde v10); (2) las 4 vistas de la nav (Hoy/
+//       Aprender/Entrenar/Yo) con enlace real al repaso (#btn-srs);
+//       (3) el ciclo de cada frase con la calificación v9.38 (Otra vez →
+//       10 min · Bien → mañana · Fácil → no vuelve) + cajas de Leitner
+//       tocables con los intervalos reales del mazo; (4) racha 🔥 en vivo
+//       (HuayuStats.getSummary) + proverbio. Fuera: quiz de la curva del
+//       olvido, paso "cuánto tiempo" y mapa largo de 6 ítems (el mapa vive
+//       ahora en el paso de las 4 vistas). Mantiene: Saltar guía, 44px,
+//       Escape/clic afuera, toggle 简/繁, enlaces defensivos. Toca
+//       onboarding.js + index.html (sello 20260919b).
+const VERSION = 'v86'; // — invalida shell (v9.39: onboarding sintético de 4 pasos)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
