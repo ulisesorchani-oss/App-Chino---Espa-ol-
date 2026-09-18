@@ -311,7 +311,16 @@
 //       frame ruidoso ya no dispara un falso 3.er tono en un 1.er tono
 //       plano. Toca app.js + lessons-dele.js + config.js + text-utils.js
 //       + pitch-analyzer.js + index.html (sello 20260919c) + api/tts.py.
-const VERSION = 'v87'; // — invalida shell (v9.40: velocidad TTS en el server + calibraciones)
+// v9.41: AVISO VISIBLE DE TTS CAÍDO — el fallback a la voz del sistema
+//       dejaba de ser silencioso: fetchTTS (punto único de acceso al
+//       server, 9 llamadas + dramas DELE) detecta 4xx/5xx/red/timeout y
+//       muestra un aviso toast (throttle 8 min, tocable para cerrar, se
+//       auto-oculta a los 9 s) en el idioma de la interfaz. Caso que lo
+//       originó: /api/tts en 404 (el tts.py quedó servido como archivo
+//       estático en Vercel) y el usuario escuchaba solo la voz robótica
+//       sin saber por qué. La app en sí no cambia: mismo fallback, mismo
+//       contrato. Toca app.js + index.html (sello 20260919d).
+const VERSION = 'v88'; // — invalida shell (v9.41: aviso visible de TTS caído)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de

@@ -1300,6 +1300,7 @@ const UI_STRINGS = {
     srsEmpty: 'Empezá a practicar y armo tu repaso', srsDueN: '{n} para repasar hoy',
     srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
     gradeNoReturn: 'no vuelve', gradeTomorrow: 'mañana', // v9.38: subtítulos diferenciados Bien/Fácil
+    ttsDown: '⚠️ Servidor de voz no disponible — estoy usando la voz del sistema (suena más robótica). Revisá api/tts.py en Vercel.', // v9.41: el fallback deja de ser silencioso
     hintTone: 'Casi: revisá el tono.', hintHomophone: 'El sonido está bien, el carácter no.',
     hintPinyinOk: 'El pinyin está bien: ahora escribilo en caracteres.',
     hintAccent: 'Casi: revisá los acentos.', hintOneChar: 'Un carácter no coincide:', hintOneLetter: 'Una letra no coincide:',
@@ -1354,6 +1355,7 @@ const UI_STRINGS = {
     srsEmpty: '开始练习，我来安排复习', srsDueN: '今天要复习 {n} 张',
     srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
     gradeNoReturn: '不再出现', gradeTomorrow: '明天', // v9.38: 中文副标题
+    ttsDown: '⚠️ 语音服务器不可用——暂时使用系统语音（比较机械）。请检查 Vercel 上的 api/tts.py。', // v9.41: 备用语音不再悄无声息
     hintTone: '差一点：注意声调。', hintHomophone: '读音对了，字不对。',
     hintPinyinOk: '拼音对了：请写汉字。',
     hintAccent: '差一点：注意重音符号。', hintOneChar: '有一个字不对：', hintOneLetter: '有一个字母不对：',
@@ -4425,6 +4427,37 @@ let isPlaying = false;
 
 // ===== Petición TTS con timeout (AbortController) =====
 // Evita botones trabados en "⏳" si el servidor tarda o la red falla
+// ===== v9.41: aviso visible cuando el TTS del servidor no responde =====
+// Hasta v9.40 el fallback a la voz del sistema era SILENCIOSO: el usuario
+// escuchaba la voz robótica sin saber que el api/tts de Vercel estaba caído
+// (caso real v9.41: /api/tts daba 404 porque el tts.py quedó servido como
+// archivo estático en vez de función). fetchTTS es el ÚNICO punto de acceso
+// al server (9 llamadas de app.js + dramas DELE): si falla acá, aviso UNA vez
+// (throttle 8 min) y la app sigue con su fallback de siempre, sin romper nada.
+let ttsDownLast = 0; // timestamp del último aviso (throttle en memoria)
+function notifyTtsFallback() {
+    try {
+        const now = Date.now();
+        if (now - ttsDownLast < 8 * 60 * 1000) return; // máx 1 aviso cada 8 min
+        ttsDownLast = now;
+        let el = document.getElementById('tts-down-notice');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'tts-down-notice';
+            el.setAttribute('role', 'alert');
+            el.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);' +
+                'z-index:99999;max-width:92vw;background:#b3261e;color:#fff;padding:10px 14px;' +
+                'border-radius:10px;font-size:13px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.35);' +
+                'cursor:pointer;display:none;text-align:center;';
+            el.addEventListener('click', () => { try { el.style.display = 'none'; } catch (e) { } });
+            (document.body || document.documentElement).appendChild(el);
+        }
+        el.textContent = uiT('ttsDown');
+        el.style.display = 'block';
+        clearTimeout(notifyTtsFallback._t);
+        notifyTtsFallback._t = setTimeout(() => { try { el.style.display = 'none'; } catch (e) { } }, 9000);
+    } catch (e) { /* defensivo: el aviso nunca rompe la app */ }
+}
 function fetchTTS(body, timeoutMs) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
@@ -4433,7 +4466,10 @@ function fetchTTS(body, timeoutMs) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
         signal: ctrl.signal
-    }).finally(() => clearTimeout(timer));
+    })
+        .then((res) => { if (!res || !res.ok) notifyTtsFallback(); return res; }) // v9.41: 4xx/5xx visible
+        .catch((err) => { notifyTtsFallback(); throw err; }) // v9.41: red/timeout visible (el caller mantiene su fallback)
+        .finally(() => clearTimeout(timer));
 }
 
 // ===== v9.40: velocidad en el SERVIDOR (fin del eco a 0.85x) =====
@@ -4620,11 +4656,7 @@ function playVoiceSample(lang) {
         const text = VOICE_SAMPLES[lang];
         const langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
         const gender = lang === 'es' ? voiceEs : voiceZh;
-        fetch(TTS_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ttsBody(text, langCode, gender)) // v9.40: +speed
-        })
+        fetchTTS(ttsBody(text, langCode, gender)) // v9.41: pasa por el choke point único (timeout + aviso si el server cae)
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (lang !== 'es') warnStaleVoice(gender, d); // v9.5: detecta servidor viejo
