@@ -1103,9 +1103,15 @@ const VR = {
         if (typeof res.confidence === 'number' && isFinite(res.confidence)) {
             const p = document.createElement('p');
             p.className = 'rec-conf';
+            // v9.44: se muestra el PISO real (softThreshold, el que decide
+            // «dudosa») en lugar del techo histórico 0.85, que según el
+            // corpus de calibración no lo alcanza ningún audio sano
+            // (README-Pronunciacion.md § Calibración, 2026-09-21).
+            const floor = (typeof res.softThreshold === 'number' && isFinite(res.softThreshold))
+                ? res.softThreshold
+                : (typeof res.confidenceThreshold === 'number' ? res.confidenceThreshold : null);
             p.textContent = '🧠 ' + T.confLabel + ' ' + Math.round(res.confidence * 100) + ' %' +
-                            (typeof res.confidenceThreshold === 'number'
-                                ? ' · umbral ' + Math.round(res.confidenceThreshold * 100) + ' %' : '');
+                            (floor !== null ? ' · piso ' + Math.round(floor * 100) + ' %' : '');
             this.result.appendChild(p);
         }
         // comparativa textual del desvío (spec §3: "Se detectó: 'X' — Se esperaba: 'Y'")

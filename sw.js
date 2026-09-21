@@ -320,7 +320,22 @@
 //       estático en Vercel) y el usuario escuchaba solo la voz robótica
 //       sin saber por qué. La app en sí no cambia: mismo fallback, mismo
 //       contrato. Toca app.js + index.html (sello 20260919d).
-const VERSION = 'v88'; // — invalida shell (v9.41: aviso visible de TTS caído)
+// v9.44: VOZ ESPAÑOLA CALIBRADA + FIX DE LA CONFIANZA — (1) BUG REAL
+//       desde v7.8: transformers.js 3.8.x NUNCA devuelve gen.scores
+//       (comentado con TODO dentro de la lib) → la confianza del
+//       evaluador de español era SIEMPRE null: el piso SOFT (v9.18)
+//       jamás actuó y la UI mostraba «—». FIX por teacher forcing
+//       (forward extra + log-softmax por posición, voice-evaluator.js);
+//       (2) SPANISH_CONFIDENCE_SOFT = 0.50 calibrado con corpus de 84
+//       muestras (6 frases reales × 14 condiciones acústicas): 0 % de
+//       falsos «dudosa», piso real del audio sano 0.557 (config.js,
+//       REGISTRO + README-Pronunciacion.md); (3) el 0.85 histórico
+//       queda como techo informativo (inalcanzable: 0 % del corpus);
+//       (4) la UI muestra «piso 50 %» en lugar del umbral engañoso
+//       (VoiceRecorder.js). Toca voice-evaluator.js + config.js +
+//       VoiceRecorder.js + index.html (sello 20260921a) +
+//       README-Pronunciacion.md (nuevo).
+const VERSION = 'v89'; // — invalida shell (v9.44: confianza real + SOFT calibrado)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de

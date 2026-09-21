@@ -76,6 +76,25 @@
        con la frase objetivo queda DIFERIDO hasta migrar de lib
        (4.2.0 tampoco lo conecta para Whisper estándar).
    ============================================================ */
+/* ============================================================
+   v9.44 — CALIBRACIÓN DE ESPAÑOL CON CORPUS + FIX DE CONFIANZA:
+     · BUG REAL (desde v7.8): transformers.js 3.8.1 NUNCA
+       devuelve gen.scores (comentado con TODO en la propia
+       lib, src/models.js) → la confianza del worker era
+       SIEMPRE null: el piso SOFT (v9.18) jamás actuó y la UI
+       mostraba «—». FIX: teacher forcing (forward extra con
+       la secuencia completa + log-softmax por posición).
+     · CALIBRACIÓN: corpus de 84 muestras (6 frases REALES del
+       app × 14 condiciones: 4 acentos, mic 300-3400 Hz, ruido
+       SNR 20/10/5/0 dB, reverb, rate ±, pitch). Audio pasable
+       con transcripción exacta → conf 0.557-0.830 (med 0.663);
+       el 0.85 histórico es INALCANZABLE (0 %). ELECCIÓN:
+       SPANISH_CONFIDENCE_SOFT = 0.50 (0 % falsos «dudosa»,
+       margen sobre el piso 0.557; frontera del corpus 0.503).
+       Método y tablas: README-Pronunciacion.md § Calibración
+       + REGISTRO en config.js. La bitácora ve_es_conf_log
+       sigue acumulando datos REALES de los dispositivos.
+   ============================================================ */
 (function () {
 'use strict';
 
@@ -172,7 +191,7 @@ const TONE_NAMES = {
    transformers.js): la 2.ª vez arranca al instante y sin red.
    ============================================================ */
 const WORKER_SRC = [
-    "import { pipeline, env } from '" + VE_CONFIG.libUrl + "';",
+    "import { pipeline, env, Tensor } from '" + VE_CONFIG.libUrl + "';",
     "env.allowLocalModels = false;      // el modelo viene del CDN de HuggingFace",
     "env.useBrowserCache = true;        // cachea el modelo → 1.ª vez sola",
     "env.backends.onnx.wasm.numThreads = 1; // sin COOP/COEP no hay SharedArrayBuffer",
@@ -202,35 +221,53 @@ const WORKER_SRC = [
     "    }",
     "  }",
     "",
-    "  // v7.8 (spec v4.0 CASO B): confianza PROMEDIO POR TOKEN.",
-    "  // Greedy decoding: el token elegido es el ARGMAX de cada paso, así",
-    "  // que la log-prob elegida = mx − logsumexp(logits). Se excluyen de",
-    "  // la media los tokens especiales/timestamp (id ≥ 50257).",
+    "",
+    "  // v9.44 (corrige v7.8): confianza PROMEDIO POR TOKEN vía teacher",
+    "  // forcing. Por qué: transformers.js 3.8.x NUNCA devuelve gen.scores",
+    "  // (el campo está comentado con TODO dentro de la lib) → la confianza",
+    "  // era SIEMPRE null y el piso SPANISH_CONFIDENCE_SOFT jamás actuaba.",
+    "  // Ahora: 1) generate() da la secuencia; 2) UN forward extra recibe",
+    "  // la secuencia completa como decoder_input_ids; 3) por cada posición",
+    "  // se toma la log-prob del token ELEGIDO (log-softmax) — misma",
+    "  // definición de la métrica, sin depender de campos no implementados.",
+    "  // Excluye de la media los especiales/timestamp (id \u2265 50257).",
     "  async function transcribe(m) {",
     "    const lang = m.language || '" + VE_CONFIG.languageZh + "';",
     "    if (m.wantConfidence && asr.model && asr.processor && asr.tokenizer) {",
     "      try {",
     "        const inputs = await asr.processor(m.audio);",
     "        const gen = await asr.model.generate(Object.assign({}, inputs, {",
-    "          output_scores: true, return_dict_in_generate: true,",
+    "          return_dict_in_generate: true,",
     "          max_new_tokens: 224, language: lang, task: '" + VE_CONFIG.task + "'",
     "        }));",
-    "        const text = asr.tokenizer.decode(Array.from(gen.sequences[0].data, Number),",
-    "                                          { skip_special_tokens: true });",
+    "        const seq = Array.from(gen.sequences[0].data, Number);",
+    "        const text = asr.tokenizer.decode(seq, { skip_special_tokens: true });",
     "        let conf = null;",
-    "        if (gen.scores && gen.scores.length) {",
-    "          let sum = 0, n = 0;",
-    "          for (let i = 0; i < gen.scores.length; i++) {",
-    "            const data = gen.scores[i].data;",
-    "            let mx = -Infinity, arg = 0;",
-    "            for (let j = 0; j < data.length; j++) if (data[j] > mx) { mx = data[j]; arg = j; }",
-    "            if (arg >= 50257) continue; // especiales/timestamps fuera de la media",
-    "            let lse = 0;",
-    "            for (let j = 0; j < data.length; j++) lse += Math.exp(data[j] - mx);",
-    "            sum += mx - Math.log(lse); n++;",
+    "        try {",
+    "          const dec = seq.slice(0, -1);",
+    "          if (dec.length) {",
+    "            const out = await asr.model.forward({",
+    "              input_features: inputs.input_features,",
+    "              decoder_input_ids: new Tensor('int64', dec.map(function (t) { return BigInt(t); }), [1, dec.length])",
+    "            });",
+    "            const logits = out.logits;",
+    "            const V = logits.dims[2];",
+    "            const L = Math.min(dec.length, logits.dims[1]);",
+    "            let sum = 0, n = 0;",
+    "            for (let i = 0; i < L; i++) {",
+    "              const tok = seq[i + 1];",
+    "              if (tok >= 50257) continue; // especiales/timestamps fuera de la media",
+    "              const off = i * V;",
+    "              const row = logits.data.subarray(off, off + V);",
+    "              let mx = -Infinity;",
+    "              for (let j = 0; j < V; j++) if (row[j] > mx) mx = row[j];",
+    "              let lse = 0;",
+    "              for (let j = 0; j < V; j++) lse += Math.exp(row[j] - mx);",
+    "              sum += row[tok] - mx - Math.log(lse); n++;",
+    "            }",
+    "            if (n) conf = Math.exp(sum / n); // ← confianza promedio por token",
     "          }",
-    "          if (n) conf = Math.exp(sum / n); // ← confianza promedio por token",
-    "        }",
+    "        } catch (eConf) { /* sin confianza esta vez → null (la UI muestra \u2014) */ }",
     "        return { text: String(text || '').trim(), confidence: conf };",
     "      } catch (e2) { /* camino directo falló → pipeline simple abajo */ }",
     "    }",
