@@ -1,5 +1,5 @@
 # ============================================================
-# api/index.py — v9.42 — TTS neuronal con velocidad en la síntesis
+# api/index.py — v9.43 — TTS neuronal con velocidad en la síntesis
 # (FastAPI — el stack que tu repo ya declara en requirements.txt:
 #  fastapi + uvicorn + edge-tts + piper-tts)
 # ------------------------------------------------------------
@@ -177,6 +177,6 @@ async def catch_get(full_path: str = ""):
     return {
         "ok": True,
         "service": "tts",
-        "version": "v9.42",
+        "version": "v9.43",
         "hint": "POST {text, lang, voice, speed} → {audio, mime, voice, speed}",
     }
