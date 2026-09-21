@@ -4458,17 +4458,49 @@ function notifyTtsFallback() {
         notifyTtsFallback._t = setTimeout(() => { try { el.style.display = 'none'; } catch (e) { } }, 9000);
     } catch (e) { /* defensivo: el aviso nunca rompe la app */ }
 }
+// ===== v9.45: GET cacheable primero (CDN de Vercel), POST de siempre de reserva =====
+// El api v9.44 acepta GET ?text=&lang=&voice=&speed= y responde con
+// Cache-Control immutable → el CDN guarda el audio y la 2.ª petición de la
+// misma frase llega en ~0,1-0,3 s sin tocar el server. POST queda INTACTO
+// como red de contención (párrafos largos del lector libre no viajan por
+// GET: límite práctico de URL). Contrato de respuesta idéntico en ambos
+// caminos → 0 cambios en los 9 callers. El aviso v9.41 (notifyTtsFallback)
+// solo suena si POST TAMBIÉN falla: un GET sin caché no debe asustar si el
+// POST salva la petición.
+const TTS_GET_MAX = 160; // chars: frases/lecciones pasan por GET; párrafos → POST
+function ttsGetUrl(body) {
+    try {
+        const t = String((body && body.text) || '').trim();
+        if (!t || t.length > TTS_GET_MAX) return null;
+        const q = new URLSearchParams();
+        q.set('text', t);
+        q.set('lang', String((body && body.lang) || 'zh-CN'));
+        q.set('voice', String((body && body.voice) || 'f'));
+        q.set('speed', String((body && typeof body.speed === 'number') ? body.speed : 1));
+        q.set('cv', '1'); // contrato del audio: un bump futuro invalida la caché CDN
+        return TTS_API_URL + '?' + q.toString();
+    } catch (e) { return null; }
+}
 function fetchTTS(body, timeoutMs) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
-    return fetch(TTS_API_URL, {
+    const post = () => fetch(TTS_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
         signal: ctrl.signal
     })
         .then((res) => { if (!res || !res.ok) notifyTtsFallback(); return res; }) // v9.41: 4xx/5xx visible
-        .catch((err) => { notifyTtsFallback(); throw err; }) // v9.41: red/timeout visible (el caller mantiene su fallback)
+        .catch((err) => { notifyTtsFallback(); throw err; }); // v9.41: red/timeout visible
+    const getUrl = ttsGetUrl(body);
+    if (!getUrl) return post().finally(() => clearTimeout(timer));
+    // v9.45: GET cacheable → se acepta SOLO si trae la marca de contrato
+    // X-TTS-Audio: 1 (un server viejo respondería el "tell" sin audio con
+    // 200 — sin la marca, la app se quedaría sin voz). Cualquier otra cosa
+    // (404/500/red/tell sin marca) lo salva el POST de siempre.
+    return fetch(getUrl, { method: 'GET', signal: ctrl.signal })
+        .then((res) => (res && res.ok && res.headers.get('x-tts-audio') === '1') ? res : post())
+        .catch(() => post())
         .finally(() => clearTimeout(timer));
 }
 

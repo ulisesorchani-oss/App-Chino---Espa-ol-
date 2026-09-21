@@ -335,7 +335,22 @@
 //       (VoiceRecorder.js). Toca voice-evaluator.js + config.js +
 //       VoiceRecorder.js + index.html (sello 20260921a) +
 //       README-Pronunciacion.md (nuevo).
-const VERSION = 'v89'; // — invalida shell (v9.44: confianza real + SOFT calibrado)
+// v9.45: CACHÉ DE AUDIOS EN EL SERVIDOR — (1) api/index.py + api/tts.py
+//       v9.44: GET ?text=&lang=&voice=&speed= responde Cache-Control
+//       immutable → el CDN de Vercel sirve la 2.ª repetición de una
+//       frase en ~0,1 s sin sintetizar; LRU en memoria (300 audios) de
+//       2.ª capa; la velocidad SIEMPRE en la clave (0.85x ≠ 1x);
+//       (2) app.js: fetchTTS intenta GET primero y si algo falla cae al
+//       POST de siempre (párrafos > 160 chars van directo por POST);
+//       contrato de respuesta idéntico → 0 cambios en los callers;
+//       (3) este SW: el GET /api/tts entra en handleTTS con la MISMA
+//       clave text|lang|voice|speed → comparte la caché offline con el
+//       POST (y deja de caer en cacheFirstShell). El aviso v9.41 solo
+//       suena si POST también falla. Contrato: el GET de audio lleva la
+//       marca X-TTS-Audio: 1 — sin ella (server viejo), el cliente cae
+//       al POST. Toca app.js + index.html (sello 20260922a) +
+//       api/index.py + api/tts.py.
+const VERSION = 'v90'; // — invalida shell (v9.45: GET TTS cacheable por CDN + misma caché offline)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -430,6 +445,10 @@ self.addEventListener('fetch', (event) => {
     return; // otros POST → red directa
   }
   if (req.method !== 'GET') return;
+  // v9.45: GET /api/tts?text=… (audio cacheable por CDN) → MISMA caché TTS
+  // offline que el POST. IMPORTANTE: interceptarlo ANTES del branch
+  // mismo-origen, si no caería en cacheFirstShell y contaminaría el shell.
+  if (req.url.includes('/api/tts')) { event.respondWith(handleTTS(req)); return; }
   const url = new URL(req.url);
   if (url.origin === self.location.origin) {
     event.respondWith(cacheFirstShell(req));
@@ -527,17 +546,27 @@ async function cacheFirstRuntime(req) {
   }
 }
 
-/* ---------- TTS: POST → clave estable por (texto|idioma|voz) ---------- */
+/* ---------- TTS: POST o GET → clave estable (texto|idioma|voz|velocidad) ----------
+   v9.45: el GET ?text=&lang=&voice=&speed= produce la MISMA clave que el
+   POST equivalente → ambos caminos comparten la caché offline de TTS. */
 async function handleTTS(req) {
   let key = null;
   try {
-    const body = await req.clone().json();
-    // v9.40: la velocidad viaja al server (body.speed) → entra en la clave.
-    // Sin esto, cambiar 0.85x ↔ 1.0x↔0.7x serviría el audio cacheado a la
-    // otra velocidad (texto+voz ya no identifican al audio). Las claves
-    // viejas (sin speed) quedan huérfanas y las limpia trimTTS (LRU).
-    const raw = `${body.text || ''}|${body.lang || ''}|${body.voice || ''}|${body.speed || 1}`;
-    key = self.location.origin + '/__tts__/' + djb2(raw);
+    if (req.method === 'GET') {
+      const u = new URL(req.url);
+      const t = u.searchParams.get('text') || '';
+      if (!t) return fetch(req); // "tell" (sin text) → red directa, sin cachear
+      const raw = `${t}|${u.searchParams.get('lang') || ''}|${u.searchParams.get('voice') || ''}|${u.searchParams.get('speed') || 1}`;
+      key = self.location.origin + '/__tts__/' + djb2(raw);
+    } else {
+      const body = await req.clone().json();
+      // v9.40: la velocidad viaja al server (body.speed) → entra en la clave.
+      // Sin esto, cambiar 0.85x ↔ 1.0x↔0.7x serviría el audio cacheado a la
+      // otra velocidad (texto+voz ya no identifican al audio). Las claves
+      // viejas (sin speed) quedan huérfanas y las limpia trimTTS (LRU).
+      const raw = `${body.text || ''}|${body.lang || ''}|${body.voice || ''}|${body.speed || 1}`;
+      key = self.location.origin + '/__tts__/' + djb2(raw);
+    }
   } catch (e) { /* body no-JSON → sin caché, pasa a red */ }
 
   if (key) {
