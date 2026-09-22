@@ -1467,6 +1467,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateStats();
     updateVocabularyPanel();
     state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
+
+    // ===== v9.46: WARMUP del motor de voz (evaluación más rápida) =====
+    // Antes: el modelo Whisper se terminaba de cargar DENTRO del primer
+    // «Analizando…» (la descarga arrancaba recién al tocar 🎤 y una
+    // grabación corta no le alcanzaba). Ahora: ~6 s después de abrir la
+    // app, en idle, se precarga el motor + UNA inferencia dummy calienta
+    // JIT/ONNX → el primer "evaluar" arranca ya caliente. Idempotente y
+    // silencioso: si falla (sin red, navegador raro) no molesta en nada.
+    setTimeout(function () {
+        try {
+            if (window.VE && typeof window.VE.warmup === 'function') {
+                window.VE.warmup();
+            }
+        } catch (e) { /* el warmup jamás rompe el arranque */ }
+    }, 6000); // ms — mismo valor que VE_CONFIG.warmupMs (voice-evaluator.js)
 });
 
 function applySavedUI() {

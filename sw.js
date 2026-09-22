@@ -350,7 +350,20 @@
 //       marca X-TTS-Audio: 1 — sin ella (server viejo), el cliente cae
 //       al POST. Toca app.js + index.html (sello 20260922a) +
 //       api/index.py + api/tts.py.
-const VERSION = 'v90'; // — invalida shell (v9.45: GET TTS cacheable por CDN + misma caché offline)
+// v9.46: EVALUACIÓN MÁS RÁPIDA — sin cambios de precache ni de router:
+//       (1) voice-evaluator.js: warmup al arrancar (app.js llama VE.warmup()
+//       ~6 s después de abrir → el motor queda cargado y calibrado ANTES
+//       del primer «Analizando…»), encoder compartido en el teacher
+//       forcing (español ~30 % menos WASM), multihilo ort-web si hay
+//       SharedArrayBuffer (COOP/COEP en vercel.json), referencias TTS por
+//       GET cacheable (entra por handleTTS con la MISMA clave → la
+//       referencia queda en la caché offline compartida), espera del motor
+//       por promesa (sin polling) y decode PCM solapado;
+//       (2) app.js: disparo del warmup en idle;
+//       (3) vercel.json: COOP same-origin + COEP credentialless
+//       (progresivo — Safari sin credentialless sigue en 1 hilo igual que
+//       hoy). Toca voice-evaluator.js + app.js + index.html + vercel.json.
+const VERSION = 'v91'; // — invalida shell (v9.46: warmup + multihilo + referencias GET)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de

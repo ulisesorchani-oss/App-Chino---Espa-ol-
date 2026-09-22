@@ -78,6 +78,8 @@
    ============================================================ */
 /* ============================================================
    v9.44 — CALIBRACIÓN DE ESPAÑOL CON CORPUS + FIX DE CONFIANZA:
+       (ver config.js para el registro completo). La confianza del
+       español es REAL desde v9.44 vía teacher forcing en el worker.
      · BUG REAL (desde v7.8): transformers.js 3.8.1 NUNCA
        devuelve gen.scores (comentado con TODO en la propia
        lib, src/models.js) → la confianza del worker era
@@ -94,6 +96,33 @@
        Método y tablas: README-Pronunciacion.md § Calibración
        + REGISTRO en config.js. La bitácora ve_es_conf_log
        sigue acumulando datos REALES de los dispositivos.
+   ------------------------------------------------------------
+   v9.46 — EVALUACIÓN MÁS RÁPIDA (mismo resultado, menos espera):
+     · WARMUP AL ARRANCAR: el motor (Whisper WASM) se carga en
+       background ~6 s después de abrir la app (VE.warmup() desde
+       app.js) + UNA inferencia dummy calienta JIT/ONNX. Antes el
+       primer «Analizando…» pagaba la carga completa del modelo.
+     · ENCODER UNA SOLA VEZ (español): el teacher forcing v9.44
+       re-corria el encoder (la parte cara). Ahora se corre UNA
+       vez y generate() + forward() comparten encoder_outputs
+       (validado en Node: texto y confianza IDÉNTICOS, conf
+       0.6620 == 0.6620). Ahorro ~1/3 del tiempo en wasm.
+     · MULTIHILO: ort-web usa pthreads si hay SharedArrayBuffer
+       (Vercel manda COOP/COEP credentialless ahora). Si el
+       navegador no aísla (Safari sin credentialless) → 1 hilo
+       como siempre. Progresivo: nunca rompe nada.
+     · REFERENCIAS POR GET: el audio de referencia TTS (mismo
+       🔊 que estudia el alumno) va primero por GET cacheable
+       (CDN + SW offline, clave idéntica a app.js v9.45) y cae
+       al POST de siempre si falla.
+     · PCM EN PARALELO: el decode 16 kHz arranca ANTES de
+       esperar el motor (se solapa con la carga del modelo).
+     · ESPERA SIN POLLING: _waitForEngine usa la promesa de
+       carga directa (antes sondeaba cada 250 ms → hasta 250 ms
+       de espera muerta por evaluación).
+     · max_new_tokens 224→96: las frases de práctica son cortas;
+       acota el peor caso (ruido/alucinación) y el forward de
+       confianza. El resultado de frases sanas no cambia.
    ============================================================ */
 (function () {
 'use strict';
@@ -122,7 +151,12 @@ const VE_CONFIG = {
     maxWaitMs: 120000,        // espera máx al motor al evaluar (1.ª descarga)
     transcribeTimeoutMs: 60000,
     minRms: 0.0015,           // debajo de esto → "no escuché nada"
-    refFramesPerChar: 8       // frames de plantilla por carácter (fallback sin TTS)
+    refFramesPerChar: 8,      // frames de plantilla por carácter (fallback sin TTS)
+    // v9.46 — tuning de velocidad (NO cambian resultados de frases sanas):
+    maxNewTokens: 96,         // frases de práctica ≤ ~30 tokens; acota alucinación
+    numThreadsMax: 4,         // pthreads de ort-web si hay SharedArrayBuffer
+    TTS_GET_MAX_CHARS: 160,   // GET cacheable de referencias (mismo límite que app.js)
+    warmupMs: 6000            // delay del warmup post-arranque (app.js lo dispara)
 };
 
 /* ============================================================
@@ -194,7 +228,10 @@ const WORKER_SRC = [
     "import { pipeline, env, Tensor } from '" + VE_CONFIG.libUrl + "';",
     "env.allowLocalModels = false;      // el modelo viene del CDN de HuggingFace",
     "env.useBrowserCache = true;        // cachea el modelo → 1.ª vez sola",
-    "env.backends.onnx.wasm.numThreads = 1; // sin COOP/COEP no hay SharedArrayBuffer",
+    // v9.46: multihilo SOLO si el navegador está aislado (COOP/COEP en Vercel
+    // → SharedArrayBuffer). Sin aislamiento (Safari, file://, sin headers) →
+    // 1 hilo como siempre: ort-web también se protege solo, esto es doble cinturón.
+    "env.backends.onnx.wasm.numThreads = (self.crossOriginIsolated && navigator.hardwareConcurrency) ? Math.min(" + VE_CONFIG.numThreadsMax + ", navigator.hardwareConcurrency) : 1;",
     "env.backends.onnx.wasm.proxy = false;  // ya estamos en un worker",
     "",
     "let asr = null;",
@@ -236,10 +273,27 @@ const WORKER_SRC = [
     "    if (m.wantConfidence && asr.model && asr.processor && asr.tokenizer) {",
     "      try {",
     "        const inputs = await asr.processor(m.audio);",
-    "        const gen = await asr.model.generate(Object.assign({}, inputs, {",
+    "        // v9.46: encoder UNA sola vez. Antes: generate({input_features})",
+    "        // corria el encoder (1) y el teacher forcing volvia a correr TODO",
+    "        // el encoder (2) — la parte cara en wasm. Ahora se corre una vez y",
+    "        // generate() + forward() comparten encoder_outputs. Validado en",
+    "        // Node (misma lib 3.8.1): texto y confianza IDENTICOS. Si la",
+    "        // corrida directa del session falla -> encOut null -> camino v9.44",
+    "        // intacto (el forward re-correria el encoder como siempre).",
+    "        let encOut = null;",
+    "        try {",
+    "          const enc = await asr.model.sessions['model'].run(",
+    "            { input_features: inputs.input_features });",
+    "          const lh = enc.last_hidden_state || enc[Object.keys(enc)[0]];",
+    "          encOut = (lh instanceof Tensor) ? lh",
+    "            : new Tensor('float32', lh.data, lh.dims);",
+    "        } catch (eEnc) { encOut = null; }",
+    "        const genKw = {",
     "          return_dict_in_generate: true,",
-    "          max_new_tokens: 224, language: lang, task: '" + VE_CONFIG.task + "'",
-    "        }));",
+    "          max_new_tokens: " + VE_CONFIG.maxNewTokens + ", language: lang, task: '" + VE_CONFIG.task + "'",
+    "        };",
+    "        if (encOut) genKw.encoder_outputs = encOut;",
+    "        const gen = await asr.model.generate(Object.assign({}, inputs, genKw));",
     "        const seq = Array.from(gen.sequences[0].data, Number);",
     "        const text = asr.tokenizer.decode(seq, { skip_special_tokens: true });",
     "        let conf = null;",
@@ -247,7 +301,8 @@ const WORKER_SRC = [
     "          const dec = seq.slice(0, -1);",
     "          if (dec.length) {",
     "            const out = await asr.model.forward({",
-    "              input_features: inputs.input_features,",
+    "              ...(encOut ? { encoder_outputs: encOut }",
+    "                          : { input_features: inputs.input_features }),",
     "              decoder_input_ids: new Tensor('int64', dec.map(function (t) { return BigInt(t); }), [1, dec.length])",
     "            });",
     "            const logits = out.logits;",
@@ -271,7 +326,7 @@ const WORKER_SRC = [
     "        return { text: String(text || '').trim(), confidence: conf };",
     "      } catch (e2) { /* camino directo falló → pipeline simple abajo */ }",
     "    }",
-    "    const out = await asr(m.audio, { language: lang, task: '" + VE_CONFIG.task + "' });",
+    "    const out = await asr(m.audio, { language: lang, task: '" + VE_CONFIG.task + "', max_new_tokens: " + VE_CONFIG.maxNewTokens + " });",
     "    return { text: String((out && out.text) || '').trim(), confidence: null };",
     "  }",
     "};"
@@ -290,9 +345,38 @@ class LocalWhisperEngine {
         this._files = new Map();     // progreso por archivo → % global
         this._seq = 0;
         this._pending = new Map();   // id → {resolve, reject} de transcripciones
+        this._warmed = false;        // v9.46: la inferencia dummy ya corrió
     }
 
     get ready() { return this.status === 'ready'; }
+
+    /** v9.46: promesa de carga DIRECTA (sin polling). Resuelve si está
+     *  lista; si está cargando devuelve la MISMA promesa; si falló
+     *  rechaza con el error guardado (la fachada lo mapea igual que
+     *  antes: engine-error → genérico, engine-timeout → su nota). */
+    whenReady() {
+        if (this.status === 'ready') return Promise.resolve();
+        if (this._loadingPromise) return this._loadingPromise;
+        return Promise.reject(new Error(this.errorMsg || ('engine-' + this.status)));
+    }
+
+    /** v9.46: UNA inferencia dummy (0,5 s de seno suave) para calentar
+     *  JIT + sesiones ONNX fuera del camino crítico. Su resultado se
+     *  descarta y NUNCA lanza. Idempotente: una sola vez por sesión. */
+    warmupOnce() {
+        if (this._warmed || this.status !== 'ready') return Promise.resolve();
+        this._warmed = true;
+        const sr = 16000, n = Math.floor(sr * 0.5);
+        const buf = new Float32Array(n);
+        for (let i = 0; i < n; i++) buf[i] = 0.12 * Math.sin(2 * Math.PI * 220 * i / sr);
+        const t0 = (window.performance && performance.now) ? performance.now() : 0;
+        return this.transcribe(buf, { language: VE_CONFIG.languageZh })
+            .then(function () {
+                const ms = Math.round(((window.performance && performance.now) ? performance.now() : 0) - t0);
+                console.log('[VE] warmup listo en ' + ms + ' ms — la 1.ª evaluación ya no paga el arranque');
+            })
+            .catch(function (e) { console.warn('[VE] warmup dummy falló (inofensivo):', (e && e.message) || e); });
+    }
 
     /** Idempotente: arranca la carga una sola vez aunque se llame mil veces. */
     preload(onProgress) {
@@ -354,12 +438,32 @@ class LocalWhisperEngine {
     }
 
     /* ---------- carga en worker (camino principal) ---------- */
+    /** v9.46: primer intento con el worker normal (multihilo si hay SAB).
+     *  Red de contención: si la carga falla, se reintenta UNA vez con un
+     *  worker clonado con numThreads=1 forzado (comportamiento exacto de
+     *  v9.45) — cubre navegadores donde los pthreads de ort-web no
+     *  arrancan aunque haya SharedArrayBuffer. Nunca degrada el resultado:
+     *  solo la velocidad. */
     _loadInWorker() {
         const self = this;
+        return this._loadInWorkerSrc(WORKER_SRC).catch(function (e1) {
+            const src1 = WORKER_SRC.replace(
+                /env\.backends\.onnx\.wasm\.numThreads = [^;]+;/,
+                'env.backends.onnx.wasm.numThreads = 1; // v9.46 fallback: 1 hilo');
+            if (src1 === WORKER_SRC) throw e1; // patrón no encontrado → error original
+            console.warn('[VE] carga con multihilo falló, reintentando con 1 hilo:',
+                         (e1 && e1.message) || e1);
+            return self._loadInWorkerSrc(src1);
+        });
+    }
+
+    _loadInWorkerSrc(src) {
+        const self = this;
         return new Promise((resolve, reject) => {
+            if (self._worker) { try { self._worker.terminate(); } catch (eT) {} self._worker = null; }
             let blobUrl = null;
             try {
-                blobUrl = URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' }));
+                blobUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
                 self._worker = new Worker(blobUrl, { type: 'module' });
             } catch (e) {
                 if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch (e2) {} }
@@ -396,7 +500,10 @@ class LocalWhisperEngine {
         mod.env.allowLocalModels = false;
         mod.env.useBrowserCache = true;
         if (mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm) {
-            mod.env.backends.onnx.wasm.numThreads = 1;
+            // v9.46: mismo criterio multihilo que el worker (progresivo).
+            mod.env.backends.onnx.wasm.numThreads =
+                (self.crossOriginIsolated && navigator.hardwareConcurrency)
+                    ? Math.min(VE_CONFIG.numThreadsMax, navigator.hardwareConcurrency) : 1;
             mod.env.backends.onnx.wasm.proxy = false;
         }
         const self = this;
@@ -489,6 +596,54 @@ function isSilence(float32) {
    ============================================================ */
 const TTS_API_URL = 'https://app-chino-espa-ol.vercel.app/api/tts';
 
+/* v9.46 — audio de referencia: GET cacheable PRIMERO, POST de reserva.
+   La referencia es el MISMO audio TTS que el alumno ya escucha (🔊 CN/ES);
+   pedirlo por GET (?text=&lang=&voice=&speed=&cv=1 — misma URL canónica
+   que app.js v9.45) lo cachea el CDN de Vercel → la 2.ª repetición de la
+   frase sale en ~0,1-0,3 s, y el Service Worker comparte la caché offline.
+   Contrato: se acepta el GET SOLO con la marca X-TTS-Audio: 1 (un server
+   viejo respondería el "tell" sin audio con 200). Cualquier fallo del GET
+   cae al POST de siempre (sin avisos: es best-effort). Devuelve el JSON
+   {audio, mime, ...} o null (→ la llamadora usa su fallback). */
+async function fetchRefAudio(text, lang, voice, signal) {
+    const t = String(text || '').trim();
+    // 1) GET cacheable (mismo formato que ttsGetUrl de app.js)
+    let getUrl = null;
+    try {
+        if (t && t.length <= VE_CONFIG.TTS_GET_MAX_CHARS) {
+            const q = new URLSearchParams();
+            q.set('text', t);
+            q.set('lang', lang);
+            q.set('voice', voice || 'f');
+            q.set('speed', '1');       // referencia SIEMPRE a 1x (DTW de tono)
+            q.set('cv', '1');
+            getUrl = TTS_API_URL + '?' + q.toString();
+        }
+    } catch (e) { getUrl = null; }
+    if (getUrl) {
+        try {
+            const g = await fetch(getUrl, { method: 'GET', signal: signal });
+            if (g && g.ok && g.headers.get('x-tts-audio') === '1') {
+                const d = await g.json();
+                if (d && d.audio) return d;
+            }
+        } catch (e) {
+            if (e && e.name === 'AbortError') throw e; // abort del modo → igual que antes
+            /* GET roto → POST */
+        }
+    }
+    // 2) POST clásico (reserva, idéntico a v7.8)
+    const resp = await fetch(TTS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: t, lang: lang, voice: voice || 'f' }),
+        signal: signal
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return (data && data.audio) ? data : null;
+}
+
 class LocalToneAnalyzer {
     constructor() {
         if (typeof window.PitchAnalyzerModule !== 'object') {
@@ -564,19 +719,13 @@ class LocalToneAnalyzer {
                 else signal.addEventListener('abort', onOuter, { once: true });
             }
             const timer = setTimeout(() => ctrl.abort(), 15000);
-            const resp = await fetch(TTS_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: targetText, lang: 'zh-CN', voice: voice || 'f' }),
-                signal: ctrl.signal
-            }).finally(() => {
-                clearTimeout(timer);
-                if (signal) signal.removeEventListener('abort', onOuter);
-            });
-            if (!resp.ok) return fallback('tts-http-' + resp.status);
-
-            const data = await resp.json();
-            if (!data || !data.audio) return fallback('tts-empty');
+            // v9.46: GET cacheable primero (CDN + SW offline), POST de reserva.
+            const data = await fetchRefAudio(targetText, 'zh-CN', voice || 'f', ctrl.signal)
+                .finally(() => {
+                    clearTimeout(timer);
+                    if (signal) signal.removeEventListener('abort', onOuter);
+                });
+            if (!data) return fallback('tts-empty');
             const bin = atob(data.audio);
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -815,7 +964,9 @@ class LocalEvaluator {
        Whisper (¿qué carácter dijo?) + F0/DTW (¿qué tono dijo?) EN
        PARALELO sobre el MISMO buffer + validación SEGMENTAL primero. */
     async _evaluateChinese(audioBlob, targetText, ctx) {
-        const pcm = await blobToFloat32_16k(audioBlob);
+        // v9.46: pcm precalculado si llegó por ctx (decode solapado con la
+        // espera del motor); si no, decode como siempre (API pública intacta).
+        const pcm = (ctx && ctx.pcmPromise) ? await ctx.pcmPromise : await blobToFloat32_16k(audioBlob);
         if (isSilence(pcm)) throw new Error('no-speech');
 
         const M = window.VoiceRecorderModule || {};
@@ -957,8 +1108,15 @@ class LocalEvaluator {
        el español no es lengua tonal. Métrica de confianza configurable
        + comparación tolerante por palabra (nunca igualdad estricta). */
     async _evaluateSpanish(audioBlob, targetText, ctx) {
-        const pcm = await blobToFloat32_16k(audioBlob);
+        // v9.46: pcm precalculado si llegó por ctx (decode solapado con la
+        // espera del motor); si no, decode como siempre (API pública intacta).
+        const pcm = (ctx && ctx.pcmPromise) ? await ctx.pcmPromise : await blobToFloat32_16k(audioBlob);
         if (isSilence(pcm)) throw new Error('no-speech');
+
+        // v9.46: la referencia TTS (botón 🔊 ES) se pide EN PARALELO con la
+        // transcripción — antes se esperaba DESPUÉS, alargando el
+        // «Analizando…» por la red. Best-effort: sin TTS no hay botón.
+        const refP = this._esRefUrl(targetText, ctx.voiceEs).catch(() => null);
 
         // Whisper con métrica de confianza (log-probabilities por token).
         // Los errores de MOTOR suben tal cual → la fachada muestra el
@@ -1047,8 +1205,9 @@ class LocalEvaluator {
 
         // referencia para comparar con el oído: TTS ES de la frase
         // (el MISMO audio 🔊 ES; best-effort → sin TTS no hay botón)
+        // v9.46: la promesa arrancó ANTES de transcribir (paralelo).
         let refAudioUrl = null;
-        try { refAudioUrl = await this._esRefUrl(targetText, ctx.voiceEs); }
+        try { refAudioUrl = await refP; }
         catch (e) { /* sin red/TTS → el botón de referencia no aparece */ }
 
         return {
@@ -1109,20 +1268,14 @@ class LocalEvaluator {
     }
 
     /** TTS ES de la frase para el botón 🔊 Referencia (best-effort).
-     *  ⚠️ PRIVACIDAD: pide la referencia, jamás envía la voz del alumno. */
+     *  ⚠️ PRIVACIDAD: pide la referencia, jamás envía la voz del alumno.
+     *  v9.46: GET cacheable primero (CDN + SW offline), POST de reserva. */
     async _esRefUrl(text, voiceEs) {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 10000);
         try {
-            const resp = await fetch(TTS_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text, lang: 'es-ES', voice: voiceEs || 'f' }),
-                signal: ctrl.signal
-            });
-            if (!resp.ok) return null;
-            const data = await resp.json();
-            if (!data || !data.audio) return null;
+            const data = await fetchRefAudio(text, 'es-ES', voiceEs || 'f', ctrl.signal);
+            if (!data) return null;
             const bin = atob(data.audio);
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -1430,6 +1583,23 @@ class PronunciationEvaluator {
     }
 
     /* ---------- captura ---------- */
+    /** v9.46 — warmup al arrancar (lo llama app.js ~6 s después de abrir,
+     *  en idle): 1) precarga el motor (descarga/compilación fuera del
+     *  camino crítico — antes el primer «Analizando…» pagaba todo);
+     *  2) UNA inferencia dummy calienta JIT + sesiones ONNX.
+     *  Nunca lanza, es idempotente (preload() reusa su promesa) y NO
+     *  compite con el micro mientras graba: a los 6 s nadie graba aún,
+     *  y si graba, la carga corre igual en el Worker (hilo separado). */
+    warmup() {
+        try {
+            if (this.provider !== 'local') return Promise.resolve();
+            const self = this;
+            return this.engine.preload(function (pct) { self._pushProgress(pct); })
+                .then(function () { return self.engine.warmupOnce(); })
+                .catch(function (e) { console.warn('[VE] warmup falló (inofensivo):', (e && e.message) || e); });
+        } catch (e) { return Promise.resolve(); }
+    }
+
     async startRecording(opts) {
         opts = opts || {};
         if (!window.VoiceRecorder) {
@@ -1538,6 +1708,10 @@ class PronunciationEvaluator {
     /* ---------- internals ---------- */
     async _evalLocal(blob, targetText) {
         const ui = this._ui();
+        // v9.46: el decode 16 kHz arranca YA — se solapa con la espera del
+        // motor (antes era secuencial: primero motor, después decode).
+        // Si el decode falla, el error sube igual que antes.
+        const pcmPromise = blobToFloat32_16k(blob);
         // Espera acotada al motor (1.ª vez): la barra sigue en pantalla
         await this._waitForEngine();
         if (ui) {
@@ -1556,6 +1730,7 @@ class PronunciationEvaluator {
                 voice: this.voice,
                 voiceEs: this.voiceEs,
                 mode: this.mode,
+                pcmPromise: pcmPromise, // v9.46: reutilizado por _evaluate* (sin re-decode)
                 signal: ac.signal
             }),
             new Promise((_, reject) => {
@@ -1569,22 +1744,25 @@ class PronunciationEvaluator {
     _waitForEngine() {
         if (this.engine.ready) return Promise.resolve();
         const self = this;
+        // v9.46: espera la PROMESA de carga directa (antes: polling cada
+        // 250 ms → hasta 250 ms muertos en CADA evaluación). El preload
+        // que arrancó al grabar (o el warmup del arranque) ya trae su
+        // promesa; el race con maxWaitMs conserva el tope de la 1.ª descarga.
+        let p;
         if (this.engine.status === 'idle') {
-            this.engine.preload(function (pct) { self._pushProgress(pct); })
-                .catch(function () {}); // el error lo maneja el polling de abajo
+            p = this.engine.preload(function (pct) { self._pushProgress(pct); });
+        } else {
+            p = this.engine.whenReady(); // 'loading' → misma promesa; 'error' → rechazo
         }
-        const started = Date.now();
-        return new Promise((resolve, reject) => {
-            const iv = setInterval(() => {
-                if (self.engine.ready) { clearInterval(iv); resolve(); }
-                else if (self.engine.status === 'error') {
-                    clearInterval(iv);
-                    reject(new Error('engine-error: ' + self.engine.errorMsg));
-                } else if (Date.now() - started > VE_CONFIG.maxWaitMs) {
-                    clearInterval(iv);
-                    reject(new Error('engine-timeout'));
-                }
-            }, 250);
+        return Promise.race([
+            p,
+            new Promise((_, reject) => setTimeout(
+                () => reject(new Error('engine-timeout')), VE_CONFIG.maxWaitMs))
+        ]).catch(function (e) {
+            const msg = String((e && e.message) || e || '');
+            throw new Error(msg.indexOf('engine-timeout') >= 0
+                ? 'engine-timeout'
+                : 'engine-error: ' + (msg || 'motor no disponible'));
         });
     }
 
