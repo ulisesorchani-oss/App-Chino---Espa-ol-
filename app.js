@@ -1330,7 +1330,9 @@ const UI_STRINGS = {
     toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
     needAnswer: 'Escribe una respuesta antes de verificar.',
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
-    lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario'
+    lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario',
+    // v9.47: contador de intentos por tarjeta (chip 🎯)
+    attChip: '🎯 {n}', attTitle: 'Esta tarjeta: {n} prácticas · {ok} correctas · {ft} al primer intento'
   },
   'cn-es': {
     appTitle: '日常華語',
@@ -1385,7 +1387,9 @@ const UI_STRINGS = {
     toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
     needAnswer: '请先输入答案再检查。',
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
-    lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙'
+    lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙',
+    // v9.47: contador de intentos por tarjeta (chip 🎯)
+    attChip: '🎯 {n}次', attTitle: '这张卡：练过 {n} 次 · 答对 {ok} 次 · 首次就答对 {ft} 次'
   }
 };
 
@@ -2752,6 +2756,21 @@ function renderCurrentSentence() {
              : uiT('lvlPre') + s.level + uiT('lvlSuf'))));
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
 
+    // v9.47: chip 🎯 con el historial de esta tarjeta (oculto si nunca la vio)
+    const attEl = document.getElementById('card-attempts');
+    if (attEl) {
+        const r = attemptsBadgeFor(s);
+        if (r) {
+            attEl.textContent = uiT('attChip').replace('{n}', r.n);
+            attEl.title = uiT('attTitle').replace('{n}', r.n).replace('{ok}', r.ok).replace('{ft}', r.ft);
+            attEl.classList.remove('hidden');
+        } else {
+            attEl.textContent = '';
+            attEl.removeAttribute('title');
+            attEl.classList.add('hidden');
+        }
+    }
+
     // 1-3. Texto de la oración (hueco posicionado por cloze + tonos + relleno)
     renderSentenceText(s);
 
@@ -3104,6 +3123,8 @@ function checkAnswer() {
         state.score++;
         rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
         refillBlank('correct');   // v7.2: la oración queda completa (verde)
+        // v9.47: pase resuelto en acierto — intentos = errados previos + este
+        recordCardAttempt(s, state.attempts + 1, 'ok');
     } else {
         state.lastResult = 'wrong';
         showFeedback(uiT('validWrong') + '"' + allOptions + '"', 'incorrect',
@@ -3112,6 +3133,8 @@ function checkAnswer() {
         rememberWordContext(wordKey ? [wordKey] : [validAnswers[0]], s); // v7.13
         if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s); // v7.21: alimenta el mazo de repaso
         refillBlank('wrong');     // v7.2: se muestra la palabra correcta (rojo)
+        // v9.47: pase resuelto en error — todos los intentos de este pase fueron errados
+        recordCardAttempt(s, state.attempts, 'ko');
     }
 
     state.answered = true;
@@ -3138,6 +3161,7 @@ function revealAnswer() {
     showFeedback(uiT('validReveal') + '"' + validAnswers.join(' / ') + '"', 'reveal');
     if (typeof window.acSrsMiss === 'function') window.acSrsMiss(s);
     state.lastResult = 'reveal';
+    recordCardAttempt(s, state.attempts + 1, 'rv'); // v9.47: revelar también cierra el pase
     refillBlank('reveal');       // v7.2: oración completa con la respuesta (ámbar)
     // v9.19: en "solo oído", Revelar también destapa la oración y cierra opciones
     if (state.mode === 'es-cn' && state.listenFirst) {
@@ -3467,6 +3491,86 @@ function setupAppNav() {
     showView(saved || 'hoy', false);
 }
 // ===== fin v10 UX =====
+
+// ============================================================
+// v9.47 — ESTADÍSTICAS DE PRÁCTICA (cero invasión, pura lectura
+// para el alumno): (1) contador de intentos por TARJETA — cada vez
+// que una tarjeta se resuelve (correcto / mal / revelar) se suma un
+// "pase" con sus intentos; el chip 🎯 de la cabecera muestra cuántas
+// veces la practicaste y cuántas salieron al primer intento.
+// (2) estadística de TRAZOS por hanzi — los dos banners de escritura
+// (práctica v7.13 y respuesta a mano v9.34) reportan errores de
+// trazo, pistas y quizzes completados por carácter; el popup de
+// rachas (stats.js) muestra tus hanzi más difíciles y los deja
+// practicar con un toque.
+// Almacenamiento: claves ac_* → viajan solas en el respaldo JSON
+// (backupCollect incluye /^ac_/) y se borran con 🗑️ Borrar progreso.
+// Nunca bloquean nada: todo en try/catch, si falla el storage la
+// app sigue igual (filosofía de la casa).
+// ============================================================
+const ATTEMPTS_KEY = 'ac_attempts_v1';
+const HANZI_STATS_KEY = 'ac_hanzi_stats_v1';
+
+function attemptsDbRead(key) {
+    try {
+        const o = JSON.parse(localStorage.getItem(key) || 'null');
+        return o || null;
+    } catch (e) { return null; }
+}
+
+// Identidad canónica de una tarjeta (misma convención v8.1 del resto
+// de la app: palabra → hanzi simplificado; oración → prefijo s: para
+// que una palabra y una oración con la misma respuesta no se mezclen).
+function cardKeyOf(s) {
+    if (!s) return null;
+    const k = ck();
+    if (s.w) {
+        const w = String(s.chinese_simp_answer || s['chinese_' + k + '_answer'] || '').trim();
+        return w ? 'w:' + w : null;
+    }
+    const a = String(s.chinese_simp_answer || s['chinese_' + k + '_answer'] || s.spanish_answer || '').trim();
+    return a ? 's:' + a : null;
+}
+
+// Registra un pase resuelto de la tarjeta: tries = intentos gastados
+// en este pase (1 = al primer intento), res = 'ok' | 'ko' | 'rv'.
+function recordCardAttempt(s, tries, res) {
+    const key = cardKeyOf(s);
+    if (!key) return;
+    let db = attemptsDbRead(ATTEMPTS_KEY);
+    if (!db || db.v !== 1 || !db.cards) db = { v: 1, cards: {} };
+    const r = db.cards[key] || { n: 0, ok: 0, ft: 0, last: '', lr: '' };
+    r.n++;
+    if (res === 'ok') { r.ok++; if (tries <= 1) r.ft++; }
+    r.last = sessionToday();
+    r.lr = res === 'ok' ? 'ok' : (res === 'rv' ? 'rv' : 'ko');
+    db.cards[key] = r;
+    try { localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(db)); } catch (e) { /* sin storage: la app sigue */ }
+}
+
+// Lo que muestra el chip 🎯 para la tarjeta dada (null = nunca vista).
+function attemptsBadgeFor(s) {
+    const key = cardKeyOf(s);
+    if (!key) return null;
+    const db = attemptsDbRead(ATTEMPTS_KEY);
+    const r = db && db.v === 1 && db.cards ? db.cards[key] : null;
+    return (r && r.n) ? { n: r.n, ok: r.ok, ft: r.ft, lr: r.lr } : null;
+}
+
+// Suma 1 a un campo de un hanzi. Campos: t = quiz iniciado,
+// m = error de trazo (onMistake), h = pista 💡 usada, q = quiz completo.
+function hanziStatsBump(ch, field) {
+    const c = String(ch == null ? '' : ch);
+    if (!c || !READER_HANZI.test(c) || c.length !== 1) return; // solo hanzi de un carácter
+    if (['t', 'm', 'h', 'q'].indexOf(field) === -1) return;
+    let db = attemptsDbRead(HANZI_STATS_KEY);
+    if (!db || db.v !== 1 || !db.chars) db = { v: 1, chars: {} };
+    const r = db.chars[c] || { t: 0, m: 0, h: 0, q: 0 };
+    r[field] = (r[field] || 0) + 1;
+    db.chars[c] = r;
+    try { localStorage.setItem(HANZI_STATS_KEY, JSON.stringify(db)); } catch (e) { /* silencioso */ }
+}
+// ===== fin v9.47 estadísticas de práctica =====
 
 function markWord(known) {
     const filtered = getFiltered();
@@ -4167,12 +4271,20 @@ function wpStartQuiz(myGen) {
     const gen = typeof myGen === 'number' ? myGen : wpPractice.gen;
     const total = wpPractice.chars.length;
     const i = wpPractice.idx;
+    hanziStatsBump(wpPractice.chars[i], 't'); // v9.47: quiz de trazos iniciado
     wpSetHint(total > 1
         ? '✍ Trazá «' + wpPractice.chars[i] + '» con el dedo (' + (i + 1) + ' de ' + total + ')'
         : '✍ Trazá con el dedo sobre el carácter gris');
     wr.quiz({
+        // v9.47: error de trazo → estadística por hanzi (el banner de práctica
+        // no muestra avisos extra: el contorno visible ya guía solo).
+        onMistake: () => {
+            if (gen !== wpPractice.gen) return;
+            hanziStatsBump(wpPractice.chars[i], 'm');
+        },
         onComplete: () => {
             if (gen !== wpPractice.gen) return; // cerró o navegó mientras tanto
+            hanziStatsBump(wpPractice.chars[i], 'q'); // v9.47: carácter completado
             if (i < total - 1) {
                 wpPractice.idx++;
                 wpSetHint('👏 ¡Bien! Ahora «' + wpPractice.chars[wpPractice.idx] + '» (' + (wpPractice.idx + 1) + ' de ' + total + ')');
@@ -4272,10 +4384,12 @@ function hwStartQuiz(myGen) {
     const gen = typeof myGen === 'number' ? myGen : hwAns.gen;
     try { wr.cancelQuiz(); } catch (e) { }
     hwAns.misses = 0;
+    hanziStatsBump(hwAns.chars[hwAns.idx], 't'); // v9.47: quiz de memoria iniciado
     wr.quiz({
         onMistake: () => {
             if (gen !== hwAns.gen) return;
             hwAns.misses++;
+            hanziStatsBump(hwAns.chars[hwAns.idx], 'm'); // v9.47: error de trazo por hanzi
             // v9.35: aviso temprano (el orden y la dirección de los trazos importan)
             // y sugerencia de pista al 2.º error en vez del 3.º — menos frustación.
             if (hwAns.misses === 1) hwSetHint('💡 El ORDEN y la DIRECCIÓN de los trazos importan — no pasa nada, seguí probando.');
@@ -4283,6 +4397,7 @@ function hwStartQuiz(myGen) {
         },
         onComplete: () => {
             if (gen !== hwAns.gen) return; // cerró el banner mientras tanto
+            hanziStatsBump(hwAns.chars[hwAns.idx], 'q'); // v9.47: carácter producido de memoria
             const total = hwAns.chars.length;
             if (hwAns.idx < total - 1) {
                 hwAns.idx++;
@@ -4368,6 +4483,7 @@ function hwHint() {
     if (!wr) return;
     try { wr.cancelQuiz(); } catch (e) { }
     const gen = hwAns.gen;
+    hanziStatsBump(hwAns.chars[hwAns.idx], 'h'); // v9.47: pista usada (aprendizaje por imitación)
     hwSetHint('▶ Mirá cómo se escribe y volvé a trazarlo…');
     Promise.resolve(wr.animateCharacter()).then(() => {
         if (gen !== hwAns.gen || hwAns.writer !== wr) return;
@@ -4418,6 +4534,8 @@ function closeHandwrite() {
 function resetProgress() {
     if (!confirm('¿Borrar todo el progreso guardado?')) return;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ATTEMPTS_KEY);   // v9.47: el contador de intentos también se borra
+    localStorage.removeItem(HANZI_STATS_KEY); // v9.47: la estadística de trazos también se borra
     if (typeof window.acSrsReset === 'function') window.acSrsReset(); // v7.21: el mazo de repaso también se borra
     state.knownWords = new Set();
     state.newWords = new Set();

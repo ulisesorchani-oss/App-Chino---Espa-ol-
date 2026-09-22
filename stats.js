@@ -1,5 +1,8 @@
 /* =====================================================================
    v9.23 · RACHAS Y ESTADÍSTICAS — Huayu Diario  (v9.25: + getSummary())
+   (v9.47: + sección «✍️ Tus caracteres difíciles» — lee ac_hanzi_stats_v1,
+     escrito por los banners de trazos de app.js, y deja practicar cada
+     hanzi con un toque)
    =====================================================================
    QUÉ ES
    · Popup #stats-pop (piel .vocab-pop, mismo estilo que SRS / colocación
@@ -9,6 +12,7 @@
        🎯 Aciertos totales + palabras dominadas
        📊 Palabras dominadas por nivel HSK (barras 1-9)
        🔢 Mazo SRS por caja (mini gráfico Leitner 10m→30d)
+       ✍️ Caracteres difíciles: tus hanzi con más errores de trazo (v9.47)
        ⏱️ Minutos practicados (estimación honesta) + total
        📍 Aviso: "tus datos viven en este dispositivo" + 💾 respaldo
    · BILINGÜE según el modo: es-cn (aprendo chino) → español; cn-es
@@ -469,7 +473,14 @@
         '.st-foot{margin-top:14px;padding:10px 11px;border:1px dashed var(--border);border-radius:11px;background:var(--bg-light);font-size:.82rem;color:var(--text-secondary);line-height:1.5;}',
         '.st-foot b{color:var(--text-primary);}',
         '.st-actions{display:flex;gap:8px;margin-top:10px;}',
-        '.st-actions .btn-primary{flex:1;}'
+        '.st-actions .btn-primary{flex:1;}',
+        // v9.47: chips de hanzi difíciles
+        '.st-hz-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;}',
+        '.st-hz{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:52px;padding:7px 8px 5px;background:var(--bg-light);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;}',
+        '.st-hz:hover{border-color:var(--primary);}',
+        '.st-hz-ch{font-size:1.5rem;line-height:1.15;font-weight:700;color:var(--text-primary);}',
+        '.st-hz-m{font-size:.66rem;font-weight:800;color:#b91c1c;line-height:1.2;}',
+        '.st-hz-q{font-size:.6rem;color:var(--text-secondary);line-height:1.2;}'
     ].join('\n');
 
     // ---------------- textos bilingües ----------------
@@ -502,7 +513,10 @@
             months: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
             footA: '📍 <b>Tus estadísticas viven solo en este dispositivo</b> (localStorage del navegador). No se suben a ningún servidor.',
             footB: 'Para no perderlas —o llevarlas a otro equipo— descargá tu respaldo de vez en cuando: las rachas viajan con él.',
-            btnBackup: '💾 Abrir respaldo'
+            btnBackup: '💾 Abrir respaldo',
+            hzTitle: '✍️ Tus caracteres difíciles',
+            hzEmpty: 'Practicá el orden de trazos (✍ en cualquier palabra china) y acá vas a ver cuáles te cuestan más.',
+            hzNote: '✗ errores al trazar · × veces trazado · tocá un carácter para practicarlo'
         },
         'cn-es': {
             btnLabel: '📊 打卡',
@@ -532,7 +546,10 @@
             months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
             footA: '📍 <b>你的统计只保存在这台设备上</b>（浏览器的 localStorage），不会上传到任何服务器。',
             footB: '想不丢数据、或者换台设备继续学，就定期下载备份：打卡记录会跟着备份一起走。',
-            btnBackup: '💾 打开备份'
+            btnBackup: '💾 打开备份',
+            hzTitle: '✍️ 你的难写汉字',
+            hzEmpty: '练一练笔顺（点汉字选 ✍ 练习），这里会显示你觉得最难写的字。',
+            hzNote: '✗ 写错次数 · × 练习次数 · 点一个字来练习'
         }
     };
 
@@ -550,6 +567,32 @@
     function readDays() { return hsParseLog(lsGet(LS_KEY)).days; }
     function readEmbedded() {
         try { return EMBEDDED_MODULE_DATA; } catch (e) { return null; } // ReferenceError → sin mapa
+    }
+
+    // ---------------- v9.47: trazos por hanzi (ac_hanzi_stats_v1) ----------------
+    // Escrito por app.js (banners de trazos): { v:1, chars: { 字: {t,m,h,q} } }
+    //   t = quizzes iniciados · m = errores de trazo · h = pistas 💡 · q = completados.
+    // Devuelve { count, top } — top = los más difíciles primero (más errores;
+    // desempate: menos completados). Solo lectura: app.js es el dueño de la clave.
+    function readHanziStats() {
+        var chars = {};
+        try {
+            var o = JSON.parse(lsGet('ac_hanzi_stats_v1') || 'null');
+            if (o && o.v === 1 && o.chars) chars = o.chars;
+        } catch (e) { chars = {}; }
+        var arr = [];
+        for (var ch in chars) {
+            if (!Object.prototype.hasOwnProperty.call(chars, ch)) continue;
+            var r = chars[ch] || {};
+            var m = r.m || 0, q = r.q || 0, t = r.t || 0, h = r.h || 0;
+            if (m || q || t || h) arr.push({ ch: ch, m: m, q: q, t: t, h: h });
+        }
+        arr.sort(function (a, b) {
+            if (b.m !== a.m) return b.m - a.m; // más errores de trazo primero
+            if (a.q !== b.q) return a.q - b.q; // desempate: menos veces completado
+            return a.ch < b.ch ? -1 : 1;
+        });
+        return { count: arr.length, top: arr.slice(0, 8) };
     }
 
     // ---------------- inyección de UI ----------------
@@ -614,6 +657,19 @@
         body.id = 'stats-body';
         pop.appendChild(x);
         pop.appendChild(body);
+        // v9.47: tocar un hanzi difícil → cierra el pop y abre la práctica de
+        // trazos de ese carácter (openWriterPractice vive en app.js; si no
+        // estuviera, el pop simplemente se cierra — la app sigue).
+        body.addEventListener('click', function (e) {
+            var b = e.target && e.target.closest ? e.target.closest('.st-hz') : null;
+            if (!b) return;
+            var ch = b.getAttribute('data-hz') || '';
+            if (!ch) return;
+            close();
+            if (typeof window.openWriterPractice === 'function') {
+                try { window.openWriterPractice(ch); } catch (err) { /* la app sigue */ }
+            }
+        });
         document.body.appendChild(pop);
     }
 
@@ -729,6 +785,24 @@
                 '</div>';
         }
         h += '</div><p class="st-note-sm">' + deck.count + ' ' + escH(P.leitNote) + '</p>';
+
+        // --- v9.47: caracteres difíciles (trazos por hanzi) ---
+        var hz = readHanziStats();
+        h += '<div class="st-sec">' + escH(P.hzTitle) + '</div>';
+        if (!hz.count) {
+            h += '<p class="st-note-sm">' + escH(P.hzEmpty) + '</p>';
+        } else {
+            h += '<div class="st-hz-grid">';
+            hz.top.forEach(function (r) {
+                h += '<button type="button" class="st-hz" data-hz="' + escH(r.ch) + '" title="' +
+                    escH(r.ch + ' · ✗ ' + r.m + ' · ' + r.q + '×') + '">' +
+                    '<span class="st-hz-ch">' + escH(r.ch) + '</span>' +
+                    '<span class="st-hz-m">✗ ' + r.m + '</span>' +
+                    '<span class="st-hz-q">' + r.q + '×</span></button>';
+            });
+            h += '</div>';
+            h += '<p class="st-note-sm">' + escH(P.hzNote) + '</p>';
+        }
 
         // --- aviso honesto + respaldo ---
         h += '<div class="st-foot"><p style="margin:0 0 4px;">' + P.footA + '</p><p style="margin:0;">' + P.footB + '</p></div>' +

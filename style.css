@@ -297,6 +297,14 @@ body.dark-mode #btn-tones.active {
     text-align: right;
 }
 
+/* v9.47: chip 🎯 — intentos históricos de la tarjeta actual */
+.card-attempts {
+    flex-shrink: 0; /* No se aplasta */
+    font-weight: 700;
+    color: var(--primary, #2563eb);
+    white-space: nowrap; /* el emoji y el número nunca se parten */
+}
+
 .sentence-container {
     margin-bottom: 24px;
 }

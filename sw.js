@@ -363,7 +363,17 @@
 //       (3) vercel.json: COOP same-origin + COEP credentialless
 //       (progresivo — Safari sin credentialless sigue en 1 hilo igual que
 //       hoy). Toca voice-evaluator.js + app.js + index.html + vercel.json.
-const VERSION = 'v91'; // — invalida shell (v9.46: warmup + multihilo + referencias GET)
+// v9.47: ESTADÍSTICAS DE PRÁCTICA — sin cambios de precache ni de router:
+//       (1) app.js: contador de intentos por tarjeta (ac_attempts_v1 — chip
+//       🎯 en la cabecera: prácticas/correctas/al primer intento; se registra
+//       al resolver la tarjeta: correcto, mal o revelar) + estadística de
+//       trazos por hanzi (ac_hanzi_stats_v1 — t/m/h/q desde los dos banners
+//       de escritura: práctica v7.13 y respuesta a mano v9.34). Ambas claves
+//       ac_* viajan en el respaldo y se borran con Borrar progreso.
+//       (2) stats.js: sección «✍️ Tus caracteres difíciles» (lee
+//       ac_hanzi_stats_v1, top 8 por errores; tocar un hanzi abre la
+//       práctica de trazos). Toca app.js + stats.js + index.html + style.css.
+const VERSION = 'v92'; // — invalida shell (v9.47: contador de intentos + trazos por hanzi)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
