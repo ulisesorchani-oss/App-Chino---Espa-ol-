@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260922c">
+    <link rel="stylesheet" href="style.css?v=20260922d">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -509,6 +509,14 @@
                     </div>
                 </div>
                 <div class="set-row">
+                    <span class="set-label" data-i18n="setStrokes">Tolerancia de trazos</span>
+                    <div class="set-ctrl set-group" id="stroke-leniency-group" role="group" aria-label="Tolerancia de trazos">
+                        <button type="button" class="speed-btn len-btn" data-lv="strict" data-i18n="lenStrict">🎯 Estricta</button>
+                        <button type="button" class="speed-btn len-btn active" data-lv="normal" data-i18n="lenNormal">⚖️ Normal</button>
+                        <button type="button" class="speed-btn len-btn" data-lv="lenient" data-i18n="lenLenient">🫧 Permisiva</button>
+                    </div>
+                </div>
+                <div class="set-row">
                     <span class="set-label" data-i18n="setData">Datos</span>
                     <div class="set-ctrl set-group">
                         <button id="btn-backup" class="speed-btn" type="button" title="Respaldo: guardar tu progreso en un archivo o exportarlo a Anki">💾 Respaldo y Anki</button>
@@ -748,7 +756,7 @@
     <script src="classics.js?v=20260910c"></script>
     <script src="onboarding.js?v=20260919b"></script>
     <script src="stats.js?v=20260922c"></script>
-    <script src="app.js?v=20260922c"></script>
+    <script src="app.js?v=20260922d"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

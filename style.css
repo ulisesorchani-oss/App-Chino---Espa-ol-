@@ -5228,3 +5228,8 @@ body.dark-mode .aprender-tools .speed-btn { background: var(--bg-light); }
 .srs-bar-btn.has-due { background: #3730a3; }
 body.dark-mode .srs-bar-btn { background: #3730a3; }
 body.paper-mode .srs-bar-btn { background: #4338ca; color: #fff; }
+
+/* ===== v9.48 — chip 🎯 del mazo + tolerancia de trazos ===== */
+.srs-chip-att { background: var(--warning); } /* ámbar ≠ azul "Repaso" · 5.02:1 con blanco */
+body.paper-mode .srs-chip-att { background: var(--warning); }
+.len-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }

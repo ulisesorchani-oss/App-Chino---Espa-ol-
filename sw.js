@@ -373,7 +373,19 @@
 //       (2) stats.js: sección «✍️ Tus caracteres difíciles» (lee
 //       ac_hanzi_stats_v1, top 8 por errores; tocar un hanzi abre la
 //       práctica de trazos). Toca app.js + stats.js + index.html + style.css.
-const VERSION = 'v92'; // — invalida shell (v9.47: contador de intentos + trazos por hanzi)
+// v9.48: SRS + LENIENCY — sin cambios de precache ni de router:
+//       (1) app.js: el contador de intentos ahora también cubre el repaso
+//       del mazo (recordSrsAttempt → 'w:'+zh en ac_attempts_v1; el pase
+//       cierra al revelar: ok = retrieval/producción resuelta, ko =
+//       producción mal, rv = "No lo sé" o reveal directo) + chip 🎯 en la
+//       fila de meta de cada tarjeta del repaso — misma base que la
+//       práctica: repasar una palabra y practicarla comparten contador.
+//       (2) Ajustes → Tolerancia de trazos: leniency manual de HanziWriter
+//       (ac_leniency_v1 — viaja en el respaldo y sobrevive a Borrar
+//       progreso, como el tema): estricta 1.2/1.6 · normal 1.6/2.0 ·
+//       permisiva 2.2/2.8, práctica con contorno / de memoria.
+//       Toca app.js + index.html + style.css.
+const VERSION = 'v93'; // — invalida shell (v9.48: intentos en el mazo + tolerancia de trazos)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de

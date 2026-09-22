@@ -1332,7 +1332,11 @@ const UI_STRINGS = {
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
     lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
-    attChip: '🎯 {n}', attTitle: 'Esta tarjeta: {n} prácticas · {ok} correctas · {ft} al primer intento'
+    attChip: '🎯 {n}', attTitle: 'Esta tarjeta: {n} prácticas · {ok} correctas · {ft} al primer intento',
+    // v9.48: tolerancia de trazos (leniency manual en Ajustes)
+    setStrokes: 'Tolerancia de trazos',
+    lenStrict: '🎯 Estricta', lenNormal: '⚖️ Normal', lenLenient: '🫧 Permisiva',
+    lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.'
   },
   'cn-es': {
     appTitle: '日常華語',
@@ -1389,7 +1393,11 @@ const UI_STRINGS = {
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
     lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
-    attChip: '🎯 {n}次', attTitle: '这张卡：练过 {n} 次 · 答对 {ok} 次 · 首次就答对 {ft} 次'
+    attChip: '🎯 {n}次', attTitle: '这张卡：练过 {n} 次 · 答对 {ok} 次 · 首次就答对 {ft} 次',
+    // v9.48: 笔顺容错（Ajustes 里手动设置）
+    setStrokes: '笔顺容错',
+    lenStrict: '🎯 严格', lenNormal: '⚖️ 标准', lenLenient: '🫧 宽容',
+    lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。'
   }
 };
 
@@ -1426,6 +1434,7 @@ function updateUILanguage(mode) {
     if (typeof updateDailyBtnLabel === 'function') updateDailyBtnLabel();
     if (typeof applyInterleaveUI === 'function') applyInterleaveUI(); // v9.15: re-etiquetar según idioma
     if (typeof applyListenUI === 'function') applyListenUI(); // v9.19: re-etiquetar solo oído
+    if (typeof applyLeniencyUI === 'function') applyLeniencyUI(); // v9.48: re-etiquetar tolerancia de trazos
 
     // 4) Lógica condicional estricta: exámenes según el sentido del estudio
     const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
@@ -3426,6 +3435,12 @@ function setupSessionUI() {
         saveSession();
         updateSessionUI();
     }));
+    // v9.48: Ajustes → Tolerancia de trazos (leniency de HanziWriter)
+    const lenGrp = document.getElementById('stroke-leniency-group');
+    if (lenGrp) lenGrp.addEventListener('click', (e) => {
+        const b = e.target.closest('.len-btn');
+        if (b) setLeniencyLevel(b.dataset.lv);
+    });
     const m = document.getElementById('btn-session-more');
     if (m) m.addEventListener('click', () => hideSessionDone(true));
     const dn = document.getElementById('btn-session-done');
@@ -3571,6 +3586,74 @@ function hanziStatsBump(ch, field) {
     try { localStorage.setItem(HANZI_STATS_KEY, JSON.stringify(db)); } catch (e) { /* silencioso */ }
 }
 // ===== fin v9.47 estadísticas de práctica =====
+
+// ============================================================
+// v9.48 — INTENTOS EN EL MAZO + LENIENCY MANUAL
+// (1) recordSrsAttempt: el repaso del mazo registra sus pases en la MISMA
+//     base ac_attempts_v1 que la práctica (identidad 'w:' + hanzi
+//     simplificado — la tarjeta del mazo ES una palabra: repasar 谢谢 y
+//     practicar 谢谢 comparten contador). El pase cierra al REVELAR:
+//     ok = retrieval/producción resuelta antes de mirar · ko = producción
+//     mal · rv = revelada sin acierto verificable ("No lo sé" o reveal
+//     directo). "Otra vez" re-encola → nuevo pase → nuevo registro.
+// (2) Leniency manual: Ajustes → Tolerancia de trazos. Es la CUÁNTO puede
+//     desviarse un trazo dibujado y aún contar como bien (HanziWriter
+//     mide ~350·leniency px en espacio de datos). Tres niveles, práctica/
+//     memoria: estricta 1.2/1.6 · normal 1.6/2.0 (los fijos del v9.35) ·
+//     permisiva 2.2/2.8. Clave ac_leniency_v1: viaja en el respaldo
+//     (/^ac_/) y SOBREVIVE a 🗑️ Borrar progreso (es preferencia, como el
+//     tema). Aplica al montar el PRÓXIMO carácter (cada carácter crea su
+//     writer). Nunca bloquea nada: try/catch, si falla la app sigue.
+// ============================================================
+function recordSrsAttempt(zh, tries, res) {
+    const w = String(zh || '').trim();
+    if (!w || w.length > 20) return; // identidad inválida → silencio
+    const key = 'w:' + w;
+    let db = attemptsDbRead(ATTEMPTS_KEY);
+    if (!db || db.v !== 1 || !db.cards) db = { v: 1, cards: {} };
+    const r = db.cards[key] || { n: 0, ok: 0, ft: 0, last: '', lr: '' };
+    r.n++;
+    if (res === 'ok') { r.ok++; if (tries <= 1) r.ft++; }
+    r.last = sessionToday();
+    r.lr = res === 'ok' ? 'ok' : (res === 'rv' ? 'rv' : 'ko');
+    db.cards[key] = r;
+    try { localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(db)); } catch (e) { /* sin storage: la app sigue */ }
+}
+
+const LENIENCY_KEY = 'ac_leniency_v1';
+const LENIENCY_LEVELS = [
+    { id: 'strict',  wp: 1.2, hw: 1.6 },
+    { id: 'normal',  wp: 1.6, hw: 2.0 },
+    { id: 'lenient', wp: 2.2, hw: 2.8 }
+];
+function leniencyLevel() {
+    try {
+        const v = localStorage.getItem(LENIENCY_KEY);
+        return LENIENCY_LEVELS.some((l) => l.id === v) ? v : 'normal';
+    } catch (e) { return 'normal'; }
+}
+// kind: 'practice' (banner con contorno, v7.16) | 'memory' (de memoria, v9.34)
+function strokeLeniency(kind) {
+    const l = LENIENCY_LEVELS.filter((x) => x.id === leniencyLevel())[0] || LENIENCY_LEVELS[1];
+    return kind === 'memory' ? l.hw : l.wp;
+}
+function setLeniencyLevel(id) {
+    if (!LENIENCY_LEVELS.some((l) => l.id === id)) return;
+    try { localStorage.setItem(LENIENCY_KEY, id); } catch (e) { /* sin storage: la app sigue */ }
+    applyLeniencyUI();
+}
+// Estado visual del grupo en Ajustes + tooltip según idioma. Se llama en el
+// arranque (vía updateUILanguage) y en cada cambio (vía setLeniencyLevel).
+function applyLeniencyUI() {
+    const grp = document.getElementById('stroke-leniency-group');
+    if (!grp) return;
+    const cur = leniencyLevel();
+    grp.querySelectorAll('.len-btn').forEach((b) => b.classList.toggle('active', b.dataset.lv === cur));
+    const lbl = document.querySelector('[data-i18n="setStrokes"]');
+    if (lbl) lbl.title = uiT('lenTitle');
+    grp.title = uiT('lenTitle');
+}
+// ===== fin v9.48 =====
 
 function markWord(known) {
     const filtered = getFiltered();
@@ -4227,7 +4310,8 @@ function wpShowChar(opts) {
                 delayBetweenStrokes: 220,
                 // v9.35 — SENSIBILIDAD: misma política que la respuesta a mano,
                 // con leniency 1.6 (acá hay contorno visible → copiar es más fácil).
-                leniency: 1.6,
+                // v9.48: el nivel lo elige el alumno en Ajustes → Tolerancia de trazos.
+                leniency: strokeLeniency('practice'),
                 acceptBackwardsStrokes: true,
                 showHintAfterMisses: 2,
                 onLoadCharDataSuccess: () => {
@@ -4450,7 +4534,8 @@ function hwShowChar() {
                 // (350·leniency px en espacio de datos); acceptBackwardsStrokes
                 // acepta trazos bien hechos pero en dirección inversa — con el
                 // dedo en el celular es el error más común y antes fallaba TODO.
-                leniency: 2,
+                // v9.48: nivel de Ajustes (normal = 2, igual que el fijo v9.35).
+                leniency: strokeLeniency('memory'),
                 acceptBackwardsStrokes: true,
                 showHintAfterMisses: 2, // tras 2 errores: resalta el próximo trazo
                 onLoadCharDataSuccess: () => {
@@ -6700,7 +6785,7 @@ function pzCounterUpdate() {
     }
 
     // ---- sesión ----
-    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false, prodOk: 0, prodTried: 0, recOk: 0, recTried: 0, recall: null }; // v9.21: recOk/recTried/recall
+    const SR = { phase: 'idle', queue: [], i: 0, total: 0, unique: 0, done: 0, again: 0, cur: null, revealed: false, prodOk: 0, prodTried: 0, recOk: 0, recTried: 0, recall: null, curTries: 0, curRes: '', attDone: false }; // v9.21: recOk/recTried/recall · v9.48: pase del mazo
 
     function startSession() {
         SR.queue = dueList().slice(0, SESSION_MAX);
@@ -6935,6 +7020,7 @@ function pzCounterUpdate() {
         const item = SR.queue[SR.i];
         if (!item) return renderSummary();
         SR.cur = item; SR.revealed = false;
+        SR.curTries = 0; SR.curRes = ''; SR.attDone = false; // v9.48: pase fresco
         const card = item.card;
         const zh = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
         const box = card.b;
@@ -6945,9 +7031,16 @@ function pzCounterUpdate() {
         const gate = plan ? null : recallData(item);
         SR.recall = gate;
 
+        // v9.48: chip 🎯 — misma base ac_attempts_v1 que la práctica (w:zh)
+        const attB = attemptsBadgeFor({ w: 1, chinese_simp_answer: String(item.zh || '') });
+        const attChip = attB
+            ? '<span class="srs-chip srs-chip-att" title="' + escHtml(uiT('attTitle')
+                .replace('{n}', attB.n).replace('{ok}', attB.ok).replace('{ft}', attB.ft)) + '">'
+                + escHtml(uiT('attChip').replace('{n}', attB.n)) + '</span>'
+            : '';
         body.innerHTML =
             '<div class="srs-meta">' +
-                '<span class="srs-chip">Repaso</span>' +
+                '<span class="srs-chip">Repaso</span>' + attChip +
                 (plan ? '<span class="srs-chip srs-chip-prod">✍️ producción</span>' : '') +
                 '<span class="srs-count">' + (SR.i + 1) + ' / ' + SR.total + '</span>' +
                 (card.lv ? '<span class="srs-lv">HSK ' + card.lv + '</span>' : '') +
@@ -7021,6 +7114,7 @@ function pzCounterUpdate() {
         if (!typed) { try { inp.focus(); } catch (e) { /* vacío → ignorar */ } return; }
         const ok = prodVariants(item).indexOf(typed) !== -1;
         SR.prodTried++; if (ok) SR.prodOk++;
+        if (ok) { SR.curRes = 'ok'; } else { SR.curTries++; SR.curRes = 'ko'; } // v9.48: resultado del pase
         const fb = document.getElementById('srs-prod-fb');
         if (fb) fb.innerHTML = ok
             ? '<span class="srs-prod-ok">✅ ¡Correcto!</span>'
@@ -7045,6 +7139,7 @@ function pzCounterUpdate() {
         const g = SR.recall || { pyList: [], esList: [] };
         const hit = srsRecallHit(typed, g.pyList, g.esList);
         SR.recTried++; if (hit) SR.recOk++;
+        if (hit) { SR.curRes = 'ok'; } else { SR.curTries++; } // v9.48: resultado del pase
         const fb = document.querySelector('#srs-body .srs-recall-fb');
         if (fb) fb.innerHTML = hit
             ? '<span class="srs-prod-ok">✅ ¡Bien! Ahora compará con la respuesta.</span>'
@@ -7064,6 +7159,23 @@ function pzCounterUpdate() {
 
     function doReveal() {
         SR.revealed = true;
+        // v9.48: el pase del mazo cierra acá — UN registro por tarjeta revelada
+        // ('again' re-encola la tarjeta → renderQuiz resets → nuevo pase).
+        if (!SR.attDone) {
+            SR.attDone = true;
+            if (SR.cur && typeof recordSrsAttempt === 'function') {
+                recordSrsAttempt(SR.cur.zh, SR.curTries + 1,
+                    SR.curRes === 'ok' ? 'ok' : (SR.curRes === 'ko' ? 'ko' : 'rv'));
+            }
+            const chip = (typeof document !== 'undefined') ? document.querySelector('#srs-body .srs-chip-att') : null;
+            if (chip && SR.cur) {
+                const b2 = attemptsBadgeFor({ w: 1, chinese_simp_answer: String(SR.cur.zh || '') });
+                if (b2) {
+                    chip.textContent = uiT('attChip').replace('{n}', b2.n);
+                    chip.title = uiT('attTitle').replace('{n}', b2.n).replace('{ok}', b2.ok).replace('{ft}', b2.ft);
+                }
+            }
+        }
         const ans = document.getElementById('srs-ans');
         // v9.21: esconder TODOS los botones de revelado (reveal + escape)
         document.querySelectorAll('#srs-body .srs-reveal-btn').forEach((b) => b.classList.add('hidden'));
