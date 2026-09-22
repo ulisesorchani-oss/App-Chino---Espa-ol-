@@ -397,7 +397,7 @@
 //       prefiere voces del país exacto en el fallback del sistema.
 //       Requiere api/ v9.49 (es-AR + zh-TW en el mapa VOICES). Toca app.js
 //       + lessons-dele.js + voice-evaluator.js + index.html (+ api/).
-const VERSION = 'v94'; // — invalida shell (v9.49: voz argentina 🇦🇷 + taiwanesa 🇹🇼)
+const VERSION = 'v95'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel en style.css)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de

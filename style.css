@@ -5233,3 +5233,513 @@ body.paper-mode .srs-bar-btn { background: #4338ca; color: #fff; }
 .srs-chip-att { background: var(--warning); } /* ámbar ≠ azul "Repaso" · 5.02:1 con blanco */
 body.paper-mode .srs-chip-att { background: var(--warning); }
 .len-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+/* ════════════════════════════════════════════════════════════════
+   v11 — UI POLISH · look "hi-end" minimalista
+   ────────────────────────────────────────────────────────────────
+   Objetivos (feedback v11):
+   1) OSCURO: negros y grises oscuros en CAPAS (nada de negro plano)
+      + detalles de color (hairlines índigo/violeta/teal) en los
+      bordes superiores de los paneles.
+   2) PAPEL DE ARROZ: textura de papel real (grano SVG), paneles que
+      ALTERNAN crema ⇄ sepia, y bordes bronce visibles en todo.
+   3) GLOBAL: sombras en capas, luz interna en superficies, foco
+      visible, scrollbars temáticos, transiciones suaves.
+
+   Todo vive AL FINAL del archivo: mismas especificidades que las
+   reglas v9.x/v10 pero declaradas después → ganan por cascada
+   sin tocar una sola regla previa.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    --radius: 14px;                 /* esquinas un punto más modernas */
+    --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --hl-indigo: #7aa2ff;           /* hairline índigo  (oscuro) */
+    --hl-violet: #a78bfa;           /* hairline violeta (oscuro) */
+    --hl-teal: #5eead4;             /* hairline teal    (oscuro, vocabulario) */
+    --hl-bronze: #c9924d;           /* hairline bronce  (papel) */
+}
+
+/* ─── Micro-pulido global: suavizado, selección, foco, motion ─── */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(102, 126, 234, 0.30); }
+:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; border-radius: 4px; }
+
+button, .card, .vocabulary-panel, .module-status, .reader-banner,
+.train-card, .vocab-pop, .app-nav, .control-panel, #answer-input, .reader-input {
+    transition: border-color 0.3s var(--ease-out),
+                box-shadow 0.3s var(--ease-out),
+                background-color 0.3s var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ─── CLARO: mismo gradiente de marca + glows de profundidad ─── */
+body {
+    background:
+        radial-gradient(1100px 700px at 85% -10%, rgba(255, 255, 255, 0.18), transparent 55%),
+        radial-gradient(950px 680px at -12% 108%, rgba(23, 16, 60, 0.30), transparent 58%),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card, .vocabulary-panel {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.08),
+        0 14px 34px -16px rgba(15, 23, 42, 0.40);
+}
+
+/* CTA principal: degradado sutil + luz interna (más "premium" que el plano) */
+.btn-primary {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 8px 20px -10px rgba(37, 99, 235, 0.60);
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 12px 26px -10px rgba(37, 99, 235, 0.70);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   1 · OSCURO EN CAPAS — carbón azulado, nunca negro puro
+   ════════════════════════════════════════════════════════════════ */
+body.dark-mode {
+    --bg-card: #151a23;        /* panel base (gris carbón azulado) */
+    --bg-light: #1d2430;       /* superficie elevada */
+    --text-primary: #edf1f7;
+    --text-secondary: #97a3b5;
+    --border: #2a3140;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 14px 34px -16px rgba(0, 0, 0, 0.65);
+    scrollbar-color: #333d4e transparent;
+    scrollbar-width: thin;
+    background:
+        radial-gradient(1100px 700px at 85% -10%, rgba(94, 118, 255, 0.13), transparent 55%),
+        radial-gradient(950px 700px at -15% 110%, rgba(124, 58, 237, 0.11), transparent 55%),
+        linear-gradient(180deg, #0a0d13 0%, #0d1219 50%, #0a0e15 100%);
+    color: var(--text-primary);
+}
+
+body.dark-mode ::selection { background: rgba(122, 162, 255, 0.32); }
+body.dark-mode :focus-visible { outline-color: rgba(138, 176, 255, 0.9); }
+body.dark-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #333d4e;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+body.dark-mode ::-webkit-scrollbar-track { background: transparent; }
+
+/* Paneles: gradiente vertical + borde gris-azulado + luz interna */
+body.dark-mode .card,
+body.dark-mode .vocabulary-panel,
+body.dark-mode .train-card {
+    position: relative;
+    background: linear-gradient(180deg, #181e29 0%, #141924 100%);
+    border: 1px solid #2b3342;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 1px 2px rgba(0, 0, 0, 0.45),
+        0 16px 36px -18px rgba(0, 0, 0, 0.70);
+}
+
+/* Detalle de color: hairline luminoso sobre el borde superior.
+   Índigo→violeta en la tarjeta principal y popups… */
+body.dark-mode .card::before,
+body.dark-mode .vocab-pop::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(46%, 220px);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--hl-indigo), var(--hl-violet), transparent);
+    opacity: 0.9;
+    pointer-events: none;
+}
+/* …y teal→índigo en el panel de vocabulario (alterna el acento) */
+body.dark-mode .vocabulary-panel::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(46%, 220px);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--hl-teal), var(--hl-indigo), transparent);
+    opacity: 0.85;
+    pointer-events: none;
+}
+/* el acento activo de las tarjetas de entrenamiento sigue siendo verde */
+body.dark-mode .train-card.active { border-color: var(--success); }
+
+/* Inputs y textareas: pozo más profundo que el panel (capa extra) */
+body.dark-mode #answer-input,
+body.dark-mode .reader-input {
+    background-color: #10151d;
+    border-color: #2b3342;
+    color: var(--text-primary);
+}
+body.dark-mode #answer-input:focus,
+body.dark-mode .reader-input:focus {
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.16);
+}
+
+/* Barra de estudio y panel de control: vidrio oscuro */
+body.dark-mode .control-panel {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.09);
+}
+body.dark-mode .control-panel.study-bar {
+    background: rgba(11, 15, 21, 0.88);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 28px -12px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Banners de módulos: mismo panel en capas, respeta su borde semántico */
+body.dark-mode .module-status,
+body.dark-mode .reader-banner {
+    background: linear-gradient(180deg, #181e29 0%, #141924 100%);
+    border-color: #2b3342;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 10px 28px -16px rgba(0, 0, 0, 0.70);
+}
+
+/* Popups: flota sobre todo con sombra profunda + hairline propio */
+body.dark-mode .vocab-pop,
+body.dark-mode #placement-pop,
+body.dark-mode #srs-pop,
+body.dark-mode .backup-pop,
+body.dark-mode .install-help-card {
+    background: linear-gradient(180deg, #181e29 0%, #141924 100%);
+    border: 1px solid #2b3342;
+    box-shadow:
+        0 24px 60px -24px rgba(0, 0, 0, 0.80),
+        0 2px 8px rgba(0, 0, 0, 0.50);
+}
+body.dark-mode .wp-banner { background: #0e1219; }
+
+/* Barra inferior de navegación: vidrio oscuro con blur */
+body.dark-mode .app-nav {
+    background: rgba(12, 16, 23, 0.92);
+    border-top-color: #262e3c;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+body.dark-mode .nav-btn.active { color: #8ab0ff; border-top-color: #8ab0ff; }
+
+/* Header: píldora de racha y botón de tema en vidrio oscuro */
+body.dark-mode .header-streak {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #edf1f7;
+}
+body.dark-mode .header-streak.at-risk {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(251, 191, 36, 0.35);
+    color: #fcd34d;
+}
+body.dark-mode .header-actions .theme-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+/* Botones y controles del modo oscuro */
+body.dark-mode .btn-primary {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        0 10px 24px -10px rgba(37, 99, 235, 0.65);
+}
+body.dark-mode .btn-secondary {
+    background: #232b39;
+    color: #edf1f7;
+}
+body.dark-mode .btn-secondary:hover { background: #2b3444; }
+body.dark-mode .level-dropdown {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+body.dark-mode .level-dropdown option { background: #1d2430; color: #edf1f7; }
+
+/* Feedback correcto/incorrecto: translúcidos (nada de pastel sólido) */
+body.dark-mode .feedback.correct {
+    background: rgba(34, 197, 94, 0.13);
+    color: #6ee7a0;
+}
+body.dark-mode .feedback.incorrect {
+    background: rgba(239, 68, 68, 0.13);
+    color: #ff9c93;
+}
+/* ════════════════════════════════════════════════════════════════
+   2 · PAPEL DE ARROZ — grano de papel, crema ⇄ sepia, bordes bronce
+   ════════════════════════════════════════════════════════════════
+   La textura es un SVG feTurbulence en data-URI (cero requests,
+   offline-friendly). Se aplica como capa superior del fondo con
+   blend soft-light → grano sutil, sin ensuciar el contraste.
+   ════════════════════════════════════════════════════════════════ */
+body.paper-mode {
+    --bg-card: #faf3df;        /* crema (tarjeta principal) */
+    --bg-light: #f0e5c8;       /* sepia (superficies secundarias) */
+    --text-primary: #43382a;
+    --text-secondary: #86755a;
+    --border: #d8c69c;
+    --shadow: 0 1px 2px rgba(122, 92, 44, 0.12), 0 14px 30px -16px rgba(122, 92, 44, 0.38);
+    scrollbar-color: #cbb58a transparent;
+    scrollbar-width: thin;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.9'/%3E%3C/svg%3E"),
+        radial-gradient(1100px 750px at 12% -8%, rgba(255, 252, 240, 0.60), transparent 55%),
+        radial-gradient(950px 700px at 110% 108%, rgba(148, 116, 61, 0.18), transparent 55%),
+        linear-gradient(160deg, #e9dab6 0%, #f3e9cf 45%, #ecdfba 100%);
+    background-blend-mode: soft-light, normal, normal, normal;
+    color: var(--text-primary);
+}
+
+body.paper-mode ::selection { background: rgba(192, 138, 62, 0.30); }
+body.paper-mode :focus-visible { outline-color: rgba(139, 94, 52, 0.85); }
+body.paper-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
+body.paper-mode ::-webkit-scrollbar-thumb {
+    background: #cbb58a;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+body.paper-mode ::-webkit-scrollbar-track { background: transparent; }
+
+/* Tarjeta principal: CREMA con borde bronce y luz interna superior */
+body.paper-mode .card {
+    position: relative;
+    background: #faf3df;
+    border: 1px solid #d5c296;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 1px 2px rgba(122, 92, 44, 0.12),
+        0 14px 30px -16px rgba(122, 92, 44, 0.38);
+}
+
+/* Panel de vocabulario: SEPIA — alterna con la tarjeta crema */
+body.paper-mode .vocabulary-panel {
+    position: relative;
+    background: #f0e5c6;
+    border: 1px solid #d0bb8d;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        0 1px 2px rgba(122, 92, 44, 0.12),
+        0 14px 30px -16px rgba(122, 92, 44, 0.38);
+}
+
+/* Detalle de color: hairline bronce sobre el borde superior */
+body.paper-mode .card::before,
+body.paper-mode .vocab-pop::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(46%, 220px);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--hl-bronze), #a5712f, transparent);
+    opacity: 0.85;
+    pointer-events: none;
+}
+body.paper-mode .vocabulary-panel::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(46%, 220px);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, #a5712f, var(--hl-bronze), transparent);
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+/* Tarjetas de entrenamiento: crema, borde bronce, activo verde té */
+body.paper-mode .train-card {
+    background: #f7efda;
+    border: 1px solid #d5c296;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.50),
+        0 10px 24px -14px rgba(122, 92, 44, 0.40);
+}
+body.paper-mode .train-card.active { border-color: #2f6b4f; }
+
+/* Banners de módulos: sepia con borde izquierdo bronce */
+body.paper-mode .module-status,
+body.paper-mode .reader-banner {
+    background: #f2e7c9;
+    border: 1px solid #d5c296;
+    border-left: 4px solid #b07d3a;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        0 10px 26px -16px rgba(122, 92, 44, 0.40);
+}
+
+/* Inputs: hoja más clara que el panel, foco café tinta */
+body.paper-mode #answer-input,
+body.paper-mode .reader-input {
+    background-color: #fffdf4;
+    border-color: #cdb98c;
+    color: #43382a;
+}
+body.paper-mode #answer-input:focus,
+body.paper-mode .reader-input:focus {
+    border-color: #8b5e34;
+    box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.16);
+}
+
+/* Barra de estudio: sepia translúcido (nada de blanco puro) */
+body.paper-mode .control-panel {
+    background: rgba(255, 252, 240, 0.55);
+    border: 1px solid rgba(139, 94, 52, 0.28);
+}
+body.paper-mode .control-panel.study-bar {
+    background: rgba(247, 238, 214, 0.96);
+    border-color: rgba(139, 94, 52, 0.25);
+    box-shadow: 0 10px 26px -14px rgba(122, 92, 44, 0.45);
+}
+
+/* Chips y toggles sobre la barra: tinta café en vez de blanco */
+body.paper-mode .mode-btn {
+    border-color: rgba(139, 94, 52, 0.40);
+    color: #4a3f2e;
+}
+body.paper-mode .mode-btn.active {
+    background: #fffdf4;
+    border-color: #8b5e34;
+    color: #6f4a28;
+}
+body.paper-mode .cat-btn {
+    border-color: rgba(139, 94, 52, 0.40);
+    background: rgba(255, 253, 244, 0.55);
+    color: #5c5041;
+}
+body.paper-mode .cat-btn.active {
+    background: #fffdf4;
+    border-color: #8b5e34;
+    color: #6f4a28;
+}
+body.paper-mode .script-toggle { border-color: rgba(139, 94, 52, 0.40); }
+body.paper-mode .script-btn { color: #5c5041; }
+body.paper-mode .script-btn.active { background: #fffdf4; color: #6f4a28; }
+body.paper-mode .pinyin-btn {
+    border-color: rgba(139, 94, 52, 0.40);
+    background: rgba(255, 253, 244, 0.55);
+    color: #5c5041;
+}
+body.paper-mode .pinyin-btn.active { background: #fffdf4; color: #6f4a28; }
+body.paper-mode .btn-reset {
+    border-color: rgba(139, 94, 52, 0.35);
+    color: #86755a;
+}
+body.paper-mode .speed-btn {
+    border-color: #2f6b4f;
+    background: rgba(47, 107, 79, 0.10);
+    color: #2f6b4f;
+}
+
+/* Navegación inferior: papel translúcido con blur */
+body.paper-mode .app-nav {
+    background: rgba(250, 243, 224, 0.95);
+    border-top-color: #d5c296;
+    box-shadow: 0 -10px 30px rgba(122, 92, 44, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+body.paper-mode .nav-btn.active { color: #8b5e34; border-top-color: #b07d3a; }
+
+/* Popups: crema con borde bronce (gana sobre la regla v9.4) */
+body.paper-mode .vocab-pop,
+body.paper-mode #placement-pop,
+body.paper-mode #srs-pop,
+body.paper-mode .backup-pop,
+body.paper-mode .install-help-card {
+    background: #faf3df;
+    border: 1px solid #d5c296;
+    box-shadow:
+        0 24px 60px -24px rgba(92, 62, 22, 0.45),
+        0 2px 8px rgba(122, 92, 44, 0.20);
+}
+body.paper-mode .wp-banner { background: #f6eed6; }
+
+/* Header: racha con borde bronce, botón de tema café */
+body.paper-mode .header-streak {
+    background: #fff8e6;
+    border: 1px solid #d9c79e;
+    color: #4a3f2e;
+}
+body.paper-mode .header-actions .theme-toggle {
+    background: rgba(139, 94, 52, 0.12);
+    border: 1px solid rgba(139, 94, 52, 0.22);
+}
+
+/* Feedback en tonos cálidos (verde té / terracota, no pasteles fríos) */
+body.paper-mode .feedback.correct { background: #e4edd8; color: #2f6b4f; }
+body.paper-mode .feedback.incorrect { background: #f5ded1; color: #a03d2e; }
+body.paper-mode .feedback.hint,
+body.paper-mode .feedback.reveal {
+    background: #f7e8c8;
+    color: #7a5b23;
+    border-left: 4px solid #b07d3a;
+}
+body.paper-mode .vocab-item.known { background: #e4edd8; border-color: #2f6b4f; }
+body.paper-mode .record-summary {
+    background: rgba(255, 253, 244, 0.92);
+    color: #4a3f2e;
+    border-color: rgba(139, 94, 52, 0.30);
+}
+
+/* ─── Oscuro: chips/toggles de la barra, antes con blanco puro ─── */
+body.dark-mode .mode-btn { border-color: rgba(255, 255, 255, 0.32); }
+body.dark-mode .mode-btn.active { border-color: #fff; }
+body.dark-mode .cat-btn {
+    border-color: rgba(255, 255, 255, 0.26);
+    background: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .cat-btn.active { border-color: #fff; background: #fff; }
+body.dark-mode .script-toggle { border-color: rgba(255, 255, 255, 0.30); }
+body.dark-mode .pinyin-btn {
+    border-color: rgba(255, 255, 255, 0.26);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Papel: fixes de contraste heredados del fondo morado ─── */
+/* .stats nació con color blanco (sobre el gradiente) → invisible sobre crema */
+body.paper-mode .stats { color: #6b5b40; }
+body.paper-mode .yo-settings .theme-toggle {
+    background: #8b5e34;
+    border: 1px solid rgba(139, 94, 52, 0.4);
+}
+/* Grano de papel también DENTRO de los paneles (muy sutil) */
+body.paper-mode .card,
+body.paper-mode .vocabulary-panel,
+body.paper-mode .train-card {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.55'/%3E%3C/svg%3E");
+    background-blend-mode: soft-light;
+}
