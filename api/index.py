@@ -1,5 +1,5 @@
 # ============================================================
-# api/index.py — v9.44 — TTS neuronal + CACHÉ (LRU memoria + CDN)
+# api/index.py — v9.49 — TTS neuronal + CACHÉ + voces 🇦🇷/🇹🇼 (LRU memoria + CDN)
 # (FastAPI — el stack que tu repo ya declara en requirements.txt:
 #  fastapi + uvicorn + edge-tts + piper-tts)
 # ------------------------------------------------------------
@@ -9,6 +9,12 @@
 #   redirige /api/tts → /api/index. El handler es CATCH-ALL:
 #   responde POST y GET en la ruta que sea (/api/tts, /tts o
 #   /api/index), así no depende del path interno.
+#
+# QUÉ CAMBIÓ EN v9.49 (voces 🇦🇷 argentina y 🇹🇼 taiwanesa):
+#   el mapa VOICES suma es-AR (Elena/Tomás) y zh-TW
+#   (HsiaoChen/YunJhe); el cliente las pide con lang es-AR/zh-TW
+#   y claves ar-f/ar-m/tw-f/tw-m. TODO lo demás (contrato v9.40
+#   de velocidad y v9.44 de caché GET/CDN + LRU) queda IGUAL.
 #
 # QUÉ CAMBIÓ EN v9.44 (caché de audios en el servidor):
 #   1) GET ?text=…&lang=…&voice=…&speed=… — NUEVO camino cacheable:
@@ -58,6 +64,15 @@ app.add_middleware(
 # El cliente valida con VOICE_EXPECT: f→Xiaoxiao, m→Yunjian,
 # f2→Xiaobei, m2→Yunxi (si devuelve otra, avisa "server viejo").
 # ------------------------------------------------------------
+# v9.49 — el mapa ahora cubre los 4 idiomas que pide la app:
+#   zh-CN  → Xiaoxiao/Yunjian/Xiaobei/Yunxi (contrato v9.4/v9.5)
+#   zh-TW  → HsiaoChen (f) y YunJhe (m): 普通话 con acento de Taiwan
+#            (claves tw-f/tw-m del cliente v9.49; f2/m2 por simetría)
+#   es-ES  → Elvira/Alvaro (España, de siempre)
+#   es-AR  → Elena (f) y Tomás (m): VOZ ARGENTINA (claves ar-f/ar-m
+#            del cliente v9.49). Voces verificadas en vivo contra el
+#            servicio de edge-tts (2026-09-23): síntesis OK con y sin
+#            rate="-15%" (contrato de velocidad v9.40 intacto).
 VOICES = {
     "zh-CN": {
         "f":  "zh-CN-XiaoxiaoNeural",
@@ -65,11 +80,23 @@ VOICES = {
         "f2": "zh-CN-XiaobeiNeural",
         "m2": "zh-CN-YunxiNeural",
     },
+    "zh-TW": {
+        "f":  "zh-TW-HsiaoChenNeural",
+        "m":  "zh-TW-YunJheNeural",
+        "f2": "zh-TW-HsiaoYuNeural",
+        "m2": "zh-TW-YunJheNeural",
+    },
     "es-ES": {
         "f":  "es-ES-ElviraNeural",
         "m":  "es-ES-AlvaroNeural",
         "f2": "es-ES-ElviraNeural",
         "m2": "es-ES-AlvaroNeural",
+    },
+    "es-AR": {
+        "f":  "es-AR-ElenaNeural",
+        "m":  "es-AR-TomasNeural",
+        "f2": "es-AR-ElenaNeural",
+        "m2": "es-AR-TomasNeural",
     },
 }
 DEFAULT_VOICE_KEY = "f"
@@ -260,7 +287,8 @@ async def catch_get(request: Request, full_path: str = ""):
     return {
         "ok": True,
         "service": "tts",
-        "version": "v9.44",
+        "version": "v9.49",
         "cache": f"LRU memoria {_TTS_CACHE_MAX} audios + CDN (GET immutable)",
+        "voices": "zh-CN · zh-TW (nuevo v9.49) · es-ES · es-AR (nuevo v9.49)",
         "hint": "GET ?text=…&lang=…&voice=…&speed=… | POST {text, lang, voice, speed}",
     }
