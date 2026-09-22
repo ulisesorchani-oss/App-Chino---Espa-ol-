@@ -1089,7 +1089,10 @@
         try {
             if (typeof fetchTTS === 'function') {
                 const vEs = (typeof voiceEs !== 'undefined') ? voiceEs : 'f';
-                const resp = await fetchTTS((typeof ttsBody === 'function') ? ttsBody(text, 'es-ES', vEs) : { text: text, lang: 'es-ES', voice: vEs }, 12000); // v9.40: +speed
+                // v9.49: la voz manda — ar-* → lang "es-AR" (argentina), resto es-ES
+                const langEs = (typeof ttsLangFor === 'function') ? ttsLangFor('es', vEs)
+                    : (String(vEs).indexOf('ar-') === 0 ? 'es-AR' : 'es-ES');
+                const resp = await fetchTTS((typeof ttsBody === 'function') ? ttsBody(text, langEs, vEs) : { text: text, lang: langEs, voice: vEs }, 12000); // v9.40: +speed
                 if (myTok !== dTok) return; // mientras tanto sonó otra línea
                 if (!resp.ok) throw new Error('TTS http ' + resp.status);
                 const data = await resp.json();
@@ -1129,11 +1132,11 @@
         } else if ('speechSynthesis' in window) {
             // fallback offline: voz del sistema en es-*
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'es-ES';
+            u.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('es', (typeof voiceEs !== 'undefined') ? voiceEs : 'f') : 'es-ES'; // v9.49: la voz manda
             u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
             try {
                 if (typeof sysVoiceFor === 'function') {
-                    const sv = sysVoiceFor('es-ES', (typeof voiceEs !== 'undefined') ? voiceEs : 'f');
+                    const sv = sysVoiceFor(u.lang, (typeof voiceEs !== 'undefined') ? voiceEs : 'f'); // v9.49: idioma de la voz
                     if (sv) u.voice = sv;
                 }
             } catch (e3) { }

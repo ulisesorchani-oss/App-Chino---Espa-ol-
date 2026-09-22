@@ -1274,7 +1274,11 @@ class LocalEvaluator {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 10000);
         try {
-            const data = await fetchRefAudio(text, 'es-ES', voiceEs || 'f', ctrl.signal);
+            // v9.49: la referencia sigue al idioma de la voz elegida (🇦🇷→es-AR)
+            const vEs49 = voiceEs || 'f';
+            const langEs49 = (typeof ttsLangFor === 'function') ? ttsLangFor('es', vEs49)
+                : (String(vEs49).indexOf('ar-') === 0 ? 'es-AR' : 'es-ES');
+            const data = await fetchRefAudio(text, langEs49, vEs49, ctrl.signal);
             if (!data) return null;
             const bin = atob(data.audio);
             const bytes = new Uint8Array(bin.length);

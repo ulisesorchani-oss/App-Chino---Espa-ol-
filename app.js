@@ -879,21 +879,51 @@ if (SPEED_STEPS.indexOf(playbackSpeed) === -1) playbackSpeed = 0.85;
 
 // ===== Voz TTS (persistente) =====
 // v9.4: el chino pasa de 2 a 4 voces — f (Xiaoxiao), m (Yunjian),
-// f2 y m2. El botón 🇨🇳 cicla las cuatro; el español mantiene f/m.
-// Las nuevas claves viajan al API igual que f/m.
-// v9.5: f2 pasa a ser FEMENINA ADULTA (Xiaobei, voz real distinta — la
-// joven Xiaoyi sonaba igual que Xiaoxiao); m2 queda como masculina joven
-// (Yunxi). VOICE_EXPECT permite detectar un api/tts.py desactualizado:
-// si el servidor devuelve otra voz, se avisa en consola y en el status.
-const VOICE_ICONS = { f: '👩', m: '👨', f2: '👩‍💼', m2: '👱‍♂️' };
-const VOICE_NAMES = { f: 'femenina', m: 'masculina', f2: 'femenina adulta · Xiaobei', m2: 'masculina joven · Yunxi' };
-// v9.5: voz neuronal esperada para cada clave — si el servidor devuelve otra,
-// es que el api/tts.py desplegado está desactualizado (f2/m2 caen a Xiaoxiao).
-const VOICE_EXPECT = { f: ['Xiaoxiao'], m: ['Yunjian'], f2: ['Xiaobei'], m2: ['Yunxi'] };
-const VOICE_ZH_SEQ = ['f', 'm', 'f2', 'm2'];
-const VOICE_ES_SEQ = ['f', 'm'];
+// f2 y m2. Las claves viajan al API igual que f/m.
+// v9.5: f2 = FEMENINA ADULTA (Xiaobei), m2 = masculina joven (Yunxi).
+// v9.49: VOCES REGIONALES — (a) el español RECUPERA la voz ARGENTINA:
+// ar-f (Elena) y ar-m (Tomás), que pasan a ciclar PRIMERO (🇦🇷→🇪🇸) porque
+// es la voz del alumno; (b) el chino suma 🇹🇼 tw-f (HsiaoChen) y tw-m
+// (YunJhe): 普通话 con acento taiwanés. El idioma del TTS sigue a la
+// voz elegida (ttsLangFor: ar-* → "es-AR", tw-* → "zh-TW"). Las banderas
+// viven dentro de VOICE_ICONS (el botón muestra 🇦🇷/🇪🇸 o 🇨🇳/🇹🇼 según la
+// voz); VOICE_EXPECT cubre las claves nuevas para seguir detectando un
+// api/tts.py desactualizado (caería a Xiaoxiao/Elvira → aviso visible).
+// v9.49 (QA): DOS mapas — las claves f/m existen en AMBOS idiomas y
+// cada botón debe mostrar SU bandera (el mapa único pintaba 🇨🇳 en el
+// botón español). VOICE_ICONS_ZH para el botón 🇨🇳/🇹🇼, VOICE_ICONS_ES
+// para el botón 🇦🇷/🇪🇸.
+const VOICE_ICONS_ZH = { f: '🇨🇳👩', m: '🇨🇳👨', f2: '🇨🇳👩‍💼', m2: '🇨🇳👱‍♂️',
+                         'tw-f': '🇹🇼👩', 'tw-m': '🇹🇼👨' };
+const VOICE_ICONS_ES = { 'ar-f': '🇦🇷👩', 'ar-m': '🇦🇷👨', f: '🇪🇸👩', m: '🇪🇸👨' };
+const VOICE_NAMES = { f: 'femenina', m: 'masculina', f2: 'femenina adulta · Xiaobei', m2: 'masculina joven · Yunxi',
+                      'tw-f': 'taiwanesa femenina · HsiaoChen', 'tw-m': 'taiwanesa masculina · YunJhe',
+                      'ar-f': 'argentina femenina · Elena', 'ar-m': 'argentina masculina · Tomás' };
+// v9.5: voz neuronal esperada por clave — si el servidor devuelve otra,
+// es que el api/tts.py desplegado está desactualizado (las nuevas claves
+// caerían a Xiaoxiao). v9.49: + HsiaoChen/YunJhe (zh-TW) y Elena/Tomas (es-AR).
+const VOICE_EXPECT = { f: ['Xiaoxiao'], m: ['Yunjian'], f2: ['Xiaobei'], m2: ['Yunxi'],
+                       'tw-f': ['HsiaoChen'], 'tw-m': ['YunJhe'],
+                       'ar-f': ['Elena'], 'ar-m': ['Tomas'] };
+// v9.49: ciclos — chino: China (f/m) → Taiwan (tw-f/tw-m) → extendidas;
+// español: ARGENTINA primero, España después.
+const VOICE_ZH_SEQ = ['f', 'm', 'tw-f', 'tw-m', 'f2', 'm2'];
+const VOICE_ES_SEQ = ['ar-f', 'ar-m', 'f', 'm'];
 function voiceValid(v, seq) { return seq.indexOf(v) !== -1 ? v : seq[0]; }
 let voiceZh = voiceValid(localStorage.getItem('ac_voice_zh'), VOICE_ZH_SEQ);
+// v9.49: MIGRACIÓN ÚNICA — quien tenía la española f/m guardada pasa a la
+// argentina equivalente UNA sola vez (flag ac_voice_es_v949): es la voz que
+// se percibía perdida. Tocar el botón permite volver a 🇪🇸 y ahí la elección
+// se respeta para siempre (sin re-migraciones).
+try {
+    if (!localStorage.getItem('ac_voice_es_v949')) {
+        const prevEs = localStorage.getItem('ac_voice_es');
+        if (prevEs === 'f' || prevEs === 'm') {
+            localStorage.setItem('ac_voice_es', prevEs === 'f' ? 'ar-f' : 'ar-m');
+        }
+        localStorage.setItem('ac_voice_es_v949', '1');
+    }
+} catch (e) { /* sin storage */ }
 let voiceEs = voiceValid(localStorage.getItem('ac_voice_es'), VOICE_ES_SEQ);
 const VOICE_SAMPLES = {
     zh: '你好！我们一起练习吧。',
@@ -1544,16 +1574,16 @@ function applySavedUI() {
         btnSpeed.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
     }
 
-    // Botones de voz (v9.4: el chino cicla 4 voces; el español f/m)
+    // Botones de voz (v9.49: bandera dentro del icono — 🇨🇳/🇹🇼 y 🇦🇷/🇪🇸)
     const btnVoiceZh = document.getElementById('btn-voice-zh');
     if (btnVoiceZh) {
-        btnVoiceZh.textContent = '🇨🇳 ' + VOICE_ICONS[voiceZh];
+        btnVoiceZh.textContent = VOICE_ICONS_ZH[voiceZh] || ('🇨🇳 ' + voiceZh);
         btnVoiceZh.title = 'Voz china: ' + (VOICE_NAMES[voiceZh] || voiceZh) + ' (clic para cambiar)';
     }
     const btnVoiceEs = document.getElementById('btn-voice-es');
     if (btnVoiceEs) {
-        btnVoiceEs.textContent = '🇪🇸 ' + VOICE_ICONS[voiceEs];
-        btnVoiceEs.title = 'Voz española: ' + (voiceEs === 'f' ? 'femenina' : 'masculina') + ' (clic para cambiar)';
+        btnVoiceEs.textContent = VOICE_ICONS_ES[voiceEs] || ('🇪🇸 ' + voiceEs);
+        btnVoiceEs.title = 'Voz española: ' + (VOICE_NAMES[voiceEs] || voiceEs) + ' (clic para cambiar)';
     }
 
     // Actualizar botón de tonos (SIEMPRE visible)
@@ -4733,6 +4763,17 @@ function fetchTTS(body, timeoutMs) {
 // de siempre → la app funciona igual antes y después de subir el api,
 // y NUNCA se aplican los dos efectos a la vez.
 let ttsServerSpeed = false; // alguna respuesta ya vino sintetizada a pedido
+// v9.49: el idioma del TTS SIGUE a la voz elegida (bandera del botón):
+//   español → ar-* pide lang "es-AR" (argentina), resto "es-ES" (España);
+//   chino   → tw-* pide lang "zh-TW" (taiwanesa), resto "zh-CN" (China).
+// El api v9.49 mapea esos lang a Elena/Tomás y HsiaoChen/YunJhe; con un api
+// viejo la clave cae a la voz default (Xiaoxiao) y el aviso de server
+// desactualizado (warnStaleVoice) lo hace visible en la muestra de voz.
+function ttsLangFor(lang, v) {
+    const k = String(v || '');
+    if (lang === 'es') return k.indexOf('ar-') === 0 ? 'es-AR' : 'es-ES';
+    return k.indexOf('tw-') === 0 ? 'zh-TW' : 'zh-CN';
+}
 function ttsBody(text, lang, voice) {
     return { text: text, lang: lang, voice: voice,
              speed: (typeof playbackSpeed === 'number') ? playbackSpeed : 1 };
@@ -4774,8 +4815,8 @@ async function playAudio(lang) {
     const k = ck();
 
     let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
-    let langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
     let voiceGender = lang === 'es' ? voiceEs : voiceZh;
+    let langCode = ttsLangFor(lang, voiceGender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
 
     // v9.19: si un playAudio anterior dejó su botón esperando ('...'), restaurarlo
     // ANTES de capturar el nuevo — al tocar Siguiente (o cambiar de tarjeta en el
@@ -4877,11 +4918,16 @@ function cycleVoice(lang) {
 // Devuelve una voz zh*/es* distinta según f/m/f2/m2 (si hay varias).
 function sysVoiceFor(langCode, v) {
     try {
-        const pref = String(langCode || '').slice(0, 2).toLowerCase();
-        const vs = speechSynthesis.getVoices().filter(x => x.lang && String(x.lang).toLowerCase().indexOf(pref) === 0);
+        const full = String(langCode || '').toLowerCase().replace('_', '-');
+        const pref = full.slice(0, 2);
+        const vs = speechSynthesis.getVoices().filter(x => x.lang && String(x.lang).toLowerCase().replace('_', '-').indexOf(pref) === 0);
         if (!vs.length) return null;
-        const idx = ({ f: 0, m: 1, f2: 2, m2: 3 })[v] || 0;
-        return vs[idx % vs.length];
+        // v9.49: con idioma regional (es-AR / zh-TW) preferir las voces del
+        // país exacto si el dispositivo las tiene; si no, las del idioma.
+        const exact = full.length > 2 ? vs.filter(x => String(x.lang).toLowerCase().replace('_', '-').indexOf(full) === 0) : [];
+        const pool = exact.length ? exact : vs;
+        const idx = ({ f: 0, m: 1, f2: 2, m2: 3, 'ar-f': 0, 'ar-m': 1, 'tw-f': 0, 'tw-m': 1 })[v] || 0;
+        return pool[idx % pool.length];
     } catch (e) { return null; }
 }
 
@@ -4894,7 +4940,7 @@ function warnStaleVoice(key, data) {
         const want = VOICE_EXPECT[key] || null;
         if (!want) return;                              // español u otra clave sin mapeo
         if (want.some(w => String(data.voice).indexOf(w) !== -1)) return; // OK
-        console.warn('⚠️ El servidor TTS no tiene aún la voz “' + key + '” (devuelve ' + data.voice + '). Subí el api/tts.py actualizado (v9.5).');
+        console.warn('⚠️ El servidor TTS no tiene aún la voz “' + key + '” (devuelve ' + data.voice + '). Subí el api/tts.py actualizado (v9.49).');
         if (typeof moduleStatus === 'function') {
             moduleStatus('⚠️ Esta voz aún no está en el servidor — subí el api/tts.py nuevo (LEEME SUBIR-A-GITHUB)', true);
         }
@@ -4904,12 +4950,15 @@ function warnStaleVoice(key, data) {
 function playVoiceSample(lang) {
     try {
         const text = VOICE_SAMPLES[lang];
-        const langCode = lang === 'es' ? 'es-ES' : 'zh-CN';
         const gender = lang === 'es' ? voiceEs : voiceZh;
+        const langCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
         fetchTTS(ttsBody(text, langCode, gender)) // v9.41: pasa por el choke point único (timeout + aviso si el server cae)
             .then(r => r.ok ? r.json() : null)
             .then(d => {
-                if (lang !== 'es') warnStaleVoice(gender, d); // v9.5: detecta servidor viejo
+                // v9.49: chequeo de server viejo SOLO para claves regionales
+                // (las f/m de España no tienen expectativa en VOICE_EXPECT).
+                if (lang === 'es') { if (gender.indexOf('ar-') === 0) warnStaleVoice(gender, d); }
+                else if (gender.indexOf('tw-') === 0) warnStaleVoice(gender, d);
                 if (!d || !d.audio) return;
                 const bin = atob(d.audio);
                 const bytes = new Uint8Array(bin.length);
@@ -4969,8 +5018,8 @@ async function toggleReaderPlay() {
     if (!text) { ta.focus(); return; }
 
     const lang = detectReaderLang(text);
-    const langCode = lang === 'zh' ? 'zh-CN' : 'es-ES';
     const gender = lang === 'zh' ? voiceZh : voiceEs; // usa la voz elegida en los botones 👩/👨
+    const langCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
 
     btn.textContent = '⏳ ...';
     btn.disabled = true;
@@ -6765,10 +6814,10 @@ function pzCounterUpdate() {
             if (!('speechSynthesis' in window)) return;
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t);
-            u.lang = 'zh-CN'; u.rate = playbackSpeed;
+            u.lang = ttsLangFor('zh', voiceZh); u.rate = playbackSpeed; // v9.49: 🇹🇼 → zh-TW
             speechSynthesis.speak(u);
         };
-        fetchTTS(ttsBody(t, 'zh-CN', voiceZh)) // v9.40: +speed
+        fetchTTS(ttsBody(t, ttsLangFor('zh', voiceZh), voiceZh)) // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             .then(r => r.ok ? r.json() : null)
             .then(d => {
                 if (!d || !d.audio) return speakFallback();
@@ -7944,7 +7993,7 @@ const KARA = (function () {
             lqPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
-            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
+            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', voiceZh), voiceZh), 12000); // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             if (myTok !== lqTok) return; // mientras tanto sonó otra línea → descartar
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
@@ -7982,9 +8031,9 @@ const KARA = (function () {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'zh-CN';
+                    u.lang = ttsLangFor('zh', voiceZh); // v9.49: 🇹🇼 → zh-TW
                     u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
-                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
+                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', voiceZh), voiceZh) : null;
                     if (sv) u.voice = sv;
                     KARA.prepare(karaLine); // v9.4: karaoke también con la voz del sistema
                     lqPlay = { text, btn, state: 'playing' };
@@ -8520,7 +8569,7 @@ const KARA = (function () {
             crPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (el) el.classList.add('lq-speaking');
-            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
+            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', voiceZh), voiceZh), 12000); // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             if (myTok !== crTok) { if (el && el.classList && el.classList.remove) el.classList.remove('lq-speaking'); return; }
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
@@ -8554,9 +8603,9 @@ const KARA = (function () {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'zh-CN';
+                    u.lang = ttsLangFor('zh', voiceZh); // v9.49: 🇹🇼 → zh-TW
                     u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
-                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
+                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', voiceZh), voiceZh) : null;
                     if (sv) u.voice = sv;
                     KARA.prepare(karaLine); // v9.4: karaoke con la voz del sistema
                     crPlay = { text, btn: el, state: 'playing' };
@@ -9175,7 +9224,7 @@ const KARA = (function () {
             return;
         }
         try {
-            const resp = await fetchTTS(ttsBody(text, 'zh-CN', voiceZh), 12000); // v9.40: +speed
+            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', voiceZh), voiceZh), 12000); // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             if (!resp.ok) throw new Error('TTS ' + resp.status);
             const data = await resp.json();
             if (!data.audio) throw new Error('sin audio');
@@ -9193,8 +9242,8 @@ const KARA = (function () {
             console.warn('[MP] Vercel falló, voz sistema', err);
             if ('speechSynthesis' in window) {
                 const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'zh-CN'; u.rate = playbackSpeed;
-                const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor('zh-CN', voiceZh) : null;
+                u.lang = ttsLangFor('zh', voiceZh); u.rate = playbackSpeed; // v9.49: 🇹🇼 → zh-TW
+                const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', voiceZh), voiceZh) : null;
                 if (sv) u.voice = sv;
                 u.onend = finish; u.onerror = finish;
                 speechSynthesis.speak(u);

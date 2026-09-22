@@ -385,7 +385,19 @@
 //       progreso, como el tema): estricta 1.2/1.6 · normal 1.6/2.0 ·
 //       permisiva 2.2/2.8, práctica con contorno / de memoria.
 //       Toca app.js + index.html + style.css.
-const VERSION = 'v93'; // — invalida shell (v9.48: intentos en el mazo + tolerancia de trazos)
+// v9.49: VOCES 🇦🇷 ARGENTINA (recuperada y default) + 🇹🇼 TAIWANESA.
+//       (1) El español cicla 🇦🇷 ar-f Elena → 🇦🇷 ar-m Tomás → 🇪🇸 f Elvira →
+//       🇪🇸 m Alvaro; el chino suma 🇹🇼 tw-f HsiaoChen y tw-m YunJhe entre
+//       las voces de China y las extendidas. El idioma del TTS sigue a la
+//       voz (ttsLangFor: ar-* → es-AR · tw-* → zh-TW) en TODOS los caminos
+//       (tarjetas, muestra de voz, lector, lecciones, clásicos, pares
+//       mínimos, dramas DELE y referencia del evaluador ES). Migración
+//       única ac_voice_es_v949: la española f/m guardada pasa a la
+//       argentina equivalente (la voz que se percibía perdida). sysVoiceFor
+//       prefiere voces del país exacto en el fallback del sistema.
+//       Requiere api/ v9.49 (es-AR + zh-TW en el mapa VOICES). Toca app.js
+//       + lessons-dele.js + voice-evaluator.js + index.html (+ api/).
+const VERSION = 'v94'; // — invalida shell (v9.49: voz argentina 🇦🇷 + taiwanesa 🇹🇼)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
