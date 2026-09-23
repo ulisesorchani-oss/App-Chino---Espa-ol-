@@ -871,10 +871,17 @@ let state = {
 // Variable global para el botón de colores
 let showToneColors = false; 
 
+// v9.50: lectura SEGURA de localStorage para las lecturas de arranque. Sin
+// esto, un navegador con el almacenamiento bloqueado (modo privado, webviews)
+// lanzaba una excepción en la carga del script y la app entera no arrancaba.
+function lsGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+
 // ===== Velocidad de audio (persistente, default 0.85) =====
 const SPEED_STEPS = [0.85, 1, 0.7];
 const SPEED_LABELS = { '0.85': '🐢 0.85x', '1': '⚡ 1.0x', '0.7': '🐌 0.7x' };
-let playbackSpeed = parseFloat(localStorage.getItem('ac_speed'));
+let playbackSpeed = parseFloat(lsGet('ac_speed'));
 if (SPEED_STEPS.indexOf(playbackSpeed) === -1) playbackSpeed = 0.85;
 
 // ===== Voz TTS (persistente) =====
@@ -910,7 +917,7 @@ const VOICE_EXPECT = { f: ['Xiaoxiao'], m: ['Yunjian'], f2: ['Xiaobei'], m2: ['Y
 const VOICE_ZH_SEQ = ['f', 'm', 'tw-f', 'tw-m', 'f2', 'm2'];
 const VOICE_ES_SEQ = ['ar-f', 'ar-m', 'f', 'm'];
 function voiceValid(v, seq) { return seq.indexOf(v) !== -1 ? v : seq[0]; }
-let voiceZh = voiceValid(localStorage.getItem('ac_voice_zh'), VOICE_ZH_SEQ);
+let voiceZh = voiceValid(lsGet('ac_voice_zh'), VOICE_ZH_SEQ);
 // v9.49: MIGRACIÓN ÚNICA — quien tenía la española f/m guardada pasa a la
 // argentina equivalente UNA sola vez (flag ac_voice_es_v949): es la voz que
 // se percibía perdida. Tocar el botón permite volver a 🇪🇸 y ahí la elección
@@ -924,7 +931,7 @@ try {
         localStorage.setItem('ac_voice_es_v949', '1');
     }
 } catch (e) { /* sin storage */ }
-let voiceEs = voiceValid(localStorage.getItem('ac_voice_es'), VOICE_ES_SEQ);
+let voiceEs = voiceValid(lsGet('ac_voice_es'), VOICE_ES_SEQ);
 const VOICE_SAMPLES = {
     zh: '你好！我们一起练习吧。',
     es: '¡Hola! Vamos a practicar juntos.'
@@ -987,7 +994,7 @@ function backupDownload(name, content, mime) {
         return true;
     } catch (e) { return false; }
 }
-function backupHoy() { return new Date().toISOString().slice(0, 10); }
+function backupHoy() { return localDay(); }
 function showBackupMsg(t) {
     const el = document.getElementById('backup-msg');
     if (el) el.textContent = t;
@@ -1012,7 +1019,11 @@ function doBackupImport(file) {
             // sin contar nada. Sin el flag, restaurar un respaldo con pocos
             // aciertos de diferencia los contaba como aciertos del día.
             try { window.__hsImporting = true; } catch (e) { }
+            // v9.50: solo se restauran las claves que la app misma exporta
+            // (backupCollect: STORAGE_KEY, theme y ac_*) — un archivo ajeno o
+            // manipulado ya no puede escribir claves arbitrarias del navegador.
             Object.keys(obj.data).forEach(k => {
+                if (!(k === STORAGE_KEY || k === 'theme' || /^ac_/.test(k))) return;
                 try { localStorage.setItem(k, String(obj.data[k])); n++; } catch (e) { }
             });
             try { window.__hsImporting = false; } catch (e) { }
@@ -1867,7 +1878,8 @@ function listenPick(optBtn) {
     if (st) st.classList.remove('hidden'); // el texto aparece AHORA (con su hueco)
     const inp = document.getElementById('answer-input');
     if (inp) inp.value = val;
-    state.attempts = 1; // v10: elegir una opción es el único intento
+    state.attempts = 1; // v10: elegir una opción es el único intento (sin pista ni reintento)
+    state._listenSingle = true; // v9.50: ese único intento SÍ cuenta como "al primer intento" en la estadística
     checkAnswer();
 }
 
@@ -2615,9 +2627,7 @@ function pzIsHanCh(ch) {
     return (c >= 0x3400 && c <= 0x9FFF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0x20000 && c <= 0x2FA1F);
 }
 
-function escHtml(t) {
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+// (escHtml vive más abajo, junto al lector interlineal: v9.50 quitó la copia duplicada)
 
 // Posición del hueco en coordenadas de caracteres han: el prefijo del
 // cloze hasta '___' es idéntico al de la oración completa.
@@ -2776,6 +2786,7 @@ function renderCurrentSentence() {
     state.answered = false;
     state.filledAnswer = null;   // v7.2: oración nueva → hueco otra vez vacío
     state.attempts = 0;          // v10 UX: dos intentos por tarjeta
+    state._listenSingle = false; // v9.50: se reactiva solo al elegir una opción en "solo oído"
     state.lastResult = null;
     const btnCheck = document.getElementById('btn-check');
     if (btnCheck) btnCheck.textContent = uiT('btnCheck');
@@ -3123,7 +3134,10 @@ function checkAnswer() {
             if (!iN) return false;
             return validAnswers.some(ans => {
                 const aN = expectChineseAns ? normZh(ans) : normEs(ans);
-                return !!aN && (iN === aN || iN.includes(aN) || aN.includes(iN));
+                // v9.50: escribir MÁS que la respuesta (oración completa) sigue valiendo;
+                // escribir MENOS solo vale si cubre ≥70 % (antes "a" o "记" pasaban)
+                return !!aN && (iN === aN || iN.includes(aN) ||
+                    (aN.includes(iN) && iN.length >= aN.length * 0.7));
             });
         })();
 
@@ -3163,7 +3177,7 @@ function checkAnswer() {
         rememberWordContext(wordKey ? [wordKey] : validAnswers, s); // v7.13: contexto de la oración actual
         refillBlank('correct');   // v7.2: la oración queda completa (verde)
         // v9.47: pase resuelto en acierto — intentos = errados previos + este
-        recordCardAttempt(s, state.attempts + 1, 'ok');
+        recordCardAttempt(s, state._listenSingle ? 1 : state.attempts + 1, 'ok');
     } else {
         state.lastResult = 'wrong';
         showFeedback(uiT('validWrong') + '"' + allOptions + '"', 'incorrect',
@@ -3391,7 +3405,13 @@ function answerDiffHtml(input, answer, expectZh) {
 
 // ---- sesión diaria ----
 const SESSION_KEY = 'ac_session_v1';
-function sessionToday() { return new Date().toISOString().slice(0, 10); }
+// v9.50: fecha LOCAL (yyyy-mm-dd). toISOString() daba la fecha UTC: en
+// Argentina (UTC-3) el "día" cambiaba a las 21:00 y la sesión se reiniciaba.
+function localDay(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function sessionToday() { return localDay(); }
 function loadSession() {
     state.sessionDate = sessionToday();
     try {
@@ -3534,6 +3554,26 @@ function setupAppNav() {
     let saved = null;
     try { saved = localStorage.getItem('ac_view_v1'); } catch (e) { /* noop */ }
     showView(saved || 'aprender', false);
+}
+// v9.50: varios overlays fullscreen pueden apilarse (lección → ficha de palabra →
+// práctica de trazos). Cada uno ponía body.overflow='' al cerrarse, así que
+// cerrar el de arriba desbloqueaba el scroll de la página detrás de los de abajo.
+// Ahora el bloqueo se recalcula según lo que siga abierto.
+function syncBodyScroll() {
+    let open = false;
+    try {
+        open = !!document.querySelector('.lq-pop:not(.hidden), #writer-practice-banner:not(.hidden), #handwrite-banner:not(.hidden)');
+    } catch (e) { /* selector no soportado */ }
+    try { document.body.style.overflow = open ? 'hidden' : ''; } catch (e) { /* noop */ }
+}
+// v9.50: capas que se dibujan POR ENCIMA de los overlays de lecciones/clásicos/
+// pares mínimos/repaso/test. Con una abierta, Escape debe cerrar solo esa capa
+// (antes cerraba también el overlay de abajo en el mismo toque).
+function topLayerOpen() {
+    return ['vocab-pop', 'writer-practice-banner', 'handwrite-banner', 'tone-legend-pop'].some((id) => {
+        const el = document.getElementById(id);
+        return !!el && !el.classList.contains('hidden');
+    });
 }
 // ===== fin v10 UX =====
 
@@ -4452,7 +4492,7 @@ function closeWriterPractice() {
     if (banner) banner.classList.add('hidden');
     const target = document.getElementById('wp-target');
     if (target) target.innerHTML = ''; // libera el SVG
-    document.body.style.overflow = ''; // restaura el scroll de la app
+    syncBodyScroll(); // v9.50: restaura el scroll solo si no queda otro overlay abierto
 }
 
 // ============================================================
@@ -4643,7 +4683,7 @@ function closeHandwrite() {
     if (banner) banner.classList.add('hidden');
     const target = document.getElementById('hw-target');
     if (target) target.innerHTML = ''; // libera el SVG
-    document.body.style.overflow = ''; // restaura el scroll de la app
+    syncBodyScroll(); // v9.50: restaura el scroll solo si no queda otro overlay abierto
 }
 
 function resetProgress() {
@@ -4790,14 +4830,14 @@ function applyTtsSpeed(audio, data) {
     return rate;
 }
 
+// v9.50: token de petición — si mientras el TTS viaja se pide otra tarjeta
+// (Siguiente rápido, "solo oído"), la respuesta vieja se descarta en vez de
+// sonar encima (o después) del audio de la tarjeta actual.
+let audioReqTok = 0;
 async function playAudio(lang) {
     const btn = document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
-    if (isPlaying && btn && btn.innerText.includes('⏳')) {
-        globalAudioPlayer.pause();
-        isPlaying = false;
-        restoreButton();
-        return;
-    }
+    // (v9.50: se quitó una rama de "cancelar mientras carga" que buscaba '⏳' en el
+    //  botón, pero el botón muestra '...' y además queda deshabilitado: nunca corría)
 
     if (globalAudioPlayer.src) {
         globalAudioPlayer.onended = null;
@@ -4812,6 +4852,8 @@ async function playAudio(lang) {
 
     const filtered = getFiltered();
     const s = filtered[state.currentIndex];
+    if (!s) return; // v9.50: módulo sin tarjetas → nada que reproducir
+    const myTok = ++audioReqTok;
     const k = ck();
 
     let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
@@ -4834,9 +4876,11 @@ async function playAudio(lang) {
 
     try {
         const response = await fetchTTS(ttsBody(text, langCode, voiceGender)); // v9.40: +speed
+        if (myTok !== audioReqTok) return; // v9.50: ya se pidió otra tarjeta
 
         if (!response.ok) throw new Error('Error en servidor');
         const data = await response.json();
+        if (myTok !== audioReqTok) return;
         if (!data.audio) { restoreButton(); return; }
 
         const binaryString = atob(data.audio);
@@ -4853,15 +4897,17 @@ async function playAudio(lang) {
             await globalAudioPlayer.play();
         } catch (playErr) {
             console.warn('Autoplay bloqueado:', playErr);
-            restoreButton();
+            if (myTok === audioReqTok) restoreButton(); // si fue reemplazado, el botón ya es de la otra petición
             return;
         }
+        if (myTok !== audioReqTok) return; // v9.50: reemplazado mientras arrancaba
 
         globalAudioPlayer.onended = () => { isPlaying = false; restoreButton(); URL.revokeObjectURL(url); };
         globalAudioPlayer.onerror = () => { console.error('Error audio'); restoreButton(); };
 
     } catch (error) {
         console.warn('Vercel falló, usando voz sistema:', error);
+        if (myTok !== audioReqTok) return; // v9.50: otra tarjeta ya tomó el audio
         if ('speechSynthesis' in window) {
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
@@ -5428,7 +5474,7 @@ function applyTheme(t) {
         themeBtn.title = 'Tema: ' + (THEME_NAME[t] || t) + ' (clic → ' + (THEME_NAME[nxt] || nxt) + ')';
     }
 }
-let curTheme = voiceValid(localStorage.getItem('theme'), THEME_SEQ); // reutiliza validador genérico
+let curTheme = voiceValid(lsGet('theme'), THEME_SEQ); // reutiliza validador genérico
 applyTheme(curTheme);
 if (themeBtn) {
     themeBtn.addEventListener('click', () => {
@@ -5539,9 +5585,11 @@ function splitGroupedPinyin(word) {
                         new Promise((res) => setTimeout(() => res(null), 30000))
                     ]);
                     if (choice && choice.outcome) outcome = choice.outcome;
+                    else outcome = 'timeout'; // v9.50: venció el seguro anti-cuelgue sin respuesta
                 } catch (err) { /* usuario canceló o diálogo no disponible */ }
                 deferredPrompt = null;
                 btn.textContent = uiT('installApp');
+                // v9.50: antes 'timeout' nunca se asignaba y el botón se ocultaba igual
                 if (outcome !== 'timeout') btn.classList.add('hidden');
                 return;
             }
@@ -5585,10 +5633,10 @@ function splitGroupedPinyin(word) {
 // (carácter modelo con la fuente del sistema).
 // ============================================================
 const PZ_MEM = new Map();               // char → datos|null (memoria de sesión)
-let pzTrazos = localStorage.getItem('ac_pz_trazos') !== '0';   // default ON
+let pzTrazos = lsGet('ac_pz_trazos') !== '0';   // default ON
 // v9.1: estilo de hoja — 'clasica' (de siempre) o 'cuaderno' (筆順 + 寫字 como la referencia)
-let pzStyle = localStorage.getItem('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
-let pzCells = parseInt(localStorage.getItem('ac_pz_cells'), 10) || 12;
+let pzStyle = lsGet('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
+let pzCells = parseInt(lsGet('ac_pz_cells'), 10) || 12;
 let pzLastSheet = '';                   // HTML de la última hoja generada
 
 function pzIsHan(ch) {
@@ -6578,7 +6626,7 @@ function pzCounterUpdate() {
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         const pop = document.getElementById('placement-pop');
-        if (pop && !pop.classList.contains('hidden')) plClose();
+        if (pop && !pop.classList.contains('hidden') && !topLayerOpen()) plClose(); // v9.50
     });
 
     // Gancho de solo lectura para tests E2E (vacío fuera del quiz)
@@ -6693,7 +6741,10 @@ function pzCounterUpdate() {
         addCard({
             zh: zh,
             zt: s.chinese_trad_answer || '',
-            es: s.w ? (s.spanish_full || '') : '', // w:1 → la glosa ES el spanish_full
+            // v9.50: w:1 → la glosa es spanish_answer (la PALABRA). Antes usaba
+            // spanish_full, que en los ejercicios de lecciones/clásicos es la
+            // traducción de toda la frase. En tarjetas HSK/TOCFL ambos coinciden.
+            es: s.w ? (s.spanish_answer || s.spanish_full || '') : '',
             py: '', m: s.module || '', lv: s.level || 0,
             ctxZh: s.w ? '' : (s.chinese_simp_full || ''),
             ctxZt: s.w ? '' : (s.chinese_trad_full || ''),
@@ -6717,7 +6768,7 @@ function pzCounterUpdate() {
             const added = addCard({
                 zh: zh,
                 zt: s.chinese_trad_answer || '',
-                es: s.w ? (s.spanish_full || '') : '',
+                es: s.w ? (s.spanish_answer || s.spanish_full || '') : '', // v9.50: glosa de la palabra
                 py: '', m: s.module || '', lv: s.level || 0,
                 ctxZh: s.w ? '' : (s.chinese_simp_full || ''),
                 ctxZt: s.w ? '' : (s.chinese_trad_full || ''),
@@ -7560,7 +7611,7 @@ function pzCounterUpdate() {
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         const pop = document.getElementById('srs-pop');
-        if (pop && !pop.classList.contains('hidden')) srsClose();
+        if (pop && !pop.classList.contains('hidden') && !topLayerOpen()) srsClose(); // v9.50
     });
 
     // Vuelta a la pestaña / app: refresca el badge (vencimientos por timestamp)
@@ -7903,7 +7954,7 @@ const KARA = (function () {
     const S = { lesson: null, view: null, idx: 0, results: [], answered: false, pinyin: false };
     // v9.1: traducción OCULTA por defecto (lector y práctica) — el alumno elige
     // verla con el botón 🇪🇸. Preferencia persistente.
-    let verEs = localStorage.getItem('ac_lq_es') === '1';
+    let verEs = lsGet('ac_lq_es') === '1';
     const setVerEs = (v) => {
         verEs = !!v;
         try { localStorage.setItem('ac_lq_es', verEs ? '1' : '0'); } catch (e) { }
@@ -8158,7 +8209,7 @@ const KARA = (function () {
     function closePop() {
         stopSpeak();
         pop.classList.add('hidden');
-        try { document.body.style.overflow = ''; } catch (e) { }
+        syncBodyScroll(); // v9.50
         S.lesson = null; S.view = null;
         renderList(); // refresca el mejor puntaje
     }
@@ -8171,7 +8222,7 @@ const KARA = (function () {
             if (t.closest && t.closest('#lq-close')) return;
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !pop.classList.contains('hidden')) closePop();
+            if (e.key === 'Escape' && !pop.classList.contains('hidden') && !topLayerOpen()) closePop(); // v9.50: si hay una capa encima, esa cierra primero
         });
     }
 
@@ -8376,7 +8427,7 @@ const KARA = (function () {
         LB[l.id] = {
             best: Math.max(prev.best || 0, score),
             completed: true,
-            last: new Date().toISOString().slice(0, 10)
+            last: localDay()
         };
         saveLB();
         progNum.textContent = '🏁';
@@ -8642,7 +8693,7 @@ const KARA = (function () {
     function closeCrPop() {
         stopCrSpeak();
         pop.classList.add('hidden');
-        try { document.body.style.overflow = ''; } catch (e) { }
+        syncBodyScroll(); // v9.50
         CR.mod = null;
         CQ.items = null; CQ.idx = 0; // v9.3: resetea la práctica inline
     }
@@ -9024,7 +9075,7 @@ const KARA = (function () {
         $('cr-close').addEventListener('click', closeCrPop);
         pop.addEventListener('click', (e) => { if (e.target === pop) closeCrPop(); });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !pop.classList.contains('hidden')) closeCrPop();
+            if (e.key === 'Escape' && !pop.classList.contains('hidden') && !topLayerOpen()) closeCrPop(); // v9.50
         });
         // el switch 简/繁 re-renderiza el bloque abierto y la lista
         document.addEventListener('ac-script-change', () => {
@@ -9346,7 +9397,8 @@ const KARA = (function () {
         if (mpTimer) { clearTimeout(mpTimer); mpTimer = null; }
         mpRestore();
         mpStopGlobal();
-        MP_CACHE.forEach(function (u) { try { URL.revokeObjectURL(u); } catch (e) { } });
+        // v9.50: los valores son { url, data } desde v9.40 — se revoca la URL, no el objeto
+        MP_CACHE.forEach(function (v) { try { URL.revokeObjectURL(v && v.url); } catch (e) { } });
         MP_CACHE.clear();
     }
 
@@ -9375,7 +9427,7 @@ const KARA = (function () {
     // El clic sobre el botón de entrada no cuenta como "afuera": es el MISMO
     // clic que abre y, al burbujear hasta document, no debe re-cerrarlo.
     document.addEventListener('keydown', function (e) {
-        if (e.key !== 'Escape' || pop.classList.contains('hidden')) return;
+        if (e.key !== 'Escape' || pop.classList.contains('hidden') || topLayerOpen()) return; // v9.50
         mpClose();
     });
     document.addEventListener('click', function (e) {
