@@ -193,8 +193,16 @@ def _parse_body(raw):
 
 
 def _pick_voice(body):
+    """Resuelve lang + voice_name desde el body del cliente.
+    Soporta claves compuestas v9.49: ar-f → f, tw-m → m, etc.
+    """
     lang = str(body.get("lang") or "zh-CN")
     key = str(body.get("voice") or DEFAULT_VOICE_KEY)
+    
+    # CORRECCIÓN v9.49: normalizar claves compuestas (ar-f → f, tw-m → m)
+    if "-" in key:
+        key = key.split("-")[-1]
+    
     voices = VOICES.get(lang, VOICES["zh-CN"])
     return lang, voices.get(key, voices[DEFAULT_VOICE_KEY])
 
