@@ -91,7 +91,9 @@ VOICES = {
     "es-AR": {
         "f":  "es-AR-ElenaNeural",
         "m":  "es-AR-TomasNeural",
-    }
+    },
+
+}
 DEFAULT_VOICE_KEY = "f"
 
 # ------------------------------------------------------------
