@@ -92,7 +92,6 @@ VOICES = {
         "f":  "es-AR-ElenaNeural",
         "m":  "es-AR-TomasNeural",
     },
-
 }
 DEFAULT_VOICE_KEY = "f"
 
@@ -192,16 +191,14 @@ def _parse_body(raw):
 
 
 def _pick_voice(body):
-    """Resuelve lang + voice_name desde el body del cliente.
-    Soporta claves compuestas v9.49: ar-f → f, tw-m → m, etc.
-    """
     lang = str(body.get("lang") or "zh-CN")
     key = str(body.get("voice") or DEFAULT_VOICE_KEY)
-    
-    # CORRECCIÓN v9.49: normalizar claves compuestas (ar-f → f, tw-m → m)
+    # v9.50 fix: el cliente manda claves con prefijo de locale para las
+    # voces nuevas (ar-f/ar-m/tw-f/tw-m), pero VOICES["es-AR"]/["zh-TW"]
+    # usan "f"/"m" pelado. Sin esto, voices.get(key, ...) nunca matcheaba
+    # y TODO pedido (f o m) caía al DEFAULT_VOICE_KEY → siempre femenina.
     if "-" in key:
-        key = key.split("-")[-1]
-    
+        key = key.split("-")[-1]  # ar-f→f, ar-m→m, tw-f→f, tw-m→m
     voices = VOICES.get(lang, VOICES["zh-CN"])
     return lang, voices.get(key, voices[DEFAULT_VOICE_KEY])
 
