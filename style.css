@@ -5743,3 +5743,73 @@ body.paper-mode .train-card {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.55'/%3E%3C/svg%3E");
     background-blend-mode: soft-light;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v12 — OSCURO: capas de gris bien diferenciadas + palabras aprendidas
+   ────────────────────────────────────────────────────────────────
+   fondo de página (gris carbón) < panel < elemento elevado (chips,
+   tarjetas de lección, botones) — cada capa unos pasos más clara.
+   Bug: .vocab-item.known tenía fondo verde claro fijo (#dcfce7) y en
+   oscuro heredaba texto casi blanco → palabras aprendidas invisibles.
+   ════════════════════════════════════════════════════════════════ */
+body.dark-mode {
+    --bg-card: #1a212c;
+    --bg-light: #252e3c;
+    --border: #364052;
+    --text-secondary: #a3afc2;
+    background:
+        radial-gradient(1100px 700px at 85% -10%, rgba(94, 118, 255, 0.10), transparent 55%),
+        radial-gradient(950px 700px at -15% 110%, rgba(124, 58, 237, 0.09), transparent 55%),
+        linear-gradient(180deg, #10141b 0%, #131822 50%, #10151d 100%);
+}
+
+/* Paneles: un escalón por encima del fondo, borde más visible */
+body.dark-mode .card,
+body.dark-mode .vocabulary-panel,
+body.dark-mode .train-card,
+body.dark-mode .module-status,
+body.dark-mode .reader-banner {
+    background: linear-gradient(180deg, #1d2532 0%, #19202b 100%);
+    border-color: #364052;
+}
+body.dark-mode .vocab-pop,
+body.dark-mode #placement-pop,
+body.dark-mode #srs-pop,
+body.dark-mode .backup-pop,
+body.dark-mode .install-help-card {
+    background: linear-gradient(180deg, #212a38 0%, #1c2431 100%);
+    border-color: #3d485c;
+}
+
+/* Elementos elevados dentro de los paneles: otro escalón más claro */
+body.dark-mode .lesson-card,
+body.dark-mode .cr-card,
+body.dark-mode .lv-chip,
+body.dark-mode .cr-chip,
+body.dark-mode .lv-chip-tocfl {
+    background: #262f3d;
+    border-color: #3a4558;
+}
+body.dark-mode .lesson-card:hover,
+body.dark-mode .cr-card:hover { background: #2b3546; }
+body.dark-mode .btn-secondary { background: #2b3546; }
+body.dark-mode .btn-secondary:hover { background: #343f53; }
+body.dark-mode .mtab { background: #232b38; border-color: #364052; }
+body.dark-mode .mtab.active { background: #2f3a4e; }
+body.dark-mode .control-panel { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
+body.dark-mode #answer-input,
+body.dark-mode .reader-input { background-color: #141a23; border-color: #3a4558; }
+body.dark-mode .app-nav { background: rgba(20, 26, 36, 0.94); border-top-color: #333d4f; }
+
+/* Palabras aprendidas: chips legibles (texto claro sobre superficie gris) */
+body.dark-mode .vocab-item {
+    background: #2a3444;
+    border-color: #3f4b60;
+    color: #e6ecf5;
+}
+body.dark-mode .vocab-item:hover { background: #333f52; }
+body.dark-mode .vocab-item.known {
+    background: rgba(74, 222, 128, 0.16);
+    border-color: #4ade80;
+    color: #bbf7d0;
+}

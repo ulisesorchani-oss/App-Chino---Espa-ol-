@@ -1882,10 +1882,10 @@ function setupModuleTabs() {
     const bar = document.getElementById('module-tabs');
     if (!bar) return;
     // v9.0: + panel-lessons (Lecciones graduadas)
-    const panels = { daily: 'panel-daily', exams: 'panel-exams', lessons: 'panel-lessons', classics: 'panel-classics' };
+    const panels = { lessons: 'panel-lessons', exams: 'panel-exams', daily: 'panel-daily', classics: 'panel-classics' };
     const TAB_KEY = 'ac_tab';
     const activate = (name, save) => {
-        if (!panels[name]) name = 'daily';
+        if (!panels[name]) name = 'lessons';
         bar.querySelectorAll('.mtab').forEach(b => {
             const on = b.dataset.tab === name;
             b.classList.toggle('active', on);
@@ -1904,7 +1904,7 @@ function setupModuleTabs() {
     });
     let saved = null;
     try { saved = localStorage.getItem(TAB_KEY); } catch (e) {}
-    activate(saved || 'daily', false);
+    activate(saved || 'lessons', false);
 }
 
 function setupEventListeners() {

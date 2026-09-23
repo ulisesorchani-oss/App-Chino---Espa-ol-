@@ -204,41 +204,27 @@
             </div>
 
             <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
-                <button class="mtab active" id="tab-daily" role="tab" aria-selected="true" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
+                <button class="mtab active" id="tab-lessons" role="tab" aria-selected="true" aria-controls="panel-lessons" data-tab="lessons" type="button" data-i18n="tabLessons">📖 Lecciones</button>
                 <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button" data-i18n="tabExams">🎓 Exámenes</button>
-                <button class="mtab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" data-tab="lessons" type="button" data-i18n="tabLessons">📖 Lecciones</button>
+                <button class="mtab" id="tab-daily" role="tab" aria-selected="false" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
                 <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button" data-i18n="tabClassics">📜 Clásicos</button>
             </nav>
 
             <div class="tab-panels">
-                <!-- Panel Diaria -->
-                <div class="tab-panel section-daily" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
-                    <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
-                    <div class="category-filter daily-filter">
-                        <div class="daily-dropdown" id="daily-dropdown">
-                            <button id="btn-daily-toggle" class="daily-main-btn" type="button"
-                                    aria-haspopup="menu" aria-expanded="false" aria-controls="daily-menu"
-                                    title="Elegí una categoría de práctica diaria">
-                                <span aria-hidden="true">📚</span> <span id="daily-current">Práctica Diaria</span>
-                                <span class="daily-caret" aria-hidden="true">▾</span>
-                            </button>
-                            <ul id="daily-menu" class="daily-menu hidden" role="menu" aria-labelledby="btn-daily-toggle">
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="todas">📖 Todas</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Saludos">👋 Saludos</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Supermercado">🛒 Supermercado</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Migraciones">🛂 Migraciones</button></li>
-                                <li role="separator" class="daily-menu-sep" aria-hidden="true"></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En un restaurante">🍜 En un restaurante</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el colectivo">🚌 En el colectivo</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el subterráneo">🚇 En el subterráneo</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En la clase de idioma">🏫 En la clase de idioma</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el shopping">🛍️ En el shopping</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el cine">🎬 En el cine</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el gimnasio">🏋️ En el gimnasio</button></li>
-                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Barrio chino">🏮 Barrio chino</button></li>
-                            </ul>
-                        </div>
+                <!-- Panel Lecciones graduadas (v9.0) -->
+                <div class="tab-panel section-lessons" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
+                    <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
+                    <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
+                    <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
+                        <button type="button" class="lv-chip active" data-level="all">Todo</button>
+                        <button type="button" class="lv-chip" data-level="1">HSK 1</button>
+                        <button type="button" class="lv-chip" data-level="2">HSK 2</button>
+                        <button type="button" class="lv-chip" data-level="3">HSK 3</button>
+                        <button type="button" class="lv-chip" data-level="4">HSK 4</button>
+                        <button type="button" class="lv-chip" data-level="5">HSK 5</button>
+                        <button type="button" class="lv-chip" data-level="6">HSK 6</button>
                     </div>
+                    <div class="lesson-list" id="lesson-list" data-level="all"></div>
                 </div>
 
                 <!-- Panel Exámenes -->
@@ -313,20 +299,34 @@
                     </div>
                 </div>
 
-                <!-- Panel Lecciones graduadas (v9.0) -->
-                <div class="tab-panel section-lessons hidden" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
-                    <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
-                    <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
-                    <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
-                        <button type="button" class="lv-chip active" data-level="all">Todo</button>
-                        <button type="button" class="lv-chip" data-level="1">HSK 1</button>
-                        <button type="button" class="lv-chip" data-level="2">HSK 2</button>
-                        <button type="button" class="lv-chip" data-level="3">HSK 3</button>
-                        <button type="button" class="lv-chip" data-level="4">HSK 4</button>
-                        <button type="button" class="lv-chip" data-level="5">HSK 5</button>
-                        <button type="button" class="lv-chip" data-level="6">HSK 6</button>
+                <!-- Panel Diaria -->
+                <div class="tab-panel section-daily hidden" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
+                    <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
+                    <div class="category-filter daily-filter">
+                        <div class="daily-dropdown" id="daily-dropdown">
+                            <button id="btn-daily-toggle" class="daily-main-btn" type="button"
+                                    aria-haspopup="menu" aria-expanded="false" aria-controls="daily-menu"
+                                    title="Elegí una categoría de práctica diaria">
+                                <span aria-hidden="true">📚</span> <span id="daily-current">Práctica Diaria</span>
+                                <span class="daily-caret" aria-hidden="true">▾</span>
+                            </button>
+                            <ul id="daily-menu" class="daily-menu hidden" role="menu" aria-labelledby="btn-daily-toggle">
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="todas">📖 Todas</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Saludos">👋 Saludos</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Supermercado">🛒 Supermercado</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Migraciones">🛂 Migraciones</button></li>
+                                <li role="separator" class="daily-menu-sep" aria-hidden="true"></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En un restaurante">🍜 En un restaurante</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el colectivo">🚌 En el colectivo</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el subterráneo">🚇 En el subterráneo</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En la clase de idioma">🏫 En la clase de idioma</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el shopping">🛍️ En el shopping</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el cine">🎬 En el cine</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="En el gimnasio">🏋️ En el gimnasio</button></li>
+                                <li role="none"><button type="button" class="cat-btn" role="menuitem" data-module="Barrio chino">🏮 Barrio chino</button></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="lesson-list" id="lesson-list" data-level="all"></div>
                 </div>
 
                 <!-- Panel Clásicos -->
