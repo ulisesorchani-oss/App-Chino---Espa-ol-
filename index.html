@@ -41,7 +41,7 @@
         <!-- ============================================================
              VISTA HOY — practicar. Única pantalla con la tarjeta.
              ============================================================ -->
-        <section class="view" id="view-hoy" role="tabpanel" aria-labelledby="nav-hoy">
+        <section class="view hidden" id="view-hoy" role="tabpanel" aria-labelledby="nav-hoy">
             <h2 class="sr-only">Hoy</h2>
 
             <!-- v10 UX: fila de estado (ya no es sticky). El texto lo escribe
@@ -193,10 +193,10 @@
         <!-- ============================================================
              VISTA APRENDER — elegir qué estudiar (catálogo).
              ============================================================ -->
-        <section class="view hidden" id="view-aprender" role="tabpanel" aria-labelledby="nav-aprender">
+        <section class="view" id="view-aprender" role="tabpanel" aria-labelledby="nav-aprender">
             <div class="view-head">
                 <h2 class="view-title" data-i18n="viewAprender">Aprender</h2>
-                <p class="view-sub" data-i18n="viewAprenderSub">Elegí qué practicar. Al elegir un módulo volvés a Hoy.</p>
+                <p class="view-sub" data-i18n="viewAprenderSub">Elegí qué aprender. Al elegir un módulo volvés a Hoy.</p>
             </div>
 
             <div class="aprender-tools">
@@ -538,11 +538,11 @@
 
         <!-- v10 UX: barra de navegación inferior (roving tabindex en app.js) -->
         <nav class="app-nav" id="app-nav" role="tablist" aria-label="Secciones de la app">
-            <button class="nav-btn active" id="nav-hoy" role="tab" aria-selected="true" aria-controls="view-hoy" data-view="hoy" type="button" tabindex="0">
-                <span class="nav-ico" aria-hidden="true">🀄</span><span class="nav-txt" data-i18n="navHoy">Hoy</span>
-            </button>
-            <button class="nav-btn" id="nav-aprender" role="tab" aria-selected="false" aria-controls="view-aprender" data-view="aprender" type="button" tabindex="-1">
+            <button class="nav-btn active" id="nav-aprender" role="tab" aria-selected="true" aria-controls="view-aprender" data-view="aprender" type="button" tabindex="0">
                 <span class="nav-ico" aria-hidden="true">📚</span><span class="nav-txt" data-i18n="navAprender">Aprender</span>
+            </button>
+            <button class="nav-btn" id="nav-hoy" role="tab" aria-selected="false" aria-controls="view-hoy" data-view="hoy" type="button" tabindex="-1">
+                <span class="nav-ico" aria-hidden="true">🀄</span><span class="nav-txt" data-i18n="navHoy">Hoy</span>
             </button>
             <button class="nav-btn" id="nav-entrenar" role="tab" aria-selected="false" aria-controls="view-entrenar" data-view="entrenar" type="button" tabindex="-1">
                 <span class="nav-ico" aria-hidden="true">🎯</span><span class="nav-txt" data-i18n="navEntrenar">Entrenar</span>

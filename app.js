@@ -1320,7 +1320,7 @@ const UI_STRINGS = {
     btnCheck: 'Verificar', btnReveal: 'No la sé, mostrar respuesta', btnKnow: 'Fácil', btnRepeat: 'Otra vez', btnGood: 'Bien', btnPrev: '‹ Anterior',
     // v10 UX: navegación, vistas, sesión, pistas
     navHoy: 'Hoy', navAprender: 'Aprender', navEntrenar: 'Entrenar', navYo: 'Yo',
-    viewAprender: 'Aprender', viewAprenderSub: 'Elegí qué practicar. Al elegir un módulo volvés a Hoy.',
+    viewAprender: 'Aprender', viewAprenderSub: 'Elegí qué aprender. Al elegir un módulo volvés a Hoy.',
     viewEntrenar: 'Entrenar', viewEntrenarSub: 'Ejercicios sueltos para el oído, la voz y la mano.',
     viewYo: 'Yo', viewYoSub: 'Tu progreso, tu repaso y los ajustes de la app.',
     yoProgress: '📈 Progreso', yoSettings: '⚙️ Ajustes',
@@ -1381,7 +1381,7 @@ const UI_STRINGS = {
     inputPlaceholder: '请输入缺少的词语…',
     btnCheck: '检查', btnReveal: '不会，显示答案', btnKnow: '简单', btnRepeat: '再来', btnGood: '记得', btnPrev: '‹ 上一句',
     navHoy: '今天', navAprender: '学习', navEntrenar: '训练', navYo: '我',
-    viewAprender: '学习', viewAprenderSub: '选择要练什么。选好模块后回到“今天”。',
+    viewAprender: '学习', viewAprenderSub: '选择要学什么。选好模块后回到“今天”。',
     viewEntrenar: '训练', viewEntrenarSub: '听力、发音和书写的单项练习。',
     viewYo: '我', viewYoSub: '你的进度、复习和应用设置。',
     yoProgress: '📈 进度', yoSettings: '⚙️ 设置',
@@ -3493,9 +3493,9 @@ function updateHeaderStreak() {
 }
 
 // ---- navegación inferior (4 vistas) ----
-const APP_VIEWS = ['hoy', 'aprender', 'entrenar', 'yo'];
+const APP_VIEWS = ['aprender', 'hoy', 'entrenar', 'yo'];
 function showView(name, save) {
-    if (APP_VIEWS.indexOf(name) === -1) name = 'hoy';
+    if (APP_VIEWS.indexOf(name) === -1) name = 'aprender';
     APP_VIEWS.forEach(v => { const sec = document.getElementById('view-' + v); if (sec) sec.classList.toggle('hidden', v !== name); });
     document.querySelectorAll('#app-nav .nav-btn').forEach(b => {
         const on = b.dataset.view === name;
@@ -3533,7 +3533,7 @@ function setupAppNav() {
     if (mt) rovingTabs(mt, '.mtab', (b) => b.click());
     let saved = null;
     try { saved = localStorage.getItem('ac_view_v1'); } catch (e) { /* noop */ }
-    showView(saved || 'hoy', false);
+    showView(saved || 'aprender', false);
 }
 // ===== fin v10 UX =====
 
