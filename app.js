@@ -4725,7 +4725,7 @@ function ttsGetUrl(body) {
         q.set('lang', String((body && body.lang) || 'zh-CN'));
         q.set('voice', String((body && body.voice) || 'f'));
         q.set('speed', String((body && typeof body.speed === 'number') ? body.speed : 1));
-        q.set('cv', '1'); // contrato del audio: un bump futuro invalida la caché CDN
+        q.set('cv', '2'); // contrato del audio: un bump futuro invalida la caché CDN
         return TTS_API_URL + '?' + q.toString();
     } catch (e) { return null; }
 }

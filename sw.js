@@ -397,7 +397,7 @@
 //       prefiere voces del país exacto en el fallback del sistema.
 //       Requiere api/ v9.49 (es-AR + zh-TW en el mapa VOICES). Toca app.js
 //       + lessons-dele.js + voice-evaluator.js + index.html (+ api/).
-const VERSION = 'v97'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel en style.css)
+const VERSION = 'v98'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel en style.css)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -422,7 +422,7 @@ const VERSION = 'v97'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel
 // v9.11: audio según dirección; play/pausa con ícono en lecciones/clásicos; panel
 //        de oración sin audio (solo botón parlante).
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
-const TTS_CACHE = 'chino-es-tts-v1';     // persiste entre versiones (no se borra)
+const TTS_CACHE = 'chino-es-tts-v2';     // v2: descarta audios femeninos viejos guardados para ar-m/tw-m
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
 const DATA_CACHE = 'chino-es-hanzi-v1';  // v7.13: datos de trazos Hanzi Writer — NUNCA se borra
 const TTS_MAX_ENTRIES = 80;
