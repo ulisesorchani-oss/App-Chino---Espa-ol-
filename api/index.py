@@ -83,21 +83,14 @@ VOICES = {
     "zh-TW": {
         "f":  "zh-TW-HsiaoChenNeural",
         "m":  "zh-TW-YunJheNeural",
-        "f2": "zh-TW-HsiaoYuNeural",
-        "m2": "zh-TW-YunJheNeural",
     },
     "es-ES": {
         "f":  "es-ES-ElviraNeural",
         "m":  "es-ES-AlvaroNeural",
-        "f2": "es-ES-ElviraNeural",
-        "m2": "es-ES-AlvaroNeural",
     },
     "es-AR": {
         "f":  "es-AR-ElenaNeural",
         "m":  "es-AR-TomasNeural",
-        "f2": "es-AR-ElenaNeural",
-        "m2": "es-AR-TomasNeural",
-    },
 }
 DEFAULT_VOICE_KEY = "f"
 
