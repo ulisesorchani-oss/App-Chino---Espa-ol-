@@ -1,53 +1,58 @@
 /* =====================================================================
-   v9.39 · ONBOARDING SINTÉTICO (guía de bienvenida) — Huayu Diario
+   v9.50 · ONBOARDING (guía de bienvenida) — Huayu Diario
    =====================================================================
    QUÉ ES
-   · Recorrido de 4 pasos (~1 minuto) que explica la app ACTUAL:
-     1) bienvenida + modo de aprendizaje activo (chino ⇄ español),
-     2) las 4 vistas de la nav v10 (Hoy · Aprender · Entrenar · Yo),
-     3) el ciclo de cada frase con la calificación REAL v9.38
-        (Otra vez → 10 min · Bien → mañana · Fácil → no vuelve) y las
-        cajas de Leitner con los intervalos REALES del mazo (BOX_DAYS:
-        10 min, 1, 3, 7, 14 y 30 días — mismos valores de app.js),
-     4) la racha 🔥 (con estado EN VIVO) + proverbio + botón final.
-   · SINTÉTICO: reemplaza el tour de 7 pasos de v9.22-9.26 — sin quiz,
-     sin paso de teoría (curva del olvido), sin mapa largo y sin el paso
-     de "cuánto tiempo". La pedagogía queda en 3 frases del paso 3 y en
-     las cajas tocables (única pieza interactiva además de los enlaces).
+   · Recorrido de 6 pasos (~1-2 minutos) que explica la app ACTUAL con su
+     flujo "primero se aprende, después se practica":
+     1) bienvenida: los tres tiempos (Aprender → Hoy → Repaso) y el modo
+        de aprendizaje activo (chino ⇄ español),
+     2) Aprender: Lecciones · Exámenes · Diaria · Clásicos (en ese orden,
+        como la pestaña) y que al elegir un módulo la app lleva a Hoy,
+     3) Hoy: el ciclo de una frase (escuchar, escribir la palabra que
+        falta, pista al 1.er error, respuesta al 2.º) y los ajustes 👁 Ver,
+     4) calificar + repaso: Otra vez → 10 min · Bien → mañana · Fácil →
+        no vuelve, y las cajas de Leitner con los intervalos REALES del
+        mazo (BOX_DAYS de app.js: 10 min, 1, 3, 7, 14 y 30 días),
+        con enlace al repaso inteligente,
+     5) Entrenar y Yo (y cómo reabrir esta guía),
+     6) la racha 🔥 (con estado EN VIVO) + proverbio + botón final.
+   · Reemplaza la guía v9.39 de 4 pasos, que ponía Hoy primero y no
+     explicaba el orden de la nueva navegación.
    · BILINGÜE según el modo: 'es-cn' (aprendo chino) → guía en español;
      'cn-es' (aprendo español) → guía en chino simplificado, igual que el
      pack de UI de app.js (UI_STRINGS['cn-es'] usa 简体).
    · 繁體 (v9.26, intacto): el pack chino tiene variante TRADICIONAL
-     ('cn-hant'): mismo tour de 4 pasos, cajas y callouts con los MISMOS
-     ids. El toggle 简/繁 (arriba a la derecha del cuerpo, solo visible
-     en modo chino) alterna al vuelo conservando el paso; la preferencia
-     persiste en localStorage 'ac_guide_script_v1' ('hans' por defecto).
+     ('cn-hant'): mismos pasos, cajas y callouts con los MISMOS ids. El
+     toggle 简/繁 (arriba a la derecha del cuerpo, solo visible en modo
+     chino) alterna al vuelo conservando el paso; la preferencia persiste
+     en localStorage 'ac_guide_script_v1' ('hans' por defecto).
 
    CÓMO SE INTEGRA (cero invasión)
    · Archivo independiente: NO toca app.js, NO toca style.css. Solo
      index.html (1 <script> antes de app.js) y sw.js (precache).
    · Se auto-inyecta: botón 📖 Guía en el primer .header-actions del DOM
-     (desde v10 es .yo-actions, en la vista Yo → Progreso) + overlay
-     #guide-pop con la piel .vocab-pop existente (temas claro/oscuro/
-     papel gratis vía variables CSS) + sus propios estilos (<style>).
+     (en la vista Yo → Progreso) + overlay #guide-pop con la piel
+     .vocab-pop existente (temas claro/oscuro/papel gratis vía variables
+     CSS) + sus propios estilos (<style>).
    · MODO: NO accede al state interno de app.js (IIFE). Detecta el modo
      con obProbeMode() (botón #btn-play-es + clase hidden-force) con
      fallback de SOLO LECTURA a la clave 'chino-espanol-app-v2' y
      MutationObserver para re-etiquetar en vivo. El idioma del contenido
      se decide SIEMPRE al abrir.
-   · 1.ª VISITA: si localStorage 'ac_onboarding_done_v1' != '1', la guía
+   · 1.ª VISITA: si localStorage 'ac_onboarding_done_v2' != '1', la guía
      se abre sola a los ~1.4 s (si no hay otro popup y la pestaña está
      visible). Cualquier cierre (✕, Escape, clic afuera, Saltar o final)
-     marca "vista".
-   · ENLACES REALES (patrón openBackup de stats.js): el paso 2 tiene
+     marca "vista". v2: la guía cambió de contenido, así que quien ya
+     había visto la v1 la vuelve a ver una vez.
+   · ENLACES REALES (patrón openBackup de stats.js): el paso 4 tiene
      "Ver mi repaso de hoy" → cierra SIN marcar vista y hace click en
-     #btn-srs (el botón público de la barra de Hoy); el paso 4 tiene
+     #btn-srs (el botón público de la barra de Hoy); el paso 6 tiene
      "Ver mi racha" → cierra marcando vista y abre #stats-pop vía
      window.HuayuStats.open(). El callout 🔥 muestra la racha EN VIVO vía
      HuayuStats.getSummary() (pura obStreakLive). Todo defensivo: si algo
      falta, queda como estaba — la app sigue igual (filosofía del módulo).
-   · v10 UX: "Saltar guía" en todos los pasos (además de la ✕) + targets
-     táctiles de 44px + Escape y clic afuera cierran (convención v9.28).
+   · "Saltar guía" en todos los pasos menos el último (además de la ✕) +
+     targets táctiles de 44px + Escape y clic afuera cierran.
    · NO toca: Leitner/doGrade, cloze, SRS, lecciones, clásicos, evaluador
      de voz, pinyin-pro. Sin dependencias. Todo el init con try/catch.
    ===================================================================== */
@@ -56,7 +61,7 @@
     if (window.HuayuGuide) return; // idempotente
 
     // ---------------- helpers ----------------
-    var LS_DONE = 'ac_onboarding_done_v1';      // 1 = guía ya vista
+    var LS_DONE = 'ac_onboarding_done_v2';      // 1 = guía (v9.50) ya vista
     var LS_SCRIPT = 'ac_guide_script_v1';       // v9.26: 'hant' = pack chino en 繁體
     var MODE_KEY = 'chino-espanol-app-v2';      // SOLO LECTURA (misma clave de app.js)
     var AUTO_DELAY = 1400;                      // ms hasta el auto-show de 1.ª visita
@@ -94,7 +99,7 @@
     // Cajas de Leitner con los intervalos REALES del mazo (app.js: AGAIN_MS =
     // 10 min y BOX_DAYS = {2:1, 3:3, 4:7, 5:14, 6:30}). days: 0 = misma sesión.
     // v9.26: zhH/zhHD = etiqueta y detalle en 繁體 (caja 4/5 usan 週, no 周).
-    // v9.39: ya no son un paso propio — son la parte interactiva del paso 3.
+    // Son la parte interactiva del paso 4.
     var OB_BOXES = [
         { b: 1, days: 0,  es: '10 minutos', zh: '10 分钟', zhH: '10 分鐘',
           esD: 'Recién fallada (o nueva): vuelve en <b>10 minutos</b>, dentro de esta misma sesión.',
@@ -168,6 +173,12 @@
         '.ob-item-ico{font-size:1.25rem;line-height:1.3;}',
         '.ob-item-title{font-weight:700;color:var(--text-primary);font-size:.92rem;margin-bottom:2px;}',
         '.ob-item-desc{color:var(--text-secondary);font-size:.85rem;line-height:1.45;}',
+        '.ob-flow{display:flex;align-items:stretch;gap:6px;margin:10px 0 12px;}',
+        '.ob-flow-step{flex:1;min-width:0;border:1px solid var(--border);background:var(--bg-light);border-radius:11px;padding:9px 6px;text-align:center;}',
+        '.ob-flow-ico{display:block;font-size:1.35rem;line-height:1.2;}',
+        '.ob-flow-l{display:block;font-weight:800;color:var(--text-primary);font-size:.86rem;margin-top:2px;}',
+        '.ob-flow-d{display:block;color:var(--text-secondary);font-size:.74rem;line-height:1.35;margin-top:3px;}',
+        '.ob-flow-arrow{align-self:center;color:var(--text-secondary);font-weight:800;}',
         '.ob-stat{text-align:center;font-size:2rem;font-weight:900;color:var(--primary);margin:6px 0 10px;letter-spacing:-.5px;}',
         '.ob-stat-sub{text-align:center;color:var(--text-secondary);font-size:.86rem;margin:-4px 0 10px;}',
         '.ob-quote{margin:12px 0;padding:14px 10px;border-radius:12px;background:var(--bg-light);border:1px dashed var(--border);text-align:center;}',
@@ -178,7 +189,7 @@
         '.ob-streak-status{font-weight:700;color:var(--primary);font-size:.9rem;margin:0 0 8px;}',
         '.ob-streak .ob-text{margin-bottom:0;}',
         '.ob-streak-btn{min-width:186px;margin-top:11px;}',
-        '.ob-srs-btn{min-width:172px;margin-top:9px;padding:8px 12px;font-size:.86rem;}',
+        '.ob-srs-btn{display:block;min-width:172px;margin:2px auto 10px;padding:8px 12px;font-size:.86rem;}',
         '.ob-grade-row{display:flex;gap:6px;margin:10px 0 2px;}',
         '.ob-grade{flex:1;min-width:0;border:2px solid var(--border);background:var(--bg-card);border-radius:10px;padding:8px 4px;text-align:center;}',
         '.og-l{display:block;font-weight:800;color:var(--text-primary);font-size:.85rem;}',
@@ -208,35 +219,52 @@
     // ---------------- contenido: pack ESPAÑOL (modo es-cn · aprendo chino) ----------------
     var PACK_ES = {
         btnLabel: '📖 Guía',
-        btnTitle: 'Guía rápida (1 min): las 4 vistas, el ciclo de repaso y tu racha',
+        btnTitle: 'Guía rápida: aprender, practicar, el repaso y tu racha',
         aria: 'Guía interactiva de la app',
-        ui: { back: '◀ Atrás', next: 'Siguiente ▶', done: '🚀 ¡Empezar hoy!', dots: 'Paso', skip: 'Saltar guía' },
+        ui: { back: '◀ Atrás', next: 'Siguiente ▶', done: '🚀 ¡Empezar!', dots: 'Paso', skip: 'Saltar guía' },
         steps: [
-            { // 1 · bienvenida — conoce el modo y el botón de re-apertura
+            { // 1 · bienvenida — los tres tiempos
                 ico: '🌏', center: true,
-                title: '¡Hola! Esta es tu app de chino',
+                title: '¡Hola! Primero se aprende, después se practica',
                 html:
                     '<div class="ob-hero">🌏</div>' +
-                    '<p class="ob-text ob-center"><b>Frases reales + un repaso que se agenda solo</b></p>' +
-                    '<p class="ob-text">Vos solo practicás unos 10 minutos por día: la app recuerda <b>qué repasarte y cuándo</b>, para que lo estudiado no se escape.</p>' +
-                    '<p class="ob-text">Ahora estás aprendiendo <b>chino</b>: respondés en 汉字, con el teclado o trazando a mano ✍️. ¿Preferís al revés (aprender español)? Lo cambiás en 🙂 <b>Yo</b>.</p>' +
-                    '<div class="ob-tip">💡 Esta visita toma <b>1 minuto</b>. La podés reabrir cuando quieras: 🙂 Yo → <b>📖 Guía</b>.</div>'
+                    '<p class="ob-text ob-center"><b>Material real, frases para practicar y un repaso que se agenda solo</b></p>' +
+                    '<div class="ob-flow">' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">📚</span><span class="ob-flow-l">Aprender</span><span class="ob-flow-d">elegís qué estudiar</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🀄</span><span class="ob-flow-l">Hoy</span><span class="ob-flow-d">practicás frases</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🔁</span><span class="ob-flow-l">Repaso</span><span class="ob-flow-d">vuelve lo que cuesta</span></div>' +
+                    '</div>' +
+                    '<p class="ob-text">Con unos 10 minutos por día alcanza: la app recuerda <b>qué repasarte y cuándo</b>, para que lo estudiado no se escape.</p>' +
+                    '<p class="ob-text">Ahora estás aprendiendo <b>chino</b>: respondés en 汉字, con el teclado o trazando a mano ✍️. ¿Preferís al revés (aprender español)? Lo cambiás en 🙂 <b>Yo</b>.</p>'
             },
-            { // 2 · las 4 vistas de la nav v10 + enlace real al repaso
-                ico: '🧭',
-                title: 'La app tiene 4 rincones (abajo)',
+            { // 2 · Aprender — las 4 pestañas
+                ico: '📚',
+                title: 'Aprender: elegí qué estudiar',
                 html:
-                    '<div class="ob-item"><span class="ob-item-ico">🀄</span><span><span class="ob-item-title">Hoy</span><br><span class="ob-item-desc">Tu frase del día + el repaso 🔁 que ya te toca. Con eso ya estudiaste algo real.</span></span></div>' +
-                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 Ver mi repaso de hoy</button>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">Aprender</span><br><span class="ob-item-desc">Elegís material: práctica diaria por tema, exámenes (HSK · TOCFL · DELE), lecciones y clásicos.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">Entrenar</span><br><span class="ob-item-desc">Oído 🎧, tonos 🎯, voz 🎤, escritura a mano ✍️, lector 🗣️ y planillas 写字 para imprimir.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">Yo</span><br><span class="ob-item-desc">Progreso, modo (chino ⇄ español), audio, meta diaria y respaldo 💾.</span></span></div>'
+                    '<p class="ob-text">Es la primera pantalla de la app. Arriba tenés cuatro pestañas:</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">Lecciones</span><br><span class="ob-item-desc">Historias cortas con pinyin y audio, más 10 ejercicios de elegir la palabra que falta. Un buen punto de partida.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">Exámenes</span><br><span class="ob-item-desc">Vocabulario por nivel: HSK y TOCFL (y DELE para español). ¿No sabés tu nivel? Hacé el 🎯 <b>test de colocación</b>.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">Diaria</span><br><span class="ob-item-desc">Frases de la vida real por tema: saludos, supermercado, colectivo, restaurante…</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📜</span><span><span class="ob-item-title">Clásicos</span><br><span class="ob-item-desc">Textos antiguos como el Tao Te King, con el original leído por bloques.</span></span></div>' +
+                    '<div class="ob-tip">💡 Al elegir un módulo, la app te lleva a <b>Hoy</b> para practicarlo. Con 🔀 <b>Intercalar</b> se mezcla el orden de las frases.</div>'
             },
-            { // 3 · el ciclo de cada frase (calificación real v9.38) + cajas
+            { // 3 · Hoy — el ciclo de una frase
+                ico: '🀄',
+                title: 'Hoy: practicá una frase',
+                html:
+                    '<p class="ob-text">1️⃣ Leé la frase y escuchala (🔊). 2️⃣ Escribí la palabra que falta — con el teclado o a mano ✍️ — y tocá <b>Verificar</b>. 3️⃣ Si fallás, la primera vez te damos una <b>pista</b>; la segunda, la respuesta.</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">👁</span><span><span class="ob-item-title">Ver</span><br><span class="ob-item-desc">Cambiá 简/繁, mostrá el pinyin y los colores de tono, o agrandá la letra.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">Pronunciación</span><br><span class="ob-item-desc">Grabá tu voz y compará con la referencia. Se procesa en tu dispositivo.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">⭕</span><span><span class="ob-item-title">Sesión de hoy</span><br><span class="ob-item-desc">El anillo cuenta tus frases del día. La meta (5, 10 o 20) la elegís en 🙂 Yo.</span></span></div>' +
+                    '<div class="ob-tip">💡 ¿No la sabés? Tocá <b>No la sé, mostrar respuesta</b>: no pasa nada, esa frase volverá pronto.</div>'
+            },
+            { // 4 · calificar + cajas + enlace al repaso
                 ico: '🔄',
-                title: 'El ciclo de cada frase',
+                title: 'Calificá y el repaso se agenda solo',
                 html:
-                    '<p class="ob-text">1️⃣ Mirás la frase y la escuchás (🔊). 2️⃣ Escribís lo que falta — teclado o a mano ✍️ — y tocá <b>Verificar</b>. 3️⃣ Calificás honesto:</p>' +
+                    '<p class="ob-text">Después de responder, calificá honesto:</p>' +
                     '<div class="ob-grade-row">' +
                         '<div class="ob-grade"><span class="og-l">🔁 Otra vez</span><span class="og-i">10 min</span></div>' +
                         '<div class="ob-grade"><span class="og-l">👍 Bien</span><span class="og-i">mañana</span></div>' +
@@ -244,14 +272,24 @@
                     '</div>' +
                     '<p class="ob-text">Eso es todo el método: <b>lo que fallás vuelve antes</b>, lo que sabés se aleja. Con los aciertos el intervalo crece — tocá cada caja:</p>' +
                     '<div id="ob-boxes" class="ob-boxes"></div>' +
-                    '<p class="ob-detail" id="ob-detail"></p>'
+                    '<p class="ob-detail" id="ob-detail"></p>' +
+                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 Ver mi repaso de hoy</button>' +
+                    '<p class="ob-text">En <b>Hoy</b>, la barra 🔁 <b>Repaso inteligente</b> te dice cuántas tarjetas te tocan.</p>'
             },
-            { // 4 · racha (en vivo) + proverbio + final
+            { // 5 · Entrenar y Yo
+                ico: '🧭',
+                title: 'Entrenar y Yo',
+                html:
+                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">Entrenar</span><br><span class="ob-item-desc">Ejercicios sueltos: pares mínimos y solo oído 🎧 para el oído, pronunciación 🎤, escribir a mano ✍️, lector 🗣️ y planillas 写字 para imprimir.</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">Yo</span><br><span class="ob-item-desc">Tu progreso y tus <b>palabras aprendidas</b> (tocá una para ver su traducción), y los ajustes: chino ⇄ español, tema claro u oscuro, voz y velocidad, meta diaria y respaldo 💾.</span></span></div>' +
+                    '<div class="ob-tip">💡 Esta guía la reabrís cuando quieras: 🙂 Yo → <b>📖 Guía</b>.</div>'
+            },
+            { // 6 · racha (en vivo) + proverbio + final
                 ico: '🔥', center: true,
                 title: 'Un paso por día',
                 html:
                     '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始于足下</div><div class="ob-quote-src">«Un camino de mil kilómetros empieza con un primer paso» · Lao zi</div></div>' +
-                    '<p class="ob-text ob-center">No hace falta saberlo todo: hace falta <b>no romper la cadena</b>. La racha 🔥 del encabezado crece cada día que practicás.</p>' +
+                    '<p class="ob-text ob-center">No hace falta saberlo todo: hace falta <b>no romper la cadena</b>. La racha 🔥 crece cada día que practicás.</p>' +
                     '<div class="ob-streak">' +
                         '<div class="ob-streak-title" id="ob-streak-title">🔥 Tu racha empieza hoy</div>' +
                         '<p class="ob-text">Días seguidos, calendario y palabras dominadas: miralo al terminar cada sesión.</p>' +
@@ -264,35 +302,52 @@
     // ---------------- contenido: pack CHINO 简体 (modo cn-es · aprendo español) ----------------
     var PACK_ZH = {
         btnLabel: '📖 指南',
-        btnTitle: '快速指南（1 分钟）：四个角落、复习循环和打卡',
+        btnTitle: '快速指南：学习、练习、复习循环和打卡',
         aria: '应用互动指南',
-        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就开始！', dots: '第', skip: '跳过导览' },
+        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 开始吧！', dots: '第', skip: '跳过导览' },
         steps: [
-            { // 1 · bienvenida
+            { // 1 · bienvenida — los tres tiempos
                 ico: '🌏', center: true,
-                title: '你好！这是你的西语 App',
+                title: '你好！先学习，再练习',
                 html:
                     '<div class="ob-hero">🌏</div>' +
-                    '<p class="ob-text ob-center"><b>真实句子 + 自动安排的复习</b></p>' +
-                    '<p class="ob-text">你只需要每天练 10 分钟左右：该复习什么、什么时候复习，App 替你记着，学过的不会溜走。</p>' +
-                    '<p class="ob-text">你现在在学<b>西班牙语</b>：用西语句子和 🎓 DELE 材料练习。想换成学中文？在 🙂 <b>我的</b> 里切换。</p>' +
-                    '<div class="ob-tip">💡 这份导览只要 <b>1 分钟</b>，以后随时能再看：🙂 我的 → <b>📖 指南</b>。</div>'
+                    '<p class="ob-text ob-center"><b>真实材料 + 句子练习 + 自动安排的复习</b></p>' +
+                    '<div class="ob-flow">' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">📚</span><span class="ob-flow-l">学习</span><span class="ob-flow-d">挑要学的内容</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🀄</span><span class="ob-flow-l">今天</span><span class="ob-flow-d">练习句子</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🔁</span><span class="ob-flow-l">复习</span><span class="ob-flow-d">难记的会回来</span></div>' +
+                    '</div>' +
+                    '<p class="ob-text">每天练 10 分钟左右就够了：该复习什么、什么时候复习，App 替你记着，学过的不会溜走。</p>' +
+                    '<p class="ob-text">你现在在学<b>西班牙语</b>：用西语句子和 🎓 DELE 材料练习。想换成学中文？在 🙂 <b>我的</b> 里切换。</p>'
             },
-            { // 2 · las 4 vistas
-                ico: '🧭',
-                title: 'App 有四个角落（在下方）',
+            { // 2 · Aprender
+                ico: '📚',
+                title: '学习：挑要学的内容',
                 html:
-                    '<div class="ob-item"><span class="ob-item-ico">🀄</span><span><span class="ob-item-title">今天</span><br><span class="ob-item-desc">今天的句子 + 到期的复习 🔁。做完这些，今天就算学过了。</span></span></div>' +
-                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 看看我的复习</button>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">学习</span><br><span class="ob-item-desc">挑内容：日常主题、考试（HSK · TOCFL · DELE）、课文和经典阅读。</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">训练</span><br><span class="ob-item-desc">听力 🎧、声调 🎯、发音 🎤、手写 ✍️、朗读 🗣️ 和写字练习纸。</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">我的</span><br><span class="ob-item-desc">进度、学习方向（中文 ⇄ 西语）、音频、每日目标和备份 💾。</span></span></div>'
+                    '<p class="ob-text">这是 App 的第一个页面，上方有四个标签：</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">课文</span><br><span class="ob-item-desc">带拼音和录音的短故事，配 10 道选词填空练习。很适合作为起点。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">考试</span><br><span class="ob-item-desc">按等级的词汇：HSK、TOCFL（学西语则有 DELE）。不知道自己的水平？做 🎯 <b>分级测试</b>。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">每日</span><br><span class="ob-item-desc">真实生活主题的句子：问候、超市、公交、餐厅……</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📜</span><span><span class="ob-item-title">古文</span><br><span class="ob-item-desc">《道德经》等古代经典，按段落阅读原文。</span></span></div>' +
+                    '<div class="ob-tip">💡 选好内容后，App 会带你去<b>今天</b>练习。🔀 <b>交错练习</b>会打乱句子的顺序。</div>'
             },
-            { // 3 · el ciclo + cajas
+            { // 3 · Hoy
+                ico: '🀄',
+                title: '今天：练一句',
+                html:
+                    '<p class="ob-text">1️⃣ 看句子、听录音 🔊。2️⃣ 填上缺的词——键盘或手写 ✍️——点 <b>检查</b>。3️⃣ 第一次答错会给<b>提示</b>，第二次才显示答案。</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">👁</span><span><span class="ob-item-title">查看</span><br><span class="ob-item-desc">切换简/繁、显示拼音和声调颜色，或放大字体。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">发音</span><br><span class="ob-item-desc">录下你的声音，和标准音对比。录音只在你的设备上处理。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">⭕</span><span><span class="ob-item-title">今日练习</span><br><span class="ob-item-desc">圆环记录今天练了几句。每日目标（5、10 或 20 句）在 🙂 我的 里设置。</span></span></div>' +
+                    '<div class="ob-tip">💡 不会？点<b>不会，显示答案</b>：没关系，这一句很快会再出现。</div>'
+            },
+            { // 4 · calificar + cajas + enlace al repaso
                 ico: '🔄',
-                title: '每句话的循环',
+                title: '评分，复习自动安排',
                 html:
-                    '<p class="ob-text">1️⃣ 看句子、听录音 🔊。2️⃣ 填上缺的词——键盘或手写 ✍️——点 <b>检查</b>。3️⃣ 诚实地给自己评分：</p>' +
+                    '<p class="ob-text">答完后，诚实地给自己评分：</p>' +
                     '<div class="ob-grade-row">' +
                         '<div class="ob-grade"><span class="og-l">🔁 再来</span><span class="og-i">10 min</span></div>' +
                         '<div class="ob-grade"><span class="og-l">👍 记得</span><span class="og-i">明天</span></div>' +
@@ -300,14 +355,24 @@
                     '</div>' +
                     '<p class="ob-text">方法就这么简单：<b>错的先回来</b>，会的越走越远。答对之后间隔会变长——点每个盒子看看：</p>' +
                     '<div id="ob-boxes" class="ob-boxes"></div>' +
-                    '<p class="ob-detail" id="ob-detail"></p>'
+                    '<p class="ob-detail" id="ob-detail"></p>' +
+                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 看看我的复习</button>' +
+                    '<p class="ob-text">在<b>今天</b>里，🔁 <b>智能复习</b>栏会告诉你今天有几张卡到期。</p>'
             },
-            { // 4 · racha + final
+            { // 5 · Entrenar y Yo
+                ico: '🧭',
+                title: '训练和我的',
+                html:
+                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">训练</span><br><span class="ob-item-desc">单项练习：最小对立词和纯听力 🎧、发音 🎤、手写 ✍️、朗读 🗣️，以及可打印的写字练习纸。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">我的</span><br><span class="ob-item-desc">你的进度和<b>已学词语</b>（点一个词看翻译），以及设置：中文 ⇄ 西语、明暗主题、语音和语速、每日目标和备份 💾。</span></span></div>' +
+                    '<div class="ob-tip">💡 这份指南随时可以再看：🙂 我的 → <b>📖 指南</b>。</div>'
+            },
+            { // 6 · racha + final
                 ico: '🔥', center: true,
                 title: '每天一小步',
                 html:
                     '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始于足下</div><div class="ob-quote-src">——老子《道德经》· 每天一小步</div></div>' +
-                    '<p class="ob-text ob-center">不用什么都会：<b>不断链</b>就行。顶部的 🔥 会随着你每天练习一点点长大。</p>' +
+                    '<p class="ob-text ob-center">不用什么都会：<b>不断链</b>就行。🔥 会随着你每天练习一点点长大。</p>' +
                     '<div class="ob-streak">' +
                         '<div class="ob-streak-title" id="ob-streak-title">🔥 你的打卡，今天开始</div>' +
                         '<p class="ob-text">连续天数、学习日历、掌握词汇：每次练完看一眼。</p>' +
@@ -318,41 +383,58 @@
     };
 
     // ---------------- contenido: pack CHINO 繁體 (v9.26 · variante tradicional) ----------------
-    // Espejo 1:1 de PACK_ZH: mismos 4 pasos, mismos ids y misma estructura;
+    // Espejo 1:1 de PACK_ZH: mismos 6 pasos, mismos ids y misma estructura;
     // solo cambia el guion (简体 → 繁體). El toggle 简/繁 alterna entre ambos
-    // conservando el paso actual. Conversión a mano (uso TW): 複習, 這, 學習,
-    // 導覽, 裡, 點, 聽力, 聲調, 手寫, 課文, 記得, 簡單, 出現, 間隔, 個, 於.
+    // conservando el paso actual. Conversión a mano (uso TW): 學習, 課文, 帶,
+    // 錄音, 選詞填空, 練習, 導覽, 複習, 這, 點, 聲調, 錄, 詞彙, 設置, 備份.
     var PACK_ZH_HANT = {
         btnLabel: '📖 指南',
-        btnTitle: '快速指南（1 分鐘）：四個角落、複習循環和打卡',
+        btnTitle: '快速指南：學習、練習、複習循環和打卡',
         aria: '應用互動指南',
-        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 今天就開始！', dots: '第', skip: '跳過導覽' },
+        ui: { back: '◀ 上一步', next: '下一步 ▶', done: '🚀 開始吧！', dots: '第', skip: '跳過導覽' },
         steps: [
-            { // 1 · bienvenida
+            { // 1 · bienvenida — los tres tiempos
                 ico: '🌏', center: true,
-                title: '你好！這是你的西語 App',
+                title: '你好！先學習，再練習',
                 html:
                     '<div class="ob-hero">🌏</div>' +
-                    '<p class="ob-text ob-center"><b>真實句子 + 自動安排的複習</b></p>' +
-                    '<p class="ob-text">你只需要每天練 10 分鐘左右：該複習什麼、什麼時候複習，App 替你記著，學過的不會溜走。</p>' +
-                    '<p class="ob-text">你現在在學<b>西班牙語</b>：用西語句子和 🎓 DELE 材料練習。想換成學中文？在 🙂 <b>我的</b> 裡切換。</p>' +
-                    '<div class="ob-tip">💡 這份導覽只要 <b>1 分鐘</b>，以後隨時能再看：🙂 我的 → <b>📖 指南</b>。</div>'
+                    '<p class="ob-text ob-center"><b>真實材料 + 句子練習 + 自動安排的複習</b></p>' +
+                    '<div class="ob-flow">' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">📚</span><span class="ob-flow-l">學習</span><span class="ob-flow-d">挑要學的內容</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🀄</span><span class="ob-flow-l">今天</span><span class="ob-flow-d">練習句子</span></div>' +
+                        '<span class="ob-flow-arrow">›</span>' +
+                        '<div class="ob-flow-step"><span class="ob-flow-ico">🔁</span><span class="ob-flow-l">複習</span><span class="ob-flow-d">難記的會回來</span></div>' +
+                    '</div>' +
+                    '<p class="ob-text">每天練 10 分鐘左右就夠了：該複習什麼、什麼時候複習，App 替你記著，學過的不會溜走。</p>' +
+                    '<p class="ob-text">你現在在學<b>西班牙語</b>：用西語句子和 🎓 DELE 材料練習。想換成學中文？在 🙂 <b>我的</b> 裡切換。</p>'
             },
-            { // 2 · las 4 vistas
-                ico: '🧭',
-                title: 'App 有四個角落（在下方）',
+            { // 2 · Aprender
+                ico: '📚',
+                title: '學習：挑要學的內容',
                 html:
-                    '<div class="ob-item"><span class="ob-item-ico">🀄</span><span><span class="ob-item-title">今天</span><br><span class="ob-item-desc">今天的句子 + 到期的複習 🔁。做完這些，今天就算學過了。</span></span></div>' +
-                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 看看我的複習</button>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">學習</span><br><span class="ob-item-desc">挑內容：日常主題、考試（HSK · TOCFL · DELE）、課文和經典閱讀。</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">訓練</span><br><span class="ob-item-desc">聽力 🎧、聲調 🎯、發音 🎤、手寫 ✍️、朗讀 🗣️ 和寫字練習紙。</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">我的</span><br><span class="ob-item-desc">進度、學習方向（中文 ⇄ 西語）、音訊、每日目標和備份 💾。</span></span></div>'
+                    '<p class="ob-text">這是 App 的第一個頁面，上方有四個標籤：</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">課文</span><br><span class="ob-item-desc">帶拼音和錄音的短故事，配 10 道選詞填空練習。很適合作為起點。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">考試</span><br><span class="ob-item-desc">按等級的詞彙：HSK、TOCFL（學西語則有 DELE）。不知道自己的水平？做 🎯 <b>分級測驗</b>。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">每日</span><br><span class="ob-item-desc">真實生活主題的句子：問候、超市、公車、餐廳……</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">📜</span><span><span class="ob-item-title">古文</span><br><span class="ob-item-desc">《道德經》等古代經典，按段落閱讀原文。</span></span></div>' +
+                    '<div class="ob-tip">💡 選好內容後，App 會帶你去<b>今天</b>練習。🔀 <b>交錯練習</b>會打亂句子的順序。</div>'
             },
-            { // 3 · el ciclo + cajas
+            { // 3 · Hoy
+                ico: '🀄',
+                title: '今天：練一句',
+                html:
+                    '<p class="ob-text">1️⃣ 看句子、聽錄音 🔊。2️⃣ 填上缺的詞——鍵盤或手寫 ✍️——點 <b>檢查</b>。3️⃣ 第一次答錯會給<b>提示</b>，第二次才顯示答案。</p>' +
+                    '<div class="ob-item"><span class="ob-item-ico">👁</span><span><span class="ob-item-title">檢視</span><br><span class="ob-item-desc">切換簡/繁、顯示拼音和聲調顏色，或放大字體。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">發音</span><br><span class="ob-item-desc">錄下你的聲音，和標準音對比。錄音只在你的裝置上處理。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">⭕</span><span><span class="ob-item-title">今日練習</span><br><span class="ob-item-desc">圓環記錄今天練了幾句。每日目標（5、10 或 20 句）在 🙂 我的 裡設定。</span></span></div>' +
+                    '<div class="ob-tip">💡 不會？點<b>不會，顯示答案</b>：沒關係，這一句很快會再出現。</div>'
+            },
+            { // 4 · calificar + cajas + enlace al repaso
                 ico: '🔄',
-                title: '每句話的循環',
+                title: '評分，複習自動安排',
                 html:
-                    '<p class="ob-text">1️⃣ 看句子、聽錄音 🔊。2️⃣ 填上缺的詞——鍵盤或手寫 ✍️——點 <b>檢查</b>。3️⃣ 誠實地給自己評分：</p>' +
+                    '<p class="ob-text">答完後，誠實地給自己評分：</p>' +
                     '<div class="ob-grade-row">' +
                         '<div class="ob-grade"><span class="og-l">🔁 再來</span><span class="og-i">10 min</span></div>' +
                         '<div class="ob-grade"><span class="og-l">👍 記得</span><span class="og-i">明天</span></div>' +
@@ -360,14 +442,24 @@
                     '</div>' +
                     '<p class="ob-text">方法就這麼簡單：<b>錯的先回來</b>，會的越走越遠。答對之後間隔會變長——點每個盒子看看：</p>' +
                     '<div id="ob-boxes" class="ob-boxes"></div>' +
-                    '<p class="ob-detail" id="ob-detail"></p>'
+                    '<p class="ob-detail" id="ob-detail"></p>' +
+                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 看看我的複習</button>' +
+                    '<p class="ob-text">在<b>今天</b>裡，🔁 <b>智慧複習</b>欄會告訴你今天有幾張卡到期。</p>'
             },
-            { // 4 · racha + final
+            { // 5 · Entrenar y Yo
+                ico: '🧭',
+                title: '訓練和我的',
+                html:
+                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">訓練</span><br><span class="ob-item-desc">單項練習：最小對立詞和純聽力 🎧、發音 🎤、手寫 ✍️、朗讀 🗣️，以及可列印的寫字練習紙。</span></span></div>' +
+                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">我的</span><br><span class="ob-item-desc">你的進度和<b>已學詞語</b>（點一個詞看翻譯），以及設定：中文 ⇄ 西語、明暗主題、語音和語速、每日目標和備份 💾。</span></span></div>' +
+                    '<div class="ob-tip">💡 這份指南隨時可以再看：🙂 我的 → <b>📖 指南</b>。</div>'
+            },
+            { // 6 · racha + final
                 ico: '🔥', center: true,
                 title: '每天一小步',
                 html:
                     '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始於足下</div><div class="ob-quote-src">——老子《道德經》· 每天一小步</div></div>' +
-                    '<p class="ob-text ob-center">不用什麼都會：<b>不斷鏈</b>就行。頂部的 🔥 會隨著你每天練習一點點長大。</p>' +
+                    '<p class="ob-text ob-center">不用什麼都會：<b>不斷鏈</b>就行。🔥 會隨著你每天練習一點點長大。</p>' +
                     '<div class="ob-streak">' +
                         '<div class="ob-streak-title" id="ob-streak-title">🔥 你的打卡，今天開始</div>' +
                         '<p class="ob-text">連續天數、學習日曆、掌握詞彙：每次練完看一眼。</p>' +
@@ -381,8 +473,8 @@
 
     // ---------------- estado ----------------
     var lang = 'es-cn';   // idioma de contenido en uso ('es-cn'|'cn-es'|'cn-hant')
-    var cur = 0;          // paso actual (0..3)
-    var boxSel = 0;       // caja seleccionada en las cajas del paso 3
+    var cur = 0;          // paso actual (0..5)
+    var boxSel = 0;       // caja seleccionada en las cajas del paso 4
 
     // ---------------- modo (DOM primero, localStorage de app.js como fallback) ----------------
     function currentMode() {
@@ -506,7 +598,7 @@
         }
         // widgets
         if ($('ob-boxes')) renderBoxes();
-        if ($('ob-srs-btn')) bindSrs();              // paso "4 rincones" → repaso SRS real
+        if ($('ob-srs-btn')) bindSrs();              // paso "calificar" → repaso SRS real
         if ($('ob-streak-title')) renderStreakLive(); // v9.25: callout con racha en vivo
         if ($('ob-streak-btn')) bindStreak();   // v9.24: paso final → racha
         // nav
@@ -537,7 +629,7 @@
         nav.appendChild(dots);
         nav.appendChild(next);
         body.appendChild(nav);
-        // v10 UX: "Saltar guía" en todos los pasos (además de la ✕)
+        // "Saltar guía" en todos los pasos menos el último (además de la ✕)
         if (cur < P.steps.length - 1) {
             var skipRow = document.createElement('div');
             skipRow.style.textAlign = 'center';
@@ -612,7 +704,7 @@
     }
 
     // ---------------- enlace con el repaso inteligente (v9.25) ----------------
-    // El paso «4 rincones» muestra el botón "Ver mi repaso de hoy": cierra
+    // El paso "calificar" muestra el botón "Ver mi repaso de hoy": cierra
     // la guía SIN marcarla como vista (paso intermedio — el tour sigue
     // pendiente y volverá a auto-mostrarse hasta completarse) y abre el
     // popup REAL del SRS haciendo click en #btn-srs, el mismo botón de la
