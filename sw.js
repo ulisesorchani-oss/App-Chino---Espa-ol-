@@ -434,7 +434,11 @@
 //        mínimos, window.MPDebug) se separaron de app.js. Ambas ya
 //        eran IIFEs autocontenidas. Toca app.js, index.html, sw.js;
 //        placement-test.js y minimal-pairs.js NUEVOS.
-const VERSION = 'v110'; // — invalida shell (placement-test.js y minimal-pairs.js nuevos en el precache)
+// v9.60: modularización fase 11 — karaoke.js (resaltado de lectura al
+//        ritmo del audio, const KARA) se separó de app.js. Se carga
+//        antes de classics-reader.js/lessons-graduated.js, que lo
+//        usan. Toca app.js, index.html, sw.js; karaoke.js NUEVO.
+const VERSION = 'v111'; // — invalida shell (karaoke.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -474,6 +478,7 @@ const PRECACHE = [
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
   './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
+  './karaoke.js',          // v9.60: karaoke de lectura extraído de app.js (fase 11)
   './classics-reader.js',  // v9.56: lector de clásicos extraído de app.js (fase 6)
   './lessons-graduated.js', // v9.58: quiz de lecciones graduadas extraído de app.js (fase 8)
   './placement-test.js',   // v9.59: test de colocación HSK extraído de app.js (fase 9)
