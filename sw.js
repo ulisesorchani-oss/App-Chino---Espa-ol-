@@ -397,7 +397,31 @@
 //       prefiere voces del país exacto en el fallback del sistema.
 //       Requiere api/ v9.49 (es-AR + zh-TW en el mapa VOICES). Toca app.js
 //       + lessons-dele.js + voice-evaluator.js + index.html (+ api/).
-const VERSION = 'v101'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel en style.css)
+// v9.51: modularización fase 1 — audio-tts.js se separó de app.js (mismo
+//        código, ahora en archivo propio). Nuevo archivo en el shell →
+//        bump de VERSION para que se precachee. Toca app.js, index.html,
+//        sw.js; audio-tts.js NUEVO.
+// v9.52: modularización fase 2 — dict.js (motor de diccionario: vocabDict,
+//        dictMini*, lookupVocab) se separó de app.js. Se carga DESPUÉS de
+//        app.js (necesita EMBEDDED_SENTENCES/EMBEDDED_MODULE_DATA). Toca
+//        app.js, index.html, sw.js; dict.js NUEVO.
+// v9.53: modularización fase 3 — trazos.js (motor Hanzi Writer: orden de
+//        trazos, banner de práctica, respuesta a mano) se separó de
+//        app.js. showVocabPop/hideVocabPop se quedaron en app.js. Toca
+//        app.js, index.html, sw.js; trazos.js NUEVO.
+// v9.54: modularización fase 4 — srs.js (mazo de repaso espaciado,
+//        window.acSrs*) se separó de app.js. Ya era una IIFE
+//        autocontenida — sin cambios de comportamiento. Toca app.js,
+//        index.html, sw.js; srs.js NUEVO.
+// v9.55: modularización fase 5 — reader.js (lector de texto libre:
+//        TTS, biblioteca de lecturas, vista interlineal, escHtml) se
+//        separó de app.js. Toca app.js, index.html, sw.js; reader.js
+//        NUEVO.
+// v9.56: modularización fase 6 — classics-reader.js (lector de los 9
+//        clásicos, window.CR_open/CR_DEBUG) se separó de app.js. Ya
+//        era una IIFE autocontenida. Toca app.js, index.html, sw.js;
+//        classics-reader.js NUEVO.
+const VERSION = 'v107'; // — invalida shell (classics-reader.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -431,6 +455,12 @@ const PRECACHE = [
   './',
   './index.html',
   './app.js',
+  './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
+  './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
+  './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
+  './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
+  './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
+  './classics-reader.js',  // v9.56: lector de clásicos extraído de app.js (fase 6)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
