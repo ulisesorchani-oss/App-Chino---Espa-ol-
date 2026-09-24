@@ -438,7 +438,12 @@
 //        ritmo del audio, const KARA) se separó de app.js. Se carga
 //        antes de classics-reader.js/lessons-graduated.js, que lo
 //        usan. Toca app.js, index.html, sw.js; karaoke.js NUEVO.
-const VERSION = 'v111'; // — invalida shell (karaoke.js nuevo en el precache)
+// v9.61: Práctica Diaria — daily-stories.js NUEVO: al elegir una situación
+//        (Gimnasio, Subte, etc.) se muestra primero un diálogo coherente
+//        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
+//        sigue el flujo de siempre (setModule). Toca app.js (wiring de
+//        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
+const VERSION = 'v112'; // — invalida shell (daily-stories.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -483,6 +488,7 @@ const PRECACHE = [
   './lessons-graduated.js', // v9.58: quiz de lecciones graduadas extraído de app.js (fase 8)
   './placement-test.js',   // v9.59: test de colocación HSK extraído de app.js (fase 9)
   './minimal-pairs.js',    // v9.59: pares mínimos extraído de app.js (fase 10)
+  './daily-stories.js',    // v9.61: escena coherente de Práctica Diaria (diálogos por situación)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
