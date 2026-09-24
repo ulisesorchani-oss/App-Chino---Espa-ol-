@@ -409,7 +409,11 @@
 //        trazos, banner de práctica, respuesta a mano) se separó de
 //        app.js. showVocabPop/hideVocabPop se quedaron en app.js. Toca
 //        app.js, index.html, sw.js; trazos.js NUEVO.
-const VERSION = 'v104'; // — invalida shell (trazos.js nuevo en el precache)
+// v9.54: modularización fase 4 — srs.js (mazo de repaso espaciado,
+//        window.acSrs*) se separó de app.js. Ya era una IIFE
+//        autocontenida — sin cambios de comportamiento. Toca app.js,
+//        index.html, sw.js; srs.js NUEVO.
+const VERSION = 'v105'; // — invalida shell (srs.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -446,6 +450,7 @@ const PRECACHE = [
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
+  './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
