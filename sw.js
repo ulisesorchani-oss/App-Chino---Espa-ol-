@@ -421,7 +421,11 @@
 //        clásicos, window.CR_open/CR_DEBUG) se separó de app.js. Ya
 //        era una IIFE autocontenida. Toca app.js, index.html, sw.js;
 //        classics-reader.js NUEVO.
-const VERSION = 'v107'; // — invalida shell (classics-reader.js nuevo en el precache)
+// v9.57: modularización fase 7 — data-embedded.js (EMBEDDED_SENTENCES,
+//        EMBEDDED_MODULE_DATA, expandWordCards) se separó de app.js.
+//        Se carga ANTES de app.js (dict.js lo necesita ya definido).
+//        Toca app.js, index.html, sw.js; data-embedded.js NUEVO.
+const VERSION = 'v108'; // — invalida shell (data-embedded.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -456,6 +460,7 @@ const PRECACHE = [
   './index.html',
   './app.js',
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
+  './data-embedded.js',    // v9.57: oraciones y vocabulario embebido extraído de app.js (fase 7)
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
