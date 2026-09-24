@@ -425,7 +425,11 @@
 //        EMBEDDED_MODULE_DATA, expandWordCards) se separó de app.js.
 //        Se carga ANTES de app.js (dict.js lo necesita ya definido).
 //        Toca app.js, index.html, sw.js; data-embedded.js NUEVO.
-const VERSION = 'v108'; // — invalida shell (data-embedded.js nuevo en el precache)
+// v9.58: modularización fase 8 — lessons-graduated.js (quiz de
+//        lecciones graduadas, window.LQ_DEBUG) se separó de app.js. Ya
+//        era una IIFE autocontenida. Toca app.js, index.html, sw.js;
+//        lessons-graduated.js NUEVO.
+const VERSION = 'v109'; // — invalida shell (lessons-graduated.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -466,6 +470,7 @@ const PRECACHE = [
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
   './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
   './classics-reader.js',  // v9.56: lector de clásicos extraído de app.js (fase 6)
+  './lessons-graduated.js', // v9.58: quiz de lecciones graduadas extraído de app.js (fase 8)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
