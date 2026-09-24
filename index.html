@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260923c">
+    <link rel="stylesheet" href="style.css?v=20260924a">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -43,6 +43,11 @@
              ============================================================ -->
         <section class="view hidden" id="view-hoy" role="tabpanel" aria-labelledby="nav-hoy">
             <h2 class="sr-only">Hoy</h2>
+
+            <!-- v9.62: Gagné evento 3 — activa conocimiento previo. Lo llena
+                 renderLastSessionNote() (app.js) con HuayuStats.getLastSession();
+                 si no hay sesión previa queda vacío/oculto (fallback silencioso). -->
+            <p class="lessons-intro last-session-note hidden" id="last-session-note" role="status"></p>
 
             <!-- v10 UX: fila de estado (ya no es sticky). El texto lo escribe
                  updateBar() del SRS: "N para repasar hoy" / "N para repetir en
@@ -150,7 +155,7 @@
                             <span class="g-label" data-i18n="btnGood">Bien</span><small class="g-int" id="g-int-good">1 día</small>
                         </button>
                         <button id="btn-know" class="btn-grade btn-success" type="button" data-grade="easy">
-                            <span class="g-label" data-i18n="btnKnow">Fácil</span><small class="g-int" id="g-int-easy">3 días</small>
+                            <span class="g-label" data-i18n="btnKnow">Fácil</span><small class="g-int" id="g-int-easy">no vuelve</small>
                         </button>
                     </div>
 
@@ -230,6 +235,7 @@
                 <!-- Panel Exámenes -->
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
+                    <p class="lessons-intro" data-i18n="examsIntro">Elegí un examen o nivel y practicá su vocabulario con tarjetas de opción simple: cada acierto suma a tu progreso real. ¿No sabés tu nivel? Empezá por el test de colocación.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
                             title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
@@ -302,6 +308,7 @@
                 <!-- Panel Diaria -->
                 <div class="tab-panel section-daily hidden" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
                     <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
+                    <p class="lessons-intro" data-i18n="dailyIntro">Elegí una situación cotidiana: primero leés un diálogo corto para entender el contexto, después practicás sus frases sueltas con hueco ___. "Todas" mezcla las oraciones de todas las situaciones.</p>
                     <div class="category-filter daily-filter">
                         <div class="daily-dropdown" id="daily-dropdown">
                             <button id="btn-daily-toggle" class="daily-main-btn" type="button"
@@ -332,6 +339,7 @@
                 <!-- Panel Clásicos -->
                 <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
                     <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
+                    <p class="lessons-intro" data-i18n="classicsIntro">Elegí un clásico para practicar frases sueltas de sus enseñanzas más conocidas, o tocá 📖 Leer el texto original para recorrer el texto completo por capítulos, con pinyin y traducción.</p>
                     <div class="classics-dropdown" id="classics-dropdown">
                         <button id="btn-classics-toggle" class="classics-main-btn" type="button"
                                 aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
@@ -761,10 +769,10 @@
     <script src="lessons-dele.js?v=20260923a"></script>
     <script src="classics.js?v=20260910c"></script>
     <script src="onboarding.js?v=20260923a"></script>
-    <script src="stats.js?v=20260922c"></script>
+    <script src="stats.js?v=20260924a"></script>
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260924a"></script>
-    <script src="app.js?v=20260924j"></script>
+    <script src="app.js?v=20260924k"></script>
     <script src="dict.js?v=20260924a"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>

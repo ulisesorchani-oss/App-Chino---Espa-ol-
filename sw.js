@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v112'; // — invalida shell (daily-stories.js nuevo en el precache)
+const VERSION = 'v113'; // — Lote 1: style.css/index.html/app.js/stats.js (audit fixes)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
