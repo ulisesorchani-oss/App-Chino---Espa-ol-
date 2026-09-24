@@ -24,8 +24,12 @@
 // bloque NO depende de dict-mini en runtime). Audio: reutiliza
 // fetchTTS() (Vercel) con cache de blob-URLs por palabra (repetir es la
 // clave del ejercicio) y fallback speechSynthesis; un solo audio a la
-// vez (mismo player global de la app). No toca state, getFiltered, SRS
-// ni ningún flujo existente.
+// vez (mismo player global de la app). No toca state ni getFiltered.
+// v9.64: SÍ toca el mazo de repaso — al fallar una ronda se llama al
+// hook existente window.acSrsMiss (srs.js) para que ese par vuelva por
+// repetición espaciada, igual que cualquier otro fallo de la práctica
+// principal (ver mpSrsMiss). Ningún flujo de getFiltered/checkAnswer se
+// modifica: es el mismo hook que ya usaban, llamado desde un lugar nuevo.
 // ═══════════════════════════════════════════════════════════════════
 (function mpInit() {
     'use strict';
@@ -275,12 +279,40 @@
             '<button type="button" class="mp-next mp-ghost" data-mp-act="close">Cerrar</button></div>';
     }
 
+    // v9.64 (AUDITORIA-GAGNE-MAYER.md, evento 9): al fallar una ronda,
+    // alimenta el MISMO mazo de repaso espaciado que usa la práctica
+    // principal — reusa el hook existente window.acSrsMiss (srs.js) tal
+    // cual está, ninguna estructura de tracking nueva. Su firma actual
+    // (ver srs.js: window.acSrsMiss = function (s) {...}) espera una
+    // "oración": s.chinese_simp_answer es la CLAVE del mazo; si s.w es
+    // verdadero la trata como tarjeta de palabra (glosa desde
+    // spanish_answer, SIN contexto — acSrsMiss fuerza ctxZh/ctxEs a '' en
+    // esa rama); si s.w es falso/ausente, sí guarda contexto desde
+    // chinese_simp_full/spanish_full (la glosa entonces la resuelve
+    // srsGloss() por diccionario, ver srs.js). Pares Mínimos no tiene una
+    // "oración" real — el contexto útil acá es el PAR MÍNIMO completo, así
+    // que se arma con las palabras del grupo y se manda por esa 2.ª rama a
+    // propósito, sin inventar s.w ni ningún campo que acSrsMiss no lea.
+    function mpSrsMiss(cur) {
+        if (typeof window.acSrsMiss !== 'function' || !cur || !cur.group || !cur.target) return;
+        const words = cur.group.words || [];
+        const ctxZh = words.map(function (w) { return w.zh + ' ' + w.py; }).join(' ↔ ');
+        const ctxEs = words.map(function (w) { return w.zh + ' = ' + w.es; }).join(' · ');
+        window.acSrsMiss({
+            chinese_simp_answer: cur.target.zh,
+            module: 'Pares mínimos',
+            chinese_simp_full: ctxZh,
+            spanish_full: ctxEs
+        });
+    }
+
     // ── flujo de sesión ──
     function mpAnswer(i) {
         if (!S.cur || S.answered || !S.cur.options[i]) return;
         const ok = S.cur.options[i] === S.cur.target;
         S.answered = true; S.pick = i;
         S.results.push(ok); if (ok) S.score++;
+        if (!ok) mpSrsMiss(S.cur); // v9.64: único punto de integración, al fallar
         mpRenderRound();
         mpPlay(S.cur.target.zh, null); // eco de la palabra correcta
     }
@@ -357,6 +389,6 @@
     });
 
     // exports para tests/QA (sin efecto en la UI)
-    window.MPDebug = { data: MP_DATA, toneSeq: mpToneSeq, toneLabel: mpToneLabel, shuffle: mpShuffle, buildRound: mpBuildRound };
+    window.MPDebug = { data: MP_DATA, toneSeq: mpToneSeq, toneLabel: mpToneLabel, shuffle: mpShuffle, buildRound: mpBuildRound, srsMiss: mpSrsMiss };
 })();
 // ===== fin v9.20 =====

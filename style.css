@@ -305,6 +305,17 @@ body.dark-mode #btn-tones.active {
     white-space: nowrap; /* el emoji y el número nunca se parten */
 }
 
+/* v9.63: chip 🔀 — esta tarjeta vino de OTRA situación de Diaria
+   (interleaving real). Violeta a propósito: no es ni el azul de intentos
+   ni los ámbar/verde/rojo de feedback, para que se lea como "es de otro
+   tema", no como un estado de acierto/error. */
+.card-mixed-chip {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: #7c3aed;
+    white-space: nowrap;
+}
+
 .sentence-container {
     margin-bottom: 24px;
 }

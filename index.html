@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260924a">
+    <link rel="stylesheet" href="style.css?v=20260924b">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -99,6 +99,8 @@
                         <span class="card-number" id="card-number">1/20</span>
                         <!-- v9.47: contador de intentos históricos de esta tarjeta -->
                         <span class="card-attempts hidden" id="card-attempts"></span>
+                        <!-- v9.63: chip de origen cuando la tarjeta viene de OTRA situación de Diaria (interleaving real) -->
+                        <span class="card-mixed-chip hidden" id="card-mixed-chip"></span>
                     </div>
 
                     <div class="practice-progress-slot">
@@ -772,7 +774,7 @@
     <script src="stats.js?v=20260924a"></script>
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260924a"></script>
-    <script src="app.js?v=20260924k"></script>
+    <script src="app.js?v=20260924l"></script>
     <script src="dict.js?v=20260924a"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>
@@ -781,7 +783,7 @@
     <script src="classics-reader.js?v=20260924a"></script>
     <script src="lessons-graduated.js?v=20260924a"></script>
     <script src="placement-test.js?v=20260924a"></script>
-    <script src="minimal-pairs.js?v=20260924a"></script>
+    <script src="minimal-pairs.js?v=20260924b"></script>
     <script src="daily-stories.js?v=20260924a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
