@@ -843,6 +843,25 @@
         } catch (e) { return null; }
     }
 
+    // ---------------- última sesión anterior (v9.62: Gagné evento 3 —
+    // activar conocimiento previo al abrir "Hoy"). Recorre los días ya
+    // trackeados (mismo readDays() de getSummary) y busca el más reciente
+    // CON actividad, distinto de hoy. Solo lectura, no agrega tracking
+    // nuevo: usa exactamente los mismos campos {a,r,s} por día.
+    function getLastSession() {
+        try {
+            var days = readDays();
+            var todayKey = hsDayKey();
+            var keys = Object.keys(days).filter(function (k) {
+                return k !== todayKey && hsIsActive(days[k]);
+            });
+            if (!keys.length) return null;
+            keys.sort(); // claves 'YYYY-MM-DD' → orden lexicográfico = cronológico
+            var d = days[keys[keys.length - 1]];
+            return { a: d.a || 0, r: d.r || 0 };
+        } catch (e) { return null; }
+    }
+
     // ---------------- open / close ----------------
     function open() {
         try {
@@ -907,6 +926,7 @@
         open: open,
         close: close,
         getSummary: getSummary,   // v9.25: resumen de solo lectura (racha en vivo de la guía)
+        getLastSession: getLastSession, // v9.62: última sesión anterior, solo lectura
         _pure: {
             dayKey: hsDayKey,
             shiftKey: hsShiftKey,

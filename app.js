@@ -591,6 +591,8 @@ const UI_STRINGS = {
     setMode: 'Estoy aprendiendo', setTheme: 'Tema', setAudio: 'Audio', setSession: 'Meta diaria', setData: 'Datos',
     sessionLabel: 'Sesión de hoy', sessionDoneTitle: '¡Sesión completa!', sessionDoneText: 'Practicaste {n} frases hoy.',
     sessionStreak: 'Racha: {n} días 🔥', sessionMore: '{n} más', sessionClose: 'Listo por hoy',
+    sessionQuality: '{a} bien, {r} para repasar', // v9.62: calidad de la sesión (Gagné 8)
+    lastSession: 'La vez pasada practicaste {n} oraciones.', // v9.62: activa conocimiento previo (Gagné 3)
     srsEmpty: 'Empezá a practicar y armo tu repaso', srsDueN: '{n} para repasar hoy',
     srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
     gradeNoReturn: 'no vuelve', gradeTomorrow: 'mañana', // v9.38: subtítulos diferenciados Bien/Fácil
@@ -652,6 +654,8 @@ const UI_STRINGS = {
     setMode: '我在学', setTheme: '主题', setAudio: '语音', setSession: '每日目标', setData: '数据',
     sessionLabel: '今日练习', sessionDoneTitle: '今日练习完成！', sessionDoneText: '今天练了 {n} 句。',
     sessionStreak: '连续 {n} 天 🔥', sessionMore: '再来 {n} 句', sessionClose: '今天到此为止',
+    sessionQuality: '答对 {a} 句，待复习 {r} 句',
+    lastSession: '上次你练习了 {n} 句。',
     srsEmpty: '开始练习，我来安排复习', srsDueN: '今天要复习 {n} 张',
     srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
     gradeNoReturn: '不再出现', gradeTomorrow: '明天', // v9.38: 中文副标题
@@ -773,6 +777,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCurrentSentence();
     updateStats();
     updateVocabularyPanel();
+    renderLastSessionNote(); // v9.62: Gagné evento 3 — "la vez pasada..." en Hoy
     state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
 
     // ===== v9.46: WARMUP del motor de voz (evaluación más rápida) =====
@@ -2722,6 +2727,15 @@ function showSessionDone() {
     try {
         const s = window.HuayuStats && HuayuStats.getSummary && HuayuStats.getSummary();
         if (s && s.streak > 0) txt += ' ' + uiT('sessionStreak').replace('{n}', s.streak).replace('días', s.streak === 1 ? 'día' : 'días');
+        // v9.62: calidad de la sesión (Gagné 8) — todayA (stats.js, aciertos
+        // observados hoy vía delta de score) vs. state.sessionDone (tarjetas
+        // calificadas hoy, incluye "Otra vez"). No toca checkAnswer/SRS: son
+        // dos contadores día-scoped ya existentes, solo se combinan acá.
+        if (s && typeof s.todayA === 'number' && state.sessionDone > 0) {
+            const bien = Math.min(s.todayA, state.sessionDone);
+            const repasar = Math.max(0, state.sessionDone - bien);
+            txt += ' ' + uiT('sessionQuality').replace('{a}', bien).replace('{r}', repasar);
+        }
     } catch (e) { /* sin stats */ }
     set('sd-text', txt);
     set('btn-session-more', uiT('sessionMore').replace('{n}', state.sessionGoal));
@@ -2731,6 +2745,23 @@ function showSessionDone() {
     try { d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* noop */ }
     const m = document.getElementById('btn-session-more');
     if (m) { try { m.focus({ preventScroll: true }); } catch (e) { m.focus(); } }
+}
+// v9.62: Gagné evento 3 (activar conocimiento previo) — al abrir "Hoy",
+// si hubo una sesión anterior (dato de stats.js, sin tracking nuevo) se
+// muestra una línea breve. Sin sesión previa o sin datos: queda oculto
+// (fallback silencioso, no toca getFiltered/checkAnswer/SRS/mazo).
+function renderLastSessionNote() {
+    const el = document.getElementById('last-session-note');
+    if (!el) return;
+    try {
+        const ls = window.HuayuStats && HuayuStats.getLastSession && HuayuStats.getLastSession();
+        if (ls && ls.a > 0) {
+            el.textContent = uiT('lastSession').replace('{n}', ls.a);
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    } catch (e) { el.classList.add('hidden'); }
 }
 function hideSessionDone(more) {
     const d = document.getElementById('session-done');

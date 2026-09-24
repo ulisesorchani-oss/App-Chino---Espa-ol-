@@ -5207,9 +5207,17 @@ body.dark-mode .btn-grade.btn-good { background: rgba(255, 255, 255, 0.08); }
 #answer-input[readonly] { background: var(--bg-light); color: var(--text-secondary); }
 
 /* --- feedback: pista, revelar, diff --- */
+/* v9.62: hint (pista, primer error — seguís jugando) y reveal (mostraste
+   la respuesta — el intento terminó) son estados pedagógicamente opuestos;
+   antes compartían el mismo ámbar exacto. hint se queda en ámbar (mismo
+   tono que "Otra vez"/advertencia); reveal pasa a azul (--primary, el
+   mismo azul "informativo" que ya usa el tono 1) para que se distingan de
+   un vistazo, sin invadir los verdes/rojos de correcto/incorrecto. */
 .feedback.hint { background: #fef3c7; color: #7c3d00; border-left: 4px solid #d97706; }
-.feedback.reveal { background: #fef3c7; color: #7c3d00; border-left: 4px solid #d97706; }
-body.dark-mode .feedback.hint, body.dark-mode .feedback.reveal { background: rgba(217, 119, 6, 0.18); color: #fcd34d; }
+.feedback.hint::before { content: '💭 '; }
+.feedback.reveal { background: #dbeafe; color: #1e3a8a; border-left: 4px solid var(--primary); }
+body.dark-mode .feedback.hint { background: rgba(217, 119, 6, 0.18); color: #fcd34d; }
+body.dark-mode .feedback.reveal { background: rgba(37, 99, 235, 0.18); color: #93c5fd; }
 .fb-diff { margin-top: 8px; display: grid; gap: 4px; font-size: 1.05rem; }
 .fb-diff-row { display: flex; align-items: baseline; gap: 10px; }
 .fb-diff-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.75; min-width: 76px; font-weight: 700; }
@@ -5780,11 +5788,17 @@ body.paper-mode .header-actions .theme-toggle {
 /* Feedback en tonos cálidos (verde té / terracota, no pasteles fríos) */
 body.paper-mode .feedback.correct { background: #e4edd8; color: #2f6b4f; }
 body.paper-mode .feedback.incorrect { background: #f5ded1; color: #a03d2e; }
-body.paper-mode .feedback.hint,
-body.paper-mode .feedback.reveal {
+body.paper-mode .feedback.hint {
     background: #f7e8c8;
     color: #7a5b23;
     border-left: 4px solid #b07d3a;
+}
+/* v9.62: reveal en modo papel — tono cálido distinto del ámbar de hint
+   (violeta/vino, sigue evitando los pasteles fríos del resto del tema) */
+body.paper-mode .feedback.reveal {
+    background: #ecdcea;
+    color: #6b3a63;
+    border-left: 4px solid #8a4f80;
 }
 body.paper-mode .vocab-item.known { background: #e4edd8; border-color: #2f6b4f; }
 body.paper-mode .record-summary {
