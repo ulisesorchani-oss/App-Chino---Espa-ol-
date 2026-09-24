@@ -94,6 +94,12 @@ const DAILY_MODULES = ['todas', 'Saludos', 'Migraciones', 'Supermercado',
     'En un restaurante', 'En el colectivo', 'En el subterráneo',
     'En la clase de idioma', 'En el shopping', 'En el cine',
     'En el gimnasio', 'Barrio chino'];
+// v9.63: interleaving real en Diaria (AUDITORIA-GAGNE-MAYER.md, evento 6) —
+// fracción del lote que se completa con frases de OTRAS situaciones cuando
+// el alumno eligió una puntual. Las 11 situaciones ya comparten el mismo
+// array en memoria (EMBEDDED_MODULE_DATA['todas'], ver data-embedded.js),
+// así que mezclar no pide datos nuevos.
+const DAILY_INTERLEAVE_RATIO = 0.2;
 const CLASSICS_MODULES = ['Clasicos-Daxue', 'Clasicos-Lunyu', 'Clasicos-Zhongyong',
     'Clasicos-Mengzi', 'Clasicos-Sanzijing', 'Clasicos-Xiaojing',
     'Clasicos-Daodejing', 'Clasicos-Xinjing', 'Clasicos-Jingangjing'];
@@ -559,7 +565,25 @@ function getFiltered() {
         c.src === state.sentences && c.n === base.length) {
         return c.data;
     }
-    const data = seededShuffle(base, state.interleaveSeed);
+    // v9.63: interleaving real en una situación puntual de Diaria — se suma
+    // una fracción chica (DAILY_INTERLEAVE_RATIO) de OTRAS situaciones al
+    // lote antes de mezclar. Los ítems traídos son COPIAS ({..s}) con
+    // _mixedFrom marcado (para el chip 🔀 de origen en la tarjeta): nunca se
+    // muta el array compartido EMBEDDED_MODULE_DATA['todas']. Fuera de
+    // Diaria (HSK/TOCFL/DELE/Clásicos, cada uno con su propio array) el
+    // comportamiento es exactamente el de antes: solo reordena base.
+    let pool = base;
+    const isDailyPick = state.activeModule !== 'todas' && DAILY_MODULES.indexOf(state.activeModule) !== -1;
+    if (isDailyPick && base.length) {
+        const others = state.sentences.filter(s => s.module !== state.activeModule && DAILY_MODULES.indexOf(s.module) !== -1);
+        if (others.length) {
+            const mixN = Math.max(1, Math.round(base.length * DAILY_INTERLEAVE_RATIO));
+            const picked = seededShuffle(others, state.interleaveSeed ^ 0x9e3779b9).slice(0, mixN)
+                .map(s => Object.assign({}, s, { _mixedFrom: s.module }));
+            pool = base.concat(picked);
+        }
+    }
+    const data = seededShuffle(pool, state.interleaveSeed);
     state._shufCache = { mod: state.activeModule, seed: state.interleaveSeed, src: state.sentences, n: base.length, data: data };
     return data;
 }
@@ -620,7 +644,7 @@ const UI_STRINGS = {
     // v9.15: práctica intercalada
     interleave: '🔀 Intercalar',
     interleaveOn: '🔀 Intercalando',
-    interleaveTitle: 'Práctica intercalada: mezcla el orden de las frases del módulo activo (apagado = orden original)',
+    interleaveTitle: 'Práctica intercalada: mezcla el orden de las frases del módulo activo; en una situación de Diaria además suma algunas de otras situaciones (apagado = orden original)',
     interOn: '🔀 Práctica intercalada: orden mezclado',
     interOff: '📚 Orden original del módulo',
     toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
@@ -629,6 +653,7 @@ const UI_STRINGS = {
     lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
     attChip: '🎯 {n}', attTitle: 'Esta tarjeta: {n} prácticas · {ok} correctas · {ft} al primer intento',
+    mixedChip: '🔀 {mod}', mixedTitle: 'Intercalada de otra situación de Práctica Diaria ({mod}) para mezclar temas — así se recuerda mejor que practicando uno solo seguido',
     // v9.48: tolerancia de trazos (leniency manual en Ajustes)
     setStrokes: 'Tolerancia de trazos',
     lenStrict: '🎯 Estricta', lenNormal: '⚖️ Normal', lenLenient: '🫧 Permisiva',
@@ -683,7 +708,7 @@ const UI_STRINGS = {
     // v9.15: práctica intercalada
     interleave: '🔀 交错练习',
     interleaveOn: '🔀 交错中',
-    interleaveTitle: '交错练习：打乱当前模块句子的顺序（关闭 = 原始顺序）',
+    interleaveTitle: '交错练习：打乱当前模块句子的顺序；在"日常练习"的某个场景里还会混入其他场景的句子（关闭 = 原始顺序）',
     interOn: '🔀 交错模式 · 顺序已打乱',
     interOff: '📚 原始顺序',
     toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
@@ -692,6 +717,7 @@ const UI_STRINGS = {
     lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
     attChip: '🎯 {n}次', attTitle: '这张卡：练过 {n} 次 · 答对 {ok} 次 · 首次就答对 {ft} 次',
+    mixedChip: '🔀 {mod}', mixedTitle: '穿插自「日常练习」的另一个场景（{mod}），混合练习有助于记忆——比连续练同一个场景效果更好',
     // v9.48: 笔顺容错（Ajustes 里手动设置）
     setStrokes: '笔顺容错',
     lenStrict: '🎯 严格', lenNormal: '⚖️ 标准', lenLenient: '🫧 宽容',
@@ -2088,6 +2114,23 @@ function renderCurrentSentence() {
             attEl.textContent = '';
             attEl.removeAttribute('title');
             attEl.classList.add('hidden');
+        }
+    }
+
+    // v9.63: chip 🔀 — esta tarjeta vino de OTRA situación de Diaria
+    // (interleaving real, getFiltered/DAILY_INTERLEAVE_RATIO). Oculto si
+    // la tarjeta no está mezclada (s._mixedFrom solo existe en esas copias).
+    const mixEl = document.getElementById('card-mixed-chip');
+    if (mixEl) {
+        if (s._mixedFrom) {
+            const lbl = moduleLabel(s._mixedFrom);
+            mixEl.textContent = uiT('mixedChip').replace('{mod}', lbl);
+            mixEl.title = uiT('mixedTitle').replace('{mod}', lbl);
+            mixEl.classList.remove('hidden');
+        } else {
+            mixEl.textContent = '';
+            mixEl.removeAttribute('title');
+            mixEl.classList.add('hidden');
         }
     }
 
