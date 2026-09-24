@@ -417,7 +417,11 @@
 //        TTS, biblioteca de lecturas, vista interlineal, escHtml) se
 //        separó de app.js. Toca app.js, index.html, sw.js; reader.js
 //        NUEVO.
-const VERSION = 'v106'; // — invalida shell (reader.js nuevo en el precache)
+// v9.56: modularización fase 6 — classics-reader.js (lector de los 9
+//        clásicos, window.CR_open/CR_DEBUG) se separó de app.js. Ya
+//        era una IIFE autocontenida. Toca app.js, index.html, sw.js;
+//        classics-reader.js NUEVO.
+const VERSION = 'v107'; // — invalida shell (classics-reader.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -456,6 +460,7 @@ const PRECACHE = [
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
   './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
+  './classics-reader.js',  // v9.56: lector de clásicos extraído de app.js (fase 6)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
