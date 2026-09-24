@@ -637,6 +637,12 @@
         <div id="placement-body"></div>
     </div>
 
+    <!-- v9.61: POPUP escena coherente de Práctica Diaria (antes de las frases sueltas) -->
+    <div id="daily-story-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Situación completa">
+        <button id="btn-daily-story-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="daily-story-body"></div>
+    </div>
+
     <!-- v7.21: POPUP Repaso SRS -->
     <div id="srs-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Repaso con repetición espaciada">
         <button id="btn-srs-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -768,6 +774,7 @@
     <script src="lessons-graduated.js?v=20260924a"></script>
     <script src="placement-test.js?v=20260924a"></script>
     <script src="minimal-pairs.js?v=20260924a"></script>
+    <script src="daily-stories.js?v=20260924a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

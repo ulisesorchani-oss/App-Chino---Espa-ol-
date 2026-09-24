@@ -1163,6 +1163,84 @@ body.dark-mode .install-help-note {
     font-weight: 400;
 }
 
+/* v9.61: popup de escena coherente (Práctica Diaria) — reusa .vocab-pop,
+   solo agrega scroll (puede tener 6+ renglones) y el layout de línea. */
+#daily-story-pop {
+    max-height: min(560px, calc(100vh - 100px));
+    overflow-y: auto;
+}
+
+.ds-head {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.ds-intro {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 10px;
+}
+
+.ds-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ds-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-light);
+    border-radius: 10px;
+}
+
+body.dark-mode .ds-line {
+    background: #0f172a;
+}
+
+.ds-play {
+    flex: 0 0 auto;
+    border: none;
+    background: var(--bg-card);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.ds-play:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.ds-line-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ds-line-text .ds-zh {
+    margin-bottom: 2px;
+}
+
+.ds-es {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.ds-actions {
+    margin-top: 14px;
+    text-align: center;
+}
+
+.ds-actions .btn-primary {
+    width: 100%;
+}
+
 .vp-example {
     font-size: 0.86rem;
     color: var(--text-secondary);

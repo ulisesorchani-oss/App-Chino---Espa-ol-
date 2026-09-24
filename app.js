@@ -1483,7 +1483,19 @@ function setupEventListeners() {
     
     // Filtros y Selects
     document.querySelectorAll('.cat-btn, .btn-exam').forEach(btn => {
-        btn.addEventListener('click', () => setModule(btn.dataset.module));
+        btn.addEventListener('click', () => {
+            const mod = btn.dataset.module;
+            // v9.61: los ítems de Práctica Diaria (situaciones) muestran primero
+            // la escena completa (diálogo coherente) si existe; "todas" y el
+            // resto de los .cat-btn (Clásicos/TOCFL/DELE) siguen yendo directo
+            // a la práctica, igual que antes.
+            if (btn.closest('#daily-menu') && mod !== 'todas' &&
+                typeof openDailyStory === 'function' &&
+                typeof DAILY_STORIES !== 'undefined' && DAILY_STORIES[mod]) {
+                if (openDailyStory(mod)) return;
+            }
+            setModule(mod);
+        });
     });
     // (Los clásicos van por dropdown: sus ítems .cat-btn ya quedaron conectados arriba)
     initDailyDropdown();
