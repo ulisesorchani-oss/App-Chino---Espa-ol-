@@ -401,7 +401,11 @@
 //        código, ahora en archivo propio). Nuevo archivo en el shell →
 //        bump de VERSION para que se precachee. Toca app.js, index.html,
 //        sw.js; audio-tts.js NUEVO.
-const VERSION = 'v102'; // — invalida shell (audio-tts.js nuevo en el precache)
+// v9.52: modularización fase 2 — dict.js (motor de diccionario: vocabDict,
+//        dictMini*, lookupVocab) se separó de app.js. Se carga DESPUÉS de
+//        app.js (necesita EMBEDDED_SENTENCES/EMBEDDED_MODULE_DATA). Toca
+//        app.js, index.html, sw.js; dict.js NUEVO.
+const VERSION = 'v103'; // — invalida shell (dict.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -436,6 +440,7 @@ const PRECACHE = [
   './index.html',
   './app.js',
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
+  './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
