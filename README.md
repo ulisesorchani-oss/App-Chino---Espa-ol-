@@ -1,74 +1,52 @@
-[LEEME-INTEGRACION.txt](https://github.com/user-attachments/files/31561992/LEEME-INTEGRACION.txt)
-CHINO-ESPAÑOL · VERSIÓN FUSIONADA — INSTRUCCIONES
-====================================================
+# 中文 ⇄ Español — Huayu Diario
 
-Qué hay en este paquete
------------------------
-index.html        -> reemplaza tu index.html actual
-app.js            -> reemplaza tu app.js actual (bug corregido + mejoras)
-style.css         -> reemplaza tu style.css actual (+ estilos nuevos)
-data/exams/tocfl.json  -> NUEVO (20 oraciones, tu repo hoy da 404)
-data/exams/dele.json   -> NUEVO (20 oraciones, tu repo hoy da 404)
+App web (PWA) para practicar chino mandarín y español: lecciones graduadas,
+exámenes (HSK, TOCFL, DELE), práctica diaria con SRS, lectura de clásicos con
+pinyin/tonos, evaluación de pronunciación por voz y síntesis de audio (TTS)
+vía Microsoft Edge neural voices.
 
-NO se incluyen: api/, data/sentences.json, data/exams/hsk1-5.json,
-vercel.json, serve.py, requirements.txt -> los tuyos siguen igual.
-El TTS de Vercel (https://app-chino-espa-ol.vercel.app/api/tts)
-queda 100% intacto, verificado en vivo (POST 200).
+**Versión actual: v9.50** — "Aprender primero · modo oscuro en capas · voces
+masculinas arregladas". La app abre en **Aprender** (Lecciones · Exámenes ·
+Diaria · Clásicos), con **Hoy · Entrenar · Yo** como resto de la barra
+inferior.
 
-Pasos
------
-1. Hacé backup de tus 3 archivos actuales (por las dudas).
-2. Subí index.html, app.js y style.css a la raíz del repo.
-3. Subí data/exams/tocfl.json y data/exams/dele.json.
-4. Commit + push -> Vercel y GitHub Pages se redespliegan solos.
-5. ANTES de probar: refresco forzado Ctrl+Shift+R (el caché te
-   puede seguir mostrando la versión vieja unos minutos).
+---
 
-Qué se corrigió
----------------
-- BUG CRÍTICO: había un bloque de código duplicado/huérfano (unas 74
-  líneas sueltas fuera de toda función, después de toggleToneColors).
-  Al cargar, el script moría con "ReferenceError" y quedaban sin
-  registrar el audio, el modo oscuro y varias funciones. Era la causa
-  de los errores de consola que viste.
-- Emoji del botón Pinyin en ON (faltaba el 📖).
-- keypress (deprecado) -> keydown.
+## Estructura del repo
 
-Qué se agregó
--------------
-- Botón de velocidad de audio: 🐢 0.85x -> ⚡ 1.0x -> 🐌 0.7x
-  (default 0.85x como pediste; se guarda solo; aplica a la voz de
-  Vercel manteniendo el tono natural -preservesPitch- y al fallback
-  del sistema).
-- Barra de progreso en la tarjeta.
-- Botón Verificar pasa a "Siguiente ▶" tras responder.
-- Mensajes de estado por módulo (cargando / N oraciones / sin datos).
-  HSK 6 avisa amablemente que todavía no tiene datos.
-- Favicon (adiós error 404) y cache-busting ?v= en CSS/JS para que
-  el navegador nunca más ejecute una versión vieja.
+| Ruta | Qué es |
+|---|---|
+| `index.html`, `app.js`, `style.css` | App principal (front-end) |
+| `sw.js`, `manifest.json`, `icons/` | Service worker + PWA instalable/offline |
+| `api/` | Endpoint serverless (Vercel, Python) para TTS (`/api/tts`) |
+| `data/` | Datos de exámenes y lecciones (`data/exams/*.json`, etc.) |
+| `lessons*.js`, `classics.js`, `dict-mini.js`, `pinyin-pro.min.js` | Contenido de lecciones, clásicos y diccionario |
+| `voice-evaluator.js`, `VoiceRecorder.js`, `pitch-analyzer.js`, `config.js` | Evaluador de pronunciación (Whisper WASM local + análisis de tono) |
+| `stats.js`, `onboarding.js`, `text-utils.js` | Estadísticas, onboarding y utilidades de texto |
+| `README-Pronunciacion.md` | Documentación viva del módulo de pronunciación (arquitectura, calibración, constantes) |
+| `docs/historial-actualizaciones/` | Notas de actualización de versiones anteriores (histórico, ya aplicadas) |
 
-Notas de los datos nuevos
--------------------------
-- TOCFL viene con caracteres tradicionales reales.
-- En ambos archivos el campo chinese_trad_* es igual al simp_* por
-  ahora (excepto TOCFL que ya es tradicional). Cuando mines más
-  oraciones podés completarlos.
-- HSK 6 sigue sin datos: la app ahora lo avisa en pantalla en vez de
-  quedarse muda.
+## Documentación
 
-Pruebas hechas (navegador real, sin errores de consola)
--------------------------------------------------------
-- 50 oraciones diarias + HSK2 + TOCFL cargan y se responden OK
-- Flujo Verificar -> feedback -> Siguiente ▶ -> siguiente oración
-- Botón de velocidad cicla y persiste
-- POST a /api/tts -> 200, audio reproducido
+- **Módulo de pronunciación** (arquitectura, cómo se decide el veredicto,
+  calibración del umbral de confianza, tabla de constantes): ver
+  [`README-Pronunciacion.md`](README-Pronunciacion.md).
+- **Historial de actualizaciones** (kits `LEEME-*` de versiones anteriores,
+  desde v2 hasta v9.50, ya integrados en el código actual): ver
+  [`docs/historial-actualizaciones/`](docs/historial-actualizaciones/).
 
-Módulo de pronunciación (v7.6 → v7.8)
--------------------------------------------------------
-Evaluación de voz 100% local y privada (Whisper WASM en el
-dispositivo + análisis de tono F0/DTW). Documentación completa
-del módulo — arquitectura por modo (es-cn / cn-es), método de
-calibración de SPANISH_CONFIDENCE_THRESHOLD y casos de prueba
-de integración/QA con fixtures de audio — en:
+## Despliegue
 
-    README-Pronunciacion.md
+- **Front-end**: GitHub Pages / hosting estático a partir de `index.html`.
+- **API de TTS**: Vercel (`vercel.json` + `api/`), Microsoft Edge neural
+  voices vía `edge-tts`.
+- El service worker (`sw.js`) versiona la caché de shell y de audios; al
+  subir cambios de `app.js`/`index.html`/`style.css`/`sw.js` conviene
+  refresco forzado (Ctrl+Shift+R) para evitar ver la versión cacheada.
+
+## Desarrollo local
+
+```bash
+pip install -r requirements.txt
+python serve.py
+```
