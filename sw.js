@@ -405,7 +405,11 @@
 //        dictMini*, lookupVocab) se separó de app.js. Se carga DESPUÉS de
 //        app.js (necesita EMBEDDED_SENTENCES/EMBEDDED_MODULE_DATA). Toca
 //        app.js, index.html, sw.js; dict.js NUEVO.
-const VERSION = 'v103'; // — invalida shell (dict.js nuevo en el precache)
+// v9.53: modularización fase 3 — trazos.js (motor Hanzi Writer: orden de
+//        trazos, banner de práctica, respuesta a mano) se separó de
+//        app.js. showVocabPop/hideVocabPop se quedaron en app.js. Toca
+//        app.js, index.html, sw.js; trazos.js NUEVO.
+const VERSION = 'v104'; // — invalida shell (trazos.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -441,6 +445,7 @@ const PRECACHE = [
   './app.js',
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
+  './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
