@@ -6,6 +6,25 @@
     --danger: #dc2626;
     --amber: #f59e0b;       /* NUEVO: Color ámbar para exámenes */
     --amber-dark: #b45309;  /* NUEVO: Ámbar oscuro para estado activo */
+    /* v9.65 (AUDITORIA-GAGNE-MAYER.md, Mayer #1 + evento 7): lenguaje
+       visual único de correcto/incorrecto/pista/aproximado. Antes
+       .feedback, .rec-score/.rec-bad/.rec-approx y .pl-opt/.lq-opt (+
+       .pl-fb-head, .btn-record.is-ok/is-bad) definían cada uno su
+       propio verde/rojo — hasta 3 tonos de "correcto" distintos en
+       pantalla (var(--success) #15803d, rgba(22,163,74,…) en pl-opt,
+       #22c55e en lq-opt) y 2 de "incorrecto" (var(--danger) #dc2626,
+       #ef4444 en lq-opt). Estos 4 son ahora la ÚNICA fuente para ese
+       feedback puntual por respuesta. Quedan separados a propósito de
+       --success/--warning/--danger/--amber de arriba: esos siguen de
+       uso general (botones, tono 2.º/3.º/4.º, chips, etc.) — tocarlos
+       habría cambiado UI no relacionada con "esta respuesta fue
+       correcta/incorrecta". Las variantes dark-mode/paper-mode que ya
+       existían para estos mismos selectores NO se tocan en este lote:
+       siguen con sus valores propios más abajo en la hoja. */
+    --color-correct: #15803d;   /* = --success */
+    --color-incorrect: #dc2626; /* = --danger */
+    --color-hint: #d97706;      /* pista activa, "seguís jugando" (v9.62 .feedback.hint) */
+    --color-approx: #b45309;    /* = --warning: "casi correcto" (evaluación de voz) */
     --bg-light: #f8fafc;
     --bg-card: #ffffff;
     --text-primary: #1e293b;
@@ -417,12 +436,12 @@ body.dark-mode #btn-tones.active {
 
 .feedback.correct {
     background: #dcfce7;
-    color: var(--success);
+    color: var(--color-correct);
 }
 
 .feedback.incorrect {
     background: #fee2e2;
-    color: var(--danger);
+    color: var(--color-incorrect);
 }
 
 .hidden {
@@ -1998,15 +2017,15 @@ body.dark-mode .dele-group-label {
 
 /* RESULTADO: ✅ verde (bien) / ✗ roja (mejorar) / 🎧 modo manual */
 .btn-record.is-ok {
-    background: var(--success);
+    background: var(--color-correct);
     color: #fff;
-    border-color: var(--success);
+    border-color: var(--color-correct);
 }
 
 .btn-record.is-bad {
-    background: var(--danger);
+    background: var(--color-incorrect);
     color: #fff;
-    border-color: var(--danger);
+    border-color: var(--color-incorrect);
 }
 
 .btn-record.is-manual {
@@ -2059,9 +2078,9 @@ body.dark-mode .dele-group-label {
     margin-bottom: 6px;
 }
 
-.rec-score.ok  { background: var(--success); }
-.rec-score.mid { background: var(--warning); }
-.rec-score.low { background: var(--danger); }
+.rec-score.ok  { background: var(--color-correct); }
+.rec-score.mid { background: var(--color-approx); }
+.rec-score.low { background: var(--color-incorrect); }
 
 .rec-msg-es { font-weight: 600; margin: 2px 0; color: var(--text-primary); }
 .rec-msg-zh { margin: 2px 0; color: var(--text-secondary); white-space: pre-line; }
@@ -2174,11 +2193,11 @@ body.dark-mode .btn-record.is-processing::after {
 }
 
 .rec-transcript .rec-bad {
-    color: var(--danger);
+    color: var(--color-incorrect);
     font-weight: 700;
-    background: rgba(220, 38, 38, 0.10);
+    background: rgba(220, 38, 38, 0.10); /* = --color-incorrect, alfa baja */
     border-radius: 4px;
-    text-decoration: underline wavy var(--danger) 2px;
+    text-decoration: underline wavy var(--color-incorrect) 2px;
     text-underline-offset: 5px;
     padding: 0 1px;
 }
@@ -2195,7 +2214,7 @@ body.dark-mode .btn-record.is-processing::after {
 
 /* tono aproximado: color del tono esperado + subrayado punteado ámbar */
 .rec-transcript .rec-approx {
-    text-decoration: underline dotted var(--warning) 2px;
+    text-decoration: underline dotted var(--color-approx) 2px;
     text-underline-offset: 5px;
     opacity: 0.85;
 }
@@ -3254,16 +3273,16 @@ body.dark-mode .mode-btn.active b {
     font-size: 0.72rem;
     font-weight: 800;
 }
-.pl-opt.is-ok { border-color: var(--success); background: rgba(22, 163, 74, 0.12); opacity: 1; }
-.pl-opt.is-ok .pl-opt-key { background: var(--success); color: #fff; }
-.pl-opt.is-bad { border-color: var(--danger); background: rgba(220, 38, 38, 0.10); opacity: 1; }
-.pl-opt.is-bad .pl-opt-key { background: var(--danger); color: #fff; }
+.pl-opt.is-ok { border-color: var(--color-correct); background: rgba(21, 128, 61, 0.12); opacity: 1; } /* v9.65: antes rgba(22,163,74,…), un verde distinto de --color-correct */
+.pl-opt.is-ok .pl-opt-key { background: var(--color-correct); color: #fff; }
+.pl-opt.is-bad { border-color: var(--color-incorrect); background: rgba(220, 38, 38, 0.10); opacity: 1; }
+.pl-opt.is-bad .pl-opt-key { background: var(--color-incorrect); color: #fff; }
 
 .pl-fb { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 10px; text-align: center; }
 .pl-fb.hidden { display: none; }
 .pl-fb-head { font-weight: 800; font-size: 0.95rem; }
-.pl-fb-head.is-ok { color: var(--success); }
-.pl-fb-head.is-bad { color: var(--danger); }
+.pl-fb-head.is-ok { color: var(--color-correct); }
+.pl-fb-head.is-bad { color: var(--color-incorrect); }
 .pl-fb-word { margin-top: 4px; font-size: 1.05rem; color: var(--text-primary); }
 .pl-fb-py { color: var(--text-secondary); font-size: 0.9rem; }
 .pl-fb-es { color: var(--text-secondary); font-size: 0.92rem; margin: 2px 0 10px; }
@@ -3927,10 +3946,13 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
     font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none;
 }
 .lq-opt-zh { font-size: 1.35rem; font-weight: 700; color: #1e293b; }
-.lq-opt.is-right { border-color: #22c55e; background: #f0fdf4; }
-.lq-opt.is-right .lq-opt-letter { background: #22c55e; color: #fff; }
-.lq-opt.is-wrong { border-color: #ef4444; background: #fef2f2; }
-.lq-opt.is-wrong .lq-opt-letter { background: #ef4444; color: #fff; }
+/* v9.65: antes #22c55e/#f0fdf4 y #ef4444/#fef2f2 (propios de este
+   ejercicio) — ahora el mismo verde/rojo + el mismo tinte que .pl-opt,
+   para que "correcto/incorrecto" se vea igual en toda la app */
+.lq-opt.is-right { border-color: var(--color-correct); background: rgba(21, 128, 61, 0.12); }
+.lq-opt.is-right .lq-opt-letter { background: var(--color-correct); color: #fff; }
+.lq-opt.is-wrong { border-color: var(--color-incorrect); background: rgba(220, 38, 38, 0.10); }
+.lq-opt.is-wrong .lq-opt-letter { background: var(--color-incorrect); color: #fff; }
 
 /* feedback */
 .lq-feedback { margin-top: 14px; }
@@ -5224,7 +5246,7 @@ body.dark-mode .btn-grade.btn-good { background: rgba(255, 255, 255, 0.08); }
    tono que "Otra vez"/advertencia); reveal pasa a azul (--primary, el
    mismo azul "informativo" que ya usa el tono 1) para que se distingan de
    un vistazo, sin invadir los verdes/rojos de correcto/incorrecto. */
-.feedback.hint { background: #fef3c7; color: #7c3d00; border-left: 4px solid #d97706; }
+.feedback.hint { background: #fef3c7; color: #7c3d00; border-left: 4px solid var(--color-hint); }
 .feedback.hint::before { content: '💭 '; }
 .feedback.reveal { background: #dbeafe; color: #1e3a8a; border-left: 4px solid var(--primary); }
 body.dark-mode .feedback.hint { background: rgba(217, 119, 6, 0.18); color: #fcd34d; }
