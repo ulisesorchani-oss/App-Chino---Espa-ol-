@@ -429,7 +429,12 @@
 //        lecciones graduadas, window.LQ_DEBUG) se separó de app.js. Ya
 //        era una IIFE autocontenida. Toca app.js, index.html, sw.js;
 //        lessons-graduated.js NUEVO.
-const VERSION = 'v109'; // — invalida shell (lessons-graduated.js nuevo en el precache)
+// v9.59: modularización fases 9 y 10 — placement-test.js (test de
+//        colocación HSK, window.PL_DEBUG) y minimal-pairs.js (pares
+//        mínimos, window.MPDebug) se separaron de app.js. Ambas ya
+//        eran IIFEs autocontenidas. Toca app.js, index.html, sw.js;
+//        placement-test.js y minimal-pairs.js NUEVOS.
+const VERSION = 'v110'; // — invalida shell (placement-test.js y minimal-pairs.js nuevos en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -471,6 +476,8 @@ const PRECACHE = [
   './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
   './classics-reader.js',  // v9.56: lector de clásicos extraído de app.js (fase 6)
   './lessons-graduated.js', // v9.58: quiz de lecciones graduadas extraído de app.js (fase 8)
+  './placement-test.js',   // v9.59: test de colocación HSK extraído de app.js (fase 9)
+  './minimal-pairs.js',    // v9.59: pares mínimos extraído de app.js (fase 10)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
