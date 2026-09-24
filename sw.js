@@ -413,7 +413,11 @@
 //        window.acSrs*) se separó de app.js. Ya era una IIFE
 //        autocontenida — sin cambios de comportamiento. Toca app.js,
 //        index.html, sw.js; srs.js NUEVO.
-const VERSION = 'v105'; // — invalida shell (srs.js nuevo en el precache)
+// v9.55: modularización fase 5 — reader.js (lector de texto libre:
+//        TTS, biblioteca de lecturas, vista interlineal, escHtml) se
+//        separó de app.js. Toca app.js, index.html, sw.js; reader.js
+//        NUEVO.
+const VERSION = 'v106'; // — invalida shell (reader.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -451,6 +455,7 @@ const PRECACHE = [
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
+  './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
