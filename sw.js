@@ -397,7 +397,11 @@
 //       prefiere voces del país exacto en el fallback del sistema.
 //       Requiere api/ v9.49 (es-AR + zh-TW en el mapa VOICES). Toca app.js
 //       + lessons-dele.js + voice-evaluator.js + index.html (+ api/).
-const VERSION = 'v101'; // — invalida shell (v11 UI: pulido hi-end oscuro/papel en style.css)
+// v9.51: modularización fase 1 — audio-tts.js se separó de app.js (mismo
+//        código, ahora en archivo propio). Nuevo archivo en el shell →
+//        bump de VERSION para que se precachee. Toca app.js, index.html,
+//        sw.js; audio-tts.js NUEVO.
+const VERSION = 'v102'; // — invalida shell (audio-tts.js nuevo en el precache)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -431,6 +435,7 @@ const PRECACHE = [
   './',
   './index.html',
   './app.js',
+  './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
