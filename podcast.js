@@ -11,14 +11,21 @@
 // oído"), con un botón chico "👁️ Ver texto" para un vistazo bajo
 // demanda si te perdiste una palabra — nunca activado solo.
 //
-// MOTOR DE COLA: adaptado de "▶️ Escuchar todo" (lessons-dele.js,
-// dQueue/dQIdx/playQueueStep, ~línea 1027-1182) — confirmado en
-// diagnóstico previo que es genérico (array de strings + una función
-// que reproduce uno y avisa cuándo termina), no específico de DELE/
-// español. Acá la función que reproduce es propia (pdPlayLine más
-// abajo) porque la de lessons-graduated.js (speakZh) es privada a su
-// propia IIFE — mismo pipeline fetchTTS/blob/applyTtsSpeed que usa
-// TODO el resto de la app, no una forma nueva de hacerlo.
+// v9.71 (fix de UX real, QA post-merge): la v9.70 pedía UN audio por
+// LÍNEA (cola encadenada, adaptada de "▶️ Escuchar todo" de
+// lessons-dele.js) — con latencia real de red entre cada fetch, sonaba
+// entrecortado ("Cargando…" entre cada oración), lejos de "de corrido".
+// Se reemplaza por UN SOLO pedido de TTS con el texto de la lección
+// COMPLETA concatenado — el mismo patrón que ya usa toggleReaderPlay()
+// en reader.js ("pegá texto y lo lee", un solo blob de audio de punta a
+// punta). El progreso por línea ("N/M", 👁️ Ver texto, ⏮/⏭) ahora se
+// ESTIMA sobre ese único audio con una línea de tiempo ponderada por
+// caracteres (mismo principio que karaoke.js, pero a nivel LÍNEA en vez
+// de carácter — karaoke.js no expone sus funciones puras de timeline,
+// así que esto es una versión chica y propia, no una reescritura de lo
+// mismo). ⏮/⏭ hacen SEEK real sobre audio.currentTime cuando el audio
+// es del API; con voz del sistema (fallback sin red) no hay seek real
+// — quedan deshabilitados y solo corre play/pausa.
 //
 // SELECCIÓN DE LECCIÓN (híbrida): lessonForSentence() (reader.js) NO
 // sirve acá — mapea a window.LESSONS_DATA (el lector 📖 de texto
@@ -55,14 +62,17 @@
     const body = $('pd-body'), progNum = $('pd-progress-num');
 
     const S = { view: null, lesson: null };
-    // ── motor de cola (adaptado de lessons-dele.js: dQueue/dQIdx/playQueueStep) ──
-    let pQueue = null;      // array de líneas [{zh, es}] de la lección actual
-    let pIdx = 0;           // índice actual dentro de la cola
-    let pAudio = null;      // Audio() del API en curso
-    let pTtsU = null;       // utterance del fallback (voz del sistema) en curso
-    let pTok = 0;           // invalida callbacks de una reproducción vieja
-    let pState = 'idle';    // 'idle' | 'loading' | 'playing' | 'paused' | 'done'
-    let showText = false;   // "👁️ Ver texto" — NUNCA activado por defecto
+    // ── reproducción: UN SOLO audio para la lección completa (v9.71) ──
+    let pIdx = 0;            // línea ESTIMADA que está sonando (para progreso/seek/texto)
+    let pTimeline = null;    // { starts: [...], total } — peso ≈ caracteres por línea
+    let pAudio = null;       // Audio() del API en curso (toda la lección)
+    let pTtsU = null;        // utterance del fallback (voz del sistema, sin seek real)
+    let pTok = 0;            // invalida callbacks de una reproducción vieja
+    let pState = 'idle';     // 'idle' | 'loading' | 'playing' | 'paused' | 'done'
+    let pRaf = 0;            // requestAnimationFrame del tick de progreso (audio real)
+    let pFbTimer = 0;        // setInterval del tick estimado (fallback voz del sistema)
+    let pFbWall = 0;         // reloj propio del fallback, en ms
+    let showText = false;    // "👁️ Ver texto" — NUNCA activado por defecto
 
     function getLastLessonId() {
         try { return localStorage.getItem('ac_last_lesson_id') || null; } catch (e) { return null; }
@@ -86,34 +96,88 @@
         pop.classList.add('hidden');
         try { if (typeof syncBodyScroll === 'function') syncBodyScroll(); else document.body.style.overflow = ''; } catch (e) { }
         S.lesson = null; S.view = null;
-        pQueue = null; pIdx = 0; showText = false;
+        pIdx = 0; pTimeline = null; showText = false;
     }
 
-    // ── audio: una línea, con el MISMO pipeline fetchTTS/blob/applyTtsSpeed
-    //    que usa todo el resto de la app (daily-stories.js, classics-reader.js,
-    //    lessons-graduated.js) — sin reinventar la síntesis ni la velocidad. ──
+    // ── v9.71: línea de tiempo ponderada por caracteres — mapea progreso
+    //    [0,1] del audio ÚNICO a "qué línea está sonando" (estimado, no
+    //    exacto: no hay marcas reales por línea en un solo blob de TTS). ──
+    function buildTimeline(lines) {
+        const starts = [];
+        let acc = 0;
+        lines.forEach(ln => {
+            starts.push(acc);
+            acc += Math.max(1, lineText(ln).zh.length);
+        });
+        return { starts: starts, total: Math.max(1, acc) };
+    }
+    function lineIdxAtProgress(tl, p) {
+        const target = p * tl.total;
+        let idx = 0;
+        for (let i = 0; i < tl.starts.length; i++) {
+            if (tl.starts[i] <= target) idx = i; else break;
+        }
+        return idx;
+    }
+    function pQueueLen() { return (S.lesson && S.lesson.lines) ? S.lesson.lines.length : 0; }
+    function currentLine() { return (S.lesson && S.lesson.lines) ? S.lesson.lines[pIdx] : null; }
+
+    // ── ticks de progreso (actualizan pIdx mientras suena) ──
+    function startProgressTick() {
+        stopProgressTick();
+        const tick = () => {
+            if (!pAudio || pState !== 'playing') { pRaf = 0; return; }
+            const d = pAudio.duration;
+            if (isFinite(d) && d > 0) {
+                const p = Math.max(0, Math.min(1, pAudio.currentTime / d));
+                const idx = lineIdxAtProgress(pTimeline, p);
+                if (idx !== pIdx) { pIdx = idx; updatePlayerUI(); }
+            }
+            pRaf = requestAnimationFrame(tick);
+        };
+        pRaf = requestAnimationFrame(tick);
+    }
+    function stopProgressTick() { if (pRaf) cancelAnimationFrame(pRaf); pRaf = 0; }
+    function startFallbackTick() {
+        stopFallbackTick();
+        const rate = (typeof playbackSpeed === 'number' && playbackSpeed > 0) ? playbackSpeed : 1;
+        const estMs = Math.max(1200, (pTimeline.total * 215) / rate); // ~215 ms/car, mismo valor que karaoke.js
+        pFbTimer = setInterval(() => {
+            if (pState !== 'playing') return;
+            pFbWall += 100;
+            const p = Math.max(0, Math.min(1, pFbWall / estMs));
+            const idx = lineIdxAtProgress(pTimeline, p);
+            if (idx !== pIdx) { pIdx = idx; updatePlayerUI(); }
+        }, 100);
+    }
+    function stopFallbackTick() { if (pFbTimer) clearInterval(pFbTimer); pFbTimer = 0; }
+
     function stopAll() {
         pTok++;
+        stopProgressTick(); stopFallbackTick();
         if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; }
         if (pTtsU) { try { speechSynthesis.cancel(); } catch (e) { } pTtsU = null; }
         pState = 'idle';
     }
-    function currentLine() {
-        return (pQueue && pIdx >= 0 && pIdx < pQueue.length) ? pQueue[pIdx] : null;
-    }
-    async function playCurrent() {
-        const line = currentLine();
-        if (!line) { onQueueDone(); return; }
+
+    // ── v9.71: UN pedido de TTS con la lección ENTERA (no una cola por
+    //    línea) — mismo pipeline fetchTTS/blob/applyTtsSpeed de siempre,
+    //    mismo patrón que toggleReaderPlay() en reader.js. ──
+    async function playLesson() {
+        if (!S.lesson) return;
         const myTok = ++pTok;
-        pState = 'loading';
+        pState = 'loading'; pIdx = 0;
         updatePlayerUI();
         if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
         if (typeof stopReader === 'function') stopReader();
+        const fullText = S.lesson.lines.map(ln => lineText(ln).zh).join('');
+        pTimeline = buildTimeline(S.lesson.lines);
         try {
             const gender = (typeof voiceZh !== 'undefined') ? voiceZh : 'f';
             const langCode = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN';
-            const reqBody = (typeof ttsBody === 'function') ? ttsBody(line.zh, langCode, gender) : { text: line.zh, lang: langCode, voice: gender };
-            const resp = await fetchTTS(reqBody, 12000);
+            const reqBody = (typeof ttsBody === 'function') ? ttsBody(fullText, langCode, gender) : { text: fullText, lang: langCode, voice: gender };
+            // v7.14/v9.71: timeout escalado con el largo, mismo criterio que reader.js
+            const resp = await fetchTTS(reqBody, Math.max(15000, fullText.length * 50));
             if (myTok !== pTok) return;
             if (!resp.ok) throw new Error('tts http ' + resp.status);
             const data = await resp.json();
@@ -129,20 +193,33 @@
             pAudio = audio;
             pState = 'playing';
             updatePlayerUI();
-            const gone = () => { URL.revokeObjectURL(url); if (myTok === pTok) { pAudio = null; advance(); } };
+            startProgressTick();
+            const gone = () => {
+                URL.revokeObjectURL(url);
+                if (myTok !== pTok) return;
+                stopProgressTick();
+                pState = 'done'; pIdx = pQueueLen() - 1;
+                updatePlayerUI();
+            };
             audio.addEventListener('ended', gone, { once: true });
             audio.addEventListener('error', gone, { once: true });
             await audio.play();
         } catch (e) {
             if (myTok !== pTok) return;
             if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(line.zh);
+                const u = new SpeechSynthesisUtterance(fullText);
                 u.lang = 'zh-CN';
                 u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
                 pTtsU = u;
-                pState = 'playing';
+                pState = 'playing'; pFbWall = 0;
                 updatePlayerUI();
-                const gone = () => { if (myTok === pTok) { pTtsU = null; advance(); } };
+                startFallbackTick();
+                const gone = () => {
+                    if (myTok !== pTok) return;
+                    stopFallbackTick();
+                    pTtsU = null; pState = 'done'; pIdx = pQueueLen() - 1;
+                    updatePlayerUI();
+                };
                 u.onend = gone;
                 u.onerror = gone;
                 speechSynthesis.speak(u);
@@ -152,35 +229,37 @@
             }
         }
     }
-    function advance() {
-        pIdx++;
-        if (!currentLine()) { onQueueDone(); return; }
-        updatePlayerUI();
-        playCurrent();
-    }
-    function onQueueDone() {
-        pState = 'done';
-        updatePlayerUI();
-    }
     function togglePlayPause() {
         if (pState === 'playing') {
-            if (pAudio) { try { pAudio.pause(); } catch (e) { } }
-            else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } }
+            if (pAudio) { try { pAudio.pause(); } catch (e) { } stopProgressTick(); }
+            else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } stopFallbackTick(); }
             pState = 'paused';
             updatePlayerUI();
         } else if (pState === 'paused') {
             if (pAudio) {
-                pAudio.play().then(() => { pState = 'playing'; updatePlayerUI(); }).catch(() => { });
+                pAudio.play().then(() => { pState = 'playing'; startProgressTick(); updatePlayerUI(); }).catch(() => { });
             } else if (pTtsU) {
-                try { speechSynthesis.resume(); pState = 'playing'; updatePlayerUI(); } catch (e) { }
+                try { speechSynthesis.resume(); pState = 'playing'; startFallbackTick(); updatePlayerUI(); } catch (e) { }
             }
-        } else { // idle | done → arrancar (de nuevo desde 0 si la cola terminó)
-            if (pState === 'done') pIdx = 0;
-            playCurrent();
+        } else { // idle | done → (re)empezar
+            playLesson();
         }
     }
-    function pdNext() { stopAll(); pIdx = Math.min((pQueue ? pQueue.length : 1) - 1, pIdx + 1); playCurrent(); }
-    function pdPrev() { stopAll(); pIdx = Math.max(0, pIdx - 1); playCurrent(); }
+    // ⏮/⏭: SEEK real sobre audio.currentTime (API). Con voz del sistema no
+    // hay seek posible (Web Speech no lo soporta) — updatePlayerUI() los
+    // deshabilita en ese caso, así que estas funciones no corren.
+    function seekToLine(idx) {
+        if (!pAudio || !pTimeline) return;
+        pIdx = Math.max(0, Math.min(pQueueLen() - 1, idx));
+        const d = pAudio.duration;
+        if (isFinite(d) && d > 0) {
+            const p = pTimeline.starts[pIdx] / pTimeline.total;
+            try { pAudio.currentTime = p * d; } catch (e) { }
+        }
+        updatePlayerUI();
+    }
+    function pdNext() { seekToLine(pIdx + 1); }
+    function pdPrev() { seekToLine(pIdx - 1); }
 
     // ── vista LISTA (híbrida: "seguí con lo último" + lista completa) ──
     function renderPicker() {
@@ -219,7 +298,7 @@
         const l = LESSONS.find(x => x.id === id);
         if (!l) return;
         S.lesson = l; S.view = 'player';
-        pQueue = l.lines; pIdx = 0; pState = 'idle'; showText = false;
+        pIdx = 0; pState = 'idle'; showText = false; pTimeline = null;
         renderPlayer();
         togglePlayPause(); // arranca solo al elegir una lección
     }
@@ -259,15 +338,15 @@
         updatePlayerUI();
     }
     // Refresca SOLO lo que cambia con el estado (no re-crea el DOM entero:
-    // evita perder el foco de los controles en cada avance de la cola).
+    // evita perder el foco de los controles en cada tick de progreso).
     function updatePlayerUI() {
         if (S.view !== 'player') return;
-        const total = pQueue ? pQueue.length : 0;
+        const total = pQueueLen();
         progNum.textContent = total ? (Math.min(pIdx + 1, total) + '/' + total) : '';
         const statusEl = $('pd-status');
         if (statusEl) {
             statusEl.textContent =
-                pState === 'loading' ? '⏳ Cargando…' :
+                pState === 'loading' ? '⏳ Preparando el audio de toda la lección…' :
                 pState === 'playing' ? '▶ Reproduciendo…' :
                 pState === 'paused' ? '⏸ En pausa' :
                 pState === 'done' ? '🏁 Listo — tocá ▶️ para volver a escuchar' :
@@ -278,9 +357,12 @@
             ppBtn.textContent = pState === 'playing' ? '⏸' : '▶️';
             ppBtn.setAttribute('aria-label', pState === 'playing' ? 'Pausar' : 'Reproducir');
         }
+        // v9.71: ⏮/⏭ necesitan seek real (audio.currentTime) — sin audio del
+        // API (fallback de voz del sistema) no hay forma de saltar, se apagan.
+        const canSeek = !!pAudio;
         const prevBtn = $('pd-prev'), nextBtn = $('pd-next');
-        if (prevBtn) prevBtn.disabled = pIdx <= 0;
-        if (nextBtn) nextBtn.disabled = !pQueue || pIdx >= pQueue.length - 1;
+        if (prevBtn) prevBtn.disabled = !canSeek || pIdx <= 0;
+        if (nextBtn) nextBtn.disabled = !canSeek || pIdx >= total - 1;
         const textEl = $('pd-text');
         if (textEl) {
             if (showText) {
