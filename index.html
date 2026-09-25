@@ -471,6 +471,20 @@
                     </label>
                     <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
                 </div>
+                <!-- v9.7x: 4 ajustes nuevos del encabezado por carácter — solo tienen
+                     efecto en el estilo "Cuaderno 筆順 + 寫字" de arriba. -->
+                <div class="pz-options">
+                    <button id="btn-pz-composicion" class="speed-btn active" type="button" title="Estilo Cuaderno: mostrar la secuencia de composición/trazos antes de las celdas de calco">🧩 Composición: ON</button>
+                    <button id="btn-pz-radical" class="speed-btn" type="button" title="Estilo Cuaderno: mostrar el radical del carácter por separado — piloto, descarga un diccionario externo la 1.ª vez que se usa">部 Radical: OFF</button>
+                    <label class="pz-label" for="select-pz-pron">Pronunciación
+                        <select id="select-pz-pron" class="level-dropdown">
+                            <option value="none">Ninguna</option>
+                            <option value="pinyin" selected>Pinyin</option>
+                            <option value="zhuyin">Zhuyin 注音</option>
+                        </select>
+                    </label>
+                    <button id="btn-pz-significado" class="speed-btn" type="button" title="Estilo Cuaderno: mostrar el significado mínimo (primera acepción) de cada carácter">📖 Significado: OFF</button>
+                </div>
                 <div id="pz-counter" class="pz-counter" role="status">📊 Hoja A4…</div>
                 <div id="pz-status" class="module-status hidden" role="status"></div>
                 <div class="reader-actions">
@@ -826,7 +840,7 @@
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260925a"></script>
     <script src="feature-tips.js?v=20260925a"></script>
-    <script src="app.js?v=20260925e"></script>
+    <script src="app.js?v=20260925f"></script>
     <script src="dict.js?v=20260925b"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>
