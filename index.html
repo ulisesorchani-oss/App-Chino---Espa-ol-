@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260925d">
+    <link rel="stylesheet" href="style.css?v=20260925e">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -398,8 +398,14 @@
                     <span class="tc-sub">¿买 o 卖? Distinguí tonos de oído</span>
                 </button>
                 <!-- v9.69: "Solo oído" se mudó a Hoy (junto a 🔊 CN / 🎤 en el
-                     header del ejercicio) — solo tenía efecto visible ahí. La
-                     tarjeta se saca de esta grilla; el Prompt B la reemplaza. -->
+                     header del ejercicio) — solo tenía efecto visible ahí. -->
+                <!-- v9.70: reemplazo prometido — Podcast: escuchar una lección
+                     de Aprender de corrido, manos libres, sin texto por defecto. -->
+                <button id="btn-podcast" class="train-card" type="button" title="Escuchá una lección de Aprender de corrido, manos libres, sin texto a la vista">
+                    <span class="tc-ico" aria-hidden="true">🎙️</span>
+                    <span class="tc-title">Podcast</span>
+                    <span class="tc-sub">Escuchá una lección entera de Aprender, de corrido</span>
+                </button>
                 <button id="btn-train-record" class="train-card" type="button" title="Grabá tu pronunciación de la frase actual y compará">
                     <span class="tc-ico" aria-hidden="true">🎤</span>
                     <span class="tc-title">Pronunciación</span>
@@ -724,6 +730,19 @@
         </div>
     </div>
 
+    <!-- v9.70: PODCAST — escuchar una lección de Aprender de corrido, manos
+         libres (reemplaza a "Solo oído" en Entrenar, v9.69) -->
+    <div id="podcast-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Podcast: escuchar una lección">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span id="pd-progress-num" class="lq-progress-num">🎙️</span>
+                <div id="pd-segments" class="lq-segments" aria-hidden="true"></div>
+                <button id="pd-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="pd-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -785,17 +804,18 @@
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260924a"></script>
     <script src="feature-tips.js?v=20260925a"></script>
-    <script src="app.js?v=20260925c"></script>
+    <script src="app.js?v=20260925d"></script>
     <script src="dict.js?v=20260925b"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>
     <script src="reader.js?v=20260924a"></script>
     <script src="karaoke.js?v=20260924a"></script>
     <script src="classics-reader.js?v=20260924a"></script>
-    <script src="lessons-graduated.js?v=20260925a"></script>
+    <script src="lessons-graduated.js?v=20260925b"></script>
     <script src="placement-test.js?v=20260924a"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20260925b"></script>
+    <script src="podcast.js?v=20260925a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
