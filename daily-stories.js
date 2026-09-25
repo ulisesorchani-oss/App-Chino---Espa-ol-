@@ -14,6 +14,11 @@
 // sueltas" cierra el popup y sigue el flujo de siempre: setModule(mod)
 // → el mismo mazo de oraciones con hueco que ya existía.
 //
+// v9.66: antes de esa escena, un paso corto y salteable con 3-5
+// palabras clave (dsRenderGlossary/extractKeyWords, dict.js) —
+// pre-entrenamiento (Mayer #7): activar el vocabulario antes de leer
+// el diálogo completo, sin curar contenido nuevo a mano.
+//
 // Es un script clásico (sin import/export): se carga después de
 // app.js/reader.js/dict.js/audio-tts.js (los usa en tiempo de
 // ejecución) y expone openDailyStory/closeDailyStory como globales —
@@ -226,13 +231,35 @@ function dsRenderBody(mod) {
     return html;
 }
 
-function openDailyStory(mod) {
-    const pop = document.getElementById('daily-story-pop');
+// v9.66 (AUDITORIA-GAGNE-MAYER.md, Mayer #7 — pre-entrenamiento): paso
+// corto y salteable ANTES de la escena completa, con 3-5 palabras clave
+// extraídas de esa misma escena (extractKeyWords, dict.js — sin curar
+// contenido nuevo a mano).
+function dsRenderGlossary(mod, keyWords) {
+    const story = DAILY_STORIES[mod];
+    const label = (typeof MODULE_LABELS !== 'undefined' && MODULE_LABELS[mod]) ? MODULE_LABELS[mod] : mod;
+    let html = '<div class="ds-head">' + (story.emoji || '💬') + ' ' + escHtml(label) + '</div>';
+    html += '<p class="ds-intro">Antes de leer, estas son algunas palabras clave de la escena:</p>';
+    html += '<div class="ds-glossary">';
+    keyWords.forEach(kw => {
+        html += '<div class="ds-gloss-item">'
+            + '<span class="ds-gloss-zh" lang="zh">' + escHtml(kw.zh) + '</span>'
+            + '<span class="ds-gloss-py">' + escHtml(kw.py) + '</span>'
+            + '<span class="ds-gloss-es">' + escHtml(kw.es) + '</span>'
+            + '</div>';
+    });
+    html += '</div>';
+    html += '<div class="ds-actions ds-actions-row">'
+        + '<button type="button" id="btn-ds-skip" class="btn-secondary">Saltar</button>'
+        + '<button type="button" id="btn-ds-continue" class="btn-primary">Leer la escena →</button>'
+        + '</div>';
+    return html;
+}
+
+function dsShowScene(mod) {
     const body = document.getElementById('daily-story-body');
-    if (!pop || !body || !DAILY_STORIES[mod]) return false;
-    body.dataset.module = mod;
+    if (!body) return;
     body.innerHTML = dsRenderBody(mod);
-    pop.classList.remove('hidden');
 
     const story = DAILY_STORIES[mod];
     body.querySelectorAll('.ds-play').forEach(btn => {
@@ -250,6 +277,29 @@ function openDailyStory(mod) {
             closeDailyStory();
             if (typeof setModule === 'function') setModule(mod);
         });
+    }
+}
+
+function openDailyStory(mod) {
+    const pop = document.getElementById('daily-story-pop');
+    const body = document.getElementById('daily-story-body');
+    if (!pop || !body || !DAILY_STORIES[mod]) return false;
+    body.dataset.module = mod;
+    pop.classList.remove('hidden');
+
+    const story = DAILY_STORIES[mod];
+    const keyWords = (typeof extractKeyWords === 'function')
+        ? extractKeyWords(story.lines.map(l => l.zh), 5)
+        : [];
+
+    if (keyWords.length >= 3) {
+        body.innerHTML = dsRenderGlossary(mod, keyWords);
+        const skip = document.getElementById('btn-ds-skip');
+        const cont = document.getElementById('btn-ds-continue');
+        if (skip) skip.addEventListener('click', () => dsShowScene(mod));
+        if (cont) cont.addEventListener('click', () => dsShowScene(mod));
+    } else {
+        dsShowScene(mod); // muy pocas palabras clave con entrada de diccionario → directo a la escena
     }
     return true;
 }
