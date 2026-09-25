@@ -773,7 +773,9 @@ function updateUILanguage(mode) {
     // v9.19: el modo "solo oído" también es exclusivo de Aprendo Chino
     // v9.28: ídem los pares mínimos — discriminación tonal del CHINO con
     //    glosas en español: para el alumno cn-es no pintan nada.
-    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen', 'btn-mp-pairs'].forEach((id) => show(id, !cnMode));
+    // v9.70: ídem Podcast — GRADED_LESSONS son mini-dramas en chino con
+    //    glosa en español, mismo alcance que btn-listen/btn-mp-pairs.
+    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen', 'btn-mp-pairs', 'btn-podcast'].forEach((id) => show(id, !cnMode));
 
     // 6) v9.11: UN solo botón de audio — siempre el idioma que se aprende.
     //    Aprendiendo chino (es-cn): 🔊 CN suena la oración china; 🔊 ES oculto.
