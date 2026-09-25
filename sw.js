@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v117'; // — Lote 2d: mini-glosario antes de escena/mini-drama nuevo
+const VERSION = 'v118'; // — Lote 2e: guía corta la primera vez por sección (feature-tips.js)
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
 //       racha en vivo, vista Yo con ajustes/respaldo/instalar, tabs de
@@ -477,6 +477,7 @@ const PRECACHE = [
   './',
   './index.html',
   './app.js',
+  './feature-tips.js',     // v9.67: guía corta, una sola vez por sección (Pronunciación, Pares Mínimos)
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
   './data-embedded.js',    // v9.57: oraciones y vocabulario embebido extraído de app.js (fase 7)
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)

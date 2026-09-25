@@ -1241,6 +1241,23 @@ function setupEventListeners() {
         const r = document.getElementById('btn-record');
         if (r) { try { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); r.focus({ preventScroll: true }); } catch (e) { r.focus(); } }
     });
+    // v9.67 (AUDITORIA-GAGNE-MAYER.md, evento 5): guía corta, una sola vez,
+    // la primera vez que se abre Pronunciación. El <details> dispara
+    // 'toggle' con CUALQUIER apertura (clic en el <summary>, o los dos
+    // btn-record*/btn-train-record de arriba que asignan .open = true) —
+    // un solo hook cubre las tres formas de entrar.
+    (function () {
+        const d = document.getElementById('record-details');
+        if (!d) return;
+        d.addEventListener('toggle', () => {
+            if (d.open && typeof window.showFeatureTip === 'function') {
+                window.showFeatureTip('pronunciacion', '🎤', 'Pronunciación', [
+                    'Tocá 🎤, grabá la oración en voz alta y soltá para terminar.',
+                    'Vas a ver tu grabación comparada con la referencia — así identificás qué tono o sonido ajustar.'
+                ]);
+            }
+        });
+    })();
     safeAdd('btn-train-write', () => {
         showView('hoy');
         const h = document.getElementById('btn-handwrite');

@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260925a">
+    <link rel="stylesheet" href="style.css?v=20260925b">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -653,6 +653,12 @@
         <div id="daily-story-body"></div>
     </div>
 
+    <!-- v9.67: POPUP guía corta, una sola vez por sección (feature-tips.js) -->
+    <div id="feature-tip-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Guía rápida">
+        <button id="btn-feature-tip-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="feature-tip-body"></div>
+    </div>
+
     <!-- v7.21: POPUP Repaso SRS -->
     <div id="srs-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Repaso con repetición espaciada">
         <button id="btn-srs-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -774,7 +780,8 @@
     <script src="stats.js?v=20260924a"></script>
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260924a"></script>
-    <script src="app.js?v=20260924l"></script>
+    <script src="feature-tips.js?v=20260925a"></script>
+    <script src="app.js?v=20260925a"></script>
     <script src="dict.js?v=20260925a"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>
@@ -783,7 +790,7 @@
     <script src="classics-reader.js?v=20260924a"></script>
     <script src="lessons-graduated.js?v=20260925a"></script>
     <script src="placement-test.js?v=20260924a"></script>
-    <script src="minimal-pairs.js?v=20260924b"></script>
+    <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20260925a"></script>
     <script>
     // Registro del Service Worker (PWA offline)

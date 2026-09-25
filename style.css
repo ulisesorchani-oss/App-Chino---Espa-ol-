@@ -1200,6 +1200,32 @@ body.dark-mode .install-help-note {
     overflow-y: auto;
 }
 
+/* v9.67: guía corta, una sola vez por sección (feature-tips.js) — reusa
+   .vocab-pop igual que #daily-story-pop, sin nada propio de posición. */
+.ft-head {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-right: 20px;
+}
+
+.ft-line {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 8px;
+}
+
+.ft-actions {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.ft-actions .btn-primary {
+    width: 100%;
+}
+
 .ds-head {
     font-size: 1.15rem;
     font-weight: 800;

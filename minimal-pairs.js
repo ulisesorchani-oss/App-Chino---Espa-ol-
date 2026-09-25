@@ -30,6 +30,9 @@
 // repetición espaciada, igual que cualquier otro fallo de la práctica
 // principal (ver mpSrsMiss). Ningún flujo de getFiltered/checkAnswer se
 // modifica: es el mismo hook que ya usaban, llamado desde un lugar nuevo.
+// v9.67: mpOpen() ahora es un gate — la 1.ª vez que se abre muestra una
+// guía corta (window.showFeatureTip, feature-tips.js) antes de arrancar
+// la 1.ª ronda; mpOpenReal() es la apertura real de siempre.
 // ═══════════════════════════════════════════════════════════════════
 (function mpInit() {
     'use strict';
@@ -329,11 +332,26 @@
             mpPlay(r.target.zh, b);
         }, 350);
     }
-    function mpOpen() {
+    function mpOpenReal() {
         S.round = 0; S.score = 0; S.results = []; S.cur = null;
         S.answered = false; S.pick = -1; S.lastId = null;
         pop.classList.remove('hidden');
         mpNext();
+    }
+    // v9.67 (AUDITORIA-GAGNE-MAYER.md, evento 5): guía corta, una sola
+    // vez, la primera vez que se abre Pares Mínimos. showFeatureTip
+    // (feature-tips.js) llama a mpOpenReal ni bien se cierra el tip (o
+    // de inmediato si ya se vio) — un solo gate, sin duplicar el chequeo
+    // de localStorage acá.
+    function mpOpen() {
+        if (typeof window.showFeatureTip === 'function') {
+            window.showFeatureTip('pares', '🎯', 'Pares mínimos', [
+                'Vas a escuchar UNA palabra y elegir cuál de las opciones sonó — sin leer texto, solo de oído.',
+                'Es normal dudar entre tonos parecidos (mǎi/mài): el objetivo es afinar el oído, no adivinar por escrito.'
+            ], mpOpenReal);
+        } else {
+            mpOpenReal();
+        }
     }
     function mpClose() {
         pop.classList.add('hidden');
