@@ -1554,7 +1554,50 @@ function setupEventListeners() {
     const hskSelect = document.getElementById('select-hsk-level');
     if (hskSelect) {
         hskSelect.addEventListener('change', (e) => setModule(e.target.value));
+        renderHskOptions(hskSelect); // Paso 4 (auditoría HSK): conteo real, no hardcodeado
     }
+}
+
+// ===== Paso 4 (auditoría de datos HSK): opciones del select con el
+// conteo REAL, calculado una sola vez al cargar (hskCumulativeCounts()
+// en data-embedded.js está memoizada — esto no recalcula nada, solo
+// pinta el texto una vez). Reemplaza el conteo hardcodeado que traía
+// index.html (fuente de la confusión 467/497 de la auditoría: un
+// número copiado a mano que se desincronizó del dato real).
+//
+// Acumulado, no aislado por nivel: HSK N = vocabulario de HSK1 a HSK N
+// inclusive, con el total fijo como marco de referencia explícito —
+// "(N de 10.944 palabras)" en vez de un número suelto sin contexto.
+//
+// HSK7-9: el estándar GF0025-2021 los define como UN tramo combinado
+// (ver data/MANIFIESTO.json); acá se reparten en tercios por frecuencia
+// para dosificar el estudio, así que el nombre lo deja explícito
+// ("HSK 7-9 · Avanzado (parte N de 3)") en vez de sugerir con un
+// "HSK7" pelado que son tres certificaciones independientes. HSK1-6 SÍ
+// son niveles oficiales independientes → mantienen su nombre de siempre,
+// solo cambia el número.
+const HSK_OPTION_NAMES = {
+    1: 'HSK 1 · Elemental',
+    2: 'HSK 2 · Elemental',
+    3: 'HSK 3 · Elemental',
+    4: 'HSK 4 · Intermedio',
+    5: 'HSK 5 · Intermedio',
+    6: 'HSK 6 · Intermedio',
+    7: 'HSK 7-9 · Avanzado (parte 1 de 3)',
+    8: 'HSK 7-9 · Avanzado (parte 2 de 3)',
+    9: 'HSK 7-9 · Avanzado (parte 3 de 3)'
+};
+function renderHskOptions(hskSelect) {
+    if (typeof hskCumulativeCounts !== 'function') return; // data-embedded.js no cargó
+    const counts = hskCumulativeCounts();
+    const total = counts.TOTAL;
+    Array.from(hskSelect.options).forEach((opt) => {
+        const n = parseInt(String(opt.value).replace('HSK', ''), 10);
+        const name = HSK_OPTION_NAMES[n];
+        const acc = counts['HSK' + n];
+        if (!name || !acc) return; // opción inesperada: no la tocamos
+        opt.textContent = name + ' (' + acc.toLocaleString('es-AR') + ' de ' + total.toLocaleString('es-AR') + ' palabras)';
+    });
 }
 
 // ===== Funciones de Estado =====

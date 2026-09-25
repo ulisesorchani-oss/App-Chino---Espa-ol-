@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v125'; // — Pronunciación libre (free-talk.js): grabar y ver qué entendió la IA, estilo chat
+const VERSION = 'v126'; // — HSK: contador acumulado real (no hardcodeado) + etiqueta honesta de HSK 7-9
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

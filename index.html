@@ -252,16 +252,23 @@
                     </button>
                     <p id="placement-status" class="placement-status hidden" role="status"></p>
                     <div class="hsk-level-selector" id="hsk-selector">
+                        <!-- v9.7x (Paso 4, auditoría de datos HSK): el texto de acá abajo es
+                             solo un fallback estático (por si algo bloquea el JS) — la fuente
+                             de verdad es hskCumulativeCounts() en data-embedded.js, calculada
+                             del vocabulario real y pintada por renderHskOptions() (app.js) al
+                             cargar. Si el vocabulario embebido cambia, ESTE texto NO se
+                             actualiza solo: es a propósito (evita otro hardcodeo invisible),
+                             el número que el usuario ve siempre sale del cálculo en vivo. -->
                         <select id="select-hsk-level" class="level-dropdown" aria-label="Nivel HSK">
-                            <option value="HSK1">HSK 1 · Elemental (497 palabras)</option>
-                            <option value="HSK2">HSK 2 · Elemental (747 nuevas)</option>
-                            <option value="HSK3">HSK 3 · Elemental (949 nuevas)</option>
-                            <option value="HSK4">HSK 4 · Intermedio (973 nuevas)</option>
-                            <option value="HSK5">HSK 5 · Intermedio (1057 nuevas)</option>
-                            <option value="HSK6">HSK 6 · Intermedio (1119 nuevas)</option>
-                            <option value="HSK7">HSK 7 · Superior I (1865 nuevas)</option>
-                            <option value="HSK8">HSK 8 · Superior II (1866 nuevas)</option>
-                            <option value="HSK9">HSK 9 · Superior III (1871 nuevas)</option>
+                            <option value="HSK1">HSK 1 · Elemental (497 de 10.944 palabras)</option>
+                            <option value="HSK2">HSK 2 · Elemental (1.244 de 10.944 palabras)</option>
+                            <option value="HSK3">HSK 3 · Elemental (2.193 de 10.944 palabras)</option>
+                            <option value="HSK4">HSK 4 · Intermedio (3.166 de 10.944 palabras)</option>
+                            <option value="HSK5">HSK 5 · Intermedio (4.223 de 10.944 palabras)</option>
+                            <option value="HSK6">HSK 6 · Intermedio (5.342 de 10.944 palabras)</option>
+                            <option value="HSK7">HSK 7-9 · Avanzado (parte 1 de 3) (7.207 de 10.944 palabras)</option>
+                            <option value="HSK8">HSK 7-9 · Avanzado (parte 2 de 3) (9.073 de 10.944 palabras)</option>
+                            <option value="HSK9">HSK 7-9 · Avanzado (parte 3 de 3) (10.944 de 10.944 palabras)</option>
                         </select>
                     </div>
                     <div class="category-filter exams-filters">
@@ -817,9 +824,9 @@
     <script src="onboarding.js?v=20260923a"></script>
     <script src="stats.js?v=20260924a"></script>
     <script src="audio-tts.js?v=20260924a"></script>
-    <script src="data-embedded.js?v=20260924a"></script>
+    <script src="data-embedded.js?v=20260925a"></script>
     <script src="feature-tips.js?v=20260925a"></script>
-    <script src="app.js?v=20260925d"></script>
+    <script src="app.js?v=20260925e"></script>
     <script src="dict.js?v=20260925b"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>

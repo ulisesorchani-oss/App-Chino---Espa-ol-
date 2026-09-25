@@ -704,3 +704,34 @@ function expandWordCards(key, rows) {
     return _wordCache[key];
 }
 
+// ===== Paso 4 (auditoría de datos HSK): conteo ACUMULADO, memoizado =====
+// Antes, el <select id="select-hsk-level"> (index.html) llevaba el conteo
+// de cada nivel HARDCODEADO en el texto de cada <option> ("HSK 1 · ...
+// (497 palabras)") — un número copiado a mano que se desincroniza en
+// cuanto alguien toca el vocabulario embebido (así se originó la
+// confusión 467/497 de esta auditoría: el HTML decía una cosa vieja,
+// data-embedded.js ya tenía otra). hskCumulativeCounts() calcula la
+// ÚNICA fuente de verdad a partir de EMBEDDED_MODULE_DATA en tiempo de
+// carga — nunca más un número pegado a mano — y la cachea (mismo patrón
+// de memoización que _wordCache/expandWordCards de arriba: se calcula la
+// primera vez que se pide, no en cada apertura del dropdown).
+//
+// v9.36 → HSK: se cuenta ACUMULADO (HSK N = vocabulario de HSK 1 a HSK N
+// inclusive), no aislado por nivel — así se habla de HSK en cualquier
+// lado ("sé 3.241 de 10.944 palabras"), y evita mostrar un número sin
+// marco de referencia. app.js consume esto para pintar las <option>;
+// este archivo sigue siendo puro contenido (sin tocar el DOM acá).
+let _hskCumulative = null;
+function hskCumulativeCounts() {
+    if (_hskCumulative) return _hskCumulative;
+    const out = {};
+    let acc = 0;
+    for (let n = 1; n <= 9; n++) {
+        acc += (EMBEDDED_MODULE_DATA['HSK' + n] || []).length;
+        out['HSK' + n] = acc;
+    }
+    out.TOTAL = acc; // suma real de HSK1..HSK9 — NUNCA un 10944 hardcodeado
+    _hskCumulative = out;
+    return out;
+}
+
