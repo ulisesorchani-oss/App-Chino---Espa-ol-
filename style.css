@@ -1271,6 +1271,55 @@ body.dark-mode .ds-line {
     width: 100%;
 }
 
+/* v9.66: glosario corto y salteable ANTES de la escena (pre-entrenamiento) */
+.ds-glossary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.ds-gloss-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    background: var(--bg-light);
+    border-radius: 10px;
+}
+
+body.dark-mode .ds-gloss-item {
+    background: #0f172a;
+}
+
+.ds-gloss-zh {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.ds-gloss-py {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.ds-gloss-es {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    flex: 1 1 auto;
+}
+
+.ds-actions-row {
+    display: flex;
+    gap: 8px;
+}
+
+.ds-actions-row .btn-primary,
+.ds-actions-row .btn-secondary {
+    flex: 1 1 auto;
+    width: auto;
+}
+
 .vp-example {
     font-size: 0.86rem;
     color: var(--text-secondary);
@@ -3918,6 +3967,17 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
 .lq-tag-row .lq-lesson-tag { margin-bottom: 0; }
 .lq-mini { padding: 6px 10px; font-size: 0.72rem; border-radius: 8px; }
 
+/* v9.66: glosario corto y salteable ANTES de la historia (pre-entrenamiento) */
+.lq-glossary { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.lq-gloss-item {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    background: #fff; border: 1.5px solid #eceff5; border-radius: 12px; padding: 10px 12px;
+}
+.lq-gloss-zh { font-weight: 800; font-size: 1.1rem; color: #1e293b; }
+.lq-gloss-py { font-size: 0.8rem; color: #7c5cf0; }
+.lq-gloss-es { font-size: 0.84rem; color: #64748b; flex: 1 1 auto; }
+.lq-gloss-foot { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+
 /* ── vista práctica ── */
 .lq-lesson-tag { font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px; }
 .lq-zh {
@@ -4003,6 +4063,11 @@ body.dark-mode .lq-line { background: #1e293b; border-color: #334155; }
 body.dark-mode .lq-line-zh { color: #f1f5f9; }
 body.dark-mode .lq-line-es { color: #94a3b8; }
 body.dark-mode .lq-line-py { color: #a5b4fc; }
+/* v9.66: glosario — mismo tratamiento que .lq-line en dark-mode */
+body.dark-mode .lq-gloss-item { background: #1e293b; border-color: #334155; }
+body.dark-mode .lq-gloss-zh { color: #f1f5f9; }
+body.dark-mode .lq-gloss-py { color: #a5b4fc; }
+body.dark-mode .lq-gloss-es { color: #94a3b8; }
 body.dark-mode .lq-es-box { background: #1e293b; border-color: #334155; color: #e2e8f0; }
 body.dark-mode .lq-blank { background: #312e81; border-color: #6366f1; color: #c7d2fe; }
 body.dark-mode .lq-blank.fill-ok { background: #14532d; border-color: #22c55e; color: #bbf7d0; }
@@ -4317,6 +4382,11 @@ body.paper-mode .lq-line { background: #fffdf6; border-color: #e6dabf; }
 body.paper-mode .lq-line:active { border-color: #b45309; }
 body.paper-mode .lq-line-zh { color: #3d3327; }
 body.paper-mode .lq-story-zh { color: #3d3327; }
+/* v9.66: glosario — mismo tratamiento que .lq-line en paper-mode */
+body.paper-mode .lq-gloss-item { background: #fffdf6; border-color: #e6dabf; }
+body.paper-mode .lq-gloss-zh { color: #3d3327; }
+body.paper-mode .lq-gloss-py { color: #b45309; }
+body.paper-mode .lq-gloss-es { color: #6b5b40; }
 body.paper-mode .lq-ghost { background: #f0e6cd; color: #6b5b40; }
 body.paper-mode .lq-btn.lq-loading { opacity: .6; }
 body.paper-mode .lq-opt { background: #fffdf6; border-color: #e6dabf; color: #43382a; }

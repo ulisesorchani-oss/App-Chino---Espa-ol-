@@ -9,11 +9,16 @@
 // solo expone window.LQ_DEBUG (solo lectura, pruebas E2E) — nada
 // externo llama a su API.
 //
+// v9.66: antes de la vista LECTURA, un paso corto y salteable con 3-5
+// palabras clave de esa misma lección (renderGlossary/extractKeyWords,
+// dict.js) — pre-entrenamiento (Mayer #7): activar el vocabulario antes
+// de leer el mini-drama completo, sin curar contenido nuevo a mano.
+//
 // Es un script clásico (sin import/export), igual que los anteriores:
 // se carga en index.html después de app.js (usa KARA, el karaoke que
 // sigue en app.js, escHtml de reader.js, fetchTTS/voiceZh/etc. de
-// audio-tts.js y window.acSrsMiss de srs.js, todo en tiempo de
-// ejecución).
+// audio-tts.js, extractKeyWords de dict.js y window.acSrsMiss de
+// srs.js, todo en tiempo de ejecución).
 // ============================================================
 
 // ═══════════════════════════════════════════════════════════════════
@@ -318,12 +323,48 @@
         });
     }
 
+    // ── vista GLOSARIO (v9.66, Mayer #7 — pre-entrenamiento) ──
+    // Paso corto y salteable ANTES de la historia completa, con 3-5
+    // palabras clave extraídas de la propia lección (extractKeyWords,
+    // dict.js) — sin curar contenido nuevo a mano.
+    function renderGlossary(l, keyWords) {
+        const k = zhKey();
+        let html = '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
+            '<div><div class="lq-story-zh">' + escHtml(k === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</div>' +
+            '<div class="lq-story-es">' + escHtml(l.titleEs) + '</div></div></div>' +
+            '<p class="lq-blurb">Antes de leer, estas son algunas palabras clave de la historia:</p>' +
+            '<div class="lq-glossary">' +
+            keyWords.map(kw =>
+                '<div class="lq-gloss-item">' +
+                '<span class="lq-gloss-zh" lang="zh">' + escHtml(kw.zh) + '</span>' +
+                '<span class="lq-gloss-py">' + escHtml(kw.py) + '</span>' +
+                '<span class="lq-gloss-es">' + escHtml(kw.es) + '</span>' +
+                '</div>'
+            ).join('') +
+            '</div>' +
+            '<div class="lq-gloss-foot">' +
+            '<button type="button" class="lq-btn lq-ghost" id="lq-gloss-skip">Saltar</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="lq-gloss-continue">Leer la historia →</button>' +
+            '</div>';
+        body.innerHTML = html;
+        const skip = $('lq-gloss-skip'), cont = $('lq-gloss-continue');
+        if (skip) skip.addEventListener('click', () => renderStory(l));
+        if (cont) cont.addEventListener('click', () => renderStory(l));
+    }
+
     // ── vista LECTURA ──
     function openStory(l) {
         S.lesson = l; S.view = 'story'; S.pinyin = false;
         openPop();
         progNum.textContent = '📖';
         segs.innerHTML = '';
+        const keyWords = (typeof extractKeyWords === 'function')
+            ? extractKeyWords(l.lines.map(ln => ln.zh), 5)
+            : [];
+        if (keyWords.length >= 3) renderGlossary(l, keyWords);
+        else renderStory(l);
+    }
+    function renderStory(l) {
         const k = zhKey();
         const lines = l.lines.map((ln, i) => {
             const zh = (k === 'trad' ? ln.zhT : ln.zh);

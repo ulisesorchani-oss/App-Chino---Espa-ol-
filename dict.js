@@ -258,3 +258,36 @@ function wordPinyin(word) {
     } catch (e) {}
     return '';
 }
+
+// v9.66 (AUDITORIA-GAGNE-MAYER.md, Mayer #7 — pre-entrenamiento): dado el
+// texto en chino de UNA escena/lección puntual (daily-stories.js,
+// lessons-graduated.js), extrae 3-5 palabras clave con pinyin+glosa para
+// mostrar en un paso corto ANTES del texto completo. No cura contenido a
+// mano: segmenta el propio texto de esa escena (zhWordsList, ya existe),
+// prioriza palabras de 2+ caracteres (vocabulario de contenido, no
+// partículas sueltas como 的/了/吗) y — a igualdad de eso — las más
+// repetidas DENTRO de esa escena puntual; resuelve pinyin/glosa con el
+// diccionario offline (dictMiniLookup, ya existe) y descarta las que no
+// tengan entrada. Sin dependencias nuevas, sin tocar SRS/checkAnswer.
+function extractKeyWords(zhLines, max) {
+    max = max || 5;
+    const counts = new Map(); // palabra → veces vista en esta escena
+    const order = [];         // primera aparición (desempate estable)
+    (zhLines || []).forEach(line => {
+        zhWordsList(line).forEach(w => {
+            if (!counts.has(w)) { counts.set(w, 0); order.push(w); }
+            counts.set(w, counts.get(w) + 1);
+        });
+    });
+    const ranked = order
+        .map(w => ({ w: w, n: counts.get(w), long: w.length >= 2 ? 1 : 0 }))
+        .sort((a, b) => (b.long - a.long) || (b.n - a.n));
+    const out = [];
+    for (const cand of ranked) {
+        if (out.length >= max) break;
+        const hit = dictMiniLookup(cand.w);
+        if (!hit || !hit.def) continue; // sin entrada de diccionario → no sirve como glosario
+        out.push({ zh: cand.w, py: hit.py || '', es: hit.def });
+    }
+    return out;
+}
