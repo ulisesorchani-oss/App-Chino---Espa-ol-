@@ -4004,7 +4004,7 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
 .pd-player { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 18px 4px 6px; }
 .pd-lesson-head { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
 .pd-status { font-size: 0.85rem; color: #64748b; min-height: 1.4em; margin-bottom: 18px; }
-.pd-controls { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 20px; }
+.pd-controls { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 16px; }
 .pd-ctrl-btn {
     border: none; background: #f1f5f9; color: #334155; border-radius: 50%;
     width: 52px; height: 52px; font-size: 1.3rem; cursor: pointer;
@@ -4017,8 +4017,15 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
     background: linear-gradient(135deg, #7c5cf0, #2563eb); color: #fff;
     box-shadow: 0 4px 14px rgba(99, 91, 255, .35);
 }
+/* v9.72: progreso real del <audio> (currentTime/duration) — reusa
+   .progress-track/.progress-fill (barra de la sesión SRS); se oculta con
+   .hidden cuando no hay <audio> (fallback de voz del sistema, sin duration). */
+.pd-player .progress-track { width: 100%; margin: 0 0 4px; }
+.pd-time { width: 100%; font-size: 0.78rem; color: #64748b; font-variant-numeric: tabular-nums; margin-bottom: 16px; }
 .pd-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 4px; }
 .pd-text { width: 100%; margin-top: 14px; padding: 12px 14px; background: #f8fafc; border-radius: 12px; text-align: left; }
+.pd-text-line { margin-bottom: 12px; }
+.pd-text-line:last-child { margin-bottom: 0; }
 .pd-text-zh { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
 .pd-text-es { font-size: 0.88rem; color: #64748b; }
 
@@ -4026,7 +4033,8 @@ body.dark-mode .pd-head, body.dark-mode .pd-lesson-head,
 body.dark-mode .pd-continue-title, body.dark-mode .pd-item-title,
 body.dark-mode .pd-text-zh { color: #f1f5f9; }
 body.dark-mode .pd-intro, body.dark-mode .pd-status,
-body.dark-mode .pd-item-meta, body.dark-mode .pd-text-es { color: #94a3b8; }
+body.dark-mode .pd-item-meta, body.dark-mode .pd-text-es,
+body.dark-mode .pd-time { color: #94a3b8; }
 body.dark-mode .pd-continue { background: linear-gradient(135deg, rgba(124, 92, 240, .18), rgba(37, 99, 235, .18)); border-color: rgba(147, 138, 255, .35); }
 body.dark-mode .pd-ctrl-btn { background: #334155; color: #e2e8f0; }
 body.dark-mode .pd-text { background: #1e293b; }
@@ -4035,7 +4043,8 @@ body.paper-mode .pd-head, body.paper-mode .pd-lesson-head,
 body.paper-mode .pd-continue-title, body.paper-mode .pd-item-title,
 body.paper-mode .pd-text-zh { color: #3d3327; }
 body.paper-mode .pd-intro, body.paper-mode .pd-status,
-body.paper-mode .pd-item-meta, body.paper-mode .pd-text-es { color: #8a7a5f; }
+body.paper-mode .pd-item-meta, body.paper-mode .pd-text-es,
+body.paper-mode .pd-time { color: #8a7a5f; }
 body.paper-mode .pd-continue { background: #f0e6cd; border-color: #d8c69e; }
 body.paper-mode .pd-ctrl-btn { background: #f0e6cd; color: #6b5b40; }
 body.paper-mode .pd-text { background: #f3ead2; }

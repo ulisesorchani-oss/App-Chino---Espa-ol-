@@ -18,14 +18,32 @@
 // Se reemplaza por UN SOLO pedido de TTS con el texto de la lección
 // COMPLETA concatenado — el mismo patrón que ya usa toggleReaderPlay()
 // en reader.js ("pegá texto y lo lee", un solo blob de audio de punta a
-// punta). El progreso por línea ("N/M", 👁️ Ver texto, ⏮/⏭) ahora se
-// ESTIMA sobre ese único audio con una línea de tiempo ponderada por
-// caracteres (mismo principio que karaoke.js, pero a nivel LÍNEA en vez
-// de carácter — karaoke.js no expone sus funciones puras de timeline,
-// así que esto es una versión chica y propia, no una reescritura de lo
-// mismo). ⏮/⏭ hacen SEEK real sobre audio.currentTime cuando el audio
-// es del API; con voz del sistema (fallback sin red) no hay seek real
-// — quedan deshabilitados y solo corre play/pausa.
+// punta).
+//
+// v9.72 (ajuste al patrón real de reader.js + UX de podcast, no de
+// cola): la v9.71 ya pedía un solo audio, pero seguía tratándolo como
+// si fuera una cola de líneas: unía el texto SIN separador (perdiendo
+// el salto de línea que reader.js sí conserva al mandar
+// lesson.text_simp/text_trad completo a fetchTTS), y estimaba una
+// "línea actual" con una línea de tiempo ponderada por caracteres para
+// alimentar ⏮/⏭ (seek), el contador "N/M" y el resaltado de texto —
+// todo aproximado, nada de eso viene del audio real. Se ajusta a lo que
+// el patrón de un solo blob permite de verdad:
+//  · fullText une las líneas con '\n' (mismo separador que usa
+//    lesson.text_simp/text_trad en lessons.js) para no perder la
+//    prosodia entre oraciones.
+//  · ⏮/⏭ pasan a significar LECCIÓN anterior/siguiente (navegan
+//    GRADED_LESSONS) — un podcast salta de episodio, no de oración.
+//  · El progreso es el real del <audio> (currentTime/duration → barra
+//    de tiempo transcurrido/total); con voz del sistema (fallback sin
+//    red) no hay <audio> ni duration, así que la barra se oculta y
+//    queda solo el texto de estado.
+//  · "👁️ Ver texto" muestra la lección COMPLETA de una vez, sin
+//    resaltado sincronizado (ya no hay "línea actual" que resaltar) —
+//    sigue bajo demanda, sigue sin ser el default.
+//  · Se elimina la línea de tiempo estimada (buildTimeline/
+//    lineIdxAtProgress y sus ticks por rAF/setInterval): dead code de
+//    la v9.71 sin consumidor una vez que ⏮/⏭ dejan de hacer seek.
 //
 // SELECCIÓN DE LECCIÓN (híbrida): lessonForSentence() (reader.js) NO
 // sirve acá — mapea a window.LESSONS_DATA (el lector 📖 de texto
@@ -63,15 +81,10 @@
 
     const S = { view: null, lesson: null };
     // ── reproducción: UN SOLO audio para la lección completa (v9.71) ──
-    let pIdx = 0;            // línea ESTIMADA que está sonando (para progreso/seek/texto)
-    let pTimeline = null;    // { starts: [...], total } — peso ≈ caracteres por línea
     let pAudio = null;       // Audio() del API en curso (toda la lección)
-    let pTtsU = null;        // utterance del fallback (voz del sistema, sin seek real)
+    let pTtsU = null;        // utterance del fallback (voz del sistema, sin progreso real)
     let pTok = 0;            // invalida callbacks de una reproducción vieja
     let pState = 'idle';     // 'idle' | 'loading' | 'playing' | 'paused' | 'done'
-    let pRaf = 0;            // requestAnimationFrame del tick de progreso (audio real)
-    let pFbTimer = 0;        // setInterval del tick estimado (fallback voz del sistema)
-    let pFbWall = 0;         // reloj propio del fallback, en ms
     let showText = false;    // "👁️ Ver texto" — NUNCA activado por defecto
 
     function getLastLessonId() {
@@ -86,6 +99,12 @@
         btn.addEventListener('click', () => { if (typeof cycleSpeed === 'function') cycleSpeed(); btn.textContent = speedLabel(); });
     }
 
+    function fmtTime(s) {
+        s = Math.max(0, Math.floor(s || 0));
+        const m = Math.floor(s / 60), sec = s % 60;
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
     // ── overlay: abrir/cerrar ──
     function openPop() {
         pop.classList.remove('hidden');
@@ -96,82 +115,32 @@
         pop.classList.add('hidden');
         try { if (typeof syncBodyScroll === 'function') syncBodyScroll(); else document.body.style.overflow = ''; } catch (e) { }
         S.lesson = null; S.view = null;
-        pIdx = 0; pTimeline = null; showText = false;
+        showText = false;
     }
 
-    // ── v9.71: línea de tiempo ponderada por caracteres — mapea progreso
-    //    [0,1] del audio ÚNICO a "qué línea está sonando" (estimado, no
-    //    exacto: no hay marcas reales por línea en un solo blob de TTS). ──
-    function buildTimeline(lines) {
-        const starts = [];
-        let acc = 0;
-        lines.forEach(ln => {
-            starts.push(acc);
-            acc += Math.max(1, lineText(ln).zh.length);
-        });
-        return { starts: starts, total: Math.max(1, acc) };
-    }
-    function lineIdxAtProgress(tl, p) {
-        const target = p * tl.total;
-        let idx = 0;
-        for (let i = 0; i < tl.starts.length; i++) {
-            if (tl.starts[i] <= target) idx = i; else break;
-        }
-        return idx;
-    }
-    function pQueueLen() { return (S.lesson && S.lesson.lines) ? S.lesson.lines.length : 0; }
-    function currentLine() { return (S.lesson && S.lesson.lines) ? S.lesson.lines[pIdx] : null; }
-
-    // ── ticks de progreso (actualizan pIdx mientras suena) ──
-    function startProgressTick() {
-        stopProgressTick();
-        const tick = () => {
-            if (!pAudio || pState !== 'playing') { pRaf = 0; return; }
-            const d = pAudio.duration;
-            if (isFinite(d) && d > 0) {
-                const p = Math.max(0, Math.min(1, pAudio.currentTime / d));
-                const idx = lineIdxAtProgress(pTimeline, p);
-                if (idx !== pIdx) { pIdx = idx; updatePlayerUI(); }
-            }
-            pRaf = requestAnimationFrame(tick);
-        };
-        pRaf = requestAnimationFrame(tick);
-    }
-    function stopProgressTick() { if (pRaf) cancelAnimationFrame(pRaf); pRaf = 0; }
-    function startFallbackTick() {
-        stopFallbackTick();
-        const rate = (typeof playbackSpeed === 'number' && playbackSpeed > 0) ? playbackSpeed : 1;
-        const estMs = Math.max(1200, (pTimeline.total * 215) / rate); // ~215 ms/car, mismo valor que karaoke.js
-        pFbTimer = setInterval(() => {
-            if (pState !== 'playing') return;
-            pFbWall += 100;
-            const p = Math.max(0, Math.min(1, pFbWall / estMs));
-            const idx = lineIdxAtProgress(pTimeline, p);
-            if (idx !== pIdx) { pIdx = idx; updatePlayerUI(); }
-        }, 100);
-    }
-    function stopFallbackTick() { if (pFbTimer) clearInterval(pFbTimer); pFbTimer = 0; }
+    // ── posición de la lección actual dentro de GRADED_LESSONS (para el
+    //    contador del header y para que ⏮/⏭ naveguen episodio a episodio) ──
+    function lessonIndex() { return S.lesson ? LESSONS.findIndex(l => l.id === S.lesson.id) : -1; }
 
     function stopAll() {
         pTok++;
-        stopProgressTick(); stopFallbackTick();
         if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; }
         if (pTtsU) { try { speechSynthesis.cancel(); } catch (e) { } pTtsU = null; }
         pState = 'idle';
     }
 
-    // ── v9.71: UN pedido de TTS con la lección ENTERA (no una cola por
-    //    línea) — mismo pipeline fetchTTS/blob/applyTtsSpeed de siempre,
-    //    mismo patrón que toggleReaderPlay() en reader.js. ──
+    // ── v9.71/v9.72: UN pedido de TTS con la lección ENTERA (no una cola
+    //    por línea) — mismo pipeline fetchTTS/blob/applyTtsSpeed de
+    //    siempre, mismo patrón que toggleReaderPlay() en reader.js,
+    //    mismo separador '\n' que lesson.text_simp/text_trad. ──
     async function playLesson() {
         if (!S.lesson) return;
         const myTok = ++pTok;
-        pState = 'loading'; pIdx = 0;
+        pState = 'loading';
         updatePlayerUI();
         if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
         if (typeof stopReader === 'function') stopReader();
-        const fullText = S.lesson.lines.map(ln => lineText(ln).zh).join('');
-        pTimeline = buildTimeline(S.lesson.lines);
+        const fullText = S.lesson.lines.map(ln => lineText(ln).zh).join('\n');
         try {
             const gender = (typeof voiceZh !== 'undefined') ? voiceZh : 'f';
             const langCode = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN';
@@ -192,13 +161,12 @@
             if (typeof applyTtsSpeed === 'function') applyTtsSpeed(audio, data);
             pAudio = audio;
             pState = 'playing';
+            audio.addEventListener('timeupdate', updateAudioProgress);
             updatePlayerUI();
-            startProgressTick();
             const gone = () => {
                 URL.revokeObjectURL(url);
                 if (myTok !== pTok) return;
-                stopProgressTick();
-                pState = 'done'; pIdx = pQueueLen() - 1;
+                pState = 'done';
                 updatePlayerUI();
             };
             audio.addEventListener('ended', gone, { once: true });
@@ -211,13 +179,11 @@
                 u.lang = 'zh-CN';
                 u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
                 pTtsU = u;
-                pState = 'playing'; pFbWall = 0;
+                pState = 'playing';
                 updatePlayerUI();
-                startFallbackTick();
                 const gone = () => {
                     if (myTok !== pTok) return;
-                    stopFallbackTick();
-                    pTtsU = null; pState = 'done'; pIdx = pQueueLen() - 1;
+                    pTtsU = null; pState = 'done';
                     updatePlayerUI();
                 };
                 u.onend = gone;
@@ -231,35 +197,30 @@
     }
     function togglePlayPause() {
         if (pState === 'playing') {
-            if (pAudio) { try { pAudio.pause(); } catch (e) { } stopProgressTick(); }
-            else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } stopFallbackTick(); }
+            if (pAudio) { try { pAudio.pause(); } catch (e) { } }
+            else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } }
             pState = 'paused';
             updatePlayerUI();
         } else if (pState === 'paused') {
             if (pAudio) {
-                pAudio.play().then(() => { pState = 'playing'; startProgressTick(); updatePlayerUI(); }).catch(() => { });
+                pAudio.play().then(() => { pState = 'playing'; updatePlayerUI(); }).catch(() => { });
             } else if (pTtsU) {
-                try { speechSynthesis.resume(); pState = 'playing'; startFallbackTick(); updatePlayerUI(); } catch (e) { }
+                try { speechSynthesis.resume(); pState = 'playing'; updatePlayerUI(); } catch (e) { }
             }
         } else { // idle | done → (re)empezar
             playLesson();
         }
     }
-    // ⏮/⏭: SEEK real sobre audio.currentTime (API). Con voz del sistema no
-    // hay seek posible (Web Speech no lo soporta) — updatePlayerUI() los
-    // deshabilita en ese caso, así que estas funciones no corren.
-    function seekToLine(idx) {
-        if (!pAudio || !pTimeline) return;
-        pIdx = Math.max(0, Math.min(pQueueLen() - 1, idx));
-        const d = pAudio.duration;
-        if (isFinite(d) && d > 0) {
-            const p = pTimeline.starts[pIdx] / pTimeline.total;
-            try { pAudio.currentTime = p * d; } catch (e) { }
-        }
-        updatePlayerUI();
+    // v9.72: ⏮/⏭ ya NO hacen seek dentro del audio — navegan a la lección
+    // anterior/siguiente de GRADED_LESSONS (un podcast salta de episodio).
+    function pdPrev() {
+        const i = lessonIndex();
+        if (i > 0) openLesson(LESSONS[i - 1].id);
     }
-    function pdNext() { seekToLine(pIdx + 1); }
-    function pdPrev() { seekToLine(pIdx - 1); }
+    function pdNext() {
+        const i = lessonIndex();
+        if (i !== -1 && i < LESSONS.length - 1) openLesson(LESSONS[i + 1].id);
+    }
 
     // ── vista LISTA (híbrida: "seguí con lo último" + lista completa) ──
     function renderPicker() {
@@ -297,8 +258,8 @@
     function openLesson(id) {
         const l = LESSONS.find(x => x.id === id);
         if (!l) return;
-        S.lesson = l; S.view = 'player';
-        pIdx = 0; pState = 'idle'; showText = false; pTimeline = null;
+        stopAll(); // corta el audio de la lección anterior (⏮/⏭ vienen del propio player)
+        S.lesson = l; S.view = 'player'; showText = false;
         renderPlayer();
         togglePlayPause(); // arranca solo al elegir una lección
     }
@@ -314,10 +275,12 @@
             + '<div class="pd-lesson-head">' + escHtml(l.emoji) + ' ' + escHtml(l.titleEs) + '</div>'
             + '<div class="pd-status" id="pd-status"></div>'
             + '<div class="pd-controls">'
-            + '<button type="button" id="pd-prev" class="pd-ctrl-btn" aria-label="Línea anterior">⏮</button>'
+            + '<button type="button" id="pd-prev" class="pd-ctrl-btn" aria-label="Lección anterior">⏮</button>'
             + '<button type="button" id="pd-playpause" class="pd-ctrl-btn pd-ctrl-main" aria-label="Reproducir">▶️</button>'
-            + '<button type="button" id="pd-next" class="pd-ctrl-btn" aria-label="Línea siguiente">⏭</button>'
+            + '<button type="button" id="pd-next" class="pd-ctrl-btn" aria-label="Lección siguiente">⏭</button>'
             + '</div>'
+            + '<div class="progress-track hidden" id="pd-audio-track"><div class="progress-fill" id="pd-audio-fill" style="width:0%"></div></div>'
+            + '<div class="pd-time" id="pd-time"></div>'
             + '<div class="pd-foot">'
             + '<button type="button" id="pd-speed" class="lq-btn lq-ghost"></button>'
             + '<button type="button" id="pd-toggle-text" class="lq-btn lq-ghost" aria-pressed="false">👁️ Ver texto</button>'
@@ -337,12 +300,36 @@
         });
         updatePlayerUI();
     }
+    // v9.72: progreso REAL del <audio> (currentTime/duration) — no hay
+    // nada análogo para el fallback de voz del sistema (sin elemento
+    // <audio>, sin duration), así que la barra se oculta en ese caso.
+    function updateAudioProgress() {
+        const track = $('pd-audio-track'), fill = $('pd-audio-fill'), timeEl = $('pd-time');
+        if (!track || !timeEl) return;
+        if (!pAudio) { track.classList.add('hidden'); timeEl.textContent = ''; return; }
+        track.classList.remove('hidden');
+        const cur = pAudio.currentTime || 0;
+        const dur = pAudio.duration;
+        const pct = (isFinite(dur) && dur > 0) ? Math.max(0, Math.min(100, (cur / dur) * 100)) : 0;
+        if (fill) fill.style.width = pct + '%';
+        timeEl.textContent = fmtTime(cur) + ' / ' + ((isFinite(dur) && dur > 0) ? fmtTime(dur) : '--:--');
+    }
+    // v9.72: con un solo audio no hay "línea actual" que resaltar — el
+    // botón 👁️ Ver texto vuelca la lección COMPLETA de una sola vez.
+    function fullTextHtml() {
+        if (!S.lesson || !S.lesson.lines) return '';
+        return S.lesson.lines.map(ln => {
+            const t = lineText(ln);
+            return '<div class="pd-text-line"><div class="pd-text-zh" lang="zh">' + escHtml(t.zh) + '</div>'
+                + '<div class="pd-text-es">' + escHtml(t.es) + '</div></div>';
+        }).join('');
+    }
     // Refresca SOLO lo que cambia con el estado (no re-crea el DOM entero:
     // evita perder el foco de los controles en cada tick de progreso).
     function updatePlayerUI() {
         if (S.view !== 'player') return;
-        const total = pQueueLen();
-        progNum.textContent = total ? (Math.min(pIdx + 1, total) + '/' + total) : '';
+        const idx = lessonIndex();
+        progNum.textContent = (idx !== -1) ? ((idx + 1) + '/' + LESSONS.length) : '🎙️';
         const statusEl = $('pd-status');
         if (statusEl) {
             statusEl.textContent =
@@ -357,18 +344,16 @@
             ppBtn.textContent = pState === 'playing' ? '⏸' : '▶️';
             ppBtn.setAttribute('aria-label', pState === 'playing' ? 'Pausar' : 'Reproducir');
         }
-        // v9.71: ⏮/⏭ necesitan seek real (audio.currentTime) — sin audio del
-        // API (fallback de voz del sistema) no hay forma de saltar, se apagan.
-        const canSeek = !!pAudio;
+        // v9.72: ⏮/⏭ ahora navegan GRADED_LESSONS — se apagan en los bordes
+        // de la lista, no según haya o no audio del API en curso.
         const prevBtn = $('pd-prev'), nextBtn = $('pd-next');
-        if (prevBtn) prevBtn.disabled = !canSeek || pIdx <= 0;
-        if (nextBtn) nextBtn.disabled = !canSeek || pIdx >= total - 1;
+        if (prevBtn) prevBtn.disabled = idx <= 0;
+        if (nextBtn) nextBtn.disabled = idx === -1 || idx >= LESSONS.length - 1;
+        updateAudioProgress();
         const textEl = $('pd-text');
         if (textEl) {
             if (showText) {
-                const t = lineText(currentLine());
-                textEl.innerHTML = '<div class="pd-text-zh" lang="zh">' + escHtml(t.zh) + '</div>'
-                    + '<div class="pd-text-es">' + escHtml(t.es) + '</div>';
+                textEl.innerHTML = fullTextHtml();
                 textEl.classList.remove('hidden');
             } else {
                 textEl.classList.add('hidden');
