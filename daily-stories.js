@@ -19,6 +19,12 @@
 // pre-entrenamiento (Mayer #7): activar el vocabulario antes de leer
 // el diálogo completo, sin curar contenido nuevo a mano.
 //
+// v9.68: piloto de codificación dual (Mayer #9) — dsEmojiHintsHtml
+// agrega emoji DECORATIVOS debajo de cada línea para las palabras de
+// la lista chica curada a mano (emojiHintFor, dict.js), comparando por
+// PALABRA completa (zhWordsList) para no confundir "水" (agua) con
+// "水果" (fruta). No toca renderZhLineHtml.
+//
 // Es un script clásico (sin import/export): se carga después de
 // app.js/reader.js/dict.js/audio-tts.js (los usa en tiempo de
 // ejecución) y expone openDailyStory/closeDailyStory como globales —
@@ -202,6 +208,27 @@ async function dsPlayLine(zh, btn) {
     }
 }
 
+// v9.68 (AUDITORIA-GAGNE-MAYER.md, Mayer #9 — piloto de codificación
+// dual): emoji DECORATIVOS para las palabras de la lista chica curada
+// (emojiHintFor, dict.js) que aparecen en ESTA línea. Segmenta con
+// zhWordsList (ya existe) para comparar PALABRA completa, no substring
+// — así "水" (agua) no dispara adentro de "水果" (fruta). Se muestran
+// aparte de renderZhLineHtml (no se toca ese renderer de pinyin/tonos):
+// una fila chica debajo de la línea, solo si hay al menos una.
+function dsEmojiHintsHtml(zh) {
+    if (typeof zhWordsList !== 'function' || typeof emojiHintFor !== 'function') return '';
+    const seen = new Set();
+    let html = '';
+    zhWordsList(zh).forEach(w => {
+        if (seen.has(w)) return;
+        const hit = emojiHintFor(w);
+        if (!hit) return;
+        seen.add(w);
+        html += '<span class="ds-emoji-hint" role="img" aria-label="' + escHtml(hit.alt) + '">' + hit.emoji + '</span>';
+    });
+    return html ? '<div class="ds-emoji-hints">' + html + '</div>' : '';
+}
+
 function dsRenderBody(mod) {
     const story = DAILY_STORIES[mod];
     if (!story) return '';
@@ -221,6 +248,7 @@ function dsRenderBody(mod) {
             + '<div class="ds-line-text">'
             + '<div class="reader-line ds-zh">' + zhHtml + '</div>'
             + '<div class="ds-es">' + escHtml(line.es) + '</div>'
+            + dsEmojiHintsHtml(zh)
             + '</div>'
             + '</div>';
     });

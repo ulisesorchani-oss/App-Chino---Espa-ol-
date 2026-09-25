@@ -291,3 +291,46 @@ function extractKeyWords(zhLines, max) {
     }
     return out;
 }
+
+// v9.68 (AUDITORIA-GAGNE-MAYER.md, Mayer #9 — codificación dual, PILOTO
+// barato): 20 palabras HSK1 de alta frecuencia con un emoji Unicode
+// razonablemente claro. Lista curada A MANO y aprobada en conversación
+// (no generada por heurística) — fuente de los candidatos:
+// EMBEDDED_MODULE_DATA['HSK1'] (data-embedded.js, 497 palabras oficiales
+// del nivel), NO dict.js/DICT_MINI: ese diccionario general no trae nivel
+// por entrada. Incluye 5 palabras con nota conocida (agua/mes/bandera/
+// profesor/caminar/reír/casa: doble lectura del emoji o variación real
+// entre Android/iOS/Windows) — aceptadas así a propósito, ver
+// AUDITORIA-GAGNE-MAYER.md. El emoji es SIEMPRE decorativo: nunca
+// reemplaza el hanzi ni la traducción al español, y quien lo pinta debe
+// darle role="img" + aria-label (alt) para lectores de pantalla — ver
+// showVocabPop (app.js) y dsRenderBody (daily-stories.js).
+const EMOJI_HINTS = {
+    '苹果': { emoji: '🍎', alt: 'manzana' },
+    '茶': { emoji: '🍵', alt: 'té' },
+    '米饭': { emoji: '🍚', alt: 'arroz' },
+    '面包': { emoji: '🍞', alt: 'pan' },
+    '鸡蛋': { emoji: '🥚', alt: 'huevo' },
+    '牛奶': { emoji: '🥛', alt: 'leche' },
+    '书': { emoji: '📖', alt: 'libro' },
+    '手机': { emoji: '📱', alt: 'celular' },
+    '电脑': { emoji: '💻', alt: 'computadora' },
+    '电视': { emoji: '📺', alt: 'televisión' },
+    '飞机': { emoji: '✈️', alt: 'avión' },
+    '学校': { emoji: '🏫', alt: 'escuela' },
+    '书包': { emoji: '🎒', alt: 'mochila' },
+    '水': { emoji: '💧', alt: 'agua' },
+    '月': { emoji: '🌙', alt: 'mes' },
+    '中国': { emoji: '🇨🇳', alt: 'China' },
+    '老师': { emoji: '🧑‍🏫', alt: 'profesor/a' },
+    '走路': { emoji: '🚶', alt: 'caminar' },
+    '笑': { emoji: '😄', alt: 'reír' },
+    '房子': { emoji: '🏡', alt: 'casa' }
+};
+
+// Lookup puro: {emoji, alt} o null. Sin DOM — quien llama arma su propio
+// <span role="img" aria-label="…"> (ver nota arriba).
+function emojiHintFor(word) {
+    const w = String(word || '').trim();
+    return w && Object.prototype.hasOwnProperty.call(EMOJI_HINTS, w) ? EMOJI_HINTS[w] : null;
+}
