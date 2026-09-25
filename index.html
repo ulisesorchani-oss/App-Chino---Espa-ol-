@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20260925c">
+    <link rel="stylesheet" href="style.css?v=20260925d">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -111,6 +111,12 @@
                         <div class="audio-controls-inline">
                             <button id="btn-play-es" class="btn-audio-mini" aria-label="Escuchar en español">🔊 ES</button>
                             <button id="btn-play-cn" class="btn-audio-mini" aria-label="Escuchar en chino">🔊 CN</button>
+                            <!-- v9.69: "Solo oído" (mudado de Entrenar) — toggle persistente,
+                                 mismo ejercicio de siempre (audio primero, texto oculto,
+                                 opciones múltiples), ahora activable donde se usa. -->
+                            <button id="btn-listen" class="btn-audio-mini" type="button" aria-pressed="false"
+                                    title="Solo oído: escuchá la frase antes de verla, sin texto a la vista"
+                                    aria-label="Activar modo solo oído">🎧</button>
                             <button id="btn-record" class="btn-audio-mini btn-record" type="button"
                                     title="Tocá para grabar tu pronunciación" aria-label="Grabar mi pronunciación">🎤</button>
                         </div>
@@ -391,11 +397,9 @@
                     <span class="tc-title">Pares mínimos</span>
                     <span class="tc-sub">¿买 o 卖? Distinguí tonos de oído</span>
                 </button>
-                <button id="btn-listen" class="train-card" type="button" title="Escucha antes que lectura: el audio suena solo y el texto aparece al responder">
-                    <span class="tc-ico" aria-hidden="true">🎧</span>
-                    <span class="tc-title">Solo oído</span>
-                    <span class="tc-sub">La frase suena antes de verse (modo de la tarjeta)</span>
-                </button>
+                <!-- v9.69: "Solo oído" se mudó a Hoy (junto a 🔊 CN / 🎤 en el
+                     header del ejercicio) — solo tenía efecto visible ahí. La
+                     tarjeta se saca de esta grilla; el Prompt B la reemplaza. -->
                 <button id="btn-train-record" class="train-card" type="button" title="Grabá tu pronunciación de la frase actual y compará">
                     <span class="tc-ico" aria-hidden="true">🎤</span>
                     <span class="tc-title">Pronunciación</span>
@@ -781,7 +785,7 @@
     <script src="audio-tts.js?v=20260924a"></script>
     <script src="data-embedded.js?v=20260924a"></script>
     <script src="feature-tips.js?v=20260925a"></script>
-    <script src="app.js?v=20260925b"></script>
+    <script src="app.js?v=20260925c"></script>
     <script src="dict.js?v=20260925b"></script>
     <script src="trazos.js?v=20260924a"></script>
     <script src="srs.js?v=20260924a"></script>
