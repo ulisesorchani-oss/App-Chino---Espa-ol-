@@ -1553,6 +1553,26 @@ body.dark-mode .vp-def {
     margin: 0;
 }
 
+/* v9.9x — Paso C (auditoría de la planilla): .level-dropdown nació para un
+   fondo oscuro/de color (texto blanco, ver la regla base más arriba) — su
+   hábitat original es el selector de nivel HSK, sobre un header con
+   degradé. body.dark-mode y body.paper-mode ya traían su propio parche
+   para .pz-label select.level-dropdown (más abajo en este archivo) porque
+   la tarjeta de la planilla es clara en esos dos temas también — pero
+   nunca se agregó el equivalente para el tema CLARO (el default), así que
+   quedaba texto blanco sobre tarjeta blanca: invisible. Mismo patrón que
+   los otros dos, con :not() en vez de body.light-mode (no existe esa
+   clase — claro es la ausencia de dark-mode/paper-mode). */
+body:not(.dark-mode):not(.paper-mode) .pz-label select.level-dropdown {
+    background: #fff;
+    color: #1e293b;
+    border-color: #e2e8f0;
+}
+body:not(.dark-mode):not(.paper-mode) .pz-label select.level-dropdown option {
+    background: #fff;
+    color: #1e293b;
+}
+
 .pz-module-btn b {
     color: var(--primary);
 }
