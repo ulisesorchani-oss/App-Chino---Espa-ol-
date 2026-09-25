@@ -531,6 +531,20 @@ body.dark-mode .btn-audio-mini:hover {
     color: white;
 }
 
+/* v9.69: estado persistente "activado" (ej. 🎧 Solo oído) — distinto del
+   :hover momentáneo, mismo azul sólido de la familia. */
+.btn-audio-mini.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+body.dark-mode .btn-audio-mini.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 480px) {
     .sentence {
@@ -5405,6 +5419,12 @@ body.dark-mode .aprender-tools .speed-btn { background: var(--bg-light); }
 
 /* --- Entrenar --- */
 .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+/* v9.69: "Solo oído" se mudó a Hoy → quedan 3 tarjetas (impares) en una
+   grilla de 2 columnas. Mientras no se sume la reemplazante (Prompt B),
+   la 3.ª/última ocupa el ancho completo en vez de dejar un hueco a su
+   lado. Deja de aplicar solo (nth-child dejará de coincidir con
+   last-child) apenas vuelva a haber 4 tarjetas. */
+.train-grid > .train-card:nth-child(3):last-child { grid-column: 1 / -1; }
 .train-card {
     display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left;
     min-height: 112px; padding: 14px; border-radius: 16px; border: 2px solid transparent;

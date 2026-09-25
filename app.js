@@ -995,18 +995,19 @@ function toggleInterleaving() {
 // - Opciones: la respuesta correcta + hasta 3 distractores del POOL ACTIVO
 //   (mismo módulo y longitud parecida primero). Sin distractores la tarjeta
 //   cae a la vista clásica (mazos muy chicos).
-// - Toggle en el panel ⚙, apagado por defecto, persistido (ac_storage).
+// - Toggle en el header del ejercicio (Hoy, junto a 🔊 CN / 🎤 — v9.69:
+//   antes vivía como tarjeta en Entrenar, mudado porque solo tenía
+//   efecto visible acá), apagado por defecto, persistido (ac_storage).
 //   Solo existe aprendiendo chino (es-cn); el cloze de siempre queda intacto.
 function applyListenUI() {
     const btn = document.getElementById('btn-listen');
     if (!btn) return;
     btn.classList.toggle('active', state.listenFirst);
     btn.setAttribute('aria-pressed', state.listenFirst ? 'true' : 'false');
-    const sub = btn.querySelector('.tc-sub');
-    if (sub) sub.textContent = state.listenFirst
-        ? 'Activado: en Hoy la frase suena antes de verse'
-        : 'La frase suena antes de verse (modo de la tarjeta)';
-    else btn.textContent = state.listenFirst ? '🎧 Solo oído ✓' : '🎧 Solo oído';
+    btn.setAttribute('aria-label', state.listenFirst ? 'Desactivar modo solo oído' : 'Activar modo solo oído');
+    btn.title = state.listenFirst
+        ? 'Solo oído: activado — la frase suena antes de verse'
+        : 'Solo oído: escuchá la frase antes de verla, sin texto a la vista';
 }
 
 function toggleListenFirst() {
