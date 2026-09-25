@@ -3671,8 +3671,11 @@ function pzStatus(msg, isError) {
 // Colores v9.1: etapas previas MÁS OSCURAS que antes (#c9ced6 → #a0a6ae) y el
 // trazo nuevo aún más oscuro (#47505c) — antes en impresoras con poca tinta
 // casi no se notaba. Renglones verdes más finos: borde 0.5→0.3mm, cruz 0.4→0.22mm.
-const PZ_PREV_FILL = '#a0a6ae';   // trazos ya escritos en la etapa
-const PZ_CUR_FILL = '#47505c';    // el trazo nuevo de la etapa
+// v9.9x — Paso 4: opacidad bajada en los dos estilos (comparten el valor
+// a propósito, confirmado — no dos grises distintos por estilo). Antes
+// #a0a6ae/#47505c quedaban muy oscuros para escribir cómodo encima.
+const PZ_PREV_FILL = '#c4c9d1';   // trazos ya escritos en la etapa
+const PZ_CUR_FILL = '#6b7280';    // el trazo nuevo de la etapa
 const PZ_TRACE_FILL = '#b5d6c4';  // calco verde suave (fila 寫字 del estilo cuaderno)
 
 // CSS autocontenido de la hoja (verde estilo XieZi, A4)
@@ -3892,15 +3895,40 @@ function pzRadicalOf(ch) {
     return (_pzRadicalMap && _pzRadicalMap[ch]) || '';
 }
 
-// v9.7x — SIGNIFICADO MÍNIMO (Paso 1.3 del diagnóstico): dictMiniLookup()
-// ya vive en dict.js y devuelve { py, def } con def "sentido1; sentido2;
-// …" — acá se pide SOLO la 1.ª acepción, nunca la entrada completa.
+// v9.7x/v9.9x — SIGNIFICADO MÍNIMO (Paso 1.3 del diagnóstico + Paso A):
+// dictMiniLookup() ya vive en dict.js y devuelve { py, def } con def
+// "sentido1; sentido2; …" — acá se pide SOLO la 1.ª acepción, nunca la
+// entrada completa.
+//
+// Paso A: en caracteres POLIFÓNICOS (py con "·", ej. "xíng · háng" para
+// 行) la 1.ª acepción a veces trae la lectura entre paréntesis pegada al
+// final ("estar bien, vale (xíng)") — es desambiguación LEGÍTIMA (aclara
+// a cuál de las lecturas corresponde ESE sentido), no ruido: medido sobre
+// las 4318 entradas de dict-mini.js, 574 tienen paréntesis en la 1.ª
+// acepción y sólo 4 hoy (假/恶/行/重) tienen un paréntesis que coincide
+// EXACTO con una lectura de py.split('·') — el resto (570) son ejemplos
+// de uso, abreviaturas, notas gramaticales, etc., y deben quedar intactos.
+// Por eso la regla compara CONTRA EL DATO (nunca una lista de caracteres
+// fija): solo se separa cuando el contenido del paréntesis es idéntico a
+// alguna lectura real de esa entrada. Se devuelve aparte (reading) para
+// que el llamador la use en aclarar la línea de pronunciación en vez de
+// dejarla pegada al texto del significado.
 function pzSignificadoOf(ch) {
     try {
         const d = (typeof dictMiniLookup === 'function') ? dictMiniLookup(ch) : null;
-        if (!d || !d.def) return '';
-        return String(d.def).split(';')[0].trim();
-    } catch (e) { return ''; }
+        if (!d || !d.def) return { text: '', reading: '' };
+        let text = String(d.def).split(';')[0].trim();
+        let reading = '';
+        if (d.py && String(d.py).indexOf('·') !== -1) {
+            const readings = String(d.py).split('·').map((s) => s.trim());
+            const m = text.match(/\(([^)]+)\)\s*$/);
+            if (m && readings.indexOf(m[1].trim()) !== -1) {
+                reading = m[1].trim();
+                text = text.slice(0, m.index).trim();
+            }
+        }
+        return { text: text, reading: reading };
+    } catch (e) { return { text: '', reading: '' }; }
 }
 
 function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
@@ -3927,11 +3955,17 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
                 ? pzSvg(d, d.strokes.length, '#1f2937')
                 : '<span class="pz2-fallback">' + ch + '</span>';
             // v9.7x: "significado breve arriba" (Paso 2.4)
-            const meanTxt = opts.significado ? pzSignificadoOf(ch) : '';
+            const meanInfo = opts.significado ? pzSignificadoOf(ch) : null;
+            const meanTxt = meanInfo ? meanInfo.text : '';
             const meanHtml = meanTxt ? '<div class="pz2-mean">' + escHtml(meanTxt) + '</div>' : '';
             // v9.7x/v9.8x: pinyin/zhuyin según el selector (Paso 2.3) — sin
             // ícono 🔊 (el color/estilo ya distingue que es pronunciación).
-            const pronTxt = opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : (opts.pron === 'none' ? '' : py);
+            // v9.9x — Paso A: si el significado mostrado es de un carácter
+            // polifónico con lectura desambiguada (pzSignificadoOf), esa
+            // lectura se aclara ACÁ, pegada a la pronunciación — no repetida
+            // suelta en el texto del significado (de donde se sacó).
+            let pronTxt = opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : (opts.pron === 'none' ? '' : py);
+            if (pronTxt && meanInfo && meanInfo.reading && pronTxt !== meanInfo.reading) pronTxt += ' (' + meanInfo.reading + ')';
             const pronHtml = pronTxt ? '<div class="pz2-py">' + escHtml(pronTxt) + '</div>' : '';
             // v9.8x: radical SIN el label "部首" — solo el carácter, ya chico
             // y en color distinto (alcanza para diferenciarlo del principal).
@@ -3986,10 +4020,21 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         // Solo si el bloque cae justo en el borde (base % C === 0) se abre
         // una fila parcial con 2 celdas de práctica — con ancho fijo
         // (pzCellWidthCss) las filas parciales no se estiran.
+        //
+        // v9.9x — Paso E: las celdas sobrantes ya NO quedan en blanco — se
+        // rellenan con MÁS práctica real (el carácter COMPLETO, en el
+        // mismo tono claro de calco PZ_PREV_FILL, no una etapa parcial de
+        // trazos). El agrupamiento por fila/carácter no cambia — sigue
+        // cerrando exactamente igual que antes; antes de esto esas celdas
+        // quedaban vacías (ver auditoría: caracteres de muchos trazos, ej.
+        // 標/统, que "se pasan" a una 2.ª fila casi toda en blanco).
         const base = celdas.length;
         const rem = base % C;
         const total = (rem === 0) ? base + 2 : base + (C - rem);
-        while (celdas.length < total) celdas.push('<div class="pz-cell"></div>');
+        const fillCell = () => '<div class="pz-cell">' + (d
+            ? pzSvg(d, d.strokes.length, PZ_PREV_FILL)
+            : '<span class="pz-glyph" style="color:' + PZ_PREV_FILL + ';">' + ch + '</span>') + '</div>';
+        while (celdas.length < total) celdas.push(fillCell());
         for (let r = 0; r < total; r += C) {
             rows += '<div class="pz-row">' + celdas.slice(r, r + C).join('') + '</div>';
         }
