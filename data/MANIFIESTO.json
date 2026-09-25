@@ -3,5 +3,5 @@
  "palabras_unicas": 10944,
  "notas": "Reparto 7-9 en tercios por frecuencia; repetidos entre niveles en su nivel más bajo; traducciones ES curadas (acepción común primero).",
  "formato": "{\"h\": simplificado, \"t\": tradicional|null, \"p\": pinyin, \"es\": glosa, \"alts\": alternativas|null}",
- "licencias": "lista oficial GF0025-2021 · nar-ran/hsk-vocab-es (MIT) · CC-CEDICT vía dict-mini (CC-BY-SA 4.0)"
+ "licencias": "hanzi/pinyin: HSK1-3 confirmado contra GF0025-2021 vía nar-ran/hsk-vocab-es (verificado directamente, README con badge \"HSK1, HSK2 & HSK3 Completed\"); HSK4-9 reportado como ~98,7% coincidente con GF0025-2021 según comparación de un asistente de IA en una sesión anterior, no verificado de forma independiente en esta revisión · traducciones ES: HSK1-3 vía nar-ran/hsk-vocab-es (MIT) · HSK4-9 generadas con asistencia de IA, sin dataset oficial en español disponible · CC-CEDICT vía dict-mini (CC-BY-SA 4.0)"
 }

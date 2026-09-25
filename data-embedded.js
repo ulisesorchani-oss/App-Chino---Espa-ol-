@@ -670,7 +670,12 @@ EMBEDDED_MODULE_DATA['Barrio chino'] = EMBEDDED_MODULE_DATA['todas'];
 
 // ===== v7.19 — HSK 3.0: expansión del vocabulario embebido =====
 // Los 9 niveles HSK viajan como TUPLAS compactas [simp, trad|null, pinyin, español, alts|null]
-// (11.092 palabras del estándar GF0025-2021) para mantener liviano app.js.
+// (10.944 palabras del estándar GF0025-2021 — ver hskCumulativeCounts()
+// más abajo y data/MANIFIESTO.json para la procedencia exacta: hanzi/
+// pinyin de HSK1-3 confirmado directo contra nar-ran/hsk-vocab-es;
+// HSK4-9 reportado ~98,7% coincidente por una auditoría de IA no
+// re-verificada acá; traducciones ES de HSK4-9 generadas con IA, sin
+// dataset oficial en español) para mantener liviano app.js.
 // expandWordCards() las convierte en tarjetas completas (w:1 = tarjeta de palabra)
 // al cargar el módulo y memoiza el resultado: el costo de expansión se paga una vez.
 const _wordCache = {};

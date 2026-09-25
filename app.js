@@ -3588,6 +3588,21 @@ let pzStyle = lsGet('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
 let pzCells = parseInt(lsGet('ac_pz_cells'), 10) || 12;
 let pzLastSheet = '';                   // HTML de la última hoja generada
 
+// v9.7x — 4 ajustes nuevos del encabezado por carácter (estilo CUADERNO
+// solamente: es donde ya existe la tarjeta pz2-card/pz2-strokes donde
+// encajan; "clásica" es una grilla densa de práctica y queda sin cambios).
+// Mismo patrón de persistencia que pzTrazos de arriba (localStorage plano,
+// sin storage nuevo). Default: composición y pinyin preservan EXACTAMENTE
+// lo que la hoja cuaderno ya mostraba antes de este cambio (composición
+// tomaba el lugar de pzTrazos ahí, pinyin ya se mostraba siempre); radical
+// y significado son agregados nuevos → arrancan OFF (radical además es un
+// piloto con descarga de red la 1.ª vez, opt-in a propósito).
+let pzComposicion = lsGet('ac_pz_composicion') !== '0';        // default ON
+let pzRadical = lsGet('ac_pz_radical') === '1';                 // default OFF (piloto)
+let pzSignificado = lsGet('ac_pz_significado') === '1';         // default OFF
+const _pzPronSaved = lsGet('ac_pz_pron');
+let pzPron = (_pzPronSaved === 'none' || _pzPronSaved === 'zhuyin') ? _pzPronSaved : 'pinyin'; // default 'pinyin'
+
 function pzIsHan(ch) {
     const c = ch.codePointAt(0);
     return (c >= 0x3400 && c <= 0x9FFF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0x20000 && c <= 0x2FA1F);
@@ -3683,14 +3698,25 @@ const PZ_SHEET_CSS = [
     // v9.4: SIN las etiquetas repetidas por bloque (筆順/寫字) — la fila de
     // progresión y los casilleros se entienden solos; queda más ancho para
     // practicar. Grid de 2 columnas: tarjeta + contenido.
-    '.pz2-block { display: grid; grid-template-columns: 24mm 1fr; gap: 2.5mm 2.5mm; align-items: center;',
+    // v9.7x: 24mm→30mm — la tarjeta suma hasta 2 líneas nuevas (significado
+    // arriba, radical abajo del pinyin/zhuyin); con 24mm el texto quedaba
+    // apretado. La fila (grid-row: span 2) igual crece con el contenido:
+    // esto solo da más ANCHO para que las líneas de texto no corten feo.
+    '.pz2-block { display: grid; grid-template-columns: 30mm 1fr; gap: 2.5mm 2.5mm; align-items: center;',
     '  margin-bottom: 4mm; break-inside: avoid; page-break-inside: avoid; }',
     '.pz2-card { grid-row: span 2; border: 0.3mm solid #64748b; border-radius: 1.5mm; padding: 2mm 1mm;',
-    '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5mm; min-height: 24mm; }',
-    '.pz2-card .pz2-hz svg { width: 17mm; height: 17mm; display: block; }',
-    '.pz2-card .pz2-hz span.pz2-fallback { font-size: 30pt; line-height: 1; color: #1f2937;',
+    '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1mm; min-height: 24mm; }',
+    '.pz2-card .pz2-hz svg { width: 15mm; height: 15mm; display: block; }',
+    '.pz2-card .pz2-hz span.pz2-fallback { font-size: 26pt; line-height: 1; color: #1f2937;',
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     '.pz2-card .pz2-py { font-size: 9pt; color: #475569; }',
+    // v9.7x: significado (arriba, Paso 2.4) — chico, ámbar, para separarse
+    // del hanzi/pinyin sin competir en jerarquía visual con el carácter.
+    '.pz2-card .pz2-mean { font-size: 7.5pt; color: #b45309; text-align: center; line-height: 1.15; }',
+    // v9.7x: radical (Paso 2.2, piloto) — mismo verde que el resto de la
+    // hoja (acento de marca), tamaño chico y peso distinto del hz grande:
+    // "diferenciado visualmente" del pedido, no un color de alarma.
+    '.pz2-card .pz2-radical { font-size: 7.5pt; font-weight: 700; color: #16a085; }',
     '.pz2-strokes { display: flex; flex-wrap: wrap; gap: 0.6mm; align-items: center; }',
     '.pz2-strokes svg { width: 9.5mm; height: 9.5mm; display: block; }',
     '.pz2-cells { display: flex; gap: 1.2mm; }',
@@ -3732,10 +3758,162 @@ function pzCellWidthCss(C) {
     return '.pz-row .pz-cell{flex:0 0 auto;width:calc((100% - ' + ((C - 1) * 1.2).toFixed(2) + 'mm)/' + C + ');}';
 }
 
-function pzSheetHTML(chars, datas, trazos, cells, style) {
+// ============================================================
+// v9.7x — PINYIN → ZHUYIN (注音), tabla determinística sílaba por sílaba
+// ============================================================
+// Diagnóstico (Paso 1.2): ni el repo ni pinyin-pro (ya usado en la app)
+// traen conversor a zhuyin — mapeo mecánico estándar: inicial + final +
+// marca de tono, sobre el pinyin CON TONO NUMÉRICO de un carácter (mismo
+// patrón que pySyll en VoiceRecorder.js: pinyinPro.pinyin(ch, {toneType:
+// 'num', type:'string'})). No cubre erhú (儿化) ni casos ultra raros —
+// alcanza y sobra para una planilla de práctica, no es un IME.
+const PZ_ZY_INITIALS = [
+    ['zh', 'ㄓ'], ['ch', 'ㄔ'], ['sh', 'ㄕ'],
+    ['b', 'ㄅ'], ['p', 'ㄆ'], ['m', 'ㄇ'], ['f', 'ㄈ'],
+    ['d', 'ㄉ'], ['t', 'ㄊ'], ['n', 'ㄋ'], ['l', 'ㄌ'],
+    ['g', 'ㄍ'], ['k', 'ㄎ'], ['h', 'ㄏ'],
+    ['j', 'ㄐ'], ['q', 'ㄑ'], ['x', 'ㄒ'],
+    ['r', 'ㄖ'], ['z', 'ㄗ'], ['c', 'ㄘ'], ['s', 'ㄙ']
+];
+// Finales ordenados de más larga a más corta (match greedy sobre el resto
+// de la sílaba, ya sin inicial): 4, 3, 2 y 1 carácter.
+const PZ_ZY_FINALS = [
+    ['iang', 'ㄧㄤ'], ['iong', 'ㄩㄥ'], ['uang', 'ㄨㄤ'], ['ueng', 'ㄨㄥ'],
+    ['iao', 'ㄧㄠ'], ['ian', 'ㄧㄢ'], ['ing', 'ㄧㄥ'], ['uai', 'ㄨㄞ'],
+    ['uan', 'ㄨㄢ'], ['üan', 'ㄩㄢ'], ['van', 'ㄩㄢ'], ['uen', 'ㄨㄣ'], ['uei', 'ㄨㄟ'],
+    ['ang', 'ㄤ'], ['eng', 'ㄥ'], ['ong', 'ㄨㄥ'],
+    ['ai', 'ㄞ'], ['ei', 'ㄟ'], ['ao', 'ㄠ'], ['ou', 'ㄡ'],
+    ['an', 'ㄢ'], ['en', 'ㄣ'], ['er', 'ㄦ'],
+    ['ia', 'ㄧㄚ'], ['ie', 'ㄧㄝ'], ['iu', 'ㄧㄡ'], ['in', 'ㄧㄣ'],
+    ['ua', 'ㄨㄚ'], ['uo', 'ㄨㄛ'], ['ui', 'ㄨㄟ'], ['un', 'ㄨㄣ'],
+    ['üe', 'ㄩㄝ'], ['ve', 'ㄩㄝ'], ['ün', 'ㄩㄣ'], ['vn', 'ㄩㄣ'],
+    ['a', 'ㄚ'], ['o', 'ㄛ'], ['e', 'ㄜ'], ['ê', 'ㄝ'],
+    ['i', 'ㄧ'], ['u', 'ㄨ'], ['ü', 'ㄩ'], ['v', 'ㄩ']
+];
+const PZ_ZY_TONES = { '1': '', '2': 'ˊ', '3': 'ˇ', '4': 'ˋ', '5': '˙', '0': '˙' };
+// zhi/chi/shi/ri/zi/ci/si: el "i" final es solo el eco vocálico del sonido
+// consonántico — no lleva símbolo zhuyin propio (se escribe SOLO el inicial).
+const PZ_ZY_BUZZ = { 'zhi': 'ㄓ', 'chi': 'ㄔ', 'shi': 'ㄕ', 'ri': 'ㄖ', 'zi': 'ㄗ', 'ci': 'ㄘ', 'si': 'ㄙ' };
+
+function pzPinyinToZhuyin(syllNum) {
+    const m = String(syllNum || '').trim().toLowerCase().match(/^([a-zü]+)([0-5]?)$/);
+    if (!m) return '';
+    let base = m[1];
+    const tone = m[2] || '5'; // sin dígito → neutro (pinyinPro no siempre marca el 5.º tono)
+
+    if (PZ_ZY_BUZZ[base]) return PZ_ZY_BUZZ[base] + PZ_ZY_TONES[tone];
+
+    // y/w iniciales: se absorben en la vocal, sin símbolo zhuyin propio
+    if (base[0] === 'y') {
+        const rest = base.slice(1);
+        if (rest === '' || rest === 'i') base = 'i';
+        else if (rest[0] === 'u') base = 'ü' + rest.slice(1);       // yu/yue/yuan/yun
+        else if (rest[0] === 'i') base = rest;                       // yin/ying (ya empiezan con i)
+        else base = 'i' + rest;                                      // ya/yan/yang/yao/yong…
+    } else if (base[0] === 'w') {
+        const rest = base.slice(1);
+        base = (rest === '' || rest === 'u') ? 'u' : 'u' + rest;      // wu/wa/wai/wan/wang/wei/wen/weng/wo
+    }
+
+    let initial = '', rest = base;
+    for (let i = 0; i < PZ_ZY_INITIALS.length; i++) {
+        const p = PZ_ZY_INITIALS[i][0];
+        if (base.indexOf(p) === 0) { initial = PZ_ZY_INITIALS[i][1]; rest = base.slice(p.length); break; }
+    }
+    // j/q/x + u es siempre ü (juan/quan/xue…: esa "u" nunca suena /u/)
+    if (initial && 'jqx'.indexOf(base[0]) !== -1 && rest[0] === 'u') rest = 'ü' + rest.slice(1);
+
+    let final = '';
+    for (let i = 0; i < PZ_ZY_FINALS.length; i++) {
+        const f = PZ_ZY_FINALS[i][0];
+        if (rest.indexOf(f) === 0) { final = PZ_ZY_FINALS[i][1]; break; }
+    }
+    if (!initial && !final) return ''; // símbolo no mapeado (erhua/caso raro): mejor vacío que un dato falso
+    return initial + final + PZ_ZY_TONES[tone];
+}
+
+function pzZhuyinOf(ch) {
+    try {
+        if (typeof pinyinPro === 'undefined' || !ch) return '';
+        const syll = pinyinPro.pinyin(ch, { toneType: 'num', type: 'string' });
+        return pzPinyinToZhuyin(syll);
+    } catch (e) { return ''; }
+}
+
+// ============================================================
+// v9.7x — RADICAL (piloto, opción "b" del diagnóstico): fetch on-demand
+// del dictionary.txt de make-me-a-hanzi. hanzi-writer-data (lo que ya
+// usa pzFetchChar) NO trae radical, solo strokes/medians — dictionary.txt
+// es un archivo APARTE del mismo proyecto que sí lo trae, uno por línea:
+// {"character":"爱","radical":"爪","decomposition":"⿱爫友", ...}. A
+// diferencia de pzFetchChar (un request por carácter), acá se baja el
+// archivo COMPLETO una sola vez y se cachea en memoria — el Service
+// Worker lo cachea también (mismo runtime caching que hanzi-writer-data),
+// offline desde la 2.ª vez. Si el piloto se queda, se migra a datos
+// embebidos (opción "a") en un paso aparte — no se preparó acá.
+// ============================================================
+const PZ_RADICAL_URLS = [
+    'https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/dictionary.txt',
+    'https://raw.githubusercontent.com/skishore/makemeahanzi/master/dictionary.txt'
+];
+let _pzRadicalMap = null;       // char → radical, construido una sola vez
+let _pzRadicalPromise = null;   // promesa de carga en curso (evita descargas duplicadas)
+
+function pzEnsureRadicalDict() {
+    if (_pzRadicalMap) return Promise.resolve(_pzRadicalMap);
+    if (_pzRadicalPromise) return _pzRadicalPromise;
+    _pzRadicalPromise = (async () => {
+        for (const url of PZ_RADICAL_URLS) {
+            try {
+                const r = await fetch(url);
+                if (!r.ok) continue;
+                const text = await r.text();
+                const map = {};
+                text.split('\n').forEach((line) => {
+                    const t = line.trim();
+                    if (!t) return;
+                    try {
+                        const obj = JSON.parse(t);
+                        if (obj && obj.character && obj.radical) map[obj.character] = obj.radical;
+                    } catch (e) { /* línea corrupta: se ignora, el resto de la hoja sigue */ }
+                });
+                _pzRadicalMap = map;
+                return map;
+            } catch (e) { /* probá el próximo espejo */ }
+        }
+        _pzRadicalMap = {}; // sin red / los dos espejos fallaron: radical vacío, la hoja se genera igual
+        return _pzRadicalMap;
+    })();
+    return _pzRadicalPromise;
+}
+
+function pzRadicalOf(ch) {
+    return (_pzRadicalMap && _pzRadicalMap[ch]) || '';
+}
+
+// v9.7x — SIGNIFICADO MÍNIMO (Paso 1.3 del diagnóstico): dictMiniLookup()
+// ya vive en dict.js y devuelve { py, def } con def "sentido1; sentido2;
+// …" — acá se pide SOLO la 1.ª acepción, nunca la entrada completa.
+function pzSignificadoOf(ch) {
+    try {
+        const d = (typeof dictMiniLookup === 'function') ? dictMiniLookup(ch) : null;
+        if (!d || !d.def) return '';
+        return String(d.def).split(';')[0].trim();
+    } catch (e) { return ''; }
+}
+
+function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
     const fecha = new Date().toLocaleDateString('es-AR');
     const C = Math.min(20, Math.max(6, parseInt(cells, 10) || 12));
     const esCuaderno = (style === 'cuaderno');
+    // v9.7x — 4 ajustes nuevos del encabezado (SOLO estilo cuaderno, ver
+    // comentario junto a las variables pzComposicion/pzRadical/pzPron/
+    // pzSignificado): composicion reemplaza el rol que tenía `trazos` en
+    // la fila pz2-strokes de acá abajo (`trazos`/pzTrazos sigue intacto
+    // para lo suyo: las celdas de práctica progresivas de estilo clásico
+    // y el calco liviano de las primeras 3 celdas, más abajo en esta
+    // misma función — dos cosas distintas aunque compartan pzSvg).
+    opts = opts || {};
     if (esCuaderno) {
         // ── estilo CUADERNO (v9.1): tarjeta del carácter + fila 筆順
         // (progresión de trazos) + fila 寫字 (calco + casilleros).
@@ -3747,7 +3925,17 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
             const hz = d
                 ? pzSvg(d, d.strokes.length, '#1f2937')
                 : '<span class="pz2-fallback">' + ch + '</span>';
-            const trazosHtml = (trazos && d)
+            // v9.7x: "significado breve arriba" (Paso 2.4)
+            const meanTxt = opts.significado ? pzSignificadoOf(ch) : '';
+            const meanHtml = meanTxt ? '<div class="pz2-mean">' + escHtml(meanTxt) + '</div>' : '';
+            // v9.7x: pinyin/zhuyin según el selector (Paso 2.3) — 🔊 es
+            // decorativo (hoja para imprimir: no hay audio que reproducir).
+            const pronTxt = opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : (opts.pron === 'none' ? '' : py);
+            const pronHtml = pronTxt ? '<div class="pz2-py">🔊 ' + escHtml(pronTxt) + '</div>' : '';
+            // v9.7x: radical aparte, visualmente diferenciado (Paso 2.2, piloto)
+            const radTxt = opts.radical ? pzRadicalOf(ch) : '';
+            const radHtml = radTxt ? '<div class="pz2-radical">部首 ' + escHtml(radTxt) + '</div>' : '';
+            const trazosHtml = (opts.composicion && d)
                 ? (() => {
                     const n = d.strokes.length;
                     let s = '';
@@ -3757,7 +3945,7 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
                     s += pzSvg(d, n, '#c9ced6'); // el carácter completo en gris, como el modelo
                     return '<div class="pz2-strokes">' + s + '</div>';
                 })()
-                : '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>';
+                : (opts.composicion ? '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>' : '');
             const boxes = Math.max(4, C);
             let cellsHtml = '';
             for (let b = 0; b < boxes; b++) {
@@ -3765,8 +3953,8 @@ function pzSheetHTML(chars, datas, trazos, cells, style) {
                 cellsHtml += '<div class="pz-cell">' + traced + '</div>';
             }
             blocks += '<div class="pz2-block">'
-                + '<div class="pz2-card"><div class="pz2-hz">' + hz + '</div>'
-                + (py ? '<div class="pz2-py">' + py + '</div>' : '') + '</div>'
+                + '<div class="pz2-card">' + meanHtml + '<div class="pz2-hz">' + hz + '</div>'
+                + pronHtml + radHtml + '</div>'
                 + trazosHtml
                 + '<div class="pz2-cells">' + cellsHtml + '</div>'
                 + '</div>';
@@ -3828,7 +4016,15 @@ async function pzGenerate() {
         done++;
         pzStatus('⏳ Descargando trazos (' + done + '/' + chars.length + ')…');
     }));
-    pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle);
+    // v9.7x: el diccionario de radicales (piloto) se baja UNA sola vez,
+    // solo si el toggle está prendido — no gasta red de quien no lo usa.
+    if (pzRadical) {
+        pzStatus('⏳ Descargando diccionario de radicales (solo la 1.ª vez)…');
+        await pzEnsureRadicalDict();
+    }
+    pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle, {
+        composicion: pzComposicion, radical: pzRadical, pron: pzPron, significado: pzSignificado
+    });
     pzRenderPreview();
     pzCounterRender(); // v9.2: con datos reales el contador es exacto
     ['btn-pz-pdf', 'btn-pz-print'].forEach((id) => {
@@ -4080,6 +4276,15 @@ function pzUpdateControls() {
     if (stl) stl.value = pzStyle;
     const nm = document.getElementById('pz-module-name');
     if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+    // v9.7x: los 4 ajustes nuevos del encabezado (mismo patrón de arriba)
+    const bc = document.getElementById('btn-pz-composicion');
+    if (bc) { bc.textContent = '🧩 Composición: ' + (pzComposicion ? 'ON' : 'OFF'); bc.classList.toggle('active', pzComposicion); }
+    const br = document.getElementById('btn-pz-radical');
+    if (br) { br.textContent = '部 Radical: ' + (pzRadical ? 'ON' : 'OFF'); br.classList.toggle('active', pzRadical); }
+    const bs = document.getElementById('btn-pz-significado');
+    if (bs) { bs.textContent = '📖 Significado: ' + (pzSignificado ? 'ON' : 'OFF'); bs.classList.toggle('active', pzSignificado); }
+    const sp = document.getElementById('select-pz-pron');
+    if (sp) sp.value = pzPron;
 }
 
 // ======================================================================
@@ -4120,8 +4325,13 @@ function pzCounterCompute() {
     let headerH = 60, blocks = null;
     try {
         // mide la hoja REAL (misma geometría que el PDF) — la altura de la
-        // cabecera y de cada bloque cuaderno depende del contenido
-        const html = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle);
+        // cabecera y de cada bloque cuaderno depende del contenido.
+        // v9.7x: mismos opts que pzGenerate() — si no, el contador subestima
+        // la altura del bloque en cuanto se prende composición/radical/
+        // significado/pinyin (mide una hoja "vacía" que nunca se imprime).
+        const html = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle, {
+            composicion: pzComposicion, radical: pzRadical, pron: pzPron, significado: pzSignificado
+        });
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const holder = document.createElement('div');
         holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;background:#fff;padding:42px;';
@@ -4236,6 +4446,35 @@ function pzCounterUpdate() {
         pzStyle = (e.target.value === 'cuaderno') ? 'cuaderno' : 'clasica';
         localStorage.setItem('ac_pz_style', pzStyle);
         pzCounterUpdate(); // v9.2: el estilo cambia el tamaño de cada bloque
+    });
+    // v9.7x — 4 ajustes nuevos del encabezado (mismo patrón de persistencia
+    // que btn-pz-trazos/select-pz-cells/select-pz-style de arriba): mutar
+    // la variable, guardarla en localStorage plano, sincronizar los
+    // controles y refrescar el contador de capacidad (aproximado para
+    // estos campos nuevos — el contador mide geometría real del PDF, no
+    // se afinó línea por línea para significado/pinyin/radical; sigue
+    // siendo tan aproximado como ya era hoy sin datos de trazos).
+    safe('btn-pz-composicion', 'click', () => {
+        pzComposicion = !pzComposicion;
+        localStorage.setItem('ac_pz_composicion', pzComposicion ? '1' : '0');
+        pzUpdateControls();
+        pzCounterUpdate();
+    });
+    safe('btn-pz-radical', 'click', () => {
+        pzRadical = !pzRadical;
+        localStorage.setItem('ac_pz_radical', pzRadical ? '1' : '0');
+        pzUpdateControls();
+    });
+    safe('btn-pz-significado', 'click', () => {
+        pzSignificado = !pzSignificado;
+        localStorage.setItem('ac_pz_significado', pzSignificado ? '1' : '0');
+        pzUpdateControls();
+        pzCounterUpdate();
+    });
+    safe('select-pz-pron', 'change', (e) => {
+        const v = e.target.value;
+        pzPron = (v === 'none' || v === 'zhuyin') ? v : 'pinyin';
+        localStorage.setItem('ac_pz_pron', pzPron);
     });
     safe('pz-input', 'input', pzCounterUpdate); // v9.2: contador en vivo
     window.addEventListener('resize', () => {

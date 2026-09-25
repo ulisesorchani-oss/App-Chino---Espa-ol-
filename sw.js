@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v126'; // — HSK: contador acumulado real (no hardcodeado) + etiqueta honesta de HSK 7-9
+const VERSION = 'v127'; // — Planilla 写字: composición/radical/pronunciación/significado en estilo Cuaderno
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -572,10 +572,17 @@ self.addEventListener('fetch', (event) => {
 
 /* ---------- v7.13: ¿son datos de un carácter para Hanzi Writer? ----------
    JSON chicos (~15 KB) e INMUTABLES (el trazo de 你 no cambia): una vez
-   cacheados funcionan offline para siempre y no se re-bajan en updates. */
+   cacheados funcionan offline para siempre y no se re-bajan en updates.
+   v9.7x: suma el dictionary.txt de make-me-a-hanzi (radical, piloto de la
+   planilla de escritura — pzEnsureRadicalDict en app.js) — mismo criterio:
+   un archivo que no cambia, se baja una vez y no debe re-bajarse en cada
+   update de la app (a diferencia de SHELL_CACHE, que sí se recicla con
+   cada bump de VERSION). */
 function isHanziData(url) {
-  return url.hostname === 'cdn.jsdelivr.net' &&
-         url.pathname.includes('hanzi-writer-data');
+  if (url.hostname === 'cdn.jsdelivr.net' && url.pathname.includes('hanzi-writer-data')) return true;
+  if (url.hostname === 'cdn.jsdelivr.net' && url.pathname.includes('/gh/skishore/makemeahanzi')) return true;
+  if (url.hostname === 'raw.githubusercontent.com' && url.pathname.includes('/skishore/makemeahanzi/')) return true;
+  return false;
 }
 
 /* ---------- v7.7: ¿es un archivo del motor de IA (grande, inmutable)? ---------- */
