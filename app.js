@@ -3210,7 +3210,15 @@ function showVocabPop(word) {
     const zh = isZhText(w);
     const hit = lookupVocab(w);
     const rec = hit.rec;
-    let html = '<div class="vp-word">' + escHtml(w) + '</div>';
+    // v9.68 (AUDITORIA-GAGNE-MAYER.md, Mayer #9 — piloto de codificación
+    // dual): emoji DECORATIVO junto a la palabra, solo si está en la
+    // lista chica curada a mano (emojiHintFor, dict.js). Nunca reemplaza
+    // el hanzi ni la traducción de abajo — role="img" + aria-label para
+    // lectores de pantalla.
+    const eHint = zh && typeof emojiHintFor === 'function' ? emojiHintFor(w) : null;
+    let html = '<div class="vp-word">' + escHtml(w)
+        + (eHint ? ' <span class="vp-emoji" role="img" aria-label="' + escHtml(eHint.alt) + '">' + eHint.emoji + '</span>' : '')
+        + '</div>';
     if (zh) {
         // Palabra china: pinyin SIEMPRE — v7.12: si hay entrada de diccionario
         // (dict-mini) su pinyin de diccionario va primero (tonos neutros reales)

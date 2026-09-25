@@ -1174,6 +1174,13 @@ body.dark-mode .install-help-note {
     padding-right: 20px;
 }
 
+/* v9.68: emoji decorativo junto a la palabra (piloto de codificación
+   dual) — mismo tamaño de línea, sin peso propio (no es texto). */
+.vp-emoji {
+    font-size: 1.15rem;
+    font-weight: 400;
+}
+
 .vp-pinyin {
     font-size: 0.92rem;
     color: var(--text-secondary);
@@ -1286,6 +1293,17 @@ body.dark-mode .ds-line {
 .ds-es {
     font-size: 0.88rem;
     color: var(--text-secondary);
+}
+
+/* v9.68: emoji decorativos de la línea (piloto de codificación dual) */
+.ds-emoji-hints {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.ds-emoji-hint {
+    margin-right: 4px;
 }
 
 .ds-actions {
