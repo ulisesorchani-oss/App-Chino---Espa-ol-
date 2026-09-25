@@ -1439,6 +1439,21 @@ class CloudSpeechProvider {
         //            provider: 'cloud', mode: 'auto' };
         throw new Error('CloudSpeechProvider no configurado todavía (FASE premium)');
     }
+    /** Contraparte de transcribeFree() (free-talk.js): SIN texto objetivo,
+     *  solo transcripción. Mismo esqueleto que evaluate() — completar
+     *  cuando se contrate el servicio. */
+    async transcribeFree(audioBlob, lang) {
+        // Esqueleto para el futuro (documentado, inactivo):
+        //   const wav = await window.VoiceRecorderModule.blobToWav16k(audioBlob);
+        //   const fd = new FormData();
+        //   fd.append('audio', wav, 'talk.wav');
+        //   fd.append('lang', lang);
+        //   const r = await fetch(this.endpoint + '/free', { method: 'POST', body: fd });
+        //   if (!r.ok) throw new Error('cloud HTTP ' + r.status);
+        //   const d = await r.json();
+        //   return { text: d.text, confidence: d.confidence };
+        throw new Error('CloudSpeechProvider.transcribeFree no configurado todavía (FASE premium)');
+    }
 }
 
 /* ============================================================
@@ -1707,6 +1722,33 @@ class PronunciationEvaluator {
         } catch (err) {
             return this._manual(audioBlob, err);
         }
+    }
+
+    /** v9.7x — TRANSCRIPCIÓN LIBRE, sin texto objetivo (free-talk.js):
+     *  graba lo que sea y devuelve lo que el motor entendió, sin
+     *  puntaje ni análisis de tono (eso solo tiene sentido contra un
+     *  texto conocido — acá no lo hay, es estilo chat/TalkPal).
+     *  MISMO motor que evaluatePronunciation() (Whisper WASM local o,
+     *  el día de mañana, this.cloud) — es el único punto que hay que
+     *  tocar para conectar un proveedor pago: CloudSpeechProvider.
+     *  transcribeFree() de abajo. No depende de this.mode (no hay
+     *  "es-cn"/"cn-es" que validar: el llamador pasa el idioma).
+     *  Devuelve { text, confidence } | lanza 'no-speech' u otro error
+     *  — el llamador (la UI de free-talk.js) decide qué mostrar. */
+    async transcribeFree(audioBlob, lang) {
+        const language = lang === 'es' ? VE_CONFIG.languageEs : VE_CONFIG.languageZh;
+        if (this.provider === 'cloud') {
+            if (!this.cloud || typeof this.cloud.transcribeFree !== 'function')
+                throw new Error('cloud-not-configured');
+            return await this.cloud.transcribeFree(audioBlob, language);
+        }
+        const pcm = await blobToFloat32_16k(audioBlob);
+        if (isSilence(pcm)) throw new Error('no-speech');
+        await this._waitForEngine();
+        const r = await this.engine.transcribe(pcm, { language: language, wantConfidence: true });
+        const text = String((r && r.text) || '').trim();
+        if (!text) throw new Error('no-speech');
+        return { text: text, confidence: (r && typeof r.confidence === 'number') ? r.confidence : null };
     }
 
     /* ---------- internals ---------- */
