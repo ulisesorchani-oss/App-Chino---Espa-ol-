@@ -3713,10 +3713,11 @@ const PZ_SHEET_CSS = [
     // v9.7x: significado (arriba, Paso 2.4) — chico, ámbar, para separarse
     // del hanzi/pinyin sin competir en jerarquía visual con el carácter.
     '.pz2-card .pz2-mean { font-size: 7.5pt; color: #b45309; text-align: center; line-height: 1.15; }',
-    // v9.7x: radical (Paso 2.2, piloto) — mismo verde que el resto de la
-    // hoja (acento de marca), tamaño chico y peso distinto del hz grande:
-    // "diferenciado visualmente" del pedido, no un color de alarma.
-    '.pz2-card .pz2-radical { font-size: 7.5pt; font-weight: 700; color: #16a085; }',
+    // v9.8x: radical a la IZQUIERDA del carácter (fila propia pz2-hzrow,
+    // ya no debajo del pinyin) — mismo tamaño/color de antes (7.5pt, verde
+    // de marca): "diferenciado visualmente" alcanza con eso, sin label.
+    '.pz2-hzrow { display: flex; align-items: center; justify-content: center; gap: 1mm; }',
+    '.pz2-card .pz2-radical { font-size: 7.5pt; font-weight: 700; color: #16a085; line-height: 1; }',
     '.pz2-strokes { display: flex; flex-wrap: wrap; gap: 0.6mm; align-items: center; }',
     '.pz2-strokes svg { width: 9.5mm; height: 9.5mm; display: block; }',
     '.pz2-cells { display: flex; gap: 1.2mm; }',
@@ -3928,13 +3929,14 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
             // v9.7x: "significado breve arriba" (Paso 2.4)
             const meanTxt = opts.significado ? pzSignificadoOf(ch) : '';
             const meanHtml = meanTxt ? '<div class="pz2-mean">' + escHtml(meanTxt) + '</div>' : '';
-            // v9.7x: pinyin/zhuyin según el selector (Paso 2.3) — 🔊 es
-            // decorativo (hoja para imprimir: no hay audio que reproducir).
+            // v9.7x/v9.8x: pinyin/zhuyin según el selector (Paso 2.3) — sin
+            // ícono 🔊 (el color/estilo ya distingue que es pronunciación).
             const pronTxt = opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : (opts.pron === 'none' ? '' : py);
-            const pronHtml = pronTxt ? '<div class="pz2-py">🔊 ' + escHtml(pronTxt) + '</div>' : '';
-            // v9.7x: radical aparte, visualmente diferenciado (Paso 2.2, piloto)
+            const pronHtml = pronTxt ? '<div class="pz2-py">' + escHtml(pronTxt) + '</div>' : '';
+            // v9.8x: radical SIN el label "部首" — solo el carácter, ya chico
+            // y en color distinto (alcanza para diferenciarlo del principal).
             const radTxt = opts.radical ? pzRadicalOf(ch) : '';
-            const radHtml = radTxt ? '<div class="pz2-radical">部首 ' + escHtml(radTxt) + '</div>' : '';
+            const radHtml = radTxt ? '<div class="pz2-radical">' + escHtml(radTxt) + '</div>' : '';
             const trazosHtml = (opts.composicion && d)
                 ? (() => {
                     const n = d.strokes.length;
@@ -3952,9 +3954,12 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
                 const traced = (trazos && d && b < 3) ? pzSvg(d, d.strokes.length, PZ_TRACE_FILL) : '';
                 cellsHtml += '<div class="pz-cell">' + traced + '</div>';
             }
+            // v9.8x: radical a la IZQUIERDA del carácter (layout horizontal),
+            // ya no debajo del pinyin/zhuyin — fila propia (pz2-hzrow) para
+            // no descuadrar el resto de la tarjeta (mean arriba, pron abajo).
+            const hzRow = '<div class="pz2-hzrow">' + radHtml + '<div class="pz2-hz">' + hz + '</div></div>';
             blocks += '<div class="pz2-block">'
-                + '<div class="pz2-card">' + meanHtml + '<div class="pz2-hz">' + hz + '</div>'
-                + pronHtml + radHtml + '</div>'
+                + '<div class="pz2-card">' + meanHtml + hzRow + pronHtml + '</div>'
                 + trazosHtml
                 + '<div class="pz2-cells">' + cellsHtml + '</div>'
                 + '</div>';
