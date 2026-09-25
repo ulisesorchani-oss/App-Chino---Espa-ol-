@@ -1238,17 +1238,14 @@ function setupEventListeners() {
     setupSessionUI();
     safeAdd('header-streak', () => { const b = document.getElementById('btn-stats'); if (b) b.click(); });
     safeAdd('btn-record', () => { const d = document.getElementById('record-details'); if (d) d.open = true; });
-    safeAdd('btn-train-record', () => {
-        showView('hoy');
-        const d = document.getElementById('record-details'); if (d) d.open = true;
-        const r = document.getElementById('btn-record');
-        if (r) { try { r.scrollIntoView({ behavior: 'smooth', block: 'center' }); r.focus({ preventScroll: true }); } catch (e) { r.focus(); } }
-    });
+    // v9.7x: btn-train-record (tarjeta "Pronunciación libre" de Entrenar)
+    // dejó de redirigir acá — lo engancha free-talk.js, que abre su propio
+    // popup (grabar libre, sin frase objetivo, estilo chat). El comparador
+    // de abajo (record-details/btn-record) sigue intacto dentro de Hoy.
     // v9.67 (AUDITORIA-GAGNE-MAYER.md, evento 5): guía corta, una sola vez,
     // la primera vez que se abre Pronunciación. El <details> dispara
-    // 'toggle' con CUALQUIER apertura (clic en el <summary>, o los dos
-    // btn-record*/btn-train-record de arriba que asignan .open = true) —
-    // un solo hook cubre las tres formas de entrar.
+    // 'toggle' con CUALQUIER apertura (clic en el <summary>, o btn-record
+    // de arriba, que asigna .open = true) — un solo hook cubre ambas formas.
     (function () {
         const d = document.getElementById('record-details');
         if (!d) return;

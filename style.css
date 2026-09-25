@@ -4049,6 +4049,55 @@ body.paper-mode .pd-continue { background: #f0e6cd; border-color: #d8c69e; }
 body.paper-mode .pd-ctrl-btn { background: #f0e6cd; color: #6b5b40; }
 body.paper-mode .pd-text { background: #f3ead2; }
 
+/* ============================================================
+   PRONUNCIACIÓN LIBRE — free-talk.js (grabar y ver qué entendió la IA,
+   estilo chat/TalkPal — sin frase objetivo, sin puntaje ni tonos)
+   ============================================================ */
+.tk-head { font-size: 1.15rem; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+.tk-intro { font-size: 0.85rem; color: #64748b; margin: 0 0 12px; line-height: 1.5; }
+.tk-chat { display: flex; flex-direction: column; gap: 10px; max-height: 42vh; overflow-y: auto; margin-bottom: 10px; padding: 2px; }
+.tk-empty { text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 20px 0; }
+.tk-bubble { background: #fff; border: 1.5px solid #eceff5; border-radius: 14px; padding: 10px 12px; }
+.tk-bubble-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.tk-play { border: none; background: #f1f5f9; color: #334155; border-radius: 50%; width: 28px; height: 28px; font-size: 0.8rem; cursor: pointer; flex: none; }
+.tk-bubble-lang { font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
+.tk-bubble-text { font-size: 1.05rem; line-height: 1.5; color: #1e293b; }
+.tk-status { text-align: center; font-size: 0.85rem; color: #64748b; min-height: 1.3em; margin: 4px 0 10px; }
+.tk-status.is-error { color: var(--danger); font-weight: 600; }
+.tk-controls { display: flex; justify-content: center; margin-bottom: 8px; }
+.tk-record-btn {
+    width: 72px; height: 72px; border: none; border-radius: 50%; cursor: pointer;
+    background: linear-gradient(135deg, #7c5cf0, #2563eb); color: #fff; font-size: 1.7rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(99, 91, 255, .35); transition: transform .12s ease;
+}
+.tk-record-btn:active { transform: scale(.94); }
+.tk-record-btn.is-recording {
+    background: var(--danger); font-size: 0.95rem; font-weight: 700;
+    animation: recPulse 1.2s ease-out infinite;
+}
+.tk-record-btn.is-processing { color: transparent; position: relative; }
+.tk-record-btn.is-processing::after {
+    content: ''; position: absolute; inset: 0; margin: auto; width: 22px; height: 22px;
+    border: 3px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%;
+    animation: recSpin .7s linear infinite;
+}
+.tk-wave { display: block; width: 100%; max-width: 260px; height: 34px; margin: 0 auto 6px; visibility: hidden; }
+.tk-wave.is-on { visibility: visible; }
+.tk-clear { display: block; margin: 0 auto 8px; }
+
+body.dark-mode .tk-head { color: #f1f5f9; }
+body.dark-mode .tk-intro, body.dark-mode .tk-status { color: #94a3b8; }
+body.dark-mode .tk-bubble { background: #1e293b; border-color: #334155; }
+body.dark-mode .tk-bubble-text { color: #f1f5f9; }
+body.dark-mode .tk-play { background: #334155; color: #e2e8f0; }
+
+body.paper-mode .tk-head { color: #3d3327; }
+body.paper-mode .tk-intro, body.paper-mode .tk-status { color: #8a7a5f; }
+body.paper-mode .tk-bubble { background: #f3ead2; border-color: #e6dabf; }
+body.paper-mode .tk-bubble-text { color: #3d3327; }
+body.paper-mode .tk-play { background: #f0e6cd; color: #6b5b40; }
+
 /* ── overlay a pantalla completa (lectura + práctica) ── */
 .lq-pop {
     position: fixed; inset: 0; z-index: 1200; background: rgba(15, 23, 42, .55);

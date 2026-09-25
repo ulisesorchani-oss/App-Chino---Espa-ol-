@@ -406,10 +406,10 @@
                     <span class="tc-title">Podcast</span>
                     <span class="tc-sub">Escuchá una lección entera de Aprender, de corrido</span>
                 </button>
-                <button id="btn-train-record" class="train-card" type="button" title="Grabá tu pronunciación de la frase actual y compará">
+                <button id="btn-train-record" class="train-card" type="button" title="Grabá lo que quieras decir (hasta 30 s) y mirá qué entendió la IA">
                     <span class="tc-ico" aria-hidden="true">🎤</span>
-                    <span class="tc-title">Pronunciación</span>
-                    <span class="tc-sub">Grabá la frase de Hoy y compará con la referencia</span>
+                    <span class="tc-title">Pronunciación libre</span>
+                    <span class="tc-sub">Grabá y mirá qué entendió la IA — estilo chat, sin frase fija</span>
                 </button>
                 <button id="btn-train-write" class="train-card" type="button" title="Escribí a mano la respuesta de la frase actual">
                     <span class="tc-ico" aria-hidden="true">✍️</span>
@@ -743,6 +743,21 @@
         </div>
     </div>
 
+    <!-- v9.7x: PRONUNCIACIÓN LIBRE — grabar y ver qué entendió la IA,
+         estilo chat/TalkPal (reemplaza el atajo "Pronunciación" de
+         Entrenar, que saltaba a Hoy; el comparador contra la frase
+         objetivo de Hoy sigue existiendo ahí, sin tocar) -->
+    <div id="talk-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Pronunciación libre">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span class="lq-progress-num">🎤</span>
+                <div class="lq-segments" aria-hidden="true"></div>
+                <button id="talk-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="tk-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- GUÍA DE INSTALACIÓN -->
     <div id="install-help" class="install-help hidden" role="dialog" aria-label="Cómo instalar la app">
         <div class="install-help-card">
@@ -792,7 +807,7 @@
     <script src="config.js?v=20260921a"></script>
     <script src="text-utils.js?v=20260919c"></script>
     <script src="VoiceRecorder.js?v=20260921a"></script>
-    <script src="voice-evaluator.js?v=20260923a"></script>
+    <script src="voice-evaluator.js?v=20260925a"></script>
     <script src="dict-mini.js?v=20260910k"></script>
     <script src="lessons.js?v=20260910c"></script>
     <script src="lessons-tocfl.js?v=20260910e"></script>
@@ -816,6 +831,7 @@
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20260925b"></script>
     <script src="podcast.js?v=20260925b"></script>
+    <script src="free-talk.js?v=20260925a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
