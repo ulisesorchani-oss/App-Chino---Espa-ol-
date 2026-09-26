@@ -1670,7 +1670,12 @@ body.dark-mode .pz-preview {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 60;
+    /* v9.7x fix: 60 quedaba POR DEBAJO de .app-nav (z-index:900, barra
+       inferior fija) — con la lista larga (11 ítems), los últimos caían
+       en la franja de pantalla del nav y le robaban el toque (confirmado
+       con Playwright: el click en "Barrio chino" lo interceptaba
+       #nav-entrenar). Mismo fix en classics-menu/dele-menu/tocfl-menu. */
+    z-index: 950;
     margin: 0;
     padding: 6px;
     list-style: none;
@@ -1776,7 +1781,7 @@ body.dark-mode .pz-preview {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 60;
+    z-index: 950; /* v9.7x fix: ver comentario en .daily-menu */
     margin: 0;
     padding: 6px;
     list-style: none;
@@ -1965,7 +1970,7 @@ body.dark-mode .classics-menu .ci-es {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 70;
+    z-index: 950; /* v9.7x fix: ver comentario en .daily-menu */
     margin: 0;
     padding: 6px;
     list-style: none;
@@ -3829,7 +3834,7 @@ body.dark-mode .card-tools-header .pinyin-btn.active {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 70;
+    z-index: 950; /* v9.7x fix: ver comentario en .daily-menu */
     margin: 0;
     padding: 6px;
     list-style: none;
