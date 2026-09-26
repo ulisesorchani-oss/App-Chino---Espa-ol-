@@ -288,6 +288,13 @@ function dsShowScene(mod) {
     const body = document.getElementById('daily-story-body');
     if (!body) return;
     body.innerHTML = dsRenderBody(mod);
+    // v9.7x fix: .vocab-pop no tiene scroll propio — con el glosario (5
+    // palabras) la página entera se desplaza para poder tocar "Leer la
+    // escena". Si ese scroll queda como estaba al cambiar a la escena
+    // (más corta), la pantalla puede mostrar un área en blanco y parecer
+    // que el botón "no hizo nada". Se resetea el scroll al mostrar la
+    // escena, igual que al abrir el popup.
+    try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
 
     const story = DAILY_STORIES[mod];
     body.querySelectorAll('.ds-play').forEach(btn => {
@@ -314,6 +321,7 @@ function openDailyStory(mod) {
     if (!pop || !body || !DAILY_STORIES[mod]) return false;
     body.dataset.module = mod;
     pop.classList.remove('hidden');
+    try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
 
     const story = DAILY_STORIES[mod];
     const keyWords = (typeof extractKeyWords === 'function')
