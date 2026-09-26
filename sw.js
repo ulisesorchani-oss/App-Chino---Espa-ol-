@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v131'; // — Lector: lectura por trozos con precarga + pausa/reanuda (fix textos largos)
+const VERSION = 'v132'; // — Karaoke: timestamps reales (WordBoundary) + agrandado, cableado en el Lector
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

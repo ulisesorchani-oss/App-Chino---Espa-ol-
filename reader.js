@@ -45,6 +45,7 @@ let readerChunkReady = new Map();  // idx -> {url,data,error} YA resuelto (para 
 let readerStopToken = 0;           // se incrementa en cada stop/nueva lectura: invalida callbacks viejos
 let readerSessionLangCode = null;  // idioma/voz fijados al arrancar esta lectura (igual para todos los trozos)
 let readerSessionGender = null;
+let readerWantKaraoke = false;     // v9.7x: karaoke ON + texto chino → se piden boundaries reales al server
 
 function detectReaderLang(text) {
     // Si hay CJK (chino simplificado o tradicional) se lee como chino; si no, español
@@ -120,7 +121,7 @@ function readerFetchChunk(idx) {
     const p = (async () => {
         try {
             const response = await fetchTTS(
-                ttsBody(text, readerSessionLangCode, readerSessionGender),
+                ttsBody(text, readerSessionLangCode, readerSessionGender, readerWantKaraoke),
                 Math.max(15000, text.length * 50)
             );
             if (!response.ok) throw new Error('Error en servidor');
@@ -152,6 +153,7 @@ function readerSpeakFallback(text, langCode) {
         u.onend = () => resolve();
         u.onerror = () => resolve();
         readerActiveEngine = 'speech';
+        KARA.withTts(u, text, u.rate); // no-op si karaoke está OFF o no hay spans preparados
         speechSynthesis.speak(u);
     });
 }
@@ -195,6 +197,13 @@ async function playReaderChunk(idx, myToken) {
     if (myToken !== readerStopToken) return;
 
     const btn = document.getElementById('btn-reader-play');
+    // v9.7x: karaoke — el contenedor de este trozo en la vista previa es
+    // exactamente el <div class="reader-line" data-chunk="idx"> que arma
+    // renderReaderPreview() con la MISMA función de agrupamiento que acá
+    // (readerGroupChunks). KARA.prepare no-opea si el karaoke está OFF o
+    // no hay spans .lq-ch (texto en español, por ejemplo).
+    const lineEl = document.querySelector('#reader-preview [data-chunk="' + idx + '"]');
+    if (lineEl) KARA.prepare(lineEl);
 
     if (!entry || entry.error || !entry.url) {
         await readerSpeakFallback(readerChunks[idx], readerSessionLangCode);
@@ -206,6 +215,7 @@ async function playReaderChunk(idx, myToken) {
     readerActiveEngine = 'audio';
     readerAudio.src = entry.url;
     applyTtsSpeed(readerAudio, entry.data); // v9.40: velocidad en el server → sin eco
+    KARA.withAudio(readerAudio, readerChunks[idx], entry.data && entry.data.boundaries);
     if (btn) { btn.textContent = '⏸ Pausar'; btn.disabled = false; }
 
     const ended = readerAudioEnded();
@@ -224,6 +234,7 @@ async function playReaderChunk(idx, myToken) {
 
 function stopReader() {
     readerStopToken++;
+    KARA.stop(); // v9.7x: apaga el resaltado si estaba activo (no-op si ya estaba parado)
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     readerAudio.pause();
     try { readerAudio.currentTime = 0; } catch (e) { /* sin src válido */ }
@@ -281,6 +292,7 @@ async function toggleReaderPlay() {
     const gender = lang === 'zh' ? voiceZh : voiceEs; // usa la voz elegida en los botones 👩/👨
     readerSessionGender = gender;
     readerSessionLangCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
+    readerWantKaraoke = (lang === 'zh') && KARA.on(); // v9.7x: solo pide boundaries si hacen falta
 
     readerChunks = readerGroupChunks(readerSplitSentences(text));
     if (!readerChunks.length) { ta.focus(); return; }
@@ -557,7 +569,9 @@ function readerWordCols(word, wantPinyin, wantTones) {
         const it = useItems ? items[i] : null;
         const isZhChar = !!(it && it.isZh);
         const toneCls = (wantTones && isZhChar) ? ' tone-' + (it.num || 5) : '';
-        let col = '<span class="ruby-col"><span class="ruby-char' + toneCls + '">' + escHtml(ch) + '</span>';
+        // v9.7x: lq-ch (+ data-ch) — el mismo contrato que usan classics-reader.js/
+        // lessons-graduated.js para que KARA (karaoke.js) pueda resaltar acá también.
+        let col = '<span class="ruby-col"><span class="ruby-char lq-ch' + toneCls + '" data-ch="' + escHtml(ch) + '">' + escHtml(ch) + '</span>';
         if (wantPinyin && isZhChar) col += '<span class="ruby-py' + toneCls + '">' + escHtml(it.pinyin || ch) + '</span>';
         col += '</span>';
         cols += col;
@@ -641,8 +655,15 @@ function renderReaderPreview() {
     }
 
     try {
-        prev.innerHTML = text.split('\n').map(l =>
-            '<div class="reader-line">' + (l ? renderZhLineHtml(l, wantPinyin, wantTones) : '&nbsp;') + '</div>'
+        // v9.7x: se agrupa por TROZO (mismo readerGroupChunks/readerSplitSentences
+        // que usa la reproducción) en vez de una línea por \n — así cada bloque de
+        // la vista previa es exactamente el contenedor que KARA necesita para
+        // resaltar un trozo completo (spansOf busca .lq-ch dentro de UN elemento).
+        const chunks = readerGroupChunks(readerSplitSentences(text));
+        prev.innerHTML = chunks.map((chunkText, ci) =>
+            '<div class="reader-line" data-chunk="' + ci + '">'
+                + chunkText.split('\n').map((l) => l ? renderZhLineHtml(l, wantPinyin, wantTones) : '&nbsp;').join('<br>')
+                + '</div>'
         ).join('');
         prev.classList.remove('hidden');
     } catch (e) {

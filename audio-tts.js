@@ -140,6 +140,7 @@ function ttsGetUrl(body) {
         q.set('voice', String((body && body.voice) || 'f'));
         q.set('speed', String((body && typeof body.speed === 'number') ? body.speed : 1));
         q.set('cv', '2'); // contrato del audio: un bump futuro invalida la caché CDN
+        if (body && body.karaoke) q.set('karaoke', '1'); // v9.7x: pide boundaries reales al server
         return TTS_API_URL + '?' + q.toString();
     } catch (e) { return null; }
 }
@@ -188,9 +189,15 @@ function ttsLangFor(lang, v) {
     if (lang === 'es') return k.indexOf('ar-') === 0 ? 'es-AR' : 'es-ES';
     return k.indexOf('tw-') === 0 ? 'zh-TW' : 'zh-CN';
 }
-function ttsBody(text, lang, voice) {
-    return { text: text, lang: lang, voice: voice,
-             speed: (typeof playbackSpeed === 'number') ? playbackSpeed : 1 };
+function ttsBody(text, lang, voice, wantBoundaries) {
+    const b = { text: text, lang: lang, voice: voice,
+                speed: (typeof playbackSpeed === 'number') ? playbackSpeed : 1 };
+    // v9.7x: karaoke con timestamps reales — opt-in, solo lo piden los
+    // llamadores que van a sincronizar resaltado (ver karaoke.js). El
+    // campo se omite por completo si no se pide, cero cambio para los
+    // demás ~9 llamadores existentes.
+    if (wantBoundaries) b.karaoke = true;
+    return b;
 }
 function applyTtsSpeed(audio, data) {
     const want = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;

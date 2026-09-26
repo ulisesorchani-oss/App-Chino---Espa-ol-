@@ -107,8 +107,11 @@ _TTS_CACHE = OrderedDict()
 _TTS_CACHE_MAX = 300
 
 
-def _cache_key(text, lang, voice_name, speed):
-    return f"{lang}|{voice_name}|{speed:.2f}|{text}"
+def _cache_key(text, lang, voice_name, speed, want_boundaries=False):
+    # v9.7x: want_boundaries suma a la clave — sin esto, un pedido CON
+    # karaoke podría pegarle a un caché viejo SIN boundaries (y quedarse
+    # sin ellos silenciosamente) o viceversa.
+    return f"{lang}|{voice_name}|{speed:.2f}|{int(bool(want_boundaries))}|{text}"
 
 
 def _cache_get(key):
@@ -145,17 +148,35 @@ def speed_to_rate(speed):
     return f"{round((speed - 1) * 100):+d}%"
 
 
-async def synth_edge_bytes(text, voice_name, rate=None):
-    """Sintetiza con edge-tts. Devuelve mp3 bytes (velocidad horneada)."""
+async def synth_edge_bytes(text, voice_name, rate=None, want_boundaries=False):
+    """Sintetiza con edge-tts. Devuelve (mp3 bytes, boundaries|None).
+
+    v9.7x — karaoke con timestamps REALES: si want_boundaries, se pide
+    boundary="WordBoundary" (edge-tts 7.2.8 lo soporta nativo, confirmado
+    leyendo edge_tts/communicate.py — no docs genéricas) y se juntan los
+    eventos WordBoundary del stream junto con el audio. offset/duration
+    vienen en ticks de 100ns (10_000_000 ticks = 1s) → se convierten a ms
+    acá para que el cliente no tenga que saber nada de "ticks". Si no se
+    pidieron boundaries, se devuelve None (mismo payload de siempre).
+    """
     kwargs = {}
     if rate and rate not in ("+0%", "-0%", "0%"):
         kwargs["rate"] = rate
+    if want_boundaries:
+        kwargs["boundary"] = "WordBoundary"
     communicate = edge_tts.Communicate(text, voice_name, **kwargs)
     buf = io.BytesIO()
+    boundaries = [] if want_boundaries else None
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
             buf.write(chunk["data"])
-    return buf.getvalue()
+        elif want_boundaries and chunk["type"] == "WordBoundary":
+            boundaries.append({
+                "text": chunk["text"],
+                "offsetMs": chunk["offset"] / 10000.0,
+                "durMs": chunk["duration"] / 10000.0,
+            })
+    return buf.getvalue(), boundaries
 
 
 def synth_piper(text, lang):
@@ -205,6 +226,10 @@ def _pick_voice(body):
     return lang, voices.get(key, voices[DEFAULT_VOICE_KEY])
 
 
+def _truthy(v):
+    return str(v).strip().lower() in ("1", "true", "yes", "on")
+
+
 async def tts_endpoint(body, via_get=False):
     text = str(body.get("text") or "").strip()
     if not text:
@@ -220,8 +245,14 @@ async def tts_endpoint(body, via_get=False):
     speed = min(1.5, max(0.5, speed))  # clamp defensivo
     speed = round(speed, 2)            # clave y eco estables (0.85, no 0.8500001)
 
+    # v9.7x: karaoke con timestamps reales — opt-in (el cliente solo lo
+    # pide cuando el karaoke está activado Y el idioma es chino; acá se
+    # confía en lo que mande, no se fuerza por lang para no acoplar el
+    # servidor a una decisión de UI del cliente).
+    want_boundaries = _truthy(body.get("karaoke"))
+
     lang, voice_name = _pick_voice(body)
-    key = _cache_key(text, lang, voice_name, speed)
+    key = _cache_key(text, lang, voice_name, speed, want_boundaries)
 
     # v9.44 — 1.ª capa: LRU en memoria (sirve sin re-sintetizar)
     hit = _cache_get(key)
@@ -234,13 +265,15 @@ async def tts_endpoint(body, via_get=False):
 
     try:
         # v9.40: la velocidad se hornea EN la síntesis (sin eco en el cliente)
-        audio = await synth_edge_bytes(text, voice_name, rate=rate)
+        audio, boundaries = await synth_edge_bytes(text, voice_name, rate=rate, want_boundaries=want_boundaries)
         payload = {
             "audio": base64.b64encode(audio).decode("ascii"),
             "mime": "audio/mpeg",
             "voice": voice_name,
             "speed": speed,  # ← eco: la app NO aplica playbackRate
         }
+        if want_boundaries and boundaries:
+            payload["boundaries"] = boundaries  # [{text, offsetMs, durMs}, ...]
         _cache_put(key, payload)
         out = dict(payload)
         out["cached"] = False
@@ -284,6 +317,7 @@ async def catch_get(request: Request, full_path: str = ""):
             "lang": qp.get("lang") or "zh-CN",
             "voice": qp.get("voice") or DEFAULT_VOICE_KEY,
             "speed": qp.get("speed") or 1,
+            "karaoke": qp.get("karaoke") or "",
         }
         return await tts_endpoint(body, via_get=True)
     return {

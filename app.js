@@ -1357,6 +1357,17 @@ function setupEventListeners() {
 
     // Lector de texto libre (banner)
     if (typeof bindReaderSpeedChip === 'function') bindReaderSpeedChip(document.getElementById('btn-reader-speed'));
+    const readerKaraBtn = document.getElementById('btn-reader-kara');
+    if (readerKaraBtn) {
+        readerKaraBtn.textContent = '✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF');
+        readerKaraBtn.addEventListener('click', () => {
+            // v9.7x: misma preferencia compartida que Clásicos/Lecciones graduadas
+            const v = !KARA.on();
+            try { localStorage.setItem('ac_karaoke', v ? '1' : '0'); } catch (e2) { }
+            if (!v) KARA.stop();
+            readerKaraBtn.textContent = '✨ Karaoke: ' + (v ? 'ON' : 'OFF');
+        });
+    }
     safeAdd('btn-reader-play', toggleReaderPlay);
     safeAdd('btn-reader-clear', clearReader);
     const readerTa = document.getElementById('reader-input');
