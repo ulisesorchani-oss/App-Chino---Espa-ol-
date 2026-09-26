@@ -111,6 +111,23 @@ function readerGroupChunks(sentences) {
     return chunks;
 }
 
+// Un intento de pedir el audio de un trozo (usado por readerFetchChunk,
+// hasta 2 veces: el intento normal + 1 reintento silencioso).
+async function readerFetchOnce(text) {
+    const response = await fetchTTS(
+        ttsBody(text, readerSessionLangCode, readerSessionGender, readerWantKaraoke),
+        Math.max(15000, text.length * 50)
+    );
+    if (!response.ok) throw new Error('Error en servidor');
+    const data = await response.json();
+    if (!data.audio) throw new Error('Sin audio');
+    const bin = atob(data.audio);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+    return { url, data, error: null };
+}
+
 // Pide (o devuelve del caché) el audio de un trozo. Se puede llamar para
 // PRECARGAR (nadie espera la promesa todavía) o para reproducir (se
 // awaitea) — misma promesa en ambos casos, nunca se pide dos veces.
@@ -120,20 +137,19 @@ function readerFetchChunk(idx) {
     const text = readerChunks[idx];
     const p = (async () => {
         try {
-            const response = await fetchTTS(
-                ttsBody(text, readerSessionLangCode, readerSessionGender, readerWantKaraoke),
-                Math.max(15000, text.length * 50)
-            );
-            if (!response.ok) throw new Error('Error en servidor');
-            const data = await response.json();
-            if (!data.audio) throw new Error('Sin audio');
-            const bin = atob(data.audio);
-            const bytes = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-            const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
-            return { url, data, error: null };
+            return await readerFetchOnce(text);
         } catch (e) {
-            return { url: null, data: null, error: e };
+            // v9.7x: 1 reintento silencioso antes de resignarse a la voz del
+            // sistema — la mayoría de los fallos puntuales de un trozo son
+            // baches pasajeros de red o cold-start de la función de Vercel,
+            // no un problema real del trozo en sí (reportado: caía a voz
+            // robótica "un poco de veces" en artículos de solo ~3 trozos).
+            await new Promise((r) => setTimeout(r, 400));
+            try {
+                return await readerFetchOnce(text);
+            } catch (e2) {
+                return { url: null, data: null, error: e2 };
+            }
         }
     })();
     readerChunkCache.set(idx, p);
