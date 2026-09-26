@@ -110,6 +110,22 @@ async function toggleReaderPlay() {
     }
 }
 
+// v9.7x: chip ⚡ de velocidad — mismo patrón chico que bindSpeedChip en
+// podcast.js/lessons-graduated.js: muestra y cambia la MISMA velocidad
+// global (playbackSpeed/cycleSpeed de audio-tts.js), sin selector nuevo.
+function readerSpeedLabel() {
+    return '⚡ ' + ((typeof playbackSpeed === 'number') ? playbackSpeed : 1) + 'x';
+}
+function bindReaderSpeedChip(btn) {
+    if (!btn) return;
+    btn.textContent = readerSpeedLabel();
+    btn.title = 'Velocidad de la lectura: la MISMA que elegís con ⚡ en la tarjeta';
+    btn.addEventListener('click', () => {
+        if (typeof cycleSpeed === 'function') cycleSpeed();
+        btn.textContent = readerSpeedLabel();
+    });
+}
+
 function clearReader() {
     const ta = document.getElementById('reader-input');
     stopReader();

@@ -1356,6 +1356,7 @@ function setupEventListeners() {
     safeAdd('btn-voice-es', () => cycleVoice('es'));
 
     // Lector de texto libre (banner)
+    if (typeof bindReaderSpeedChip === 'function') bindReaderSpeedChip(document.getElementById('btn-reader-speed'));
     safeAdd('btn-reader-play', toggleReaderPlay);
     safeAdd('btn-reader-clear', clearReader);
     const readerTa = document.getElementById('reader-input');

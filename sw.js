@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v129'; // — Auditoría HSK: 36 correcciones de glosas ES (HSK4/5/7/8/9)
+const VERSION = 'v130'; // — Lector: chip ⚡ de velocidad (bindReaderSpeedChip, reusa playbackSpeed)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
