@@ -46,7 +46,16 @@
 //     adelante que atrás).
 //  4) duration = Infinity (quirk de Chrome con algunos WAV): reloj propio
 //     × playbackRate para que el resaltado nunca quede muerto.
-// API: prepare(line) → withAudio(audio, text) | withTts(u, text, rate) → stop().
+// v9.7x — TIMESTAMPS REALES (karaoke del Lector + upgrade general):
+//  api/index.py ahora puede devolver boundaries reales de edge-tts
+//  ([{text, offsetMs, durMs}], WordBoundary nativo de la librería) cuando
+//  el caller pidió `karaoke:true`. withAudio(audio, text, boundaries)
+//  usa esos timestamps de punta a punta si vienen y se pudieron ubicar
+//  en el texto (buildBoundaryMap) — nada de línea de tiempo ponderada ni
+//  recorte de silencio por RMS, innecesarios con datos reales. Si no
+//  vienen (Piper, español, caché vieja, o el matching falla), cae
+//  intacto al modo estimado de siempre — cero regresión.
+// API: prepare(line) → withAudio(audio, text, boundaries?) | withTts(u, text, rate) → stop().
 const KARA = (function () {
     'use strict';
     const RE_HAN = /[\u3400-\u9FFF\uF900-\uFAFF]/;
@@ -144,6 +153,50 @@ const KARA = (function () {
         }
         return res;
     }
+    // ── v9.7x: TIMESTAMPS REALES (WordBoundary de edge-tts) ──────────
+    // boundaries llega en el ORDEN en que edge-tts fue leyendo el texto;
+    // b.text es el token tal cual lo separó el motor (no necesariamente
+    // 1 palabra china = 1 boundary, puede incluir puntuación pegada).
+    // Se ubica cada boundary en `text` con indexOf secuencial (cursor
+    // que solo avanza) para no confundir apariciones repetidas de la
+    // misma palabra, y se mapea el final de cada boundary al último
+    // span de carácter Han que cubre — así el "upto" ya viene resuelto
+    // por el propio motor de síntesis, sin adivinar con Intl.Segmenter.
+    function buildBoundaryMap(text, boundaries) {
+        if (!boundaries || !boundaries.length) return null;
+        const src = String(text == null ? '' : text);
+        const hanziIdx = [];
+        for (let i = 0; i < src.length; i++) if (RE_HAN.test(src[i])) hanziIdx.push(i);
+        if (!hanziIdx.length) return null;
+        const marks = [];
+        let cursor = 0;
+        for (let bi = 0; bi < boundaries.length; bi++) {
+            const b = boundaries[bi];
+            const t = String((b && b.text) || '');
+            if (!t) continue;
+            let at = src.indexOf(t, cursor);
+            if (at === -1) at = src.indexOf(t); // red de contención: el orden no matcheó, buscar igual
+            if (at === -1) continue;            // no se pudo ubicar este boundary puntual → se salta
+            const end = at + t.length - 1;
+            cursor = at + t.length;
+            let upto = -1;
+            for (let k = 0; k < hanziIdx.length; k++) {
+                if (hanziIdx[k] <= end) upto = k; else break;
+            }
+            if (upto === -1) continue; // boundary sin ningún hanzi (puntuación suelta)
+            marks.push({ atMs: Number(b.offsetMs) || 0, upto: upto });
+        }
+        return marks.length ? marks : null;
+    }
+    // ms transcurridos → índice del span que suena (mayor mark con atMs <= ms)
+    function idxAtReal(marks, ms) {
+        let lo = 0, hi = marks.length - 1, res = 0;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (marks[mid].atMs <= ms) { res = mid; lo = mid + 1; } else hi = mid - 1;
+        }
+        return marks[res].upto;
+    }
     function stop() {
         if (!act) return;
         if (act.raf) cancelAnimationFrame(act.raf);
@@ -213,15 +266,20 @@ const KARA = (function () {
             return { t0: t0, t1: t1 };
         } catch (e) { return null; }
     }
-    // Variante A: audio del API → progreso real sobre la VENTANA DE HABLA
-    // (v9.6) + línea de tiempo ponderada con las pausas de la puntuación.
-    function withAudio(audio, text) {
+    // Variante A: audio del API. v9.7x: si llegaron boundaries reales y se
+    // pudieron ubicar en el texto, se usan de punta a punta (currentTime en
+    // ms comparado directo contra offsetMs — el propio motor de síntesis ya
+    // da la posición exacta, sin estimar nada). Si no, cae al modo v9.6 de
+    // siempre: progreso sobre la VENTANA DE HABLA (recorte de silencio por
+    // RMS) + línea de tiempo ponderada por puntuación.
+    function withAudio(audio, text, boundaries) {
         if (!act || !audio) return;
         const n = act.spans.length;
-        const tl = buildTimeline(text, n);
+        const marks = buildBoundaryMap(text, boundaries);
+        const tl = marks ? null : buildTimeline(text, n);
         let finished = false;
-        let win = null;   // { t0, t1 } ventana de habla real (llega async)
-        let t0wall = 0;   // reloj propio si duration = Infinity/NaN
+        let win = null;   // { t0, t1 } ventana de habla real (solo modo estimado)
+        let t0wall = 0;   // reloj propio si duration = Infinity/NaN (solo modo estimado)
         const done = () => {
             if (finished || !act) return;
             finished = true;
@@ -231,6 +289,11 @@ const KARA = (function () {
         };
         const tick = () => {
             if (!act || finished) return;
+            if (marks) {
+                paint(act.spans, idxAtReal(marks, audio.currentTime * 1000));
+                act.raf = requestAnimationFrame(tick);
+                return;
+            }
             const d = audio.duration;
             if (isFinite(d) && d > 0) {
                 const t = audio.currentTime;
@@ -252,9 +315,11 @@ const KARA = (function () {
         act.raf = requestAnimationFrame(tick);
         audio.addEventListener('ended', done, { once: true });
         audio.addEventListener('error', done, { once: true });
-        detectSpeechWindow(audio.src).then(function (w) {
-            if (act && !finished && w) win = w;
-        }).catch(function () { });
+        if (!marks) {
+            detectSpeechWindow(audio.src).then(function (w) {
+                if (act && !finished && w) win = w;
+            }).catch(function () { });
+        }
     }
     // Variante B: voz del sistema → boundary si existe; si no, estimado.
     // v9.6: el reloj arranca con el evento 'start' (antes contaba desde

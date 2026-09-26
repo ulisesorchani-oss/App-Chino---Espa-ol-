@@ -885,6 +885,15 @@ body.dark-mode .reader-preview {
     font-size: 1.45rem;
     line-height: 1.25;
 }
+/* v9.7x: el carácter suma la clase .lq-ch para que karaoke.js lo pueda
+   resaltar (mismo contrato que classics-reader.js/lessons-graduated.js) —
+   pero acá NO queremos el tinte morado de hover/active de .lq-ch (línea
+   ~4449): la palabra entera (.reader-word:active) ya tiene su propio
+   feedback al tocar; sin esto quedaría un doble tinte superpuesto.
+   Especificidad más alta que ".lq-ch:hover"/".lq-ch:active" a propósito. */
+.ruby-char.lq-ch:hover, .ruby-char.lq-ch:active {
+    background: none;
+}
 
 .ruby-py {
     font-size: 0.72rem;
@@ -4521,22 +4530,39 @@ body.grand-mode .lq-line-say { width: 34px; height: 34px; font-size: 15px; }
    v9.4 — KARAOKE DE LECTURA (✨, desactivado por defecto)
    Los .lq-ch de la línea activa se van "rellenando" con un marcador
    ámbar al ritmo del audio (clase .k-on asignada por KARA en app.js).
+   v9.7x: suma agrandado (transform: scale) al marcador de fondo de
+   siempre. inline-block en TODOS los .lq-ch de la línea activa (no solo
+   el .k-on) para que el transform del que se prende no cambie el modo
+   de caja de sus vecinos a mitad de lectura; transform es puramente
+   visual (no participa del layout) → los caracteres de al lado NO se
+   mueven ni saltan al agrandarse el actual.
+   v9.7x: suma .reader-line — el Lector (reader.js) usa esa clase para sus
+   bloques de vista previa, no .lq-line (esa es de Clásicos/Lecciones
+   graduadas) — mismo marcador ámbar, mismo contrato .k-on, dos nombres
+   de contenedor distintos.
    ════════════════════════════════════════════════════════════════ */
-.lq-line.kara-active .lq-ch {
-    transition: color .16s ease, background-color .16s ease, box-shadow .16s ease;
+.lq-line.kara-active .lq-ch,
+.reader-line.kara-active .lq-ch {
+    display: inline-block;
+    transition: color .16s ease, background-color .16s ease, box-shadow .16s ease, transform .12s ease;
 }
-.lq-line.kara-active .lq-ch.k-on {
+.lq-line.kara-active .lq-ch.k-on,
+.reader-line.kara-active .lq-ch.k-on {
     background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
     color: #78350f;
     box-shadow: 0 0 0 2px rgba(245, 158, 11, .22), 0 0 12px rgba(251, 191, 36, .45);
     border-radius: 4px;
+    transform: scale(1.16);
+    transform-origin: center;
 }
-body.dark-mode .lq-line.kara-active .lq-ch.k-on {
+body.dark-mode .lq-line.kara-active .lq-ch.k-on,
+body.dark-mode .reader-line.kara-active .lq-ch.k-on {
     background: linear-gradient(180deg, rgba(251, 191, 36, .38) 0%, rgba(245, 158, 11, .46) 100%);
     color: #fff7e6;
     box-shadow: 0 0 0 2px rgba(245, 158, 11, .30), 0 0 14px rgba(251, 191, 36, .35);
 }
-body.paper-mode .lq-line.kara-active .lq-ch.k-on {
+body.paper-mode .lq-line.kara-active .lq-ch.k-on,
+body.paper-mode .reader-line.kara-active .lq-ch.k-on {
     background: linear-gradient(180deg, #fde9b8 0%, #fbdc8e 100%);
     color: #7c4a03;
 }
