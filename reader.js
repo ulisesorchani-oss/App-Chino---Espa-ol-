@@ -20,7 +20,31 @@
 const readerAudio = new Audio();
 readerAudio.preservesPitch = true;        // mantiene la voz natural a distinta velocidad
 readerAudio.webkitPreservesPitch = true;  // Safari
-let readerPlaying = false;
+// v9.7x: LECTURA POR TROZOS CON PRECARGA — antes, un texto largo (una
+// lección entera) viajaba en UN solo POST a api/tts.py; si la síntesis
+// tardaba más que el maxDuration de Vercel (60 s), la función se cortaba,
+// el fetch fallaba y el lector caía a la voz del sistema — que a su vez
+// tiene un bug conocido de Chrome/Chromium: las utterances largas se
+// cortan solas a los ~15 s de habla (~300 caracteres en chino a
+// velocidad normal). Ahora el texto se parte en trozos de ~150
+// caracteres (alineados a TTS_GET_MAX de audio-tts.js: cada trozo entra
+// en el camino GET cacheable por el CDN) y, mientras suena el trozo N,
+// ya se pide el trozo N+1 en paralelo — el mismo problema que causó
+// descartar la cola por-línea de Podcast (corte audible esperando el
+// siguiente) queda resuelto sin ese corte, porque acá NO se espera a
+// que termine N para recién pedir N+1.
+const READER_CHUNK_TARGET = 150; // chars — igual a TTS_GET_MAX (audio-tts.js)
+const READER_SENT_END = '。！？.!?';
+
+let readerPlayState = 'idle';      // 'idle' | 'playing' | 'paused'
+let readerActiveEngine = null;     // 'audio' | 'speech' — cuál está sonando/pausado ahora
+let readerChunks = [];             // trozos de texto de la lectura actual
+let readerChunkIdx = -1;           // trozo que está sonando (o el último que sonó)
+let readerChunkCache = new Map();  // idx -> Promise<{url,data,error}> (fetch en curso o resuelto)
+let readerChunkReady = new Map();  // idx -> {url,data,error} YA resuelto (para saber si hay que mostrar "cargando")
+let readerStopToken = 0;           // se incrementa en cada stop/nueva lectura: invalida callbacks viejos
+let readerSessionLangCode = null;  // idioma/voz fijados al arrancar esta lectura (igual para todos los trozos)
+let readerSessionGender = null;
 
 function detectReaderLang(text) {
     // Si hay CJK (chino simplificado o tradicional) se lee como chino; si no, español
@@ -38,35 +62,212 @@ function updateReaderLang() {
         + ' · ' + t.length + '/' + (ta.maxLength || 600);
 }
 
+// Parte una "línea" (ya sin \n) en oraciones por puntuación — SOLO se usa
+// como red de contención para texto pegado libremente sin saltos de línea
+// propios; las lecciones de lessons.js ya vienen una oración por \n (ver
+// readerSplitSentences) y nunca pasan por acá (ninguna línea real supera
+// los 200 caracteres del umbral de abajo).
+function readerSplitLongLine(line) {
+    const out = [];
+    let buf = '';
+    for (const ch of line) {
+        buf += ch;
+        if (READER_SENT_END.indexOf(ch) !== -1) { out.push(buf.trim()); buf = ''; }
+    }
+    if (buf.trim()) out.push(buf.trim());
+    return out.length ? out : [line];
+}
+
+// Oraciones del texto completo: 1 por \n (ya es así en lessons.js) — solo
+// las líneas anormalmente largas (texto libre sin saltos) se re-parten por
+// puntuación china/española.
+function readerSplitSentences(text) {
+    const out = [];
+    String(text || '').split('\n').forEach((raw) => {
+        const line = raw.trim();
+        if (!line) return;
+        if (line.length <= 200) { out.push(line); return; }
+        readerSplitLongLine(line).forEach((s) => { if (s) out.push(s); });
+    });
+    return out;
+}
+
+// Agrupa oraciones consecutivas en trozos de ~150 caracteres (nunca corta
+// una oración a la mitad); una oración más larga que el objetivo queda
+// sola en su propio trozo.
+function readerGroupChunks(sentences) {
+    const chunks = [];
+    let cur = '';
+    sentences.forEach((s) => {
+        if (cur && (cur.length + 1 + s.length) > READER_CHUNK_TARGET) {
+            chunks.push(cur);
+            cur = s;
+        } else {
+            cur = cur ? (cur + '\n' + s) : s;
+        }
+    });
+    if (cur) chunks.push(cur);
+    return chunks;
+}
+
+// Pide (o devuelve del caché) el audio de un trozo. Se puede llamar para
+// PRECARGAR (nadie espera la promesa todavía) o para reproducir (se
+// awaitea) — misma promesa en ambos casos, nunca se pide dos veces.
+function readerFetchChunk(idx) {
+    if (idx < 0 || idx >= readerChunks.length) return Promise.resolve(null);
+    if (readerChunkCache.has(idx)) return readerChunkCache.get(idx);
+    const text = readerChunks[idx];
+    const p = (async () => {
+        try {
+            const response = await fetchTTS(
+                ttsBody(text, readerSessionLangCode, readerSessionGender),
+                Math.max(15000, text.length * 50)
+            );
+            if (!response.ok) throw new Error('Error en servidor');
+            const data = await response.json();
+            if (!data.audio) throw new Error('Sin audio');
+            const bin = atob(data.audio);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
+            return { url, data, error: null };
+        } catch (e) {
+            return { url: null, data: null, error: e };
+        }
+    })();
+    readerChunkCache.set(idx, p);
+    p.then((entry) => { readerChunkReady.set(idx, entry); });
+    return p;
+}
+
+// Voz del sistema como red de contención PUNTUAL: si el TTS del server
+// falla para ESTE trozo, se lee con speechSynthesis y la lectura sigue
+// (no se corta toda la lección por un trozo que falló).
+function readerSpeakFallback(text, langCode) {
+    return new Promise((resolve) => {
+        if (!('speechSynthesis' in window)) { resolve(); return; }
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = langCode;
+        u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        readerActiveEngine = 'speech';
+        speechSynthesis.speak(u);
+    });
+}
+
+function readerAudioEnded() {
+    return new Promise((resolve) => {
+        const onend = () => { cleanup(); resolve(); };
+        const onerr = () => { cleanup(); resolve(); };
+        function cleanup() {
+            readerAudio.removeEventListener('ended', onend);
+            readerAudio.removeEventListener('error', onerr);
+        }
+        readerAudio.addEventListener('ended', onend, { once: true });
+        readerAudio.addEventListener('error', onerr, { once: true });
+    });
+}
+
+function readerFinishPlayback() {
+    readerPlayState = 'idle';
+    readerActiveEngine = null;
+    readerChunkIdx = -1;
+    const btn = document.getElementById('btn-reader-play');
+    if (btn) { btn.textContent = '🔊 Leer'; btn.disabled = false; }
+}
+
+function readerAdvanceAfterChunk(idx, myToken) {
+    if (myToken !== readerStopToken) return;
+    const nextIdx = idx + 1;
+    if (nextIdx >= readerChunks.length) { readerFinishPlayback(); return; }
+    const btn = document.getElementById('btn-reader-play');
+    // Solo se muestra "cargando" si de verdad el siguiente trozo no está
+    // listo — con trozos de ~150 caracteres, lo normal es que ya lo esté.
+    if (btn && !readerChunkReady.has(nextIdx)) btn.textContent = '⏳ ...';
+    playReaderChunk(nextIdx, myToken);
+}
+
+async function playReaderChunk(idx, myToken) {
+    if (myToken !== readerStopToken) return;
+    readerChunkIdx = idx;
+    const entry = await readerFetchChunk(idx);
+    if (myToken !== readerStopToken) return;
+
+    const btn = document.getElementById('btn-reader-play');
+
+    if (!entry || entry.error || !entry.url) {
+        await readerSpeakFallback(readerChunks[idx], readerSessionLangCode);
+        if (myToken !== readerStopToken) return;
+        readerAdvanceAfterChunk(idx, myToken);
+        return;
+    }
+
+    readerActiveEngine = 'audio';
+    readerAudio.src = entry.url;
+    applyTtsSpeed(readerAudio, entry.data); // v9.40: velocidad en el server → sin eco
+    if (btn) { btn.textContent = '⏸ Pausar'; btn.disabled = false; }
+
+    const ended = readerAudioEnded();
+    try { await readerAudio.play(); } catch (e) { /* autoplay bloqueado: seguimos igual */ }
+    if (myToken !== readerStopToken) return;
+
+    // Precarga del trozo N+1 apenas arranca N — NO se espera a "ended"
+    // (ese es justo el patrón que se descartó en Podcast por el corte
+    // audible entre trozos).
+    readerFetchChunk(idx + 1);
+
+    await ended; // nunca se resuelve solo por pausar (pause() no dispara 'ended')
+    if (myToken !== readerStopToken) return;
+    readerAdvanceAfterChunk(idx, myToken);
+}
+
 function stopReader() {
-    if (!readerPlaying && !readerAudio.src) return;
-    readerPlaying = false;
-    readerAudio.onended = null;
-    readerAudio.onerror = null;
+    readerStopToken++;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
     readerAudio.pause();
     try { readerAudio.currentTime = 0; } catch (e) { /* sin src válido */ }
     if (readerAudio.src && readerAudio.src.startsWith('blob:')) URL.revokeObjectURL(readerAudio.src);
     readerAudio.removeAttribute('src');
+    readerChunkCache.forEach((p) => {
+        p.then((entry) => { if (entry && entry.url) { try { URL.revokeObjectURL(entry.url); } catch (e) { /* ya liberada */ } } });
+    });
+    readerChunkCache.clear();
+    readerChunkReady.clear();
+    readerChunks = [];
+    readerChunkIdx = -1;
+    readerPlayState = 'idle';
+    readerActiveEngine = null;
     const btn = document.getElementById('btn-reader-play');
     if (btn) { btn.textContent = '🔊 Leer'; btn.disabled = false; }
 }
 
 async function toggleReaderPlay() {
-    if (readerPlaying) { stopReader(); return; }
-
-    const ta = document.getElementById('reader-input');
     const btn = document.getElementById('btn-reader-play');
-    if (!ta || !btn) return;
+    if (!btn) return;
+
+    if (readerPlayState === 'playing') {
+        if (readerActiveEngine === 'speech') { if ('speechSynthesis' in window) speechSynthesis.pause(); }
+        else { readerAudio.pause(); }
+        readerPlayState = 'paused';
+        btn.textContent = '▶ Continuar';
+        return;
+    }
+    if (readerPlayState === 'paused') {
+        readerPlayState = 'playing';
+        btn.textContent = '⏸ Pausar';
+        if (readerActiveEngine === 'speech') { if ('speechSynthesis' in window) speechSynthesis.resume(); }
+        else { try { await readerAudio.play(); } catch (e) { /* nada que reanudar */ } }
+        return;
+    }
+
+    // idle → arranca una lectura nueva desde el principio
+    const ta = document.getElementById('reader-input');
+    if (!ta) return;
     const text = ta.value.trim();
     if (!text) { ta.focus(); return; }
 
-    const lang = detectReaderLang(text);
-    const gender = lang === 'zh' ? voiceZh : voiceEs; // usa la voz elegida en los botones 👩/👨
-    const langCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
-
-    btn.textContent = '⏳ ...';
-    btn.disabled = true;
-
+    stopReader(); // por si quedó algo de una lectura anterior
     // Un solo audio a la vez: cortar voz del sistema, tarjeta y lector
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     if (isPlaying && activeBtn) { restoreButton(); isPlaying = false; }
@@ -75,39 +276,36 @@ async function toggleReaderPlay() {
         globalAudioPlayer.pause();
         globalAudioPlayer.removeAttribute('src');
     }
-    stopReader();
 
-    try {
-        // v7.14: timeout escalado con el largo — una lección completa tarda
-        // más de 15 s en sintetizarse (15 s base + 50 ms por carácter).
-        const response = await fetchTTS(ttsBody(text, langCode, gender), Math.max(15000, text.length * 50)); // v9.40: +speed
-        if (!response.ok) throw new Error('Error en servidor');
-        const data = await response.json();
-        if (!data.audio) throw new Error('Sin audio');
+    const lang = detectReaderLang(text);
+    const gender = lang === 'zh' ? voiceZh : voiceEs; // usa la voz elegida en los botones 👩/👨
+    readerSessionGender = gender;
+    readerSessionLangCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
 
-        const bin = atob(data.audio);
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
-        readerAudio.src = url;
-        applyTtsSpeed(readerAudio, data); // v9.40: velocidad en el server → sin eco
+    readerChunks = readerGroupChunks(readerSplitSentences(text));
+    if (!readerChunks.length) { ta.focus(); return; }
 
-        readerPlaying = true;
-        btn.textContent = '⏹ Detener';
-        btn.disabled = false;
-        await readerAudio.play();
-        readerAudio.onended = stopReader;
-        readerAudio.onerror = stopReader;
-    } catch (err) {
-        console.warn('Lector: falló el TTS del servidor, usando voz del sistema:', err);
-        stopReader();
-        if ('speechSynthesis' in window) {
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = langCode;
-            u.rate = playbackSpeed;
-            speechSynthesis.speak(u);
-        }
-    }
+    readerPlayState = 'playing';
+    btn.textContent = '⏳ ...';
+    btn.disabled = false;
+    const myToken = readerStopToken;
+    playReaderChunk(0, myToken); // no se espera: la cadena de trozos sigue sola
+}
+
+// v9.7x: chip ⚡ de velocidad — mismo patrón chico que bindSpeedChip en
+// podcast.js/lessons-graduated.js: muestra y cambia la MISMA velocidad
+// global (playbackSpeed/cycleSpeed de audio-tts.js), sin selector nuevo.
+function readerSpeedLabel() {
+    return '⚡ ' + ((typeof playbackSpeed === 'number') ? playbackSpeed : 1) + 'x';
+}
+function bindReaderSpeedChip(btn) {
+    if (!btn) return;
+    btn.textContent = readerSpeedLabel();
+    btn.title = 'Velocidad de la lectura: la MISMA que elegís con ⚡ en la tarjeta';
+    btn.addEventListener('click', () => {
+        if (typeof cycleSpeed === 'function') cycleSpeed();
+        btn.textContent = readerSpeedLabel();
+    });
 }
 
 function clearReader() {
