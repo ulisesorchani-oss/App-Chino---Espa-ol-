@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v135'; // — Práctica Diaria: resetea scroll al abrir/cambiar de contenido el popup de escena
+const VERSION = 'v136'; // — Fix real: z-index de dropdowns (Diaria/Clásicos/DELE/TOCFL) bajo la barra inferior
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
