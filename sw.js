@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v132'; // — Karaoke: timestamps reales (WordBoundary) + agrandado, cableado en el Lector
+const VERSION = 'v133'; // — Mis lecturas: guardar texto del Lector en IndexedDB + tab Personales
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -493,6 +493,7 @@ const PRECACHE = [
   './daily-stories.js',    // v9.61: escena coherente de Práctica Diaria (diálogos por situación)
   './podcast.js',          // v9.70: escuchar una lección de Aprender de corrido, manos libres
   './free-talk.js',        // v9.7x: Pronunciación libre — grabar y ver qué entendió la IA (estilo chat)
+  './personal-lessons.js', // v9.7x: Mis lecturas — guardar el texto del Lector en IndexedDB
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
