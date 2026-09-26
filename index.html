@@ -221,6 +221,7 @@
                 <button class="mtab" id="tab-exams" role="tab" aria-selected="false" aria-controls="panel-exams" data-tab="exams" type="button" data-i18n="tabExams">🎓 Exámenes</button>
                 <button class="mtab" id="tab-daily" role="tab" aria-selected="false" aria-controls="panel-daily" data-tab="daily" type="button" data-i18n="tabDaily">📚 Diaria</button>
                 <button class="mtab" id="tab-classics" role="tab" aria-selected="false" aria-controls="panel-classics" data-tab="classics" type="button" data-i18n="tabClassics">📜 Clásicos</button>
+                <button class="mtab" id="tab-personal" role="tab" aria-selected="false" aria-controls="panel-personal" data-tab="personal" type="button">📌 Personales</button>
             </nav>
 
             <div class="tab-panels">
@@ -386,6 +387,15 @@
                     <h4 class="cread-head">📖 Leer el texto original <span class="cread-sub">por bloques, como las lecciones</span></h4>
                     <div class="cread-list" id="cread-list" role="group" aria-label="Leer el texto original de un clásico"></div>
                 </div>
+
+                <!-- Panel Personales (v9.7x): textos propios pegados en el Lector,
+                     guardados en IndexedDB (personal-lessons.js) — texto libre, sin
+                     nivel HSK/TOCFL/DELE asociado. -->
+                <div class="tab-panel section-personal hidden" id="panel-personal" role="tabpanel" aria-labelledby="tab-personal">
+                    <h3 class="section-title">📌 MIS LECTURAS</h3>
+                    <p class="lessons-intro">Textos que guardaste desde el Lector (Entrenar) — se leen y se escuchan tal cual, sin ejercicios.</p>
+                    <div class="lesson-list" id="personal-list"></div>
+                </div>
             </div>
         </section>
 
@@ -444,6 +454,7 @@
                     <button id="btn-reader-speed" class="speed-btn" type="button"></button>
                     <button id="btn-reader-kara" class="speed-btn" type="button" title="Resalta cada palabra china al ritmo de la voz (preferencia compartida con Clásicos y Lecciones)">✨ Karaoke: OFF</button>
                     <button id="btn-reader-clear" class="btn-secondary" type="button" data-i18n="readerClear">🗑️ Limpiar</button>
+                    <button id="btn-reader-save" class="btn-secondary" type="button" title="Guardar este texto en Mis lecturas (Aprender → 📌 Personales)">💾 Guardar</button>
                     <button id="btn-reader-play" class="btn-primary" type="button" data-i18n="readerPlay">🔊 Leer</button>
                 </div>
             </div>
@@ -680,6 +691,12 @@
         <div id="placement-body"></div>
     </div>
 
+    <!-- v9.7x: POPUP guardar/renombrar en Mis lecturas (personal-lessons.js) -->
+    <div id="personal-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Guardar en Mis lecturas">
+        <button id="btn-personal-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
+        <div id="personal-pop-body"></div>
+    </div>
+
     <!-- v9.61: POPUP escena coherente de Práctica Diaria (antes de las frases sueltas) -->
     <div id="daily-story-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Situación completa">
         <button id="btn-daily-story-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -855,6 +872,7 @@
     <script src="daily-stories.js?v=20260925b"></script>
     <script src="podcast.js?v=20260925b"></script>
     <script src="free-talk.js?v=20260925a"></script>
+    <script src="personal-lessons.js?v=20260926a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {

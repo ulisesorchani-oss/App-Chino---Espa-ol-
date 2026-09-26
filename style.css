@@ -3996,6 +3996,9 @@ body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
 .lc-blurb { font-size: 0.8rem; color: #64748b; margin: 4px 0 6px; line-height: 1.45; }
 .lc-meta { font-size: 0.7rem; color: #94a3b8; font-weight: 600; margin-bottom: 8px; }
 .lc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* v9.7x: Mis lecturas (personal-lessons.js) — mismo .lesson-card/.lc-* de
+   arriba, 3 acciones en vez de 2 (Abrir/Renombrar/Borrar). */
+.pl-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
 /* botones compartidos del módulo */
 .lq-btn {

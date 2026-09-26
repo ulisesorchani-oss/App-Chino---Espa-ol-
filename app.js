@@ -1181,7 +1181,8 @@ function setupModuleTabs() {
     const bar = document.getElementById('module-tabs');
     if (!bar) return;
     // v9.0: + panel-lessons (Lecciones graduadas)
-    const panels = { lessons: 'panel-lessons', exams: 'panel-exams', daily: 'panel-daily', classics: 'panel-classics' };
+    // v9.7x: + panel-personal (Mis lecturas, personal-lessons.js)
+    const panels = { lessons: 'panel-lessons', exams: 'panel-exams', daily: 'panel-daily', classics: 'panel-classics', personal: 'panel-personal' };
     const TAB_KEY = 'ac_tab';
     const activate = (name, save) => {
         if (!panels[name]) name = 'lessons';
@@ -1196,6 +1197,9 @@ function setupModuleTabs() {
             if (p) p.classList.toggle('hidden', k !== name);
         });
         if (save) { try { localStorage.setItem(TAB_KEY, name); } catch (e) {} }
+        // v9.7x: la lista de Personales se arma al entrar a esa tab (IndexedDB
+        // es async) — no hace falta refrescarla en las otras.
+        if (name === 'personal' && typeof PL !== 'undefined') PL.renderList();
     };
     bar.addEventListener('click', (e) => {
         const b = e.target.closest('.mtab');
@@ -1370,6 +1374,7 @@ function setupEventListeners() {
     }
     safeAdd('btn-reader-play', toggleReaderPlay);
     safeAdd('btn-reader-clear', clearReader);
+    safeAdd('btn-reader-save', () => { if (typeof PL !== 'undefined') PL.openSaveDialog(); });
     const readerTa = document.getElementById('reader-input');
     if (readerTa) {
         readerTa.addEventListener('input', () => {
