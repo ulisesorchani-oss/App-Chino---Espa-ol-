@@ -352,12 +352,15 @@ function closeDailyStory() {
         if (closeBtn) closeBtn.addEventListener('click', closeDailyStory);
         const pop = document.getElementById('daily-story-pop');
         if (pop) {
-            document.addEventListener('click', (e) => {
-                if (!pop.classList.contains('hidden') && !pop.contains(e.target)
-                    && !e.target.closest('#daily-menu')) {
-                    closeDailyStory();
-                }
-            });
+            // v9.7x fix: se saca el cierre por "click afuera" — un video real
+            // (2026-09-27) mostró el popup cerrándose solo al tocar "Leer la
+            // escena →" sin llegar a mostrar la escena nunca, en un dispositivo
+            // donde no se pudo confirmar la causa exacta (no hay consola). La
+            // hipótesis más probable es un toque que cae justo al borde del
+            // popup, fuera de sus límites, disparando este cierre por accidente
+            // — el botón está a centímetros del borde de la tarjeta. Sacando
+            // esta vía de cierre entera (queda ✕ y Escape) se elimina esa clase
+            // entera de falla, se pueda confirmar la causa exacta o no.
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && !pop.classList.contains('hidden')) closeDailyStory();
             });
