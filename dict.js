@@ -259,6 +259,29 @@ function wordPinyin(word) {
     return '';
 }
 
+// v9.7x (rankear candidatos de pre-entrenamiento por nivel HSK, no solo
+// frecuencia): mapa inverso palabra→nivel armado UNA vez a partir de los
+// baldes oficiales HSK1..HSK9 (EMBEDDED_MODULE_DATA, data-embedded.js;
+// cada entrada [simp, trad|null, pinyin, es, alt|null]). null = la
+// palabra no vive en ningún balde HSK1-9 (vocabulario fuera del
+// estándar: técnico, nombre propio, etc.) — esas NUNCA se descartan por
+// nivel, ver extractKeyWords más abajo.
+let _hskLevelMap;
+function hskLevelOf(word) {
+    if (_hskLevelMap === undefined) {
+        _hskLevelMap = new Map();
+        for (let n = 1; n <= 9; n++) {
+            const bucket = (typeof EMBEDDED_MODULE_DATA !== 'undefined' && EMBEDDED_MODULE_DATA['HSK' + n]) || [];
+            bucket.forEach(entry => {
+                const simp = entry[0], trad = entry[1];
+                if (simp && !_hskLevelMap.has(simp)) _hskLevelMap.set(simp, n);
+                if (trad && !_hskLevelMap.has(trad)) _hskLevelMap.set(trad, n);
+            });
+        }
+    }
+    return _hskLevelMap.has(word) ? _hskLevelMap.get(word) : null;
+}
+
 // v9.66 (AUDITORIA-GAGNE-MAYER.md, Mayer #7 — pre-entrenamiento): dado el
 // texto en chino de UNA escena/lección puntual (daily-stories.js,
 // lessons-graduated.js), extrae 3-5 palabras clave con pinyin+glosa para
@@ -269,7 +292,15 @@ function wordPinyin(word) {
 // repetidas DENTRO de esa escena puntual; resuelve pinyin/glosa con el
 // diccionario offline (dictMiniLookup, ya existe) y descarta las que no
 // tengan entrada. Sin dependencias nuevas, sin tocar SRS/checkAnswer.
-function extractKeyWords(zhLines, max) {
+//
+// v9.7x: 3er parámetro opcional minLevel (nivel HSK de la lección, ej.
+// l.hsk en lessons-graduated.js) — si se pasa, descarta candidatas cuyo
+// nivel HSK sea MENOR al de la lección (ya dominadas por un alumno de
+// ese nivel, ej. 他/一/工 en una lección HSK6). Las palabras fuera de
+// HSK1-9 (hskLevelOf → null) nunca se descartan por este filtro. Sin
+// minLevel el comportamiento es idéntico al de antes (daily-stories.js
+// no lo pasa: sus escenas no tienen nivel propio asignado todavía).
+function extractKeyWords(zhLines, max, minLevel) {
     max = max || 5;
     const counts = new Map(); // palabra → veces vista en esta escena
     const order = [];         // primera aparición (desempate estable)
@@ -285,6 +316,10 @@ function extractKeyWords(zhLines, max) {
     const out = [];
     for (const cand of ranked) {
         if (out.length >= max) break;
+        if (minLevel) {
+            const lvl = hskLevelOf(cand.w);
+            if (lvl !== null && lvl < minLevel) continue; // más básica que el nivel de la lección → no sirve como palabra "nueva"
+        }
         const hit = dictMiniLookup(cand.w);
         if (!hit || !hit.def) continue; // sin entrada de diccionario → no sirve como glosario
         out.push({ zh: cand.w, py: hit.py || '', es: hit.def });

@@ -363,8 +363,11 @@
         // Storage propio, de solo lectura para quien la consulta: no es progreso,
         // no toca LB/ac_lessons_v1 ni state.
         try { localStorage.setItem('ac_last_lesson_id', l.id); } catch (e) { /* sin storage: podcast.js no preselecciona nada */ }
+        // v9.7x: minLevel = l.hsk → descarta candidatas más básicas que el
+        // nivel de la propia lección (ej. 他/一/工 en una lección HSK6), ver
+        // hskLevelOf/extractKeyWords en dict.js.
         const keyWords = (typeof extractKeyWords === 'function')
-            ? extractKeyWords(l.lines.map(ln => ln.zh), 5)
+            ? extractKeyWords(l.lines.map(ln => ln.zh), 5, l.hsk)
             : [];
         if (keyWords.length >= 3) renderGlossary(l, keyWords);
         else renderStory(l);
