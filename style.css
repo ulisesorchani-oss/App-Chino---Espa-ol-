@@ -5032,7 +5032,17 @@ body.paper-mode .bottom-app-actions .utility-btn { border-color: #d9c9a3; }
         gap: 8px;
     }
 
-    .practice-meta { grid-area: meta; }
+    /* min-width:0 le permite al item de grid respetar el ancho de la
+       columna 1fr en vez de forzarla a expandirse según su contenido
+       (el "blowout" clásico de grid); flex-wrap hace que el contador
+       baje de renglón cuando el nivel es largo ("Nivel 6 · vocabulario")
+       en vez de desbordar por encima de los botones de audio de al lado. */
+    .practice-meta { grid-area: meta; min-width: 0; flex-wrap: wrap; row-gap: 2px; }
+    /* el nivel en sí (ej. "Nivel 6 · vocabulario") es más largo que el
+       hueco disponible junto a los botones de audio — acá SÍ necesita
+       poder achicarse y partir en su propia línea (flex-shrink:0 de la
+       regla base se lo impedía, forzando el desborde sobre los botones) */
+    .practice-meta .card-level { flex-shrink: 1; min-width: 0; white-space: normal; }
     .practice-progress-slot { grid-area: progress; }
     .practice-audio-actions { grid-area: actions; }
 
