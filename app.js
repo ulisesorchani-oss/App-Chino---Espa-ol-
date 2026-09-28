@@ -259,15 +259,24 @@ function showBackupMsg(t) {
     if (el) el.textContent = t;
     else moduleStatus(t);
 }
-function doBackupExport() {
+async function doBackupExport() {
+    // v9.7x: Mis lecturas vive en IndexedDB (personal-lessons.js), fuera del
+    // barrido de backupCollect() (solo localStorage) — se suma acá aparte.
+    // Si PL no está cargado o IndexedDB falla, el resto del respaldo sigue
+    // generándose igual: solo queda sin el campo `personal`.
+    let personal;
+    try {
+        if (window.PL && typeof PL.exportAll === 'function') personal = await PL.exportAll();
+    } catch (e) { personal = undefined; }
     const payload = { app: 'huayu-diario', kind: 'respaldo', version: 1, date: new Date().toISOString(), data: backupCollect() };
+    if (Array.isArray(personal)) payload.personal = personal;
     if (backupDownload('huayu-diario-respaldo-' + backupHoy() + '.json', JSON.stringify(payload), 'application/json')) {
         showBackupMsg('✅ Respaldo descargado. Guardalo en un lugar seguro.');
     }
 }
 function doBackupImport(file) {
     const rd = new FileReader();
-    rd.onload = () => {
+    rd.onload = async () => {
         try {
             const obj = JSON.parse(String(rd.result || ''));
             if (!obj || obj.app !== 'huayu-diario' || !obj.data || typeof obj.data !== 'object') throw new Error('formato');
@@ -286,8 +295,33 @@ function doBackupImport(file) {
                 try { localStorage.setItem(k, String(obj.data[k])); n++; } catch (e) { }
             });
             try { window.__hsImporting = false; } catch (e) { }
-            showBackupMsg('✅ Importado (' + n + ' bloques). Recargando…');
-            setTimeout(() => { try { location.reload(); } catch (e) { } }, 900);
+
+            // v9.7x: Mis lecturas — respaldo viejo sin `personal` (o vacío) no
+            // toca nada acá, cero errores. Si hay datos, PL.importAll hace el
+            // upsert (ver personal-lessons.js) y devuelve conteos; se espera
+            // TODA escritura (Promise.all adentro) antes de decidir el mensaje
+            // y si conviene recargar.
+            let plResult = null;
+            const personalRaw = Array.isArray(obj.personal) ? obj.personal : [];
+            if (personalRaw.length && window.PL && typeof PL.importAll === 'function') {
+                try { plResult = await PL.importAll(personalRaw); }
+                catch (e) { plResult = { written: 0, upToDate: 0, invalid: 0, failed: personalRaw.length, total: personalRaw.length }; }
+            }
+
+            let msg = '✅ Importado (' + n + ' bloques)';
+            let hadProblems = false;
+            if (plResult) {
+                const synced = plResult.written + plResult.upToDate;   // ya reflejadas en este dispositivo
+                const notApplied = plResult.invalid + plResult.failed; // del respaldo, no se pudieron aplicar
+                msg += ' · Mis lecturas: ' + synced + ' importadas' + (notApplied ? ', ' + notApplied + ' no' : '');
+                hadProblems = notApplied > 0;
+            }
+            if (hadProblems) {
+                showBackupMsg('⚠ ' + msg + '. No se recargó — revisá Personales antes de seguir.');
+            } else {
+                showBackupMsg(msg + '. Recargando…');
+                setTimeout(() => { try { location.reload(); } catch (e) { } }, 900);
+            }
         } catch (e) {
             showBackupMsg('⚠ El archivo no parece un respaldo de Huayu Diario.');
         }
