@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v140'; // — Práctica: cabecera móvil ya no superpone "Nivel N · vocabulario"/contador con los botones de audio
+const VERSION = 'v142'; // — Lector: la Biblioteca ya no ofrece los clásicos completos (abrían otro popup en vez de cargar texto); siguen en Aprender → Clásicos
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

@@ -455,9 +455,17 @@ function buildReaderLibrary() {
     sel.disabled = false;
 
     // Orden del archivo = orden del autor; un óptgroup por 'group'
+    // v9.7x: el "texto completo" de cada clásico (L.module = 'Clasicos-*')
+    // queda AFUERA de esta Biblioteca — "Cargar" promete llenar el Lector y
+    // esos ítems en realidad abrían un popup aparte (el Lector de Clásicos,
+    // CR_open), sin tocar el Lector para nada. Siguen 100% disponibles
+    // desde Aprender → 📜 Clásicos, que es su lector propio. Las SECCIONES
+    // de cada clásico (sanzijing-s1, daodejing-01, etc.) no tienen `module`
+    // y sí cargan texto real en el Lector, así que esas quedan.
     const groups = [];
     const byGroup = {};
     LESSONS_DATA.lessons.forEach(L => {
+        if (L.module && String(L.module).indexOf('Clasicos-') === 0) return;
         const g = L.group || 'Lecturas';
         if (!byGroup[g]) { byGroup[g] = []; groups.push(g); }
         byGroup[g].push(L);
@@ -472,14 +480,7 @@ function buildReaderLibrary() {
             if (L.status === 'planned') { planned.push(L); return; }
             const o = document.createElement('option');
             o.value = L.id;
-            if (false) {
-                /* planned: agrupadas abajo */
-            } else if (L.module && String(L.module).indexOf('Clasicos-') === 0) {
-                // v9.2: los clásicos abren el lector de clásicos (texto original)
-                o.textContent = '📖 Leer el texto original (lector de clásicos)';
-            } else {
-                o.textContent = L.label || L.title;
-            }
+            o.textContent = L.label || L.title;
             og.appendChild(o);
         });
         if (og.childElementCount) sel.appendChild(og);
@@ -517,13 +518,9 @@ function loadLibraryLesson() {
         moduleStatus('⚠ No encontré esa lectura en lessons.js.', true);
         return;
     }
-    // v9.2: los clásicos de la Biblioteca abren el lector de clásicos
-    // (texto original por bloques) — los textos viejos de lessons.js eran
-    // la concatenación de oraciones de práctica.
-    if (L.module && String(L.module).indexOf('Clasicos-') === 0 && typeof window.CR_open === 'function') {
-        window.CR_open(L.module);
-        return;
-    }
+    // v9.7x: el "texto completo" de los clásicos (L.module) ya no aparece en
+    // esta Biblioteca (ver buildReaderLibrary) — todo lo que llega acá tiene
+    // texto propio para el Lector.
     fillReaderWithLesson(L);
 }
 
