@@ -79,6 +79,63 @@
         }));
     }
 
+    // ===== v9.7x — Respaldo (app.js doBackupExport/doBackupImport) =====
+    // Export: todas las entradas tal cual están en el store.
+    function exportAll() {
+        return plGetAll();
+    }
+
+    // Import: valida cada entrada del respaldo (nunca confía en el JSON
+    // ajeno) y hace upsert por id — si ya existe una entrada con ese id en
+    // este dispositivo, solo la pisa cuando la del respaldo es más nueva
+    // (updatedAt mayor); si no existía, la agrega. Nunca borra entradas
+    // locales ausentes del respaldo. Devuelve un resumen con conteos, sin
+    // tirar excepción, para que app.js arme el mensaje y decida si recargar.
+    const PL_MAX_TEXT_LEN = 5000;   // bien por encima del maxlength=1200 del Lector: margen sin ser ilimitado
+    const PL_MAX_NAME_LEN = 200;
+    const PL_MAX_LEVEL_LEN = 100;
+    const PL_MAX_ID_LEN = 200;
+
+    function plSanitizeEntry(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        if (typeof raw.id !== 'string' || !raw.id.trim() || raw.id.length > PL_MAX_ID_LEN) return null;
+        if (typeof raw.text !== 'string' || !raw.text.trim() || raw.text.length > PL_MAX_TEXT_LEN) return null;
+        const name = (typeof raw.name === 'string') ? raw.name.slice(0, PL_MAX_NAME_LEN) : '';
+        const level = (typeof raw.level === 'string') ? raw.level.slice(0, PL_MAX_LEVEL_LEN) : '';
+        const lang = (raw.lang === 'es') ? 'es' : 'zh'; // cualquier otra cosa → zh (valor por defecto de siempre)
+        const createdAt = (typeof raw.createdAt === 'number' && isFinite(raw.createdAt)) ? raw.createdAt : Date.now();
+        const updatedAt = (typeof raw.updatedAt === 'number' && isFinite(raw.updatedAt)) ? raw.updatedAt : createdAt;
+        // Campos desconocidos del objeto crudo (raw.*) NO se copian: solo estos 6.
+        return { id: raw.id, name: name, level: level, text: raw.text, lang: lang, createdAt: createdAt, updatedAt: updatedAt };
+    }
+
+    async function importAll(rawEntries) {
+        const list = Array.isArray(rawEntries) ? rawEntries : [];
+        const summary = { written: 0, upToDate: 0, invalid: 0, failed: 0, total: list.length };
+        if (!list.length) return summary;
+
+        let existing = new Map();
+        try { (await plGetAll()).forEach((e) => existing.set(e.id, e)); }
+        catch (e) { /* sin IndexedDB disponible: cada plPut de abajo va a fallar igual y se cuenta como failed */ }
+
+        const writes = [];
+        list.forEach((raw) => {
+            const entry = plSanitizeEntry(raw);
+            if (!entry) { summary.invalid++; return; }
+            const current = existing.get(entry.id);
+            if (current && typeof current.updatedAt === 'number' && current.updatedAt >= entry.updatedAt) {
+                summary.upToDate++; // la copia local ya es igual o más nueva: no se pisa
+                return;
+            }
+            writes.push(
+                plPut(entry).then(() => { summary.written++; })
+                    .catch((e) => { console.warn('Personales: no se pudo importar', entry.id, e); summary.failed++; })
+            );
+        });
+        await Promise.all(writes);
+        return summary;
+    }
+
     // Se pide UNA sola vez, en el momento del primer guardado exitoso —
     // no en cada guardado ni al cargar la app. En la mayoría de los
     // navegadores esto no muestra ningún diálogo (Chrome lo concede o no
@@ -262,5 +319,5 @@
         }
     });
 
-    window.PL = { openSaveDialog: openSaveDialog, renderList: renderList };
+    window.PL = { openSaveDialog: openSaveDialog, renderList: renderList, exportAll: exportAll, importAll: importAll };
 })();
