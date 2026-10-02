@@ -335,6 +335,439 @@
                 { z: '办法', t: '辦法', p: 'bànfǎ', e: 'Método, solución' },
                 { z: '消息', t: '消息', p: 'xiāoxi', e: 'Noticia, aviso' } ] }
         ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 5 · 你好，我叫玛丽 — TOCFL 準備級 Prep (≈HSK 1) · presentarse
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-prep-jianjie',
+        hsk: 1, exam: 'TOCFL', examLvl: 'Prep',
+        emoji: '👋',
+        titleZh: '你好，我叫玛丽',
+        titleZhT: '你好，我叫瑪麗',
+        titleEs: 'Hola, me llamo Mary',
+        blurb: 'Mary conoce a un profesor de chino en su primer día: nombre, nacionalidad y una charla muy simple. Vocabulario básico del TOCFL 準備級.',
+        lines: [
+            { zh: '你好！我叫玛丽。', zhT: '你好！我叫瑪麗。', es: '¡Hola! Me llamo Mary.' },
+            { zh: '你好，我姓林。很高兴认识你！', zhT: '你好，我姓林。很高興認識你！', es: 'Hola, mi apellido es Lin. ¡Mucho gusto en conocerte!' },
+            { zh: '我也很高兴。你是哪国人？', zhT: '我也很高興。你是哪國人？', es: 'Yo también. ¿De dónde eres?' },
+            { zh: '我是美国人，你呢？', zhT: '我是美國人，你呢？', es: 'Soy estadounidense, ¿y tú?' },
+            { zh: '我是台湾人。你是学生吗？', zhT: '我是台灣人。你是學生嗎？', es: 'Soy taiwanés. ¿Eres estudiante?' },
+            { zh: '是，我是大学生。你的工作是什么？', zhT: '是，我是大學生。你的工作是什麼？', es: 'Sí, soy universitaria. ¿Cuál es tu trabajo?' },
+            { zh: '我是老师，我教中文。', zhT: '我是老師，我教中文。', es: 'Soy profesor, enseño chino.' },
+            { zh: '太好了！我想学中文。', zhT: '太好了！我想學中文。', es: '¡Qué bien! Quiero aprender chino.' }
+        ],
+        quiz: [
+            { zh: '你好！我___玛丽。', zhT: '你好！我___瑪麗。', es: '¡Hola! Me llamo Mary.',
+              opts: [
+                { z: '叫', t: '叫', p: 'jiào', e: 'Llamarse' },
+                { z: '是', t: '是', p: 'shì', e: 'Ser' },
+                { z: '姓', t: '姓', p: 'xìng', e: 'Apellidarse' } ] },
+            { zh: '很___认识你！', zhT: '很___認識你！', es: '¡Mucho gusto en conocerte!',
+              opts: [
+                { z: '高兴', t: '高興', p: 'gāoxìng', e: 'Contento' },
+                { z: '漂亮', t: '漂亮', p: 'piàoliang', e: 'Lindo' },
+                { z: '忙', t: '忙', p: 'máng', e: 'Ocupado' } ] },
+            { zh: '你是___国人？', zhT: '你是___國人？', es: '¿De dónde eres?',
+              opts: [
+                { z: '哪', t: '哪', p: 'nǎ', e: 'Cuál' },
+                { z: '那', t: '那', p: 'nà', e: 'Ese' },
+                { z: '这', t: '這', p: 'zhè', e: 'Este' } ] },
+            { zh: '我是美国人，你___？', zhT: '我是美國人，你___？', es: 'Soy estadounidense, ¿y tú?',
+              opts: [
+                { z: '呢', t: '呢', p: 'ne', e: 'Partícula (¿y...?)' },
+                { z: '吗', t: '嗎', p: 'ma', e: 'Partícula de pregunta sí/no' },
+                { z: '吧', t: '吧', p: 'ba', e: 'Partícula de sugerencia' } ] },
+            { zh: '你是___吗？', zhT: '你是___嗎？', es: '¿Eres estudiante?',
+              opts: [
+                { z: '学生', t: '學生', p: 'xuésheng', e: 'Estudiante' },
+                { z: '老师', t: '老師', p: 'lǎoshī', e: 'Profesor' },
+                { z: '医生', t: '醫生', p: 'yīshēng', e: 'Médico' } ] },
+            { zh: '是，我是___生。', zhT: '是，我是___生。', es: 'Sí, soy universitaria.',
+              opts: [
+                { z: '大学', t: '大學', p: 'dàxué', e: 'Universidad' },
+                { z: '中学', t: '中學', p: 'zhōngxué', e: 'Secundaria' },
+                { z: '小学', t: '小學', p: 'xiǎoxué', e: 'Primaria' } ] },
+            { zh: '我是老师，我___中文。', zhT: '我是老師，我___中文。', es: 'Soy profesor, enseño chino.',
+              opts: [
+                { z: '教', t: '教', p: 'jiāo', e: 'Enseñar' },
+                { z: '学', t: '學', p: 'xué', e: 'Aprender' },
+                { z: '说', t: '說', p: 'shuō', e: 'Hablar' } ] },
+            { zh: '太好了！我___学中文。', zhT: '太好了！我___學中文。', es: '¡Qué bien! Quiero aprender chino.',
+              opts: [
+                { z: '想', t: '想', p: 'xiǎng', e: 'Querer' },
+                { z: '会', t: '會', p: 'huì', e: 'Saber (hacer algo)' },
+                { z: '能', t: '能', p: 'néng', e: 'Poder' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 6 · 我的一天 — TOCFL 準備級 Prep (≈HSK 1) · familia y rutina
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-prep-wodejia',
+        hsk: 1, exam: 'TOCFL', examLvl: 'Prep',
+        emoji: '🏠',
+        titleZh: '我的一天',
+        titleZhT: '我的一天',
+        titleEs: 'Mi día',
+        blurb: 'Una descripción muy simple de la familia y la rutina diaria — números, horas y gustos básicos del TOCFL 準備級.',
+        lines: [
+            { zh: '这是我的家。', zhT: '這是我的家。', es: 'Esta es mi familia.' },
+            { zh: '爸爸、妈妈、哥哥和我，一家四口。', zhT: '爸爸、媽媽、哥哥和我，一家四口。', es: 'Papá, mamá, mi hermano mayor y yo, somos cuatro en la familia.' },
+            { zh: '爸爸是医生，妈妈是老师。', zhT: '爸爸是醫生，媽媽是老師。', es: 'Papá es médico, mamá es profesora.' },
+            { zh: '哥哥是大学生，他在台北上学。', zhT: '哥哥是大學生，他在臺北上學。', es: 'Mi hermano es universitario, estudia en Taipéi.' },
+            { zh: '我每天早上七点起床。', zhT: '我每天早上七點起床。', es: 'Me levanto todos los días a las siete de la mañana.' },
+            { zh: '我喜欢喝咖啡，不喜欢喝茶。', zhT: '我喜歡喝咖啡，不喜歡喝茶。', es: 'Me gusta tomar café, no me gusta el té.' },
+            { zh: '晚上我们一起吃饭，很高兴。', zhT: '晚上我們一起吃飯，很高興。', es: 'Por la noche comemos juntos, estamos contentos.' },
+            { zh: '周末，我们常常去公园。', zhT: '週末，我們常常去公園。', es: 'Los fines de semana solemos ir al parque.' },
+            { zh: '我很爱我的家人。', zhT: '我很愛我的家人。', es: 'Quiero mucho a mi familia.' }
+        ],
+        quiz: [
+            { zh: '爸爸、妈妈、哥哥和我，一家四___。', zhT: '爸爸、媽媽、哥哥和我，一家四___。', es: 'Papá, mamá, mi hermano mayor y yo, somos cuatro en la familia.',
+              opts: [
+                { z: '口', t: '口', p: 'kǒu', e: 'Clasificador de personas de una familia' },
+                { z: '个', t: '個', p: 'gè', e: 'Clasificador general' },
+                { z: '位', t: '位', p: 'wèi', e: 'Clasificador de personas (cortés)' } ] },
+            { zh: '爸爸是___，妈妈是老师。', zhT: '爸爸是___，媽媽是老師。', es: 'Papá es médico, mamá es profesora.',
+              opts: [
+                { z: '医生', t: '醫生', p: 'yīshēng', e: 'Médico' },
+                { z: '学生', t: '學生', p: 'xuésheng', e: 'Estudiante' },
+                { z: '司机', t: '司機', p: 'sījī', e: 'Chofer' } ] },
+            { zh: '哥哥是大学生，他在台北上___。', zhT: '哥哥是大學生，他在臺北上___。', es: 'Mi hermano es universitario, estudia en Taipéi.',
+              opts: [
+                { z: '学', t: '學', p: 'xué', e: 'Estudiar (上学 = ir a clase)' },
+                { z: '班', t: '班', p: 'bān', e: 'Trabajar (上班 = ir a trabajar)' },
+                { z: '课', t: '課', p: 'kè', e: 'Clase' } ] },
+            { zh: '我每天早上七点___。', zhT: '我每天早上七點___。', es: 'Me levanto todos los días a las siete de la mañana.',
+              opts: [
+                { z: '起床', t: '起床', p: 'qǐchuáng', e: 'Levantarse' },
+                { z: '睡觉', t: '睡覺', p: 'shuìjiào', e: 'Dormir' },
+                { z: '吃饭', t: '吃飯', p: 'chīfàn', e: 'Comer' } ] },
+            { zh: '我___喝咖啡，不喜欢喝茶。', zhT: '我___喝咖啡，不喜歡喝茶。', es: 'Me gusta tomar café, no me gusta el té.',
+              opts: [
+                { z: '喜欢', t: '喜歡', p: 'xǐhuan', e: 'Gustar' },
+                { z: '想', t: '想', p: 'xiǎng', e: 'Querer' },
+                { z: '要', t: '要', p: 'yào', e: 'Querer, necesitar' } ] },
+            { zh: '晚上我们一起吃饭，很___。', zhT: '晚上我們一起吃飯，很___。', es: 'Por la noche comemos juntos, estamos contentos.',
+              opts: [
+                { z: '高兴', t: '高興', p: 'gāoxìng', e: 'Contento' },
+                { z: '忙', t: '忙', p: 'máng', e: 'Ocupado' },
+                { z: '累', t: '累', p: 'lèi', e: 'Cansado' } ] },
+            { zh: '周末，我们常常去___。', zhT: '週末，我們常常去___。', es: 'Los fines de semana solemos ir al parque.',
+              opts: [
+                { z: '公园', t: '公園', p: 'gōngyuán', e: 'Parque' },
+                { z: '餐厅', t: '餐廳', p: 'cāntīng', e: 'Restaurante' },
+                { z: '学校', t: '學校', p: 'xuéxiào', e: 'Escuela' } ] },
+            { zh: '我很___我的家人。', zhT: '我很___我的家人。', es: 'Quiero mucho a mi familia.',
+              opts: [
+                { z: '爱', t: '愛', p: 'ài', e: 'Amar' },
+                { z: '想', t: '想', p: 'xiǎng', e: 'Extrañar, pensar en' },
+                { z: '喜欢', t: '喜歡', p: 'xǐhuan', e: 'Gustar' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 7 · 去图书馆的路 — TOCFL 入門級 A1 (≈HSK 1) · direcciones
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-a1-tushuguan',
+        hsk: 1, exam: 'TOCFL', examLvl: 'A1',
+        emoji: '📚',
+        titleZh: '去图书馆的路',
+        titleZhT: '去圖書館的路',
+        titleEs: 'El camino a la biblioteca',
+        blurb: 'Alguien busca la biblioteca y pide indicaciones en la calle — direcciones, distancias y cortesía básica del TOCFL 入門級.',
+        lines: [
+            { zh: '请问，图书馆怎么走？', zhT: '請問，圖書館怎麼走？', es: 'Disculpe, ¿cómo se llega a la biblioteca?' },
+            { zh: '你先往前走，到十字路口左转。', zhT: '你先往前走，到十字路口左轉。', es: 'Primero sigue derecho, en el cruce dobla a la izquierda.' },
+            { zh: '图书馆在邮局的对面。', zhT: '圖書館在郵局的對面。', es: 'La biblioteca está frente al correo.' },
+            { zh: '离这里远不远？', zhT: '離這裡遠不遠？', es: '¿Está lejos de aquí?' },
+            { zh: '不远，走路五分钟就到了。', zhT: '不遠，走路五分鐘就到了。', es: 'No, a pie se llega en cinco minutos.' },
+            { zh: '谢谢你！我找了很久。', zhT: '謝謝你！我找了很久。', es: '¡Gracias! Hace rato que la busco.' },
+            { zh: '不客气。你要借书吗？', zhT: '不客氣。你要借書嗎？', es: 'De nada. ¿Vas a pedir prestado un libro?' },
+            { zh: '对，我要还书，也要借一本新的。', zhT: '對，我要還書，也要借一本新的。', es: 'Sí, voy a devolver uno y pedir uno nuevo.' },
+            { zh: '希望你找到想看的书。', zhT: '希望你找到想看的書。', es: 'Espero que encuentres el libro que quieres.' }
+        ],
+        quiz: [
+            { zh: '请问，图书馆___走？', zhT: '請問，圖書館___走？', es: 'Disculpe, ¿cómo se llega a la biblioteca?',
+              opts: [
+                { z: '怎么', t: '怎麼', p: 'zěnme', e: 'Cómo' },
+                { z: '什么', t: '什麼', p: 'shénme', e: 'Qué' },
+                { z: '哪里', t: '哪裡', p: 'nǎlǐ', e: 'Dónde' } ] },
+            { zh: '到十字路口___转。', zhT: '到十字路口___轉。', es: 'En el cruce dobla a la izquierda.',
+              opts: [
+                { z: '左', t: '左', p: 'zuǒ', e: 'Izquierda' },
+                { z: '右', t: '右', p: 'yòu', e: 'Derecha' },
+                { z: '前', t: '前', p: 'qián', e: 'Adelante' } ] },
+            { zh: '图书馆在邮局的___。', zhT: '圖書館在郵局的___。', es: 'La biblioteca está frente al correo.',
+              opts: [
+                { z: '对面', t: '對面', p: 'duìmiàn', e: 'Enfrente' },
+                { z: '旁边', t: '旁邊', p: 'pángbiān', e: 'Al lado' },
+                { z: '中间', t: '中間', p: 'zhōngjiān', e: 'En medio' } ] },
+            { zh: '___这里远不远？', zhT: '___這裡遠不遠？', es: '¿Está lejos de aquí?',
+              opts: [
+                { z: '离', t: '離', p: 'lí', e: 'A una distancia de' },
+                { z: '从', t: '從', p: 'cóng', e: 'Desde' },
+                { z: '到', t: '到', p: 'dào', e: 'Hasta' } ] },
+            { zh: '不远，走路五___就到了。', zhT: '不遠，走路五___就到了。', es: 'No, a pie se llega en cinco minutos.',
+              opts: [
+                { z: '分钟', t: '分鐘', p: 'fēnzhōng', e: 'Minutos' },
+                { z: '小时', t: '小時', p: 'xiǎoshí', e: 'Horas' },
+                { z: '点', t: '點', p: 'diǎn', e: 'En punto (hora)' } ] },
+            { zh: '谢谢你！我___了很久。', zhT: '謝謝你！我___了很久。', es: '¡Gracias! Hace rato que la busco.',
+              opts: [
+                { z: '找', t: '找', p: 'zhǎo', e: 'Buscar' },
+                { z: '等', t: '等', p: 'děng', e: 'Esperar' },
+                { z: '看', t: '看', p: 'kàn', e: 'Mirar' } ] },
+            { zh: '你要___书吗？', zhT: '你要___書嗎？', es: '¿Vas a pedir prestado un libro?',
+              opts: [
+                { z: '借', t: '借', p: 'jiè', e: 'Pedir prestado' },
+                { z: '买', t: '買', p: 'mǎi', e: 'Comprar' },
+                { z: '还', t: '還', p: 'huán', e: 'Devolver' } ] },
+            { zh: '我要___书，也要借一本新的。', zhT: '我要___書，也要借一本新的。', es: 'Voy a devolver uno y pedir uno nuevo.',
+              opts: [
+                { z: '还', t: '還', p: 'huán', e: 'Devolver' },
+                { z: '借', t: '借', p: 'jiè', e: 'Pedir prestado' },
+                { z: '读', t: '讀', p: 'dú', e: 'Leer' } ] },
+            { zh: '___你找到想看的书。', zhT: '___你找到想看的書。', es: 'Espero que encuentres el libro que quieres.',
+              opts: [
+                { z: '希望', t: '希望', p: 'xīwàng', e: 'Esperar (desear)' },
+                { z: '以为', t: '以為', p: 'yǐwéi', e: 'Creer (erróneamente)' },
+                { z: '相信', t: '相信', p: 'xiāngxìn', e: 'Creer' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 8 · 朋友的生日礼物 — TOCFL 入門級 A1 (≈HSK 1) · compras y colores
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-a1-shengri',
+        hsk: 1, exam: 'TOCFL', examLvl: 'A1',
+        emoji: '🎁',
+        titleZh: '朋友的生日礼物',
+        titleZhT: '朋友的生日禮物',
+        titleEs: 'El regalo de cumpleaños de una amiga',
+        blurb: 'Dos amigas van de compras para elegir un regalo de cumpleaños — colores, precios y gustos del TOCFL 入門級.',
+        lines: [
+            { zh: '下星期是小华的生日。', zhT: '下星期是小華的生日。', es: 'La próxima semana es el cumpleaños de Xiaohua.' },
+            { zh: '我们去商店买生日礼物，好不好？', zhT: '我們去商店買生日禮物，好不好？', es: 'Vamos a la tienda a comprar un regalo de cumpleaños, ¿sí?' },
+            { zh: '好啊，她喜欢什么颜色？', zhT: '好啊，她喜歡什麼顏色？', es: 'Bueno, ¿qué color le gusta?' },
+            { zh: '她最喜欢白色和黄色。', zhT: '她最喜歡白色和黃色。', es: 'Le gustan más el blanco y el amarillo.' },
+            { zh: '这条裙子怎么样？颜色很漂亮。', zhT: '這條裙子怎麼樣？顏色很漂亮。', es: '¿Qué tal esta falda? El color es muy lindo.' },
+            { zh: '太贵了，我们买不起。', zhT: '太貴了，我們買不起。', es: 'Es muy cara, no nos alcanza.' },
+            { zh: '那这个呢？比较便宜。', zhT: '那這個呢？比較便宜。', es: '¿Y esto? Es más barato.' },
+            { zh: '这个不错，而且很特别。', zhT: '這個不錯，而且很特別。', es: 'Este está bien, y además es especial.' },
+            { zh: '老板，这个多少钱？可以便宜一点吗？', zhT: '老闆，這個多少錢？可以便宜一點嗎？', es: 'Señor, ¿cuánto cuesta esto? ¿Puede hacer un descuento?' },
+            { zh: '当然可以，希望她会喜欢。', zhT: '當然可以，希望她會喜歡。', es: 'Claro que sí, espero que le guste.' }
+        ],
+        quiz: [
+            { zh: '我们去商店买生日___，好不好？', zhT: '我們去商店買生日___，好不好？', es: 'Vamos a la tienda a comprar un regalo de cumpleaños, ¿sí?',
+              opts: [
+                { z: '礼物', t: '禮物', p: 'lǐwù', e: 'Regalo' },
+                { z: '东西', t: '東西', p: 'dōngxi', e: 'Cosa' },
+                { z: '衣服', t: '衣服', p: 'yīfu', e: 'Ropa' } ] },
+            { zh: '她喜欢什么___？', zhT: '她喜歡什麼___？', es: '¿Qué color le gusta?',
+              opts: [
+                { z: '颜色', t: '顏色', p: 'yánsè', e: 'Color' },
+                { z: '样子', t: '樣子', p: 'yàngzi', e: 'Aspecto, forma' },
+                { z: '大小', t: '大小', p: 'dàxiǎo', e: 'Tamaño' } ] },
+            { zh: '这条裙子怎么样？颜色很___。', zhT: '這條裙子怎麼樣？顏色很___。', es: '¿Qué tal esta falda? El color es muy lindo.',
+              opts: [
+                { z: '漂亮', t: '漂亮', p: 'piàoliang', e: 'Lindo' },
+                { z: '便宜', t: '便宜', p: 'piányí', e: 'Barato' },
+                { z: '简单', t: '簡單', p: 'jiǎndān', e: 'Simple' } ] },
+            { zh: '太___了，我们买不起。', zhT: '太___了，我們買不起。', es: 'Es muy cara, no nos alcanza.',
+              opts: [
+                { z: '贵', t: '貴', p: 'guì', e: 'Caro' },
+                { z: '便宜', t: '便宜', p: 'piányí', e: 'Barato' },
+                { z: '重', t: '重', p: 'zhòng', e: 'Pesado' } ] },
+            { zh: '那这个呢？___便宜。', zhT: '那這個呢？___便宜。', es: '¿Y esto? Es más barato.',
+              opts: [
+                { z: '比较', t: '比較', p: 'bǐjiào', e: 'Relativamente, más' },
+                { z: '最', t: '最', p: 'zuì', e: 'El más' },
+                { z: '非常', t: '非常', p: 'fēicháng', e: 'Muy, extremadamente' } ] },
+            { zh: '这个不错，而且很___。', zhT: '這個不錯，而且很___。', es: 'Este está bien, y además es especial.',
+              opts: [
+                { z: '特别', t: '特別', p: 'tèbié', e: 'Especial' },
+                { z: '奇怪', t: '奇怪', p: 'qíguài', e: 'Raro' },
+                { z: '普通', t: '普通', p: 'pǔtōng', e: 'Común' } ] },
+            { zh: '老板，这个___钱？', zhT: '老闆，這個___錢？', es: 'Señor, ¿cuánto cuesta esto?',
+              opts: [
+                { z: '多少', t: '多少', p: 'duōshǎo', e: 'Cuánto' },
+                { z: '多么', t: '多麼', p: 'duōme', e: 'Qué tan (exclamativo)' },
+                { z: '几', t: '幾', p: 'jǐ', e: 'Cuántos (número pequeño)' } ] },
+            { zh: '___便宜一点吗？', zhT: '___便宜一點嗎？', es: '¿Puede hacer un descuento?',
+              opts: [
+                { z: '可以', t: '可以', p: 'kěyǐ', e: 'Poder, se puede' },
+                { z: '应该', t: '應該', p: 'yīnggāi', e: 'Debería' },
+                { z: '要', t: '要', p: 'yào', e: 'Querer, necesitar' } ] },
+            { zh: '当然可以，___她会喜欢。', zhT: '當然可以，___她會喜歡。', es: 'Claro que sí, espero que le guste.',
+              opts: [
+                { z: '希望', t: '希望', p: 'xīwàng', e: 'Esperar (desear)' },
+                { z: '知道', t: '知道', p: 'zhīdào', e: 'Saber' },
+                { z: '觉得', t: '覺得', p: 'juéde', e: 'Sentir, opinar' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 9 · 工作面试 — TOCFL 高階級 B2 (≈HSK 6) · entrevista de trabajo
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-b2-mianshi',
+        hsk: 6, exam: 'TOCFL', examLvl: 'B2',
+        emoji: '💼',
+        titleZh: '工作面试',
+        titleZhT: '工作面試',
+        titleEs: 'La entrevista de trabajo',
+        blurb: 'Una entrevista laboral: experiencia, motivos de cambio y expectativas de desarrollo — vocabulario profesional del TOCFL 高階級.',
+        lines: [
+            { zh: '王先生，谢谢你今天来面试。', zhT: '王先生，謝謝你今天來面試。', es: 'Sr. Wang, gracias por venir hoy a la entrevista.' },
+            { zh: '不客气，我对这个职位很有兴趣。', zhT: '不客氣，我對這個職位很有興趣。', es: 'De nada, estoy muy interesado en este puesto.' },
+            { zh: '可以说说你过去的工作经验吗？', zhT: '可以說說你過去的工作經驗嗎？', es: '¿Puede contarme sobre su experiencia laboral previa?' },
+            { zh: '我在一家贸易公司工作了三年，负责客户服务。', zhT: '我在一家貿易公司工作了三年，負責客戶服務。', es: 'Trabajé tres años en una empresa de comercio, a cargo de atención al cliente.' },
+            { zh: '那你为什么想离开那家公司？', zhT: '那你為什麼想離開那家公司？', es: '¿Y por qué quiere dejar esa empresa?' },
+            { zh: '我希望能有更多发展的机会，学习新的技能。', zhT: '我希望能有更多發展的機會，學習新的技能。', es: 'Espero tener más oportunidades de desarrollo y aprender nuevas habilidades.' },
+            { zh: '我们公司常常需要跟国外客户沟通，你的外语能力怎么样？', zhT: '我們公司常常需要跟國外客戶溝通，你的外語能力怎麼樣？', es: 'Nuestra empresa suele comunicarse con clientes extranjeros, ¿cómo es su nivel de idiomas?' },
+            { zh: '我的英文不错，最近也在学中文。', zhT: '我的英文不錯，最近也在學中文。', es: 'Mi inglés es bueno, y últimamente también estudio chino.' },
+            { zh: '很好，如果录取了，你什么时候可以上班？', zhT: '很好，如果錄取了，你什麼時候可以上班？', es: 'Muy bien, si lo contratamos, ¿cuándo podría empezar?' },
+            { zh: '我可以下个月一号开始。', zhT: '我可以下個月一號開始。', es: 'Puedo empezar el primero del próximo mes.' },
+            { zh: '我们会尽快跟你联络，谢谢你的耐心等待。', zhT: '我們會盡快跟你聯絡，謝謝你的耐心等待。', es: 'Nos pondremos en contacto lo antes posible, gracias por su paciencia.' },
+            { zh: '谢谢您给我这个机会，期待您的消息。', zhT: '謝謝您給我這個機會，期待您的消息。', es: 'Gracias por darme esta oportunidad, espero su respuesta.' }
+        ],
+        quiz: [
+            { zh: '我对这个职位很有___。', zhT: '我對這個職位很有___。', es: 'Estoy muy interesado en este puesto.',
+              opts: [
+                { z: '兴趣', t: '興趣', p: 'xìngqù', e: 'Interés' },
+                { z: '意思', t: '意思', p: 'yìsi', e: 'Significado' },
+                { z: '把握', t: '把握', p: 'bǎwò', e: 'Certeza, seguridad' } ] },
+            { zh: '可以说说你过去的工作___吗？', zhT: '可以說說你過去的工作___嗎？', es: '¿Puede contarme sobre su experiencia laboral previa?',
+              opts: [
+                { z: '经验', t: '經驗', p: 'jīngyàn', e: 'Experiencia' },
+                { z: '计划', t: '計劃', p: 'jìhuà', e: 'Plan' },
+                { z: '态度', t: '態度', p: 'tàidù', e: 'Actitud' } ] },
+            { zh: '我在贸易公司工作三年，___客户服务。', zhT: '我在貿易公司工作三年，___客戶服務。', es: 'Trabajé tres años en una empresa de comercio, a cargo de atención al cliente.',
+              opts: [
+                { z: '负责', t: '負責', p: 'fùzé', e: 'Estar a cargo de' },
+                { z: '关于', t: '關於', p: 'guānyú', e: 'Acerca de' },
+                { z: '帮忙', t: '幫忙', p: 'bāngmáng', e: 'Ayudar' } ] },
+            { zh: '你为什么想___那家公司？', zhT: '你為什麼想___那家公司？', es: '¿Por qué quiere dejar esa empresa?',
+              opts: [
+                { z: '离开', t: '離開', p: 'líkāi', e: 'Dejar, irse de' },
+                { z: '进入', t: '進入', p: 'jìnrù', e: 'Entrar a' },
+                { z: '加入', t: '加入', p: 'jiārù', e: 'Unirse a' } ] },
+            { zh: '我希望能有更多发展的___。', zhT: '我希望能有更多發展的___。', es: 'Espero tener más oportunidades de desarrollo.',
+              opts: [
+                { z: '机会', t: '機會', p: 'jīhuì', e: 'Oportunidad' },
+                { z: '压力', t: '壓力', p: 'yālì', e: 'Presión' },
+                { z: '问题', t: '問題', p: 'wèntí', e: 'Problema' } ] },
+            { zh: '我们公司常常需要跟国外客户___。', zhT: '我們公司常常需要跟國外客戶___。', es: 'Nuestra empresa suele comunicarse con clientes extranjeros.',
+              opts: [
+                { z: '沟通', t: '溝通', p: 'gōutōng', e: 'Comunicarse' },
+                { z: '竞争', t: '競爭', p: 'jìngzhēng', e: 'Competir' },
+                { z: '合作', t: '合作', p: 'hézuò', e: 'Colaborar' } ] },
+            { zh: '你的外语___怎么样？', zhT: '你的外語___怎麼樣？', es: '¿Cómo es su nivel de idiomas?',
+              opts: [
+                { z: '能力', t: '能力', p: 'nénglì', e: 'Capacidad' },
+                { z: '成绩', t: '成績', p: 'chéngjì', e: 'Calificación' },
+                { z: '兴趣', t: '興趣', p: 'xìngqù', e: 'Interés' } ] },
+            { zh: '如果___了，你什么时候可以上班？', zhT: '如果___了，你什麼時候可以上班？', es: 'Si lo contratamos, ¿cuándo podría empezar?',
+              opts: [
+                { z: '录取', t: '錄取', p: 'lùqǔ', e: 'Ser contratado/admitido' },
+                { z: '拒绝', t: '拒絕', p: 'jùjué', e: 'Rechazar' },
+                { z: '通过', t: '通過', p: 'tōngguò', e: 'Aprobar, pasar' } ] },
+            { zh: '我们会尽快跟你___。', zhT: '我們會盡快跟你___。', es: 'Nos pondremos en contacto lo antes posible.',
+              opts: [
+                { z: '联络', t: '聯絡', p: 'liánluò', e: 'Contactar' },
+                { z: '讨论', t: '討論', p: 'tǎolùn', e: 'Discutir' },
+                { z: '见面', t: '見面', p: 'jiànmiàn', e: 'Encontrarse en persona' } ] },
+            { zh: '谢谢您给我这个机会，___您的消息。', zhT: '謝謝您給我這個機會，___您的消息。', es: 'Gracias por darme esta oportunidad, espero su respuesta.',
+              opts: [
+                { z: '期待', t: '期待', p: 'qídài', e: 'Esperar con ilusión' },
+                { z: '等待', t: '等待', p: 'děngdài', e: 'Esperar' },
+                { z: '担心', t: '擔心', p: 'dānxīn', e: 'Preocuparse' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 10 · 环保与生活 — TOCFL 高階級 B2 (≈HSK 6) · medioambiente
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-b2-huanbao',
+        hsk: 6, exam: 'TOCFL', examLvl: 'B2',
+        emoji: '🌱',
+        titleZh: '环保与生活',
+        titleZhT: '環保與生活',
+        titleEs: 'El medioambiente y la vida cotidiana',
+        blurb: 'Dos amigos debaten cómo reducir la basura y qué responsabilidad le toca a cada parte de la sociedad — vocabulario abstracto del TOCFL 高階級.',
+        lines: [
+            { zh: '最近环保的议题越来越受到重视。', zhT: '最近環保的議題越來越受到重視。', es: 'Últimamente el tema del medioambiente recibe cada vez más atención.' },
+            { zh: '你觉得我们应该怎么减少垃圾呢？', zhT: '你覺得我們應該怎麼減少垃圾呢？', es: '¿Qué crees que deberíamos hacer para reducir la basura?' },
+            { zh: '我认为从日常生活做起最重要，比如少用塑胶袋。', zhT: '我認為從日常生活做起最重要，比如少用塑膠袋。', es: 'Creo que lo más importante es empezar por la vida diaria, como usar menos bolsas de plástico.' },
+            { zh: '对，很多人出门都会自备环保杯和购物袋。', zhT: '對，很多人出門都會自備環保杯和購物袋。', es: 'Sí, mucha gente al salir lleva su propio vaso ecológico y bolsa de compras.' },
+            { zh: '不过有些人觉得这样很麻烦，不愿意改变习惯。', zhT: '不過有些人覺得這樣很麻煩，不願意改變習慣。', es: 'Pero algunos creen que es muy molesto y no quieren cambiar sus hábitos.' },
+            { zh: '政府应该提供更多方便的回收设施。', zhT: '政府應該提供更多方便的回收設施。', es: 'El gobierno debería ofrecer más instalaciones de reciclaje accesibles.' },
+            { zh: '没错，而且可以透过教育让孩子从小养成习惯。', zhT: '沒錯，而且可以透過教育讓孩子從小養成習慣。', es: 'Exacto, y se puede educar a los niños desde pequeños para que adquieran el hábito.' },
+            { zh: '企业的责任也很大，应该减少包装的浪费。', zhT: '企業的責任也很大，應該減少包裝的浪費。', es: 'La responsabilidad de las empresas también es grande; deberían reducir el desperdicio de empaques.' },
+            { zh: '我同意，环保不只是个人的事，是全社会的责任。', zhT: '我同意，環保不只是個人的事，是全社會的責任。', es: 'Estoy de acuerdo, el cuidado ambiental no es solo cosa individual, es responsabilidad de toda la sociedad.' },
+            { zh: '如果大家一起努力，环境一定会越来越好。', zhT: '如果大家一起努力，環境一定會越來越好。', es: 'Si todos nos esforzamos juntos, el medioambiente seguramente mejorará cada vez más.' },
+            { zh: '我们学校下个月也要办一个环保活动。', zhT: '我們學校下個月也要辦一個環保活動。', es: 'Nuestra escuela también va a organizar una actividad ecológica el próximo mes.' },
+            { zh: '真的吗？我很愿意参加，一起为地球尽一份力。', zhT: '真的嗎？我很願意參加，一起為地球盡一份力。', es: '¿De verdad? Con gusto participo, aportemos juntos por el planeta.' },
+            { zh: '那我们先约时间讨论细节吧。', zhT: '那我們先約時間討論細節吧。', es: 'Entonces quedemos para hablar de los detalles.' }
+        ],
+        quiz: [
+            { zh: '环保的议题越来越受到___。', zhT: '環保的議題越來越受到___。', es: 'El tema del medioambiente recibe cada vez más atención.',
+              opts: [
+                { z: '重视', t: '重視', p: 'zhòngshì', e: 'Atención, importancia' },
+                { z: '欢迎', t: '歡迎', p: 'huānyíng', e: 'Bienvenida' },
+                { z: '怀疑', t: '懷疑', p: 'huáiyí', e: 'Sospecha, duda' } ] },
+            { zh: '我们应该怎么___垃圾呢？', zhT: '我們應該怎麼___垃圾呢？', es: '¿Qué deberíamos hacer para reducir la basura?',
+              opts: [
+                { z: '减少', t: '減少', p: 'jiǎnshǎo', e: 'Reducir' },
+                { z: '增加', t: '增加', p: 'zēngjiā', e: 'Aumentar' },
+                { z: '处理', t: '處理', p: 'chǔlǐ', e: 'Procesar, manejar' } ] },
+            { zh: '有些人不愿意改变___。', zhT: '有些人不願意改變___。', es: 'Algunos no quieren cambiar sus hábitos.',
+              opts: [
+                { z: '习惯', t: '習慣', p: 'xíguàn', e: 'Costumbre, hábito' },
+                { z: '想法', t: '想法', p: 'xiǎngfǎ', e: 'Idea, opinión' },
+                { z: '生活', t: '生活', p: 'shēnghuó', e: 'Vida' } ] },
+            { zh: '政府应该提供更多方便的回收___。', zhT: '政府應該提供更多方便的回收___。', es: 'El gobierno debería ofrecer más instalaciones de reciclaje accesibles.',
+              opts: [
+                { z: '设施', t: '設施', p: 'shèshī', e: 'Instalaciones' },
+                { z: '政策', t: '政策', p: 'zhèngcè', e: 'Política (pública)' },
+                { z: '资源', t: '資源', p: 'zīyuán', e: 'Recurso' } ] },
+            { zh: '让孩子从小___习惯。', zhT: '讓孩子從小___習慣。', es: 'Que los niños adquieran el hábito desde pequeños.',
+              opts: [
+                { z: '养成', t: '養成', p: 'yǎngchéng', e: 'Adquirir, formar (un hábito)' },
+                { z: '改变', t: '改變', p: 'gǎibiàn', e: 'Cambiar' },
+                { z: '学习', t: '學習', p: 'xuéxí', e: 'Aprender' } ] },
+            { zh: '企业的___也很大。', zhT: '企業的___也很大。', es: 'La responsabilidad de las empresas también es grande.',
+              opts: [
+                { z: '责任', t: '責任', p: 'zérèn', e: 'Responsabilidad' },
+                { z: '利益', t: '利益', p: 'lìyì', e: 'Beneficio' },
+                { z: '压力', t: '壓力', p: 'yālì', e: 'Presión' } ] },
+            { zh: '应该减少包装的___。', zhT: '應該減少包裝的___。', es: 'Deberían reducir el desperdicio de empaques.',
+              opts: [
+                { z: '浪费', t: '浪費', p: 'làngfèi', e: 'Desperdicio' },
+                { z: '成本', t: '成本', p: 'chéngběn', e: 'Costo' },
+                { z: '数量', t: '數量', p: 'shùliàng', e: 'Cantidad' } ] },
+            { zh: '我___，环保是全社会的责任。', zhT: '我___，環保是全社會的責任。', es: 'Estoy de acuerdo, el cuidado ambiental es responsabilidad de toda la sociedad.',
+              opts: [
+                { z: '同意', t: '同意', p: 'tóngyì', e: 'Estar de acuerdo' },
+                { z: '反对', t: '反對', p: 'fǎnduì', e: 'Oponerse' },
+                { z: '怀疑', t: '懷疑', p: 'huáiyí', e: 'Dudar' } ] },
+            { zh: '如果大家一起___，环境一定会越来越好。', zhT: '如果大家一起___，環境一定會越來越好。', es: 'Si todos nos esforzamos juntos, el medioambiente mejorará.',
+              opts: [
+                { z: '努力', t: '努力', p: 'nǔlì', e: 'Esforzarse' },
+                { z: '休息', t: '休息', p: 'xiūxí', e: 'Descansar' },
+                { z: '抱怨', t: '抱怨', p: 'bàoyuàn', e: 'Quejarse' } ] },
+            { zh: '那我们先约时间讨论___吧。', zhT: '那我們先約時間討論___吧。', es: 'Entonces quedemos para hablar de los detalles.',
+              opts: [
+                { z: '细节', t: '細節', p: 'xìjié', e: 'Detalle' },
+                { z: '结果', t: '結果', p: 'jiéguǒ', e: 'Resultado' },
+                { z: '原因', t: '原因', p: 'yuányīn', e: 'Causa' } ] }
+        ]
     }
 
     ];

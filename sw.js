@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v143'; // — TOCFL Band C (流利精通級, Nivel 5) completo: 2.776 palabras de la lista oficial 2023
+const VERSION = 'v144'; // — 6 lecciones graduadas TOCFL nuevas: Preparatorio, Básico temprano (A1) e Intermedio 2 (B2)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
