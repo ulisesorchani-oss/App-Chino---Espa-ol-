@@ -995,6 +995,429 @@
                 { z: '潜力', t: '潛力', p: 'qiánlì', e: 'Potencial' },
                 { z: '惯例', t: '慣例', p: 'guànlì', e: 'Convención, usanza' } ] }
         ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HSK 7 · 外交谈判 — negociación diplomática, registro formal avanzado
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'h7-tanpan',
+        hsk: 7,
+        emoji: '🤝',
+        titleZh: '外交谈判',
+        titleZhT: '外交談判',
+        titleEs: 'La negociación diplomática',
+        blurb: 'Dos delegaciones negocian un acuerdo comercial: concesiones, líneas rojas y el arte del compromiso — vocabulario diplomático de nivel avanzado.',
+        lines: [
+            { zh: '这次双边会谈的主要议题是贸易壁垒与关税减让。', zhT: '這次雙邊會談的主要議題是貿易壁壘與關稅減讓。', es: 'Esta ronda de conversaciones bilaterales tiene como tema principal las barreras comerciales y la reducción arancelaria.' },
+            { zh: '甲代表：我们希望贵方能在农产品关税上做出实质性让步。', zhT: '甲代表：我們希望貴方能在農產品關稅上做出實質性讓步。', es: 'Representante A: Esperamos que su parte haga concesiones sustanciales en los aranceles agrícolas.' },
+            { zh: '乙代表：这涉及国内产业的切身利益，恐怕难以一步到位。', zhT: '乙代表：這涉及國內產業的切身利益，恐怕難以一步到位。', es: 'Representante B: Eso afecta directamente a nuestras industrias nacionales; me temo que no se puede resolver de un solo golpe.' },
+            { zh: '甲代表：那我们是否可以设定一个分阶段实施的时间表？', zhT: '甲代表：那我們是否可以設定一個分階段實施的時間表？', es: 'Representante A: Entonces, ¿podríamos fijar un cronograma de implementación por etapas?' },
+            { zh: '乙代表：原则上可以考虑，但须以互惠互利为前提。', zhT: '乙代表：原則上可以考慮，但須以互惠互利為前提。', es: 'Representante B: En principio podemos considerarlo, pero bajo la premisa del beneficio mutuo.' },
+            { zh: '甲代表：我方的底线是三年内关税降至百分之五以下。', zhT: '甲代表：我方的底線是三年內關稅降至百分之五以下。', es: 'Representante A: Nuestra línea roja es reducir el arancel a menos del cinco por ciento en tres años.' },
+            { zh: '乙代表：这个期限过于紧迫，我们需要更长的缓冲期来调整产业结构。', zhT: '乙代表：這個期限過於緊迫，我們需要更長的緩衝期來調整產業結構。', es: 'Representante B: Ese plazo es demasiado ajustado; necesitamos un período de transición más largo para reestructurar la industria.' },
+            { zh: '甲代表：那么贵方的期望是多久？', zhT: '甲代表：那麼貴方的期望是多久？', es: 'Representante A: ¿Y cuánto tiempo esperarían ustedes?' },
+            { zh: '乙代表：我们建议五年，并附加技术合作条款作为配套。', zhT: '乙代表：我們建議五年，並附加技術合作條款作為配套。', es: 'Representante B: Proponemos cinco años, acompañados de una cláusula de cooperación tecnológica como contrapartida.' },
+            { zh: '甲代表：技术合作的具体范围能否进一步明确？', zhT: '甲代表：技術合作的具體範圍能否進一步明確？', es: 'Representante A: ¿Podría precisarse el alcance concreto de esa cooperación tecnológica?' },
+            { zh: '乙代表：包括农业机械的技术转让与人才培训项目。', zhT: '乙代表：包括農業機械的技術轉讓與人才培訓項目。', es: 'Representante B: Incluiría la transferencia tecnológica de maquinaria agrícola y programas de capacitación de personal.' },
+            { zh: '甲代表：这个提议值得考虑，但我们需要向上级汇报请示。', zhT: '甲代表：這個提議值得考慮，但我們需要向上級彙報請示。', es: 'Representante A: Esa propuesta merece consideración, pero debemos informar y consultar a nuestros superiores.' },
+            { zh: '（旁白）双方陷入短暂的僵局，会议暂时休会。', zhT: '（旁白）雙方陷入短暫的僵局，會議暫時休會。', es: 'Narración: Ambas partes cayeron en un breve punto muerto y la reunión se suspendió temporalmente.' },
+            { zh: '乙代表：经过内部磋商，我们愿意将期限缩短至四年。', zhT: '乙代表：經過內部磋商，我們願意將期限縮短至四年。', es: 'Representante B: Tras consultas internas, estamos dispuestos a acortar el plazo a cuatro años.' },
+            { zh: '甲代表：那关税下限呢？能否降到百分之三？', zhT: '甲代表：那關稅下限呢？能否降到百分之三？', es: 'Representante A: ¿Y el límite inferior del arancel? ¿Podría bajar al tres por ciento?' },
+            { zh: '乙代表：百分之三恐怕会冲击我们的中小农户，我们建议折中为百分之四。', zhT: '乙代表：百分之三恐怕會衝擊我們的中小農戶，我們建議折中為百分之四。', es: 'Representante B: Me temo que el tres por ciento golpearía a nuestros pequeños agricultores; proponemos un término medio del cuatro por ciento.' },
+            { zh: '甲代表：好，我方可以接受这个折中方案。', zhT: '甲代表：好，我方可以接受這個折中方案。', es: 'Representante A: De acuerdo, nuestra parte puede aceptar esta solución intermedia.' },
+            { zh: '乙代表：那我们是否可以就争端解决机制达成共识？', zhT: '乙代表：那我們是否可以就爭端解決機制達成共識？', es: 'Representante B: Entonces, ¿podemos llegar a un consenso sobre el mecanismo de resolución de disputas?' },
+            { zh: '甲代表：我们建议引入第三方仲裁，以确保公正性。', zhT: '甲代表：我們建議引入第三方仲裁，以確保公正性。', es: 'Representante A: Proponemos introducir un arbitraje de terceros para garantizar la imparcialidad.' },
+            { zh: '乙代表：可以接受，但仲裁机构须由双方共同指定。', zhT: '乙代表：可以接受，但仲裁機構須由雙方共同指定。', es: 'Representante B: Aceptable, pero el organismo de arbitraje debe ser designado conjuntamente por ambas partes.' },
+            { zh: '甲代表：没问题，我们会把这一条款写入附件。', zhT: '甲代表：沒問題，我們會把這一條款寫入附件。', es: 'Representante A: Sin problema, incluiremos esa cláusula en el anexo.' },
+            { zh: '（旁白）经过长达六小时的磋商，双方终于达成了初步协议。', zhT: '（旁白）經過長達六小時的磋商，雙方終於達成了初步協議。', es: 'Narración: Tras más de seis horas de negociación, ambas partes finalmente alcanzaron un acuerdo preliminar.' },
+            { zh: '乙代表：这次谈判充分体现了互谅互让的精神。', zhT: '乙代表：這次談判充分體現了互諒互讓的精神。', es: 'Representante B: Esta negociación reflejó plenamente un espíritu de comprensión y concesión mutuas.' },
+            { zh: '甲代表：期待双方尽快签署正式协议，造福两国人民。', zhT: '甲代表：期待雙方盡快簽署正式協議，造福兩國人民。', es: 'Representante A: Esperamos firmar pronto el acuerdo formal, en beneficio de los pueblos de ambas naciones.' }
+        ],
+        quiz: [
+            { zh: '我们希望贵方能在农产品关税上做出实质性___。', zhT: '我們希望貴方能在農產品關稅上做出實質性___。', es: 'Esperamos que su parte haga concesiones sustanciales en los aranceles agrícolas.',
+              opts: [
+                { z: '让步', t: '讓步', p: 'ràngbù', e: 'Hacer concesión', a: ['Ceder'] },
+                { z: '承诺', t: '承諾', p: 'chéngnuò', e: 'Comprometerse' },
+                { z: '投资', t: '投資', p: 'tóuzī', e: 'Invertir' } ] },
+            { zh: '这___国内产业的切身利益，恐怕难以一步到位。', zhT: '這___國內產業的切身利益，恐怕難以一步到位。', es: 'Eso afecta directamente a nuestras industrias nacionales; me temo que no se puede resolver de un solo golpe.',
+              opts: [
+                { z: '涉及', t: '涉及', p: 'shèjí', e: 'Concernir, involucrar' },
+                { z: '属于', t: '屬於', p: 'shǔyú', e: 'Pertenecer a' },
+                { z: '来自', t: '來自', p: 'láizì', e: 'Provenir de' } ] },
+            { zh: '原则上可以考虑，但须以___为前提。', zhT: '原則上可以考慮，但須以___為前提。', es: 'En principio podemos considerarlo, pero bajo la premisa del beneficio mutuo.',
+              opts: [
+                { z: '互惠互利', t: '互惠互利', p: 'hùhuì hùlì', e: 'Beneficio mutuo' },
+                { z: '各自为政', t: '各自為政', p: 'gèzì wéizhèng', e: 'Actuar cada uno por su cuenta' },
+                { z: '斤斤计较', t: '斤斤計較', p: 'jīnjīn jìjiào', e: 'Regatear al detalle' } ] },
+            { zh: '我方的___是三年内关税降至百分之五以下。', zhT: '我方的___是三年內關稅降至百分之五以下。', es: 'Nuestra línea roja es reducir el arancel a menos del cinco por ciento en tres años.',
+              opts: [
+                { z: '底线', t: '底線', p: 'dǐxiàn', e: 'Línea roja, límite mínimo' },
+                { z: '目标', t: '目標', p: 'mùbiāo', e: 'Objetivo' },
+                { z: '计划', t: '計劃', p: 'jìhuà', e: 'Plan' } ] },
+            { zh: '我们需要更长的___来调整产业结构。', zhT: '我們需要更長的___來調整產業結構。', es: 'Necesitamos un período de transición más largo para reestructurar la industria.',
+              opts: [
+                { z: '缓冲期', t: '緩衝期', p: 'huǎnchōngqī', e: 'Período de transición' },
+                { z: '保质期', t: '保質期', p: 'bǎozhìqī', e: 'Fecha de vencimiento' },
+                { z: '黄金期', t: '黃金期', p: 'huángjīnqī', e: 'Época dorada' } ] },
+            { zh: '我们建议五年，并附加技术合作条款作为___。', zhT: '我們建議五年，並附加技術合作條款作為___。', es: 'Proponemos cinco años, acompañados de una cláusula de cooperación tecnológica como contrapartida.',
+              opts: [
+                { z: '配套', t: '配套', p: 'pèitào', e: 'Medida complementaria' },
+                { z: '交换', t: '交換', p: 'jiāohuàn', e: 'Intercambio' },
+                { z: '奖励', t: '獎勵', p: 'jiǎnglì', e: 'Recompensa' } ] },
+            { zh: '技术合作的具体范围能否进一步___？', zhT: '技術合作的具體範圍能否進一步___？', es: '¿Podría precisarse el alcance concreto de esa cooperación tecnológica?',
+              opts: [
+                { z: '明确', t: '明確', p: 'míngquè', e: 'Precisar, aclarar' },
+                { z: '扩大', t: '擴大', p: 'kuòdà', e: 'Ampliar' },
+                { z: '延后', t: '延後', p: 'yánhòu', e: 'Posponer' } ] },
+            { zh: '包括农业机械的技术___与人才培训项目。', zhT: '包括農業機械的技術___與人才培訓項目。', es: 'Incluiría la transferencia tecnológica de maquinaria agrícola y programas de capacitación de personal.',
+              opts: [
+                { z: '转让', t: '轉讓', p: 'zhuǎnràng', e: 'Transferir (derechos/tecnología)' },
+                { z: '出口', t: '出口', p: 'chūkǒu', e: 'Exportar' },
+                { z: '研发', t: '研發', p: 'yánfā', e: 'Investigar y desarrollar' } ] },
+            { zh: '这个提议值得考虑，但我们需要向上级汇报___。', zhT: '這個提議值得考慮，但我們需要向上級彙報___。', es: 'Esa propuesta merece consideración, pero debemos informar y consultar a nuestros superiores.',
+              opts: [
+                { z: '请示', t: '請示', p: 'qǐngshì', e: 'Solicitar instrucciones' },
+                { z: '抗议', t: '抗議', p: 'kàngyì', e: 'Protestar' },
+                { z: '庆祝', t: '慶祝', p: 'qìngzhù', e: 'Celebrar' } ] },
+            { zh: '双方陷入短暂的___，会议暂时休会。', zhT: '雙方陷入短暫的___，會議暫時休會。', es: 'Ambas partes cayeron en un breve punto muerto y la reunión se suspendió temporalmente.',
+              opts: [
+                { z: '僵局', t: '僵局', p: 'jiāngjú', e: 'Punto muerto, estancamiento' },
+                { z: '高潮', t: '高潮', p: 'gāocháo', e: 'Clímax' },
+                { z: '共识', t: '共識', p: 'gòngshí', e: 'Consenso' } ] },
+            { zh: '经过内部___，我们愿意将期限缩短至四年。', zhT: '經過內部___，我們願意將期限縮短至四年。', es: 'Tras consultas internas, estamos dispuestos a acortar el plazo a cuatro años.',
+              opts: [
+                { z: '磋商', t: '磋商', p: 'cuōshāng', e: 'Consultar, negociar' },
+                { z: '猜测', t: '猜測', p: 'cāicè', e: 'Especular' },
+                { z: '投票', t: '投票', p: 'tóupiào', e: 'Votar' } ] },
+            { zh: '百分之三恐怕会___我们的中小农户。', zhT: '百分之三恐怕會___我們的中小農戶。', es: 'Me temo que el tres por ciento golpearía a nuestros pequeños agricultores.',
+              opts: [
+                { z: '冲击', t: '衝擊', p: 'chōngjī', e: 'Golpear, impactar negativamente' },
+                { z: '激励', t: '激勵', p: 'jīlì', e: 'Incentivar' },
+                { z: '补贴', t: '補貼', p: 'bǔtiē', e: 'Subsidiar' } ] },
+            { zh: '好，我方可以接受这个___。', zhT: '好，我方可以接受這個___。', es: 'De acuerdo, nuestra parte puede aceptar esta solución intermedia.',
+              opts: [
+                { z: '折中方案', t: '折中方案', p: "zhézhōng fāng'àn", e: 'Solución intermedia' },
+                { z: '最终目标', t: '最終目標', p: 'zuìzhōng mùbiāo', e: 'Meta final' },
+                { z: '附加条件', t: '附加條件', p: 'fùjiā tiáojiàn', e: 'Condición adicional' } ] },
+            { zh: '那我们是否可以就争端解决机制达成___？', zhT: '那我們是否可以就爭端解決機制達成___？', es: '¿Podemos llegar a un consenso sobre el mecanismo de resolución de disputas?',
+              opts: [
+                { z: '共识', t: '共識', p: 'gòngshí', e: 'Consenso' },
+                { z: '争议', t: '爭議', p: 'zhēngyì', e: 'Disputa' },
+                { z: '误解', t: '誤解', p: 'wùjiě', e: 'Malentendido' } ] },
+            { zh: '我们建议引入第三方___，以确保公正性。', zhT: '我們建議引入第三方___，以確保公正性。', es: 'Proponemos introducir un arbitraje de terceros para garantizar la imparcialidad.',
+              opts: [
+                { z: '仲裁', t: '仲裁', p: 'zhòngcái', e: 'Arbitraje' },
+                { z: '监督', t: '監督', p: 'jiāndū', e: 'Supervisión' },
+                { z: '投资', t: '投資', p: 'tóuzī', e: 'Inversión' } ] },
+            { zh: '可以接受，但仲裁机构须由双方共同___。', zhT: '可以接受，但仲裁機構須由雙方共同___。', es: 'Aceptable, pero el organismo de arbitraje debe ser designado conjuntamente por ambas partes.',
+              opts: [
+                { z: '指定', t: '指定', p: 'zhǐdìng', e: 'Designar' },
+                { z: '解散', t: '解散', p: 'jiěsàn', e: 'Disolver' },
+                { z: '怀疑', t: '懷疑', p: 'huáiyí', e: 'Sospechar de' } ] },
+            { zh: '没问题，我们会把这一条款写入___。', zhT: '沒問題，我們會把這一條款寫入___。', es: 'Sin problema, incluiremos esa cláusula en el anexo.',
+              opts: [
+                { z: '附件', t: '附件', p: 'fùjiàn', e: 'Anexo' },
+                { z: '正文', t: '正文', p: 'zhèngwén', e: 'Texto principal' },
+                { z: '草稿', t: '草稿', p: 'cǎogǎo', e: 'Borrador' } ] },
+            { zh: '经过长达六小时的磋商，双方终于___了初步协议。', zhT: '經過長達六小時的磋商，雙方終於___了初步協議。', es: 'Tras más de seis horas de negociación, ambas partes finalmente alcanzaron un acuerdo preliminar.',
+              opts: [
+                { z: '达成', t: '達成', p: 'dáchéng', e: 'Alcanzar, lograr' },
+                { z: '撤回', t: '撤回', p: 'chèhuí', e: 'Retirar' },
+                { z: '延迟', t: '延遲', p: 'yánchí', e: 'Retrasar' } ] },
+            { zh: '这次谈判充分体现了___的精神。', zhT: '這次談判充分體現了___的精神。', es: 'Esta negociación reflejó plenamente un espíritu de comprensión y concesión mutuas.',
+              opts: [
+                { z: '互谅互让', t: '互諒互讓', p: 'hùliàng hùràng', e: 'Comprensión y concesión mutuas' },
+                { z: '针锋相对', t: '針鋒相對', p: 'zhēnfēng xiāngduì', e: 'Confrontación directa' },
+                { z: '袖手旁观', t: '袖手旁觀', p: 'xiùshǒu pángguān', e: 'Quedarse de brazos cruzados' } ] },
+            { zh: '期待双方尽快签署正式协议，___两国人民。', zhT: '期待雙方盡快簽署正式協議，___兩國人民。', es: 'Esperamos firmar pronto el acuerdo formal, en beneficio de los pueblos de ambas naciones.',
+              opts: [
+                { z: '造福', t: '造福', p: 'zàofú', e: 'Beneficiar (a la gente)' },
+                { z: '约束', t: '約束', p: 'yuēshù', e: 'Restringir' },
+                { z: '疏远', t: '疏遠', p: 'shūyuǎn', e: 'Distanciar' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HSK 8 · 认知科学讲座 — conferencia académica, vocabulario técnico
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'h8-jiangzuo',
+        hsk: 8,
+        emoji: '🧠',
+        titleZh: '认知科学讲座',
+        titleZhT: '認知科學講座',
+        titleEs: 'La conferencia de ciencia cognitiva',
+        blurb: 'Una ponencia universitaria sobre redes neuronales y cognición humana: hipótesis, evidencia empírica y preguntas del público — registro académico de nivel avanzado.',
+        lines: [
+            { zh: '今天的讲座主题是「神经网络与人类认知的异同」。', zhT: '今天的講座主題是「神經網絡與人類認知的異同」。', es: 'El tema de la conferencia de hoy es "Semejanzas y diferencias entre las redes neuronales y la cognición humana".' },
+            { zh: '主讲人：感谢大家拨冗前来，我们先从一个基本假说谈起。', zhT: '主講人：感謝大家撥冗前來，我們先從一個基本假說談起。', es: 'Ponente: Gracias a todos por venir a pesar de sus apretadas agendas; comencemos con una hipótesis básica.' },
+            { zh: '这个假说认为，人工神经网络的运作机制与大脑神经元有相似之处。', zhT: '這個假說認為，人工神經網絡的運作機制與大腦神經元有相似之處。', es: 'Esta hipótesis sostiene que el mecanismo de funcionamiento de las redes neuronales artificiales guarda semejanzas con las neuronas del cerebro.' },
+            { zh: '然而，越来越多的实证研究对此提出了质疑。', zhT: '然而，越來越多的實證研究對此提出了質疑。', es: 'Sin embargo, cada vez más investigaciones empíricas ponen esto en duda.' },
+            { zh: '譬如，大脑的学习过程并不完全依赖于反向传播算法。', zhT: '譬如，大腦的學習過程並不完全依賴於反向傳播算法。', es: 'Por ejemplo, el proceso de aprendizaje del cerebro no depende por completo del algoritmo de retropropagación.' },
+            { zh: '这意味着，我们或许高估了两者之间的类比关系。', zhT: '這意味著，我們或許高估了兩者之間的類比關係。', es: 'Esto implica que quizás hemos sobreestimado la analogía entre ambos.' },
+            { zh: '学生甲：请问，这项研究的样本规模足够支撑这个结论吗？', zhT: '學生甲：請問，這項研究的樣本規模足夠支撐這個結論嗎？', es: 'Estudiante A: Disculpe, ¿el tamaño de la muestra de este estudio es suficiente para sustentar esa conclusión?' },
+            { zh: '主讲人：这是个很好的问题，样本量确实有限，这也是该研究的局限性之一。', zhT: '主講人：這是個很好的問題，樣本量確實有限，這也是該研究的局限性之一。', es: 'Ponente: Muy buena pregunta; el tamaño muestral es en efecto limitado, y esa es una de las limitaciones del estudio.' },
+            { zh: '因此，这项假说仍有待更大规模的跨学科研究来验证。', zhT: '因此，這項假說仍有待更大規模的跨學科研究來驗證。', es: 'Por eso, esta hipótesis todavía requiere estudios interdisciplinarios de mayor escala para ser verificada.' },
+            { zh: '学生乙：那么，这项研究的可复制性如何？', zhT: '學生乙：那麼，這項研究的可複製性如何？', es: 'Estudiante B: Entonces, ¿cómo es la reproducibilidad de este estudio?' },
+            { zh: '主讲人：目前只有两个实验室成功复现了部分结果。', zhT: '主講人：目前只有兩個實驗室成功複現了部分結果。', es: 'Ponente: Hasta ahora, solo dos laboratorios han logrado replicar parte de los resultados.' },
+            { zh: '这也是认知科学领域长期存在的难题——可复制性危机。', zhT: '這也是認知科學領域長期存在的難題——可複製性危機。', es: 'Esto también es un problema de larga data en el campo de la ciencia cognitiva: la crisis de reproducibilidad.' },
+            { zh: '学生甲：有没有研究采用量化分析来解决这个问题？', zhT: '學生甲：有沒有研究採用量化分析來解決這個問題？', es: 'Estudiante A: ¿Hay estudios que usen análisis cuantitativo para resolver este problema?' },
+            { zh: '主讲人：有，近期一篇论文提出了新的统计范式，值得关注。', zhT: '主講人：有，近期一篇論文提出了新的統計範式，值得關注。', es: 'Ponente: Sí; un artículo reciente propuso un nuevo paradigma estadístico que vale la pena seguir.' },
+            { zh: '该范式强调效应量而非单纯的显著性检验。', zhT: '該範式強調效應量而非單純的顯著性檢驗。', es: 'Ese paradigma enfatiza el tamaño del efecto en lugar de la mera prueba de significancia.' },
+            { zh: '这种转变有助于避免过度诠释偶然的实验结果。', zhT: '這種轉變有助於避免過度詮釋偶然的實驗結果。', es: 'Este cambio ayuda a evitar la sobreinterpretación de resultados experimentales casuales.' },
+            { zh: '学生乙：老师怎么看待这个领域未来的发展方向？', zhT: '學生乙：老師怎麼看待這個領域未來的發展方向？', es: 'Estudiante B: Profesor, ¿cómo ve usted la dirección futura de este campo?' },
+            { zh: '主讲人：我认为跨学科合作是必然趋势，单一学科难以穷尽认知的复杂性。', zhT: '主講人：我認為跨學科合作是必然趨勢，單一學科難以窮盡認知的複雜性。', es: 'Ponente: Creo que la colaboración interdisciplinaria es una tendencia inevitable; una sola disciplina difícilmente agota la complejidad de la cognición.' },
+            { zh: '神经科学、计算机科学与哲学的对话将愈加紧密。', zhT: '神經科學、計算機科學與哲學的對話將愈加緊密。', es: 'El diálogo entre la neurociencia, la informática y la filosofía será cada vez más estrecho.' },
+            { zh: '学生甲：谢谢老师，这场讲座让我对这个领域有了全新的认识。', zhT: '學生甲：謝謝老師，這場講座讓我對這個領域有了全新的認識。', es: 'Estudiante A: Gracias, profesor; esta conferencia me dio una visión completamente nueva de este campo.' },
+            { zh: '主讲人：也谢谢大家的提问，批判性思考正是学术研究的核心。', zhT: '主講人：也謝謝大家的提問，批判性思考正是學術研究的核心。', es: 'Ponente: Gracias también por sus preguntas; el pensamiento crítico es precisamente el núcleo de la investigación académica.' },
+            { zh: '（旁白）讲座结束后，许多学生仍留下来继续讨论细节。', zhT: '（旁白）講座結束後，許多學生仍留下來繼續討論細節。', es: 'Narración: Tras finalizar la conferencia, muchos estudiantes se quedaron a seguir discutiendo los detalles.' },
+            { zh: '有人甚至当场提出了合作研究的构想。', zhT: '有人甚至當場提出了合作研究的構想。', es: 'Algunos incluso propusieron ahí mismo ideas de investigación colaborativa.' },
+            { zh: '这场讲座不仅传授了知识，也点燃了探索的热情。', zhT: '這場講座不僅傳授了知識，也點燃了探索的熱情。', es: 'Esta conferencia no solo transmitió conocimiento, sino que también encendió la pasión por explorar.' }
+        ],
+        quiz: [
+            { zh: '感谢大家___前来，我们先从一个基本假说谈起。', zhT: '感謝大家___前來，我們先從一個基本假說談起。', es: 'Gracias a todos por venir a pesar de sus apretadas agendas.',
+              opts: [
+                { z: '拨冗', t: '撥冗', p: 'bōrǒng', e: 'Sacar tiempo (a pesar de estar ocupado)' },
+                { z: '随意', t: '隨意', p: 'suíyì', e: 'Libremente, como gusten' },
+                { z: '提前', t: '提前', p: 'tíqián', e: 'Con anticipación' } ] },
+            { zh: '这个___认为，人工神经网络与大脑神经元有相似之处。', zhT: '這個___認為，人工神經網絡與大腦神經元有相似之處。', es: 'Esta hipótesis sostiene que las redes neuronales artificiales guardan semejanzas con las neuronas del cerebro.',
+              opts: [
+                { z: '假说', t: '假說', p: 'jiǎshuō', e: 'Hipótesis' },
+                { z: '定律', t: '定律', p: 'dìnglǜ', e: 'Ley (científica)' },
+                { z: '传说', t: '傳說', p: 'chuánshuō', e: 'Leyenda' } ] },
+            { zh: '然而，越来越多的___对此提出了质疑。', zhT: '然而，越來越多的___對此提出了質疑。', es: 'Sin embargo, cada vez más investigaciones empíricas ponen esto en duda.',
+              opts: [
+                { z: '实证研究', t: '實證研究', p: 'shízhèng yánjiū', e: 'Investigación empírica' },
+                { z: '民间传闻', t: '民間傳聞', p: 'mínjiān chuánwén', e: 'Rumor popular' },
+                { z: '个人经验', t: '個人經驗', p: 'gèrén jīngyàn', e: 'Experiencia personal' } ] },
+            { zh: '大脑的学习过程并不完全___反向传播算法。', zhT: '大腦的學習過程並不完全___反向傳播算法。', es: 'El proceso de aprendizaje del cerebro no depende por completo del algoritmo de retropropagación.',
+              opts: [
+                { z: '依赖于', t: '依賴於', p: 'yīlài yú', e: 'Depender de' },
+                { z: '类似于', t: '類似於', p: 'lèisì yú', e: 'Ser similar a' },
+                { z: '区别于', t: '區別於', p: 'qūbié yú', e: 'Diferenciarse de' } ] },
+            { zh: '我们或许高估了两者之间的___。', zhT: '我們或許高估了兩者之間的___。', es: 'Quizás hemos sobreestimado la analogía entre ambos.',
+              opts: [
+                { z: '类比关系', t: '類比關係', p: 'lèibǐ guānxì', e: 'Relación analógica' },
+                { z: '因果关系', t: '因果關係', p: 'yīnguǒ guānxì', e: 'Relación causal' },
+                { z: '竞争关系', t: '競爭關係', p: 'jìngzhēng guānxì', e: 'Relación de competencia' } ] },
+            { zh: '请问，这项研究的___足够支撑这个结论吗？', zhT: '請問，這項研究的___足夠支撐這個結論嗎？', es: '¿El tamaño de la muestra de este estudio es suficiente para sustentar esa conclusión?',
+              opts: [
+                { z: '样本规模', t: '樣本規模', p: 'yàngběn guīmó', e: 'Tamaño de la muestra' },
+                { z: '研究经费', t: '研究經費', p: 'yánjiū jīngfèi', e: 'Presupuesto de investigación' },
+                { z: '发表时间', t: '發表時間', p: 'fābiǎo shíjiān', e: 'Fecha de publicación' } ] },
+            { zh: '样本量确实有限，这也是该研究的___之一。', zhT: '樣本量確實有限，這也是該研究的___之一。', es: 'El tamaño muestral es en efecto limitado, y esa es una de las limitaciones del estudio.',
+              opts: [
+                { z: '局限性', t: '局限性', p: 'júxiànxìng', e: 'Limitación' },
+                { z: '创新性', t: '創新性', p: 'chuàngxīnxìng', e: 'Carácter innovador' },
+                { z: '权威性', t: '權威性', p: 'quánwēixìng', e: 'Autoridad, carácter autorizado' } ] },
+            { zh: '这项假说仍有待更大规模的___研究来验证。', zhT: '這項假說仍有待更大規模的___研究來驗證。', es: 'Esta hipótesis todavía requiere estudios interdisciplinarios de mayor escala para ser verificada.',
+              opts: [
+                { z: '跨学科', t: '跨學科', p: 'kuà xuékē', e: 'Interdisciplinario' },
+                { z: '单一学科', t: '單一學科', p: 'dānyī xuékē', e: 'De una sola disciplina' },
+                { z: '非正式', t: '非正式', p: 'fēizhèngshì', e: 'Informal' } ] },
+            { zh: '那么，这项研究的___如何？', zhT: '那麼，這項研究的___如何？', es: 'Entonces, ¿cómo es la reproducibilidad de este estudio?',
+              opts: [
+                { z: '可复制性', t: '可複製性', p: 'kě fùzhì xìng', e: 'Reproducibilidad' },
+                { z: '普及率', t: '普及率', p: 'pǔjílǜ', e: 'Tasa de difusión' },
+                { z: '知名度', t: '知名度', p: 'zhīmíngdù', e: 'Nivel de reconocimiento' } ] },
+            { zh: '目前只有两个实验室成功___了部分结果。', zhT: '目前只有兩個實驗室成功___了部分結果。', es: 'Hasta ahora, solo dos laboratorios han logrado replicar parte de los resultados.',
+              opts: [
+                { z: '复现', t: '複現', p: 'fùxiàn', e: 'Replicar, reproducir' },
+                { z: '推翻', t: '推翻', p: 'tuīfān', e: 'Refutar, derribar' },
+                { z: '发表', t: '發表', p: 'fābiǎo', e: 'Publicar' } ] },
+            { zh: '这也是认知科学领域长期存在的___——可复制性危机。', zhT: '這也是認知科學領域長期存在的___——可複製性危機。', es: 'Esto también es un problema de larga data en el campo de la ciencia cognitiva.',
+              opts: [
+                { z: '难题', t: '難題', p: 'nántí', e: 'Problema difícil' },
+                { z: '共识', t: '共識', p: 'gòngshí', e: 'Consenso' },
+                { z: '优势', t: '優勢', p: 'yōushì', e: 'Ventaja' } ] },
+            { zh: '有没有研究采用___来解决这个问题？', zhT: '有沒有研究採用___來解決這個問題？', es: '¿Hay estudios que usen análisis cuantitativo para resolver este problema?',
+              opts: [
+                { z: '量化分析', t: '量化分析', p: 'liànghuà fēnxī', e: 'Análisis cuantitativo' },
+                { z: '定性描述', t: '定性描述', p: 'dìngxìng miáoshù', e: 'Descripción cualitativa' },
+                { z: '主观判断', t: '主觀判斷', p: 'zhǔguān pànduàn', e: 'Juicio subjetivo' } ] },
+            { zh: '近期一篇论文提出了新的统计___，值得关注。', zhT: '近期一篇論文提出了新的統計___，值得關注。', es: 'Un artículo reciente propuso un nuevo paradigma estadístico que vale la pena seguir.',
+              opts: [
+                { z: '范式', t: '範式', p: 'fànshì', e: 'Paradigma' },
+                { z: '口号', t: '口號', p: 'kǒuhào', e: 'Consigna' },
+                { z: '谣言', t: '謠言', p: 'yáoyán', e: 'Rumor' } ] },
+            { zh: '该范式强调___而非单纯的显著性检验。', zhT: '該範式強調___而非單純的顯著性檢驗。', es: 'Ese paradigma enfatiza el tamaño del efecto en lugar de la mera prueba de significancia.',
+              opts: [
+                { z: '效应量', t: '效應量', p: 'xiàoyìngliàng', e: 'Tamaño del efecto' },
+                { z: '知名度', t: '知名度', p: 'zhīmíngdù', e: 'Nivel de fama' },
+                { z: '点击率', t: '點擊率', p: 'diǎnjīlǜ', e: 'Tasa de clics' } ] },
+            { zh: '这种转变有助于避免___偶然的实验结果。', zhT: '這種轉變有助於避免___偶然的實驗結果。', es: 'Este cambio ayuda a evitar la sobreinterpretación de resultados experimentales casuales.',
+              opts: [
+                { z: '过度诠释', t: '過度詮釋', p: 'guòdù quánshì', e: 'Sobreinterpretar' },
+                { z: '公开发表', t: '公開發表', p: 'gōngkāi fābiǎo', e: 'Publicar abiertamente' },
+                { z: '重新设计', t: '重新設計', p: 'chóngxīn shèjì', e: 'Rediseñar' } ] },
+            { zh: '我认为跨学科合作是___，单一学科难以穷尽认知的复杂性。', zhT: '我認為跨學科合作是___，單一學科難以窮盡認知的複雜性。', es: 'Creo que la colaboración interdisciplinaria es una tendencia inevitable.',
+              opts: [
+                { z: '必然趋势', t: '必然趨勢', p: 'bìrán qūshì', e: 'Tendencia inevitable' },
+                { z: '个人选择', t: '個人選擇', p: 'gèrén xuǎnzé', e: 'Elección personal' },
+                { z: '短期现象', t: '短期現象', p: 'duǎnqī xiànxiàng', e: 'Fenómeno pasajero' } ] },
+            { zh: '单一学科难以___认知的复杂性。', zhT: '單一學科難以___認知的複雜性。', es: 'Una sola disciplina difícilmente agota la complejidad de la cognición.',
+              opts: [
+                { z: '穷尽', t: '窮盡', p: 'qióngjìn', e: 'Agotar por completo' },
+                { z: '忽视', t: '忽視', p: 'hūshì', e: 'Ignorar' },
+                { z: '简化', t: '簡化', p: 'jiǎnhuà', e: 'Simplificar' } ] },
+            { zh: '神经科学、计算机科学与哲学的对话将___。', zhT: '神經科學、計算機科學與哲學的對話將___。', es: 'El diálogo entre la neurociencia, la informática y la filosofía será cada vez más estrecho.',
+              opts: [
+                { z: '愈加紧密', t: '愈加緊密', p: 'yùjiā jǐnmì', e: 'Cada vez más estrecho' },
+                { z: '逐渐疏远', t: '逐漸疏遠', p: 'zhújiàn shūyuǎn', e: 'Cada vez más distante' },
+                { z: '彻底中断', t: '徹底中斷', p: 'chèdǐ zhōngduàn', e: 'Totalmente interrumpido' } ] },
+            { zh: '也谢谢大家的提问，___正是学术研究的核心。', zhT: '也謝謝大家的提問，___正是學術研究的核心。', es: 'Gracias también por sus preguntas; el pensamiento crítico es precisamente el núcleo de la investigación académica.',
+              opts: [
+                { z: '批判性思考', t: '批判性思考', p: 'pīpànxìng sīkǎo', e: 'Pensamiento crítico' },
+                { z: '盲目服从', t: '盲目服從', p: 'mángmù fúcóng', e: 'Obediencia ciega' },
+                { z: '机械记忆', t: '機械記憶', p: 'jīxiè jìyì', e: 'Memorización mecánica' } ] },
+            { zh: '这场讲座不仅传授了知识，也___了探索的热情。', zhT: '這場講座不僅傳授了知識，也___了探索的熱情。', es: 'Esta conferencia no solo transmitió conocimiento, sino que también encendió la pasión por explorar.',
+              opts: [
+                { z: '点燃', t: '點燃', p: 'diǎnrán', e: 'Encender, avivar' },
+                { z: '掩盖', t: '掩蓋', p: 'yǎngài', e: 'Ocultar' },
+                { z: '消耗', t: '消耗', p: 'xiāohào', e: 'Consumir, agotar' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HSK 9 · 红楼梦读书会 — registro literario/clásico, el más exigente
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'h9-dushuhui',
+        hsk: 9,
+        emoji: '📜',
+        titleZh: '红楼梦读书会',
+        titleZhT: '紅樓夢讀書會',
+        titleEs: 'El club de lectura: Sueño en el Pabellón Rojo',
+        blurb: 'Un grupo de lectores debate el sentido profundo de una gran novela clásica china: destino, decadencia y la fugacidad de la vida — el registro más literario y exigente.',
+        lines: [
+            { zh: '今晚读书会的主题是《红楼梦》中贾府由盛转衰的寓意。', zhT: '今晚讀書會的主題是《紅樓夢》中賈府由盛轉衰的寓意。', es: 'El tema del club de lectura de esta noche es el simbolismo de la decadencia de la familia Jia en "Sueño en el Pabellón Rojo".' },
+            { zh: '主持人：这部小说开篇便以「假作真时真亦假」点明了全书的基调。', zhT: '主持人：這部小說開篇便以「假作真時真亦假」點明了全書的基調。', es: 'Moderador: Desde el inicio, la novela marca el tono de toda la obra con "cuando lo falso se toma por verdadero, lo verdadero también se vuelve falso".' },
+            { zh: '读者甲：我认为这句话暗示了整部作品虚实交织的叙事手法。', zhT: '讀者甲：我認為這句話暗示了整部作品虛實交織的敘事手法。', es: 'Lector A: Creo que esta frase insinúa la técnica narrativa de entrelazar lo real y lo ficticio en toda la obra.' },
+            { zh: '读者乙：不仅如此，它也预示了贾府繁华背后的虚幻本质。', zhT: '讀者乙：不僅如此，它也預示了賈府繁華背後的虛幻本質。', es: 'Lector B: No solo eso; también anticipa la naturaleza ilusoria detrás del esplendor de la familia Jia.' },
+            { zh: '主持人：确实，曹雪芹借贾府的兴衰，影射了人世无常的道理。', zhT: '主持人：確實，曹雪芹借賈府的興衰，影射了人世無常的道理。', es: 'Moderador: En efecto; a través del ascenso y caída de la familia Jia, Cao Xueqin alude a la impermanencia del mundo humano.' },
+            { zh: '读者甲：尤其是黛玉葬花那一回，寄托了她对生命凋零的哀叹。', zhT: '讀者甲：尤其是黛玉葬花那一回，寄託了她對生命凋零的哀嘆。', es: 'Lector A: Especialmente en el episodio en que Daiyu entierra las flores caídas, se expresa su lamento por la decadencia de la vida.' },
+            { zh: '读者乙：那句「侬今葬花人笑痴，他年葬侬知是谁」令人感慨万千。', zhT: '讀者乙：那句「儂今葬花人笑癡，他年葬儂知是誰」令人感慨萬千。', es: 'Lector B: Esa línea, "hoy entierro flores y se ríen de mi locura, mas quién me enterrará a mí algún día", conmueve profundamente.' },
+            { zh: '主持人：这正体现了她对自身命运的预感与无力感。', zhT: '主持人：這正體現了她對自身命運的預感與無力感。', es: 'Moderador: Esto refleja precisamente su presentimiento sobre su propio destino y su sensación de impotencia.' },
+            { zh: '读者甲：相比之下，宝钗的处世态度则显得更为世故圆融。', zhT: '讀者甲：相比之下，寶釵的處世態度則顯得更為世故圓融。', es: 'Lector A: En comparación, la actitud de Baochai ante la vida parece más mundana y acomodaticia.' },
+            { zh: '读者乙：她深谙「大观园」中趋炎附势的人情世故。', zhT: '讀者乙：她深諳「大觀園」中趨炎附勢的人情世故。', es: 'Lector B: Ella conoce a fondo el oportunismo y las convenciones sociales dentro del "Jardín de la Gran Vista".' },
+            { zh: '主持人：那么，宝玉这个人物又该如何解读？', zhT: '主持人：那麼，寶玉這個人物又該如何解讀？', es: 'Moderador: Entonces, ¿cómo interpretar al personaje de Baoyu?' },
+            { zh: '读者甲：我认为他代表了一种不愿同流合污的理想主义。', zhT: '讀者甲：我認為他代表了一種不願同流合污的理想主義。', es: 'Lector A: Creo que él representa un idealismo que se niega a corromperse junto con los demás.' },
+            { zh: '读者乙：但他的叛逆也注定了他在封建礼教下的悲剧结局。', zhT: '讀者乙：但他的叛逆也注定了他在封建禮教下的悲劇結局。', es: 'Lector B: Pero su rebeldía también condenó su final trágico bajo la moral feudal confuciana.' },
+            { zh: '主持人：小说结尾「白茫茫一片大地真干净」又该如何理解？', zhT: '主持人：小說結尾「白茫茫一片大地真乾淨」又該如何理解？', es: 'Moderador: ¿Cómo interpretar el final de la novela, "una vasta extensión blanca, verdaderamente pura"?' },
+            { zh: '读者甲：这个意象象征着繁华落尽后归于虚无的禅意。', zhT: '讀者甲：這個意象象徵著繁華落盡後歸於虛無的禪意。', es: 'Lector A: Esta imagen simboliza el sentido zen de retornar a la nada tras el desvanecimiento del esplendor.' },
+            { zh: '读者乙：也暗合佛教中「色即是空」的哲理。', zhT: '讀者乙：也暗合佛教中「色即是空」的哲理。', es: 'Lector B: También coincide con la filosofía budista de que "la forma es vacío".' },
+            { zh: '主持人：这部作品之所以历久弥新，正因为它探讨了人性的永恒命题。', zhT: '主持人：這部作品之所以歷久彌新，正因為它探討了人性的永恆命題。', es: 'Moderador: Esta obra sigue tan vigente precisamente porque explora cuestiones eternas de la naturaleza humana.' },
+            { zh: '读者甲：每次重读，都会因阅历的增长而有新的体悟。', zhT: '讀者甲：每次重讀，都會因閱歷的增長而有新的體悟。', es: 'Lector A: Cada vez que la releo, mi experiencia acumulada me da nuevas comprensiones.' },
+            { zh: '读者乙：这也正是经典之所以为经典的原因吧。', zhT: '讀者乙：這也正是經典之所以為經典的原因吧。', es: 'Lector B: Esta es, sin duda, la razón por la que un clásico es un clásico.' },
+            { zh: '主持人：今晚的讨论就到这里，感谢大家的真知灼见。', zhT: '主持人：今晚的討論就到這裡，感謝大家的真知灼見。', es: 'Moderador: La discusión de esta noche termina aquí; gracias a todos por sus perspicaces reflexiones.' },
+            { zh: '（旁白）读书会结束后，大家仍意犹未尽地交流着彼此的感想。', zhT: '（旁白）讀書會結束後，大家仍意猶未盡地交流著彼此的感想。', es: 'Narración: Tras terminar el club de lectura, todos seguían intercambiando impresiones, sin querer que terminara.' },
+            { zh: '有人提议下次探讨《红楼梦》中诗词的艺术价值。', zhT: '有人提議下次探討《紅樓夢》中詩詞的藝術價值。', es: 'Alguien propuso que la próxima vez se explorara el valor artístico de los poemas dentro de la novela.' },
+            { zh: '这部巨著给予每位读者的感悟都不尽相同。', zhT: '這部巨著給予每位讀者的感悟都不盡相同。', es: 'Esta gran obra ofrece a cada lector una comprensión distinta.' },
+            { zh: '正如书中所言：「满纸荒唐言，一把辛酸泪。」', zhT: '正如書中所言：「滿紙荒唐言，一把辛酸淚。」', es: 'Tal como dice el libro: "Una página entera de palabras absurdas, un puñado de lágrimas amargas."' }
+        ],
+        quiz: [
+            { zh: '今晚读书会的主题是贾府由盛转衰的___。', zhT: '今晚讀書會的主題是賈府由盛轉衰的___。', es: 'El tema de esta noche es el simbolismo de la decadencia de la familia Jia.',
+              opts: [
+                { z: '寓意', t: '寓意', p: 'yùyì', e: 'Significado simbólico, moraleja' },
+                { z: '情节', t: '情節', p: 'qíngjié', e: 'Trama' },
+                { z: '背景', t: '背景', p: 'bèijǐng', e: 'Trasfondo' } ] },
+            { zh: '我认为这句话___了整部作品虚实交织的叙事手法。', zhT: '我認為這句話___了整部作品虛實交織的敘事手法。', es: 'Creo que esta frase insinúa la técnica narrativa de entrelazar lo real y lo ficticio.',
+              opts: [
+                { z: '暗示', t: '暗示', p: 'ànshì', e: 'Insinuar, sugerir' },
+                { z: '证明', t: '證明', p: 'zhèngmíng', e: 'Demostrar' },
+                { z: '否定', t: '否定', p: 'fǒudìng', e: 'Negar' } ] },
+            { zh: '它也___了贾府繁华背后的虚幻本质。', zhT: '它也___了賈府繁華背後的虛幻本質。', es: 'También anticipa la naturaleza ilusoria detrás del esplendor de la familia Jia.',
+              opts: [
+                { z: '预示', t: '預示', p: 'yùshì', e: 'Presagiar, anticipar' },
+                { z: '掩饰', t: '掩飾', p: 'yǎnshì', e: 'Disimular' },
+                { z: '描绘', t: '描繪', p: 'miáohuì', e: 'Describir, retratar' } ] },
+            { zh: '曹雪芹借贾府的兴衰，___了人世无常的道理。', zhT: '曹雪芹借賈府的興衰，___了人世無常的道理。', es: 'A través del ascenso y caída de la familia Jia, Cao Xueqin alude a la impermanencia del mundo humano.',
+              opts: [
+                { z: '影射', t: '影射', p: 'yǐngshè', e: 'Aludir indirectamente' },
+                { z: '赞美', t: '讚美', p: 'zànměi', e: 'Elogiar' },
+                { z: '记录', t: '記錄', p: 'jìlù', e: 'Registrar' } ] },
+            { zh: '黛玉葬花那一回，___了她对生命凋零的哀叹。', zhT: '黛玉葬花那一回，___了她對生命凋零的哀嘆。', es: 'En el episodio en que Daiyu entierra las flores, se expresa su lamento por la decadencia de la vida.',
+              opts: [
+                { z: '寄托', t: '寄託', p: 'jìtuō', e: 'Expresar, depositar (un sentimiento)' },
+                { z: '隐藏', t: '隱藏', p: 'yǐncáng', e: 'Ocultar' },
+                { z: '忽略', t: '忽略', p: 'hūlüè', e: 'Pasar por alto' } ] },
+            { zh: '那句诗令人___。', zhT: '那句詩令人___。', es: 'Esa línea conmueve profundamente.',
+              opts: [
+                { z: '感慨万千', t: '感慨萬千', p: 'gǎnkǎi wànqiān', e: 'Conmover profundamente, suscitar mil emociones' },
+                { z: '不以为然', t: '不以為然', p: 'bùyǐwéirán', e: 'No estar de acuerdo' },
+                { z: '无动于衷', t: '無動於衷', p: 'wúdòngyúzhōng', e: 'Permanecer indiferente' } ] },
+            { zh: '这正体现了她对自身命运的___与无力感。', zhT: '這正體現了她對自身命運的___與無力感。', es: 'Esto refleja su presentimiento sobre su propio destino y su sensación de impotencia.',
+              opts: [
+                { z: '预感', t: '預感', p: 'yùgǎn', e: 'Presentimiento' },
+                { z: '误会', t: '誤會', p: 'wùhuì', e: 'Malentendido' },
+                { z: '嘲讽', t: '嘲諷', p: 'cháofěng', e: 'Burla' } ] },
+            { zh: '相比之下，宝钗的处世态度则显得更为___。', zhT: '相比之下，寶釵的處世態度則顯得更為___。', es: 'En comparación, la actitud de Baochai parece más mundana y acomodaticia.',
+              opts: [
+                { z: '世故圆融', t: '世故圓融', p: 'shìgù yuánróng', e: 'Mundano y acomodaticio' },
+                { z: '天真烂漫', t: '天真爛漫', p: 'tiānzhēn lànmàn', e: 'Ingenuo y espontáneo' },
+                { z: '孤僻冷漠', t: '孤僻冷漠', p: 'gūpì lěngmò', e: 'Huraño y frío' } ] },
+            { zh: '她深谙大观园中___的人情世故。', zhT: '她深諳大觀園中___的人情世故。', es: 'Ella conoce a fondo el oportunismo dentro del Jardín de la Gran Vista.',
+              opts: [
+                { z: '趋炎附势', t: '趨炎附勢', p: 'qūyán fùshì', e: 'Adular al poderoso, oportunismo social' },
+                { z: '安贫乐道', t: '安貧樂道', p: 'ānpín lèdào', e: 'Conformarse con la pobreza con gusto' },
+                { z: '淡泊名利', t: '淡泊名利', p: 'dànbó mínglì', e: 'Desapego a la fama y el provecho' } ] },
+            { zh: '我认为他代表了一种不愿___的理想主义。', zhT: '我認為他代表了一種不願___的理想主義。', es: 'Creo que él representa un idealismo que se niega a corromperse junto con los demás.',
+              opts: [
+                { z: '同流合污', t: '同流合污', p: 'tóngliú héwū', e: 'Corromperse junto con los demás' },
+                { z: '随波逐流', t: '隨波逐流', p: 'suíbō zhúliú', e: 'Dejarse llevar por la corriente' },
+                { z: '力争上游', t: '力爭上游', p: 'lìzhēng shàngyóu', e: 'Esforzarse por destacar' } ] },
+            { zh: '他的叛逆也注定了他在封建礼教下的___。', zhT: '他的叛逆也注定了他在封建禮教下的___。', es: 'Su rebeldía también condenó su final trágico bajo la moral feudal confuciana.',
+              opts: [
+                { z: '悲剧结局', t: '悲劇結局', p: 'bēijù jiéjú', e: 'Desenlace trágico' },
+                { z: '圆满收场', t: '圓滿收場', p: 'yuánmǎn shōuchǎng', e: 'Final satisfactorio' },
+                { z: '意外惊喜', t: '意外驚喜', p: 'yìwài jīngxǐ', e: 'Sorpresa inesperada' } ] },
+            { zh: '这个___象征着繁华落尽后归于虚无的禅意。', zhT: '這個___象徵著繁華落盡後歸於虛無的禪意。', es: 'Esta imagen simboliza el sentido zen de retornar a la nada tras el desvanecimiento del esplendor.',
+              opts: [
+                { z: '意象', t: '意象', p: 'yìxiàng', e: 'Imagen (literaria), símbolo' },
+                { z: '结构', t: '結構', p: 'jiégòu', e: 'Estructura' },
+                { z: '标题', t: '標題', p: 'biāotí', e: 'Título' } ] },
+            { zh: '也___佛教中「色即是空」的哲理。', zhT: '也___佛教中「色即是空」的哲理。', es: 'También coincide con la filosofía budista de que "la forma es vacío".',
+              opts: [
+                { z: '暗合', t: '暗合', p: 'ànhé', e: 'Coincidir (de forma implícita)' },
+                { z: '违背', t: '違背', p: 'wéibèi', e: 'Contradecir' },
+                { z: '模仿', t: '模仿', p: 'mófǎng', e: 'Imitar' } ] },
+            { zh: '这部作品之所以___，正因为它探讨了人性的永恒命题。', zhT: '這部作品之所以___，正因為它探討了人性的永恆命題。', es: 'Esta obra sigue tan vigente precisamente porque explora cuestiones eternas de la naturaleza humana.',
+              opts: [
+                { z: '历久弥新', t: '歷久彌新', p: 'lìjiǔ míxīn', e: 'Mantenerse vigente a través del tiempo' },
+                { z: '昙花一现', t: '曇花一現', p: 'tánhuā yíxiàn', e: 'Efímero, fugaz' },
+                { z: '默默无闻', t: '默默無聞', p: 'mòmò wúwén', e: 'Pasar desapercibido' } ] },
+            { zh: '每次重读，都会因阅历的增长而有新的___。', zhT: '每次重讀，都會因閱歷的增長而有新的___。', es: 'Cada vez que la releo, mi experiencia acumulada me da nuevas comprensiones.',
+              opts: [
+                { z: '体悟', t: '體悟', p: 'tǐwù', e: 'Comprensión profunda, percepción' },
+                { z: '怀疑', t: '懷疑', p: 'huáiyí', e: 'Duda' },
+                { z: '争论', t: '爭論', p: 'zhēnglùn', e: 'Discusión, debate' } ] },
+            { zh: '感谢大家的___。', zhT: '感謝大家的___。', es: 'Gracias a todos por sus perspicaces reflexiones.',
+              opts: [
+                { z: '真知灼见', t: '真知灼見', p: 'zhēnzhī zhuójiàn', e: 'Perspicaz comprensión, juicio sagaz' },
+                { z: '道听途说', t: '道聽途說', p: 'dàotīng túshuō', e: 'Rumores sin fundamento' },
+                { z: '老生常谈', t: '老生常談', p: 'lǎoshēng chángtán', e: 'Lugar común, cliché' } ] },
+            { zh: '读书会结束后，大家仍___地交流着彼此的感想。', zhT: '讀書會結束後，大家仍___地交流著彼此的感想。', es: 'Tras terminar el club de lectura, todos seguían intercambiando impresiones, sin querer que terminara.',
+              opts: [
+                { z: '意犹未尽', t: '意猶未盡', p: 'yìyóu wèijìn', e: 'Con ganas de más, sin querer terminar' },
+                { z: '心灰意冷', t: '心灰意冷', p: 'xīnhuī yìlěng', e: 'Desalentado' },
+                { z: '漠不关心', t: '漠不關心', p: 'mòbù guānxīn', e: 'Indiferente' } ] },
+            { zh: '有人提议下次探讨《红楼梦》中诗词的___。', zhT: '有人提議下次探討《紅樓夢》中詩詞的___。', es: 'Alguien propuso explorar la próxima vez el valor artístico de los poemas.',
+              opts: [
+                { z: '艺术价值', t: '藝術價值', p: 'yìshù jiàzhí', e: 'Valor artístico' },
+                { z: '出版年份', t: '出版年份', p: 'chūbǎn niánfèn', e: 'Año de publicación' },
+                { z: '字数多寡', t: '字數多寡', p: 'zìshù duōguǎ', e: 'Cantidad de caracteres' } ] },
+            { zh: '这部巨著给予每位读者的感悟都___。', zhT: '這部巨著給予每位讀者的感悟都___。', es: 'Esta gran obra ofrece a cada lector una comprensión distinta.',
+              opts: [
+                { z: '不尽相同', t: '不盡相同', p: 'bújìn xiāngtóng', e: 'No del todo iguales, diversos' },
+                { z: '完全一致', t: '完全一致', p: 'wánquán yízhì', e: 'Completamente iguales' },
+                { z: '毫无关联', t: '毫無關聯', p: 'háowú guānlián', e: 'Sin ninguna relación' } ] },
+            { zh: '正如书中所言：「满纸荒唐言，一把___。」', zhT: '正如書中所言：「滿紙荒唐言，一把___。」', es: 'Tal como dice el libro: "Una página entera de palabras absurdas, un puñado de lágrimas amargas".',
+              opts: [
+                { z: '辛酸泪', t: '辛酸淚', p: 'xīnsuān lèi', e: 'Lágrimas amargas' },
+                { z: '欢喜泪', t: '歡喜淚', p: 'huānxǐ lèi', e: 'Lágrimas de alegría' },
+                { z: '无情话', t: '無情話', p: 'wúqíng huà', e: 'Palabras sin sentimiento' } ] }
+        ]
     }
 
     ];

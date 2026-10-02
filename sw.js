@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v147'; // — diseño: contraste tema papel de arroz + filtros HSK/TOCFL reordenados (HSK 7-9 nuevo)
+const VERSION = 'v148'; // — 5 lecciones nuevas: HSK 7/8/9 (una c/u, diplomacia/academia/literatura clásica) y TOCFL C1 ×2 (audiencia pública, pitch a inversores), el doble de largo que las B2
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
