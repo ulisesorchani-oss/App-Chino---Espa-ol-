@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v146'; // — Doctrina del Medio (+5) y Mencio (+10): más frases por capítulo, simplificado/tradicional/ES
+const VERSION = 'v147'; // — diseño: contraste tema papel de arroz + filtros HSK/TOCFL reordenados (HSK 7-9 nuevo)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
