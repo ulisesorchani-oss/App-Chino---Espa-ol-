@@ -55,7 +55,7 @@
     const MAX_SECONDS = 30; // spec: grabación libre "estilo chat", hasta 30 s
 
     const T = {
-        introEs: 'Grabá lo que quieras decir en voz alta (hasta 30 s) y mirá qué entendió la IA — así podés autoevaluarte vos mismo, sin frase objetivo.',
+        introEs: 'Grabá lo que quieras decir en voz alta (hasta 30 s): la IA transcribe en chino Y en español lo que escuchó, en simultáneo — útil si se te mezclan los dos idiomas en la misma frase. Sin frase objetivo, para que te autoevalúes vos mismo.',
         privacy: '🔒 Tu voz se procesa en tu dispositivo y no se guarda ni se envía a ningún servidor.',
         tapToRecord: '👆 Tocá 🎤 para grabar',
         recording: '🔴 Grabando… tocá para terminar (máx 30 s)',
@@ -80,7 +80,20 @@
     function targetLang() {
         return (typeof state === 'object' && state && state.mode === 'cn-es') ? 'es' : 'zh';
     }
-    function langLabel(lang) { return lang === 'es' ? '🇪🇸 Español' : '🇨🇳 中文'; }
+    // v9.7x: pedido del usuario — Whisper solo puede decodificar UN idioma
+    // por pasada (si se le fuerza 'zh', una palabra dicha en español sale
+    // como caracteres chinos sin sentido). No hace code-switching real
+    // dentro de una misma frase, pero sí podemos correr DOS pasadas en
+    // paralelo sobre el mismo audio (zh y es) y mostrar ambas lecturas —
+    // así, si mezclaste idiomas, al menos una de las dos lee bien cada
+    // tramo. engine.transcribe() ya es seguro para llamadas concurrentes
+    // (cola por id en LocalWhisperEngine), así que esto no pisa nada.
+    function pinyinOf(zhText) {
+        try {
+            if (typeof pinyinPro === 'undefined' || !zhText) return '';
+            return pinyinPro.pinyin(zhText, { toneType: 'mark' });
+        } catch (e) { return ''; }
+    }
 
     function errText(err) {
         const n = err && err.name;
@@ -145,19 +158,29 @@
     }
 
     // ── piezas actualizadas SIN re-crear el DOM entero ──
+    function renderSeg(lang, data) {
+        if (!data) return '';
+        return '<div class="tk-seg">'
+            + '<span class="tk-bubble-lang">' + (lang === 'zh' ? '🇨🇳 中文' : '🇪🇸 Español') + '</span>'
+            + '<div class="tk-bubble-text"' + (lang === 'zh' ? ' lang="zh"' : '') + '>' + escHtml(data.text) + '</div>'
+            + (lang === 'zh' && data.pinyin ? '<div class="tk-pinyin">' + escHtml(data.pinyin) + '</div>' : '')
+            + '</div>';
+    }
     function renderChat() {
         const chat = $('tk-chat');
         if (!chat) return;
         if (!S.bubbles.length) {
             chat.innerHTML = '<p class="tk-empty">' + escHtml(T.empty) + '</p>';
         } else {
+            // orden: el idioma objetivo del modo activo primero (más
+            // relevante para lo que se está practicando), el otro debajo.
+            const order = targetLang() === 'es' ? ['es', 'zh'] : ['zh', 'es'];
             chat.innerHTML = S.bubbles.map((b, i) =>
                 '<div class="tk-bubble">'
                 + '<div class="tk-bubble-head">'
                 + '<button type="button" class="tk-play" data-i="' + i + '" aria-label="Escuchar mi grabación">▶️</button>'
-                + '<span class="tk-bubble-lang">' + escHtml(langLabel(b.lang)) + '</span>'
                 + '</div>'
-                + '<div class="tk-bubble-text"' + (b.lang === 'zh' ? ' lang="zh"' : '') + '>' + escHtml(b.text) + '</div>'
+                + order.map((k) => renderSeg(k, b[k])).join('')
                 + '</div>'
             ).join('');
             chat.querySelectorAll('.tk-play').forEach((btn) => {
@@ -232,19 +255,34 @@
         const blob = res && res.blob;
         if (!blob || !blob.size) { S.state = 'idle'; showError(T.errGeneric); return; }
 
-        const lang = targetLang();
         try {
-            const out = await window.VE.transcribeFree(blob, lang);
+            // v9.7x: dos pasadas en paralelo (zh y es) sobre el MISMO
+            // audio — ver nota en pinyinOf() de arriba.
+            const [rZh, rEs] = await Promise.allSettled([
+                window.VE.transcribeFree(blob, 'zh'),
+                window.VE.transcribeFree(blob, 'es')
+            ]);
             if (myTok !== S.tok) return; // se cerró el popup mientras transcribía
-            S.bubbles.push({ url: URL.createObjectURL(blob), text: out.text, lang: lang, confidence: out.confidence });
+            const zh = rZh.status === 'fulfilled' ? rZh.value : null;
+            const es = rEs.status === 'fulfilled' ? rEs.value : null;
+            if (!zh && !es) {
+                const msg = String((rZh.reason && rZh.reason.message) || (rEs.reason && rEs.reason.message) || '');
+                S.state = 'idle';
+                showError(msg.indexOf('no-speech') >= 0 ? T.errNoSpeech : T.errGeneric);
+                return;
+            }
+            S.bubbles.push({
+                url: URL.createObjectURL(blob),
+                zh: zh ? { text: zh.text, pinyin: pinyinOf(zh.text), confidence: zh.confidence } : null,
+                es: es ? { text: es.text, confidence: es.confidence } : null
+            });
             S.errorMsg = '';
             S.state = 'idle';
             renderChat(); updateStatus(); updateBtn();
         } catch (err) {
             if (myTok !== S.tok) return;
             S.state = 'idle';
-            const msg = String((err && err.message) || err || '');
-            showError(msg.indexOf('no-speech') >= 0 ? T.errNoSpeech : T.errGeneric);
+            showError(T.errGeneric);
         }
     }
 
