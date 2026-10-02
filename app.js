@@ -33,6 +33,7 @@ const DATA_SOURCES = {
     'TOCFL-A2': 'data/tocfl/tocfl_a2.json',
     'TOCFL-B3': 'data/tocfl/tocfl_b3.json', // v9.5: Band B — fallback solo; viaja embebido
     'TOCFL-B4': 'data/tocfl/tocfl_b4.json', // v9.5: Band B — fallback solo; viaja embebido
+    'TOCFL-C': 'data/tocfl/tocfl_c.json', // v9.7x: Band C (流利精通級) — fallback solo; viaja embebido
     'TOCFL': 'data/exams/tocfl.json',
     'DELE-A1-Escolares': 'data/exams/dele-a1-escolares.json',
     'DELE-A2B1-Escolares': 'data/exams/dele-a2b1-escolares.json',
@@ -75,6 +76,7 @@ const MODULE_LABELS = {
     'TOCFL-A2': 'TOCFL · Nivel 2 (基礎)',
     'TOCFL-B3': 'TOCFL · Nivel 3 (進階)',
     'TOCFL-B4': 'TOCFL · Nivel 4 (高階)',
+    'TOCFL-C': 'TOCFL · Nivel 5 (流利)',
     'TOCFL': 'TOCFL',
     'DELE-A1-Escolares': 'DELE A1 · Escolares',
     'DELE-A2B1-Escolares': 'DELE A2/B1 · Escolares',
@@ -127,14 +129,19 @@ const DELE_INFO = {
 };
 
 // v8.2: badge de la insignia de tarjeta para los módulos de vocabulario TOCFL
-// (['🇹🇼 TOCFL N1 · vocabulario']). Los niveles Band B/C llegarán cuando la
-// data esté lista (mismo dropdown, sección "próximamente").
+// (['🇹🇼 TOCFL N1 · vocabulario']).
+// v9.7x: Band C (流利精通級, N5) completa — 2.776 palabras, misma lista
+// oficial 華語八千詞表 2023 (tocfl.edu.tw / tocfl-202307.csv) que Band A/B;
+// hanzi+pinyin de la fuente oficial, traducciones ES: 1.880 reusadas de
+// glosas ya existentes en la app (sobre todo HSK7-9, mismo vocabulario
+// avanzado) y 896 nuevas.
 const TOCFL_INFO = {
     'TOCFL-Prep': { badge: 'Prep' },
     'TOCFL-A1':   { badge: 'N1' },
     'TOCFL-A2':   { badge: 'N2' },
     'TOCFL-B3':   { badge: 'N3' },
-    'TOCFL-B4':   { badge: 'N4' }
+    'TOCFL-B4':   { badge: 'N4' },
+    'TOCFL-C':    { badge: 'N5' }
 };
 
 // Etiqueta visible de un módulo (los clásicos muestran nombre ES + zh según el script activo)
