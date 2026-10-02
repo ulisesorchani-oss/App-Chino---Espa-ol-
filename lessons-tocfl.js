@@ -768,6 +768,288 @@
                 { z: '结果', t: '結果', p: 'jiéguǒ', e: 'Resultado' },
                 { z: '原因', t: '原因', p: 'yuányīn', e: 'Causa' } ] }
         ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 11 · 都市更新听证会 — TOCFL 流利精通級 C1 · audiencia pública, Taipéi
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-c1-dushi',
+        hsk: 8, exam: 'TOCFL', examLvl: 'C1',
+        emoji: '🏙️',
+        titleZh: '都市更新听证会',
+        titleZhT: '都市更新聽證會',
+        titleEs: 'La audiencia pública sobre renovación urbana',
+        blurb: 'Una audiencia pública en Taipéi sobre un proyecto de renovación urbana: derechos de los residentes, compensación y consenso comunitario — vocabulario cívico de nivel C1.',
+        lines: [
+            { zh: '今天的听证会主题是信义区老旧社区的都市更新计划。', zhT: '今天的聽證會主題是信義區老舊社區的都市更新計劃。', es: 'La audiencia de hoy trata sobre el plan de renovación urbana de un barrio antiguo en el distrito de Xinyi.' },
+            { zh: '主持人：欢迎各位居民与建商代表出席这场公听会。', zhT: '主持人：歡迎各位居民與建商代表出席這場公聽會。', es: 'Moderador: Bienvenidos los residentes y representantes de la constructora a esta audiencia pública.' },
+            { zh: '建商代表：本案预计拆除三十年以上的老旧建筑，兴建新大楼。', zhT: '建商代表：本案預計拆除三十年以上的老舊建築，興建新大樓。', es: 'Representante de la constructora: Este proyecto prevé demoler edificios de más de treinta años para construir una torre nueva.' },
+            { zh: '居民甲：我们最关心的是容积率提高后，交通负荷能否承受。', zhT: '居民甲：我們最關心的是容積率提高後，交通負荷能否承受。', es: 'Residente A: Lo que más nos preocupa es si el aumento del índice de edificabilidad será manejable para el tráfico.' },
+            { zh: '建商代表：我们已经委托交通顾问公司进行评估，结果将公开透明。', zhT: '建商代表：我們已經委託交通顧問公司進行評估，結果將公開透明。', es: 'Representante: Ya encargamos una evaluación a una consultora de tráfico; los resultados serán totalmente transparentes.' },
+            { zh: '居民乙：那拆迁补偿的标准究竟如何订定？', zhT: '居民乙：那拆遷補償的標準究竟如何訂定？', es: 'Residente B: ¿Y cómo se determinan exactamente los criterios de compensación por la demolición?' },
+            { zh: '建商代表：补偿方案参照都更条例，并额外提供搬迁补助金。', zhT: '建商代表：補償方案參照都更條例，並額外提供搬遷補助金。', es: 'Representante: El plan de compensación sigue el reglamento de renovación urbana, con un subsidio adicional de mudanza.' },
+            { zh: '居民甲：但是条例中的权利变换机制，一般民众很难理解。', zhT: '居民甲：但是條例中的權利變換機制，一般民眾很難理解。', es: 'Residente A: Pero el mecanismo de conversión de derechos en el reglamento es difícil de entender para la gente común.' },
+            { zh: '主持人：这点建商是否能提供更简明的说明文件？', zhT: '主持人：這點建商是否能提供更簡明的說明文件？', es: 'Moderador: ¿Podría la constructora ofrecer un documento explicativo más claro sobre este punto?' },
+            { zh: '建商代表：没问题，我们会制作简化版手册，并安排专人解说。', zhT: '建商代表：沒問題，我們會製作簡化版手冊，並安排專人解說。', es: 'Representante: Sin problema, elaboraremos un manual simplificado y asignaremos personal para explicarlo.' },
+            { zh: '居民乙：我们也担心施工期间的噪音与灰尘会影响生活品质。', zhT: '居民乙：我們也擔心施工期間的噪音與灰塵會影響生活品質。', es: 'Residente B: También nos preocupa que el ruido y el polvo durante la construcción afecten nuestra calidad de vida.' },
+            { zh: '建商代表：我们承诺施工时段将严格限制在法定范围内。', zhT: '建商代表：我們承諾施工時段將嚴格限制在法定範圍內。', es: 'Representante: Prometemos que el horario de construcción se limitará estrictamente al marco legal.' },
+            { zh: '居民甲：这些承诺是否会明确写入合约，以保障居民权益？', zhT: '居民甲：這些承諾是否會明確寫入合約，以保障居民權益？', es: 'Residente A: ¿Se incluirán estos compromisos claramente en el contrato para proteger los derechos de los residentes?' },
+            { zh: '建商代表：当然，所有协议都会经过公证，具有法律效力。', zhT: '建商代表：當然，所有協議都會經過公證，具有法律效力。', es: 'Representante: Por supuesto, todos los acuerdos pasarán por notarización y tendrán validez legal.' },
+            { zh: '主持人：目前住户同意比例已达到法定门槛的多少？', zhT: '主持人：目前住戶同意比例已達到法定門檻的多少？', es: 'Moderador: ¿Qué porcentaje del umbral legal de consentimiento de los residentes se ha alcanzado hasta ahora?' },
+            { zh: '建商代表：目前已有百分之八十二的住户签署同意书。', zhT: '建商代表：目前已有百分之八十二的住戶簽署同意書。', es: 'Representante: Hasta ahora, el ochenta y dos por ciento de los residentes ha firmado el consentimiento.' },
+            { zh: '居民乙：那剩下不同意的住户，权益该如何保障？', zhT: '居民乙：那剩下不同意的住戶，權益該如何保障？', es: 'Residente B: ¿Y cómo se protegerán los derechos de los residentes que aún no están de acuerdo?' },
+            { zh: '建商代表：我们会持续沟通协调，寻求共识，绝不会强制拆迁。', zhT: '建商代表：我們會持續溝通協調，尋求共識，絕不會強制拆遷。', es: 'Representante: Seguiremos comunicándonos y coordinando para buscar consenso; jamás habrá demolición forzada.' },
+            { zh: '主持人：接下来开放现场提问，请大家踊跃发言。', zhT: '主持人：接下來開放現場提問，請大家踴躍發言。', es: 'Moderador: A continuación abrimos las preguntas; los invito a participar activamente.' },
+            { zh: '居民甲：请问重建后的房屋坪数，与原本的产权如何对应？', zhT: '居民甲：請問重建後的房屋坪數，與原本的產權如何對應？', es: 'Residente A: ¿Cómo se corresponderá la superficie de la vivienda reconstruida con la propiedad original?' },
+            { zh: '建商代表：将依照专业估价师的鉴定结果，按比例分配。', zhT: '建商代表：將依照專業估價師的鑑定結果，按比例分配。', es: 'Representante: Se asignará proporcionalmente según los resultados de la tasación de un perito profesional.' },
+            { zh: '（旁白）听证会持续了近三个小时，气氛热烈但不失理性。', zhT: '（旁白）聽證會持續了近三個小時，氣氛熱烈但不失理性。', es: 'Narración: La audiencia duró casi tres horas, con un ambiente intenso pero racional.' },
+            { zh: '主持人：感谢大家的参与，我们会将今日的意见整理后回复。', zhT: '主持人：感謝大家的參與，我們會將今日的意見整理後回覆。', es: 'Moderador: Gracias a todos por participar; organizaremos las opiniones de hoy y responderemos.' },
+            { zh: '这场公听会体现了民主社会中沟通协商的重要性。', zhT: '這場公聽會體現了民主社會中溝通協商的重要性。', es: 'Esta audiencia pública reflejó la importancia de la comunicación y la negociación en una sociedad democrática.' }
+        ],
+        quiz: [
+            { zh: '欢迎各位居民与建商代表出席这场___。', zhT: '歡迎各位居民與建商代表出席這場___。', es: 'Bienvenidos los residentes y representantes de la constructora a esta audiencia pública.',
+              opts: [
+                { z: '公听会', t: '公聽會', p: 'gōngtīnghuì', e: 'Audiencia pública' },
+                { z: '记者会', t: '記者會', p: 'jìzhěhuì', e: 'Conferencia de prensa' },
+                { z: '说明会', t: '說明會', p: 'shuōmínghuì', e: 'Reunión informativa' } ] },
+            { zh: '本案预计___三十年以上的老旧建筑，兴建新大楼。', zhT: '本案預計___三十年以上的老舊建築，興建新大樓。', es: 'Este proyecto prevé demoler edificios de más de treinta años para construir una torre nueva.',
+              opts: [
+                { z: '拆除', t: '拆除', p: 'chāichú', e: 'Demoler' },
+                { z: '翻新', t: '翻新', p: 'fānxīn', e: 'Renovar' },
+                { z: '保留', t: '保留', p: 'bǎoliú', e: 'Conservar' } ] },
+            { zh: '我们最关心的是___提高后，交通负荷能否承受。', zhT: '我們最關心的是___提高後，交通負荷能否承受。', es: 'Lo que más nos preocupa es si el aumento del índice de edificabilidad será manejable para el tráfico.',
+              opts: [
+                { z: '容积率', t: '容積率', p: 'róngjīlǜ', e: 'Índice de edificabilidad' },
+                { z: '绿化率', t: '綠化率', p: 'lǜhuàlǜ', e: 'Tasa de áreas verdes' },
+                { z: '出租率', t: '出租率', p: 'chūzūlǜ', e: 'Tasa de ocupación (alquiler)' } ] },
+            { zh: '我们已经___交通顾问公司进行评估。', zhT: '我們已經___交通顧問公司進行評估。', es: 'Ya encargamos una evaluación a una consultora de tráfico.',
+              opts: [
+                { z: '委托', t: '委託', p: 'wěituō', e: 'Encargar, encomendar' },
+                { z: '拒绝', t: '拒絕', p: 'jùjué', e: 'Rechazar' },
+                { z: '怀疑', t: '懷疑', p: 'huáiyí', e: 'Dudar de' } ] },
+            { zh: '那___的标准究竟如何订定？', zhT: '那___的標準究竟如何訂定？', es: '¿Cómo se determinan exactamente los criterios de compensación por la demolición?',
+              opts: [
+                { z: '拆迁补偿', t: '拆遷補償', p: 'chāiqiān bǔcháng', e: 'Compensación por demolición/reubicación' },
+                { z: '环境保护', t: '環境保護', p: 'huánjìng bǎohù', e: 'Protección ambiental' },
+                { z: '土地税率', t: '土地稅率', p: 'tǔdì shuìlǜ', e: 'Tasa de impuesto territorial' } ] },
+            { zh: '补偿方案参照___，并额外提供搬迁补助金。', zhT: '補償方案參照___，並額外提供搬遷補助金。', es: 'El plan de compensación sigue el reglamento de renovación urbana, con un subsidio adicional de mudanza.',
+              opts: [
+                { z: '都更条例', t: '都更條例', p: 'dūgēng tiáolì', e: 'Reglamento de renovación urbana' },
+                { z: '劳动基准法', t: '勞動基準法', p: 'láodòng jīzhǔnfǎ', e: 'Ley de normas laborales' },
+                { z: '公司章程', t: '公司章程', p: 'gōngsī zhāngchéng', e: 'Estatuto de la empresa' } ] },
+            { zh: '条例中的___机制，一般民众很难理解。', zhT: '條例中的___機制，一般民眾很難理解。', es: 'El mecanismo de conversión de derechos en el reglamento es difícil de entender para la gente común.',
+              opts: [
+                { z: '权利变换', t: '權利變換', p: 'quánlì biànhuàn', e: 'Conversión de derechos' },
+                { z: '股权分配', t: '股權分配', p: 'gǔquán fēnpèi', e: 'Distribución de acciones' },
+                { z: '税务申报', t: '稅務申報', p: 'shuìwù shēnbào', e: 'Declaración de impuestos' } ] },
+            { zh: '这点建商是否能提供更___的说明文件？', zhT: '這點建商是否能提供更___的說明文件？', es: '¿Podría la constructora ofrecer un documento explicativo más claro sobre este punto?',
+              opts: [
+                { z: '简明', t: '簡明', p: 'jiǎnmíng', e: 'Claro y conciso' },
+                { z: '冗长', t: '冗長', p: 'rǒngcháng', e: 'Extenso, tedioso' },
+                { z: '正式', t: '正式', p: 'zhèngshì', e: 'Formal' } ] },
+            { zh: '我们也担心施工期间的___与灰尘会影响生活品质。', zhT: '我們也擔心施工期間的___與灰塵會影響生活品質。', es: 'También nos preocupa que el ruido y el polvo durante la construcción afecten nuestra calidad de vida.',
+              opts: [
+                { z: '噪音', t: '噪音', p: 'zàoyīn', e: 'Ruido' },
+                { z: '烟雾', t: '煙霧', p: 'yānwù', e: 'Humo' },
+                { z: '异味', t: '異味', p: 'yìwèi', e: 'Mal olor' } ] },
+            { zh: '我们承诺施工时段将严格限制在___内。', zhT: '我們承諾施工時段將嚴格限制在___內。', es: 'Prometemos que el horario de construcción se limitará estrictamente al marco legal.',
+              opts: [
+                { z: '法定范围', t: '法定範圍', p: 'fǎdìng fànwéi', e: 'Marco legal permitido' },
+                { z: '预算范围', t: '預算範圍', p: 'yùsuàn fànwéi', e: 'Marco presupuestario' },
+                { z: '安全距离', t: '安全距離', p: 'ānquán jùlí', e: 'Distancia de seguridad' } ] },
+            { zh: '这些承诺是否会明确写入合约，以___居民权益？', zhT: '這些承諾是否會明確寫入合約，以___居民權益？', es: '¿Se incluirán estos compromisos en el contrato para proteger los derechos de los residentes?',
+              opts: [
+                { z: '保障', t: '保障', p: 'bǎozhàng', e: 'Proteger, garantizar' },
+                { z: '削弱', t: '削弱', p: 'xuēruò', e: 'Debilitar' },
+                { z: '转移', t: '轉移', p: 'zhuǎnyí', e: 'Transferir' } ] },
+            { zh: '所有协议都会经过___，具有法律效力。', zhT: '所有協議都會經過___，具有法律效力。', es: 'Todos los acuerdos pasarán por notarización y tendrán validez legal.',
+              opts: [
+                { z: '公证', t: '公證', p: 'gōngzhèng', e: 'Notarización' },
+                { z: '审查', t: '審查', p: 'shěnchá', e: 'Revisión, examen' },
+                { z: '口头', t: '口頭', p: 'kǒutóu', e: 'Verbal, de palabra' } ] },
+            { zh: '目前住户同意比例已达到___的多少？', zhT: '目前住戶同意比例已達到___的多少？', es: '¿Qué porcentaje del umbral legal de consentimiento se ha alcanzado hasta ahora?',
+              opts: [
+                { z: '法定门槛', t: '法定門檻', p: 'fǎdìng ménkǎn', e: 'Umbral legal' },
+                { z: '平均水准', t: '平均水準', p: 'píngjūn shuǐzhǔn', e: 'Nivel promedio' },
+                { z: '历史纪录', t: '歷史紀錄', p: 'lìshǐ jìlù', e: 'Récord histórico' } ] },
+            { zh: '目前已有百分之八十二的住户___同意书。', zhT: '目前已有百分之八十二的住戶___同意書。', es: 'Hasta ahora, el ochenta y dos por ciento de los residentes ha firmado el consentimiento.',
+              opts: [
+                { z: '签署', t: '簽署', p: 'qiānshǔ', e: 'Firmar' },
+                { z: '撤销', t: '撤銷', p: 'chèxiāo', e: 'Anular' },
+                { z: '浏览', t: '瀏覽', p: 'liúlǎn', e: 'Hojear' } ] },
+            { zh: '我们会持续沟通协调，寻求共识，绝不会___。', zhT: '我們會持續溝通協調，尋求共識，絕不會___。', es: 'Seguiremos comunicándonos para buscar consenso; jamás habrá demolición forzada.',
+              opts: [
+                { z: '强制拆迁', t: '強制拆遷', p: 'qiángzhì chāiqiān', e: 'Demolición forzada' },
+                { z: '延期施工', t: '延期施工', p: 'yánqī shīgōng', e: 'Posponer la construcción' },
+                { z: '公开招标', t: '公開招標', p: 'gōngkāi zhāobiāo', e: 'Licitación pública' } ] },
+            { zh: '接下来开放现场提问，请大家___发言。', zhT: '接下來開放現場提問，請大家___發言。', es: 'A continuación abrimos las preguntas; los invito a participar activamente.',
+              opts: [
+                { z: '踊跃', t: '踴躍', p: 'yǒngyuè', e: 'Entusiasta, activamente' },
+                { z: '勉强', t: '勉強', p: 'miǎnqiǎng', e: 'A regañadientes' },
+                { z: '随便', t: '隨便', p: 'suíbiàn', e: 'De cualquier manera' } ] },
+            { zh: '请问重建后的房屋坪数，与原本的___如何对应？', zhT: '請問重建後的房屋坪數，與原本的___如何對應？', es: '¿Cómo se corresponderá la superficie reconstruida con la propiedad original?',
+              opts: [
+                { z: '产权', t: '產權', p: 'chǎnquán', e: 'Derecho de propiedad' },
+                { z: '使用权', t: '使用權', p: 'shǐyòngquán', e: 'Derecho de uso' },
+                { z: '继承权', t: '繼承權', p: 'jìchéngquán', e: 'Derecho de herencia' } ] },
+            { zh: '将依照专业___的鉴定结果，按比例分配。', zhT: '將依照專業___的鑑定結果，按比例分配。', es: 'Se asignará proporcionalmente según los resultados de la tasación de un perito profesional.',
+              opts: [
+                { z: '估价师', t: '估價師', p: 'gūjiàshī', e: 'Tasador, perito valuador' },
+                { z: '建筑师', t: '建築師', p: 'jiànzhùshī', e: 'Arquitecto' },
+                { z: '律师', t: '律師', p: 'lǜshī', e: 'Abogado' } ] },
+            { zh: '听证会持续了近三个小时，气氛热烈但不失___。', zhT: '聽證會持續了近三個小時，氣氛熱烈但不失___。', es: 'La audiencia duró casi tres horas, con un ambiente intenso pero racional.',
+              opts: [
+                { z: '理性', t: '理性', p: 'lǐxìng', e: 'Racionalidad' },
+                { z: '秩序', t: '秩序', p: 'zhìxù', e: 'Orden' },
+                { z: '耐心', t: '耐心', p: 'nàixīn', e: 'Paciencia' } ] },
+            { zh: '这场公听会体现了民主社会中沟通___的重要性。', zhT: '這場公聽會體現了民主社會中溝通___的重要性。', es: 'Esta audiencia reflejó la importancia de la comunicación y la negociación en una sociedad democrática.',
+              opts: [
+                { z: '协商', t: '協商', p: 'xiéshāng', e: 'Negociación, consulta' },
+                { z: '对抗', t: '對抗', p: 'duìkàng', e: 'Confrontación' },
+                { z: '妥协', t: '妥協', p: 'tuǒxié', e: 'Concesión, compromiso (acción de ceder)' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 12 · 新创公司路演 — TOCFL 流利精通級 C1 · pitch a inversores
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-c1-luyan',
+        hsk: 8, exam: 'TOCFL', examLvl: 'C1',
+        emoji: '🚀',
+        titleZh: '新创公司路演',
+        titleZhT: '新創公司路演',
+        titleEs: 'El pitch de la startup ante inversores',
+        blurb: 'Un fundador presenta su startup a un grupo de inversores en Taipéi: modelo de negocio, proyección de mercado y ronda de preguntas difíciles — vocabulario empresarial de nivel C1.',
+        lines: [
+            { zh: '今天的路演邀请了五位创投合伙人到场评估这个项目。', zhT: '今天的路演邀請了五位創投合夥人到場評估這個項目。', es: 'El pitch de hoy contó con cinco socios de capital de riesgo evaluando el proyecto.' },
+            { zh: '创办人：各位好，我们的产品是一款针对银发族设计的健康管理App。', zhT: '創辦人：各位好，我們的產品是一款針對銀髮族設計的健康管理App。', es: 'Fundador: Buenos días a todos; nuestro producto es una app de gestión de salud diseñada para personas mayores.' },
+            { zh: '投资人甲：请先说明一下你们的商业模式。', zhT: '投資人甲：請先說明一下你們的商業模式。', es: 'Inversor A: Primero explique su modelo de negocio.' },
+            { zh: '创办人：我们采取订阅制，并与医疗院所合作抽取转介佣金。', zhT: '創辦人：我們採取訂閱制，並與醫療院所合作抽取轉介佣金。', es: 'Fundador: Operamos con un sistema de suscripción, y colaboramos con instituciones médicas cobrando comisiones por derivación.' },
+            { zh: '投资人乙：目前的市场规模与渗透率大概是多少？', zhT: '投資人乙：目前的市場規模與滲透率大概是多少？', es: 'Inversor B: ¿Cuál es el tamaño de mercado actual y la tasa de penetración?' },
+            { zh: '创办人：台湾六十五岁以上人口已超过四百万，目前渗透率不到百分之二。', zhT: '創辦人：台灣六十五歲以上人口已超過四百萬，目前滲透率不到百分之二。', es: 'Fundador: La población taiwanesa mayor de 65 años supera los 4 millones; la penetración actual es inferior al 2%.' },
+            { zh: '投资人甲：这代表成长空间很大，但竞争者的情况如何？', zhT: '投資人甲：這代表成長空間很大，但競爭者的情況如何？', es: 'Inversor A: Eso implica un gran margen de crecimiento, pero ¿cómo está la competencia?' },
+            { zh: '创办人：目前市场上多为单点式服务，缺乏整合性平台，这正是我们的切入点。', zhT: '創辦人：目前市場上多為單點式服務，缺乏整合性平台，這正是我們的切入點。', es: 'Fundador: Actualmente el mercado ofrece servicios puntuales sin una plataforma integrada; ese es precisamente nuestro punto de entrada.' },
+            { zh: '投资人乙：你们打算如何扩大用户基数？', zhT: '投資人乙：你們打算如何擴大用戶基數？', es: 'Inversor B: ¿Cómo planean ampliar su base de usuarios?' },
+            { zh: '创办人：我们计划与地方卫生所合作，以社区推广的方式获客。', zhT: '創辦人：我們計劃與地方衛生所合作，以社區推廣的方式獲客。', es: 'Fundador: Planeamos colaborar con centros de salud comunitarios para captar usuarios mediante promoción local.' },
+            { zh: '投资人甲：那获客成本大概是多少？能否打平？', zhT: '投資人甲：那獲客成本大概是多少？能否打平？', es: 'Inversor A: ¿Cuál es el costo de adquisición de clientes aproximado? ¿Es sostenible?' },
+            { zh: '创办人：目前单一用户获客成本约三百元，生命周期价值则超过三千元。', zhT: '創辦人：目前單一用戶獲客成本約三百元，生命週期價值則超過三千元。', es: 'Fundador: El costo de adquisición por usuario es de unos 300 dólares; el valor de vida del cliente supera los 3.000.' },
+            { zh: '投资人乙：这个比例确实合理。那你们这一轮募资的估值是多少？', zhT: '投資人乙：這個比例確實合理。那你們這一輪募資的估值是多少？', es: 'Inversor B: Esa proporción es razonable. ¿Cuál es la valoración de esta ronda de financiamiento?' },
+            { zh: '创办人：我们希望以八千万的估值募集一千两百万元。', zhT: '創辦人：我們希望以八千萬的估值募集一千兩百萬元。', es: 'Fundador: Esperamos recaudar 12 millones con una valoración de 80 millones.' },
+            { zh: '投资人甲：这个估值是否有同类公司的案例可以参照？', zhT: '投資人甲：這個估值是否有同類公司的案例可以參照？', es: 'Inversor A: ¿Hay casos de empresas similares que respalden esa valoración?' },
+            { zh: '创办人：有的，我们参考了日本同类型公司的最新一轮估值作为基准。', zhT: '創辦人：有的，我們參考了日本同類型公司的最新一輪估值作為基準。', es: 'Fundador: Sí, tomamos como referencia la última ronda de valoración de una empresa japonesa similar.' },
+            { zh: '投资人乙：团队的技术背景如何？是否足以支撑长期发展？', zhT: '投資人乙：團隊的技術背景如何？是否足以支撐長期發展？', es: 'Inversor B: ¿Cómo es el perfil técnico del equipo? ¿Es suficiente para sostener el desarrollo a largo plazo?' },
+            { zh: '创办人：技术长曾在医疗科技公司任职十年，团队核心成员皆有相关经验。', zhT: '創辦人：技術長曾在醫療科技公司任職十年，團隊核心成員皆有相關經驗。', es: 'Fundador: Nuestro director de tecnología trabajó diez años en una empresa de tecnología médica, y el equipo central tiene experiencia relevante.' },
+            { zh: '投资人甲：那你们预计多久能达到损益平衡？', zhT: '投資人甲：那你們預計多久能達到損益平衡？', es: 'Inversor A: ¿Cuándo esperan alcanzar el punto de equilibrio?' },
+            { zh: '创办人：根据现金流预测，预计十八个月后可以达到损益平衡。', zhT: '創辦人：根據現金流預測，預計十八個月後可以達到損益平衡。', es: 'Fundador: Según la proyección de flujo de caja, esperamos alcanzar el equilibrio en dieciocho meses.' },
+            { zh: '投资人乙：如果市场扩张不如预期，你们的备案是什么？', zhT: '投資人乙：如果市場擴張不如預期，你們的備案是什麼？', es: 'Inversor B: Si la expansión de mercado no cumple las expectativas, ¿cuál es su plan de contingencia?' },
+            { zh: '创办人：我们会优先调整行销预算，并考虑将部分服务授权给合作伙伴。', zhT: '創辦人：我們會優先調整行銷預算，並考慮將部分服務授權給合作夥伴。', es: 'Fundador: Priorizaríamos ajustar el presupuesto de marketing y consideraríamos licenciar parte del servicio a socios.' },
+            { zh: '（旁白）经过近一小时的提问，投资人之间交换了几个眼神，似乎颇感兴趣。', zhT: '（旁白）經過近一小時的提問，投資人之間交換了幾個眼神，似乎頗感興趣。', es: 'Narración: Tras casi una hora de preguntas, los inversores intercambiaron miradas, pareciendo bastante interesados.' },
+            { zh: '投资人甲：我们会在一周内给出初步回覆，谢谢你们精彩的简报。', zhT: '投資人甲：我們會在一週內給出初步回覆，謝謝你們精彩的簡報。', es: 'Inversor A: Les daremos una respuesta preliminar en una semana; gracias por su excelente presentación.' }
+        ],
+        quiz: [
+            { zh: '今天的___邀请了五位创投合伙人到场评估这个项目。', zhT: '今天的___邀請了五位創投合夥人到場評估這個項目。', es: 'El pitch de hoy contó con cinco socios de capital de riesgo evaluando el proyecto.',
+              opts: [
+                { z: '路演', t: '路演', p: 'lùyǎn', e: 'Pitch, presentación itinerante a inversores' },
+                { z: '面试', t: '面試', p: 'miànshì', e: 'Entrevista' },
+                { z: '记者会', t: '記者會', p: 'jìzhěhuì', e: 'Conferencia de prensa' } ] },
+            { zh: '请先说明一下你们的___。', zhT: '請先說明一下你們的___。', es: 'Primero explique su modelo de negocio.',
+              opts: [
+                { z: '商业模式', t: '商業模式', p: 'shāngyè móshì', e: 'Modelo de negocio' },
+                { z: '企业文化', t: '企業文化', p: 'qǐyè wénhuà', e: 'Cultura empresarial' },
+                { z: '产品规格', t: '產品規格', p: 'chǎnpǐn guīgé', e: 'Especificaciones del producto' } ] },
+            { zh: '我们与医疗院所合作抽取___。', zhT: '我們與醫療院所合作抽取___。', es: 'Colaboramos con instituciones médicas cobrando comisiones por derivación.',
+              opts: [
+                { z: '转介佣金', t: '轉介佣金', p: 'zhuǎnjiè yòngjīn', e: 'Comisión por derivación' },
+                { z: '会员年费', t: '會員年費', p: 'huìyuán niánfèi', e: 'Cuota anual de membresía' },
+                { z: '广告收入', t: '廣告收入', p: 'guǎnggào shōurù', e: 'Ingresos por publicidad' } ] },
+            { zh: '目前的市场规模与___大概是多少？', zhT: '目前的市場規模與___大概是多少？', es: '¿Cuál es el tamaño de mercado actual y la tasa de penetración?',
+              opts: [
+                { z: '渗透率', t: '滲透率', p: 'shèntòulǜ', e: 'Tasa de penetración' },
+                { z: '成长率', t: '成長率', p: 'chéngzhǎnglǜ', e: 'Tasa de crecimiento' },
+                { z: '流失率', t: '流失率', p: 'liúshīlǜ', e: 'Tasa de abandono (churn)' } ] },
+            { zh: '缺乏整合性平台，这正是我们的___。', zhT: '缺乏整合性平台，這正是我們的___。', es: 'Falta una plataforma integrada; ese es precisamente nuestro punto de entrada.',
+              opts: [
+                { z: '切入点', t: '切入點', p: 'qièrùdiǎn', e: 'Punto de entrada/enfoque' },
+                { z: '终点站', t: '終點站', p: 'zhōngdiǎnzhàn', e: 'Punto final' },
+                { z: '弱点', t: '弱點', p: 'ruòdiǎn', e: 'Punto débil' } ] },
+            { zh: '你们打算如何扩大___？', zhT: '你們打算如何擴大___？', es: '¿Cómo planean ampliar su base de usuarios?',
+              opts: [
+                { z: '用户基数', t: '用戶基數', p: 'yònghù jīshù', e: 'Base de usuarios' },
+                { z: '员工人数', t: '員工人數', p: 'yuángōng rénshù', e: 'Número de empleados' },
+                { z: '办公面积', t: '辦公面積', p: 'bàngōng miànjī', e: 'Superficie de oficina' } ] },
+            { zh: '那___大概是多少？能否打平？', zhT: '那___大概是多少？能否打平？', es: '¿Cuál es el costo de adquisición de clientes aproximado? ¿Es sostenible?',
+              opts: [
+                { z: '获客成本', t: '獲客成本', p: 'huòkè chéngběn', e: 'Costo de adquisición de clientes' },
+                { z: '营运利润', t: '營運利潤', p: 'yíngyùn lìrùn', e: 'Beneficio operativo' },
+                { z: '固定资产', t: '固定資產', p: 'gùdìng zīchǎn', e: 'Activo fijo' } ] },
+            { zh: '单一用户获客成本约三百元，___则超过三千元。', zhT: '單一用戶獲客成本約三百元，___則超過三千元。', es: 'El costo de adquisición por usuario es de 300; el valor de vida del cliente supera los 3.000.',
+              opts: [
+                { z: '生命周期价值', t: '生命週期價值', p: 'shēngmìng zhōuqī jiàzhí', e: 'Valor de vida del cliente (LTV)' },
+                { z: '初期投资额', t: '初期投資額', p: 'chūqī tóuzī é', e: 'Inversión inicial' },
+                { z: '退货率', t: '退貨率', p: 'tuìhuòlǜ', e: 'Tasa de devolución' } ] },
+            { zh: '那你们这一轮募资的___是多少？', zhT: '那你們這一輪募資的___是多少？', es: '¿Cuál es la valoración de esta ronda de financiamiento?',
+              opts: [
+                { z: '估值', t: '估值', p: 'gūzhí', e: 'Valoración (de empresa)' },
+                { z: '利率', t: '利率', p: 'lìlǜ', e: 'Tasa de interés' },
+                { z: '税率', t: '稅率', p: 'shuìlǜ', e: 'Tasa de impuesto' } ] },
+            { zh: '我们希望以八千万的估值___一千两百万元。', zhT: '我們希望以八千萬的估值___一千兩百萬元。', es: 'Esperamos recaudar 12 millones con una valoración de 80 millones.',
+              opts: [
+                { z: '募集', t: '募集', p: 'mùjí', e: 'Recaudar (fondos)' },
+                { z: '偿还', t: '償還', p: 'chánghuán', e: 'Reembolsar' },
+                { z: '冻结', t: '凍結', p: 'dòngjié', e: 'Congelar' } ] },
+            { zh: '我们___了日本同类型公司的最新一轮估值作为基准。', zhT: '我們___了日本同類型公司的最新一輪估值作為基準。', es: 'Tomamos como referencia la última ronda de valoración de una empresa japonesa similar.',
+              opts: [
+                { z: '参照', t: '參照', p: 'cānzhào', e: 'Tomar como referencia' },
+                { z: '反驳', t: '反駁', p: 'fǎnbó', e: 'Refutar' },
+                { z: '忽视', t: '忽視', p: 'hūshì', e: 'Ignorar' } ] },
+            { zh: '团队的技术背景是否足以___长期发展？', zhT: '團隊的技術背景是否足以___長期發展？', es: '¿El perfil técnico del equipo es suficiente para sostener el desarrollo a largo plazo?',
+              opts: [
+                { z: '支撑', t: '支撐', p: 'zhīchēng', e: 'Sostener, respaldar' },
+                { z: '阻碍', t: '阻礙', p: "zǔ'ài", e: 'Obstaculizar' },
+                { z: '取代', t: '取代', p: 'qǔdài', e: 'Reemplazar' } ] },
+            { zh: '技术长曾在医疗科技公司___十年。', zhT: '技術長曾在醫療科技公司___十年。', es: 'Nuestro director de tecnología trabajó diez años en una empresa de tecnología médica.',
+              opts: [
+                { z: '任职', t: '任職', p: 'rènzhí', e: 'Desempeñar un cargo, trabajar en' },
+                { z: '实习', t: '實習', p: 'shíxí', e: 'Hacer pasantía' },
+                { z: '兼职', t: '兼職', p: 'jiānzhí', e: 'Trabajar a tiempo parcial' } ] },
+            { zh: '你们预计多久能达到___？', zhT: '你們預計多久能達到___？', es: '¿Cuándo esperan alcanzar el punto de equilibrio?',
+              opts: [
+                { z: '损益平衡', t: '損益平衡', p: 'sǔnyì pínghéng', e: 'Punto de equilibrio (break-even)' },
+                { z: '股权稀释', t: '股權稀釋', p: 'gǔquán xīshì', e: 'Dilución accionaria' },
+                { z: '资产重组', t: '資產重組', p: 'zīchǎn chóngzǔ', e: 'Reestructuración de activos' } ] },
+            { zh: '根据___预测，预计十八个月后可以达到损益平衡。', zhT: '根據___預測，預計十八個月後可以達到損益平衡。', es: 'Según la proyección de flujo de caja, esperamos alcanzar el equilibrio en 18 meses.',
+              opts: [
+                { z: '现金流', t: '現金流', p: 'xiànjīnliú', e: 'Flujo de caja' },
+                { z: '人力资源', t: '人力資源', p: 'rénlì zīyuán', e: 'Recursos humanos' },
+                { z: '供应链', t: '供應鏈', p: 'gōngyìngliàn', e: 'Cadena de suministro' } ] },
+            { zh: '如果市场扩张不如预期，你们的___是什么？', zhT: '如果市場擴張不如預期，你們的___是什麼？', es: 'Si la expansión no cumple las expectativas, ¿cuál es su plan de contingencia?',
+              opts: [
+                { z: '备案', t: '備案', p: "bèi'àn", e: 'Plan de contingencia' },
+                { z: '草案', t: '草案', p: "cǎo'àn", e: 'Borrador (de propuesta)' },
+                { z: '悬案', t: '懸案', p: 'xuán\'àn', e: 'Caso sin resolver' } ] },
+            { zh: '我们会考虑将部分服务___给合作伙伴。', zhT: '我們會考慮將部分服務___給合作夥伴。', es: 'Consideraríamos licenciar parte del servicio a socios.',
+              opts: [
+                { z: '授权', t: '授權', p: 'shòuquán', e: 'Otorgar licencia, autorizar' },
+                { z: '出售', t: '出售', p: 'chūshòu', e: 'Vender' },
+                { z: '捐赠', t: '捐贈', p: 'juānzèng', e: 'Donar' } ] },
+            { zh: '投资人之间___，似乎颇感兴趣。', zhT: '投資人之間___，似乎頗感興趣。', es: 'Los inversores intercambiaron miradas, pareciendo bastante interesados.',
+              opts: [
+                { z: '交换眼神', t: '交換眼神', p: 'jiāohuàn yǎnshén', e: 'Intercambiar miradas' },
+                { z: '摇头叹气', t: '搖頭嘆氣', p: 'yáotóu tànqì', e: 'Negar con la cabeza y suspirar' },
+                { z: '低头沉默', t: '低頭沉默', p: 'dītóu chénmò', e: 'Bajar la cabeza en silencio' } ] },
+            { zh: '我们会在一周内给出___。', zhT: '我們會在一週內給出___。', es: 'Les daremos una respuesta preliminar en una semana.',
+              opts: [
+                { z: '初步回覆', t: '初步回覆', p: 'chūbù huífù', e: 'Respuesta preliminar' },
+                { z: '最终判决', t: '最終判決', p: 'zuìzhōng pànjué', e: 'Veredicto final' },
+                { z: '书面警告', t: '書面警告', p: 'shūmiàn jǐnggào', e: 'Advertencia por escrito' } ] },
+            { zh: '谢谢你们精彩的___。', zhT: '謝謝你們精彩的___。', es: 'Gracias por su excelente presentación.',
+              opts: [
+                { z: '简报', t: '簡報', p: 'jiǎnbào', e: 'Presentación (de diapositivas)' },
+                { z: '报税', t: '報稅', p: 'bàoshuì', e: 'Declaración de impuestos' },
+                { z: '合约', t: '合約', p: 'héyuē', e: 'Contrato' } ] }
+        ]
     }
 
     ];
