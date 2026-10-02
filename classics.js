@@ -77,33 +77,51 @@ var DATA = {
     { n: "学而第一", l: [
       ["子曰：「学而时习之，不亦说乎？有朋自远方来，不亦乐乎？人不知而不愠，不亦君子乎？」", "Dijo el Maestro: \"Estudiar y practicar a su tiempo: ¿no es un placer? Que vengan amigos de lejos: ¿no es alegría? Que no te conozcan y no ofenderte: ¿no eres un noble?\""],
       ["子曰：「巧言令色，鲜矣仁！」", "Dijo el Maestro: \"Palabras finas y cara bonita: poca benevolencia.\""],
+    
+      ["曾子曰：「吾日三省吾身：为人谋而不忠乎？与朋友交而不信乎？传不习乎？」", "Dijo Zengzi: \"Cada día me examino en tres cosas: si al actuar por otros fui leal; si al tratar con amigos fui sincero; si practiqué lo que me enseñaron.\""],
     ]},
     { n: "为政第二", l: [
       ["子曰：「温故而知新，可以为师矣。」", "Dijo el Maestro: \"Revisar lo viejo y descubrir lo nuevo: ya puede enseñar.\""],
       ["子曰：「学而不思则罔，思而不学则殆。」", "Dijo el Maestro: \"Estudiar sin pensar confunde; pensar sin estudiar, pone en riesgo.\""],
+    
+      ["子曰：「吾十有五而志于学，三十而立，四十而不惑，五十而知天命，六十而耳顺，七十而从心所欲，不逾矩。」", "Dijo el Maestro: \"A los quince, fijé mi voluntad en aprender; a los treinta, me sostuve firme; a los cuarenta, dejé de dudar; a los cincuenta, conocí el mandato del cielo; a los sesenta, mi oído se volvió dócil; a los setenta, seguí los deseos de mi corazón sin salirme de la norma.\""],
     ]},
     { n: "里仁第四", l: [
       ["子曰：「见贤思齐焉，见不贤而内自省也。」", "Dijo el Maestro: \"Al ver a alguien valioso, piensa en igualarlo; al ver al que no lo es, revísate por dentro.\""],
+    
+      ["子曰：「君子喻于义，小人喻于利。」", "Dijo el Maestro: \"El noble entiende de justicia; el pequeño, de ganancia.\""],
     ]},
     { n: "公冶长第五", l: [
       ["子贡问曰：「孔文子何以谓之文也？」子曰：「敏而好学，不耻下问，是以谓之文也。」", "Zigong preguntó: \"¿Por qué llamaron Culto a Kong Wenzi?\" El Maestro: \"Vivo y amante del estudio, y preguntar a los de abajo sin vergüenza: por eso Culto.\""],
+    
+      ["子曰：「老者安之，朋友信之，少者怀之。」", "Dijo el Maestro: \"Que los ancianos vivan tranquilos, que los amigos se tengan confianza, que los jóvenes sean cuidados.\""],
     ]},
     { n: "雍也第六", l: [
       ["子曰：「知之者不如好之者，好之者不如乐之者。」", "Dijo el Maestro: \"Quien lo conoce no llega a quien lo disfruta; quien lo disfruta no llega a quien vive feliz con ello.\""],
+    
+      ["子曰：「贤哉，回也！一箪食，一瓢饮，在陋巷，人不堪其忧，回也不改其乐。贤哉，回也！」", "Dijo el Maestro: \"¡Qué virtuoso Hui! Con un cuenco de arroz y un cucharón de agua, viviendo en un callejón pobre, cualquiera no soportaría esa angustia; Hui, en cambio, no pierde su alegría. ¡Qué virtuoso Hui!\""],
     ]},
     { n: "述而第七", l: [
       ["子曰：「三人行，必有我师焉。择其善者而从之，其不善者而改之。」", "Dijo el Maestro: \"Si tres caminan, uno de ellos será mi maestro: elijo sus virtudes y las sigo; sus defectos, y los corrijo en mí.\""],
+    
+      ["子曰：「饭疏食饮水，曲肱而枕之，乐亦在其中矣。不义而富且贵，于我如浮云。」", "Dijo el Maestro: \"Comer cosas simples, beber agua y usar el brazo doblado como almohada: ahí también hay alegría. Riqueza y rango logrados sin justicia son, para mí, como nubes pasajeras.\""],
     ]},
     { n: "子罕第九", l: [
       ["子在川上曰：「逝者如斯夫！不舍昼夜。」", "A orillas del río dijo el Maestro: \"Así pasa todo, sin parar ni de día ni de noche.\""],
       ["子曰：「岁寒，然后知松柏之后凋也。」", "Dijo el Maestro: \"Con el frío del año se sabe que pino y ciprés son los últimos en marchitarse.\""],
+    
+      ["子绝四：毋意，毋必，毋固，毋我。", "El Maestro erradicó cuatro cosas en sí mismo: las conjeturas sin base, la obstinación absoluta, la rigidez y el egoísmo."],
     ]},
     { n: "子路第十三", l: [
       ["子曰：「其身正，不令而行；其身不正，虽令不从。」", "Dijo el Maestro: \"Si el que manda es recto, obedecen sin órdenes; si no es recto, las órdenes no se siguen.\""],
       ["子曰：「君子和而不同，小人同而不和。」", "Dijo el Maestro: \"El noble armoniza sin copiar; el pequeño copia sin armonizar.\""],
+    
+      ["子曰：「名不正，则言不顺；言不顺，则事不成。」", "Dijo el Maestro: \"Si los nombres no son correctos, el lenguaje no fluye; si el lenguaje no fluye, los asuntos no se logran.\""],
     ]},
     { n: "卫灵公第十五", l: [
       ["子贡问曰：「有一言而可以终身行之者乎？」子曰：「其恕乎！己所不欲，勿施于人。」", "Zigong preguntó: \"¿Hay una sola palabra para regir toda la vida?\" El Maestro: \"¿La reciprocidad? Lo que no quieras para ti, no se lo hagas al otro.\""],
+    
+      ["子曰：「躬自厚而薄责于人，则远怨矣。」", "Dijo el Maestro: \"Exigirse mucho a sí mismo y poco a los demás aleja el rencor.\""],
     ]},
   ]},
 "Clasicos-Zhongyong": {
@@ -126,15 +144,21 @@ var DATA = {
       ["天地之大也，人犹有所憾。故君子语大，天下莫能载焉；语小，天下莫能破焉。", "Cielo y tierra son grandes y aun así alguien se queja de ellos: el camino del noble, en lo grande, no lo carga el mundo; en lo chico, no lo rompe nadie."],
       ["《诗》云：「鸢飞戾天，鱼跃于渊。」言其上下察也。", "El Cántico dice: \"El milano sube hasta el cielo, el pez brinca en el fondo\": arriba y abajo, todo lo revela."],
       ["君子之道，造端乎夫妇；及其至也，察乎天地。", "El camino del noble nace en la pareja corriente y, en su tope, ilumina el cielo y la tierra."],
+    
+      ["夫妇之不肖，可以能行焉；及其至也，虽圣人亦有所不能焉。", "Hasta la pareja más torpe puede practicar algo de él; en su tope, ni el sabio puede con todo."],
     ]},
     { n: "第十四章", l: [
       ["君子素其位而行，不愿乎其外。", "El noble obra desde el puesto que le toca y no suspira por otro."],
       ["素富贵，行乎富贵；素贫贱，行乎贫贱；素夷狄，行乎夷狄；素患难，行乎患难。君子无入而不自得焉。", "Rico y noble: obra como rico; pobre y humilde: como pobre; entre extranjeros: entre extranjeros; en la adversidad: en la adversidad. El noble, donde entra, siempre se encuentra."],
       ["在上位不陵下，在下位不援上，正己而不求于人则无怨。", "Quien manda no aplasta al de abajo; quien obedece no arrastra al de arriba; rectificándose sin exigir a otros, no hay rencor."],
+    
+      ["故君子居易以俟命，小人行险以徼幸。", "Por eso el noble habita en lo llano y espera su destino; el pequeño arriesga el paso buscando un golpe de suerte."],
     ]},
     { n: "第十五章", l: [
       ["君子之道，辟如行远必自迩，辟如登高必自卑。", "El camino del noble es como ir lejos: empieza en lo cercano; como subir alto: empieza en lo bajo."],
       ["《诗》曰：「妻子好合，如鼓瑟琴。兄弟既翕，和乐且湛。」", "El Cántico dice: \"Marido y mujer en sintonía, como cítara y arpa; hermanos en paz, gozo que no se apaga.\""],
+    
+      ["子曰：「父母其顺矣乎！」", "Dijo el Maestro: \"¡Así deben de vivir en paz los padres!\""],
     ]},
     { n: "第二十章", l: [
       ["天下之达道五，所以行之者三。曰：君臣也，父子也，夫妇也，昆弟也，朋友之交也。五者，天下之达道也。知、仁、勇三者，天下之达德也。", "Cinco caminos alcanzan al mundo y tres virtudes los recorren: soberano y súbdito, padre e hijo, marido y mujer, hermanos, amigos: cinco caminos. Sabiduría, benevolencia y valentía: tres virtudes universales."],
@@ -145,12 +169,16 @@ var DATA = {
       ["诚者不勉而中，不思而得，从容中道，圣人也。诚之者，择善而固执之者也。", "El auténtico acierta sin forzar, obtiene sin pensar, camina en el medio con soltura: es el sabio. Hacerse auténtico es elegir el bien y sostenerlo con uñas."],
       ["博学之，审问之，慎思之，明辨之，笃行之。", "Estudiarlo de lo ancho, preguntarlo con rigor, pensarlo con cuidado, discernirlo con claridad, practicarlo a fondo."],
       ["人一能之，己百之；人十能之，己千之。果能此道矣，虽愚必明，虽柔必强。", "Si otro lo logra de una, tú hazlo cien veces; si otro de diez, tú mil. Con ese método, el torpe se aclara y el débil se fortalece."],
+    
+      ["在下位不获乎上，民不可得而治矣。", "Quien ocupa un cargo menor sin ganarse la confianza de quien manda, no logra gobernar al pueblo."],
     ]},
     { n: "第二十六章", l: [
       ["故至诚无息。", "La autenticidad al máximo no descansa."],
       ["不息则久，久则征，征则悠远，悠远则博厚，博厚则高明。", "Sin descanso dura; durando se muestra; mostrándose se extiende lejana; extendiéndose, vasta y espesa; y espesa, alta y luminosa."],
       ["博厚，所以载物也；高明，所以覆物也；悠久，所以成物也。", "Vasta y espesa: carga las cosas; alta y luminosa: las cubre; larga y extendida: las madura."],
       ["天地之道：博也，厚也，高也，明也，悠也，久也。", "El camino del cielo y la tierra: vasto, espeso, alto, luminoso, largo, duradero."],
+    
+      ["今夫天，斯昭昭之多，及其无穷也，日月星辰系焉，万物覆焉。", "El cielo no es más que este brillo que se ve, pero en su extensión infinita cuelgan de él el sol, la luna y las estrellas, y bajo él se cubren las diez mil cosas."],
     ]},
     { n: "第三十章", l: [
       ["仲尼祖述尧舜，宪章文武；上律天时，下袭水土。", "Zhongni siguió a Yao y Shun como antepasados, honró a Wen y Wu como norma; arriba sintonizó los tiempos del cielo, abajo tomó tierra y agua."],
@@ -164,12 +192,16 @@ var DATA = {
     { n: "梁惠王上 · La gracia que se extiende", l: [
       ["「老吾老，以及人之老；幼吾幼，以及人之幼：天下可运于掌。诗云：『刑于寡妻，至于兄弟，以御于家邦。』言举斯心加诸彼而已。」", "\"Honra a tus viejos y extiéndelo a los viejos de todos; cuida a tus chicos y extiéndelo a los chicos de todos: el mundo cabe en tu palma. El Cántico dice: 'Da ejemplo a tu esposa, sigue a tus hermanos, gobierna tu casa y tu reino': es poner ese corazón en el otro.\""],
       ["故推恩足以保四海，不推恩无以保妻子。古之人所以大过人者，无他焉，善推其所为而已矣。", "Extender la gracia basta para guardar los cuatro mares; sin extenderla, ni esposa ni hijos se guardan. Los antiguos superaban a todos por una sola cosa: bien extendido lo que hacían."],
+    
+      ["孟子曰：「王何必曰利？亦有仁义而已矣。」", "Mencio dijo: \"¿Para qué hablar de provecho, Majestad? Solo hay benevolencia y justicia.\""],
     ]},
     { n: "公孙丑上 · Los cuatro brotes", l: [
       ["所以谓人皆有不忍人之心者：今人乍见孺子将入于井，皆有怵惕恻隐之心。", "Digo que toda persona tiene un corazón que no soporta ver sufrir: quien ve de pronto a un niño a punto de caer en un pozo siente espanto y compasión."],
       ["非所以内交于孺子之父母也，非所以要誉于乡党朋友也，非恶其声而然也。", "No es para quedar bien con sus padres, ni por fama entre vecinos y amigos, ni por horror al grito."],
       ["由是观之，无恻隐之心，非人也；无羞恶之心，非人也；无辞让之心，非人也；无是非之心，非人也。", "Visto así: sin compasión no es persona; sin vergüenza ante el mal, no es persona; sin la cesión cortés, no; sin lo justo y lo injusto, no."],
       ["恻隐之心，仁之端也；羞恶之心，义之端也；辞让之心，礼之端也；是非之心，智之端也。", "La compasión es el brote de la benevolencia; la vergüenza, de la justicia; la cortesía, del rito; el discernimiento, de la sabiduría."],
+    
+      ["孟子曰：「我善养吾浩然之气。」", "Mencio dijo: \"Yo cultivo bien mi energía vital, vasta como una inundación.\""],
     ]},
     { n: "公孙丑下 · Cielo, tierra y gente", l: [
       ["天时不如地利，地利不如人和。", "El momento favorable del cielo no llega a la ventaja de la tierra; la ventaja de la tierra no llega a la concordia de la gente."],
@@ -177,38 +209,54 @@ var DATA = {
       ["城非不高也，池非不深也，兵革非不坚利也，米粟非不多也；委而去之，是地利不如人和也。", "No es el muro bajo ni el foso seco ni las armas flojas ni el grano escaso: se abandona y se va — la tierra no llega a la concordia."],
       ["故曰：域民不以封疆之界，固国不以山溪之险，威天下不以兵革之利。得道者多助，失道者寡助。", "Por eso: no se retiene al pueblo con fronteras, no se afianza un reino con barrancos, no se impone el mundo con armas. Quien tiene el Camino, muchos lo ayudan; quien lo pierde, pocos."],
       ["寡助之至，亲戚畔之；多助之至，天下顺之。以天下之所顺，攻亲戚之所畔，故君子有不战，战必胜矣。", "Pocos ayudantes al final: hasta la familia lo abandona; muchos: el mundo lo sigue. Con el mundo detrás y la familia en contra: el noble, si puede, no pelea; y si pelea, gana."],
+    
+      ["孟子曰：「五百年必有王者兴，其间必有名世者。」", "Mencio dijo: \"Cada quinientos años, sin falta, surge un verdadero rey; y en ese lapso, sin falta, aparece alguien que da nombre a su época.\""],
     ]},
     { n: "滕文公下 · El gran hombre", l: [
       ["居天下之广居，立天下之正位，行天下之大道；得志，与民由之；不得志，独行其道。", "Habita la casa más ancha del mundo, párate en el lugar justo del mundo, anda el gran camino del mundo: con logros, el pueblo camina contigo; sin ellos, sigues solo tu camino."],
       ["富贵不能淫，贫贱不能移，威武不能屈，此之谓大丈夫。", "Ni la riqueza y el poder lo corrompen, ni la pobreza y la baja estación lo desvían, ni el poder y las armas lo doblegan: ese es el gran hombre."],
+    
+      ["孟子曰：「予岂好辩哉？予不得已也。」", "Mencio dijo: \"¿Acaso me gusta discutir? No me queda otra.\""],
     ]},
     { n: "离娄上 · Sin compás no hay cuadrado", l: [
       ["离娄之明，公输子之巧，不以规矩，不能成方圆；师旷之聪，不以六律，不能正五音。", "Sin compás ni escuadra, ni la vista aguda de Lou ni la maestría de Gongshu dan un cuadrado perfecto; sin las seis notas, el fino oído de Shi Kuang no afina las cinco voces."],
       ["尧、舜之道，不以仁政，不能平治天下。", "El camino de Yao y Shun, sin gobierno benevolente, no pacifica el mundo."],
+    
+      ["孟子曰：「人有恒言，皆曰『天下国家』。天下之本在国，国之本在家，家之本在身。」", "Mencio dijo: \"La gente tiene un dicho constante: 'el mundo, el reino, la familia'. La raíz del mundo está en el reino; la raíz del reino, en la familia; la raíz de la familia, en la persona.\""],
     ]},
     { n: "离娄下 · Quien ama, es amado", l: [
       ["君子以仁存心，以礼存心。仁者爱人，有礼者敬人。", "El noble guarda benevolencia en el corazón y guarda el rito. El benevolente ama a la gente; el cortés, la respeta."],
       ["爱人者，人恒爱之；敬人者，人恒敬之。", "Quien ama, siempre es amado; quien respeta, siempre respetado."],
       ["有人于此，其待我以横逆，则君子必自反也：我必不仁也，必无礼也，此物奚宜至哉？", "Si alguien lo trata con violencia, el noble se mira primero: \"Seguro fui sin benevolencia, sin cortesía: ¿cómo vino esto?\""],
+    
+      ["孟子曰：「大人者，不失其赤子之心者也。」", "Mencio dijo: \"El gran hombre es el que no pierde el corazón de su primera infancia.\""],
     ]},
     { n: "告子下 · Nacer de la adversidad", l: [
       ["舜发于畎亩之中，傅说举于版筑之间，胶鬲举于鱼盐之中，管夷吾举于士，孙叔敖举于海，百里奚举于市。", "Shun brotó del surco, Fu Yue del muro que levantaba, Jiao Ge del pescado y la sal, Guan Yiwu de la cárcel, Sunshu Ao de la playa, Baili Xi del mercado."],
       ["故天将降大任于是人也，必先苦其心志，劳其筋骨，饿其体肤，空乏其身，行拂乱其所为，所以动心忍性，曾益其所不能。", "Cuando el cielo le va a encargar el gran trabajo a alguien, primero aprieta su ánimo, agota sus huesos, lo deja con hambre y a flote y le desbarata los planes: así templa su corazón y le crece lo que no tenía."],
       ["人恒过，然后能改；困于心，衡于虑，而后作；征于色，发于声，而后喻。", "La gente siempre yerra; después corrige; con el corazón apretado y la cabeza atrancada, por fin actúa; se le nota en la cara y sale en la voz, y por fin se entiende."],
       ["入则无法家拂士，出则无敌国外患者，国恒亡。然后知生于忧患而死于安乐也。", "Un reino sin consejeros firmes dentro ni rivales y alertas afuera cae siempre: así se ve que se vive de la adversidad y se muere en la comodidad."],
+    
+      ["曹交问曰：「人皆可以为尧舜，有诸？」孟子曰：「然。」", "Cao Jiao preguntó: \"¿Es verdad que todos pueden llegar a ser como Yao y Shun?\" Mencio respondió: \"Así es.\""],
     ]},
     { n: "尽心上 · Pobre y próspero", l: [
       ["尊德乐义，则可以嚣嚣矣。故士穷不失义，达不离道。", "Honrar la virtud y gozar la justicia: así se vive tranquilo. El letrado, pobre, no suelta la justicia; próspero, no deja el camino."],
       ["穷则独善其身，达则兼善天下。", "Pobre: cultívate a solas; próspero: cultiva junto al mundo."],
+    
+      ["孟子曰：「尽其心者，知其性也。知其性，则知天矣。」", "Mencio dijo: \"Quien agota su corazón conoce su naturaleza; conociendo su naturaleza, conoce el cielo.\""],
     ]},
     { n: "尽心下 · El pueblo primero", l: [
       ["孟子曰：「民为贵，社稷次之，君为轻。", "Mencio dijo: \"El pueblo es lo más precioso; los altares del estado, después; el soberano, lo más liviano."],
       ["是故得乎丘民而为天子，得乎天子为诸侯，得乎诸侯为大夫。", "Por eso: ganarse al campo da el cielo, ganarse al hijo del cielo da el feudo, ganarse al señor da el cargo."],
       ["诸侯危社稷，则变置。牺牲既成，粢盛既絜，祭祀以时，然而旱干水溢，则变置社稷。」", "Si el señor amenaza los altares, se lo cambia; si la ofrenda está lista y limpia y a tiempo, y aun así sequía e inundación, se cambian los altares.\""],
+    
+      ["孟子曰：「养心莫善于寡欲。」", "Mencio dijo: \"Para cultivar el corazón, nada mejor que tener pocos deseos.\""],
     ]},
     { n: "尽心下 · Creer todo el libro", l: [
       ["孟子曰：「尽信《书》，则不如无《书》。吾于《武成》，取二三策而已矣。", "Mencio dijo: \"Creer todo el Documento es peor que no tenerlo: del Wu Cheng acepto dos o tres tiras."],
       ["仁人无敌于天下，以至仁伐至不仁，而何其血之流杵也？」", "El benevolente no tiene enemigos en el mundo: si la máxima benevolencia castigó la máxima tiranía, ¿cómo iba a rodar la sangre hasta los morteros?\""],
+    
+      ["孟子曰：「说大人，则藐之，勿视其巍巍然。」", "Mencio dijo: \"Al aconsejar a los poderosos, míralos con desapego, sin dejarte impresionar por su grandeza.\""],
     ]},
   ]},
 "Clasicos-Sanzijing": {
@@ -621,9 +669,9 @@ var DATA = {
 };
 var T_LINE = {
   "Clasicos-Daxue": ["大學之道，在明明德，在親民，在止於至善。", "知止而後有定，定而後能靜，靜而後能安，安而後能慮，慮而後能得。", "物有本末，事有終始。", "知所先後，則近道矣。", "古之欲明明德於天下者，先治其國；欲治其國者，先齊其家；欲齊其家者，先修其身；欲修其身者，先正其心；欲正其心者，先誠其意；欲誠其意者，先致其知；致知在格物。", "物格而後知至，知至而後意誠，意誠而後心正，心正而後身修，身修而後家齊，家齊而後國治，國治而後天下平。", "自天子以至於庶人，壹是皆以修身為本。", "其本亂而末治者否矣。", "其所厚者薄，而其所薄者厚，未之有也。", "湯之《盤銘》曰：「苟日新，日日新，又日新。」", "《康誥》曰：「作新民。」", "《詩》曰：「周雖舊邦，其命維新。」", "是故君子無所不用其極。", "《詩》云：「穆穆文王，於緝熙敬止！」", "為人君，止於仁；為人臣，止於敬；為人子，止於孝；為人父，止於慈；與國人交，止於信。", "《詩》云：「邦畿千里，惟民所止。」", "所謂誠其意者，毋自欺也。", "如惡惡臭，如好好色，此之謂自謙。", "故君子必慎其獨也。", "小人閒居為不善，無所不至；見君子而後厭然，掩其不善而著其善。", "人之視己，如見其肺肝然，則何益矣。", "曾子曰：「十目所視，十手所指，其嚴乎！」", "富潤屋，德潤身，心廣體胖，故君子必誠其意。", "所謂修身在正其心者：身有所忿懥，則不得其正；有所恐懼，則不得其正；有所好樂，則不得其正；有所憂患，則不得其正。", "心不在焉，視而不見，聽而不聞，食而不知其味。", "此謂修身在正其心。", "所謂治國必先齊其家者，其家不可教而能教人者，無之。", "故君子不出家而成教於國：孝者，所以事君也；弟者，所以事長也；慈者，所以使眾也。", "一家仁，一國興仁；一家讓，一國興讓；一人貪戾，一國作亂。", "其機如此。此謂一言僨事，一人定國。", "堯、舜率天下以仁，而民從之；桀、紂率天下以暴，而民從之。", "所謂平天下在治其國者：上老老而民興孝，上長長而民興弟，上恤孤而民不倍，是以君子有絜矩之道也。", "所惡於上，毋以使下；所惡於下，毋以事上；所惡於前，毋以先後；所惡於後，毋以從前；所惡於右，毋以交於左；所惡於左，毋以交於右：此之謂絜矩之道。", "是故君子先慎乎德。有德此有人，有人此有土，有土此有財，有財此有用。", "德者本也，財者末也。", "外本內末，爭民施奪。", "是故財聚則民散，財散則民聚。", "是故言悖而出者，亦悖而入；貨悖而入者，亦悖而出。", "生財有大道：生之者眾，食之者寡，為之者疾，用之者舒，則財恆足矣。", "仁者以財發身，不仁者以身發財。"],
-  "Clasicos-Lunyu": ["子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」", "子曰：「巧言令色，鮮矣仁！」", "子曰：「溫故而知新，可以為師矣。」", "子曰：「學而不思則罔，思而不學則殆。」", "子曰：「見賢思齊焉，見不賢而內自省也。」", "子貢問曰：「孔文子何以謂之文也？」子曰：「敏而好學，不恥下問，是以謂之文也。」", "子曰：「知之者不如好之者，好之者不如樂之者。」", "子曰：「三人行，必有我師焉。擇其善者而從之，其不善者而改之。」", "子在川上曰：「逝者如斯夫！不捨晝夜。」", "子曰：「歲寒，然後知松柏之後凋也。」", "子曰：「其身正，不令而行；其身不正，雖令不從。」", "子曰：「君子和而不同，小人同而不和。」", "子貢問曰：「有一言而可以終身行之者乎？」子曰：「其恕乎！己所不欲，勿施於人。」"],
-  "Clasicos-Zhongyong": ["天命之謂性，率性之謂道，修道之謂教。", "道也者，不可須臾離也；可離，非道也。", "是故君子戒慎乎其所不睹，恐懼乎其所不聞。莫見乎隱，莫顯乎微，故君子慎其獨也。", "喜怒哀樂之未發，謂之中；發而皆中節，謂之和。", "中也者，天下之大本也；和也者，天下之達道也。", "致中和，天地位焉，萬物育焉。", "仲尼曰：「君子中庸，小人反中庸。君子之中庸也，君子而時中；小人之反中庸也，小人而無忌憚也。」", "君子之道費而隱。", "夫婦之愚，可以與知焉；及其至也，雖聖人亦有所不知焉。", "天地之大也，人猶有所憾。故君子語大，天下莫能載焉；語小，天下莫能破焉。", "《詩》云：「鳶飛戾天，魚躍於淵。」言其上下察也。", "君子之道，造端乎夫婦；及其至也，察乎天地。", "君子素其位而行，不願乎其外。", "素富貴，行乎富貴；素貧賤，行乎貧賤；素夷狄，行乎夷狄；素患難，行乎患難。君子無入而不自得焉。", "在上位不陵下，在下位不援上，正己而不求於人則無怨。", "君子之道，闢如行遠必自邇，闢如登高必自卑。", "《詩》曰：「妻子好合，如鼓瑟琴。兄弟既翕，和樂且湛。」", "天下之達道五，所以行之者三。曰：君臣也，父子也，夫婦也，昆弟也，朋友之交也。五者，天下之達道也。知、仁、勇三者，天下之達德也。", "好學近乎知，力行近乎仁，知恥近乎勇。", "凡事豫則立，不豫則廢。", "言前定則不跲，事前定則不困，行前定則不疚，道前定則不窮。", "誠者，天之道也；誠之者，人之道也。", "誠者不勉而中，不思而得，從容中道，聖人也。誠之者，擇善而固執之者也。", "博學之，審問之，慎思之，明辨之，篤行之。", "人一能之，己百之；人十能之，己千之。果能此道矣，雖愚必明，雖柔必強。", "故至誠無息。", "不息則久，久則徵，徵則悠遠，悠遠則博厚，博厚則高明。", "博厚，所以載物也；高明，所以覆物也；悠久，所以成物也。", "天地之道：博也，厚也，高也，明也，悠也，久也。", "仲尼祖述堯舜，憲章文武；上律天時，下襲水土。", "闢如天地之無不持載，無不覆幬，闢如四時之錯行，如日月之代明。", "萬物並育而不相害，道並行而不相悖，小德川流，大德敦化，此天地之所以為大也。"],
-  "Clasicos-Mengzi": ["「老吾老，以及人之老；幼吾幼，以及人之幼：天下可運於掌。詩云：『刑于寡妻，至於兄弟，以御於家邦。』言舉斯心加諸彼而已。」", "故推恩足以保四海，不推恩無以保妻子。古之人所以大過人者，無他焉，善推其所為而已矣。", "所以謂人皆有不忍人之心者：今人乍見孺子將入於井，皆有怵惕惻隱之心。", "非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。", "由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。", "惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。", "天時不如地利，地利不如人和。", "三里之城，七里之郭，環而攻之而不勝。夫環而攻之，必有得天時者矣；然而不勝者，是天時不如地利也。", "城非不高也，池非不深也，兵革非不堅利也，米粟非不多也；委而去之，是地利不如人和也。", "故曰：域民不以封疆之界，固國不以山溪之險，威天下不以兵革之利。得道者多助，失道者寡助。", "寡助之至，親戚畔之；多助之至，天下順之。以天下之所順，攻親戚之所畔，故君子有不戰，戰必勝矣。", "居天下之廣居，立天下之正位，行天下之大道；得志，與民由之；不得志，獨行其道。", "富貴不能淫，貧賤不能移，威武不能屈，此之謂大丈夫。", "離婁之明，公輸子之巧，不以規矩，不能成方圓；師曠之聰，不以六律，不能正五音。", "堯、舜之道，不以仁政，不能平治天下。", "君子以仁存心，以禮存心。仁者愛人，有禮者敬人。", "愛人者，人恆愛之；敬人者，人恆敬之。", "有人於此，其待我以橫逆，則君子必自反也：我必不仁也，必無禮也，此物奚宜至哉？", "舜發於畎畝之中，傅說舉於版築之間，膠鬲舉於魚鹽之中，管夷吾舉於士，孫叔敖舉於海，百里奚舉於市。", "故天將降大任於是人也，必先苦其心志，勞其筋骨，餓其體膚，空乏其身，行拂亂其所為，所以動心忍性，曾益其所不能。", "人恆過，然後能改；困於心，衡於慮，而後作；徵於色，發於聲，而後喻。", "入則無法家拂士，出則無敵國外患者，國恆亡。然後知生於憂患而死於安樂也。", "尊德樂義，則可以囂囂矣。故士窮不失義，達不離道。", "窮則獨善其身，達則兼善天下。", "孟子曰：「民為貴，社稷次之，君為輕。", "是故得乎丘民而為天子，得乎天子為諸侯，得乎諸侯為大夫。", "諸侯危社稷，則變置。犧牲既成，粢盛既絜，祭祀以時，然而旱乾水溢，則變置社稷。」", "孟子曰：「盡信《書》，則不如無《書》。吾於《武成》，取二三策而已矣。", "仁人無敵於天下，以至仁伐至不仁，而何其血之流杵也？」"],
+  "Clasicos-Lunyu": ["子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」","子曰：「巧言令色，鮮矣仁！」","曾子曰：「吾日三省吾身：為人謀而不忠乎？與朋友交而不信乎？傳不習乎？」","子曰：「溫故而知新，可以為師矣。」","子曰：「學而不思則罔，思而不學則殆。」","子曰：「吾十有五而志於學，三十而立，四十而不惑，五十而知天命，六十而耳順，七十而從心所欲，不踰矩。」","子曰：「見賢思齊焉，見不賢而內自省也。」","子曰：「君子喻於義，小人喻於利。」","子貢問曰：「孔文子何以謂之文也？」子曰：「敏而好學，不恥下問，是以謂之文也。」","子曰：「老者安之，朋友信之，少者懷之。」","子曰：「知之者不如好之者，好之者不如樂之者。」","子曰：「賢哉，回也！一簞食，一瓢飲，在陋巷，人不堪其憂，回也不改其樂。賢哉，回也！」","子曰：「三人行，必有我師焉。擇其善者而從之，其不善者而改之。」","子曰：「飯疏食飲水，曲肱而枕之，樂亦在其中矣。不義而富且貴，於我如浮雲。」","子在川上曰：「逝者如斯夫！不捨晝夜。」","子曰：「歲寒，然後知松柏之後凋也。」","子絕四：毋意，毋必，毋固，毋我。","子曰：「其身正，不令而行；其身不正，雖令不從。」","子曰：「君子和而不同，小人同而不和。」","子曰：「名不正，則言不順；言不順，則事不成。」","子貢問曰：「有一言而可以終身行之者乎？」子曰：「其恕乎！己所不欲，勿施於人。」","子曰：「躬自厚而薄責於人，則遠怨矣。」"],
+  "Clasicos-Zhongyong": ["天命之謂性，率性之謂道，修道之謂教。","道也者，不可須臾離也；可離，非道也。","是故君子戒慎乎其所不睹，恐懼乎其所不聞。莫見乎隱，莫顯乎微，故君子慎其獨也。","喜怒哀樂之未發，謂之中；發而皆中節，謂之和。","中也者，天下之大本也；和也者，天下之達道也。","致中和，天地位焉，萬物育焉。","仲尼曰：「君子中庸，小人反中庸。君子之中庸也，君子而時中；小人之反中庸也，小人而無忌憚也。」","君子之道費而隱。","夫婦之愚，可以與知焉；及其至也，雖聖人亦有所不知焉。","天地之大也，人猶有所憾。故君子語大，天下莫能載焉；語小，天下莫能破焉。","《詩》云：「鳶飛戾天，魚躍於淵。」言其上下察也。","君子之道，造端乎夫婦；及其至也，察乎天地。","夫婦之不肖，可以能行焉；及其至也，雖聖人亦有所不能焉。","君子素其位而行，不願乎其外。","素富貴，行乎富貴；素貧賤，行乎貧賤；素夷狄，行乎夷狄；素患難，行乎患難。君子無入而不自得焉。","在上位不陵下，在下位不援上，正己而不求於人則無怨。","故君子居易以俟命，小人行險以徼幸。","君子之道，闢如行遠必自邇，闢如登高必自卑。","《詩》曰：「妻子好合，如鼓瑟琴。兄弟既翕，和樂且湛。」","子曰：「父母其順矣乎！」","天下之達道五，所以行之者三。曰：君臣也，父子也，夫婦也，昆弟也，朋友之交也。五者，天下之達道也。知、仁、勇三者，天下之達德也。","好學近乎知，力行近乎仁，知恥近乎勇。","凡事豫則立，不豫則廢。","言前定則不跲，事前定則不困，行前定則不疚，道前定則不窮。","誠者，天之道也；誠之者，人之道也。","誠者不勉而中，不思而得，從容中道，聖人也。誠之者，擇善而固執之者也。","博學之，審問之，慎思之，明辨之，篤行之。","人一能之，己百之；人十能之，己千之。果能此道矣，雖愚必明，雖柔必強。","在下位不獲乎上，民不可得而治矣。","故至誠無息。","不息則久，久則徵，徵則悠遠，悠遠則博厚，博厚則高明。","博厚，所以載物也；高明，所以覆物也；悠久，所以成物也。","天地之道：博也，厚也，高也，明也，悠也，久也。","今夫天，斯昭昭之多，及其無窮也，日月星辰繫焉，萬物覆焉。","仲尼祖述堯舜，憲章文武；上律天時，下襲水土。","闢如天地之無不持載，無不覆幬，闢如四時之錯行，如日月之代明。","萬物並育而不相害，道並行而不相悖，小德川流，大德敦化，此天地之所以為大也。"],
+  "Clasicos-Mengzi": ["「老吾老，以及人之老；幼吾幼，以及人之幼：天下可運於掌。詩云：『刑于寡妻，至於兄弟，以御於家邦。』言舉斯心加諸彼而已。」","故推恩足以保四海，不推恩無以保妻子。古之人所以大過人者，無他焉，善推其所為而已矣。","孟子曰：「王何必曰利？亦有仁義而已矣。」","所以謂人皆有不忍人之心者：今人乍見孺子將入於井，皆有怵惕惻隱之心。","非所以內交於孺子之父母也，非所以要譽於鄉黨朋友也，非惡其聲而然也。","由是觀之，無惻隱之心，非人也；無羞惡之心，非人也；無辭讓之心，非人也；無是非之心，非人也。","惻隱之心，仁之端也；羞惡之心，義之端也；辭讓之心，禮之端也；是非之心，智之端也。","孟子曰：「我善養吾浩然之氣。」","天時不如地利，地利不如人和。","三里之城，七里之郭，環而攻之而不勝。夫環而攻之，必有得天時者矣；然而不勝者，是天時不如地利也。","城非不高也，池非不深也，兵革非不堅利也，米粟非不多也；委而去之，是地利不如人和也。","故曰：域民不以封疆之界，固國不以山溪之險，威天下不以兵革之利。得道者多助，失道者寡助。","寡助之至，親戚畔之；多助之至，天下順之。以天下之所順，攻親戚之所畔，故君子有不戰，戰必勝矣。","孟子曰：「五百年必有王者興，其間必有名世者。」","居天下之廣居，立天下之正位，行天下之大道；得志，與民由之；不得志，獨行其道。","富貴不能淫，貧賤不能移，威武不能屈，此之謂大丈夫。","孟子曰：「予豈好辯哉？予不得已也。」","離婁之明，公輸子之巧，不以規矩，不能成方圓；師曠之聰，不以六律，不能正五音。","堯、舜之道，不以仁政，不能平治天下。","孟子曰：「人有恆言，皆曰『天下國家』。天下之本在國，國之本在家，家之本在身。」","君子以仁存心，以禮存心。仁者愛人，有禮者敬人。","愛人者，人恆愛之；敬人者，人恆敬之。","有人於此，其待我以橫逆，則君子必自反也：我必不仁也，必無禮也，此物奚宜至哉？","孟子曰：「大人者，不失其赤子之心者也。」","舜發於畎畝之中，傅說舉於版築之間，膠鬲舉於魚鹽之中，管夷吾舉於士，孫叔敖舉於海，百里奚舉於市。","故天將降大任於是人也，必先苦其心志，勞其筋骨，餓其體膚，空乏其身，行拂亂其所為，所以動心忍性，曾益其所不能。","人恆過，然後能改；困於心，衡於慮，而後作；徵於色，發於聲，而後喻。","入則無法家拂士，出則無敵國外患者，國恆亡。然後知生於憂患而死於安樂也。","曹交問曰：「人皆可以為堯舜，有諸？」孟子曰：「然。」","尊德樂義，則可以囂囂矣。故士窮不失義，達不離道。","窮則獨善其身，達則兼善天下。","孟子曰：「盡其心者，知其性也。知其性，則知天矣。」","孟子曰：「民為貴，社稷次之，君為輕。","是故得乎丘民而為天子，得乎天子為諸侯，得乎諸侯為大夫。","諸侯危社稷，則變置。犧牲既成，粢盛既絜，祭祀以時，然而旱乾水溢，則變置社稷。」","孟子曰：「養心莫善於寡欲。」","孟子曰：「盡信《書》，則不如無《書》。吾於《武成》，取二三策而已矣。","仁人無敵於天下，以至仁伐至不仁，而何其血之流杵也？」","孟子曰：「說大人，則藐之，勿視其巍巍然。」"],
   "Clasicos-Sanzijing": ["人之初，性本善。", "性相近，習相遠。", "苟不教，性乃遷。", "教之道，貴以專。", "昔孟母，擇鄰處。", "子不學，斷機杼。", "竇燕山，有義方。", "教五子，名俱揚。", "養不教，父之過。", "教不嚴，師之惰。", "子不學，非所宜。", "幼不學，老何為。", "玉不琢，不成器。", "人不學，不知義。", "為人子，方少時。", "親師友，習禮儀。", "香九齡，能溫席。", "孝於親，所當執。", "融四歲，能讓梨。", "弟於長，宜先知。", "首孝悌，次見聞。", "知某數，識某文。", "一而十，十而百。", "百而千，千而萬。", "三才者，天地人。", "三光者，日月星。", "三綱者，君臣義。", "父子親，夫婦順。", "曰春夏，曰秋冬。", "此四時，運不窮。", "曰南北，曰西東。", "此四方，應乎中。", "曰水火，木金土。", "此五行，本乎數。", "曰仁義，禮智信。", "此五常，不容紊。", "凡訓蒙，須講究。", "詳訓詁，明句讀。", "為學者，必有初。", "小學終，至四書。", "論語者，二十篇。", "群弟子，記善言。", "孟子者，七篇止。", "講道德，說仁義。", "作中庸，乃孔伋。", "中不偏，庸不易。", "作大學，乃曾子。", "自修齊，至平治。", "孝經通，四書熟。", "如六經，始可讀。", "經子通，讀諸史。", "考世系，知終始。", "自羲農，至黃帝。", "號三皇，居上世。", "唐有虞，號二帝。", "相揖遜，稱盛世。", "夏有禹，商有湯。", "周文武，稱三王。", "夏傳子，家天下。", "四百載，遷夏社。", "湯伐夏，國號商。", "六百載，至紂亡。", "周武王，始誅紂。", "八百載，最長久。", "周轍東，王綱墮。", "逞干戈，尚遊說。", "始春秋，終戰國。", "五霸強，七雄出。", "嬴秦氏，始兼併。", "傳二世，楚漢爭。", "高祖興，漢業建。", "至孝平，王莽篡。", "光武興，為東漢。", "四百年，終於獻。", "魏蜀吳，爭漢鼎。", "號三國，迄兩晉。", "宋齊繼，梁陳承。", "為南朝，都金陵。", "北元魏，分東西。", "宇文周，與高齊。", "迨至隋，一土宇。", "不再傳，失統緒。", "唐高祖，起義師。", "除隋亂，創國基。", "二十傳，三百載。", "梁滅之，國乃改。", "梁唐晉，及漢周。", "稱五代，皆有由。", "炎宋興，受周禪。", "十八傳，南北混。", "讀史者，考實錄。", "通古今，若親目。", "昔仲尼，師項橐。", "古聖賢，尚勤學。", "趙中令，讀魯論。", "彼既仕，學且勤。", "披蒲編，削竹簡。", "彼無書，且知勉。", "頭懸樑，錐刺股。", "彼不教，自勤苦。", "如囊螢，如映雪。", "家雖貧，學不輟。", "如負薪，如掛角。", "身雖勞，猶苦卓。", "蘇老泉，二十七。", "始發憤，讀書籍。", "彼既老，猶悔遲。", "爾小生，宜早思。", "若梁灝，八十二。", "對大廷，魁多士。", "彼既成，眾稱異。", "爾小生，宜立志。", "瑩八歲，能詠詩。", "泌七歲，能賦棋。", "彼穎悟，人稱奇。", "爾幼學，當效之。", "蔡文姬，能辨琴。", "謝道韞，能詠吟。", "彼女子，且聰敏。", "爾男子，當自警。", "唐劉晏，方七歲。", "舉神童，作正字。", "彼雖幼，身已仕。", "爾幼學，勉而致。", "有為者，亦若是。", "犬守夜，雞司晨。", "苟不學，曷為人。", "蠶吐絲，蜂釀蜜。", "人不學，不如物。", "幼而學，壯而行。", "上致君，下澤民。", "揚名聲，顯父母。", "光於前，裕於後。", "人遺子，金滿籝。", "我教子，惟一經。", "勤有功，戲無益。", "戒之哉，宜勉力。"],
   "Clasicos-Xiaojing": ["仲尼居，曾子侍。", "子曰：「先王有至德要道，以順天下，民用和睦，上下無怨。汝知之乎？」", "曾子避席曰：「參不敏，何足以知之？」", "子曰：「夫孝，德之本也，教之所由生也。復坐，吾語汝。」", "身體髮膚，受之父母，不敢毀傷，孝之始也。", "立身行道，揚名於後世，以顯父母，孝之終也。", "夫孝，始於事親，中於事君，終於立身。", "《大雅》云：「無念爾祖，聿修厥德。」", "愛親者，不敢惡於人；敬親者，不敢慢於人。", "愛敬盡於事親，而德教加於百姓，刑于四海，蓋天子之孝也。", "《甫刑》云：「一人有慶，兆民賴之。」", "在上不驕，高而不危；制節謹度，滿而不溢。", "高而不危，所以長守貴也；滿而不溢，所以長守富也。", "《詩》云：「戰戰兢兢，如臨深淵，如履薄冰。」", "非先王之法服不敢服，非先王之法言不敢道，非先王之德行不敢行。", "是故非法不言，非道不行；口無擇言，身無擇行；言滿天下無口過，行滿天下無怨惡。", "三者備矣，然後能守其宗廟，蓋卿大夫之孝也。", "資於事父以事母，而愛同；資於事父以事君，而敬同。", "故母取其愛，而君取其敬，兼之者父也。", "故以孝事君則忠，以敬事長則順。", "忠順不失，以事其上，然後能保其祿位，而守其祭祀，蓋士之孝也。", "用天之道，分地之利，謹身節用，以養父母，此庶人之孝也。", "故自天子至於庶人，孝無終始，而患不及者，未之有也。", "曾子曰：「甚哉，孝之大也！」", "子曰：「夫孝，天之經也，地之義也，民之行也。天地之經，而民是則之。", "則天之明，因地之利，以順天下。是以其教不肅而成，其政不嚴而治。", "先王見教之可以化民也，是故先之以博愛，而民莫遺其親；陳之以德義，而民興行；先之以敬讓，而民不爭；導之以禮樂，而民和睦；示之以好惡，而民知禁。", "子曰：「昔者明王之以孝治天下也，不敢遺小國之臣，而況於公、侯、伯、子、男乎？」", "故得萬國之歡心，以事其先王。", "治國者，不敢侮於鰥寡，而況於士民乎？", "生則親安之，祭則鬼享之。是以天下和平，災害不生，禍亂不作。", "曾子曰：「敢問聖人之德，無以加於孝乎？」", "子曰：「天地之性，人為貴。人之行，莫大於孝。", "孝莫大於嚴父，嚴父莫大於配天，則周公其人也。", "是以四海之內，各以其職來祭。夫聖人之德，又何以加於孝乎？", "故親生之膝下，以養父母日嚴。聖人因嚴以教敬，因親以教愛。", "子曰：「孝子之事親也，居則致其敬，養則致其樂，病則致其憂，喪則致其哀，祭則致其嚴。", "五者備矣，然後能事親。", "事親者，居上不驕，為下不亂，在醜不爭。", "子曰：「五刑之屬三千，而罪莫大於不孝。", "要君者無上，非聖人者無法，非孝者無親，此大亂之道也。」", "子曰：「教民親愛，莫善於孝；教民禮順，莫善於悌；移風易俗，莫善於樂；安上治民，莫善於禮。", "禮者，敬而已矣。故敬其父，則子悅；敬其兄，則弟悅；敬其君，則臣悅；敬一人，而千萬人悅。", "所敬者寡，而悅者眾，此之謂要道也。", "子曰：「君子之教以孝也，非家至而日見之也。教以孝，所以敬天下之為人父者也。", "教以悌，所以敬天下之為人兄者也。教以臣，所以敬天下之為人君者也。", "《詩》云：「愷悌君子，民之父母。」", "子曰：「君子之事親孝，故忠可移於君。事兄悌，故順可移於長。居家理，故治可移於官。", "是以行成於內，而名立於後世矣。」", "曾子曰：「敢問子從父之令，可謂孝乎？」", "子曰：「是何言與！是何言與！」", "昔者天子有爭臣七人，雖無道，不失其天下。", "故當不義，則子不可以不爭於父，臣不可以不爭於君。故當不義則爭之。從父之令，又焉得為孝乎！」", "子曰：「昔者明王事父孝，故事天明；事母孝，故事地察；長幼順，故上下治。", "天地明察，神明彰矣。", "宗廟致敬，不忘親也；修身慎行，恐辱先也。", "孝悌之至，通於神明，光於四海，無所不通。", "子曰：「君子之事上也，進思盡忠，退思補過，將順其美，匡救其惡，故上下能相親也。", "子曰：「孝子之喪親也，哭不偯，禮無容，言不文，服美不安，聞樂不樂，食旨不甘，此哀慼之情也。", "三日而食，教民無以死傷生，毀不滅性，此聖人之政也。", "喪不過三年，示民有終也。", "生事愛敬，死事哀慼，生民之本盡矣，死生之義備矣，孝子之事親終矣。」"],
   "Clasicos-Daodejing": ["道可道，非常道；名可名，非常名。", "無名，天地之始；有名，萬物之母。", "故常無欲，以觀其妙；常有欲，以觀其徼。", "此兩者，同出而異名，同謂之玄。玄之又玄，眾妙之門。", "上善若水。水善利萬物而不爭，處眾人之所惡，故幾於道。", "居善地，心善淵，與善仁，言善信，政善治，事善能，動善時。", "夫唯不爭，故無尤。", "持而盈之，不如其已；揣而銳之，不可長保。", "金玉滿堂，莫之能守；富貴而驕，自遺其咎。", "功遂身退，天之道也。", "致虛極，守靜篤。", "萬物並作，吾以觀復。", "夫物芸芸，各復歸其根。歸根曰靜，靜曰覆命。", "覆命曰常，知常曰明。不知常，妄作兇。", "知常容，容乃公，公乃全，全乃天，天乃道，道乃久，沒身不殆。", "有物混成，先天地生。", "寂兮寥兮，獨立而不改，周行而不殆，可以為天下母。", "吾不知其名，強字之曰道，強為之名曰大。", "大曰逝，逝曰遠，遠曰反。", "故道大，天大，地大，人亦大。域中有四大，而人居其一焉。", "人法地，地法天，天法道，道法自然。", "知人者智，自知者明。", "勝人者有力，自勝者強。", "知足者富，強行者有志。", "不失其所者久，死而不亡者壽。", "上士聞道，勤而行之；中士聞道，若存若亡；下士聞道，大笑之。不笑不足以為道。", "故建言有之：明道若昧，進道若退，夷道若纇。", "上德若谷，廣德若不足，建德若偷，質真若渝。", "大白若辱，大方無隅，大器晚成，大音希聲，大象無形。", "道隱無名。夫唯道，善貸且成。", "名與身孰親？身與貨孰多？得與亡孰病？", "甚愛必大費；多藏必厚亡。", "故知足不辱，知止不殆，可以長久。", "為學日益，為道日損。", "損之又損，以至於無為。", "無為而無不為。取天下常以無事，及其有事，不足以取天下。", "其政悶悶，其民淳淳；其政察察，其民缺缺。", "禍兮，福之所倚；福兮，禍之所伏。孰知其極？其無正也。", "正復為奇，善復為妖。人之迷，其日固久。", "是以聖人方而不割，廉而不劌，直而不肆，光而不耀。", "治大國，若烹小鮮。", "以道蒞天下，其鬼不神；非其鬼不神，其神不傷人；非其神不傷人，聖人亦不傷人。", "夫兩不相傷，故德交歸焉。", "合抱之木，生於毫末；九層之臺，起於累土；千里之行，始於足下。", "為者敗之，執者失之。是以聖人無為故無敗，無執故無失。", "民之從事，常於幾成而敗之。慎終如始，則無敗事。", "是以聖人欲不欲，不貴難得之貨；學不學，復眾人之所過。", "信言不美，美言不信。", "善者不辯，辯者不善。知者不博，博者不知。", "聖人不積，既以為人己愈有，既以與人己愈多。", "天之道，利而不害；聖人之道，為而不爭。"],
