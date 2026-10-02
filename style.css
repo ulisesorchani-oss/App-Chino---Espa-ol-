@@ -3975,7 +3975,11 @@ body.dark-mode .tocfl-menu .dele-group-label {
     font-size: 0.86rem; color: rgba(255, 255, 255, .88); margin: 6px 0 12px; line-height: 1.5;
 }
 body.dark-mode .lessons-intro { color: rgba(226, 232, 240, .85); }
-.lesson-levels { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+/* v9.7x: HSK arriba, TOCFL abajo — dos filas garantizadas (antes era
+   una sola fila con flex-wrap + un separador "·", y el punto de corte
+   entre HSK y TOCFL dependía del ancho de pantalla, no de la fila). */
+.lesson-levels { display: flex; flex-direction: column; gap: 6px; margin: 0 0 12px; }
+.lv-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .lv-chip {
     border: 1.5px solid #e2e8f0; background: #fff; color: #475569;
     border-radius: 999px; padding: 6px 12px; font-size: 0.78rem; font-weight: 700;
@@ -4642,6 +4646,14 @@ body.paper-mode .header h1,
 body.paper-mode .header .subtitle,
 body.paper-mode .header { color: #4a3f2e; }
 body.paper-mode .section-title { color: #7a5b23; }
+/* v9.7x: .lessons-title/.classics-title (h3.section-title combinadas) y sus
+   "-sub"/-intro quedaron afuera de la pasada anterior — mismo caso: blanco
+   pensado para el morado, invisible sobre el fondo cálido. */
+body.paper-mode .lessons-title,
+body.paper-mode .classics-title { color: #7a5b23; }
+body.paper-mode .lessons-sub,
+body.paper-mode .lessons-intro,
+body.paper-mode .classics-sub { color: #8a7a5f; }
 body.paper-mode .hsk-level-selector { color: #6b5b40; }
 body.paper-mode .level-dropdown,
 body.paper-mode .pz-label select.level-dropdown {

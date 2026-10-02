@@ -210,16 +210,25 @@
     function renderList() {
         const wrap = $('lesson-list');
         if (!wrap) return;
-        const filt = wrap.dataset.level || 'all';
+        const filt = wrap.dataset.level || '1';
         // v9.6b: accesos paralelos HSK / TOCFL. Los chips 'tocfl:XX' filtran
         // por examen+nivel (A1/A2/B1/B2/C1); los chips HSK muestran SOLO
         // lecciones sin exam — cada examen tiene su propia fila de accesos.
+        // v9.7x: '7-9' es el chip HSK avanzado (reservado, sin lecciones
+        // todavía) — agrupa los tres niveles bajo un solo acceso.
         const tocflLvl = filt.indexOf('tocfl:') === 0 ? filt.slice(6) : null;
+        const hskAdvanced = filt === '7-9';
         wrap.innerHTML = '';
-        LESSONS.filter(l => filt === 'all' ||
-            (tocflLvl
-                ? (l.exam === 'TOCFL' && String(l.examLvl || '') === tocflLvl)
-                : (!l.exam && String(l.hsk) === filt))).forEach(l => {
+        const filtered = LESSONS.filter(l => {
+            if (tocflLvl) return l.exam === 'TOCFL' && String(l.examLvl || '') === tocflLvl;
+            if (hskAdvanced) return !l.exam && ['7', '8', '9'].indexOf(String(l.hsk)) !== -1;
+            return !l.exam && String(l.hsk) === filt;
+        });
+        if (!filtered.length) {
+            wrap.innerHTML = '<p class="lessons-intro">📭 Todavía no hay lecciones en este nivel — queda reservado para cuando se sumen.</p>';
+            return;
+        }
+        filtered.forEach(l => {
             const p = progOf(l.id);
             const best = (p.best != null) ? p.best + '/10' : '—';
             const flag = p.completed ? ' <span class="lq-done">✓ completada</span>' : '';
@@ -241,39 +250,25 @@
         });
     }
 
-    // v9.6b: accesos TOCFL junto a los de HSK — un chip por nivel TOCFL
-    // presente en los datos (A1 → C1), tras un separador · que divide la
-    // fila HSK de la fila TOCFL. Se generan SOLO los niveles con lecciones:
-    // agregar un mini-drama nuevo con examLvl 'B2' crea su chip solo,
-    // sin tocar el HTML. Si no hay lecciones TOCFL, no se dibuja nada.
-    const TOCFL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    // v9.6b: accesos TOCFL junto a los de HSK — un chip por nivel TOCFL, en
+    // su propia fila (#lesson-levels-tocfl, debajo de la fila HSK).
+    // v9.7x: ya NO depende de qué niveles tengan lecciones — se dibujan
+    // los 6 siempre (準備→流利), igual que la fila HSK siempre muestra sus
+    // 7 chips aunque 7-9 todavía no tenga contenido. Un nivel sin
+    // lecciones hoy simplemente muestra el estado vacío al tocarlo.
+    const TOCFL_ORDER = ['Prep', 'A1', 'A2', 'B1', 'B2', 'C1'];
     function buildTocflChips() {
-        const chips = $('lesson-levels');
-        if (!chips) return;
-        const lvls = [];
-        LESSONS.forEach(l => {
-            if (!l || l.exam !== 'TOCFL' || !l.examLvl) return;
-            const v = String(l.examLvl);
-            if (lvls.indexOf(v) === -1) lvls.push(v);
-        });
-        if (!lvls.length) return;
-        lvls.sort((a, b) => {
-            const ia = TOCFL_ORDER.indexOf(a), ib = TOCFL_ORDER.indexOf(b);
-            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-        });
-        const sep = document.createElement('span');
-        sep.className = 'lv-sep';
-        sep.setAttribute('aria-hidden', 'true');
-        sep.textContent = '·';
-        chips.appendChild(sep);
-        lvls.forEach(v => {
+        const row = $('lesson-levels-tocfl');
+        if (!row) return;
+        row.innerHTML = '';
+        TOCFL_ORDER.forEach(v => {
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'lv-chip lv-chip-tocfl';
             b.dataset.level = 'tocfl:' + v;
             b.setAttribute('aria-label', 'Filtrar lecciones TOCFL ' + v);
             b.textContent = 'TOCFL ' + v;
-            chips.appendChild(b);
+            row.appendChild(b);
         });
     }
 
