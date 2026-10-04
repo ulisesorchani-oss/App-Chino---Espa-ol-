@@ -359,6 +359,17 @@ class LocalWhisperEngine {
         this._seq = 0;
         this._pending = new Map();   // id → {resolve, reject} de transcripciones
         this._warmed = false;        // v9.46: la inferencia dummy ya corrió
+        // v9.7x — cola FIFO: dos transcribe() concurrentes sobre el MISMO
+        // modelo/session (p. ej. las pasadas zh+es en paralelo de
+        // Pronunciación libre) pueden corromperse entre sí — onnxruntime-web
+        // no garantiza que corridas superpuestas sobre una misma
+        // InferenceSession sean seguras (bug real: audio en español puro
+        // devolviendo texto en inglés, reproducido con el doble pase).
+        // _chain es un mutex de promesas: cada llamada espera a que la
+        // anterior TERMINE (éxito o error) antes de arrancar la suya. Vive
+        // acá, a nivel motor, para proteger a cualquier caller presente o
+        // futuro — no solo free-talk.js.
+        this._chain = Promise.resolve();
     }
 
     get ready() { return this.status === 'ready'; }
@@ -424,8 +435,19 @@ class LocalWhisperEngine {
     /** Float32Array 16 kHz mono → { text, confidence } (dentro del
      *  dispositivo). SOLO verificación de contenido: el tono lo mide
      *  LocalToneAnalyzer; la confianza es la métrica del modo Español
-     *  (spec v4.0 CASO B) y NO mide calidad fonética (ver config.js). */
-    async transcribe(float32, opts) {
+     *  (spec v4.0 CASO B) y NO mide calidad fonética (ver config.js).
+     *  v9.7x: punto público — encola en _chain y delega en
+     *  _transcribeOne(), que es la que de verdad habla con el motor.
+     *  Dos llamadas concurrentes (p. ej. zh+es en paralelo) quedan
+     *  serializadas automáticamente, sin que el llamador haga nada. */
+    transcribe(float32, opts) {
+        const run = () => this._transcribeOne(float32, opts);
+        const started = this._chain.then(run, run);
+        this._chain = started.then(() => {}, () => {}); // nunca rechaza: no traba la cola
+        return started;
+    }
+
+    async _transcribeOne(float32, opts) {
         opts = opts || {};
         const lang = opts.language || VE_CONFIG.languageZh;
         await this.preload();
