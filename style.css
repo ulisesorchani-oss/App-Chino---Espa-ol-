@@ -4111,6 +4111,9 @@ body.paper-mode .pd-text { background: #f3ead2; }
 .tk-seg:first-of-type { margin-top: 0; }
 .tk-seg + .tk-seg { padding-top: 8px; border-top: 1px dashed #e2e8f0; }
 .tk-pinyin { font-size: 0.82rem; color: #7c5cf0; margin-top: 2px; }
+/* v9.7x: burbuja de "el motor no arrancó, pero grabé tu audio" — sin
+   zh/es, mismo criterio que el fallback 🎧 del modo dirigido. */
+.tk-engine-note { font-size: 0.88rem; color: #92400e; line-height: 1.5; margin: 0; }
 .tk-status { text-align: center; font-size: 0.85rem; color: #64748b; min-height: 1.3em; margin: 4px 0 10px; }
 .tk-status.is-error { color: var(--danger); font-weight: 600; }
 .tk-controls { display: flex; justify-content: center; margin-bottom: 8px; }
@@ -4142,6 +4145,7 @@ body.dark-mode .tk-bubble-text { color: #f1f5f9; }
 body.dark-mode .tk-play { background: #334155; color: #e2e8f0; }
 body.dark-mode .tk-seg + .tk-seg { border-top-color: #334155; }
 body.dark-mode .tk-pinyin { color: #a78bfa; }
+body.dark-mode .tk-engine-note { color: #fbbf24; }
 
 body.paper-mode .tk-head { color: #3d3327; }
 body.paper-mode .tk-intro, body.paper-mode .tk-status { color: #8a7a5f; }
@@ -4150,6 +4154,7 @@ body.paper-mode .tk-bubble-text { color: #3d3327; }
 body.paper-mode .tk-play { background: #f0e6cd; color: #6b5b40; }
 body.paper-mode .tk-seg + .tk-seg { border-top-color: #e6dabf; }
 body.paper-mode .tk-pinyin { color: #9a6b2f; }
+body.paper-mode .tk-engine-note { color: #8a5a1f; }
 
 /* ── overlay a pantalla completa (lectura + práctica) ── */
 .lq-pop {

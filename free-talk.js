@@ -17,9 +17,10 @@
 // NADA de cómo se transcribe — llama a window.VE.transcribeFree(blob,
 // lang), un método chico agregado a PronunciationEvaluator
 // (voice-evaluator.js) que hoy corre 100% local (Whisper WASM,
-// Xenova/whisper-tiny, el mismo motor ya cacheado por el comparador de
-// Hoy) y el día que el presupuesto dé para un proveedor pago (Azure
-// Pronunciation Assessment, SuperSpeech...) solo hay que completar
+// onnx-community/whisper-base, el mismo motor ya cacheado por el
+// comparador de Hoy) y el día que el presupuesto dé para un
+// proveedor pago (Azure Pronunciation Assessment, SuperSpeech...)
+// solo hay que completar
 // CloudSpeechProvider.transcribeFree() ahí — este archivo, la UI y el
 // resto de la app no cambian una línea (VE.setProvider('cloud') ya
 // existe para ese switch, ver voice-evaluator.js).
@@ -68,6 +69,12 @@
         errSecure: '🎤 La grabación necesita HTTPS (o localhost). Abrí la app en su dirección oficial.',
         errNoSpeech: 'No escuché nada claro — acercate al micrófono y hablá más fuerte.',
         errGeneric: 'No pude transcribir esa grabación. Probá de nuevo.',
+        // v9.7x: antes, si el MOTOR fallaba (no solo una pasada sin
+        // suerte), se perdía la grabación y solo quedaba este error
+        // genérico — a diferencia del modo dirigido (Hoy/Entrenar),
+        // que ya cae a "escuchá y comparás vos mismo" si Whisper no
+        // arranca (_manual() en voice-evaluator.js). Mismo criterio acá.
+        errEngine: '🎤 El motor de voz no arrancó esta vez — no pude transcribir, pero grabé tu audio: tocá ▶️ para escucharlo.',
         clear: '🗑️ Borrar historial'
     };
 
@@ -180,7 +187,9 @@
                 + '<div class="tk-bubble-head">'
                 + '<button type="button" class="tk-play" data-i="' + i + '" aria-label="Escuchar mi grabación">▶️</button>'
                 + '</div>'
-                + order.map((k) => renderSeg(k, b[k])).join('')
+                + (b.engineNote
+                    ? '<p class="tk-engine-note">' + escHtml(b.engineNote) + '</p>'
+                    : order.map((k) => renderSeg(k, b[k])).join(''))
                 + '</div>'
             ).join('');
             chat.querySelectorAll('.tk-play').forEach((btn) => {
@@ -268,7 +277,22 @@
             if (!zh && !es) {
                 const msg = String((rZh.reason && rZh.reason.message) || (rEs.reason && rEs.reason.message) || '');
                 S.state = 'idle';
-                showError(msg.indexOf('no-speech') >= 0 ? T.errNoSpeech : T.errGeneric);
+                if (msg.indexOf('no-speech') >= 0) {
+                    // audio captado pero ininteligible (silencio o bucle de
+                    // alucinación descartado) — el motor SÍ funciona, solo
+                    // no hubo nada que transcribir. No vale la pena guardar
+                    // la grabación: no hay nada que escuchar que ayude.
+                    showError(T.errNoSpeech);
+                } else {
+                    // el motor mismo no arrancó (timeout/sin memoria/falló
+                    // la carga) — mismo criterio que el modo dirigido
+                    // (_manual() en voice-evaluator.js): JAMÁS perder la
+                    // grabación, avisar claro y dejar escucharla igual.
+                    S.bubbles.push({ url: URL.createObjectURL(blob), zh: null, es: null, engineNote: T.errEngine });
+                    S.errorMsg = '';
+                    renderChat();
+                }
+                updateStatus(); updateBtn();
                 return;
             }
             S.bubbles.push({

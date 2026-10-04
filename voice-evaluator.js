@@ -22,7 +22,7 @@
      │   ├─ LocalWhisperProvider  → VERIFICACIÓN DE CONTENIDO│
      │   │    "¿dijo el carácter correcto?"                 │
      │   │    Whisper WASM (@huggingface/transformers,      │
-     │    │    Xenova/whisper-tiny int8, en Web Worker).    │
+     │    │    onnx-community/whisper-base q8, en Worker).  │
      │   │    ⚠️ Whisper NO mide calidad de pronunciación   │
      │   │    NI tono: solo confirma qué caracter reconoció.│
      │   └─ LocalToneAnalyzer     → EVALUACIÓN DE TONO      │
@@ -39,7 +39,8 @@
      · La voz del alumno NUNCA sale del dispositivo: ni Whisper
        ni el análisis de tono hacen requests con el audio.
      · La única red involucrada es la descarga del MODELO
-       (~40 MB, solo la 1.ª vez; queda cacheado en el navegador)
+       (~80 MB q8, solo la 1.ª vez; queda cacheado en el navegador
+       — v9.7x: antes ~40 MB con tiny, ver VE_CONFIG.model arriba)
        y el audio de REFERENCIA (el mismo TTS 🔊 CN que el
        alumno ya escucha para estudiar — no es su voz).
      · setProvider('cloud') queda preparado para el futuro
@@ -131,14 +132,25 @@
    CONFIG — tocar solo acá para cambiar de motor o de modelo
    ============================================================ */
 const VE_CONFIG = {
-    // Verificación de contenido: tiny prioriza velocidad móvil sobre
-    // precisión (solo se usa para chequear QUÉ carácter dijo, no
-    // para puntuar calidad — eso lo hace el análisis de tono).
-    // Subir a 'Xenova/whisper-base' (~80 MB) si se quiere afinar.
-    model: 'Xenova/whisper-tiny',
+    // v9.7x — MIGRACIÓN tiny → base (decisión del usuario, no solo
+    // afinado de precisión): el alumno típico practica en LAS DOS
+    // direcciones (es-cn y cn-es), así que separar un modelo por
+    // idioma hubiera significado bajar dos modelos igual — unificar
+    // en un solo 'base' para ambas es más liviano EN TOTAL y más
+    // simple de mantener (un solo punto de calibración/carga/caché)
+    // que dos modelos tiny independientes. Usado tanto para chequear
+    // QUÉ carácter dijo (chino) como para transcribir (español) — no
+    // puntúa calidad de pronunciación, eso lo hace el análisis de
+    // tono (chino) o la distancia léxica (español, config.js).
+    // onnx-community/ (no Xenova/): namespace donde HuggingFace y la
+    // propia transformers.js publican las conversiones ONNX oficiales
+    // mantenidas hoy — Xenova/ sigue existiendo pero es el namespace
+    // legacy del autor original de la librería.
+    model: 'onnx-community/whisper-base',
     // @xenova/transformers quedó deprecado desde v3 → paquete actual
-    // @huggingface/transformers (los modelos siguen bajo el namespace
-    // Xenova/ en el Hub). Pin fijo: sin sorpresas de breaking changes.
+    // @huggingface/transformers. Pin fijo: sin sorpresas de breaking
+    // changes de versión (el modelo y el namespace son algo aparte,
+    // ver comentario de VE_CONFIG.model arriba).
     libUrl: 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1',
     // v7.8 (spec v4.0 §1): el idioma de transcripción depende del MODO:
     //   es-cn → 'zh' (verificar qué carácter dijo)
