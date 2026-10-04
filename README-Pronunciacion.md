@@ -9,16 +9,17 @@ formal (v9.44, 2026-09-21).
 
 ## 1. Arquitectura (resumen honesto)
 
-- **Modo Chino (es-cn)**: Whisper tiny (contenido, «¿dijo el carácter
+- **Modo Chino (es-cn)**: Whisper (contenido, «¿dijo el carácter
   correcto?») + F0/YIN + DTW contra el audio de referencia (tono real).
   Ver `pitch-analyzer.js`.
 - **Modo Español (cn-es)**: SOLO Whisper. La métrica es la **confianza
   promedio por token**: `exp(media de las log-probabilities de los
   tokens de texto generados)`. NO mide fonema a fonema (whisper es un
   modelo ASR): correlaciona con la claridad global del audio.
-- Todo corre LOCAL en el dispositivo (Web Worker + WASM, int8/q8,
-  `Xenova/whisper-tiny`, transformers.js 3.8.1). La voz del alumno
-  nunca sale del teléfono.
+- Todo corre LOCAL en el dispositivo (Web Worker + WASM, q8,
+  `onnx-community/whisper-base`, transformers.js 3.8.1 — migrado desde
+  `Xenova/whisper-tiny`, ver §3.3). La voz del alumno nunca sale del
+  teléfono.
 
 ## 2. Cómo se decide el veredicto en español (v9.18 → v9.44)
 
@@ -98,11 +99,15 @@ depender de campos no implementados.
 - Las «voces de alumnos» son voces neuronales con degradaciones
   acústicas: cubren el canal (mic, ruido, reverb) pero no todos los
   acentos/errores articulatorios de estudiantes reales de chino.
-- tiny sigue fallando en contenido con frases largas: «sábado» →
+- tiny seguía fallando en contenido con frases largas: «sábado» →
   «Salvador», «bombo legüero» → «bolegero» (por eso existe la capa
-  léxica tolerante y su calibración v9.40). Si se quisiera más
-  precisión de contenido, el paso natural es `whisper-base` (~80 MB,
-  ya previsto en VE_CONFIG).
+  léxica tolerante y su calibración v9.40). **v9.7x: migrado a
+  `onnx-community/whisper-base`** (más preciso en contenido; la
+  medición de 3.1-3.3 de arriba sigue siendo el registro histórico de
+  CUANDO se calibró con tiny — no se reescribe. La recalibración de
+  SPANISH_CONFIDENCE_SOFT con base está pendiente, ver §3.4: la
+  bitácora ve_es_conf_log ya está juntando datos reales del modelo
+  nuevo para repetir este mismo método.)
 
 ### 3.4 Re-calibración con datos reales (sin tocar código)
 
