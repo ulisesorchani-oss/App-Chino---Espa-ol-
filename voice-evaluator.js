@@ -290,7 +290,8 @@ const WORKER_SRC = [
     "        } catch (eEnc) { encOut = null; }",
     "        const genKw = {",
     "          return_dict_in_generate: true,",
-    "          max_new_tokens: " + VE_CONFIG.maxNewTokens + ", language: lang, task: '" + VE_CONFIG.task + "'",
+    "          max_new_tokens: " + VE_CONFIG.maxNewTokens + ", language: lang, task: '" + VE_CONFIG.task + "',",
+    "          no_repeat_ngram_size: 3",
     "        };",
     "        if (encOut) genKw.encoder_outputs = encOut;",
     "        const gen = await asr.model.generate(Object.assign({}, inputs, genKw));",
@@ -326,7 +327,7 @@ const WORKER_SRC = [
     "        return { text: String(text || '').trim(), confidence: conf };",
     "      } catch (e2) { /* camino directo falló → pipeline simple abajo */ }",
     "    }",
-    "    const out = await asr(m.audio, { language: lang, task: '" + VE_CONFIG.task + "', max_new_tokens: " + VE_CONFIG.maxNewTokens + " });",
+    "    const out = await asr(m.audio, { language: lang, task: '" + VE_CONFIG.task + "', max_new_tokens: " + VE_CONFIG.maxNewTokens + ", no_repeat_ngram_size: 3 });",
     "    return { text: String((out && out.text) || '').trim(), confidence: null };",
     "  }",
     "};"
@@ -433,7 +434,7 @@ class LocalWhisperEngine {
             });
         }
         // fallback hilo principal (iOS<15): pipeline simple → sin confianza
-        const out = await this._mainPipe(float32, { language: lang, task: VE_CONFIG.task });
+        const out = await this._mainPipe(float32, { language: lang, task: VE_CONFIG.task, no_repeat_ngram_size: 3 });
         return { text: String((out && out.text) || '').trim(), confidence: null };
     }
 
@@ -583,6 +584,23 @@ function isSilence(float32) {
     for (let i = 0; i < float32.length; i += step) { sum += float32[i] * float32[i]; n++; }
     const rms = Math.sqrt(sum / Math.max(1, n));
     return rms < VE_CONFIG.minRms;
+}
+
+/** v9.7x — bucle de alucinación de Whisper-tiny: cuando el audio es
+ *  corto/ambiguo o se fuerza el idioma equivocado, el modelo a veces
+ *  entra en un loop y repite la misma unidad corta decenas de veces
+ *  ("好啦好啦好啦…", "¿No? ¿No? ¿No?…") en vez de fallar limpio. Se
+ *  detecta buscando un grupo de 1-12 caracteres que se repite 4+
+ *  veces seguidas y cubre la mayor parte del texto — sirve igual
+ *  para chino (sin espacios) y español (con espacios), sin tokenizar
+ *  por idioma. Usado por transcribeFree() para tratar ese resultado
+ *  como "no se entendió" en vez de mostrar el bucle. */
+function looksLikeHallucination(text) {
+    if (!text) return false;
+    const clean = text.replace(/\s+/g, ' ').trim();
+    if (!clean) return false;
+    const m = clean.match(/(.{1,12}?)\1{3,}/);
+    return !!m && (m[0].length / clean.length) >= 0.6;
 }
 
 /* ============================================================
@@ -1747,7 +1765,7 @@ class PronunciationEvaluator {
         await this._waitForEngine();
         const r = await this.engine.transcribe(pcm, { language: language, wantConfidence: true });
         const text = String((r && r.text) || '').trim();
-        if (!text) throw new Error('no-speech');
+        if (!text || looksLikeHallucination(text)) throw new Error('no-speech');
         return { text: text, confidence: (r && typeof r.confidence === 'number') ? r.confidence : null };
     }
 

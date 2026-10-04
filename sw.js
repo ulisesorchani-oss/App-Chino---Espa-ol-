@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v149'; // — Pronunciación libre: pinyin bajo el texto chino + doble transcripción zh/es en paralelo sobre el mismo audio
+const VERSION = 'v150'; // — corrige bucles de alucinación de Whisper-tiny ("好啦好啦...", "¿No? ¿No?...") en Pronunciación libre: no_repeat_ngram_size en la generación + detector de repetición como red de seguridad
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
