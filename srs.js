@@ -162,6 +162,18 @@
         return { again: '10 min', good: lbl(Math.min(c.b + 1, 6)), easy: lbl(Math.min(c.b + 2, 6)), inDeck: true };
     };
     window.acSrsRefreshBar = function () { updateBar(); };
+    // v9.7x: abre el popup de repaso desde OTRO lugar de la app (Entrenar →
+    // "Escribir a mano"). Llama a srsOpen() directo — NO uses
+    // document.getElementById('btn-srs').click() para esto: el listener de
+    // "clic afuera cierra #srs-pop" (más abajo en este archivo) solo
+    // exceptúa clics cuyo e.target sea el propio #btn-srs; un .click()
+    // simulado desde OTRO botón deja que el evento REAL siga burbujeando
+    // con ese otro botón como target, y el popup se cierra solo en el
+    // mismo tick en que se abrió (reproducido con Playwright antes de
+    // este fix: el popup quedaba oculto a pesar de que srs-body sí se
+    // había renderizado). srsOpen() está declarada más abajo con
+    // `function` → hoisted, se puede referenciar acá arriba sin problema.
+    window.acSrsOpen = function () { srsOpen(); };
     function relearnCount() {
         const now = Date.now(); let n = 0;
         for (const zh in DB.cards) { const c = DB.cards[zh]; if (c && c.b === 1 && c.d > now) n++; }
