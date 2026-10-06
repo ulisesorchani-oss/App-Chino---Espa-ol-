@@ -136,7 +136,7 @@ function vpStrokesAnimate() {
 //  · Generación wpPractice.gen: cerrar el banner o cambiar de
 //    carácter invalida callbacks en vuelo (carga de datos, quiz,
 //    animación) — mismo patrón que vpStrokes.gen del popup.
-const wpPractice = { gen: 0, word: '', chars: [], idx: 0, writer: null, pending: null, resizeT: null };
+const wpPractice = { gen: 0, word: '', chars: [], idx: 0, writer: null, pending: null, resizeT: null, returnToWrite: false };
 
 function wpSetHint(msg) {
     const h = document.getElementById('wp-hint');
@@ -299,6 +299,95 @@ function closeWriterPractice() {
     const target = document.getElementById('wp-target');
     if (target) target.innerHTML = ''; // libera el SVG
     syncBodyScroll(); // v9.50: restaura el scroll solo si no queda otro overlay abierto
+    // v9.7x: si este banner se abrió desde el popup "Escribir a mano"
+    // (openWriteWord → una palabra de la lista del repaso de hoy),
+    // volver a esa lista en vez de dejar al alumno sin nada abierto —
+    // así sigue con la próxima palabra sin volver a tocar Entrenar.
+    // Cualquier OTRO camino (SRS, popup de vocabulario) no toca esta
+    // bandera, así que este bloque no los afecta.
+    // setTimeout(…, 0) es NECESARIO, no cosmético: closeWriterPractice()
+    // se llama desde el clic en #btn-wp-close, cuyo evento REAL sigue
+    // burbujeando hasta document DESPUÉS de este return. Si reabrimos
+    // #write-pop de forma síncrona acá, el listener de "clic afuera
+    // cierra #write-pop" (app.js) lo recibe en el mismo tick, ve el
+    // target (#btn-wp-close) fuera del popup y lo vuelve a cerrar —
+    // mismo bug de raíz que el de #btn-srs de la ronda anterior,
+    // reproducido con Playwright antes de este fix. Diferir a un
+    // macrotask deja que el clic termine de burbujear del todo antes
+    // de reabrir: para cuando corre, ya no hay ningún evento en vuelo.
+    if (wpPractice.returnToWrite) {
+        wpPractice.returnToWrite = false;
+        setTimeout(openWriteDaily, 0);
+    }
+}
+
+// ============================================================
+// v9.7x — "ESCRIBIR A MANO" (Entrenar): popup dedicado que lista las
+// palabras del repaso de hoy (window.acSrsDueWords, srs.js) y abre
+// DIRECTO el lienzo de trazos de arriba al tocar una — sin pasar por
+// el quiz de pinyin/significado de #srs-pop, y sin quedar superpuesto
+// a él (reporte del usuario: el banner de trazos se abría ENCIMA de
+// #srs-pop, dos overlays apilados y confusos). openWriteWord() cierra
+// este popup ANTES de abrir el banner — nunca están los dos visibles
+// a la vez — y closeWriterPractice() (arriba) vuelve acá cuando
+// corresponde, vía wpPractice.returnToWrite.
+// ============================================================
+function wrRenderBody() {
+    const body = document.getElementById('write-body');
+    if (!body) return;
+    const words = (typeof window.acSrsDueWords === 'function') ? window.acSrsDueWords() : [];
+    if (!words.length) {
+        body.innerHTML =
+            '<h3 class="wr-title">✍️ Escribir a mano</h3>' +
+            '<p class="wr-empty">📭 No tenés palabras para repasar hoy — volvé mañana, o sumá alguna desde el diccionario con 🔁 "Sumar a mi repaso".</p>';
+        return;
+    }
+    const trad = (typeof ck === 'function') && ck() === 'trad';
+    const rows = words.map(function (w) {
+        const show = trad ? (w.zt || w.zh) : w.zh;
+        const py = w.py || (typeof wordPinyin === 'function' ? wordPinyin(w.zh) : '') || '';
+        return '<button type="button" class="wr-row" data-zh="' + escHtml(w.zh) + '">' +
+            '<span class="wr-hanzi" lang="zh">' + escHtml(show) + '</span>' +
+            '<span class="wr-meta">' +
+                (py ? '<span class="wr-py">' + escHtml(py) + '</span>' : '') +
+                (w.es ? '<span class="wr-es">' + escHtml(w.es) + '</span>' : '') +
+            '</span>' +
+            '<span class="wr-go" aria-hidden="true">✍️</span>' +
+        '</button>';
+    }).join('');
+    body.innerHTML =
+        '<h3 class="wr-title">✍️ Escribir a mano</h3>' +
+        '<p class="wr-sub">Elegí una palabra de tu repaso de hoy (' + words.length + ') y trazala de memoria.</p>' +
+        '<div class="wr-list">' + rows + '</div>';
+}
+
+function openWriteDaily() {
+    const pop = document.getElementById('write-pop');
+    if (!pop) return;
+    wrRenderBody();
+    pop.classList.remove('hidden');
+}
+
+function closeWriteDaily() {
+    const pop = document.getElementById('write-pop');
+    if (pop) pop.classList.add('hidden');
+}
+
+// Tocar una palabra de la lista: cerrar ESTE popup y abrir el banner
+// de trazos directo para esa palabra (sin pasar por #srs-pop).
+function openWriteWord(zh) {
+    closeWriteDaily();
+    wpPractice.returnToWrite = true;
+    openWriterPractice(zh);
+    // openWriterPractice() puede fallar en silencio (sin hanzi válido,
+    // banner ausente) — si el banner sigue oculto, no quedó nada
+    // abierto: deshacer la bandera y volver a mostrar la lista en vez
+    // de dejar al alumno en una pantalla vacía.
+    const banner = document.getElementById('writer-practice-banner');
+    if (!banner || banner.classList.contains('hidden')) {
+        wpPractice.returnToWrite = false;
+        openWriteDaily();
+    }
 }
 
 // v9.34 — RESPUESTA A MANO (✍️ junto al input de respuesta).

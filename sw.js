@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v153'; // — "Escribir a mano" en Entrenar ya no navega a Hoy a ciegas: abre #srs-pop (repaso del día) ahí mismo, de donde cada palabra tiene su ✍️ Practicar trazos
+const VERSION = 'v154'; // — "Escribir a mano" en Entrenar: popup propio (#write-pop) en vez de abrir #srs-pop y quedar superpuesto al banner de trazos; corrige además que el banner no volvía a la lista al cerrarse (mismo bug de burbujeo de clics que #btn-srs, esta vez diferido con setTimeout)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
