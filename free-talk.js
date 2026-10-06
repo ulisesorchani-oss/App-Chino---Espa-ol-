@@ -56,7 +56,7 @@
     const MAX_SECONDS = 30; // spec: grabación libre "estilo chat", hasta 30 s
 
     const T = {
-        introEs: 'Grabá lo que quieras decir en voz alta (hasta 30 s): la IA transcribe en chino Y en español lo que escuchó, en simultáneo — útil si se te mezclan los dos idiomas en la misma frase. Sin frase objetivo, para que te autoevalúes vos mismo.',
+        introEs: 'Grabá lo que quieras decir en voz alta (hasta 30 s) y mirá qué entendió la IA — así podés autoevaluarte vos mismo, sin frase objetivo.',
         privacy: '🔒 Tu voz se procesa en tu dispositivo y no se guarda ni se envía a ningún servidor.',
         tapToRecord: '👆 Tocá 🎤 para grabar',
         recording: '🔴 Grabando… tocá para terminar (máx 30 s)',
@@ -78,8 +78,10 @@
         clear: '🗑️ Borrar historial'
     };
 
-    // S.bubbles: [{ url, text, lang, confidence }] — SOLO en memoria,
-    // se libera (URL.revokeObjectURL) al cerrar el popup o al borrar.
+    // S.bubbles: [{ url, text, lang, pinyin, confidence }] (éxito) |
+    // [{ url, engineNote }] (el motor no arrancó, ver T.errEngine) —
+    // SOLO en memoria, se libera (URL.revokeObjectURL) al cerrar el
+    // popup o al borrar.
     const S = { recorder: null, state: 'idle', bubbles: [], tok: 0, errorMsg: '', tickLabel: '' };
     let player = null;
     let rafId = 0;
@@ -87,14 +89,18 @@
     function targetLang() {
         return (typeof state === 'object' && state && state.mode === 'cn-es') ? 'es' : 'zh';
     }
-    // v9.7x: pedido del usuario — Whisper solo puede decodificar UN idioma
-    // por pasada (si se le fuerza 'zh', una palabra dicha en español sale
-    // como caracteres chinos sin sentido). No hace code-switching real
-    // dentro de una misma frase, pero sí podemos correr DOS pasadas en
-    // paralelo sobre el mismo audio (zh y es) y mostrar ambas lecturas —
-    // así, si mezclaste idiomas, al menos una de las dos lee bien cada
-    // tramo. engine.transcribe() ya es seguro para llamadas concurrentes
-    // (cola por id en LocalWhisperEngine), así que esto no pisa nada.
+    function langLabel(lang) { return lang === 'es' ? '🇪🇸 Español' : '🇨🇳 中文'; }
+    // v9.7x (probado y descartado): se intentó forzar DOS pasadas en
+    // paralelo (zh y es) sobre el mismo audio para cubrir el caso de
+    // mezclar idiomas en una misma frase. En uso real no funcionó: con
+    // audio 100% en un idioma, la pasada del OTRO igual alucinaba algo
+    // fluido y sin relación ("qué tal", oraciones completas inventadas)
+    // — Whisper decodifica TODO el audio como si fuera un solo idioma
+    // por llamada, nunca hace code-switching de verdad dentro de la
+    // misma frase, así que la segunda pasada nunca resolvía el caso que
+    // buscaba cubrir y solo agregaba ruido + el doble de espera. Vuelta
+    // a UNA sola pasada en el idioma que se está practicando (igual que
+    // el resto de la app: es-cn → zh, cn-es → es).
     function pinyinOf(zhText) {
         try {
             if (typeof pinyinPro === 'undefined' || !zhText) return '';
@@ -165,31 +171,22 @@
     }
 
     // ── piezas actualizadas SIN re-crear el DOM entero ──
-    function renderSeg(lang, data) {
-        if (!data) return '';
-        return '<div class="tk-seg">'
-            + '<span class="tk-bubble-lang">' + (lang === 'zh' ? '🇨🇳 中文' : '🇪🇸 Español') + '</span>'
-            + '<div class="tk-bubble-text"' + (lang === 'zh' ? ' lang="zh"' : '') + '>' + escHtml(data.text) + '</div>'
-            + (lang === 'zh' && data.pinyin ? '<div class="tk-pinyin">' + escHtml(data.pinyin) + '</div>' : '')
-            + '</div>';
-    }
     function renderChat() {
         const chat = $('tk-chat');
         if (!chat) return;
         if (!S.bubbles.length) {
             chat.innerHTML = '<p class="tk-empty">' + escHtml(T.empty) + '</p>';
         } else {
-            // orden: el idioma objetivo del modo activo primero (más
-            // relevante para lo que se está practicando), el otro debajo.
-            const order = targetLang() === 'es' ? ['es', 'zh'] : ['zh', 'es'];
             chat.innerHTML = S.bubbles.map((b, i) =>
                 '<div class="tk-bubble">'
                 + '<div class="tk-bubble-head">'
                 + '<button type="button" class="tk-play" data-i="' + i + '" aria-label="Escuchar mi grabación">▶️</button>'
+                + (b.engineNote ? '' : '<span class="tk-bubble-lang">' + escHtml(langLabel(b.lang)) + '</span>')
                 + '</div>'
                 + (b.engineNote
                     ? '<p class="tk-engine-note">' + escHtml(b.engineNote) + '</p>'
-                    : order.map((k) => renderSeg(k, b[k])).join(''))
+                    : '<div class="tk-bubble-text"' + (b.lang === 'zh' ? ' lang="zh"' : '') + '>' + escHtml(b.text) + '</div>'
+                      + (b.lang === 'zh' && b.pinyin ? '<div class="tk-pinyin">' + escHtml(b.pinyin) + '</div>' : ''))
                 + '</div>'
             ).join('');
             chat.querySelectorAll('.tk-play').forEach((btn) => {
@@ -264,41 +261,16 @@
         const blob = res && res.blob;
         if (!blob || !blob.size) { S.state = 'idle'; showError(T.errGeneric); return; }
 
+        const lang = targetLang();
         try {
-            // v9.7x: dos pasadas en paralelo (zh y es) sobre el MISMO
-            // audio — ver nota en pinyinOf() de arriba.
-            const [rZh, rEs] = await Promise.allSettled([
-                window.VE.transcribeFree(blob, 'zh'),
-                window.VE.transcribeFree(blob, 'es')
-            ]);
+            const out = await window.VE.transcribeFree(blob, lang);
             if (myTok !== S.tok) return; // se cerró el popup mientras transcribía
-            const zh = rZh.status === 'fulfilled' ? rZh.value : null;
-            const es = rEs.status === 'fulfilled' ? rEs.value : null;
-            if (!zh && !es) {
-                const msg = String((rZh.reason && rZh.reason.message) || (rEs.reason && rEs.reason.message) || '');
-                S.state = 'idle';
-                if (msg.indexOf('no-speech') >= 0) {
-                    // audio captado pero ininteligible (silencio o bucle de
-                    // alucinación descartado) — el motor SÍ funciona, solo
-                    // no hubo nada que transcribir. No vale la pena guardar
-                    // la grabación: no hay nada que escuchar que ayude.
-                    showError(T.errNoSpeech);
-                } else {
-                    // el motor mismo no arrancó (timeout/sin memoria/falló
-                    // la carga) — mismo criterio que el modo dirigido
-                    // (_manual() en voice-evaluator.js): JAMÁS perder la
-                    // grabación, avisar claro y dejar escucharla igual.
-                    S.bubbles.push({ url: URL.createObjectURL(blob), zh: null, es: null, engineNote: T.errEngine });
-                    S.errorMsg = '';
-                    renderChat();
-                }
-                updateStatus(); updateBtn();
-                return;
-            }
             S.bubbles.push({
                 url: URL.createObjectURL(blob),
-                zh: zh ? { text: zh.text, pinyin: pinyinOf(zh.text), confidence: zh.confidence } : null,
-                es: es ? { text: es.text, confidence: es.confidence } : null
+                lang: lang,
+                text: out.text,
+                pinyin: lang === 'zh' ? pinyinOf(out.text) : '',
+                confidence: out.confidence
             });
             S.errorMsg = '';
             S.state = 'idle';
@@ -306,7 +278,23 @@
         } catch (err) {
             if (myTok !== S.tok) return;
             S.state = 'idle';
-            showError(T.errGeneric);
+            const msg = String((err && err.message) || err || '');
+            if (msg.indexOf('no-speech') >= 0) {
+                // audio captado pero ininteligible (silencio o bucle de
+                // alucinación descartado) — el motor SÍ funciona, solo no
+                // hubo nada que transcribir. No vale la pena guardar la
+                // grabación: no hay nada que escuchar que ayude.
+                showError(T.errNoSpeech);
+            } else {
+                // el motor mismo no arrancó (timeout/sin memoria/falló la
+                // carga) — mismo criterio que el modo dirigido (_manual()
+                // en voice-evaluator.js): JAMÁS perder la grabación, avisar
+                // claro y dejar escucharla igual.
+                S.bubbles.push({ url: URL.createObjectURL(blob), engineNote: T.errEngine });
+                S.errorMsg = '';
+                renderChat();
+            }
+            updateStatus(); updateBtn();
         }
     }
 
