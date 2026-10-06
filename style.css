@@ -4127,12 +4127,6 @@ body.paper-mode .pd-text { background: #f3ead2; }
 .tk-play { border: none; background: #f1f5f9; color: #334155; border-radius: 50%; width: 28px; height: 28px; font-size: 0.8rem; cursor: pointer; flex: none; }
 .tk-bubble-lang { font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
 .tk-bubble-text { font-size: 1.05rem; line-height: 1.5; color: #1e293b; }
-/* v9.7x: dos lecturas (zh/es) por grabación — cada .tk-seg es una de
-   las dos pasadas de Whisper sobre el mismo audio; la 2.ª lleva un
-   separador para distinguirla de la primera de un vistazo. */
-.tk-seg { margin-top: 6px; }
-.tk-seg:first-of-type { margin-top: 0; }
-.tk-seg + .tk-seg { padding-top: 8px; border-top: 1px dashed #e2e8f0; }
 .tk-pinyin { font-size: 0.82rem; color: #7c5cf0; margin-top: 2px; }
 /* v9.7x: burbuja de "el motor no arrancó, pero grabé tu audio" — sin
    zh/es, mismo criterio que el fallback 🎧 del modo dirigido. */
@@ -4166,7 +4160,6 @@ body.dark-mode .tk-intro, body.dark-mode .tk-status { color: #94a3b8; }
 body.dark-mode .tk-bubble { background: #1e293b; border-color: #334155; }
 body.dark-mode .tk-bubble-text { color: #f1f5f9; }
 body.dark-mode .tk-play { background: #334155; color: #e2e8f0; }
-body.dark-mode .tk-seg + .tk-seg { border-top-color: #334155; }
 body.dark-mode .tk-pinyin { color: #a78bfa; }
 body.dark-mode .tk-engine-note { color: #fbbf24; }
 
@@ -4175,7 +4168,6 @@ body.paper-mode .tk-intro, body.paper-mode .tk-status { color: #8a7a5f; }
 body.paper-mode .tk-bubble { background: #f3ead2; border-color: #e6dabf; }
 body.paper-mode .tk-bubble-text { color: #3d3327; }
 body.paper-mode .tk-play { background: #f0e6cd; color: #6b5b40; }
-body.paper-mode .tk-seg + .tk-seg { border-top-color: #e6dabf; }
 body.paper-mode .tk-pinyin { color: #9a6b2f; }
 body.paper-mode .tk-engine-note { color: #8a5a1f; }
 

@@ -443,7 +443,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v155'; // — "Escribir a mano" de Entrenar usa ahora el trazo DE MEMORIA (sin contorno, con corrector) en vez del modo con guía — pedido del usuario tras probar la ronda anterior
+const VERSION = 'v156'; // — Pronunciación libre: se saca el doble reconocedor zh+es en paralelo (probado en uso real, no detecta code-switching de verdad y solo agregaba alucinaciones + demora) — vuelve a una sola pasada en el idioma que se está practicando
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
