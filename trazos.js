@@ -136,7 +136,7 @@ function vpStrokesAnimate() {
 //  · Generación wpPractice.gen: cerrar el banner o cambiar de
 //    carácter invalida callbacks en vuelo (carga de datos, quiz,
 //    animación) — mismo patrón que vpStrokes.gen del popup.
-const wpPractice = { gen: 0, word: '', chars: [], idx: 0, writer: null, pending: null, resizeT: null, returnToWrite: false };
+const wpPractice = { gen: 0, word: '', chars: [], idx: 0, writer: null, pending: null, resizeT: null };
 
 function wpSetHint(msg) {
     const h = document.getElementById('wp-hint');
@@ -299,38 +299,21 @@ function closeWriterPractice() {
     const target = document.getElementById('wp-target');
     if (target) target.innerHTML = ''; // libera el SVG
     syncBodyScroll(); // v9.50: restaura el scroll solo si no queda otro overlay abierto
-    // v9.7x: si este banner se abrió desde el popup "Escribir a mano"
-    // (openWriteWord → una palabra de la lista del repaso de hoy),
-    // volver a esa lista en vez de dejar al alumno sin nada abierto —
-    // así sigue con la próxima palabra sin volver a tocar Entrenar.
-    // Cualquier OTRO camino (SRS, popup de vocabulario) no toca esta
-    // bandera, así que este bloque no los afecta.
-    // setTimeout(…, 0) es NECESARIO, no cosmético: closeWriterPractice()
-    // se llama desde el clic en #btn-wp-close, cuyo evento REAL sigue
-    // burbujeando hasta document DESPUÉS de este return. Si reabrimos
-    // #write-pop de forma síncrona acá, el listener de "clic afuera
-    // cierra #write-pop" (app.js) lo recibe en el mismo tick, ve el
-    // target (#btn-wp-close) fuera del popup y lo vuelve a cerrar —
-    // mismo bug de raíz que el de #btn-srs de la ronda anterior,
-    // reproducido con Playwright antes de este fix. Diferir a un
-    // macrotask deja que el clic termine de burbujear del todo antes
-    // de reabrir: para cuando corre, ya no hay ningún evento en vuelo.
-    if (wpPractice.returnToWrite) {
-        wpPractice.returnToWrite = false;
-        setTimeout(openWriteDaily, 0);
-    }
 }
 
 // ============================================================
 // v9.7x — "ESCRIBIR A MANO" (Entrenar): popup dedicado que lista las
 // palabras del repaso de hoy (window.acSrsDueWords, srs.js) y abre
-// DIRECTO el lienzo de trazos de arriba al tocar una — sin pasar por
-// el quiz de pinyin/significado de #srs-pop, y sin quedar superpuesto
-// a él (reporte del usuario: el banner de trazos se abría ENCIMA de
-// #srs-pop, dos overlays apilados y confusos). openWriteWord() cierra
-// este popup ANTES de abrir el banner — nunca están los dos visibles
-// a la vez — y closeWriterPractice() (arriba) vuelve acá cuando
-// corresponde, vía wpPractice.returnToWrite.
+// DIRECTO el trazo DE MEMORIA (handwrite-banner, sin contorno y con
+// corrector) al tocar una — sin pasar por el quiz de pinyin/
+// significado de #srs-pop, y sin quedar superpuesto a nada (reporte
+// del usuario, 2 rondas: 1.ª el banner se abría ENCIMA de #srs-pop;
+// 2.ª el modo CON contorno —writer-practice-banner, pensado para
+// aprender el ORDEN de trazos— resultaba "mucho" para repasar de
+// memoria). openWriteWord() cierra este popup ANTES de abrir el
+// banner — nunca hay dos overlays visibles a la vez — y
+// closeHandwrite() (más abajo) vuelve acá cuando corresponde, vía
+// hwAns.returnToWrite.
 // ============================================================
 function wrRenderBody() {
     const body = document.getElementById('write-body');
@@ -373,19 +356,22 @@ function closeWriteDaily() {
     if (pop) pop.classList.add('hidden');
 }
 
-// Tocar una palabra de la lista: cerrar ESTE popup y abrir el banner
-// de trazos directo para esa palabra (sin pasar por #srs-pop).
+// Tocar una palabra de la lista: cerrar ESTE popup y abrir el trazo
+// DE MEMORIA para esa palabra (sin pasar por #srs-pop). v9.7x (3.ª
+// ronda, pedido del usuario tras probar la 2.ª): usa
+// openHandwriteAnswer() — SIN contorno (showOutline: false) y con el
+// corrector trazo por trazo que ya traía ese camino (hwStartQuiz,
+// 💡 pista tras 2 fallos) — NO openWriterPractice(), que muestra el
+// carácter en gris como guía: "Escribir a mano" implica de memoria,
+// ver el contorno es un ejercicio distinto (practicar el ORDEN de
+// trazos, sigue existiendo tal cual desde la ficha de vocabulario y
+// ✍ del repaso SRS — este cambio no los toca).
 function openWriteWord(zh) {
     closeWriteDaily();
-    wpPractice.returnToWrite = true;
-    openWriterPractice(zh);
-    // openWriterPractice() puede fallar en silencio (sin hanzi válido,
-    // banner ausente) — si el banner sigue oculto, no quedó nada
-    // abierto: deshacer la bandera y volver a mostrar la lista en vez
-    // de dejar al alumno en una pantalla vacía.
-    const banner = document.getElementById('writer-practice-banner');
-    if (!banner || banner.classList.contains('hidden')) {
-        wpPractice.returnToWrite = false;
+    hwAns.returnToWrite = true;
+    const ok = openHandwriteAnswer(zh, null); // sin fill: acá no hay answer-input que rellenar
+    if (!ok) {
+        hwAns.returnToWrite = false;
         openWriteDaily();
     }
 }
@@ -408,7 +394,7 @@ function openWriteWord(zh) {
 //  secuencial auto-encadenado (patrón wpPractice); caracteres
 //  repetidos (爸爸) se trazan UNA sola vez y el input recibe la
 //  palabra completa.
-const hwAns = { gen: 0, word: '', chars: [], idx: 0, writer: null, fill: null, misses: 0, resizeT: null };
+const hwAns = { gen: 0, word: '', chars: [], idx: 0, writer: null, fill: null, misses: 0, resizeT: null, returnToWrite: false };
 
 function hwSetHint(msg) {
     const h = document.getElementById('hw-hint');
@@ -577,4 +563,16 @@ function closeHandwrite() {
     const target = document.getElementById('hw-target');
     if (target) target.innerHTML = ''; // libera el SVG
     syncBodyScroll(); // v9.50: restaura el scroll solo si no queda otro overlay abierto
+    // v9.7x: si este banner se abrió desde "Escribir a mano" de Entrenar
+    // (openWriteWord → una palabra de #write-pop), volver a esa lista —
+    // mismo patrón que closeWriterPractice() con wpPractice.returnToWrite.
+    // setTimeout por la MISMA razón: closeHandwrite() se llama desde el
+    // clic en #btn-hw-close/#btn-hw-keyboard (o el auto-cierre al
+    // completar el quiz), y reabrir #write-pop de forma síncrona deja
+    // que el clic real, que sigue burbujeando, lo vuelva a cerrar en
+    // el mismo tick.
+    if (hwAns.returnToWrite) {
+        hwAns.returnToWrite = false;
+        setTimeout(openWriteDaily, 0);
+    }
 }
