@@ -1303,10 +1303,25 @@ function setupEventListeners() {
             }
         });
     })();
-    safeAdd('btn-train-write', () => {
-        showView('hoy');
-        const h = document.getElementById('btn-handwrite');
-        if (h && !h.classList.contains('hidden')) h.click(); else focusAnswerInput();
+    // v9.7x: antes navegaba a Hoy y clickeaba btn-handwrite — pero ese
+    // botón solo existe si la tarjeta ACTUAL de Hoy tiene respuesta en
+    // chino (ver updateCard más abajo), así que la mayoría de las veces
+    // no había nada para escribir. #srs-pop ("🔁 Repaso inteligente") ya
+    // es exactamente "la lista de palabras diarias para repasar" — y
+    // cada tarjeta del repaso ya tiene su propio ✍️ "Practicar trazos"
+    // (.srs-write, ver srs.js). Reusa ese flujo completo en vez de
+    // reinventarlo: mismo popup, sin salir de Entrenar (#srs-pop es un
+    // overlay de toda la app, no depende de qué vista esté activa).
+    // window.acSrsOpen() (no un .click() simulado sobre #btn-srs): ver
+    // el comentario en srs.js. e.stopPropagation() es NECESARIO: el
+    // listener de "clic afuera cierra #srs-pop" vive en document y solo
+    // exceptúa clics cuyo target sea el propio #btn-srs — sin esto, el
+    // clic real en #btn-train-write sigue burbujeando hasta document
+    // DESPUÉS de abrir el popup y lo cierra en el mismo tick (reproducido
+    // con Playwright: popHidden seguía true después del clic).
+    safeAdd('btn-train-write', (e) => {
+        if (e) e.stopPropagation();
+        if (typeof window.acSrsOpen === 'function') window.acSrsOpen();
     });
     safeAdd('btn-read-lesson', readCurrentLesson); // v7.14: leer lección completa
     safeAdd('btn-library-load', loadLibraryLesson); // v7.15: Biblioteca de Lecturas
