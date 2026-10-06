@@ -1303,25 +1303,23 @@ function setupEventListeners() {
             }
         });
     })();
-    // v9.7x: antes navegaba a Hoy y clickeaba btn-handwrite — pero ese
-    // botón solo existe si la tarjeta ACTUAL de Hoy tiene respuesta en
-    // chino (ver updateCard más abajo), así que la mayoría de las veces
-    // no había nada para escribir. #srs-pop ("🔁 Repaso inteligente") ya
-    // es exactamente "la lista de palabras diarias para repasar" — y
-    // cada tarjeta del repaso ya tiene su propio ✍️ "Practicar trazos"
-    // (.srs-write, ver srs.js). Reusa ese flujo completo en vez de
-    // reinventarlo: mismo popup, sin salir de Entrenar (#srs-pop es un
-    // overlay de toda la app, no depende de qué vista esté activa).
-    // window.acSrsOpen() (no un .click() simulado sobre #btn-srs): ver
-    // el comentario en srs.js. e.stopPropagation() es NECESARIO: el
-    // listener de "clic afuera cierra #srs-pop" vive en document y solo
-    // exceptúa clics cuyo target sea el propio #btn-srs — sin esto, el
-    // clic real en #btn-train-write sigue burbujeando hasta document
-    // DESPUÉS de abrir el popup y lo cierra en el mismo tick (reproducido
-    // con Playwright: popHidden seguía true después del clic).
+    // v9.7x (dos rondas): 1.ª navegaba a Hoy y clickeaba btn-handwrite,
+    // que solo existe si la tarjeta ACTUAL tenía respuesta en chino —
+    // casi nunca abría nada. 2.ª abría #srs-pop (el quiz de repaso
+    // completo), pero el botón ✍️ de ahí adentro abre el banner de
+    // trazos ENCIMA de #srs-pop — dos overlays apilados y confusos
+    // (reporte del usuario con captura). Ahora: popup PROPIO
+    // (#write-pop, trazos.js) que lista las palabras del repaso de hoy
+    // y abre el banner de trazos DIRECTO al tocar una — nunca dos
+    // overlays a la vez (openWriteWord cierra #write-pop antes de abrir
+    // el banner; closeWriterPractice vuelve a #write-pop al cerrar).
+    // e.stopPropagation() sigue siendo necesario por la misma razón que
+    // antes: el listener de "clic afuera cierra #write-pop" de abajo
+    // vive en document, y sin esto el clic real en #btn-train-write
+    // seguiría burbujeando y cerrándolo en el mismo tick.
     safeAdd('btn-train-write', (e) => {
         if (e) e.stopPropagation();
-        if (typeof window.acSrsOpen === 'function') window.acSrsOpen();
+        if (typeof openWriteDaily === 'function') openWriteDaily();
     });
     safeAdd('btn-read-lesson', readCurrentLesson); // v7.14: leer lección completa
     safeAdd('btn-library-load', loadLibraryLesson); // v7.15: Biblioteca de Lecturas
@@ -1547,6 +1545,32 @@ function setupEventListeners() {
     safeAdd('btn-hw-close', closeHandwrite);
     safeAdd('btn-hw-keyboard', closeHandwrite); // volver al teclado SIN rellenar
     safeAdd('btn-hw-hint', hwHint);
+    // v9.7x: popup dedicado "Escribir a mano" (#write-pop, trazos.js) —
+    // cierre, lista delegada (tocar una palabra abre el banner de
+    // trazos directo vía openWriteWord), clic afuera y Escape. Mismo
+    // patrón que srs.js/free-talk.js para sus propios popups.
+    safeAdd('btn-write-close', closeWriteDaily);
+    (function () {
+        const body = document.getElementById('write-body');
+        if (body) {
+            body.addEventListener('click', (e) => {
+                const row = e.target.closest('.wr-row');
+                if (row && row.dataset.zh) openWriteWord(row.dataset.zh);
+            });
+        }
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('write-pop');
+            if (!pop || pop.classList.contains('hidden')) return;
+            const path = (typeof e.composedPath === 'function') ? e.composedPath() : null;
+            if (path ? path.indexOf(pop) !== -1 : pop.contains(e.target)) return;
+            closeWriteDaily();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const pop = document.getElementById('write-pop');
+            if (pop && !pop.classList.contains('hidden') && !topLayerOpen()) closeWriteDaily();
+        });
+    })();
     // v7.16: botones del banner de práctica (HTML estático → safeAdd sirve)
     safeAdd('btn-wp-close', closeWriterPractice);
     safeAdd('btn-wp-animate', () => {
