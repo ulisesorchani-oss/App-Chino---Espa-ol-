@@ -66,8 +66,7 @@ function updateReaderLang() {
 // Parte una "línea" (ya sin \n) en oraciones por puntuación — SOLO se usa
 // como red de contención para texto pegado libremente sin saltos de línea
 // propios; las lecciones de lessons.js ya vienen una oración por \n (ver
-// readerSplitSentences) y nunca pasan por acá (ninguna línea real supera
-// los 200 caracteres del umbral de abajo).
+// readerSplitSentences).
 function readerSplitLongLine(line) {
     const out = [];
     let buf = '';
@@ -79,16 +78,54 @@ function readerSplitLongLine(line) {
     return out.length ? out : [line];
 }
 
-// Oraciones del texto completo: 1 por \n (ya es así en lessons.js) — solo
-// las líneas anormalmente largas (texto libre sin saltos) se re-parten por
-// puntuación china/española.
+// v9.5x — CORTE DURO: red de contención final para que ningún pedido al
+// TTS supere READER_CHUNK_TARGET, pase lo que pase arriba (texto pegado
+// sin NINGÚN signo de puntuación, o un tramo entre signos que de por sí
+// ya es más largo que el objetivo — ver "Mis lecturas", que entra al
+// Lector con ta.value = entry.text y puede traer hasta 5000 caracteres
+// sin pasar por el maxlength=1200 del textarea). En chino se corta por
+// CARÁCTER (no hay un límite real de "palabra"); en español, por PALABRA
+// (nunca a mitad de una) — salvo que una sola palabra ya exceda el
+// límite (rarísimo: una cadena/URL pegada), en cuyo caso se la corta por
+// caracteres para no perder la garantía de tamaño.
+function readerHardSplit(s, limit) {
+    if (s.length <= limit) return [s];
+    if (detectReaderLang(s) === 'zh') {
+        const chars = Array.from(s);
+        const out = [];
+        for (let i = 0; i < chars.length; i += limit) out.push(chars.slice(i, i + limit).join(''));
+        return out;
+    }
+    const out = [];
+    let cur = '';
+    s.split(' ').forEach((w) => {
+        while (w.length > limit) {
+            if (cur) { out.push(cur); cur = ''; }
+            out.push(w.slice(0, limit));
+            w = w.slice(limit);
+        }
+        if (cur && (cur.length + 1 + w.length) > limit) { out.push(cur); cur = w; }
+        else { cur = cur ? (cur + ' ' + w) : w; }
+    });
+    if (cur) out.push(cur);
+    return out;
+}
+
+// Oraciones del texto completo: 1 por \n (ya es así en lessons.js) — las
+// líneas anormalmente largas (texto libre sin saltos) se re-parten por
+// puntuación china/española, y CUALQUIER tramo que siga pasándose del
+// objetivo (con o sin puntuación) se corta duro con readerHardSplit —
+// ninguna oración que sale de acá supera READER_CHUNK_TARGET.
 function readerSplitSentences(text) {
     const out = [];
     String(text || '').split('\n').forEach((raw) => {
         const line = raw.trim();
         if (!line) return;
-        if (line.length <= 200) { out.push(line); return; }
-        readerSplitLongLine(line).forEach((s) => { if (s) out.push(s); });
+        const pieces = (line.length <= 200) ? [line] : readerSplitLongLine(line);
+        pieces.forEach((p) => {
+            if (!p) return;
+            readerHardSplit(p, READER_CHUNK_TARGET).forEach((s) => { if (s) out.push(s); });
+        });
     });
     return out;
 }
