@@ -3872,12 +3872,38 @@ function pzPinyinOf(ch) {
     }
     if (_pzPyMap[ch]) return _pzPyMap[ch];
     // v9.5x — paso 2: dictMiniLookup (ver cabecera de la función).
+    // Si ch llega por ALIAS (un tradicional que comparte simplificado con
+    // OTRO tradicional, ej. 髮/發→发, 乾/幹→干) no se usa la lectura del
+    // simplificado a ciegas: puede traer varias lecturas pegadas sin
+    // separar (幹→"gān, gàn", dict-mini.js separa a veces con '·' y a
+    // veces con ',' — antes solo se cortaba por '·') o puede tener una
+    // sola lectura anotada que en realidad es la de OTRO tradicional que
+    // comparte el mismo simplificado (髮→"发" solo tiene "fā", la de 發;
+    // "fà" no está anotado en ningún lado del dataset). Por eso para el
+    // caso de alias se cruza SIEMPRE contra pinyin-pro aplicado al propio
+    // carácter tradicional: si esa lectura está entre las candidatas del
+    // simplificado, se usa; si no hay acuerdo (o no hay pinyin-pro), ''
+    // — nunca se imprime más de una lectura ni una lectura sin respaldo.
+    // Si ch NO llega por alias (es la clave directa en dict-mini), se
+    // sigue usando la primera lectura tal como antes.
     try {
         if (typeof dictMiniLookup === 'function') {
             const d = dictMiniLookup(ch);
             if (d && d.py) {
-                const first = String(d.py).split('·')[0].trim();
-                if (first) return first;
+                const viaAlias = typeof dictMini !== 'undefined' && typeof dictMini.has === 'function' && !dictMini.has(ch);
+                if (!viaAlias) {
+                    const first = String(d.py).split(/[,·]/)[0].trim();
+                    if (first) return first;
+                } else {
+                    const candidates = String(d.py).split(/[,·]/).map((s) => s.trim()).filter(Boolean);
+                    let pp = '';
+                    try {
+                        if (typeof pinyinPro !== 'undefined') {
+                            pp = String(pinyinPro.pinyin(ch, { toneType: 'mark', nonZh: 'removed' }) || '').trim();
+                        }
+                    } catch (e2) { pp = ''; }
+                    return (pp && candidates.indexOf(pp) !== -1) ? pp : '';
+                }
             }
         }
     } catch (e) { /* sigue al paso 3 */ }
