@@ -50,11 +50,21 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
-# La app abre el audio desde su propio dominio (same-origin): CORS no es
-# estrictamente necesario, pero no molesta y facilita pruebas locales.
+# v9.5x: antes "*" (cualquier origen). CORS lo hacen cumplir los
+# NAVEGADORES: no frena un script/servidor que le pegue directo a la
+# URL (para eso está el límite de tamaño de abajo + el rate limit del
+# Firewall de Vercel, fuera de este archivo). Lo que sí evita: que OTRO
+# sitio web use fetch() desde el navegador de un visitante tuyo para
+# gastar tu cuota en su nombre. Incluye localhost para pruebas locales
+# y cualquier subdominio de preview de Vercel del mismo proyecto.
+ALLOWED_ORIGINS_REGEX = (
+    r"^https://app-chino-espa-ol(-[a-z0-9-]+)?\.vercel\.app$"
+    r"|^http://localhost(:\d+)?$"
+    r"|^http://127\.0\.0\.1(:\d+)?$"
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=ALLOWED_ORIGINS_REGEX,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -94,6 +104,9 @@ VOICES = {
     },
 }
 DEFAULT_VOICE_KEY = "f"
+
+# v9.5x: tope de longitud para el camino POST (ver uso en tts_endpoint).
+POST_TEXT_MAX = 4000
 
 # ------------------------------------------------------------
 # v9.44 — Caché LRU en memoria del serverless.
@@ -235,6 +248,21 @@ async def tts_endpoint(body, via_get=False):
     if via_get and len(text) > 400:
         # por GET solo viajan frases; textos largos → el cliente usa POST
         return JSONResponse({"error": "text demasiado largo para GET"}, status_code=400)
+    if len(text) > POST_TEXT_MAX:
+        # v9.5x: tope también en POST (antes solo lo tenía GET). Podcast NO
+        # entra acá — solo lee GRADED_LESSONS (lección más larga medida:
+        # 674 caracteres, HSK9/TOCFL-C1) — pero el Lector SÍ puede llegar
+        # alto: "Mis lecturas" (personal-lessons.js, hasta 5000 caracteres)
+        # se abre en el Lector con ta.value = entry.text (openInReader),
+        # que ESQUIVA el maxlength=1200 del textarea (ese atributo solo
+        # limita lo tecleado/pegado a mano, no una asignación por JS). El
+        # Lector trocea en ~150 caracteres por pedido, salvo el caso
+        # patológico de una lectura guardada sin NINGÚN signo de puntuación
+        # en todo el texto: ahí todo el texto viaja en un solo pedido. 4000
+        # cubre ese caso real con margen (por debajo del máximo de 5000 de
+        # Personales, que en la práctica nunca llega sin puntuación) sin
+        # aceptar un texto arbitrariamente grande.
+        return JSONResponse({"error": "text demasiado largo"}, status_code=413)
 
     try:
         speed = float(body.get("speed", 1) or 1)

@@ -153,7 +153,17 @@ function fetchTTS(body, timeoutMs) {
         body: JSON.stringify(body),
         signal: ctrl.signal
     })
-        .then((res) => { if (!res || !res.ok) notifyTtsFallback(); return res; }) // v9.41: 4xx/5xx visible
+        .then((res) => {
+            // v9.5x: 413 (texto demasiado largo) y 429 (límite de pedidos) son
+            // límites propios, no una caída del server — caen al mismo fallback
+            // de voz del sistema que cualquier otro fallo (ver cada llamador),
+            // pero SIN el aviso rojo "servidor caído": ese aviso es para cuando
+            // el TTS realmente no responde, no para un límite que funciona como
+            // se espera.
+            if (res && (res.status === 413 || res.status === 429)) return res;
+            if (!res || !res.ok) notifyTtsFallback();
+            return res;
+        }) // v9.41: 4xx/5xx visible
         .catch((err) => { notifyTtsFallback(); throw err; }); // v9.41: red/timeout visible
     const getUrl = ttsGetUrl(body);
     if (!getUrl) return post().finally(() => clearTimeout(timer));
