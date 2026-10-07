@@ -4139,9 +4139,17 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
                 })()
                 : (opts.composicion ? '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>' : '');
             const boxes = Math.max(4, C);
+            // v9.5x: antes solo las primeras 3 celdas llevaban la guía verde
+            // de calco, fueran 8 o 20 celdas por fila — con C grande quedaba
+            // casi toda la fila vacía. Ahora llevan guía todas MENOS las
+            // últimas 4 (que quedan vacías con su grilla, como antes, para
+            // practicar de memoria al final de la fila): Math.max(1, C - 4).
+            // Mismo "boxes" de siempre — no cambia la cantidad de celdas ni
+            // de filas, solo cuáles traen el carácter calcado.
+            const guideCells = Math.max(1, C - 4);
             let cellsHtml = '';
             for (let b = 0; b < boxes; b++) {
-                const traced = (trazos && d && b < 3) ? pzSvg(d, d.strokes.length, PZ_TRACE_FILL) : '';
+                const traced = (trazos && d && b < guideCells) ? pzSvg(d, d.strokes.length, PZ_TRACE_FILL) : '';
                 cellsHtml += '<div class="pz-cell">' + traced + '</div>';
             }
             // v9.8x: radical a la IZQUIERDA del carácter (layout horizontal),
