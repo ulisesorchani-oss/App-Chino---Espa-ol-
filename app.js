@@ -3845,15 +3845,23 @@ function pzPinyinOf(ch) {
 }
 
 // v9.35 — FILAS POR CARÁCTER (estilo clásico): las celdas de práctica
-// completan la fila ACTUAL y nada más; solo si el bloque cae justo en el
-// borde (base % C === 0) se abre una fila parcial con 2 celdas. Antes
-// ceil((base+2)/C) inflaba SIEMPRE a fila completa → un carácter de 8
-// trazos con 10 celdas sumaba una fila VACÍA de 10 ("suma espacios cuando
-// no los hay"). La usa TAMBIÉN el contador (v9.2) para que ambos coincidan.
+// completan la fila ACTUAL y nada más. La usa TAMBIÉN el contador (v9.2)
+// para que ambos coincidan — y desde v9.5x el armado real de la hoja
+// (pzSheetHTML) llama a ESTA MISMA función en vez de repetir la cuenta,
+// para que no puedan divergir de nuevo (ver comentario de pzClassicTotal).
+//
+// v9.5x — FIX: cuando base ya es múltiplo exacto de C (ej. un carácter
+// de 11 trazos → base=12 con C=12), la cuenta vieja (base+2) abría una
+// fila PARCIAL de 2 celdas sueltas sin completar — justo el caso límite
+// que "caía justo en el borde" (ver auditoría: 教/授/國/假, 11 trazos).
+// Ahora ese caso suma una fila COMPLETA de calco (+C), nunca una parcial.
+function pzClassicTotal(base, C) {
+    let total = Math.ceil(base / C) * C;
+    if (total === base) total += C;
+    return total;
+}
 function pzClassicRows(base, C) {
-    const rem = base % C;
-    const total = (rem === 0) ? base + 2 : base + (C - rem);
-    return Math.ceil(total / C);
+    return pzClassicTotal(base, C) / C;
 }
 function pzCellWidthCss(C) {
     return '.pz-row .pz-cell{flex:0 0 auto;width:calc((100% - ' + ((C - 1) * 1.2).toFixed(2) + 'mm)/' + C + ');}';
@@ -4114,9 +4122,6 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         }
         // v9.35 — relleno compacto: las celdas de práctica completan la fila
         // ACTUAL del carácter y nada más (antes la fila extra casi vacía).
-        // Solo si el bloque cae justo en el borde (base % C === 0) se abre
-        // una fila parcial con 2 celdas de práctica — con ancho fijo
-        // (pzCellWidthCss) las filas parciales no se estiran.
         //
         // v9.9x — Paso E: las celdas sobrantes ya NO quedan en blanco — se
         // rellenan con MÁS práctica real (el carácter COMPLETO, en el
@@ -4125,9 +4130,15 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         // cerrando exactamente igual que antes; antes de esto esas celdas
         // quedaban vacías (ver auditoría: caracteres de muchos trazos, ej.
         // 標/统, que "se pasan" a una 2.ª fila casi toda en blanco).
+        //
+        // v9.5x — total vía pzClassicTotal(), la MISMA función que usa el
+        // contador (pzCounterCompute → pzClassicRows): antes esta cuenta
+        // estaba copiada acá aparte y por eso podía (y llegó a) divergir
+        // del contador. Fix real: cuando base ya es múltiplo exacto de C,
+        // ya no abre una fila parcial de 2 celdas sueltas (ver auditoría:
+        // 教/授/國/假, 11 trazos).
         const base = celdas.length;
-        const rem = base % C;
-        const total = (rem === 0) ? base + 2 : base + (C - rem);
+        const total = pzClassicTotal(base, C);
         const fillCell = () => '<div class="pz-cell">' + (d
             ? pzSvg(d, d.strokes.length, PZ_PREV_FILL)
             : '<span class="pz-glyph" style="color:' + PZ_PREV_FILL + ';">' + ch + '</span>') + '</div>';
