@@ -57,10 +57,24 @@ app = FastAPI()
 # URL (para eso está el límite de tamaño de abajo + el rate limit del
 # Firewall de Vercel, fuera de este archivo). Lo que sí evita: que OTRO
 # sitio web use fetch() desde el navegador de un visitante tuyo para
-# gastar tu cuota en su nombre. Incluye localhost para pruebas locales
-# y cualquier subdominio de preview de Vercel del mismo proyecto.
+# gastar tu cuota en su nombre. Incluye localhost para pruebas locales.
+# v9.5x: el patrón de preview quedó ANCLADO al proyecto Y al equipo real
+# de Vercel (verificado contra una URL de preview real:
+# huayudiario-2wrxiu3i0-aprende-chino.vercel.app) — "huayudiario" es el
+# nombre del proyecto en Vercel (el dominio de producción de abajo,
+# app-chino-espa-ol.vercel.app, es un alias custom del mismo proyecto,
+# no el slug real) y "aprende-chino" el equipo. El tramo del medio
+# (hash de deploy o nombre de rama) es libre A PROPÓSITO — lo arbitrario
+# ahí no es una brecha: para que un origen matchee hace falta ARRANCAR
+# con "huayudiario-" y TERMINAR con "-aprende-chino.vercel.app", y esos
+# dos extremos los asigna Vercel según el proyecto/equipo real (los
+# slugs de equipo son únicos en Vercel: nadie más puede registrar
+# "aprende-chino"). Antes el sufijo quedaba libre de punta a punta
+# (".../app-chino-espa-ol-CUALQUIER-COSA.vercel.app" matcheaba) —
+# ESO sí era una brecha real, ya cerrada acá.
 ALLOWED_ORIGINS_REGEX = (
-    r"^https://app-chino-espa-ol(-[a-z0-9-]+)?\.vercel\.app$"
+    r"^https://app-chino-espa-ol\.vercel\.app$"
+    r"|^https://huayudiario-[a-z0-9-]+-aprende-chino\.vercel\.app$"
     r"|^http://localhost(:\d+)?$"
     r"|^http://127\.0\.0\.1(:\d+)?$"
 )
@@ -108,7 +122,7 @@ VOICES = {
 DEFAULT_VOICE_KEY = "f"
 
 # v9.5x: tope de longitud para el camino POST (ver uso en tts_endpoint).
-POST_TEXT_MAX = 4000
+POST_TEXT_MAX = 2000
 
 # ------------------------------------------------------------
 # v9.44 — Caché LRU en memoria del serverless.
@@ -251,19 +265,20 @@ async def tts_endpoint(body, via_get=False):
         # por GET solo viajan frases; textos largos → el cliente usa POST
         return JSONResponse({"error": "text demasiado largo para GET"}, status_code=400)
     if len(text) > POST_TEXT_MAX:
-        # v9.5x: tope también en POST (antes solo lo tenía GET). Podcast NO
-        # entra acá — solo lee GRADED_LESSONS (lección más larga medida:
-        # 674 caracteres, HSK9/TOCFL-C1) — pero el Lector SÍ puede llegar
-        # alto: "Mis lecturas" (personal-lessons.js, hasta 5000 caracteres)
-        # se abre en el Lector con ta.value = entry.text (openInReader),
-        # que ESQUIVA el maxlength=1200 del textarea (ese atributo solo
-        # limita lo tecleado/pegado a mano, no una asignación por JS). El
-        # Lector trocea en ~150 caracteres por pedido, salvo el caso
-        # patológico de una lectura guardada sin NINGÚN signo de puntuación
-        # en todo el texto: ahí todo el texto viaja en un solo pedido. 4000
-        # cubre ese caso real con margen (por debajo del máximo de 5000 de
-        # Personales, que en la práctica nunca llega sin puntuación) sin
-        # aceptar un texto arbitrariamente grande.
+        # v9.5x: tope también en POST (antes solo lo tenía GET). El pedido
+        # legítimo más largo hoy es la lección completa del Podcast
+        # (~700 caracteres, HSK9/TOCFL-C1 — playLesson() en podcast.js, la
+        # única llamada que manda MÁS de una oración/línea suelta por
+        # pedido). El Lector (reader.js) puede recibir hasta 5000
+        # caracteres de una lectura de "Mis lecturas" (openInReader() los
+        # mete con ta.value = entry.text, esquivando el maxlength=1200 del
+        # textarea — ese atributo solo limita lo tecleado a mano), pero
+        # ahora SIEMPRE trocea en ≤150 caracteres por pedido (readerHardSplit
+        # en reader.js corta duro cualquier tramo que la puntuación no
+        # alcance a partir, por carácter en chino / por palabra en español)
+        # — ya no es un caso a cubrir acá. 2000 deja margen real sobre el
+        # máximo legítimo de hoy (~700) sin aceptar un texto arbitrariamente
+        # grande.
         return JSONResponse({"error": "text demasiado largo"}, status_code=413)
 
     try:
