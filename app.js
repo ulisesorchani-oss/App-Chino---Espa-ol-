@@ -3824,24 +3824,75 @@ const PZ_SHEET_CSS = [
     '.pz2-cells .pz-cell { flex: 1 1 0; }'
 ].join('\n');
 
-// Pinyin por carácter (mapa perezoso desde las tuplas HSK 3.0 + TOCFL embebidas)
+// Pinyin por carácter — v9.5x, 3 niveles (el que resuelve antes manda):
+//   1) mapa HSK 3.0 + TOCFL embebidas (perezoso, r[0] simplificado Y r[1]
+//      tradicional de las entradas de 1 solo carácter)
+//   2) dictMiniLookup (CC-CEDICT recortado, dict-mini.js) — resuelve
+//      tradicional por alias y es la misma fuente que pzSignificadoOf usa
+//      para el significado, así lectura y significado quedan coherentes
+//   3) pinyin-pro para un solo carácter, con tonos — último recurso
+// Antes SOLO indexaba r[0]: un carácter tradicional (國/氣/連/慶/穩/溫,
+// 教授 fuera de compuesto) nunca encontraba pinyin aunque el dato
+// existiera (archivado bajo su forma simplificada) o directamente no
+// existiera como entrada de 1 carácter — quedaba mudo en la planilla
+// "cuaderno" con Pronunciación = pinyin.
 let _pzPyMap = null;
 function pzPinyinOf(ch) {
     if (!_pzPyMap) {
         _pzPyMap = {};
+        // v9.5x: candidatos de tradicional (r[1]) agrupados por pinyin
+        // DISTINTO reclamado — si dos entradas con pinyin distinto
+        // reclaman el mismo tradicional (caso real: 干 es simplificado de
+        // 乾 Y de 幹, con lecturas distintas) no se indexa NINGUNA: mejor
+        // sin dato acá (cae a dictMiniLookup/pinyin-pro) que con una
+        // lectura ambigua. Si el tradicional coincide con un simplificado
+        // que ya tiene su propia entrada directa (r[0]), esa manda —
+        // "sin pisar entradas ya presentes".
+        const traditCandidates = {};
         try {
             for (const key in EMBEDDED_MODULE_DATA) {
                 const rows = EMBEDDED_MODULE_DATA[key];
                 if (!Array.isArray(rows)) continue;
                 for (const r of rows) {
-                    if (Array.isArray(r) && r[0] && r[0].length === 1 && r[2] && !_pzPyMap[r[0]]) {
-                        _pzPyMap[r[0]] = String(r[2]).split('(')[0].trim();
+                    if (!Array.isArray(r) || !r[2]) continue;
+                    const py = String(r[2]).split('(')[0].trim();
+                    if (r[0] && r[0].length === 1 && !_pzPyMap[r[0]]) _pzPyMap[r[0]] = py;
+                    if (r[1] && r[1].length === 1 && r[1] !== r[0]) {
+                        if (!traditCandidates[r[1]]) traditCandidates[r[1]] = new Set();
+                        traditCandidates[r[1]].add(py);
                     }
+                }
+            }
+            for (const trad in traditCandidates) {
+                if (!_pzPyMap[trad] && traditCandidates[trad].size === 1) {
+                    _pzPyMap[trad] = [...traditCandidates[trad]][0];
                 }
             }
         } catch (e) { _pzPyMap = {}; }
     }
-    return _pzPyMap[ch] || '';
+    if (_pzPyMap[ch]) return _pzPyMap[ch];
+    // v9.5x — paso 2: dictMiniLookup (ver cabecera de la función).
+    try {
+        if (typeof dictMiniLookup === 'function') {
+            const d = dictMiniLookup(ch);
+            if (d && d.py) {
+                const first = String(d.py).split('·')[0].trim();
+                if (first) return first;
+            }
+        }
+    } catch (e) { /* sigue al paso 3 */ }
+    // v9.5x — paso 3: último recurso, pinyin-pro para UN carácter con
+    // tonos. nonZh:'removed' hace que un símbolo/no-chino dé '' en vez
+    // del carácter sin convertir; el chequeo py !== ch cubre el caso de
+    // un hanzi real pero fuera del diccionario de pinyin-pro (lo
+    // devolvería tal cual, sin romanizar — tampoco cuenta como pinyin).
+    try {
+        if (typeof pinyinPro !== 'undefined' && ch) {
+            const py = String(pinyinPro.pinyin(ch, { toneType: 'mark', nonZh: 'removed' }) || '').trim();
+            if (py && py !== ch) return py;
+        }
+    } catch (e) { /* sin dato */ }
+    return '';
 }
 
 // v9.35 — FILAS POR CARÁCTER (estilo clásico): las celdas de práctica
