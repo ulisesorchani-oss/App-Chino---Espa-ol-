@@ -70,6 +70,17 @@ const KARA = (function () {
     let act = null;          // { line, spans, endSpan, raf, timer }
     let acShared = null;     // AudioContext perezoso (recorte de silencio)
 
+    // ── v9.5x — TRAZA DE DEPURACIÓN (apagada por defecto) ────────────
+    // Activar: localStorage.ac_debug_kara = '1' (y recargar). Sin eso,
+    // dbgOn() corta en el primer chequeo — cero costo, no se acumula
+    // nada. Pensada para correr en el dispositivo real (acá no hay forma
+    // de llegar al backend de TTS para conseguir boundaries reales). NO
+    // toca la lógica de matching — solo mira y anota lo que ya pasa.
+    function dbgOn() {
+        try { return localStorage.getItem('ac_debug_kara') === '1'; } catch (e) { return false; }
+    }
+    let _dbgChunks = []; // [{idx, textLen, boundariesLen, marksLen, rows, saltosGrandes, retrocesos, noResueltos}]
+
     function on() {
         try { return localStorage.getItem('ac_karaoke') === '1'; } catch (e) { return false; }
     }
@@ -162,29 +173,55 @@ const KARA = (function () {
     // misma palabra, y se mapea el final de cada boundary al último
     // span de carácter Han que cubre — así el "upto" ya viene resuelto
     // por el propio motor de síntesis, sin adivinar con Intl.Segmenter.
-    function buildBoundaryMap(text, boundaries) {
-        if (!boundaries || !boundaries.length) return null;
+    function buildBoundaryMap(text, boundaries, chunkIdx) {
+        const DBG = dbgOn();
         const src = String(text == null ? '' : text);
+        if (!boundaries || !boundaries.length) {
+            if (DBG) _dbgChunks.push({ idx: chunkIdx, textLen: src.length, boundariesLen: 0, marksLen: 0, rows: [], saltosGrandes: 0, retrocesos: 0, noResueltos: 0 });
+            return null;
+        }
         const hanziIdx = [];
         for (let i = 0; i < src.length; i++) if (RE_HAN.test(src[i])) hanziIdx.push(i);
-        if (!hanziIdx.length) return null;
+        if (!hanziIdx.length) {
+            if (DBG) _dbgChunks.push({ idx: chunkIdx, textLen: src.length, boundariesLen: boundaries.length, marksLen: 0, rows: [], saltosGrandes: 0, retrocesos: 0, noResueltos: 0 });
+            return null;
+        }
         const marks = [];
         let cursor = 0;
+        const rows = DBG ? [] : null;
+        let saltosGrandes = 0, retrocesos = 0, noResueltos = 0;
         for (let bi = 0; bi < boundaries.length; bi++) {
             const b = boundaries[bi];
             const t = String((b && b.text) || '');
             if (!t) continue;
+            const cursorBefore = cursor;
             let at = src.indexOf(t, cursor);
             if (at === -1) at = src.indexOf(t); // red de contención: el orden no matcheó, buscar igual
-            if (at === -1) continue;            // no se pudo ubicar este boundary puntual → se salta
+            if (at === -1) {
+                if (DBG) { noResueltos++; rows.push({ text: t, offsetMs: Number(b.offsetMs) || 0, at: null, salto: null, flag: '⚠️ no resuelto' }); }
+                continue;            // no se pudo ubicar este boundary puntual → se salta
+            }
             const end = at + t.length - 1;
             cursor = at + t.length;
             let upto = -1;
             for (let k = 0; k < hanziIdx.length; k++) {
                 if (hanziIdx[k] <= end) upto = k; else break;
             }
+            if (DBG) {
+                const salto = at - cursorBefore;
+                let flag = '';
+                if (salto < 0) { retrocesos++; flag = '⚠️ retrocede'; }
+                else if (salto > 30) { saltosGrandes++; flag = '⚠️ salto grande'; }
+                rows.push({ text: t, offsetMs: Number(b.offsetMs) || 0, at: at, salto: salto, flag: flag });
+            }
             if (upto === -1) continue; // boundary sin ningún hanzi (puntuación suelta)
             marks.push({ atMs: Number(b.offsetMs) || 0, upto: upto });
+        }
+        if (DBG) {
+            _dbgChunks.push({
+                idx: chunkIdx, textLen: src.length, boundariesLen: boundaries.length, marksLen: marks.length,
+                rows: rows, saltosGrandes: saltosGrandes, retrocesos: retrocesos, noResueltos: noResueltos
+            });
         }
         return marks.length ? marks : null;
     }
@@ -272,10 +309,10 @@ const KARA = (function () {
     // da la posición exacta, sin estimar nada). Si no, cae al modo v9.6 de
     // siempre: progreso sobre la VENTANA DE HABLA (recorte de silencio por
     // RMS) + línea de tiempo ponderada por puntuación.
-    function withAudio(audio, text, boundaries) {
+    function withAudio(audio, text, boundaries, chunkIdx) {
         if (!act || !audio) return;
         const n = act.spans.length;
-        const marks = buildBoundaryMap(text, boundaries);
+        const marks = buildBoundaryMap(text, boundaries, chunkIdx);
         const tl = marks ? null : buildTimeline(text, n);
         let finished = false;
         let win = null;   // { t0, t1 } ventana de habla real (solo modo estimado)
@@ -365,6 +402,36 @@ const KARA = (function () {
             const p = Math.max(0, Math.min(1, (elapsed - MS_LEAD) / estMs));
             paint(act.spans, spanUptoFor(idxAt(tl, p)));
         }, 100);
+    }
+    // KARA_DEBUG.dump() — texto copiable con la traza completa acumulada
+    // (localStorage.ac_debug_kara = '1'). Vive en el mismo closure que
+    // _dbgChunks porque es privado — no hay otra forma de leerlo de afuera.
+    if (typeof window !== 'undefined') {
+        window.KARA_DEBUG = {
+            dump: function () {
+                if (!_dbgChunks.length) {
+                    const msg = 'KARA_DEBUG: sin datos. Activá localStorage.ac_debug_kara = "1", recargá la página y escuchá una lectura en el Lector.';
+                    console.log(msg);
+                    return msg;
+                }
+                const lines = [];
+                _dbgChunks.forEach(function (c) {
+                    lines.push('── Trozo ' + (c.idx === undefined ? '?' : c.idx) + ' — ' + c.textLen + ' caracteres ──');
+                    (c.rows || []).forEach(function (r) {
+                        lines.push('  [' + r.offsetMs + 'ms] "' + r.text + '" → ' + (r.at === null ? 'null' : r.at) +
+                            (r.salto === null ? '' : ' (salto ' + (r.salto >= 0 ? '+' : '') + r.salto + ')') +
+                            (r.flag ? '  ' + r.flag : ''));
+                    });
+                    lines.push('  RESUMEN: ' + c.boundariesLen + ' boundaries, ' + c.marksLen + ' resueltos, ' +
+                        c.saltosGrandes + ' saltos grandes, ' + c.retrocesos + ' retrocesos');
+                    lines.push('');
+                });
+                const text = lines.join('\n');
+                console.log(text);
+                return text;
+            },
+            clear: function () { _dbgChunks = []; }
+        };
     }
     return { prepare: prepare, withAudio: withAudio, withTts: withTts, stop: stop, on: on };
 })();
