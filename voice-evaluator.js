@@ -624,16 +624,25 @@ function isSilence(float32) {
  *  corto/ambiguo o se fuerza el idioma equivocado, el modelo a veces
  *  entra en un loop y repite la misma unidad corta decenas de veces
  *  ("好啦好啦好啦…", "¿No? ¿No? ¿No?…") en vez de fallar limpio. Se
- *  detecta buscando un grupo de 1-12 caracteres que se repite 4+
- *  veces seguidas y cubre la mayor parte del texto — sirve igual
- *  para chino (sin espacios) y español (con espacios), sin tokenizar
- *  por idioma. Usado por transcribeFree() para tratar ese resultado
- *  como "no se entendió" en vez de mostrar el bucle. */
+ *  detecta buscando un grupo que se repite seguido y cubre la mayor
+ *  parte del texto — sirve igual para chino (sin espacios) y español
+ *  (con espacios), sin tokenizar por idioma. Usado por transcribeFree()
+ *  para tratar ese resultado como "no se entendió" en vez de mostrar
+ *  el bucle.
+ *
+ *  v9.5x — umbral PARTIDO por tamaño de unidad: una unidad de 1-2
+ *  caracteres (谢谢, 看看, 哈哈哈哈哈) es reduplicación/risa NORMAL del
+ *  chino, no una alucinación — con el umbral viejo (4+) "对对对对" caía
+ *  como bucle siendo una frase real ("sí sí sí sí"). Unidades cortas
+ *  ahora piden 8+ repeticiones seguidas; unidades de 3-12 caracteres
+ *  mantienen el umbral de siempre (4+) — ahí la unidad ya es lo
+ *  bastante larga como para que 4 repeticiones sean inequívocamente un
+ *  bucle y no una frase con una palabra corta repetida a propósito. */
 function looksLikeHallucination(text) {
     if (!text) return false;
     const clean = text.replace(/\s+/g, ' ').trim();
     if (!clean) return false;
-    const m = clean.match(/(.{1,12}?)\1{3,}/);
+    const m = clean.match(/(.{1,2}?)\1{7,}|(.{3,12}?)\2{3,}/);
     return !!m && (m[0].length / clean.length) >= 0.6;
 }
 
