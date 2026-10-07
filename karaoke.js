@@ -81,6 +81,36 @@ const KARA = (function () {
     }
     let _dbgChunks = []; // [{idx, textLen, boundariesLen, marksLen, rows, saltosGrandes, retrocesos, noResueltos}]
 
+    // ── v9.5x — AUTO-SCROLL de la palabra resaltada ──────────────────
+    // Solo entra en juego cuando cambia la línea visual (offsetTop
+    // distinto al último al que se hizo scroll) — no en cada tick del
+    // RAF. Si el usuario desplazó a mano hace menos de 3 s, no insiste
+    // (suppressScrollUntil además evita que el PROPIO scrollIntoView se
+    // lea a sí mismo como "desplazó a mano" en el listener de abajo).
+    let lastManualScrollAt = 0;
+    let suppressScrollUntil = 0;
+    let lastScrollTop = null;
+    let scrollListenerBound = false;
+    function ensureScrollListener() {
+        if (scrollListenerBound || typeof window === 'undefined') return;
+        scrollListenerBound = true;
+        try {
+            window.addEventListener('scroll', function () {
+                if (Date.now() < suppressScrollUntil) return; // es nuestro propio scrollIntoView
+                lastManualScrollAt = Date.now();
+            }, { passive: true });
+        } catch (e) { /* sin window: no-op */ }
+    }
+    function maybeAutoScroll(span) {
+        if (!span || !on()) return;
+        if (Date.now() - lastManualScrollAt < 3000) return; // el usuario scrolleó hace poco: no pelear
+        const top = span.offsetTop;
+        if (lastScrollTop !== null && Math.abs(top - lastScrollTop) < 4) return; // misma línea visual
+        lastScrollTop = top;
+        suppressScrollUntil = Date.now() + 700; // smooth scroll tarda ~300-500 ms; margen
+        try { span.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { /* noop */ }
+    }
+
     function on() {
         try { return localStorage.getItem('ac_karaoke') === '1'; } catch (e) { return false; }
     }
@@ -89,6 +119,7 @@ const KARA = (function () {
     }
     function paint(spans, upto) {
         for (let i = 0; i < spans.length; i++) spans[i].classList.toggle('k-on', i <= upto);
+        if (upto >= 0 && upto < spans.length) maybeAutoScroll(spans[upto]);
     }
     // v9.5: mapa palabra→spans. endSpan[c] = índice del ÚLTIMO span de la
     // palabra que contiene al carácter c. Null = modo por carácter.
@@ -251,6 +282,8 @@ const KARA = (function () {
         if (!spans.length) return null;
         act = { line: line, spans: spans, endSpan: buildWordEnd(spans), raf: 0, timer: 0 };
         line.classList.add('kara-active');
+        lastScrollTop = null; // línea nueva: el próximo highlight decide si hace falta scrollear
+        ensureScrollListener();
         return act;
     }
     // ── v9.6: RECORTE DEL SILENCIO DE PUNTA A PUNTA ──────────────────
