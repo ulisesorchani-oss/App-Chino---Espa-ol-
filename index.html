@@ -470,10 +470,17 @@
                     <h3 class="section-title">✍️ Planillas de escritura 写字</h3>
                     <span class="reader-lang">hojas A4 para imprimir, con orden de trazos</span>
                 </div>
+                <!-- v9.11x: panel reordenado en grupos — (a) caracteres, (b) estilo
+                     de hoja, (c) ajustes por carácter, (d) estado, (e) acciones —
+                     para que se lea de arriba a abajo en el orden en que se decide
+                     cada cosa, en vez de "Trazos" y "Composición" sueltos como dos
+                     interruptores aparte (ver pzTrazos, unificado). -->
                 <label for="pz-input" class="sr-only">Caracteres para la planilla</label>
                 <textarea id="pz-input" class="reader-input" rows="2" maxlength="80" placeholder="Pegá los caracteres a practicar, ej.: 你是哪国人"></textarea>
                 <div class="pz-options">
-                    <button id="btn-pz-trazos" class="speed-btn active" type="button" title="Mostrar (o no) la secuencia de trazos de cada carácter">✍️ Trazos: ON</button>
+                    <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
+                </div>
+                <div class="pz-options">
                     <label class="pz-label" for="select-pz-style">Estilo de hoja
                         <select id="select-pz-style" class="level-dropdown">
                             <option value="clasica" selected>Clásica (celdas)</option>
@@ -487,12 +494,9 @@
                             <option value="14">14 (más repaso)</option>
                         </select>
                     </label>
-                    <button id="btn-pz-module" class="btn-secondary pz-module-btn" type="button" title="Cargar los caracteres de las palabras del módulo activo">📋 Usar módulo: <b id="pz-module-name">Todas</b></button>
                 </div>
-                <!-- v9.7x: 4 ajustes nuevos del encabezado por carácter — solo tienen
-                     efecto en el estilo "Cuaderno 筆順 + 寫字" de arriba. -->
                 <div class="pz-options">
-                    <button id="btn-pz-composicion" class="speed-btn active" type="button" title="Estilo Cuaderno: mostrar la secuencia de composición/trazos antes de las celdas de calco">🧩 Composición: ON</button>
+                    <button id="btn-pz-trazos" class="speed-btn active" type="button" title="Clásica: celdas con la secuencia paso a paso después del modelo. Cuaderno: fila de trazos sobre las celdas de calco.">✍️ Orden de trazos: ON</button>
                     <button id="btn-pz-radical" class="speed-btn" type="button" title="Estilo Cuaderno: mostrar el radical del carácter por separado — piloto, descarga un diccionario externo la 1.ª vez que se usa">部 Radical: OFF</button>
                     <label class="pz-label" for="select-pz-pron">Pronunciación
                         <select id="select-pz-pron" class="level-dropdown">

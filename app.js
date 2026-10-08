@@ -3679,6 +3679,13 @@ function splitGroupedPinyin(word) {
 // (carácter modelo con la fuente del sistema).
 // ============================================================
 const PZ_MEM = new Map();               // char → datos|null (memoria de sesión)
+// v9.11x: "Trazos" (clásica) y "Composición" (cuaderno) eran dos
+// interruptores separados que hacían lo mismo en espíritu (mostrar el
+// orden de trazos antes de las celdas de calco) — se unifican en UNA sola
+// clave ('✍️ Orden de trazos', pzTrazos) para los dos estilos. Migración:
+// ON salvo que ac_pz_trazos ya estuviera explícitamente en '0' (mismo
+// default de siempre, sin tocar esta línea); ac_pz_composicion queda
+// ignorada y se borra de localStorage (ver pzInit) para no dejar basura.
 let pzTrazos = lsGet('ac_pz_trazos') !== '0';   // default ON
 // v9.1: estilo de hoja — 'clasica' (de siempre) o 'cuaderno' (筆順 + 寫字 como la referencia)
 let pzStyle = lsGet('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
@@ -3690,12 +3697,10 @@ let pzLastMissingPron = [];             // v9.10x: caracteres sin pronunciación
 // solamente: es donde ya existe la tarjeta pz2-card/pz2-strokes donde
 // encajan; "clásica" es una grilla densa de práctica y queda sin cambios).
 // Mismo patrón de persistencia que pzTrazos de arriba (localStorage plano,
-// sin storage nuevo). Default: composición y pinyin preservan EXACTAMENTE
-// lo que la hoja cuaderno ya mostraba antes de este cambio (composición
-// tomaba el lugar de pzTrazos ahí, pinyin ya se mostraba siempre); radical
-// y significado son agregados nuevos → arrancan OFF (radical además es un
-// piloto con descarga de red la 1.ª vez, opt-in a propósito).
-let pzComposicion = lsGet('ac_pz_composicion') !== '0';        // default ON
+// sin storage nuevo). Default: pinyin preserva EXACTAMENTE lo que la hoja
+// cuaderno ya mostraba antes de este cambio (ya se mostraba siempre);
+// radical y significado son agregados nuevos → arrancan OFF (radical
+// además es un piloto con descarga de red la 1.ª vez, opt-in a propósito).
 let pzRadical = lsGet('ac_pz_radical') === '1';                 // default OFF (piloto)
 let pzSignificado = lsGet('ac_pz_significado') === '1';         // default OFF
 const _pzPronSaved = lsGet('ac_pz_pron');
@@ -3795,6 +3800,19 @@ const PZ_SHEET_CSS = [
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     '.pz-cell svg path { stroke-linejoin: round; }',
     '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }',
+    // v9.11x — PASO 2 (maqueta): Clásica con radical/pronunciación/
+    // significado — mismo criterio de tamaño/color que el radical
+    // ampliado de Cuaderno (11.5pt, verde de marca); con fondo clarito
+    // porque acá va ENCIMA del carácter modelo (celda ya casi llena con el
+    // SVG a 86%×86%), no al lado como en la tarjeta de Cuaderno.
+    '.pz-cell-radical { position: absolute; top: 2%; left: 3%; z-index: 3; font-size: 11.5pt; font-weight: 700;',
+    '  line-height: 1; color: #16a085; background: rgba(255,255,255,0.82); padding: 0 0.8mm; border-radius: 0.6mm; }',
+    // Línea fina por carácter (pinyin/zhuyin · significado), hermana de su
+    // .pz-row (no envuelta en un div nuevo — ver pzSheetHTML). break-after:
+    // avoid para la impresión nativa (que si rompe página por CSS, no deja
+    // la línea sola); pzDownloadPDF (que pagina por JS, no por CSS) la
+    // trata aparte como parte de "las filas" (ver su clasificación).
+    '.pz-charinfo { font-size: 7.5pt; color: #475569; margin: 2mm 0 0.8mm; break-after: avoid; page-break-after: avoid; }',
     // ── v9.1 estilo CUADERNO (筆順 + 寫字, como el modelo de la referencia) ──
     // v9.4: SIN las etiquetas repetidas por bloque (筆順/寫字) — la fila de
     // progresión y los casilleros se entienden solos; queda más ancho para
@@ -4162,17 +4180,34 @@ function pzSignificadoOf(ch) {
     } catch (e) { return { text: '', reading: '' }; }
 }
 
+// v9.11x — PASO 2 (maqueta): línea de info de estilo CLÁSICO ("pinyin o
+// zhuyin · significado") para un carácter — USADA TANTO por pzSheetHTML
+// (armado real de la hoja) COMO por pzCounterCompute (estimación de
+// capacidad), para que nunca puedan divergir sobre qué caracteres llevan
+// línea y cuáles no (mismo espíritu que pzClassicTotal, compartido por
+// armado y contador). Si la lectura no está confirmada, se omite esa
+// parte (igual que en Cuaderno); si faltan las dos, no hay línea.
+function pzClassicInfoOf(ch, opts) {
+    const py = pzPinyinOf(ch);
+    const confirmed = !!py;
+    const meanInfo = opts.significado ? pzSignificadoOf(ch) : null;
+    const meanTxt = meanInfo ? meanInfo.text : '';
+    let pronTxt = (opts.pron === 'none' || !confirmed) ? '' : (opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : py);
+    if (pronTxt && meanInfo && meanInfo.reading && pronTxt !== meanInfo.reading) pronTxt += ' (' + meanInfo.reading + ')';
+    const text = [pronTxt, meanTxt].filter(Boolean).join(' · ');
+    return { text: text, confirmed: confirmed };
+}
+
 function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
     const fecha = new Date().toLocaleDateString('es-AR');
     const C = Math.min(20, Math.max(6, parseInt(cells, 10) || 12));
     const esCuaderno = (style === 'cuaderno');
-    // v9.7x — 4 ajustes nuevos del encabezado (SOLO estilo cuaderno, ver
-    // comentario junto a las variables pzComposicion/pzRadical/pzPron/
-    // pzSignificado): composicion reemplaza el rol que tenía `trazos` en
-    // la fila pz2-strokes de acá abajo (`trazos`/pzTrazos sigue intacto
-    // para lo suyo: las celdas de práctica progresivas de estilo clásico
-    // y el calco liviano de las primeras 3 celdas, más abajo en esta
-    // misma función — dos cosas distintas aunque compartan pzSvg).
+    // v9.7x/v9.11x — ajustes del encabezado (SOLO estilo cuaderno, ver
+    // comentario junto a las variables pzRadical/pzPron/pzSignificado):
+    // `trazos` (pzTrazos, "✍️ Orden de trazos" — unificado con la ex
+    // "Composición") maneja la fila pz2-strokes acá abajo Y las celdas de
+    // práctica progresivas/el calco liviano de estilo clásico, más abajo
+    // en esta misma función — dos lugares distintos de UNA sola bandera.
     opts = opts || {};
     if (esCuaderno) {
         // ── estilo CUADERNO (v9.1): tarjeta del carácter + fila 筆順
@@ -4214,7 +4249,10 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
             // y en color distinto (alcanza para diferenciarlo del principal).
             const radTxt = opts.radical ? pzRadicalOf(ch) : '';
             const radHtml = radTxt ? '<div class="pz2-radical">' + escHtml(radTxt) + '</div>' : '';
-            const trazosHtml = (opts.composicion && d)
+            // v9.11x: "Composición" (cuaderno) se unificó con "Trazos" (clásica)
+            // en un solo interruptor — acá usa el mismo parámetro `trazos` que
+            // ya recibe la función (antes venía aparte en opts.composicion).
+            const trazosHtml = (trazos && d)
                 ? (() => {
                     const n = d.strokes.length;
                     let s = '';
@@ -4224,7 +4262,7 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
                     s += pzSvg(d, n, '#c9ced6'); // el carácter completo en gris, como el modelo
                     return '<div class="pz2-strokes">' + s + '</div>';
                 })()
-                : (opts.composicion ? '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>' : '');
+                : (trazos ? '<div class="pz2-strokes"><span class="pz-glyph" style="position:static;font-size:18pt;color:#94a3b8;">—</span></div>' : '');
             const boxes = Math.max(4, C);
             // v9.5x: antes solo las primeras 3 celdas llevaban la guía verde
             // de calco, fueran 8 o 20 celdas por fila — con C grande quedaba
@@ -4270,12 +4308,27 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
             + '<div class="pz-meta">Nombre: ____________________________ &nbsp;&nbsp; Curso: ______________ &nbsp;&nbsp; Fecha: ' + fecha + '</div>'
             + blocks + pronNote + '</body></html>';
     }
-    pzLastMissingPron = [];
+    // v9.11x — PASO 2 (maqueta, sin aprobar todavía): Clásica con radical/
+    // pronunciación/significado, reusando EXACTAMENTE los mismos helpers
+    // que ya usa Cuaderno (pzPinyinOf/pzZhuyinOf/pzSignificadoOf/
+    // pzRadicalOf) — así la lectura/significado de un carácter es la MISMA
+    // sea cual sea el estilo elegido, nunca dos criterios en paralelo.
+    // Con los 3 toggles apagados (radical/pron/significado), ninguna de
+    // estas 3 variables aporta HTML nuevo → la hoja queda idéntica a la de
+    // siempre (mismo criterio "igual a hoy" que ya usa Cuaderno), con la
+    // misma capacidad por hoja.
+    const missingPron = [];
     let rows = '';
     chars.forEach((ch, i) => {
         const d = datas[i];
-        // Contenido del bloque del carácter: modelo + etapas de trazos
-        const celdas = ['<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
+        const info = pzClassicInfoOf(ch, opts);
+        if ((opts.pron === 'pinyin' || opts.pron === 'zhuyin') && !info.confirmed) missingPron.push(ch);
+        const infoHtml = info.text ? '<div class="pz-charinfo">' + escHtml(info.text) + '</div>' : '';
+        const radTxt = opts.radical ? pzRadicalOf(ch) : '';
+        const radHtml = radTxt ? '<div class="pz-cell-radical">' + escHtml(radTxt) + '</div>' : '';
+        // Contenido del bloque del carácter: modelo (+ radical en la esquina
+        // si está activo) + etapas de trazos
+        const celdas = ['<div class="pz-cell">' + radHtml + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
         if (trazos && d) {
             const n = d.strokes.length;
             // v9.1: el trazo NUEVO de cada etapa va más oscuro — se ve qué trazo se agrega
@@ -4304,10 +4357,20 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
             ? pzSvg(d, d.strokes.length, PZ_PREV_FILL)
             : '<span class="pz-glyph" style="color:' + PZ_PREV_FILL + ';">' + ch + '</span>') + '</div>';
         while (celdas.length < total) celdas.push(fillCell());
+        // v9.11x: la línea de info (si hay) va COMO HERMANA de la fila, sin
+        // envolverla en un div nuevo — pzDownloadPDF() reclasifica los
+        // hijos DIRECTOS del body en header/filas/nota final por nombre de
+        // clase (ver más abajo, mismo punto que ya tocó el aviso de
+        // pronunciación en Cuaderno): un wrapper nuevo caía en "header" y
+        // ARRUINABA la paginación entera de la Clásica (todo en una sola
+        // página, sin cortar). pzDownloadPDF ya sabe tratar '.pz-charinfo'
+        // como parte de "las filas" para que viaje pegada a la suya.
+        rows += infoHtml;
         for (let r = 0; r < total; r += C) {
             rows += '<div class="pz-row">' + celdas.slice(r, r + C).join('') + '</div>';
         }
     });
+    pzLastMissingPron = missingPron;
     const faltan = chars.filter((c, i) => !datas[i]);
     const nota = faltan.length ? '<p class="pz-note">Sin datos de trazos para: ' + faltan.join(' ') + ' — el carácter modelo usa la fuente del sistema.</p>' : '';
     const hz = chars.map((c) => '<span>' + c + '</span>').join(' ');
@@ -4342,7 +4405,7 @@ async function pzGenerate() {
         await pzEnsureRadicalDict();
     }
     pzLastSheet = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle, {
-        composicion: pzComposicion, radical: pzRadical, pron: pzPron, significado: pzSignificado
+        radical: pzRadical, pron: pzPron, significado: pzSignificado
     });
     pzRenderPreview();
     pzCounterRender(); // v9.2: con datos reales el contador es exacto
@@ -4470,30 +4533,44 @@ async function pzDownloadPDF() {
         while (doc.body.firstChild) meas.appendChild(doc.body.firstChild);
         document.body.appendChild(meas);
 
-        // Clasificar bloques: filas (lo paginable), cabecera y nota final
+        // Clasificar bloques: filas (lo paginable), cabecera y nota final.
+        // v9.11x: en Clásica, la línea '.pz-charinfo' (pinyin/zhuyin ·
+        // significado, Paso 2) es HERMANA de su '.pz-row', no está adentro
+        // — para que nunca quede sola en una página con su fila recién en
+        // la siguiente, cada '.pz-row' se agrupa con la '.pz-charinfo' que
+        // la precede (si hay) en un mismo "grupo" paginable: ambas viajan
+        // y se miden juntas de acá en adelante.
         const esCuad = (pzStyle === 'cuaderno');
         const rowCls = esCuad ? 'pz2-block' : 'pz-row';
         const header = [], tail = [], rowsArr = [];
+        let pendingInfo = null;
         Array.prototype.forEach.call(meas.children, (n) => {
             if (n.tagName === 'STYLE') return;
-            if (n.classList && n.classList.contains(rowCls)) rowsArr.push(n);
-            else if (n.classList && n.classList.contains('pz-note')) tail.push(n);
-            else header.push(n);
+            if (n.classList && n.classList.contains('pz-charinfo')) { pendingInfo = n; return; }
+            if (n.classList && n.classList.contains(rowCls)) {
+                rowsArr.push(pendingInfo ? [pendingInfo, n] : [n]);
+                pendingInfo = null;
+                return;
+            }
+            if (n.classList && n.classList.contains('pz-note')) { tail.push(n); return; }
+            header.push(n);
         });
 
         // ── 2) Partir en páginas A4 midiendo bloques REALES (misma lógica
         // de flujo que la impresión nativa: cada página arranca a 11mm) ──
         const gapY = (esCuad ? 4 : 1.8) * 96 / 25.4;      // margen inferior del bloque
-        const headerH = rowsArr.length ? rowsArr[0].offsetTop : 42;
+        const groupTop = (g) => g[0].offsetTop;
+        const groupBottom = (g) => { const last = g[g.length - 1]; return last.offsetTop + last.offsetHeight; };
+        const headerH = rowsArr.length ? groupTop(rowsArr[0]) : 42;
         const pages = [[]];
         let y = headerH;
-        rowsArr.forEach((r) => {
-            const h = r.offsetHeight + gapY;
+        rowsArr.forEach((g) => {
+            const h = (groupBottom(g) - groupTop(g)) + gapY;
             if (y + h > 1123 - 42 && pages[pages.length - 1].length) {
                 pages.push([]);
                 y = 42;
             }
-            pages[pages.length - 1].push(r);
+            pages[pages.length - 1].push(g);
             y += h;
         });
         meas.remove(); // los nodos quedan vivos: se re-montan por página
@@ -4515,7 +4592,7 @@ async function pzDownloadPDF() {
             st2.textContent = pzPdfHolderStyle(C, cw);
             holder.appendChild(st2);
             if (p === 0) header.forEach((n) => holder.appendChild(n));
-            pages[p].forEach((n) => holder.appendChild(n));
+            pages[p].forEach((g) => g.forEach((n) => holder.appendChild(n)));
             if (p === pages.length - 1) tail.forEach((n) => holder.appendChild(n));
             document.body.appendChild(holder);
             const canvas = await window.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff', logging: false });
@@ -4592,7 +4669,7 @@ function pzUseModule() {
 function pzUpdateControls() {
     const bt = document.getElementById('btn-pz-trazos');
     if (bt) {
-        bt.textContent = '✍️ Trazos: ' + (pzTrazos ? 'ON' : 'OFF');
+        bt.textContent = '✍️ Orden de trazos: ' + (pzTrazos ? 'ON' : 'OFF');
         bt.classList.toggle('active', pzTrazos);
     }
     const sel = document.getElementById('select-pz-cells');
@@ -4601,9 +4678,8 @@ function pzUpdateControls() {
     if (stl) stl.value = pzStyle;
     const nm = document.getElementById('pz-module-name');
     if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
-    // v9.7x: los 4 ajustes nuevos del encabezado (mismo patrón de arriba)
-    const bc = document.getElementById('btn-pz-composicion');
-    if (bc) { bc.textContent = '🧩 Composición: ' + (pzComposicion ? 'ON' : 'OFF'); bc.classList.toggle('active', pzComposicion); }
+    // v9.7x: los ajustes del encabezado (mismo patrón de arriba) — v9.11x:
+    // Composición se unificó con Trazos (ver pzUpdateControls/btn-pz-trazos).
     const br = document.getElementById('btn-pz-radical');
     if (br) { br.textContent = '部 Radical: ' + (pzRadical ? 'ON' : 'OFF'); br.classList.toggle('active', pzRadical); }
     const bs = document.getElementById('btn-pz-significado');
@@ -4646,17 +4722,16 @@ function pzCounterCompute() {
     const datas = chars.map((ch) => (PZ_MEM.has(ch) ? PZ_MEM.get(ch) : null));
     const unknown = datas.filter((d) => !d).length;
     const estN = (i) => (pzTrazos ? (datas[i] ? datas[i].strokes.length : 10) : 0);
+    const pzOpts = { radical: pzRadical, pron: pzPron, significado: pzSignificado };
 
     let headerH = 60, blocks = null;
     try {
         // mide la hoja REAL (misma geometría que el PDF) — la altura de la
-        // cabecera y de cada bloque cuaderno depende del contenido.
+        // cabecera y de cada bloque depende del contenido.
         // v9.7x: mismos opts que pzGenerate() — si no, el contador subestima
-        // la altura del bloque en cuanto se prende composición/radical/
-        // significado/pinyin (mide una hoja "vacía" que nunca se imprime).
-        const html = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle, {
-            composicion: pzComposicion, radical: pzRadical, pron: pzPron, significado: pzSignificado
-        });
+        // la altura del bloque en cuanto se prende radical/significado/pinyin
+        // (mide una hoja "vacía" que nunca se imprime).
+        const html = pzSheetHTML(chars, datas, pzTrazos, pzCells, pzStyle, pzOpts);
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const holder = document.createElement('div');
         holder.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;background:#fff;padding:42px;';
@@ -4674,35 +4749,56 @@ function pzCounterCompute() {
             holder.querySelectorAll('.pz2-block').forEach((b) => {
                 blocks.push({ top: b.offsetTop, h: b.offsetHeight + 4 * PZ_MM });
             });
+        } else if (chars.length) {
+            // v9.11x — PASO 2: un "bloque" por carácter acá también (igual
+            // espíritu que Cuaderno): su(s) '.pz-row' de celdas, más la
+            // '.pz-charinfo' de arriba SI ese carácter la tiene (mismo
+            // criterio que pzSheetHTML, vía pzClassicInfoOf — "mismo
+            // cálculo compartido"). Se mide el tramo real top→fondo de
+            // cada bloque directo del DOM en vez de sumar a mano la altura
+            // de cada elemento suelto más sus márgenes: el margen entre la
+            // fila y la línea de info COLAPSA según CSS (son hermanos) y
+            // sumarlos aparte los contaba de más, subestimando cuánto
+            // entra de verdad.
+            const flatRows = Array.prototype.filter.call(holder.children, (n) => n.classList && n.classList.contains('pz-row'));
+            const flatInfos = Array.prototype.filter.call(holder.children, (n) => n.classList && n.classList.contains('pz-charinfo'));
+            blocks = [];
+            let rowIdx = 0, infoIdx = 0;
+            for (let i = 0; i < chars.length; i++) {
+                const rowsN = pzClassicRows(1 + estN(i), C);
+                const hasInfo = pzClassicInfoOf(chars[i], pzOpts).text !== '';
+                let top = null, bottom = 0;
+                if (hasInfo) { top = flatInfos[infoIdx].offsetTop; infoIdx++; }
+                for (let r = 0; r < rowsN; r++) {
+                    const rowEl = flatRows[rowIdx]; rowIdx++;
+                    if (!rowEl) break;
+                    if (top === null) top = rowEl.offsetTop;
+                    bottom = rowEl.offsetTop + rowEl.offsetHeight;
+                }
+                if (top === null) continue;
+                blocks.push({ top: top, h: (bottom - top) + 1.8 * PZ_MM });
+            }
         }
         holder.remove();
     } catch (e) { /* medidas por defecto */ }
 
     let fit = 0, capOnly = 0;
-    if (pzStyle === 'cuaderno') {
-        if (blocks && blocks.length) {
-            for (const b of blocks) { if (b.top + b.h <= PZ_PAGE_LIMIT) fit++; else break; }
-        } else {
-            const estH = 26 * PZ_MM; // bloque típico (tarjeta 24mm + envolturas)
-            fit = Math.floor((PZ_PAGE_LIMIT - headerH) / estH);
-        }
+    if (blocks && blocks.length) {
+        // v9.11x: MISMO bucle para los dos estilos — "entran N de M"
+        // siempre sale de medir bloques reales, nunca de una fórmula
+        // aparte que pueda divergir de la hoja real.
+        for (const b of blocks) { if (b.top + b.h <= PZ_PAGE_LIMIT) fit++; else break; }
         capOnly = fit;
+    } else if (pzStyle === 'cuaderno') {
+        const estH = 26 * PZ_MM; // bloque típico (tarjeta 24mm + envolturas)
+        capOnly = Math.floor((PZ_PAGE_LIMIT - headerH) / estH);
     } else {
+        // Sin caracteres todavía (textarea vacío): capacidad genérica con
+        // un carácter de referencia de 10 trazos, por fórmula (no hay DOM
+        // real que medir todavía).
         const rowsAvail = Math.floor((PZ_PAGE_LIMIT - headerH) / rowH);
-        if (!chars.length) {
-            // capacidad genérica: carácter de referencia de 10 trazos
-            const rows1 = pzClassicRows(1 + (pzTrazos ? 10 : 0), C);
-            capOnly = Math.floor(rowsAvail / Math.max(1, rows1));
-        } else {
-            let acc = 0;
-            // v9.35: misma fórmula de filas que pzSheetHTML (pzClassicRows) —
-            // el contador y la hoja real nunca difieren.
-            while (fit < chars.length && acc + pzClassicRows(1 + estN(fit), C) <= rowsAvail) {
-                acc += pzClassicRows(1 + estN(fit), C);
-                fit++;
-            }
-            capOnly = Math.floor(rowsAvail / Math.max(1, pzClassicRows(1 + (pzTrazos ? 10 : 0), C)));
-        }
+        const rows1 = pzClassicRows(1 + (pzTrazos ? 10 : 0), C);
+        capOnly = Math.floor(rowsAvail / Math.max(1, rows1));
     }
     return { chars: chars.length, rawHan, fit, capOnly, unknown, est: unknown > 0 && chars.length > 0 };
 }
@@ -4725,7 +4821,7 @@ function pzCounterRender() {
             (r.rawHan > r.chars ? ' · solo los primeros 40 se usan' : '') + '.';
     } else {
         el.textContent = '📊 Hoja A4 (' + cfg + '): entran ' + r.fit + ' de ' + r.chars +
-            ' caracteres · ' + sobran + ' quedan por fuera (hoja 2+)' + est +
+            ' caracteres · ' + sobran + (sobran === 1 ? ' queda' : ' quedan') + ' por fuera (hoja 2+)' + est +
             (r.rawHan > r.chars ? ' · solo los primeros 40 se usan' : '') + '.';
     }
 }
@@ -4756,11 +4852,14 @@ function pzCounterUpdate() {
     safe('btn-pz-pdf', 'click', pzDownloadPDF);
     safe('btn-pz-print', 'click', pzPrint);
     safe('btn-pz-module', 'click', pzUseModule);
+    // v9.11x: ex-localStorage.removeItem — ac_pz_composicion quedó obsoleta
+    // al unificarse con ac_pz_trazos (ver btn-pz-trazos acá abajo).
+    try { localStorage.removeItem('ac_pz_composicion'); } catch (e) { /* storage no disponible: no pasa nada */ }
     safe('btn-pz-trazos', 'click', () => {
         pzTrazos = !pzTrazos;
         localStorage.setItem('ac_pz_trazos', pzTrazos ? '1' : '0');
         pzUpdateControls();
-        pzCounterUpdate(); // v9.2: los trazos cambian cuánto ocupa cada carácter
+        pzCounterUpdate(); // v9.2: los trazos cambian cuánto ocupa cada carácter (y, en cuaderno, la fila de composición)
     });
     safe('select-pz-cells', 'change', (e) => {
         pzCells = parseInt(e.target.value, 10) || 12;
@@ -4772,19 +4871,13 @@ function pzCounterUpdate() {
         localStorage.setItem('ac_pz_style', pzStyle);
         pzCounterUpdate(); // v9.2: el estilo cambia el tamaño de cada bloque
     });
-    // v9.7x — 4 ajustes nuevos del encabezado (mismo patrón de persistencia
-    // que btn-pz-trazos/select-pz-cells/select-pz-style de arriba): mutar
-    // la variable, guardarla en localStorage plano, sincronizar los
-    // controles y refrescar el contador de capacidad (aproximado para
-    // estos campos nuevos — el contador mide geometría real del PDF, no
-    // se afinó línea por línea para significado/pinyin/radical; sigue
-    // siendo tan aproximado como ya era hoy sin datos de trazos).
-    safe('btn-pz-composicion', 'click', () => {
-        pzComposicion = !pzComposicion;
-        localStorage.setItem('ac_pz_composicion', pzComposicion ? '1' : '0');
-        pzUpdateControls();
-        pzCounterUpdate();
-    });
+    // v9.7x — ajustes del encabezado (mismo patrón de persistencia que
+    // btn-pz-trazos/select-pz-cells/select-pz-style de arriba): mutar la
+    // variable, guardarla en localStorage plano, sincronizar los controles
+    // y refrescar el contador de capacidad (aproximado para estos campos —
+    // el contador mide geometría real del PDF, no se afinó línea por línea
+    // para significado/pinyin/radical; sigue siendo tan aproximado como ya
+    // era hoy sin datos de trazos).
     safe('btn-pz-radical', 'click', () => {
         pzRadical = !pzRadical;
         localStorage.setItem('ac_pz_radical', pzRadical ? '1' : '0');
