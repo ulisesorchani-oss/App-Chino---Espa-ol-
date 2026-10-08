@@ -117,9 +117,35 @@ const KARA = (function () {
     function spansOf(line) {
         return line ? Array.prototype.slice.call(line.querySelectorAll('.lq-ch')) : [];
     }
+    // v9.5x — chequeo de DOM huérfano (parte de la traza de depuración):
+    // si en algún momento #reader-preview se vuelve a renderizar mientras
+    // hay una lectura en curso (ej. el usuario toca el toggle de pinyin/
+    // tonos a mitad de la lectura), los spans que el karaoke tiene
+    // agarrados (act.spans/act.line) quedan DESCONECTADOS del documento
+    // — classList.toggle no tira error sobre un nodo huérfano, así que el
+    // resaltado "deja de verse" sin ningún error en consola, mientras el
+    // audio (y el reloj interno de acá) siguen corriendo normales. Esto
+    // solo registra el momento de la transición (conectado→huérfano),
+    // no en cada tick — para no inundar el log.
+    let lastConnectedState = null;
     function paint(spans, upto) {
         for (let i = 0; i < spans.length; i++) spans[i].classList.toggle('k-on', i <= upto);
         if (upto >= 0 && upto < spans.length) maybeAutoScroll(spans[upto]);
+        if (dbgOn() && act && act.line) {
+            const connected = !!act.line.isConnected;
+            if (connected !== lastConnectedState) {
+                const esPrimeraObservacion = lastConnectedState === null;
+                _dbgChunks.push({
+                    tipo: 'dom', ts: Date.now(),
+                    mensaje: esPrimeraObservacion
+                        ? ('línea ' + (connected ? 'conectada' : 'YA DESCONECTADA') + ' (estado inicial)')
+                        : (connected
+                            ? 'línea reconectada al documento'
+                            : '⚠️ línea DESCONECTADA del documento — el resaltado sigue "pintando" pero ya no se ve')
+                });
+                lastConnectedState = connected;
+            }
+        }
     }
     // v9.5: mapa palabra→spans. endSpan[c] = índice del ÚLTIMO span de la
     // palabra que contiene al carácter c. Null = modo por carácter.
@@ -283,6 +309,7 @@ const KARA = (function () {
         act = { line: line, spans: spans, endSpan: buildWordEnd(spans), raf: 0, timer: 0 };
         line.classList.add('kara-active');
         lastScrollTop = null; // línea nueva: el próximo highlight decide si hace falta scrollear
+        lastConnectedState = null; // línea nueva: estado de conexión al documento, desconocido de nuevo
         ensureScrollListener();
         return act;
     }
@@ -449,6 +476,10 @@ const KARA = (function () {
                 }
                 const lines = [];
                 _dbgChunks.forEach(function (c) {
+                    if (c.tipo === 'dom') {
+                        lines.push('※ [' + new Date(c.ts).toLocaleTimeString() + '] ' + c.mensaje);
+                        return;
+                    }
                     lines.push('── Trozo ' + (c.idx === undefined ? '?' : c.idx) + ' — ' + c.textLen + ' caracteres ──');
                     (c.rows || []).forEach(function (r) {
                         lines.push('  [' + r.offsetMs + 'ms] "' + r.text + '" → ' + (r.at === null ? 'null' : r.at) +
