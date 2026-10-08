@@ -660,18 +660,42 @@ body.dark-mode .blank-fill.correct { color: #4ade80; background: rgba(74, 222, 1
 body.dark-mode .blank-fill.wrong   { color: #f87171; background: rgba(248, 113, 113, .12); }
 body.dark-mode .blank-fill.reveal  { color: #fbbf24; background: rgba(251, 191, 36, .14); }
 
-/* v7.11: los colores de tono se resuelven con variables (--tone-N) que
-   applyToneScheme() define SOLO si el usuario elige un esquema distinto del
-   estándar. Sin variable definida, cada regla cae a su color nativo de la
-   app (mismo look de siempre, y el modo oscuro sigue adaptándose solo). */
-.tone-1 { color: var(--tone-1, var(--primary)); }   /* Azul */
-.tone-2 { color: var(--tone-2, var(--warning)); }   /* Naranja/Ámbar */
-.tone-3 { color: var(--tone-3, var(--success)); }   /* Verde */
-.tone-4 { color: var(--tone-4, var(--danger)); }    /* Rojo */
+/* v9.13x — Nuevo Estándar: vive en variables PROPIAS (--tone-N-std),
+   separadas de las que escribe applyToneScheme() (--tone-N, para los
+   esquemas Okabe-Ito/Pleco/Dummitt/Anterior/Personalizado). .tone-N usa
+   --tone-N si hay un esquema elegido, si no cae a --tone-N-std — así el
+   Estándar no necesita JS (nunca se pisa a sí mismo) y, a la vez, un
+   esquema elegido nunca puede quedar tapado por el Estándar.
+   IMPORTANTE: --tone-N-std SÍ tiene variante propia para modo oscuro
+   (ver body.dark-mode acá abajo — T1-T4 no cambiaban con el tema antes
+   de este cambio, ver AUDITORIA). --tone-N (sin -std) NUNCA se define acá
+   en CSS — solo applyToneScheme() en JS la fija, para que body.dark-mode/
+   body.paper-mode no puedan tapar el esquema que el usuario eligió.
+   Contraste verificado contra el fondo real de Lector/Tarjetas/Leyenda en
+   los 3 temas — ver tabla en el PR. */
+:root {
+    --tone-1-std: #086da0; /* T1 azul cielo */
+    --tone-2-std: #157538; /* T2 verde */
+    --tone-3-std: #866013; /* T3 ocre */
+    --tone-4-std: #ca1f16; /* T4 rojo */
+    --tone-0-std: #5e6573; /* T5 gris ceniza */
+}
+body.dark-mode {
+    --tone-1-std: #2badee; /* T1 celeste */
+    --tone-2-std: #42d78c; /* T2 verde esmeralda, más claro */
+    --tone-3-std: #eeb32b; /* T3 amarillo ámbar */
+    --tone-4-std: #f16255; /* T4 rojo más brillante */
+    --tone-0-std: #89909f; /* T5 gris claro */
+}
+
+.tone-1 { color: var(--tone-1, var(--tone-1-std)); }
+.tone-2 { color: var(--tone-2, var(--tone-2-std)); }
+.tone-3 { color: var(--tone-3, var(--tone-3-std)); }
+.tone-4 { color: var(--tone-4, var(--tone-4-std)); }
 
 /* Tono neutro: el DOM usa tone-5 (pinyin-pro num 5); tone-0 queda como
    alias defensivo por si alguna función vuelve a generar ese nombre. */
-.tone-0, .tone-5 { color: var(--tone-0, var(--text-secondary)); } /* Gris */
+.tone-0, .tone-5 { color: var(--tone-0, var(--tone-0-std)); } /* Gris */
 
 /* ===== BARRA DE PROGRESO ===== */
 .progress-track {
@@ -2522,7 +2546,15 @@ body.dark-mode .rec-es-word.is-bad {
     font-size: 0.85rem;
 }
 
-#tone-legend-pop { width: min(370px, calc(100vw - 32px)); }
+/* v9.13x: 6 esquemas + personalizado + aviso de migración ya no entran
+   siempre a la vista en móvil chico — mismo patrón que #daily-story-pop
+   (scroll interno, el popup no se sale de la pantalla ni tapa la frase
+   demo, que queda arriba del scroll de los esquemas). */
+#tone-legend-pop {
+    width: min(370px, calc(100vw - 32px));
+    max-height: min(560px, calc(100vh - 100px));
+    overflow-y: auto;
+}
 
 .tl-title {
     margin: 0 0 4px;
@@ -2617,6 +2649,33 @@ body.dark-mode .tl-demo { background: rgba(147, 197, 253, 0.09); }
     cursor: pointer;
 }
 
+/* v9.13x: aviso de migración (una sola vez, ver toneUpgradeOfferPending) */
+.tl-upgrade {
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    border-radius: 10px;
+    padding: 9px 11px;
+    margin: 0 0 10px;
+}
+.tl-upgrade.hidden { display: none; }
+.tl-upgrade-text {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+.tl-upgrade-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tl-upgrade-actions button { font-size: 0.8rem; padding: 6px 12px; }
+
+/* v9.13x: crédito de Dummitt (TONE_DUMMITT_CREDIT en app.js) — chico y
+   discreto, solo visible mientras ese preset está elegido. */
+.tl-credits {
+    margin: 10px 0 0;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+.tl-credits.hidden { display: none; }
+
 /* ---------- Modo oscuro (regla de duplicación) ---------- */
 body.dark-mode .tl-title,
 body.dark-mode .tl-sub,
@@ -2624,7 +2683,13 @@ body.dark-mode .tl-label,
 body.dark-mode .tl-opt { color: #e2e8f0; }
 body.dark-mode .tl-intro,
 body.dark-mode .tl-check,
+body.dark-mode .tl-credits,
 body.dark-mode .tl-custom label { color: #cbd5e1; }
+body.dark-mode .tl-upgrade {
+    background: rgba(147, 197, 253, 0.1);
+    border-color: rgba(147, 197, 253, 0.3);
+}
+body.dark-mode .tl-upgrade-text { color: #e2e8f0; }
 
 /* ---------- Responsive ≤480px (regla de duplicación) ---------- */
 @media (max-width: 480px) {
