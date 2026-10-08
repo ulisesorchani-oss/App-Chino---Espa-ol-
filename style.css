@@ -1587,6 +1587,35 @@ body:not(.dark-mode):not(.paper-mode) .pz-label select.level-dropdown option {
     color: var(--primary);
 }
 
+/* v9.11x — Paso B (reorden del panel): mismo alto para TODOS los
+   controles de la fila (botones .speed-btn/.btn-secondary y los <select>
+   dentro de .pz-label) — antes podían diferir unos px según el tipo de
+   control (padding/borde distintos de cada clase). Acotado a
+   #writer-banner para no tocar botones del resto de la app. */
+#writer-banner .pz-options > button,
+#writer-banner .pz-options > .pz-label,
+#writer-banner .pz-options > .pz-label select.level-dropdown {
+    min-height: 40px;
+    box-sizing: border-box;
+}
+
+/* Móvil ≤480px: una columna, controles a ancho completo — más fáciles de
+   tocar y de leer que una fila apretada de botones/selects chicos. */
+@media (max-width: 480px) {
+    #writer-banner .pz-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #writer-banner .pz-options > button,
+    #writer-banner .pz-options > .pz-label {
+        width: 100%;
+        justify-content: space-between;
+    }
+    #writer-banner .pz-options > .pz-label select.level-dropdown {
+        flex: 1 1 auto;
+    }
+}
+
 .pz-preview {
     margin-top: 12px;
     border: 1px solid var(--border);
