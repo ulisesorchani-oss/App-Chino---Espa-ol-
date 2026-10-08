@@ -3800,19 +3800,27 @@ const PZ_SHEET_CSS = [
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     '.pz-cell svg path { stroke-linejoin: round; }',
     '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }',
-    // v9.11x — PASO 2 (maqueta): Clásica con radical/pronunciación/
-    // significado — mismo criterio de tamaño/color que el radical
-    // ampliado de Cuaderno (11.5pt, verde de marca); con fondo clarito
-    // porque acá va ENCIMA del carácter modelo (celda ya casi llena con el
-    // SVG a 86%×86%), no al lado como en la tarjeta de Cuaderno.
-    '.pz-cell-radical { position: absolute; top: 2%; left: 3%; z-index: 3; font-size: 11.5pt; font-weight: 700;',
-    '  line-height: 1; color: #16a085; background: rgba(255,255,255,0.82); padding: 0 0.8mm; border-radius: 0.6mm; }',
-    // Línea fina por carácter (pinyin/zhuyin · significado), hermana de su
+    // v9.12x — PASO 3: el radical de Clásica se sacó de la celda modelo
+    // (pisaba el carácter en trazos complejos, ej. 博 con 十) y pasó a
+    // vivir acá, al final de la línea de info — ver pzClassicInfoOf.
+    // Línea fina por carácter (texto truncable + radical), hermana de su
     // .pz-row (no envuelta en un div nuevo — ver pzSheetHTML). break-after:
     // avoid para la impresión nativa (que si rompe página por CSS, no deja
     // la línea sola); pzDownloadPDF (que pagina por JS, no por CSS) la
     // trata aparte como parte de "las filas" (ver su clasificación).
-    '.pz-charinfo { font-size: 7.5pt; color: #475569; margin: 2mm 0 0.8mm; break-after: avoid; page-break-after: avoid; }',
+    '.pz-charinfo { display: flex; align-items: baseline; font-size: 7.5pt; color: #475569; margin: 2mm 0 0.8mm;',
+    '  break-after: avoid; page-break-after: avoid; overflow: hidden; }',
+    // Texto (pinyin/zhuyin · significado): se recorta con "…" si no entra
+    // — el radical de al lado NUNCA se corta (flex-shrink:0, más abajo).
+    '.pz-charinfo-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }',
+    // Radical: mismo verde de marca de siempre; +2pt sobre el texto de la
+    // línea (7.5pt → 9.5pt), negrita, y la MISMA tipografía CJK que ya usa
+    // el carácter modelo (dibuja bien radicales de varios trazos — la
+    // fuente de la línea, heredada del body, no está pensada para hanzi).
+    // Espacio fijo antes vía margin (no gap): se mantiene aunque el texto
+    // esté vacío (radical solo) o truncado.
+    '.pz-info-radical { flex: 0 0 auto; margin-left: 1.5mm; font-size: 9.5pt; font-weight: 700; color: #16a085;',
+    '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     // ── v9.1 estilo CUADERNO (筆順 + 寫字, como el modelo de la referencia) ──
     // v9.4: SIN las etiquetas repetidas por bloque (筆順/寫字) — la fila de
     // progresión y los casilleros se entienden solos; queda más ancho para
@@ -4180,13 +4188,14 @@ function pzSignificadoOf(ch) {
     } catch (e) { return { text: '', reading: '' }; }
 }
 
-// v9.11x — PASO 2 (maqueta): línea de info de estilo CLÁSICO ("pinyin o
-// zhuyin · significado") para un carácter — USADA TANTO por pzSheetHTML
-// (armado real de la hoja) COMO por pzCounterCompute (estimación de
-// capacidad), para que nunca puedan divergir sobre qué caracteres llevan
-// línea y cuáles no (mismo espíritu que pzClassicTotal, compartido por
-// armado y contador). Si la lectura no está confirmada, se omite esa
-// parte (igual que en Cuaderno); si faltan las dos, no hay línea.
+// v9.11x — PASO 2/3: línea de info de estilo CLÁSICO ("pinyin o zhuyin ·
+// significado", más el radical al final — ver Paso 3) para un carácter —
+// USADA TANTO por pzSheetHTML (armado real de la hoja) COMO por
+// pzCounterCompute (estimación de capacidad), para que nunca puedan
+// divergir sobre qué caracteres llevan línea y cuáles no (mismo espíritu
+// que pzClassicTotal, compartido por armado y contador). Si la lectura no
+// está confirmada, se omite esa parte (igual que en Cuaderno); si faltan
+// las tres (radical/pronunciación/significado), no hay línea.
 function pzClassicInfoOf(ch, opts) {
     const py = pzPinyinOf(ch);
     const confirmed = !!py;
@@ -4195,7 +4204,12 @@ function pzClassicInfoOf(ch, opts) {
     let pronTxt = (opts.pron === 'none' || !confirmed) ? '' : (opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : py);
     if (pronTxt && meanInfo && meanInfo.reading && pronTxt !== meanInfo.reading) pronTxt += ' (' + meanInfo.reading + ')';
     const text = [pronTxt, meanTxt].filter(Boolean).join(' · ');
-    return { text: text, confirmed: confirmed };
+    // v9.12x — PASO 3: el radical YA NO vive dentro de la celda modelo
+    // (pisaba el carácter en trazos complejos, ej. 博 con 十) — se agrega
+    // acá, al final de la MISMA línea de info, para que pzSheetHTML y
+    // pzCounterCompute decidan "¿hay línea?" con el mismo criterio.
+    const radical = opts.radical ? pzRadicalOf(ch) : '';
+    return { text: text, confirmed: confirmed, radical: radical };
 }
 
 function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
@@ -4323,12 +4337,17 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         const d = datas[i];
         const info = pzClassicInfoOf(ch, opts);
         if ((opts.pron === 'pinyin' || opts.pron === 'zhuyin') && !info.confirmed) missingPron.push(ch);
-        const infoHtml = info.text ? '<div class="pz-charinfo">' + escHtml(info.text) + '</div>' : '';
-        const radTxt = opts.radical ? pzRadicalOf(ch) : '';
-        const radHtml = radTxt ? '<div class="pz-cell-radical">' + escHtml(radTxt) + '</div>' : '';
-        // Contenido del bloque del carácter: modelo (+ radical en la esquina
-        // si está activo) + etapas de trazos
-        const celdas = ['<div class="pz-cell">' + radHtml + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
+        // v9.12x — PASO 3: texto (pinyin/zhuyin · significado) truncable con
+        // "…" si no entra, + radical NUNCA se corta (flex-shrink:0, ver
+        // CSS) — el radical va último, con un espacio fijo antes (margin,
+        // no gap: así se mantiene aunque el texto esté vacío o truncado).
+        const textHtml = info.text ? '<span class="pz-charinfo-text">' + escHtml(info.text) + '</span>' : '';
+        const radHtml = info.radical ? '<span class="pz-info-radical">' + escHtml(info.radical) + '</span>' : '';
+        const infoHtml = (textHtml || radHtml) ? '<div class="pz-charinfo">' + textHtml + radHtml + '</div>' : '';
+        // Contenido del bloque del carácter: modelo + etapas de trazos (el
+        // radical ya NO va acá — ver más arriba — así la celda queda
+        // limpia, sin riesgo de pisar el carácter en trazos complejos).
+        const celdas = ['<div class="pz-cell">' + (d ? pzSvg(d, d.strokes.length, '#1f2937') : '<span class="pz-glyph">' + ch + '</span>') + '</div>'];
         if (trazos && d) {
             const n = d.strokes.length;
             // v9.1: el trazo NUEVO de cada etapa va más oscuro — se ve qué trazo se agrega
@@ -4780,7 +4799,8 @@ function pzCounterCompute() {
             let rowIdx = 0, infoIdx = 0;
             for (let i = 0; i < chars.length; i++) {
                 const rowsN = pzClassicRows(1 + estN(i), C);
-                const hasInfo = pzClassicInfoOf(chars[i], pzOpts).text !== '';
+                const infoI = pzClassicInfoOf(chars[i], pzOpts);
+                const hasInfo = infoI.text !== '' || infoI.radical !== '';
                 let top = null, bottom = 0;
                 if (hasInfo) { top = flatInfos[infoIdx].offsetTop; infoIdx++; }
                 for (let r = 0; r < rowsN; r++) {
