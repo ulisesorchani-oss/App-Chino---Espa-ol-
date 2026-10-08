@@ -268,7 +268,7 @@ async function playReaderChunk(idx, myToken) {
     readerActiveEngine = 'audio';
     readerAudio.src = entry.url;
     applyTtsSpeed(readerAudio, entry.data); // v9.40: velocidad en el server → sin eco
-    KARA.withAudio(readerAudio, readerChunks[idx], entry.data && entry.data.boundaries);
+    KARA.withAudio(readerAudio, readerChunks[idx], entry.data && entry.data.boundaries, idx);
     if (btn) { btn.textContent = '⏸ Pausar'; btn.disabled = false; }
 
     const ended = readerAudioEnded();
