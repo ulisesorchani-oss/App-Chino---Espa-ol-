@@ -3684,6 +3684,7 @@ let pzTrazos = lsGet('ac_pz_trazos') !== '0';   // default ON
 let pzStyle = lsGet('ac_pz_style') === 'cuaderno' ? 'cuaderno' : 'clasica';
 let pzCells = parseInt(lsGet('ac_pz_cells'), 10) || 12;
 let pzLastSheet = '';                   // HTML de la última hoja generada
+let pzLastMissingPron = [];             // v9.10x: caracteres sin pronunciación confirmada en esa hoja
 
 // v9.7x — 4 ajustes nuevos del encabezado por carácter (estilo CUADERNO
 // solamente: es donde ya existe la tarjeta pz2-card/pz2-strokes donde
@@ -3814,14 +3815,25 @@ const PZ_SHEET_CSS = [
     // del hanzi/pinyin sin competir en jerarquía visual con el carácter.
     '.pz2-card .pz2-mean { font-size: 7.5pt; color: #b45309; text-align: center; line-height: 1.15; }',
     // v9.8x: radical a la IZQUIERDA del carácter (fila propia pz2-hzrow,
-    // ya no debajo del pinyin) — mismo tamaño/color de antes (7.5pt, verde
-    // de marca): "diferenciado visualmente" alcanza con eso, sin label.
+    // ya no debajo del pinyin) — mismo color de antes (verde de marca):
+    // "diferenciado visualmente" alcanza con eso, sin label.
+    // v9.10x: 7.5pt (10px) quedaba ilegible para radicales de varios
+    // trazos (氵 門 癶 彡/髟 艹 辶) — medido con Playwright a tamaño real de
+    // impresión (794px/210mm): el "gap: 1mm" del flex de acá abajo mantiene
+    // SIEMPRE la misma separación fija entre radical y carácter principal
+    // sin importar cuánto crezca el radical (ninguno le quita lugar al
+    // otro), y la columna de la tarjeta (30mm, ver .pz2-block) tiene sobra
+    // de sobra incluso al carácter principal real (15mm/56.7px). +2/+3/+4pt
+    // probados, ninguno choca con nada — se usa el mayor: 11.5pt (15.3px).
     '.pz2-hzrow { display: flex; align-items: center; justify-content: center; gap: 1mm; }',
-    '.pz2-card .pz2-radical { font-size: 7.5pt; font-weight: 700; color: #16a085; line-height: 1; }',
+    '.pz2-card .pz2-radical { font-size: 11.5pt; font-weight: 700; color: #16a085; line-height: 1; }',
     '.pz2-strokes { display: flex; flex-wrap: wrap; gap: 0.6mm; align-items: center; }',
     '.pz2-strokes svg { width: 9.5mm; height: 9.5mm; display: block; }',
     '.pz2-cells { display: flex; gap: 1.2mm; }',
-    '.pz2-cells .pz-cell { flex: 1 1 0; }'
+    '.pz2-cells .pz-cell { flex: 1 1 0; }',
+    // v9.10x: nota al pie, discreta — solo cuando quedó algún carácter sin
+    // pronunciación confirmada (ver pzLastMissingPron/pzSheetHTML).
+    '.pz2-pronnote { font-size: 7pt; color: #94a3b8; text-align: center; margin-top: 4mm; }'
 ].join('\n');
 
 // Pinyin por carácter — v9.5x, 3 niveles (el que resuelve antes manda):
@@ -4095,21 +4107,58 @@ function pzRadicalOf(ch) {
 // alguna lectura real de esa entrada. Se devuelve aparte (reading) para
 // que el llamador la use en aclarar la línea de pronunciación en vez de
 // dejarla pegada al texto del significado.
+// v9.10x — FIX (significado coherente con la lectura): antes se tomaba
+// SIEMPRE la 1.ª acepción tal cual, sin mirar por qué carácter se preguntó
+// — para un ALIAS (tradicional que comparte simplificado con OTRO
+// tradicional, ej. 髮/發→发, igual que el caso ya resuelto en pzPinyinOf)
+// eso mostraba el significado del carácter DONANTE sin ninguna garantía de
+// que correspondiera: 髮 mostraba "enviar", que es de 發 (发 solo tiene esa
+// acepción). Y el corte por lectura entre paréntesis solo miraba '·' — con
+// ',' (ej. 干: "gān, gàn") nunca desambiguaba, por eso 幹 mostraba "seco
+// (gān)" pegado al pinyin "gàn" (acepción de la OTRA lectura).
+// Ahora: para una clave DIRECTA se sigue devolviendo la 1.ª acepción (o la
+// marcada con la lectura por defecto si alguna lleva paréntesis), con el
+// separador ampliado a '·' Y ','. Para un ALIAS se exige que pzPinyinOf(ch)
+// (que YA hace el cruce anti-colisión contra pinyin-pro) dé una lectura
+// confirmada Y que esa lectura esté entre las anotadas acá — si no, sin
+// significado antes que uno de otro carácter.
 function pzSignificadoOf(ch) {
     try {
         const d = (typeof dictMiniLookup === 'function') ? dictMiniLookup(ch) : null;
         if (!d || !d.def) return { text: '', reading: '' };
-        let text = String(d.def).split(';')[0].trim();
-        let reading = '';
-        if (d.py && String(d.py).indexOf('·') !== -1) {
-            const readings = String(d.py).split('·').map((s) => s.trim());
-            const m = text.match(/\(([^)]+)\)\s*$/);
-            if (m && readings.indexOf(m[1].trim()) !== -1) {
-                reading = m[1].trim();
-                text = text.slice(0, m.index).trim();
+        const viaAlias = typeof dictMini !== 'undefined' && typeof dictMini.has === 'function' && !dictMini.has(ch);
+        const senses = String(d.def).split(';').map((s) => s.trim()).filter(Boolean);
+        const readings = d.py ? String(d.py).split(/[,·]/).map((s) => s.trim()).filter(Boolean) : [];
+        // Busca la acepción para `wantReading`: una marcada con ESA lectura
+        // entre paréntesis al final manda; si ninguna acepción lleva marca,
+        // dict-mini deja la lectura POR DEFECTO (readings[0]) sin anotar —
+        // en ese caso la 1.ª acepción es la válida, siempre que ella misma
+        // no esté marcada con otra lectura distinta.
+        const pick = (wantReading) => {
+            for (const s of senses) {
+                const m = s.match(/\(([^)]+)\)\s*$/);
+                if (m && readings.indexOf(m[1].trim()) !== -1 && m[1].trim() === wantReading) {
+                    return { text: s.slice(0, m.index).trim(), reading: wantReading };
+                }
             }
+            if (readings.length === 0 || readings[0] === wantReading) {
+                const first = senses[0];
+                const m = first.match(/\(([^)]+)\)\s*$/);
+                const taggedOther = m && readings.indexOf(m[1].trim()) !== -1 && readings.length > 1;
+                if (!taggedOther) return { text: first, reading: '' };
+            }
+            return null;
+        };
+        if (!viaAlias) {
+            if (readings.length > 1) {
+                const r = pick(readings[0]);
+                if (r) return r;
+            }
+            return { text: senses[0], reading: '' };
         }
-        return { text: text, reading: reading };
+        const confirmed = (typeof pzPinyinOf === 'function') ? pzPinyinOf(ch) : '';
+        if (!confirmed || (readings.length && readings.indexOf(confirmed) === -1)) return { text: '', reading: '' };
+        return pick(confirmed) || { text: '', reading: '' };
     } catch (e) { return { text: '', reading: '' }; }
 }
 
@@ -4129,10 +4178,22 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         // ── estilo CUADERNO (v9.1): tarjeta del carácter + fila 筆順
         // (progresión de trazos) + fila 寫字 (calco + casilleros).
         // v9.4: sin rótulos por bloque — se entienden solos. ──
+        // v9.10x — "lectura no confirmada" (Paso A/B): algunos caracteres son
+        // ALIAS de otro (comparten simplificado, ej. 髮/發→发) y pzPinyinOf
+        // ya puede devolver '' ahí a propósito (sin corroborar contra
+        // pinyin-pro) — antes esta hoja mostraba igual el pinyin/zhuyin
+        // "crudo" de pzZhuyinOf (que NO hace ese cruce) y el significado del
+        // carácter donante, aunque no correspondiera. Ahora, si la lectura
+        // no está confirmada, NI la pronunciación NI el significado se
+        // imprimen (vacío antes que mal) — y el carácter se lista en el
+        // aviso de pantalla/impreso que arma pzGenerate.
         let blocks = '';
+        const missingPron = [];
         chars.forEach((ch, i) => {
             const d = datas[i];
             const py = pzPinyinOf(ch);
+            const confirmed = !!py;
+            if ((opts.pron === 'pinyin' || opts.pron === 'zhuyin') && !confirmed) missingPron.push(ch);
             const hz = d
                 ? pzSvg(d, d.strokes.length, '#1f2937')
                 : '<span class="pz2-fallback">' + ch + '</span>';
@@ -4146,7 +4207,7 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
             // polifónico con lectura desambiguada (pzSignificadoOf), esa
             // lectura se aclara ACÁ, pegada a la pronunciación — no repetida
             // suelta en el texto del significado (de donde se sacó).
-            let pronTxt = opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : (opts.pron === 'none' ? '' : py);
+            let pronTxt = (opts.pron === 'none' || !confirmed) ? '' : (opts.pron === 'zhuyin' ? pzZhuyinOf(ch) : py);
             if (pronTxt && meanInfo && meanInfo.reading && pronTxt !== meanInfo.reading) pronTxt += ' (' + meanInfo.reading + ')';
             const pronHtml = pronTxt ? '<div class="pz2-py">' + escHtml(pronTxt) + '</div>' : '';
             // v9.8x: radical SIN el label "部首" — solo el carácter, ya chico
@@ -4188,13 +4249,28 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
                 + '<div class="pz2-cells">' + cellsHtml + '</div>'
                 + '</div>';
         });
+        pzLastMissingPron = missingPron; // v9.10x: para el aviso en pantalla (pzGenerate lo lee después)
+        // v9.10x: nota discreta al pie, SOLO en la última página impresa.
+        // En la vista previa/impresión nativa (flujo continuo + @page) alcanza
+        // con ponerla al final del body. Pero pzDownloadPDF() NO usa ese
+        // flujo: reclasifica cada nodo del body en header/filas/nota-final
+        // ANTES de repaginar (ver pzDownloadPDF, clasificación por
+        // classList) y solo reconoce la nota final por la clase 'pz-note'
+        // (si no, cae en "header" y se repite arriba en la página 1) — por
+        // eso lleva ESA clase además de la propia (pz2-pronnote solo pone
+        // el estilo discreto, gris y chico).
+        const pronNote = missingPron.length
+            ? '<div class="pz-note pz2-pronnote">Sin pronunciación por lectura no confirmada: '
+                + escHtml(missingPron.join(' ')) + '. Consultá un diccionario.</div>'
+            : '';
         const hz2 = chars.map((c) => '<span>' + c + '</span>').join(' ');
         return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Planilla de práctica 写字</title>'
             + '<style>' + PZ_SHEET_CSS + '</style></head><body>'
             + '<div class="pz-title">Planilla de práctica · Caracteres <span class="pz-hz">' + hz2 + '</span></div>'
             + '<div class="pz-meta">Nombre: ____________________________ &nbsp;&nbsp; Curso: ______________ &nbsp;&nbsp; Fecha: ' + fecha + '</div>'
-            + blocks + '</body></html>';
+            + blocks + pronNote + '</body></html>';
     }
+    pzLastMissingPron = [];
     let rows = '';
     chars.forEach((ch, i) => {
         const d = datas[i];
@@ -4275,9 +4351,15 @@ async function pzGenerate() {
         if (b) b.classList.remove('hidden');
     });
     const faltan = datas.filter((d) => !d).length;
-    pzStatus(faltan
+    // v9.10x: aviso aparte si algún carácter quedó sin pronunciación
+    // confirmada (ver pzSheetHTML/pzLastMissingPron) — solo cuando se está
+    // mostrando pinyin o zhuyin; con Pronunciación = ninguna no aplica.
+    const pronNote = pzLastMissingPron.length
+        ? ' ℹ️ Sin pronunciación en ' + pzLastMissingPron.length + ' carácter(es) (lectura no confirmada): ' + pzLastMissingPron.join(' ')
+        : '';
+    pzStatus((faltan
         ? '⚠ Hoja lista, pero sin datos de trazos para ' + faltan + ' carácter(es) (¿sin conexión la primera vez?). Se usa el modelo del sistema.'
-        : '✅ Hoja lista (' + chars.length + ' caracteres). Tocá ⬇️ Descargar PDF.');
+        : '✅ Hoja lista (' + chars.length + ' caracteres). Tocá ⬇️ Descargar PDF.') + pronNote);
     if (btn) { btn.disabled = false; btn.textContent = '📄 Generar hoja'; }
 }
 
