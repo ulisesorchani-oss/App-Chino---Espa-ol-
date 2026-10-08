@@ -4344,6 +4344,9 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         // cerrando exactamente igual que antes; antes de esto esas celdas
         // quedaban vacías (ver auditoría: caracteres de muchos trazos, ej.
         // 標/统, que "se pasan" a una 2.ª fila casi toda en blanco).
+        // v9.11x — EXCEPTO las últimas 4: esas vuelven a quedar en blanco a
+        // propósito (ver fillGuided más abajo), mismo criterio que ya usa
+        // Cuaderno, para terminar de memoria sin calco.
         //
         // v9.5x — total vía pzClassicTotal(), la MISMA función que usa el
         // contador (pzCounterCompute → pzClassicRows): antes esta cuenta
@@ -4353,9 +4356,20 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         // 教/授/國/假, 11 trazos).
         const base = celdas.length;
         const total = pzClassicTotal(base, C);
-        const fillCell = () => '<div class="pz-cell">' + (d
-            ? pzSvg(d, d.strokes.length, PZ_PREV_FILL)
-            : '<span class="pz-glyph" style="color:' + PZ_PREV_FILL + ';">' + ch + '</span>') + '</div>';
+        // v9.11x: las ÚLTIMAS 4 celdas de calco quedan SIN guía — mismo
+        // criterio que ya usa Cuaderno (guideCells = Math.max(1, C-4) en
+        // su fila de práctica) para que el alumno termine de memoria, sin
+        // andamiaje, en vez de calcar hasta la última celda.
+        const fillCount = total - base;
+        const fillGuided = Math.max(1, fillCount - 4);
+        let fillIdx = 0;
+        const fillCell = () => {
+            const guided = fillIdx < fillGuided;
+            fillIdx++;
+            return '<div class="pz-cell">' + (guided
+                ? (d ? pzSvg(d, d.strokes.length, PZ_PREV_FILL) : '<span class="pz-glyph" style="color:' + PZ_PREV_FILL + ';">' + ch + '</span>')
+                : '') + '</div>';
+        };
         while (celdas.length < total) celdas.push(fillCell());
         // v9.11x: la línea de info (si hay) va COMO HERMANA de la fila, sin
         // envolverla en un div nuevo — pzDownloadPDF() reclasifica los
