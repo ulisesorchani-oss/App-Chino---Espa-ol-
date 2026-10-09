@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v157'; // — Whisper bajo demanda: ya no se baja al abrir (~100 MB); aviso con permiso la 1.ª vez que se usa pronunciación (+ aviso de datos móviles); tips de 🎤 Pronunciación y Pronunciación libre en el idioma de la interfaz
+const VERSION = 'v158'; // — Botón Atrás: cierra la capa abierta de arriba en vez de salir (nav.js); Escape en DELE solo cierra la capa de arriba
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -495,6 +495,7 @@ const PRECACHE = [
   './podcast.js',          // v9.70: escuchar una lección de Aprender de corrido, manos libres
   './free-talk.js',        // v9.7x: Pronunciación libre — grabar y ver qué entendió la IA (estilo chat)
   './personal-lessons.js', // v9.7x: Mis lecturas — guardar el texto del Lector en IndexedDB
+  './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra
