@@ -41,7 +41,9 @@
             c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    function closeTip() {
+    // runNext === false → no abre la función que venía detrás (Atrás, ver nav.js).
+    // Como listener recibe el evento → sigue abriéndola, igual que siempre.
+    function closeTip(runNext) {
         const pop = document.getElementById('feature-tip-pop');
         if (pop) pop.classList.add('hidden');
         if (currentKey) {
@@ -57,8 +59,9 @@
         // listener del otro popup lo ve como "clic afuera" y lo cierra de
         // nuevo en el mismo ciclo. setTimeout(…, 0) lo corre después de que
         // termine de burbujear el clic que disparó este cierre.
-        if (typeof cb === 'function') setTimeout(cb, 0);
+        if (runNext !== false && typeof cb === 'function') setTimeout(cb, 0);
     }
+    window.cancelFeatureTip = function () { closeTip(false); };
 
     window.showFeatureTip = function (key, emoji, title, lines, onClose) {
         let seen = false;

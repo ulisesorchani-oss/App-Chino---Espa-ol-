@@ -32,9 +32,26 @@ const LAYERS = [
     { id: 'cread-pop', close: '#cr-close' },
     { id: 'podcast-pop', close: '#pd-close' },
     { id: 'daily-story-pop', close: '#btn-daily-story-close' },
+    { id: 'placement-pop', close: '#btn-placement-close' },
+    { id: 'mp-pop', close: '#mp-close' },
+    { id: 'talk-pop', close: '#talk-close' },
+    { id: 'srs-pop', close: '#btn-srs-close' },
+    { id: 'write-pop', close: '#btn-write-close' },
+    { id: 'personal-pop', close: '#btn-personal-close' },
+    { id: 'stats-pop', close: '#btn-stats-close' },
+    { id: 'backup-pop', close: '#btn-backup-close' },
+    { id: 'guide-pop', close: '#btn-guide-close' },
+    { id: 'install-help', close: '#btn-install-help-close' },
+    // Tip: Atrás cancela (no abre la función que venía detrás); se marca visto igual que con ✕.
+    { id: 'feature-tip-pop', close: '#btn-feature-tip-close',
+      back: () => (typeof window.cancelFeatureTip === 'function' ? (window.cancelFeatureTip(), true) : false) },
     { id: 'vocab-pop', close: '#btn-vocab-pop-close' },
+    { id: 'tone-legend-pop', close: '#btn-tone-legend-close' },
     { id: 'writer-practice-banner', close: '#btn-wp-close' },
-    { id: 'handwrite-banner', close: '#btn-hw-close' }
+    { id: 'handwrite-banner', close: '#btn-hw-close' },
+    // Aviso de descarga del modelo (voice-evaluator.js): sin id, se agrega y se saca de <body>.
+    // Atrás = "Ahora no". Una descarga ya aceptada no depende de ninguna capa: Atrás nunca la cancela.
+    { id: 've-dl', sel: '.ve-dl-overlay', close: '.ve-dl-actions .btn-secondary' }
 ];
 // Margen para detectar un intercambio: los flujos encadenados de la app
 // reabren con setTimeout(…, 0) como mucho.
@@ -50,7 +67,7 @@ let settleT = 0;
 const stats = { observer: 0, syncs: 0 };
 
 const layerById = (id) => LAYERS.find((l) => l.id === id);
-const elOf = (l) => document.getElementById(l.id);
+const elOf = (l) => (l.sel ? document.querySelector(l.sel) : document.getElementById(l.id));
 function isOpen(l) {
     if (!l) return false;
     if (typeof l.isOpen === 'function') { try { return !!l.isOpen(); } catch (e) { return false; } }
@@ -83,15 +100,31 @@ function schedule() {
     frame = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame(run) : setTimeout(run, 16);
 }
 
+// Chrome saltea con Atrás las entradas creadas sin un toque del usuario. Una
+// capa que se abre sola (guía de la 1.ª visita) recién entra a la pila con el
+// primer clic dentro de ella (clic: en táctil, pointerdown no cuenta como gesto).
+const touched = new Set();
+const armed = new WeakSet();
+function needsGesture(l, el) {
+    const ua = navigator.userActivation;
+    if (!ua || ua.isActive || touched.has(l.id) || !el) return false;
+    if (!armed.has(el)) {
+        armed.add(el);
+        el.addEventListener('click', () => { touched.add(l.id); armed.delete(el); schedule(); }, { capture: true, once: true });
+    }
+    return true;
+}
+
 // Compara lo visible con la pila y ajusta el historial. También es la red
 // de seguridad: una capa oculta que siga en la pila sale y consume su entrada.
 function sync(final) {
     stats.syncs++;
     watchLayers();
     detached.forEach((id) => { if (!isOpen(layerById(id))) detached.delete(id); });
+    touched.forEach((id) => { if (!isOpen(layerById(id))) touched.delete(id); });
     const vis = LAYERS.filter((l) => !detached.has(l.id) && isOpen(l)).map((l) => l.id);
     const gone = stack.filter((id) => vis.indexOf(id) === -1);
-    const fresh = vis.filter((id) => stack.indexOf(id) === -1);
+    const fresh = vis.filter((id) => stack.indexOf(id) === -1 && !needsGesture(layerById(id), elOf(layerById(id))));
     if (!gone.length && !fresh.length) { clearTimeout(settleT); settleT = 0; return; }
     if (gone.length > fresh.length && !final) {
         // Puede venir otra capa en camino (intercambio): esperar antes de consumir.
@@ -114,8 +147,9 @@ function sync(final) {
 // Atrás: exactamente el ✕ de la capa. Si no hay ✕ o la capa sigue visible,
 // sale de la pila igual: Atrás nunca queda muerto.
 function closeByBack(l) {
-    if (typeof l.back === 'function') { try { l.back(); } catch (e) { /* noop */ } }
-    else {
+    let done = false;
+    if (typeof l.back === 'function') { try { done = l.back() !== false; } catch (e) { done = false; } }
+    if (!done && l.close) {
         const el = elOf(l);
         const btn = el && el.querySelector(l.close);
         if (btn) { try { btn.click(); } catch (e) { /* noop */ } }

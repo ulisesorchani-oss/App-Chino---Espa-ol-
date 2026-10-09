@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v158'; // — Botón Atrás: cierra la capa abierta de arriba en vez de salir (nav.js); Escape en DELE solo cierra la capa de arriba
+const VERSION = 'v158'; // — Botón Atrás: cierra la capa abierta de arriba en vez de salir (nav.js: lecciones, lectores, podcast, ficha, trazos y popups; en un tip, Atrás cancela); Escape en DELE solo cierra la capa de arriba
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
