@@ -1334,7 +1334,7 @@
             if (e.target === pop) closePop(); // clic en el fondo (convención lecciones)
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !pop.classList.contains('hidden')) closePop();
+            if (e.key === 'Escape' && !pop.classList.contains('hidden') && !(typeof topLayerOpen === 'function' && topLayerOpen())) closePop(); // si hay una capa encima (ficha, trazos), esa cierra primero
         });
     }
     function openPop() {
