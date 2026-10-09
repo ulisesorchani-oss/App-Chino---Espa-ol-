@@ -75,7 +75,8 @@
         pendingOnClose = onClose;
         body.innerHTML = '<div class="ft-head">' + escHtml(emoji || '💡') + ' ' + escHtml(title || '') + '</div>'
             + (lines || []).map(l => '<p class="ft-line">' + escHtml(l) + '</p>').join('')
-            + '<div class="ft-actions"><button type="button" id="btn-ft-ok" class="btn-primary">Entendido</button></div>';
+            + '<div class="ft-actions"><button type="button" id="btn-ft-ok" class="btn-primary">'
+            + escHtml((typeof uiT === 'function' && uiT('tipOk')) || 'Entendido') + '</button></div>';
         pop.classList.remove('hidden');
         const ok = document.getElementById('btn-ft-ok');
         if (ok) ok.addEventListener('click', closeTip);

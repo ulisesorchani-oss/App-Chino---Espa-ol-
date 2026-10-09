@@ -365,9 +365,11 @@
         const btnEntry = $('btn-train-record');
         if (btnEntry) btnEntry.addEventListener('click', () => {
             if (typeof window.showFeatureTip === 'function') {
-                window.showFeatureTip('talk-libre', '🎤', 'Pronunciación libre', [
-                    'Tocá 🎤, decí lo que quieras en voz alta (hasta 30 s) y soltá para terminar.',
-                    'La IA transcribe lo que entendió — comparalo con lo que quisiste decir para autoevaluarte.'
+                // textos en UI_STRINGS (app.js) → salen en el idioma de la interfaz
+                const t = (k) => (typeof uiT === 'function' ? uiT(k) : '');
+                window.showFeatureTip('talk-libre', '🎤', t('tipTalkTitle'), [
+                    t('tipTalk1'),
+                    t('tipTalk2')
                 ], openTalk);
             } else {
                 openTalk();

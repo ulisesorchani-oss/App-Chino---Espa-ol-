@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v157'; // — Whisper bajo demanda: ya no se baja al abrir (~100 MB); aviso con permiso la 1.ª vez que se usa pronunciación (+ aviso de datos móviles)
+const VERSION = 'v157'; // — Whisper bajo demanda: ya no se baja al abrir (~100 MB); aviso con permiso la 1.ª vez que se usa pronunciación (+ aviso de datos móviles); tips de 🎤 Pronunciación y Pronunciación libre en el idioma de la interfaz
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

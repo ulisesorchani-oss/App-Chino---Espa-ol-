@@ -707,7 +707,15 @@ const UI_STRINGS = {
     mdlBody: 'La evaluación de pronunciación necesita descargar unos {mb} MB una vez. Después funciona sin conexión.',
     mdlCell: '📶 Estás usando datos móviles.',
     mdlSaveData: '📶 Tenés activado el ahorro de datos.',
-    mdlYes: 'Descargar ahora', mdlNo: 'Ahora no'
+    mdlYes: 'Descargar ahora', mdlNo: 'Ahora no',
+    // tips de una sola vez (feature-tips.js)
+    tipOk: 'Entendido',
+    tipPronTitle: 'Pronunciación',
+    tipPron1: 'Tocá 🎤, grabá la oración en voz alta y soltá para terminar.',
+    tipPron2: 'Vas a ver tu grabación comparada con la referencia — así identificás qué tono o sonido ajustar.',
+    tipTalkTitle: 'Pronunciación libre',
+    tipTalk1: 'Tocá 🎤, decí lo que quieras en voz alta (hasta 30 s) y soltá para terminar.',
+    tipTalk2: 'La IA transcribe lo que entendió — comparalo con lo que quisiste decir para autoevaluarte.'
   },
   'cn-es': {
     appTitle: '日常華語',
@@ -777,7 +785,15 @@ const UI_STRINGS = {
     mdlBody: '发音评估需要下载约 {mb} MB（只需下载一次），之后无需联网即可使用。',
     mdlCell: '📶 你正在使用移动数据。',
     mdlSaveData: '📶 你已开启省流量模式。',
-    mdlYes: '立即下载', mdlNo: '以后再说'
+    mdlYes: '立即下载', mdlNo: '以后再说',
+    // 一次性提示（feature-tips.js）。cn-es 练的是西班牙语，没有声调分析
+    tipOk: '知道了',
+    tipPronTitle: '发音练习',
+    tipPron1: '点 🎤，大声读出这句话，读完再点一下结束。',
+    tipPron2: '你的录音会和标准发音对比——帮你找出哪个音需要调整。',
+    tipTalkTitle: '自由发音',
+    tipTalk1: '点 🎤，大声说你想说的话（最长 30 秒），说完再点一下结束。',
+    tipTalk2: 'AI 会写出它听到的内容——和你想说的对比一下，自己检查。'
   }
 };
 
@@ -1315,9 +1331,9 @@ function setupEventListeners() {
         if (!d) return;
         d.addEventListener('toggle', () => {
             if (d.open && typeof window.showFeatureTip === 'function') {
-                window.showFeatureTip('pronunciacion', '🎤', 'Pronunciación', [
-                    'Tocá 🎤, grabá la oración en voz alta y soltá para terminar.',
-                    'Vas a ver tu grabación comparada con la referencia — así identificás qué tono o sonido ajustar.'
+                window.showFeatureTip('pronunciacion', '🎤', uiT('tipPronTitle'), [
+                    uiT('tipPron1'),
+                    uiT('tipPron2')
                 ]);
             }
         });
