@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.huayudiario.app",
+    "sha256_cert_fingerprints": ["FB:76:EB:B2:28:EE:72:DE:A9:37:83:50:0C:CF:CF:B8:EB:FF:81:B0:8B:C3:44:05:C3:AB:00:8F:90:29:8C:73"]
+  }
+}]
