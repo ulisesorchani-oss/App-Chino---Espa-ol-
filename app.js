@@ -701,7 +701,21 @@ const UI_STRINGS = {
     // v9.48: tolerancia de trazos (leniency manual en Ajustes)
     setStrokes: 'Tolerancia de trazos',
     lenStrict: '🎯 Estricta', lenNormal: '⚖️ Normal', lenLenient: '🫧 Permisiva',
-    lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.'
+    lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.',
+    // v9.7x: aviso antes de la 1.ª descarga del modelo de pronunciación
+    mdlTitle: '🎤 Evaluación de pronunciación',
+    mdlBody: 'La evaluación de pronunciación necesita descargar unos {mb} MB una vez. Después funciona sin conexión.',
+    mdlCell: '📶 Estás usando datos móviles.',
+    mdlSaveData: '📶 Tenés activado el ahorro de datos.',
+    mdlYes: 'Descargar ahora', mdlNo: 'Ahora no',
+    // tips de una sola vez (feature-tips.js)
+    tipOk: 'Entendido',
+    tipPronTitle: 'Pronunciación',
+    tipPron1: 'Tocá 🎤, grabá la oración en voz alta y soltá para terminar.',
+    tipPron2: 'Vas a ver tu grabación comparada con la referencia — así identificás qué tono o sonido ajustar.',
+    tipTalkTitle: 'Pronunciación libre',
+    tipTalk1: 'Tocá 🎤, decí lo que quieras en voz alta (hasta 30 s) y soltá para terminar.',
+    tipTalk2: 'La IA transcribe lo que entendió — comparalo con lo que quisiste decir para autoevaluarte.'
   },
   'cn-es': {
     appTitle: '日常華語',
@@ -765,7 +779,21 @@ const UI_STRINGS = {
     // v9.48: 笔顺容错（Ajustes 里手动设置）
     setStrokes: '笔顺容错',
     lenStrict: '🎯 严格', lenNormal: '⚖️ 标准', lenLenient: '🫧 宽容',
-    lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。'
+    lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。',
+    // v9.7x: 首次下载发音模型前的提示
+    mdlTitle: '🎤 发音评估',
+    mdlBody: '发音评估需要下载约 {mb} MB（只需下载一次），之后无需联网即可使用。',
+    mdlCell: '📶 你正在使用移动数据。',
+    mdlSaveData: '📶 你已开启省流量模式。',
+    mdlYes: '立即下载', mdlNo: '以后再说',
+    // 一次性提示（feature-tips.js）。cn-es 练的是西班牙语，没有声调分析
+    tipOk: '知道了',
+    tipPronTitle: '发音练习',
+    tipPron1: '点 🎤，大声读出这句话，读完再点一下结束。',
+    tipPron2: '你的录音会和标准发音对比——帮你找出哪个音需要调整。',
+    tipTalkTitle: '自由发音',
+    tipTalk1: '点 🎤，大声说你想说的话（最长 30 秒），说完再点一下结束。',
+    tipTalk2: 'AI 会写出它听到的内容——和你想说的对比一下，自己检查。'
   }
 };
 
@@ -853,16 +881,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
 
     // ===== v9.46: WARMUP del motor de voz (evaluación más rápida) =====
-    // Antes: el modelo Whisper se terminaba de cargar DENTRO del primer
-    // «Analizando…» (la descarga arrancaba recién al tocar 🎤 y una
-    // grabación corta no le alcanzaba). Ahora: ~6 s después de abrir la
-    // app, en idle, se precarga el motor + UNA inferencia dummy calienta
-    // JIT/ONNX → el primer "evaluar" arranca ya caliente. Idempotente y
-    // silencioso: si falla (sin red, navegador raro) no molesta en nada.
+    // ~6 s después de abrir, en idle, se precarga el motor + UNA inferencia
+    // dummy calienta JIT/ONNX → el primer "evaluar" arranca ya caliente.
+    // v9.7x: SOLO si el modelo ya está guardado en el navegador. Antes
+    // bajaba ~100 MB a todos los alumnos al abrir, usaran o no
+    // pronunciación; ahora la 1.ª descarga pide permiso al tocar 🎤
+    // (VE.ensureModelConsent). El chequeo de caché arranca ya (no usa la
+    // red) para que el 🎤 no espere nada cuando el modelo está guardado.
+    try {
+        if (window.VE && typeof window.VE.probeModelCache === 'function') window.VE.probeModelCache();
+    } catch (e) { /* noop */ }
     setTimeout(function () {
         try {
-            if (window.VE && typeof window.VE.warmup === 'function') {
-                window.VE.warmup();
+            if (window.VE && typeof window.VE.warmupIfCached === 'function') {
+                window.VE.warmupIfCached();
             }
         } catch (e) { /* el warmup jamás rompe el arranque */ }
     }, 6000); // ms — mismo valor que VE_CONFIG.warmupMs (voice-evaluator.js)
@@ -1299,9 +1331,9 @@ function setupEventListeners() {
         if (!d) return;
         d.addEventListener('toggle', () => {
             if (d.open && typeof window.showFeatureTip === 'function') {
-                window.showFeatureTip('pronunciacion', '🎤', 'Pronunciación', [
-                    'Tocá 🎤, grabá la oración en voz alta y soltá para terminar.',
-                    'Vas a ver tu grabación comparada con la referencia — así identificás qué tono o sonido ajustar.'
+                window.showFeatureTip('pronunciacion', '🎤', uiT('tipPronTitle'), [
+                    uiT('tipPron1'),
+                    uiT('tipPron2')
                 ]);
             }
         });

@@ -9,7 +9,8 @@
      escuchaste se puede reescuchar SIN conexión.
    - v7.7: caché PERSISTENTE de modelos de IA (Whisper ONNX de
      huggingface.co + runtime WASM de jsdelivr) → el motor de
-     pronunciación NO se re-descarga (40 MB) en cada update.
+     pronunciación NO se re-descarga (~100 MB: whisper-base q8 +
+     runtime WASM) en cada update.
    - v7.8: +config.js/text-utils.js en precache; pitch-analyzer.js
      se inyecta LAZY solo en modo Chino (sigue precacheado p/ offline).
    - v7.9: sin cambios de precache — lector interlineal vive en app.js
@@ -443,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v156'; // — Pronunciación libre: se saca el doble reconocedor zh+es en paralelo (probado en uso real, no detecta code-switching de verdad y solo agregaba alucinaciones + demora) — vuelve a una sola pasada en el idioma que se está practicando
+const VERSION = 'v157'; // — Whisper bajo demanda: ya no se baja al abrir (~100 MB); aviso con permiso la 1.ª vez que se usa pronunciación (+ aviso de datos móviles); tips de 🎤 Pronunciación y Pronunciación libre en el idioma de la interfaz
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -519,7 +520,7 @@ const PRECACHE = [
   './icons/maskable-icon.png', // v9.8: ícono adaptable (safe zone círculo)
   './icons/favicon.png'        // v9.8: favicon PNG del sello
   // v6.2: los datos van DENTRO de app.js (EMBEDDED_MODULE_DATA) — no hace falta data/
-  // v7.7: los archivos DEL MODELO Whisper (40 MB) NO van al precache:
+  // v7.7: los archivos DEL MODELO Whisper (~100 MB con el runtime) NO van al precache:
   //       los gestiona MODEL_CACHE en runtime (ver cacheFirstModel).
   // v7.8: pitch-analyzer.js sigue en el precache aunque se cargue LAZY:
   //       así el ensurePitchScript() del modo chino funciona offline.
@@ -596,7 +597,7 @@ function isModelAsset(url) {
 }
 
 /* ---------- v7.7/7.13: inmutables — cache-first SIN refresco ----------
-   Modelos IA (40 MB) y datos de caracteres de Hanzi Writer: acá no
+   Modelos IA (~100 MB) y datos de caracteres de Hanzi Writer: acá no
    conviene revalidar en background. Cache parametrizable para que
    cada familia viva en su caché persistente. */
 async function cacheFirstImmutable(req, cacheName) {

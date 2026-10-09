@@ -2206,7 +2206,7 @@ body.dark-mode .dele-group-label {
 
 /* PROCESANDO: spinner CSS (texto vacío).
    v9.30: FUERA pointer-events:none — era la raíz del "no funciona como
-   stop": el 1.er análisis descarga el motor (~40 MB, solo la 1.ª vez) y
+   stop": el 1.er análisis descarga el motor (~100 MB, solo la 1.ª vez) y
    el botón quedaba intocable hasta 2 min (maxWaitMs). Ahora el clic
    durante el análisis CANCELA y vuelve a 🎤 (lo maneja VoiceRecorder.js). */
 .btn-record.is-processing {
@@ -6392,3 +6392,26 @@ body.dark-mode .vocab-item.known {
     border-color: #4ade80;
     color: #bbf7d0;
 }
+
+/* v9.7x: aviso antes de la 1.ª descarga del modelo de pronunciación
+   (voice-evaluator.js → showModelDownloadDialog). Encima de todo, incluso
+   de los popups (.vocab-pop 9500, .install-help 10000). Solo variables de
+   tema → sin reglas duplicadas para oscuro/papel. */
+.ve-dl-overlay {
+    position: fixed; inset: 0; z-index: 10001;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+}
+.ve-dl-box {
+    width: 100%; max-width: 360px;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.3);
+    padding: 18px 18px 14px;
+}
+.ve-dl-title { margin: 0 0 8px; font-size: 1.05rem; }
+.ve-dl-text { margin: 0 0 8px; font-size: 0.92rem; line-height: 1.45; }
+.ve-dl-net { margin: 0 0 8px; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+.ve-dl-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
+.ve-dl-actions button { min-height: 44px; padding: 8px 16px; }

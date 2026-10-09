@@ -711,6 +711,18 @@ const VR = {
         // el mando. La descarga del modelo (1.ª vez) corre EN PARALELO sin
         // bloquear el micro; el audio nunca sale del dispositivo.
         if (this._veActive()) {
+            // v9.7x: la 1.ª vez el modelo (~100 MB) se baja con permiso del
+            // alumno. 'asking' bloquea un 2.º toque mientras el aviso está
+            // abierto; si cambian de oración (setTarget sube _evalTok), se aborta.
+            if (typeof window.VE.ensureModelConsent === 'function') {
+                const tok = this._evalTok;
+                this.state = 'asking';
+                let ok = false;
+                try { ok = await window.VE.ensureModelConsent(); } catch (e) { ok = false; }
+                if (tok !== this._evalTok) return;
+                this.state = 'idle';
+                if (!ok) return;
+            }
             this._updatePrivacy();
             this.state = 'recording';
             this._setBtn('🔴 00:00', 'is-recording');
