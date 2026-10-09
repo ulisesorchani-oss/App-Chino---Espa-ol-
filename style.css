@@ -662,30 +662,38 @@ body.dark-mode .blank-fill.reveal  { color: #fbbf24; background: rgba(251, 191, 
 
 /* v9.13x — Nuevo Estándar: vive en variables PROPIAS (--tone-N-std),
    separadas de las que escribe applyToneScheme() (--tone-N, para los
-   esquemas Okabe-Ito/Pleco/Dummitt/Anterior/Personalizado). .tone-N usa
+   esquemas Okabe-Ito/Pleco/Dummitt/Personalizado). .tone-N usa
    --tone-N si hay un esquema elegido, si no cae a --tone-N-std — así el
    Estándar no necesita JS (nunca se pisa a sí mismo) y, a la vez, un
    esquema elegido nunca puede quedar tapado por el Estándar.
    IMPORTANTE: --tone-N-std SÍ tiene variante propia para modo oscuro
    (ver body.dark-mode acá abajo — T1-T4 no cambiaban con el tema antes
-   de este cambio, ver AUDITORIA). --tone-N (sin -std) NUNCA se define acá
-   en CSS — solo applyToneScheme() en JS la fija, para que body.dark-mode/
-   body.paper-mode no puedan tapar el esquema que el usuario eligió.
+   de este cambio, ver AUDITORIA) y T1 también tiene variante propia para
+   modo papel (ver body.paper-mode). --tone-N (sin -std) NUNCA se define
+   acá en CSS — solo applyToneScheme() en JS la fija, para que
+   body.dark-mode/body.paper-mode no puedan tapar el esquema que el
+   usuario eligió.
+   T3 = EXACTAMENTE el tono 2 de Okabe-Ito (TONE_SCHEMES.colorblind en
+   app.js: '#E69F00', igual en claro/papel y oscuro) — pedido explícito,
+   no es un valor elegido por contraste.
    Contraste verificado contra el fondo real de Lector/Tarjetas/Leyenda en
    los 3 temas — ver tabla en el PR. */
 :root {
-    --tone-1-std: #086da0; /* T1 azul cielo */
+    --tone-1-std: #2563eb; /* T1 azul (el de siempre) */
     --tone-2-std: #157538; /* T2 verde */
-    --tone-3-std: #866013; /* T3 ocre */
+    --tone-3-std: #E69F00; /* T3 = Okabe-Ito T2, sin tocar */
     --tone-4-std: #ca1f16; /* T4 rojo */
     --tone-0-std: #5e6573; /* T5 gris ceniza */
 }
 body.dark-mode {
-    --tone-1-std: #2badee; /* T1 celeste */
+    --tone-1-std: #4f8cff; /* T1 azul, modo oscuro */
     --tone-2-std: #42d78c; /* T2 verde esmeralda, más claro */
-    --tone-3-std: #eeb32b; /* T3 amarillo ámbar */
+    --tone-3-std: #E69F00; /* T3 = Okabe-Ito T2, sin tocar */
     --tone-4-std: #f16255; /* T4 rojo más brillante */
     --tone-0-std: #89909f; /* T5 gris claro */
+}
+body.paper-mode {
+    --tone-1-std: #1d4ed8; /* T1 azul, modo papel */
 }
 
 .tone-1 { color: var(--tone-1, var(--tone-1-std)); }
@@ -2649,23 +2657,6 @@ body.dark-mode .tl-demo { background: rgba(147, 197, 253, 0.09); }
     cursor: pointer;
 }
 
-/* v9.13x: aviso de migración (una sola vez, ver toneUpgradeOfferPending) */
-.tl-upgrade {
-    background: rgba(37, 99, 235, 0.08);
-    border: 1px solid rgba(37, 99, 235, 0.25);
-    border-radius: 10px;
-    padding: 9px 11px;
-    margin: 0 0 10px;
-}
-.tl-upgrade.hidden { display: none; }
-.tl-upgrade-text {
-    margin: 0 0 8px;
-    font-size: 0.82rem;
-    color: var(--text-primary);
-}
-.tl-upgrade-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.tl-upgrade-actions button { font-size: 0.8rem; padding: 6px 12px; }
-
 /* v9.13x: crédito de Dummitt (TONE_DUMMITT_CREDIT en app.js) — chico y
    discreto, solo visible mientras ese preset está elegido. */
 .tl-credits {
@@ -2685,11 +2676,6 @@ body.dark-mode .tl-intro,
 body.dark-mode .tl-check,
 body.dark-mode .tl-credits,
 body.dark-mode .tl-custom label { color: #cbd5e1; }
-body.dark-mode .tl-upgrade {
-    background: rgba(147, 197, 253, 0.1);
-    border-color: rgba(147, 197, 253, 0.3);
-}
-body.dark-mode .tl-upgrade-text { color: #e2e8f0; }
 
 /* ---------- Responsive ≤480px (regla de duplicación) ---------- */
 @media (max-width: 480px) {

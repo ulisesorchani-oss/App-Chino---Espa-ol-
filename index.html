@@ -668,17 +668,6 @@
         <button id="btn-tone-legend-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
         <div id="tone-legend-body">
             <h3 class="tl-title">🎨 Colores por tono</h3>
-            <!-- v9.13x: aviso de migración, una sola vez, para quien ya usaba la
-                 app con el Estándar de siempre (ver state.toneUpgradeOfferPending
-                 en app.js: loadProgress() lo activa, showToneLegend() lo
-                 muestra). Oculto por default. -->
-            <div id="tone-upgrade-offer" class="tl-upgrade hidden">
-                <p class="tl-upgrade-text">Actualizamos los colores del esquema Estándar. Tus colores de siempre siguen disponibles como "Anterior".</p>
-                <div class="tl-upgrade-actions">
-                    <button type="button" id="btn-tone-upgrade-try" class="btn-primary">✨ Probar el nuevo</button>
-                    <button type="button" id="btn-tone-upgrade-dismiss" class="btn-secondary">Seguir con Anterior</button>
-                </div>
-            </div>
             <p class="tl-intro">Cada color indica el tono de la sílaba (activá 🎨 Tonos para verlo en las frases):</p>
             <div class="tl-grid">
                 <div class="tl-row"><span class="tl-sample tone-1">ā</span><span class="tl-label">Tono 1 · alto y plano</span></div>
@@ -694,7 +683,6 @@
                 <label class="tl-opt"><input type="radio" name="tone-scheme" value="colorblind"> Amigable para daltonismo (Okabe-Ito)</label>
                 <label class="tl-opt"><input type="radio" name="tone-scheme" value="pleco"> Estilo Pleco</label>
                 <label class="tl-opt"><input type="radio" name="tone-scheme" value="dummitt"> Estilo Dummitt</label>
-                <label class="tl-opt"><input type="radio" name="tone-scheme" value="legacy"> Anterior</label>
                 <label class="tl-opt"><input type="radio" name="tone-scheme" value="custom"> Personalizado</label>
             </div>
             <div id="tone-custom-colors" class="tl-custom hidden">

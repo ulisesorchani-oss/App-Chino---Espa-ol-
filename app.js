@@ -174,16 +174,9 @@ let state = {
     answered: false,
     filledAnswer: null,  // v7.2: 'correct' | 'wrong' | 'reveal' → el hueco se muestra completo
     // v7.11: esquema de colores de tono + leyenda
-    toneScheme: 'standard',   // 'standard'|'colorblind'|'pleco'|'dummitt'|'legacy'|'custom'
+    toneScheme: 'standard',   // 'standard'|'colorblind'|'pleco'|'dummitt'|'custom'
     toneCustomColors: null,   // {'1':'#hex',...,'5':'#hex'} — 5 = neutro
     toneLegendSeen: false,    // la leyenda ya se mostró al activar tonos
-    // v9.13x: migración al nuevo Estándar — default true (instalación
-    // nueva, nunca necesita migrar). loadProgress() lo pasa a false SOLO
-    // la primera vez que carga un guardado YA EXISTENTE sin esta clave
-    // (ver ahí el detalle: por qué el blob guardado, no toneScheme, es la
-    // única señal confiable de "¿esto es una instalación nueva?").
-    toneMigrated: true,
-    toneUpgradeOfferPending: false, // aviso "probá el nuevo Estándar" pendiente de mostrar
     // v7.13: contexto guardado al marcar una palabra → wordContexts[palabra] =
     // { zh: oración simplificada, zt: oración tradicional, es: oración española,
     //   py: pinyin de la PALABRA }. Se muestra en el popup ("tu ejemplo").
@@ -227,9 +220,6 @@ function saveProgress() {
             toneScheme: state.toneScheme,
             toneCustomColors: state.toneCustomColors,
             toneLegendSeen: state.toneLegendSeen,
-            // v9.13x: migración al nuevo Estándar (ver loadProgress)
-            toneMigrated: state.toneMigrated,
-            toneUpgradeOfferPending: state.toneUpgradeOfferPending,
             // v7.13: contexto de las palabras marcadas
             wordContexts: state.wordContexts,
             // v9.15: práctica intercalada (modo + semilla sobreviven al reload)
@@ -479,31 +469,12 @@ function loadProgress() {
         if (data.activeModule) state.activeModule = data.activeModule;
         if (data.showPinyin !== undefined) state.showPinyin = data.showPinyin;
         if (data.showToneColors !== undefined) showToneColors = data.showToneColors;
-        // v7.11: esquema de tonos (validado — localStorage puede venir viejo o trucado)
-        if (['standard', 'colorblind', 'pleco', 'dummitt', 'legacy', 'custom'].indexOf(data.toneScheme) !== -1) {
+        // v7.11: esquema de tonos (validado — localStorage puede venir viejo o
+        // trucado). 'legacy' ya no existe como esquema propio (el preset
+        // "Anterior" se sacó): un guardado viejo con 'legacy' simplemente no
+        // matchea acá y queda en el default de state ('standard'), sin error.
+        if (['standard', 'colorblind', 'pleco', 'dummitt', 'custom'].indexOf(data.toneScheme) !== -1) {
             state.toneScheme = data.toneScheme;
-        }
-        // v9.13x — migración al nuevo Estándar: este bloque corre UNA sola
-        // vez por instalación EXISTENTE (raw ya existía — las instalaciones
-        // nuevas nunca llegan acá: loadProgress() ya volvió en el "if
-        // (!raw) return;" de arriba, con toneMigrated:true de fábrica).
-        // data.toneMigrated ausente = el guardado es de ANTES de este
-        // cambio → si el esquema seguía en el default de siempre
-        // ('standard' o ausente, nunca tocado), se pasa a 'legacy' para no
-        // cambiarle los colores sin avisar, y se marca el aviso pendiente.
-        // Si ya tenía 'colorblind'/'custom' elegido a propósito, no se toca.
-        // Una vez migrado, toneScheme deja de ser 'standard' (o pasa a
-        // serlo recién cuando el usuario lo elige desde el aviso/leyenda),
-        // así que esta condición no puede volver a dispararse después.
-        if (!data.toneMigrated) {
-            if (!data.toneScheme || data.toneScheme === 'standard') {
-                state.toneScheme = 'legacy';
-                state.toneUpgradeOfferPending = true;
-            }
-            state.toneMigrated = true;
-        } else {
-            state.toneMigrated = true;
-            if (data.toneUpgradeOfferPending !== undefined) state.toneUpgradeOfferPending = !!data.toneUpgradeOfferPending;
         }
         if (data.toneCustomColors && typeof data.toneCustomColors === 'object') {
             const clean = {};
@@ -864,13 +835,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyToneScheme(); // v7.11: restaurar esquema de tonos guardado (respeta dark ya aplicado)
     await loadSentences();
     setupEventListeners();
-    // v9.13x: aviso de migración al nuevo Estándar — PROACTIVO (no espera a
-    // que el usuario prenda 🎨 Tonos o abra la leyenda a mano, a diferencia
-    // de toneLegendSeen/showToneLegend más abajo: un usuario existente ya
-    // migrado a 'legacy' puede tener toneLegendSeen:true de antes y nunca
-    // volver a ver ese disparador). Se muestra UNA sola vez (ver
-    // loadProgress: toneUpgradeOfferPending solo nace true en la migración).
-    if (state.toneUpgradeOfferPending) showToneLegend();
     buildReaderLibrary(); // v7.15: poblar la Biblioteca de Lecturas (lessons.js)
     applySavedUI();
     applyFontMode(); // v9.14: restaurar fuente de estudio 默认/楷体 guardada
@@ -1390,14 +1354,6 @@ function setupEventListeners() {
     document.querySelectorAll('input[name="tone-scheme"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             state.toneScheme = e.target.value;
-            // v9.13x: elegir CUALQUIER esquema a mano (incluido Estándar)
-            // ya cuenta como "decisión tomada" — el aviso de migración no
-            // tiene más sentido después de esto.
-            if (state.toneUpgradeOfferPending) {
-                state.toneUpgradeOfferPending = false;
-                const offer = document.getElementById('tone-upgrade-offer');
-                if (offer) offer.classList.add('hidden');
-            }
             const customDiv = document.getElementById('tone-custom-colors');
             if (customDiv) customDiv.classList.toggle('hidden', state.toneScheme !== 'custom');
             if (state.toneScheme === 'custom' && !state.toneCustomColors) {
@@ -1413,25 +1369,6 @@ function setupEventListeners() {
             applyToneScheme();
             saveProgress();
         });
-    });
-    // v9.13x: aviso de migración — "Probar el nuevo" cambia al Estándar
-    // nuevo; "Seguir con Anterior" solo apaga el aviso (ya está en
-    // 'legacy' desde la migración, no hace falta tocar toneScheme).
-    safeAdd('btn-tone-upgrade-try', () => {
-        state.toneScheme = 'standard';
-        state.toneUpgradeOfferPending = false;
-        document.querySelectorAll('input[name="tone-scheme"]').forEach(r => { r.checked = (r.value === 'standard'); });
-        const offer = document.getElementById('tone-upgrade-offer');
-        if (offer) offer.classList.add('hidden');
-        syncToneCredits();
-        applyToneScheme();
-        saveProgress();
-    });
-    safeAdd('btn-tone-upgrade-dismiss', () => {
-        state.toneUpgradeOfferPending = false;
-        const offer = document.getElementById('tone-upgrade-offer');
-        if (offer) offer.classList.add('hidden');
-        saveProgress();
     });
     // Colores personalizados: SOLO 'input' (actualización en vivo).
     // ⚠ No usar safeAdd (click) acá: dispararía doble con 'input'.
@@ -2540,15 +2477,6 @@ const TONE_SCHEMES = {
     dummitt: {
         light: { 1: '#cc1414', 2: '#965408', 3: '#187245', 4: '#0e69aa', 5: 'var(--text-secondary)' },
         dark:  { 1: '#f0624c', 2: '#f48525', 3: '#47d18c', 4: '#2b9dee', 5: 'var(--text-secondary)' }
-    },
-    // v9.13x — "Anterior": los colores de SIEMPRE, ahora EXPLÍCITOS (antes
-    // eran el fallback nativo --primary/--warning/--success/--danger, que
-    // no cambiaba con el tema — acá tampoco cambia, a propósito: es
-    // "quedate con lo de antes", no una mejora). T5 sigue el gris del
-    // tema, igual que siempre (--text-secondary SÍ variaba por tema).
-    legacy: {
-        light: { 1: '#2563eb', 2: '#b45309', 3: '#15803d', 4: '#dc2626', 5: 'var(--text-secondary)' },
-        dark:  { 1: '#2563eb', 2: '#b45309', 3: '#15803d', 4: '#dc2626', 5: 'var(--text-secondary)' }
     }
 };
 // Semilla del esquema personalizado = look actual de la app (el usuario parte
@@ -2621,8 +2549,6 @@ function showToneLegend() {
     }
     const chk = document.getElementById('chk-tone-legend-once');
     if (chk) chk.checked = !!state.toneLegendSeen;
-    const offer = document.getElementById('tone-upgrade-offer');
-    if (offer) offer.classList.toggle('hidden', !state.toneUpgradeOfferPending);
     syncToneCredits();
     pop.classList.remove('hidden');
 }
