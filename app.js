@@ -3846,8 +3846,9 @@ const PZ_SHEET_CSS = [
     '.pz-note { font-size: 8pt; color: #b45309; margin-top: 3mm; }',
     // v9.12x — PASO 3: el radical de Clásica se sacó de la celda modelo
     // (pisaba el carácter en trazos complejos, ej. 博 con 十) y pasó a
-    // vivir acá, al final de la línea de info — ver pzClassicInfoOf.
-    // Línea fina por carácter (texto truncable + radical), hermana de su
+    // vivir acá, al PRINCIPIO de la línea de info (v9.36: antes al final,
+    // quedaba pegado al margen derecho de la hoja) — ver pzClassicInfoOf.
+    // Línea fina por carácter (radical + texto truncable), hermana de su
     // .pz-row (no envuelta en un div nuevo — ver pzSheetHTML). break-after:
     // avoid para la impresión nativa (que si rompe página por CSS, no deja
     // la línea sola); pzDownloadPDF (que pagina por JS, no por CSS) la
@@ -3861,9 +3862,9 @@ const PZ_SHEET_CSS = [
     // línea (7.5pt → 9.5pt), negrita, y la MISMA tipografía CJK que ya usa
     // el carácter modelo (dibuja bien radicales de varios trazos — la
     // fuente de la línea, heredada del body, no está pensada para hanzi).
-    // Espacio fijo antes vía margin (no gap): se mantiene aunque el texto
+    // Espacio fijo después vía margin (no gap): se mantiene aunque el texto
     // esté vacío (radical solo) o truncado.
-    '.pz-info-radical { flex: 0 0 auto; margin-left: 1.5mm; font-size: 9.5pt; font-weight: 700; color: #16a085;',
+    '.pz-info-radical { flex: 0 0 auto; margin-right: 1.5mm; font-size: 9.5pt; font-weight: 700; color: #16a085;',
     '  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "WenQuanYi Zen Hei", sans-serif; }',
     // ── v9.1 estilo CUADERNO (筆順 + 寫字, como el modelo de la referencia) ──
     // v9.4: SIN las etiquetas repetidas por bloque (筆順/寫字) — la fila de
@@ -4250,8 +4251,9 @@ function pzClassicInfoOf(ch, opts) {
     const text = [pronTxt, meanTxt].filter(Boolean).join(' · ');
     // v9.12x — PASO 3: el radical YA NO vive dentro de la celda modelo
     // (pisaba el carácter en trazos complejos, ej. 博 con 十) — se agrega
-    // acá, al final de la MISMA línea de info, para que pzSheetHTML y
-    // pzCounterCompute decidan "¿hay línea?" con el mismo criterio.
+    // acá, al principio de la MISMA línea de info (v9.36), para que
+    // pzSheetHTML y pzCounterCompute decidan "¿hay línea?" con el mismo
+    // criterio.
     const radical = opts.radical ? pzRadicalOf(ch) : '';
     return { text: text, confirmed: confirmed, radical: radical };
 }
@@ -4381,13 +4383,17 @@ function pzSheetHTML(chars, datas, trazos, cells, style, opts) {
         const d = datas[i];
         const info = pzClassicInfoOf(ch, opts);
         if ((opts.pron === 'pinyin' || opts.pron === 'zhuyin') && !info.confirmed) missingPron.push(ch);
-        // v9.12x — PASO 3: texto (pinyin/zhuyin · significado) truncable con
-        // "…" si no entra, + radical NUNCA se corta (flex-shrink:0, ver
-        // CSS) — el radical va último, con un espacio fijo antes (margin,
-        // no gap: así se mantiene aunque el texto esté vacío o truncado).
+        // v9.36 — el radical va PRIMERO, pegado a la pronunciación (antes
+        // quedaba empujado al margen derecho de la hoja: el texto tenía
+        // flex-grow y el radical flex:0 0 auto detrás, así que el radical
+        // terminaba solo, lejos del resto de la línea). Texto (pinyin/
+        // zhuyin · significado) truncable con "…" si no entra, + radical
+        // NUNCA se corta (flex-shrink:0, ver CSS) — espacio fijo DESPUÉS
+        // del radical (margin, no gap: se mantiene aunque el texto esté
+        // vacío o truncado).
         const textHtml = info.text ? '<span class="pz-charinfo-text">' + escHtml(info.text) + '</span>' : '';
         const radHtml = info.radical ? '<span class="pz-info-radical">' + escHtml(info.radical) + '</span>' : '';
-        const infoHtml = (textHtml || radHtml) ? '<div class="pz-charinfo">' + textHtml + radHtml + '</div>' : '';
+        const infoHtml = (textHtml || radHtml) ? '<div class="pz-charinfo">' + radHtml + textHtml + '</div>' : '';
         // Contenido del bloque del carácter: modelo + etapas de trazos (el
         // radical ya NO va acá — ver más arriba — así la celda queda
         // limpia, sin riesgo de pisar el carácter en trazos complejos).
