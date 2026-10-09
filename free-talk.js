@@ -28,8 +28,8 @@
 // Reusa: window.VoiceRecorder (VoiceRecorder.js: getUserMedia +
 // MediaRecorder + medidor de nivel + límite de tiempo — la MISMA
 // captura que usa el comparador de Hoy, otra instancia), window.VE
-// (voice-evaluator.js: motor Whisper WASM, ya se precarga con
-// VE.warmup() al abrir la app), state.mode (app.js: es-cn → target
+// (voice-evaluator.js: motor Whisper WASM; la 1.ª descarga pide
+// permiso con VE.ensureModelConsent), state.mode (app.js: es-cn → target
 // zh, cn-es → target es — sigue el modo activo de la app, igual que
 // el resto de los módulos) y el shell de popup .lq-pop (mismo patrón
 // que podcast.js/minimal-pairs.js).
@@ -224,6 +224,16 @@
         if (!window.VoiceRecorder || !VoiceRecorder.supported()) {
             showError(!navigator.mediaDevices ? T.errSecure : T.errSupport);
             return;
+        }
+        // v9.7x: la 1.ª vez el modelo (~100 MB) se baja con permiso del
+        // alumno; al aceptar, la descarga arranca ya y corre mientras graba.
+        if (window.VE && typeof window.VE.ensureModelConsent === 'function') {
+            S.state = 'asking';
+            let ok = false;
+            try { ok = await window.VE.ensureModelConsent(); } catch (e) { ok = false; }
+            if (S.state !== 'asking') return; // el popup se cerró mientras preguntaba
+            S.state = 'idle';
+            if (!ok) return;
         }
         S.errorMsg = '';
         S.state = 'recording';

@@ -5,9 +5,11 @@
    ------------------------------------------------------------
    Este archivo existe para que NUNCA haya un número mágico
    enterrado en la lógica: todo lo que se calibra con datos
-   reales vive acá, documentado y en un solo lugar. Si mañana
-   cambia el modelo (whisper-tiny → base) o el micrófono típico,
-   se recalibra ACÁ sin tocar la lógica.
+   reales vive acá, documentado y en un solo lugar. Si cambia el
+   modelo o el micrófono típico, se recalibra ACÁ sin tocar la
+   lógica. El modelo YA cambió (whisper-tiny → base, v9.7x): los
+   registros de abajo se midieron con tiny y la recalibración con
+   base está pendiente (README-Pronunciacion.md §3.4).
    ============================================================ */
 (function (global) {
 'use strict';

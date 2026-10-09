@@ -701,7 +701,13 @@ const UI_STRINGS = {
     // v9.48: tolerancia de trazos (leniency manual en Ajustes)
     setStrokes: 'Tolerancia de trazos',
     lenStrict: '🎯 Estricta', lenNormal: '⚖️ Normal', lenLenient: '🫧 Permisiva',
-    lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.'
+    lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.',
+    // v9.7x: aviso antes de la 1.ª descarga del modelo de pronunciación
+    mdlTitle: '🎤 Evaluación de pronunciación',
+    mdlBody: 'La evaluación de pronunciación necesita descargar unos {mb} MB una vez. Después funciona sin conexión.',
+    mdlCell: '📶 Estás usando datos móviles.',
+    mdlSaveData: '📶 Tenés activado el ahorro de datos.',
+    mdlYes: 'Descargar ahora', mdlNo: 'Ahora no'
   },
   'cn-es': {
     appTitle: '日常華語',
@@ -765,7 +771,13 @@ const UI_STRINGS = {
     // v9.48: 笔顺容错（Ajustes 里手动设置）
     setStrokes: '笔顺容错',
     lenStrict: '🎯 严格', lenNormal: '⚖️ 标准', lenLenient: '🫧 宽容',
-    lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。'
+    lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。',
+    // v9.7x: 首次下载发音模型前的提示
+    mdlTitle: '🎤 发音评估',
+    mdlBody: '发音评估需要下载约 {mb} MB（只需下载一次），之后无需联网即可使用。',
+    mdlCell: '📶 你正在使用移动数据。',
+    mdlSaveData: '📶 你已开启省流量模式。',
+    mdlYes: '立即下载', mdlNo: '以后再说'
   }
 };
 
@@ -853,16 +865,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
 
     // ===== v9.46: WARMUP del motor de voz (evaluación más rápida) =====
-    // Antes: el modelo Whisper se terminaba de cargar DENTRO del primer
-    // «Analizando…» (la descarga arrancaba recién al tocar 🎤 y una
-    // grabación corta no le alcanzaba). Ahora: ~6 s después de abrir la
-    // app, en idle, se precarga el motor + UNA inferencia dummy calienta
-    // JIT/ONNX → el primer "evaluar" arranca ya caliente. Idempotente y
-    // silencioso: si falla (sin red, navegador raro) no molesta en nada.
+    // ~6 s después de abrir, en idle, se precarga el motor + UNA inferencia
+    // dummy calienta JIT/ONNX → el primer "evaluar" arranca ya caliente.
+    // v9.7x: SOLO si el modelo ya está guardado en el navegador. Antes
+    // bajaba ~100 MB a todos los alumnos al abrir, usaran o no
+    // pronunciación; ahora la 1.ª descarga pide permiso al tocar 🎤
+    // (VE.ensureModelConsent). El chequeo de caché arranca ya (no usa la
+    // red) para que el 🎤 no espere nada cuando el modelo está guardado.
+    try {
+        if (window.VE && typeof window.VE.probeModelCache === 'function') window.VE.probeModelCache();
+    } catch (e) { /* noop */ }
     setTimeout(function () {
         try {
-            if (window.VE && typeof window.VE.warmup === 'function') {
-                window.VE.warmup();
+            if (window.VE && typeof window.VE.warmupIfCached === 'function') {
+                window.VE.warmupIfCached();
             }
         } catch (e) { /* el warmup jamás rompe el arranque */ }
     }, 6000); // ms — mismo valor que VE_CONFIG.warmupMs (voice-evaluator.js)

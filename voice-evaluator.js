@@ -100,9 +100,12 @@
    ------------------------------------------------------------
    v9.46 — EVALUACIÓN MÁS RÁPIDA (mismo resultado, menos espera):
      · WARMUP AL ARRANCAR: el motor (Whisper WASM) se carga en
-       background ~6 s después de abrir la app (VE.warmup() desde
-       app.js) + UNA inferencia dummy calienta JIT/ONNX. Antes el
-       primer «Analizando…» pagaba la carga completa del modelo.
+       background ~6 s después de abrir la app + UNA inferencia
+       dummy calienta JIT/ONNX. Antes el primer «Analizando…»
+       pagaba la carga completa del modelo. v9.7x: SOLO si el
+       modelo ya está guardado (VE.warmupIfCached); la 1.ª
+       descarga (~100 MB) pide permiso al alumno al usar
+       pronunciación (VE.ensureModelConsent).
      · ENCODER UNA SOLA VEZ (español): el teacher forcing v9.44
        re-corria el encoder (la parte cara). Ahora se corre UNA
        vez y generate() + forward() comparten encoder_outputs
@@ -168,7 +171,13 @@ const VE_CONFIG = {
     maxNewTokens: 96,         // frases de práctica ≤ ~30 tokens; acota alucinación
     numThreadsMax: 4,         // pthreads de ort-web si hay SharedArrayBuffer
     TTS_GET_MAX_CHARS: 160,   // GET cacheable de referencias (mismo límite que app.js)
-    warmupMs: 6000            // delay del warmup post-arranque (app.js lo dispara)
+    warmupMs: 6000,           // delay del warmup post-arranque (solo si el modelo ya está guardado)
+    // Descarga bajo demanda: el aviso previo muestra este tamaño. Motor WASM
+    // + librería medidos: 22,5 MB; pesos q8 de whisper-base: ~80 MB (estimado).
+    downloadMbApprox: 100,
+    // Dónde quedan los pesos: el SW los guarda en la suya (sw.js MODEL_CACHE)
+    // y transformers.js en la propia (env.useBrowserCache).
+    modelCaches: ['chino-es-models-v1', 'transformers-cache']
 };
 
 /* ============================================================
@@ -1538,6 +1547,101 @@ function ensurePitchScript() {
 }
 
 /* ============================================================
+   AVISO PREVIO A LA DESCARGA DEL MODELO (una sola vez)
+   Textos vía uiT() de app.js (idioma de la interfaz); fallback en
+   español si app.js todavía no cargó.
+   ============================================================ */
+function veT(key, fallback) {
+    try {
+        if (typeof window.uiT === 'function') {
+            const v = window.uiT(key);
+            if (v) return v;
+        }
+    } catch (e) { /* noop */ }
+    return fallback;
+}
+
+/** Solo informa lo que el navegador expone (Chrome Android sí; Safari/
+ *  Firefox no tienen navigator.connection → sin línea extra). */
+function veNetworkNote() {
+    const c = navigator.connection;
+    if (!c) return '';
+    if (c.type === 'cellular') return veT('mdlCell', '📶 Estás usando datos móviles.');
+    if (c.saveData) return veT('mdlSaveData', '📶 Tenés activado el ahorro de datos.');
+    return '';
+}
+
+/** Resuelve true ("Descargar ahora") o false ("Ahora no", Escape o toque
+ *  afuera). Se resuelve DENTRO del handler del clic: así el getUserMedia
+ *  que sigue todavía cuenta como gesto del usuario. */
+function showModelDownloadDialog() {
+    return new Promise((resolve) => {
+        const prevFocus = document.activeElement;
+        const ov = document.createElement('div');
+        ov.className = 've-dl-overlay';
+        const box = document.createElement('div');
+        box.className = 've-dl-box';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-modal', 'true');
+        box.setAttribute('aria-labelledby', 've-dl-title');
+
+        const title = document.createElement('h3');
+        title.id = 've-dl-title';
+        title.className = 've-dl-title';
+        title.textContent = veT('mdlTitle', '🎤 Evaluación de pronunciación');
+        const body = document.createElement('p');
+        body.className = 've-dl-text';
+        body.textContent = veT('mdlBody', 'La evaluación de pronunciación necesita descargar unos {mb} MB una vez. Después funciona sin conexión.')
+            .replace('{mb}', String(VE_CONFIG.downloadMbApprox));
+        box.appendChild(title);
+        box.appendChild(body);
+        const net = veNetworkNote();
+        if (net) {
+            const p = document.createElement('p');
+            p.className = 've-dl-net';
+            p.textContent = net;
+            box.appendChild(p);
+        }
+        const actions = document.createElement('div');
+        actions.className = 've-dl-actions';
+        const no = document.createElement('button');
+        no.type = 'button';
+        no.className = 'btn-secondary';
+        no.textContent = veT('mdlNo', 'Ahora no');
+        const yes = document.createElement('button');
+        yes.type = 'button';
+        yes.className = 'btn-primary';
+        yes.textContent = veT('mdlYes', 'Descargar ahora');
+        actions.appendChild(no);
+        actions.appendChild(yes);
+        box.appendChild(actions);
+        ov.appendChild(box);
+
+        let done = false;
+        const finish = (ok) => {
+            if (done) return;
+            done = true;
+            document.removeEventListener('keydown', onKey, true);
+            ov.remove();
+            try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) { /* noop */ }
+            resolve(ok);
+        };
+        // Captura + stopPropagation: Escape no debe cerrar además el popup de abajo.
+        const onKey = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+        };
+        // stopPropagation: los cerradores de "clic afuera" de otros popups
+        // (document) no deben ver estos clics.
+        yes.addEventListener('click', (e) => { e.stopPropagation(); finish(true); });
+        no.addEventListener('click', (e) => { e.stopPropagation(); finish(false); });
+        ov.addEventListener('click', (e) => { e.stopPropagation(); if (e.target === ov) finish(false); });
+        document.addEventListener('keydown', onKey, true);
+        document.body.appendChild(ov);
+        yes.focus();
+    });
+}
+
+/* ============================================================
    FACHADA — PronunciationEvaluator
    startRecording() · stopAndEvaluate() · setProvider('local'|'cloud')
    v7.8: + setMode('es-cn'|'cn-es') async (spec v4.0 §4/§5)
@@ -1589,6 +1693,67 @@ class PronunciationEvaluator {
         catch (e) { return 'f'; }
     }
     get activeRecorder() { return this._recorder; }
+
+    /* ── Descarga bajo demanda del modelo ──────────────────────────
+       Nada se baja al abrir la app: el alumno da permiso la 1.ª vez que
+       usa pronunciación (ensureModelConsent). Si los pesos ya están en el
+       navegador, no se pregunta y el warmup del arranque sigue valiendo. */
+
+    /** ¿Están guardados los pesos (encoder + decoder, ~todo el tamaño)?
+     *  Solo lee Cache Storage — nunca usa la red. Se calcula una vez. */
+    probeModelCache() {
+        if (this._cacheProbe) return this._cacheProbe;
+        const model = VE_CONFIG.model;
+        this._cacheProbe = (async () => {
+            if (!('caches' in window)) return false;
+            for (const name of VE_CONFIG.modelCaches) {
+                try {
+                    if (!(await caches.has(name))) continue; // has() no crea cachés vacías
+                    const keys = await (await caches.open(name)).keys();
+                    const onnx = keys.map((r) => r.url)
+                        .filter((u) => u.indexOf(model) !== -1 && /\.onnx(\?|$)/.test(u));
+                    if (onnx.some((u) => u.indexOf('encoder') !== -1) &&
+                        onnx.some((u) => u.indexOf('decoder') !== -1)) return true;
+                } catch (e) { /* caché ilegible → como si no estuviera */ }
+            }
+            return false;
+        })().then((v) => { this._modelCached = v; return v; });
+        return this._cacheProbe;
+    }
+
+    /** Warmup del arranque: solo si el modelo ya está guardado (cero red
+     *  para quien nunca usó pronunciación). */
+    warmupIfCached() {
+        if (this.provider !== 'local') return Promise.resolve();
+        return this.probeModelCache()
+            .then((cached) => (cached ? this.warmup() : undefined), () => undefined);
+    }
+
+    /** true → seguir (modelo guardado, descarga ya en curso o aceptada en
+     *  esta sesión); si no, muestra el aviso. Con caché conocida resuelve
+     *  sin pasos asíncronos extra (el clic sigue siendo gesto del usuario).
+     *  Al aceptar arranca la descarga ya, en paralelo con la grabación. */
+    ensureModelConsent() {
+        if (this.provider !== 'local' || this._consentGiven || this._modelCached === true ||
+            this.engine.status === 'ready' || this.engine.status === 'loading') {
+            return Promise.resolve(true);
+        }
+        return this.probeModelCache().then((cached) => {
+            if (cached) return true;
+            return showModelDownloadDialog().then((ok) => {
+                if (ok) {
+                    this._consentGiven = true;
+                    const self = this;
+                    this.engine.preload(function (pct) { self._pushProgress(pct); })
+                        .catch(function (e) {
+                            self._consentGiven = false; // descarga cortada → se vuelve a preguntar
+                            console.warn('[VE] descarga del modelo falló:', (e && e.message) || e);
+                        });
+                }
+                return ok;
+            });
+        });
+    }
 
     /* ────────────────────────────────────────────────────────────
        v7.8 — setMode(newMode) — spec v4.0 §4 (GESTIÓN DE MEMORIA)
@@ -1663,8 +1828,9 @@ class PronunciationEvaluator {
     }
 
     /* ---------- captura ---------- */
-    /** v9.46 — warmup al arrancar (lo llama app.js ~6 s después de abrir,
-     *  en idle): 1) precarga el motor (descarga/compilación fuera del
+    /** v9.46 — warmup al arrancar (app.js ~6 s después de abrir, vía
+     *  warmupIfCached: solo con el modelo ya guardado, así nunca dispara
+     *  la 1.ª descarga): 1) precarga el motor (descarga/compilación fuera del
      *  camino crítico — antes el primer «Analizando…» pagaba todo);
      *  2) UNA inferencia dummy calienta JIT + sesiones ONNX.
      *  Nunca lanza, es idempotente (preload() reusa su promesa) y NO
@@ -1688,8 +1854,9 @@ class PronunciationEvaluator {
         this.abort(); // por si quedó algo de una sesión anterior
 
         // Ambos motores arrancan a cargarse EN PARALELO (no bloquean el
-        // micro). Solo la 1.ª vez (~40 MB) → luego sale del cache del
-        // navegador. La referencia TTS se pide recién al evaluar (y queda
+        // micro). Solo la 1.ª vez (~100 MB, ya aceptada en el aviso de
+        // ensureModelConsent) → luego sale del cache del navegador. La
+        // referencia TTS se pide recién al evaluar (y queda
         // cacheada por frase).
         if (this.provider === 'local') {
             const self = this;
