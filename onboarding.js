@@ -1,6 +1,14 @@
 /* =====================================================================
    v9.50 · ONBOARDING (guía de bienvenida) — Huayu Diario
    =====================================================================
+   v9.7x · GUÍA SIMPLE EN ESPAÑOL: con la interfaz en español la guía es de
+   3 pantallas (renderSimple: bienvenida → ¿desde dónde empezamos? → las
+   cuatro pestañas); la elección se aplica con el botón final (HSK 1, test
+   de nivel o Exámenes). Quien la TERMINA ve una sola vez una pista en la
+   1.ª tarjeta de Hoy y "Tu racha empieza hoy" al primer acierto
+   (ac_first_hint_v1 / ac_first_win_v1). Guía vista = done_v2 o done_v1.
+   Con la interfaz en chino sigue la guía de 6 pasos de abajo.
+   =====================================================================
    QUÉ ES
    · Recorrido de 6 pasos (~1-2 minutos) que explica la app ACTUAL con su
      flujo "primero se aprende, después se practica":
@@ -62,6 +70,11 @@
 
     // ---------------- helpers ----------------
     var LS_DONE = 'ac_onboarding_done_v2';      // 1 = guía (v9.50) ya vista
+    var LS_DONE_V1 = 'ac_onboarding_done_v1';   // guía anterior: también cuenta como vista
+    // v9.7x: pista y mensaje de racha de la 1.ª tarjeta, SOLO para quien termina
+    // la guía simple: 'pending' → se muestra; 'done' → nunca más.
+    var LS_HINT = 'ac_first_hint_v1';
+    var LS_WIN = 'ac_first_win_v1';
     var LS_SCRIPT = 'ac_guide_script_v1';       // v9.26: 'hant' = pack chino en 繁體
     var MODE_KEY = 'chino-espanol-app-v2';      // SOLO LECTURA (misma clave de app.js)
     var AUTO_DELAY = 1400;                      // ms hasta el auto-show de 1.ª visita
@@ -213,90 +226,69 @@
         '.ob-skip{background:transparent;border:0;color:var(--text-secondary);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;font-size:.85rem;min-height:44px;padding:6px 10px;border-radius:8px;}',
         '.ob-skip:hover{color:var(--primary);}',
         '.ob-nav{flex-wrap:wrap;}',
-        '#btn-guide-close{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;}'
+        '#btn-guide-close{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;}',
+        // v9.7x — guía simple en español (3 pantallas) + pista/racha de la 1.ª tarjeta
+        '#guide-body.ob-simple{position:relative;padding-top:34px;}',
+        '.ob-s-skip{position:absolute;top:0;left:0;min-height:36px;padding:0 6px;}',
+        '.ob-s-hero{font-size:2.6rem;line-height:1;text-align:center;margin:4px 0 8px;}',
+        '.ob-s-text{color:var(--text-secondary);font-size:.98rem;line-height:1.6;margin:0 0 6px;text-align:center;}',
+        '.ob-s-choice{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px 12px;margin:0 0 8px;min-height:58px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg-card);color:var(--text-primary);font:inherit;cursor:pointer;}',
+        '.ob-s-choice.on{border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,.22);}',
+        '.ob-s-choice .i{font-size:1.5rem;}',
+        '.ob-s-choice .t{display:block;font-weight:800;font-size:.97rem;}',
+        '.ob-s-choice .d{display:block;font-size:.85rem;color:var(--text-secondary);margin-top:1px;}',
+        '.ob-s-foot{color:var(--text-secondary);font-size:.85rem;text-align:center;margin:2px 0 0;}',
+        '.ob-s-tab{display:flex;gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--border);}',
+        '.ob-s-tab:last-child{border-bottom:0;}',
+        '.ob-s-tab .i{font-size:1.35rem;width:30px;text-align:center;}',
+        '.ob-s-tab .t{font-weight:800;color:var(--text-primary);}',
+        '.ob-s-tab .d{color:var(--text-secondary);font-size:.9rem;}',
+        '.ob-hint{position:relative;margin:4px 0 12px;padding:10px 42px 10px 12px;border-radius:12px;background:rgba(102,126,234,.12);border:1px solid rgba(102,126,234,.4);color:var(--text-primary);font-size:.92rem;line-height:1.45;}',
+        '.ob-hint::after{content:"";position:absolute;left:26px;bottom:-8px;border:8px solid transparent;border-top-color:rgba(102,126,234,.4);border-bottom:0;}',
+        '.ob-hint-x{position:absolute;top:2px;right:2px;width:40px;height:40px;border:0;background:none;color:var(--text-secondary);font-size:1rem;cursor:pointer;}',
+        '.ob-win{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fdba74;color:#9a3412;font-weight:800;text-align:center;}',
+        'body.dark-mode .ob-win{background:rgba(251,146,60,.14);border-color:rgba(251,146,60,.45);color:#fdba74;}'
     ].join('\n');
 
     // ---------------- contenido: pack ESPAÑOL (modo es-cn · aprendo chino) ----------------
+    // v9.7x: el español usa la guía SIMPLE de 3 pantallas (renderSimple). La
+    // guía de 6 pasos queda para la interfaz en chino (PACK_ZH / PACK_ZH_HANT)
+    // hasta que exista el texto zh de la versión simple.
     var PACK_ES = {
         btnLabel: '📖 Guía',
-        btnTitle: 'Guía rápida: aprender, practicar, el repaso y tu racha',
-        aria: 'Guía interactiva de la app',
-        ui: { back: '◀ Atrás', next: 'Siguiente ▶', done: '🚀 ¡Empezar!', dots: 'Paso', skip: 'Saltar guía' },
-        steps: [
-            { // 1 · bienvenida — los tres tiempos
-                ico: '🌏', center: true,
-                title: '¡Hola! Primero se aprende, después se practica',
-                html:
-                    '<div class="ob-hero">🌏</div>' +
-                    '<p class="ob-text ob-center"><b>Material real, frases para practicar y un repaso que se agenda solo</b></p>' +
-                    '<div class="ob-flow">' +
-                        '<div class="ob-flow-step"><span class="ob-flow-ico">📚</span><span class="ob-flow-l">Aprender</span><span class="ob-flow-d">elegís qué estudiar</span></div>' +
-                        '<span class="ob-flow-arrow">›</span>' +
-                        '<div class="ob-flow-step"><span class="ob-flow-ico">🀄</span><span class="ob-flow-l">Hoy</span><span class="ob-flow-d">practicás frases</span></div>' +
-                        '<span class="ob-flow-arrow">›</span>' +
-                        '<div class="ob-flow-step"><span class="ob-flow-ico">🔁</span><span class="ob-flow-l">Repaso</span><span class="ob-flow-d">vuelve lo que cuesta</span></div>' +
-                    '</div>' +
-                    '<p class="ob-text">Con unos 10 minutos por día alcanza: la app recuerda <b>qué repasarte y cuándo</b>, para que lo estudiado no se escape.</p>' +
-                    '<p class="ob-text">Ahora estás aprendiendo <b>chino</b>: respondés en 汉字, con el teclado o trazando a mano ✍️. ¿Preferís al revés (aprender español)? Lo cambiás en 🙂 <b>Yo</b>.</p>'
+        btnTitle: 'Guía rápida: cómo empezar y las cuatro pestañas',
+        aria: 'Guía de bienvenida',
+        ui: { back: '◀ Atrás', next: 'Siguiente ▶', start: 'Empezar', skip: 'Saltar', dots: 'Paso' },
+        simple: {
+            s1: {
+                title: '¡Hola! 你好',
+                text: 'Frases reales con audio y pinyin. La app te repasa lo que te cuesta, justo antes de olvidarlo. Un poquito cada día.'
             },
-            { // 2 · Aprender — las 4 pestañas
-                ico: '📚',
-                title: 'Aprender: elegí qué estudiar',
-                html:
-                    '<p class="ob-text">Es la primera pantalla de la app. Arriba tenés cuatro pestañas:</p>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📖</span><span><span class="ob-item-title">Lecciones</span><br><span class="ob-item-desc">Historias cortas con pinyin y audio, más 10 ejercicios de elegir la palabra que falta. Un buen punto de partida.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🎓</span><span><span class="ob-item-title">Exámenes</span><br><span class="ob-item-desc">Vocabulario por nivel: HSK y TOCFL (y DELE para español). ¿No sabés tu nivel? Hacé el 🎯 <b>test de colocación</b>.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📚</span><span><span class="ob-item-title">Diaria</span><br><span class="ob-item-desc">Frases de la vida real por tema: saludos, supermercado, colectivo, restaurante…</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">📜</span><span><span class="ob-item-title">Clásicos</span><br><span class="ob-item-desc">Textos antiguos como el Tao Te King, con el original leído por bloques.</span></span></div>' +
-                    '<div class="ob-tip">💡 Al elegir un módulo, la app te lleva a <b>Hoy</b> para practicarlo. Con 🔀 <b>Intercalar</b> se mezcla el orden de las frases.</div>'
+            s2: {
+                title: '¿Desde dónde empezamos?',
+                opts: [
+                    { id: 'cero', ico: '🌱', t: 'Desde cero', d: 'Primeras palabras (HSK 1)' },
+                    { id: 'test', ico: '🎯', t: 'Ya sé algo', d: 'Un test corto te dice tu nivel' },
+                    { id: 'examen', ico: '🎓', t: 'Preparo un examen', d: 'Elegí HSK o TOCFL' }
+                ],
+                foot: 'Lo podés cambiar cuando quieras.'
             },
-            { // 3 · Hoy — el ciclo de una frase
-                ico: '🀄',
-                title: 'Hoy: practicá una frase',
-                html:
-                    '<p class="ob-text">1️⃣ Leé la frase y escuchala (🔊). 2️⃣ Escribí la palabra que falta — con el teclado o a mano ✍️ — y tocá <b>Verificar</b>. 3️⃣ Si fallás, la primera vez te damos una <b>pista</b>; la segunda, la respuesta.</p>' +
-                    '<div class="ob-item"><span class="ob-item-ico">👁</span><span><span class="ob-item-title">Ver</span><br><span class="ob-item-desc">Cambiá 简/繁, mostrá el pinyin y los colores de tono, o agrandá la letra.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🎤</span><span><span class="ob-item-title">Pronunciación</span><br><span class="ob-item-desc">Grabá tu voz y compará con la referencia. Se procesa en tu dispositivo.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">⭕</span><span><span class="ob-item-title">Sesión de hoy</span><br><span class="ob-item-desc">El anillo cuenta tus frases del día. La meta (5, 10 o 20) la elegís en 🙂 Yo.</span></span></div>' +
-                    '<div class="ob-tip">💡 ¿No la sabés? Tocá <b>No la sé, mostrar respuesta</b>: no pasa nada, esa frase volverá pronto.</div>'
+            s3: {
+                title: 'Tus cuatro pestañas',
+                tabs: [
+                    ['📚', 'Aprender', 'elegís qué estudiar'],
+                    ['🀄', 'Hoy', 'practicás frases'],
+                    ['🎯', 'Entrenar', 'oído, escritura y lectura'],
+                    ['🙂', 'Yo', 'tu progreso, ajustes y esta guía']
+                ],
+                done: { cero: 'Empezar ▶', test: 'Hacer el test ▶', examen: 'Ver exámenes ▶', none: 'Listo' }
             },
-            { // 4 · calificar + cajas + enlace al repaso
-                ico: '🔄',
-                title: 'Calificá y el repaso se agenda solo',
-                html:
-                    '<p class="ob-text">Después de responder, calificá honesto:</p>' +
-                    '<div class="ob-grade-row">' +
-                        '<div class="ob-grade"><span class="og-l">🔁 Otra vez</span><span class="og-i">10 min</span></div>' +
-                        '<div class="ob-grade"><span class="og-l">👍 Bien</span><span class="og-i">mañana</span></div>' +
-                        '<div class="ob-grade"><span class="og-l">⭐ Fácil</span><span class="og-i">no vuelve</span></div>' +
-                    '</div>' +
-                    '<p class="ob-text">Eso es todo el método: <b>lo que fallás vuelve antes</b>, lo que sabés se aleja. Con los aciertos el intervalo crece — tocá cada caja:</p>' +
-                    '<div id="ob-boxes" class="ob-boxes"></div>' +
-                    '<p class="ob-detail" id="ob-detail"></p>' +
-                    '<button type="button" id="ob-srs-btn" class="btn-secondary ob-srs-btn">🔁 Ver mi repaso de hoy</button>' +
-                    '<p class="ob-text">En <b>Hoy</b>, la barra 🔁 <b>Repaso inteligente</b> te dice cuántas tarjetas te tocan.</p>'
-            },
-            { // 5 · Entrenar y Yo
-                ico: '🧭',
-                title: 'Entrenar y Yo',
-                html:
-                    '<div class="ob-item"><span class="ob-item-ico">🎯</span><span><span class="ob-item-title">Entrenar</span><br><span class="ob-item-desc">Ejercicios sueltos: pares mínimos y solo oído 🎧 para el oído, pronunciación 🎤, escribir a mano ✍️, lector 🗣️ y planillas 写字 para imprimir.</span></span></div>' +
-                    '<div class="ob-item"><span class="ob-item-ico">🙂</span><span><span class="ob-item-title">Yo</span><br><span class="ob-item-desc">Tu progreso y tus <b>palabras aprendidas</b> (tocá una para ver su traducción), y los ajustes: chino ⇄ español, tema claro u oscuro, voz y velocidad, meta diaria y respaldo 💾.</span></span></div>' +
-                    '<div class="ob-tip">💡 Esta guía la reabrís cuando quieras: 🙂 Yo → <b>📖 Guía</b>.</div>'
-            },
-            { // 6 · racha (en vivo) + proverbio + final
-                ico: '🔥', center: true,
-                title: 'Un paso por día',
-                html:
-                    '<div class="ob-quote"><div class="ob-quote-zh">千里之行，始于足下</div><div class="ob-quote-src">«Un camino de mil kilómetros empieza con un primer paso» · Lao zi</div></div>' +
-                    '<p class="ob-text ob-center">No hace falta saberlo todo: hace falta <b>no romper la cadena</b>. La racha 🔥 crece cada día que practicás.</p>' +
-                    '<div class="ob-streak">' +
-                        '<div class="ob-streak-title" id="ob-streak-title">🔥 Tu racha empieza hoy</div>' +
-                        '<p class="ob-text">Días seguidos, calendario y palabras dominadas: miralo al terminar cada sesión.</p>' +
-                        '<button type="button" id="ob-streak-btn" class="btn-primary ob-streak-btn">🔥 Ver mi racha</button>' +
-                    '</div>'
-            }
-        ]
+            // Sin "te damos una pista": ante un error cualquiera la app solo
+            // da otra oportunidad (hintGeneric); la pista real aparece solo si
+            // la respuesta estuvo cerca (tono, acento, una letra).
+            hint: '👆 Escribí tu respuesta y tocá <b>Verificar</b>.',
+            win: '🔥 ¡Bien! Tu racha empieza hoy.'
+        }
     };
 
     // ---------------- contenido: pack CHINO 简体 (modo cn-es · aprendo español) ----------------
@@ -475,6 +467,19 @@
     var lang = 'es-cn';   // idioma de contenido en uso ('es-cn'|'cn-es'|'cn-hant')
     var cur = 0;          // paso actual (0..5)
     var boxSel = 0;       // caja seleccionada en las cajas del paso 4
+    var sCur = 0;         // guía simple: pantalla actual (0..2)
+    var sChoice = null;   // guía simple: 'cero' | 'test' | 'examen' | null
+
+    function isSeen() { return lsGet(LS_DONE) === '1' || lsGet(LS_DONE_V1) === '1'; }
+    // ¿Ya respondió tarjetas? (progreso guardado o contador de intentos)
+    function hasAnswers() {
+        try {
+            var d = JSON.parse(lsGet(MODE_KEY) || 'null');
+            if (d && (d.score > 0 || (d.knownWords && d.knownWords.length) || (d.newWords && d.newWords.length))) return true;
+        } catch (e) { /* guardado ilegible: seguir con el otro indicio */ }
+        var a = lsGet('ac_attempts_v1');
+        return !!(a && a !== '{}' && a !== '[]');
+    }
 
     // ---------------- modo (DOM primero, localStorage de app.js como fallback) ----------------
     function currentMode() {
@@ -563,6 +568,7 @@
         var st = P.steps[cur];
         var body = $('guide-body');
         if (!body) return;
+        body.className = '';
         body.innerHTML =
             '<h3 class="ob-title' + (st.center ? ' ob-center' : '') + '">' +
               (st.center ? '' : '<span class="ob-ico">' + st.ico + '</span> ') + st.title + '</h3>' +
@@ -643,6 +649,141 @@
         }
         body.scrollTop = 0;
     }
+
+    // ---------------- v9.7x: guía simple en español (3 pantallas) ----------------
+    // Bienvenida → ¿Desde dónde empezamos? → Tus cuatro pestañas. La opción
+    // elegida se ejecuta con el botón final; sin elegir, "Listo" solo cierra
+    // (reabrir la guía desde 📖 nunca cambia el módulo por sí sola).
+    function simpleChoices() {
+        var opts = PACK_ES.simple.s2.opts;
+        // "aprendo español": el test de nivel es de HSK (oculto en ese modo)
+        if (currentMode() === 'cn-es') return opts.filter(function (o) { return o.id !== 'test'; });
+        return opts;
+    }
+    function renderSimple() {
+        var P = PACK_ES, S = P.simple;
+        var body = $('guide-body');
+        if (!body) return;
+        body.className = 'ob-simple';
+        var h = '<button type="button" class="ob-skip ob-s-skip">' + P.ui.skip + '</button>';
+        if (sCur === 0) {
+            h += '<div class="ob-s-hero">👋</div><h3 class="ob-title ob-center">' + S.s1.title + '</h3>' +
+                '<p class="ob-s-text">' + S.s1.text + '</p>';
+        } else if (sCur === 1) {
+            h += '<h3 class="ob-title">' + S.s2.title + '</h3>';
+            simpleChoices().forEach(function (o) {
+                var on = sChoice === o.id;
+                h += '<button type="button" class="ob-s-choice' + (on ? ' on' : '') + '" data-choice="' + o.id + '" aria-pressed="' + on + '">' +
+                    '<span class="i">' + o.ico + '</span><span><span class="t">' + o.t + '</span><span class="d">' + o.d + '</span></span></button>';
+            });
+            h += '<p class="ob-s-foot">' + S.s2.foot + '</p>';
+        } else {
+            h += '<h3 class="ob-title">' + S.s3.title + '</h3>';
+            S.s3.tabs.forEach(function (t) {
+                h += '<div class="ob-s-tab"><span class="i">' + t[0] + '</span><span><span class="t">' + t[1] +
+                    '</span> <span class="d">· ' + t[2] + '</span></span></div>';
+            });
+        }
+        var dots = '';
+        for (var i = 0; i < 3; i++) dots += '<span class="ob-dot' + (i === sCur ? ' on' : '') + '"></span>';
+        var nextLabel = sCur === 0 ? P.ui.start : (sCur === 1 ? P.ui.next : S.s3.done[sChoice || 'none']);
+        h += '<div class="ob-nav"><button type="button" class="btn-secondary ob-back' + (sCur === 0 ? ' ghost' : '') + '">' + P.ui.back + '</button>' +
+            '<div class="ob-dots" aria-label="' + P.ui.dots + ' ' + (sCur + 1) + ' / 3">' + dots + '</div>' +
+            '<button type="button" class="btn-primary ob-next">' + nextLabel + '</button></div>';
+        body.innerHTML = h;
+        body.querySelector('.ob-s-skip').addEventListener('click', function () { close(true); });
+        body.querySelectorAll('.ob-s-choice').forEach(function (b) {
+            b.addEventListener('click', function () {
+                var id = b.getAttribute('data-choice');
+                sChoice = (sChoice === id) ? null : id; // tocar la elegida la desmarca
+                renderSimple();
+            });
+        });
+        body.querySelector('.ob-back').addEventListener('click', function () { if (sCur > 0) { sCur--; renderSimple(); } });
+        body.querySelector('.ob-next').addEventListener('click', function () {
+            if (sCur < 2) { sCur++; renderSimple(); } else finishSimple();
+        });
+        body.scrollTop = 0;
+    }
+    function finishSimple() {
+        var choice = sChoice;
+        // Solo la primera vez: si al cargar ya quedó 'done' (guía vista o
+        // respuestas guardadas), terminar la guía no la vuelve a activar.
+        if (lsGet(LS_HINT) === null) lsSet(LS_HINT, 'pending');
+        if (lsGet(LS_WIN) === null) lsSet(LS_WIN, 'pending');
+        close(true);
+        // setTimeout: el clic en el botón final sigue burbujeando hasta document;
+        // si el test de nivel se abriera en este mismo tick, su cierre por
+        // "clic afuera" lo vería y lo cerraría al instante (patrón de feature-tips).
+        setTimeout(function () {
+            try {
+                if (choice === 'cero' && typeof window.setModule === 'function') {
+                    window.setModule(currentMode() === 'cn-es' ? 'DELE-A1-Escolares' : 'HSK1');
+                } else if (choice === 'test') {
+                    var b = $('btn-placement');
+                    if (b) b.click();
+                } else if (choice === 'examen') {
+                    if (typeof window.showView === 'function') window.showView('aprender');
+                    var t = $('tab-exams');
+                    if (t) t.click();
+                }
+            } catch (e) { console.warn('[guía] no se pudo aplicar la elección:', e); }
+            armFirstCard();
+        }, 0);
+    }
+
+    // ---------------- v9.7x: pista y racha de la primera tarjeta ----------------
+    // Solo para quien terminó la guía simple ('pending'). El acierto se detecta
+    // mirando #feedback (clase 'correct' de showFeedback): checkAnswer no se toca.
+    var fbObs = null;
+    function settleFirstCardFlags() {
+        // Quien ya tenía la guía vista o respuestas guardadas no ve la pista.
+        var old = isSeen() || hasAnswers();
+        [LS_HINT, LS_WIN].forEach(function (k) { if (lsGet(k) === null && old) lsSet(k, 'done'); });
+    }
+    function doneHint() {
+        lsSet(LS_HINT, 'done');
+        var h = $('ob-hint');
+        if (h) h.parentNode.removeChild(h);
+    }
+    function armFirstCard() {
+        if (currentMode() !== 'es-cn') return; // textos solo en español por ahora
+        if (lsGet(LS_HINT) === 'pending' && !$('ob-hint')) {
+            var sec = $('answer-section');
+            if (sec && sec.parentNode) {
+                var d = document.createElement('div');
+                d.id = 'ob-hint';
+                d.className = 'ob-hint';
+                d.setAttribute('role', 'note');
+                d.innerHTML = PACK_ES.simple.hint + '<button type="button" class="ob-hint-x" aria-label="Cerrar">✕</button>';
+                d.querySelector('.ob-hint-x').addEventListener('click', doneHint);
+                sec.parentNode.insertBefore(d, sec);
+            }
+        }
+        var fb = $('feedback');
+        if (fbObs || !fb || typeof MutationObserver === 'undefined') return;
+        if (lsGet(LS_HINT) !== 'pending' && lsGet(LS_WIN) !== 'pending') return;
+        fbObs = new MutationObserver(function () {
+            var w = $('ob-win');
+            if (fb.classList.contains('hidden')) {
+                if (w) w.parentNode.removeChild(w); // siguiente tarjeta: el mensaje se va
+            } else {
+                if (lsGet(LS_HINT) === 'pending') doneHint(); // ya usó Verificar
+                if (fb.classList.contains('correct') && lsGet(LS_WIN) === 'pending') {
+                    lsSet(LS_WIN, 'done');
+                    w = document.createElement('div');
+                    w.id = 'ob-win';
+                    w.className = 'ob-win';
+                    w.setAttribute('role', 'status');
+                    w.textContent = PACK_ES.simple.win;
+                    fb.parentNode.insertBefore(w, fb.nextSibling);
+                }
+            }
+            if (lsGet(LS_HINT) !== 'pending' && lsGet(LS_WIN) !== 'pending' && !$('ob-win')) { fbObs.disconnect(); fbObs = null; }
+        });
+        fbObs.observe(fb, { attributes: true, attributeFilter: ['class'] });
+    }
+
     function renderBoxes() {
         var host = $('ob-boxes');
         if (!host) return;
@@ -773,9 +914,11 @@
             lang = langForMode(currentMode()); // idioma SIEMPRE al abrir (+ pref 简/繁 v9.26)
             cur = 0;
             boxSel = 0;
+            sCur = 0;
+            sChoice = null;
             pop.setAttribute('aria-label', PACKS[lang].aria);
             pop.classList.remove('hidden');
-            renderStep();
+            if (lang === 'es-cn') renderSimple(); else renderStep();
         } catch (e) { console.warn('[guía] no se pudo abrir:', e); }
     }
     function close(markDone) {
@@ -833,7 +976,7 @@
 
     // ---------------- init ----------------
     function autoShow() {
-        if (lsGet(LS_DONE) === '1') return;
+        if (isSeen()) return;
         // cortesía: no abrir si hay otro popup/baner activo o la pestaña está oculta
         if (document.hidden) return;
         if (document.querySelector('.vocab-pop:not(.hidden), .lq-pop:not(.hidden), .wp-banner:not(.hidden), #install-help:not(.hidden)')) return;
@@ -845,8 +988,9 @@
             injectButton();
             buildOverlay();
             watchMode();
-            var seen = lsGet(LS_DONE);
-            if (seen !== '1') setTimeout(autoShow, AUTO_DELAY);
+            settleFirstCardFlags();
+            if (!isSeen()) setTimeout(autoShow, AUTO_DELAY);
+            setTimeout(armFirstCard, 0); // pista pendiente de una sesión anterior
         } catch (e) {
             console.warn('[guía] init falló (la app sigue igual):', e);
         }
