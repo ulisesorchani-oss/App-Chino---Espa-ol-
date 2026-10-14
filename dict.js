@@ -49,16 +49,102 @@ function esWords(text) {
     return String(text || '').toLowerCase().match(/[a-záéíóúüñ]+/g) || [];
 }
 
-// Palabras hanzi de un texto (Intl.Segmenter; sin Segmenter → carácter a carácter)
-function zhWordsList(text) {
-    if (!text) return [];
+// ===== v9.7x — RESPALDO DEL CORTE POR PALABRAS (Android) =====
+// En Android, Chrome y Brave traen Intl.Segmenter pero SIN el diccionario de
+// chino del ICU: cortan 公園運動 en 公|園|運|動. Cuando el corte devuelve casi
+// todo en caracteres sueltos (o no hay Segmenter), se corta con un
+// diccionario propio: palabras de 2 a 6 caracteres de dict-mini (+ sus
+// alias tradicionales) y del vocabulario HSK y TOCFL embebido, buscando de
+// izquierda a derecha la palabra más larga. Lo que no está queda suelto.
+// El índice se arma UNA sola vez, la primera vez que hace falta.
+const ZH_DICT_MAX = 6;
+const ZH_HAN_CHAR = /^[㐀-䶿一-鿿豈-﫿]$/;
+let _zhDictIdx = null;
+function zhDictIndex() {
+    if (_zhDictIdx) return _zhDictIdx;
+    const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const idx = new Set();
+    const add = (w) => {
+        const ch = Array.from(String(w || ''));
+        if (ch.length >= 2 && ch.length <= ZH_DICT_MAX && ch.every(c => ZH_HAN_CHAR.test(c))) idx.add(ch.join(''));
+    };
+    // Los datos crudos de dict-mini.js (cargado antes), no los Map de más abajo:
+    // este índice puede armarse durante la carga de dict.js (indexWordHits).
+    const raw = (typeof window !== 'undefined' && window.DICT_MINI) || {};
+    Object.keys(raw).forEach((k) => { add(k); const v = raw[k]; if (Array.isArray(v)) add(v[2]); });
+    if (typeof EMBEDDED_MODULE_DATA !== 'undefined') {
+        Object.keys(EMBEDDED_MODULE_DATA).forEach((key) => {
+            if (!/^(HSK\d|TOCFL-)/.test(key)) return;
+            const rows = EMBEDDED_MODULE_DATA[key];
+            if (Array.isArray(rows)) rows.forEach((r) => { if (Array.isArray(r)) { add(r[0]); add(r[1]); } });
+        });
+    }
+    _zhDictIdx = idx;
+    const t1 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    zhDictIndex.buildMs = t1 - t0; // medición (pruebas)
+    return idx;
+}
+// ¿Es una palabra del diccionario de respaldo? (para que un toque abra la palabra)
+function zhIsDictWord(w) { return zhDictIndex().has(String(w || '')); }
+// Corte por diccionario: hanzi por palabra más larga; el resto, de a un carácter
+// (letras y dígitos seguidos van juntos, como hace Intl.Segmenter).
+function zhSegmentByDict(text) {
+    const c = Array.from(String(text || ''));
+    const idx = zhDictIndex();
+    const out = [];
+    let i = 0;
+    while (i < c.length) {
+        if (!ZH_HAN_CHAR.test(c[i])) {
+            let j = i + 1;
+            if (/[A-Za-z0-9]/.test(c[i])) while (j < c.length && /[A-Za-z0-9]/.test(c[j])) j++;
+            out.push(c.slice(i, j).join('')); i = j; continue;
+        }
+        let len = 1;
+        for (let L = Math.min(ZH_DICT_MAX, c.length - i); L >= 2; L--) {
+            const part = c.slice(i, i + L);
+            if (part.every(x => ZH_HAN_CHAR.test(x)) && idx.has(part.join(''))) { len = L; break; }
+        }
+        out.push(c.slice(i, i + len).join('')); i += len;
+    }
+    return out;
+}
+// ¿El Segmenter del navegador corta palabras? Prueba única con 公园运动 / 公園運動.
+let _zhSegOk;
+function zhSegmenterWorks() {
+    if (_zhSegOk !== undefined) return _zhSegOk;
     const seg = getZhSegmenter();
+    _zhSegOk = false;
     if (seg) {
         try {
-            return Array.from(seg.segment(String(text)), s => s.segment).filter(s => READER_HANZI.test(s));
-        } catch (e) { /* cae al fallback */ }
+            _zhSegOk = ['公园运动', '公園運動'].every(t => Array.from(seg.segment(t)).length < 4);
+        } catch (e) { _zhSegOk = false; }
     }
-    return Array.from(String(text)).filter(ch => READER_HANZI.test(ch));
+    return _zhSegOk;
+}
+// Todos los segmentos de un texto (palabras y puntuación), con respaldo: si
+// el corte del navegador deja casi todo suelto (≥ 80 % de las piezas hanzi
+// son de 1 carácter, con 4 o más hanzi), se usa el corte por diccionario.
+function zhSegmentAll(text) {
+    const t = String(text || '');
+    if (!t) return [];
+    const seg = getZhSegmenter();
+    if (seg && zhSegmenterWorks()) {
+        let parts = null;
+        try { parts = Array.from(seg.segment(t), s => s.segment); } catch (e) { parts = null; }
+        if (parts) {
+            const han = parts.filter(p => READER_HANZI.test(p));
+            const hanChars = han.reduce((a, p) => a + Array.from(p).length, 0);
+            const singles = han.filter(p => Array.from(p).length === 1).length;
+            if (hanChars < 4 || singles / Math.max(1, han.length) < 0.8) return parts;
+        }
+    }
+    return zhSegmentByDict(t);
+}
+
+// Palabras hanzi de un texto (Intl.Segmenter; v9.7x: con respaldo por diccionario)
+function zhWordsList(text) {
+    if (!text) return [];
+    return zhSegmentAll(text).filter(s => READER_HANZI.test(s));
 }
 
 function indexSentencesForVocab(arr) {

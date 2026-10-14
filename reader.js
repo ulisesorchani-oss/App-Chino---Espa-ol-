@@ -587,6 +587,8 @@ const READER_STICKY = /[，。！？、；：…—·（）()《》〈〉「」�
 function readerSegmentLine(line) {
     // Palabras naturales del chino (你好 = 1 palabra); fallback: carácter a carácter.
     // v7.10: comparte la ÚNICA instancia de Intl.Segmenter con el diccionario.
+    // v9.7x: con respaldo por diccionario cuando el navegador corta suelto (Android).
+    if (typeof zhSegmentAll === 'function') return zhSegmentAll(line);
     const seg = getZhSegmenter();
     if (seg) {
         try { return Array.from(seg.segment(line), s => s.segment); } catch (e) { /* cae al fallback */ }
