@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v175'; // — Glosario de lecciones: campo opcional keywords (palabras elegidas, en la escritura elegida, pinyin con pinyinFor); 5 palabras en las 8 lecciones TOCFL Prep y A1
+const VERSION = 'v176'; // — Lecciones: botones HSK/TOCFL en dos líneas (etiqueta chica del examen arriba, nivel grande abajo); "TOCFL Prep" ya no se corta a 320 px
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

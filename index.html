@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261014i">
+    <link rel="stylesheet" href="style.css?v=20261014j">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -236,22 +236,27 @@
                          placeholder deshabilitado ("HSK" / "TOCFL"). -->
                     <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
                         <div class="lvsel-row">
+                            <!-- v9.7x: dos líneas — etiqueta chica (examen) arriba y el nivel
+                                 grande abajo (las opciones van sin el prefijo; el aria-label
+                                 ya nombra el examen). Inactivo: el rango de niveles. -->
                             <label class="lvsel lvsel-hsk on">
+                                <span class="lvsel-tag" aria-hidden="true">HSK</span>
                                 <select id="sel-lv-hsk" aria-label="Lecciones HSK: elegí el nivel">
-                                    <option value="" disabled hidden>HSK</option>
-                                    <option value="1" selected>HSK 1</option>
-                                    <option value="2">HSK 2</option>
-                                    <option value="3">HSK 3</option>
-                                    <option value="4">HSK 4</option>
-                                    <option value="5">HSK 5</option>
-                                    <option value="6">HSK 6</option>
-                                    <option value="7-9">HSK 7-9</option>
+                                    <option value="" disabled hidden>1–9</option>
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7-9">7-9</option>
                                 </select>
                             </label>
                             <label class="lvsel lvsel-tocfl">
+                                <span class="lvsel-tag" aria-hidden="true">TOCFL</span>
                                 <!-- opciones generadas en JS desde TOCFL_ORDER (buildTocflOptions) -->
                                 <select id="sel-lv-tocfl" aria-label="Lecciones TOCFL: elegí el nivel">
-                                    <option value="" disabled hidden selected>TOCFL</option>
+                                    <option value="" disabled hidden selected>Prep–C1</option>
                                 </select>
                             </label>
                         </div>
@@ -921,7 +926,7 @@
     <script src="reader.js?v=20261014u"></script>
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20261014t"></script>
-    <script src="lessons-graduated.js?v=20261014x"></script>
+    <script src="lessons-graduated.js?v=20261014y"></script>
     <script src="placement-test.js?v=20261014s"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20261014s"></script>
