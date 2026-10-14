@@ -5216,7 +5216,7 @@ body.paper-mode .bottom-app-actions .utility-btn { border-color: #d9c9a3; }
 }
 
 /* ===== v9.15: práctica intercalada — estado activo del toggle =====
-   Botón #btn-interleaving (tools-row). Apagado se ve como los demás chips;
+   Botón #btn-interleaving (fila de estado de Hoy). Apagado se ve como los demás chips;
    encendido queda verde (se distingue del violeta de Pinyin y del azul de
    简/繁) para que el alumno siempre sepa si está practicando mezclado. */
 #btn-interleaving.active {
@@ -5605,6 +5605,12 @@ body.paper-mode .header-streak { background: #fff8e6; color: #4a3f2e; }
     margin-bottom: 10px;
 }
 .srs-bar-btn { margin-top: 0; min-height: 48px; }
+/* v9.7x: 🔀 Intercalar en la fila de estado, debajo de "Repaso inteligente"
+   (su aviso aparece justo abajo, en #module-status) */
+.control-panel.study-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.study-bar #btn-interleaving { min-height: 44px; }
+.study-bar #btn-interleaving:not(.active) { background: rgba(255, 255, 255, 0.92); }
+body.dark-mode .study-bar #btn-interleaving:not(.active) { background: var(--bg-light); }
 
 /* --- vistas + barra inferior --- */
 main#main { display: block; }
@@ -5733,7 +5739,6 @@ body.dark-mode .d-no { color: #ff8a7f; }
 body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-primary); border-color: var(--border); }
 
 /* --- Aprender --- */
-.aprender-tools { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 /* v9.7x: aviso "practicás en Hoy" en Exámenes/Diaria/Clásicos (los paneles
    que saltan a Hoy al elegir). Píldora con fondo propio: el texto se lee
    igual sobre el degradado del tema claro que sobre oscuro y papel. */
@@ -5748,8 +5753,6 @@ body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-
     background: var(--bg-card);
     color: var(--text-primary);
 }
-.aprender-tools .speed-btn { background: rgba(255, 255, 255, 0.92); }
-body.dark-mode .aprender-tools .speed-btn { background: var(--bg-light); }
 
 /* --- Entrenar --- */
 .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
