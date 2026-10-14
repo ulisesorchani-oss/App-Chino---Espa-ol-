@@ -5734,6 +5734,20 @@ body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-
 
 /* --- Aprender --- */
 .aprender-tools { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+/* v9.7x: aviso "practicás en Hoy" en Exámenes/Diaria/Clásicos (los paneles
+   que saltan a Hoy al elegir). Píldora con fondo propio: el texto se lee
+   igual sobre el degradado del tema claro que sobre oscuro y papel. */
+.aprender-hoy-hint {
+    display: inline-block;
+    margin: -2px 0 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.35;
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
 .aprender-tools .speed-btn { background: rgba(255, 255, 255, 0.92); }
 body.dark-mode .aprender-tools .speed-btn { background: var(--bg-light); }
 
