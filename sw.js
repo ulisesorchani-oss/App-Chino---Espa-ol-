@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v172'; // — Lecciones: etiqueta con el nombre de quien habla arriba de cada línea (who/whoT opcionales), un color por persona; fuera del karaoke, el audio y el quiz
+const VERSION = 'v173'; // — Lecciones TOCFL A2, B1 y C1: el nombre de quien habla pasa de la línea a la etiqueta (who/whoT); hasta 4 colores por persona; sin prefijo （旁白）
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

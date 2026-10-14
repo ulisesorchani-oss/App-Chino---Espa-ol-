@@ -4311,7 +4311,7 @@ body.paper-mode .tk-engine-note { color: #8a5a1f; }
 .lq-line-zh { font-size: 1.12rem; line-height: 1.6; color: #1e293b; }
 .lq-line-py { font-size: 0.78rem; color: #7c5cf0; margin-top: 2px; }
 .lq-line-es { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
-/* v9.7x: hablantes — etiqueta chica arriba de la línea, un color por persona */
+/* v9.7x: hablantes — etiqueta chica arriba de la línea, un color por persona (hasta 4) */
 .lq-line-who {
     display: inline-flex; align-items: baseline; gap: 6px; margin-bottom: 4px;
     padding: 1px 8px; border-radius: 999px;
@@ -4320,10 +4320,16 @@ body.paper-mode .tk-engine-note { color: #8a5a1f; }
 .lq-who-py { font-weight: 600; }
 .lq-who-a { background: #ccfbf1; color: #115e59; }
 .lq-who-b { background: #fce7f3; color: #9d174d; }
+.lq-who-c { background: #fef3c7; color: #92400e; }
+.lq-who-d { background: #dbeafe; color: #1e40af; }
 body.dark-mode .lq-who-a { background: rgba(45, 212, 191, 0.16); color: #5eead4; }
 body.dark-mode .lq-who-b { background: rgba(244, 114, 182, 0.16); color: #f9a8d4; }
+body.dark-mode .lq-who-c { background: rgba(251, 191, 36, 0.16); color: #fcd34d; }
+body.dark-mode .lq-who-d { background: rgba(96, 165, 250, 0.16); color: #93c5fd; }
 body.paper-mode .lq-who-a { background: #e3efe6; color: #1f5f4a; }
 body.paper-mode .lq-who-b { background: #f5e1e1; color: #8a2b3c; }
+body.paper-mode .lq-who-c { background: #f3e5c4; color: #7a4510; }
+body.paper-mode .lq-who-d { background: #e0e8f3; color: #1f4e8a; }
 body.grand-mode .lq-line-who { font-size: 0.92rem; }
 .lq-story-foot { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; }
 .lq-tag-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
