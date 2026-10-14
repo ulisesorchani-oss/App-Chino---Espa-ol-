@@ -93,6 +93,8 @@
     // ── utilidades compartidas ──
     const ckKey = (typeof ck === 'function') ? ck() : 'simp';
     const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
+    // v9.7x: escritura de una lección puntual (la lista muestra TOCFL y HSK a la vez)
+    const lessonScript = (l) => (typeof scriptFor === 'function') ? scriptFor(l) : zhKey();
     const pyLine = (zh) => {
         try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
         catch (e) { return ''; }
@@ -238,7 +240,7 @@
                 '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + l.emoji + '</span>' +
                 '<span class="lc-hsk">' + (l.exam ? escHtml(l.exam + ' ' + (l.examLvl || l.hsk)) : 'HSK ' + l.hsk) + '</span>' +
                 '<span class="lc-best">🎯 ' + best + flag + '</span></div>' +
-                '<div class="lc-titles"><span class="lc-zh">' + escHtml(l.titleZh) + '</span>' +
+                '<div class="lc-titles"><span class="lc-zh">' + escHtml(lessonScript(l) === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</span>' +
                 '<span class="lc-es">' + escHtml(l.titleEs) + '</span></div>' +
                 '<p class="lc-blurb">' + escHtml(l.blurb) + '</p>' +
                 '<div class="lc-meta">' + l.lines.length + ' líneas · ' + l.quiz.length + ' ejercicios</div>' +
@@ -337,6 +339,7 @@
         pop.classList.add('hidden');
         syncBodyScroll(); // v9.50
         S.lesson = null; S.view = null;
+        window.acScriptRef = null; // v9.7x: vuelve el contexto de Hoy
         renderList(); // refresca el mejor puntaje
     }
     function bindPop() {
@@ -384,6 +387,7 @@
     // ── vista LECTURA ──
     function openStory(l) {
         S.lesson = l; S.view = 'story'; S.pinyin = false;
+        window.acScriptRef = l; // v9.7x: ck() = escritura de ESTA lección (scriptFor) mientras está abierta
         openPop();
         progNum.textContent = '📖';
         segs.innerHTML = '';
@@ -396,7 +400,7 @@
         // nivel de la propia lección (ej. 他/一/工 en una lección HSK6), ver
         // hskLevelOf/extractKeyWords en dict.js.
         const keyWords = (typeof extractKeyWords === 'function')
-            ? extractKeyWords(l.lines.map(ln => ln.zh), 5, l.hsk)
+            ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
             : [];
         if (keyWords.length >= 3) renderGlossary(l, keyWords);
         else renderStory(l);
@@ -460,6 +464,7 @@
     // ── vista PRÁCTICA ──
     function openQuiz(l) {
         S.lesson = l; S.view = 'quiz'; S.idx = 0; S.results = new Array(l.quiz.length).fill(null);
+        window.acScriptRef = l; // v9.7x
         // mezcla por sesión: los datos traen opts[0]=correcta; el orden visible
         // se baraja acá para que la posición de la correcta no sea predecible.
         S.order = l.quiz.map(() => {
@@ -623,6 +628,8 @@
     // ── arranque ──
     function boot() {
         buildTocflOptions(); // v9.6b/v9.7x: opciones TOCFL del <select>, desde TOCFL_ORDER
+        // v9.7x: cambiar 简/繁 (Hoy o Ajustes) redibuja la lista sin recargar
+        document.addEventListener('ac-script-change', () => renderList());
         restoreLevel();      // v9.7x: último nivel elegido (ac_lesson_level)
         bindList();
         bindPop();

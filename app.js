@@ -147,7 +147,7 @@ const TOCFL_INFO = {
 // Etiqueta visible de un módulo (los clásicos muestran nombre ES + zh según el script activo)
 function moduleLabel(mod) {
     const info = CLASSICS_INFO[mod];
-    if (info) return info.es + ' ' + (ck() === 'trad' ? info.zhT : info.zh);
+    if (info) return info.es + ' ' + (scriptFor(mod) === 'trad' ? info.zhT : info.zh);
     return MODULE_LABELS[mod] || mod;
 }
 
@@ -543,8 +543,55 @@ function rememberWordContext(words, s) {
 }
 
 // ===== Helpers =====
+// v9.7x: ESCRITURA POR FAMILIA. Dos familias de contenido: 'tocfl' (módulos
+// y lecciones TOCFL) y 'hsk' (HSK y todo lo demás: Diaria, Clásicos, Lector,
+// Repaso). Cada familia recuerda su elección EXPLÍCITA en su propia clave
+// (ac_script_tocfl / ac_script_hsk); sin elección, TOCFL se ve en
+// tradicional y "HSK y el resto" en simplificado. La misma familyOf()
+// servirá después para el pinyin y la voz.
+const SCRIPT_KEY = { hsk: 'ac_script_hsk', tocfl: 'ac_script_tocfl' };
+function familyOf(ref) {
+    if (ref && typeof ref === 'object') return ref.exam === 'TOCFL' ? 'tocfl' : 'hsk';
+    const r = String(ref || '');
+    return (r === 'tocfl' || r.indexOf('TOCFL') === 0) ? 'tocfl' : 'hsk';
+}
+function explicitScript(fam) {
+    try {
+        const v = localStorage.getItem(SCRIPT_KEY[fam]);
+        return (v === 'trad' || v === 'simp') ? v : null;
+    } catch (e) { return null; }
+}
+function scriptFor(ref) {
+    const fam = familyOf(ref);
+    return explicitScript(fam) || (fam === 'tocfl' ? 'trad' : 'simp');
+}
+// Contexto de ck(): una lección o el Podcast abiertos (window.acScriptRef,
+// lo ponen lessons-graduated.js/podcast.js) → esa lección; el Repaso (SRS)
+// abierto → "HSK y el resto", como siempre; si no, el módulo activo de Hoy.
+function scriptContextRef() {
+    if (window.acScriptRef) return window.acScriptRef;
+    const srs = document.getElementById('srs-pop');
+    if (srs && !srs.classList.contains('hidden')) return 'hsk';
+    return state.activeModule;
+}
 function ck() {
-    return state.charType === 'trad' ? 'trad' : 'simp';
+    return scriptFor(scriptContextRef());
+}
+// Migración única: un 'trad' guardado con el 简/繁 de antes (global) cuenta
+// como elección explícita para las dos familias; un 'simp' guardado NO
+// (no se distingue de "nunca eligió"). state.charType queda como espejo de
+// la familia "HSK y el resto" (respaldo y compatibilidad).
+function migrateScriptChoice() {
+    try {
+        if (!localStorage.getItem('ac_script_v1')) {
+            if (state.charType === 'trad') {
+                if (!explicitScript('hsk')) localStorage.setItem(SCRIPT_KEY.hsk, 'trad');
+                if (!explicitScript('tocfl')) localStorage.setItem(SCRIPT_KEY.tocfl, 'trad');
+            }
+            localStorage.setItem('ac_script_v1', '1');
+        }
+    } catch (e) { /* sin storage: valen los valores por defecto */ }
+    state.charType = scriptFor('hsk');
 }
 
 /**
@@ -869,6 +916,7 @@ function updateUILanguage(mode) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     loadProgress();
+    migrateScriptChoice(); // v9.7x: escritura por familia (TOCFL / HSK y el resto)
     applyToneScheme(); // v7.11: restaurar esquema de tonos guardado (respeta dark ya aplicado)
     await loadSentences();
     setupEventListeners();
@@ -921,7 +969,7 @@ function applySavedUI() {
     applyListenUI(); // v9.19: restaurar estado del toggle solo oído
 
     // Actualizar estado visual de botones simp/trad (Hoy y Ajustes)
-    paintScriptButtons(state.charType);
+    paintScriptButtons(ck()); // v9.7x: la escritura del contexto actual (familia del módulo de Hoy)
     // Actualizar botones diarios, de exámenes Y clásicos
     const cats = document.querySelectorAll('.cat-btn, .btn-exam');
     cats.forEach(b => {
@@ -1778,8 +1826,12 @@ function paintScriptButtons(ct) {
 }
 
 function setCharType(ct) {
-    state.charType = ct;
-    paintScriptButtons(ct);
+    // v9.7x: la elección explícita se guarda para la familia del contexto
+    // actual (el módulo de Hoy); "HSK y el resto" además sigue en charType.
+    const fam = familyOf(scriptContextRef());
+    try { localStorage.setItem(SCRIPT_KEY[fam], ct); } catch (e) { /* sin storage */ }
+    if (fam === 'hsk') state.charType = ct;
+    paintScriptButtons(ck());
     
     saveProgress();
     updateClassicsScript();   // nombres de clásicos en 简/繁
@@ -1803,6 +1855,7 @@ function setModule(mod) {
     updateDeleBtnLabel();
     updateTocflBtnLabel(); // v8.2
     updateClassicsScript();
+    paintScriptButtons(ck()); // v9.7x: otra familia puede tener otra escritura
     
     saveProgress();
     loadSentences().then(() => {
@@ -1893,7 +1946,7 @@ function updateClassicsBtnLabel() {
     if (!lbl) return;
     const info = CLASSICS_INFO[state.activeModule];
     if (info) {
-        const zh = (ck() === 'trad') ? info.zhT : info.zh;
+        const zh = (scriptFor('hsk') === 'trad') ? info.zhT : info.zh; // Clásicos: "HSK y el resto"
         lbl.textContent = zh + ' · ' + info.es;
     } else {
         lbl.textContent = 'Clásicos Antiguos';
@@ -1903,7 +1956,7 @@ function updateClassicsBtnLabel() {
 function updateClassicsScript() {
     const menu = document.getElementById('classics-menu');
     if (!menu) return;
-    const trad = ck() === 'trad';
+    const trad = scriptFor('hsk') === 'trad'; // Clásicos: "HSK y el resto"
     menu.querySelectorAll('.classic-item').forEach(item => {
         const info = CLASSICS_INFO[item.dataset.module];
         const zhEl = item.querySelector('.ci-zh');
@@ -2353,7 +2406,7 @@ function renderCurrentSentence() {
 
     // 6. Placeholder dinámico (v8.1: las tarjetas de palabra invierten la dirección)
     const input = document.getElementById('answer-input');
-    const charLabel = state.charType === 'trad' ? 'tradicional' : 'simplificado';
+    const charLabel = ck() === 'trad' ? 'tradicional' : 'simplificado';
     if (s.w) {
         input.placeholder = learningChinese
             ? 'Escribí el significado en español...'

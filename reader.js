@@ -409,7 +409,7 @@ function lessonForSentence(s) {
 // v7.15: vuelca el texto de una lección/sección en el Lector y avisa.
 // Devuelve true si cargó texto (las plantadas avisan y devuelven false).
 function fillReaderWithLesson(lesson) {
-    const k = ck();
+    const k = (typeof scriptFor === 'function') ? scriptFor('hsk') : ck(); // v9.7x: Lector = "HSK y el resto"
     const text = (k === 'trad' ? (lesson.text_trad || lesson.text_simp)
                                : (lesson.text_simp || lesson.text_trad)) || '';
     if (!text) {

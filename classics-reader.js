@@ -48,7 +48,7 @@
     const CR = { mod: null, block: 0, pinyin: false };
 
     // ── utilidades compartidas con lessonsInit ──
-    const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
+    const zhKey = () => (typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp'; // v9.7x: Clásicos = "HSK y el resto"
     const pyLine = (zh) => {
         try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
         catch (e) { return ''; }
