@@ -426,9 +426,20 @@
     }
     function renderStory(l) {
         const k = zhKey();
+        // v9.7x: hablantes (who/whoT opcionales) — etiqueta chica arriba de la
+        // línea, FUERA de .lq-line-zh: no entra en el karaoke, ni en el audio,
+        // ni en el glosario o el quiz. Color por persona (orden de aparición).
+        const whoIdx = new Map();
+        l.lines.forEach(ln => { if (ln.who && !whoIdx.has(ln.who)) whoIdx.set(ln.who, whoIdx.size % 2); });
         const lines = l.lines.map((ln, i) => {
             const zh = (k === 'trad' ? ln.zhT : ln.zh);
+            const who = ln.who ? (k === 'trad' ? (ln.whoT || ln.who) : ln.who) : '';
+            const whoHtml = who
+                ? '<div class="lq-line-who lq-who-' + (whoIdx.get(ln.who) ? 'b' : 'a') + '"><span lang="zh">' + escHtml(who) + '</span>' +
+                  '<span class="lq-who-py hidden" data-zh="' + escHtml(ln.who) + '"></span></div>'
+                : '';
             return '<div class="lq-line" data-i="' + i + '" role="button" tabindex="0" title="Tocá un carácter para verlo · 🔊 para escuchar la línea">' +
+                whoHtml +
                 '<div class="lq-line-zh">' + zhCharsHtml(zh) + '</div>' +
                 '<button type="button" class="lq-line-say" data-zh="' + escHtml(zh) + '" aria-label="Escuchar la línea">🔊</button>' +
                 '<div class="lq-line-py hidden" data-zh="' + escHtml(ln.zh) + '"></div>' +
@@ -465,7 +476,7 @@
         body.querySelector('#lq-story-pinyin').addEventListener('click', (e) => {
             S.pinyin = !S.pinyin;
             e.target.textContent = '🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF');
-            body.querySelectorAll('.lq-line-py').forEach(el => {
+            body.querySelectorAll('.lq-line-py, .lq-who-py').forEach(el => { // v9.7x: también el nombre del hablante
                 if (S.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
                 el.classList.toggle('hidden', !S.pinyin);
             });
