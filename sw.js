@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v169'; // — Escritura por familia: TOCFL en tradicional y HSK y el resto en simplificado por defecto; la elección explícita (简/繁) se recuerda por familia (ac_script_tocfl / ac_script_hsk)
+const VERSION = 'v170'; // — Lecciones: los botones HSK y TOCFL ya no muestran el país debajo del nivel (los colores no cambian)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
