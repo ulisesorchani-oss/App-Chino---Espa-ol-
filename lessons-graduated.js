@@ -268,6 +268,22 @@
         });
     }
 
+    // v9.7x: recordar el último nivel elegido en Lecciones. Solo se APLICA
+    // al cargar (antes del primer renderList) y solo si coincide con una
+    // opción real de los <select>; si no, queda el data-level del HTML ('1').
+    const LEVEL_KEY = 'ac_lesson_level';
+    function restoreLevel() {
+        const wrap = $('lesson-list');
+        let v = null;
+        try { v = localStorage.getItem(LEVEL_KEY); } catch (e) { /* sin storage */ }
+        if (!wrap || !v) return;
+        const ok = ['sel-lv-hsk', 'sel-lv-tocfl'].some(id => {
+            const s = $(id);
+            return s && Array.from(s.options).some(o => o.value === v && !o.disabled);
+        });
+        if (ok) wrap.dataset.level = v;
+    }
+
     // v9.7x: los dos <select> (HSK / TOCFL) REFLEJAN data-level de
     // #lesson-list, la única fuente de verdad del nivel. El del examen
     // activo muestra el nivel y queda resaltado (.on); el otro vuelve a su
@@ -302,6 +318,7 @@
             if (sel) sel.addEventListener('change', () => {
                 if (!sel.value) return;
                 wrap.dataset.level = sel.value;
+                try { localStorage.setItem(LEVEL_KEY, sel.value); } catch (e) { /* sin storage: no se recuerda */ }
                 renderList();
             });
         });
@@ -606,6 +623,7 @@
     // ── arranque ──
     function boot() {
         buildTocflOptions(); // v9.6b/v9.7x: opciones TOCFL del <select>, desde TOCFL_ORDER
+        restoreLevel();      // v9.7x: último nivel elegido (ac_lesson_level)
         bindList();
         bindPop();
         renderList();
