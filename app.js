@@ -704,6 +704,7 @@ const UI_STRINGS = {
     mixedChip: '🔀 {mod}', mixedTitle: 'Intercalada de otra situación de Práctica Diaria ({mod}) para mezclar temas — así se recuerda mejor que practicando uno solo seguido',
     // v9.48: tolerancia de trazos (leniency manual en Ajustes)
     setStrokes: 'Tolerancia de trazos',
+    setScript: 'Escritura', setGrand: 'Letra grande', setFont: 'Fuente china', // v9.7x
     lenStrict: '🎯 Estricta', lenNormal: '⚖️ Normal', lenLenient: '🫧 Permisiva',
     lenTitle: 'Cuánto puede desviarse un trazo dibujado y contar como bien. Estricta te exige más; Permisiva perdona más. Se aplica desde el próximo carácter que practiques.',
     // v9.7x: aviso antes de la 1.ª descarga del modelo de pronunciación
@@ -785,6 +786,7 @@ const UI_STRINGS = {
     mixedChip: '🔀 {mod}', mixedTitle: '穿插自「日常练习」的另一个场景（{mod}），混合练习有助于记忆——比连续练同一个场景效果更好',
     // v9.48: 笔顺容错（Ajustes 里手动设置）
     setStrokes: '笔顺容错',
+    setScript: '字形', setGrand: '大字', setFont: '中文字体',
     lenStrict: '🎯 严格', lenNormal: '⚖️ 标准', lenLenient: '🫧 宽容',
     lenTitle: '笔画偏差多少还算写对。严格＝要求更高；宽容＝更容易通过。从下一个字开始生效。',
     // v9.7x: 首次下载发音模型前的提示
@@ -918,19 +920,8 @@ function applySavedUI() {
     applyInterleaveUI(); // v9.15: restaurar estado del toggle intercalado
     applyListenUI(); // v9.19: restaurar estado del toggle solo oído
 
-        // Actualizar estado visual de botones simp/trad
-    const btnSimp = document.getElementById('btn-simplified');
-    const btnTrad = document.getElementById('btn-traditional');
-
-    if (btnSimp) {
-        btnSimp.classList.toggle('active', state.charType === 'simp');
-        btnSimp.innerHTML = state.charType === 'simp' ? '<b>简</b> 简体' : '简 简体';
-    }
-
-    if (btnTrad) {
-        btnTrad.classList.toggle('active', state.charType === 'trad');
-        btnTrad.innerHTML = state.charType === 'trad' ? '<b>繁</b> 繁體' : '繁 繁體';
-    }
+    // Actualizar estado visual de botones simp/trad (Hoy y Ajustes)
+    paintScriptButtons(state.charType);
     // Actualizar botones diarios, de exámenes Y clásicos
     const cats = document.querySelectorAll('.cat-btn, .btn-exam');
     cats.forEach(b => {
@@ -948,11 +939,7 @@ function applySavedUI() {
         pinyinBtn.classList.toggle('active', state.showPinyin);
     }
 
-    const btnSpeed = document.getElementById('btn-speed');
-    if (btnSpeed) {
-        btnSpeed.textContent = SPEED_LABELS[String(playbackSpeed)];
-        btnSpeed.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
-    }
+    paintSpeedButtons(); // v9.7x: Ajustes y Hoy (audio-tts.js)
 
     // Botones de voz (v9.49: bandera dentro del icono — 🇨🇳/🇹🇼 y 🇦🇷/🇪🇸)
     const btnVoiceZh = document.getElementById('btn-voice-zh');
@@ -1312,6 +1299,8 @@ function setupEventListeners() {
     // Tipo de carácter (Simplificado/Tradicional)
     safeAdd('btn-simplified', () => setCharType('simp'));
     safeAdd('btn-traditional', () => setCharType('trad'));
+    safeAdd('btn-simplified-set', () => setCharType('simp'));   // v9.7x: mismo 简/繁 en Ajustes
+    safeAdd('btn-traditional-set', () => setCharType('trad'));
     
     // Acciones principales
     safeAdd('btn-check', checkAnswer);
@@ -1437,6 +1426,7 @@ function setupEventListeners() {
         hideToneLegend();
     });
     safeAdd('btn-speed', cycleSpeed);
+    safeAdd('btn-speed-hoy', cycleSpeed); // v9.7x: la misma velocidad desde la hoja 👁 Ver de Hoy
     // v9.3: respaldo de progreso + exportar a Anki + modo abuelo
     safeAdd('btn-backup', openBackupPop);
     safeAdd('btn-backup-close', closeBackupPop);
@@ -1770,21 +1760,26 @@ async function setMode(mode) {
     renderCurrentSentence();
 }
 
+// v9.7x: dos pares de botones 简/繁 — la hoja 👁 Ver de Hoy y Yo → Ajustes —
+// con el MISMO estado (state.charType): cambiar uno repinta el otro.
+function paintScriptButtons(ct) {
+    [['btn-simplified', 'btn-traditional'], ['btn-simplified-set', 'btn-traditional-set']].forEach(([s, t]) => {
+        const btnSimp = document.getElementById(s);
+        const btnTrad = document.getElementById(t);
+        if (btnSimp) {
+            btnSimp.classList.toggle('active', ct === 'simp');
+            btnSimp.innerHTML = ct === 'simp' ? '<b>简</b> 简体' : '简 简体';
+        }
+        if (btnTrad) {
+            btnTrad.classList.toggle('active', ct === 'trad');
+            btnTrad.innerHTML = ct === 'trad' ? '<b>繁</b> 繁體' : '繁 繁體';
+        }
+    });
+}
+
 function setCharType(ct) {
     state.charType = ct;
-    
-    const btnSimp = document.getElementById('btn-simplified');
-    const btnTrad = document.getElementById('btn-traditional');
-    
-    if (btnSimp) {
-        btnSimp.classList.toggle('active', ct === 'simp');
-        btnSimp.innerHTML = ct === 'simp' ? '<b>简</b> 简体' : '简 简体';
-    }
-    
-    if (btnTrad) {
-        btnTrad.classList.toggle('active', ct === 'trad');
-        btnTrad.innerHTML = ct === 'trad' ? '<b>繁</b> 繁體' : '繁 繁體';
-    }
+    paintScriptButtons(ct);
     
     saveProgress();
     updateClassicsScript();   // nombres de clásicos en 简/繁

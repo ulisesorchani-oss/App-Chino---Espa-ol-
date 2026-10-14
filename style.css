@@ -3835,14 +3835,18 @@ body.dark-mode .vp-srs-add.is-in { color: #4ade80; border-color: #4ade80; backgr
     color: white;
 }
 
-/* Chips de visualización sobre fondo claro */
-.card-tools-header .script-toggle {
+/* Chips de visualización sobre fondo claro (hoja 👁 Ver de Hoy y, v9.7x,
+   el mismo 简/繁 en Yo → Ajustes) */
+.card-tools-header .script-toggle,
+.yo-settings .script-toggle {
     border-color: var(--border);
 }
-.card-tools-header .script-btn {
+.card-tools-header .script-btn,
+.yo-settings .script-btn {
     color: var(--text-secondary);
 }
-.card-tools-header .script-btn.active {
+.card-tools-header .script-btn.active,
+.yo-settings .script-btn.active {
     background: var(--primary);
     color: white;
 }
@@ -3874,10 +3878,12 @@ body.dark-mode .card-tools-header .mode-btn.active {
     border-color: #2563eb;
     color: white;
 }
-body.dark-mode .card-tools-header .script-btn {
+body.dark-mode .card-tools-header .script-btn,
+body.dark-mode .yo-settings .script-btn {
     color: var(--text-secondary);
 }
-body.dark-mode .card-tools-header .script-btn.active {
+body.dark-mode .card-tools-header .script-btn.active,
+body.dark-mode .yo-settings .script-btn.active {
     background: #2563eb;
     color: white;
 }

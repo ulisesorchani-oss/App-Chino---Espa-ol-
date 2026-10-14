@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v165'; // — Tema papel: pestañas inactivas de Aprender en marrón (antes blanco sobre crema)
+const VERSION = 'v166'; // — Ajustes: Letra grande y Fuente china se mudan desde Hoy; 简/繁 también en Ajustes y velocidad también en Hoy (mismo estado)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
