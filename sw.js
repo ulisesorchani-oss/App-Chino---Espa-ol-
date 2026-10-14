@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v173'; // — Lecciones TOCFL A2, B1 y C1: el nombre de quien habla pasa de la línea a la etiqueta (who/whoT); hasta 4 colores por persona; sin prefijo （旁白）
+const VERSION = 'v174'; // — Pinyin por familia: capa «errores» global (还书, 包子, 裙子, 东西, 客气) y convención TOCFL (327 palabras de la lista TOCFL) en Lecciones; el Lector genera el pinyin del tradicional pegado desde el simplificado
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -483,6 +483,8 @@ const PRECACHE = [
   './audio-tts.js',        // v9.51: audio/TTS extraído de app.js (fase 1 de modularización)
   './data-embedded.js',    // v9.57: oraciones y vocabulario embebido extraído de app.js (fase 7)
   './dict.js',             // v9.52: motor de diccionario extraído de app.js (fase 2)
+  './pinyin-familias.js',  // v9.7x: pinyin por familia (capa «errores» + convención TOCFL)
+  './pinyin-tocfl.js',     // v9.7x: tabla TOCFL — se carga LAZY, precacheada para offline
   './trazos.js',           // v9.53: motor Hanzi Writer extraído de app.js (fase 3)
   './srs.js',              // v9.54: mazo de repaso extraído de app.js (fase 4)
   './reader.js',           // v9.55: lector de texto libre extraído de app.js (fase 5)

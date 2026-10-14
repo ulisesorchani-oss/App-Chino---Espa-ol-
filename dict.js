@@ -408,7 +408,8 @@ function extractKeyWords(zhLines, max, minLevel) {
         }
         const hit = dictMiniLookup(cand.w);
         if (!hit || !hit.def) continue; // sin entrada de diccionario → no sirve como glosario
-        out.push({ zh: cand.w, py: hit.py || '', es: hit.def });
+        // v9.7x: zhS = la clave simplificada de dict-mini, para generar el pinyin desde el simplificado
+        out.push({ zh: cand.w, zhS: dictMini.has(cand.w) ? cand.w : (dictMiniAlias.get(cand.w) || cand.w), py: hit.py || '', es: hit.def });
     }
     return out;
 }
