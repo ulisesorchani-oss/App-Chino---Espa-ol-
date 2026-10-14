@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v167'; // — Tema papel: 👁 Ver legible abierto (hover pegado en el celular) y verde más oscuro en la hoja Ver
+const VERSION = 'v168'; // — Diccionario: 你 = «vos; tú» (antes «tú; usted (informal)»)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
