@@ -5216,7 +5216,7 @@ body.paper-mode .bottom-app-actions .utility-btn { border-color: #d9c9a3; }
 }
 
 /* ===== v9.15: práctica intercalada — estado activo del toggle =====
-   Botón #btn-interleaving (tools-row). Apagado se ve como los demás chips;
+   Botón #btn-interleaving (fila de estado de Hoy). Apagado se ve como los demás chips;
    encendido queda verde (se distingue del violeta de Pinyin y del azul de
    简/繁) para que el alumno siempre sepa si está practicando mezclado. */
 #btn-interleaving.active {
@@ -5605,6 +5605,12 @@ body.paper-mode .header-streak { background: #fff8e6; color: #4a3f2e; }
     margin-bottom: 10px;
 }
 .srs-bar-btn { margin-top: 0; min-height: 48px; }
+/* v9.7x: 🔀 Intercalar en la fila de estado, debajo de "Repaso inteligente"
+   (su aviso aparece justo abajo, en #module-status) */
+.control-panel.study-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.study-bar #btn-interleaving { min-height: 44px; }
+.study-bar #btn-interleaving:not(.active) { background: rgba(255, 255, 255, 0.92); }
+body.dark-mode .study-bar #btn-interleaving:not(.active) { background: var(--bg-light); }
 
 /* --- vistas + barra inferior --- */
 main#main { display: block; }
@@ -5733,9 +5739,20 @@ body.dark-mode .d-no { color: #ff8a7f; }
 body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-primary); border-color: var(--border); }
 
 /* --- Aprender --- */
-.aprender-tools { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.aprender-tools .speed-btn { background: rgba(255, 255, 255, 0.92); }
-body.dark-mode .aprender-tools .speed-btn { background: var(--bg-light); }
+/* v9.7x: aviso "practicás en Hoy" en Exámenes/Diaria/Clásicos (los paneles
+   que saltan a Hoy al elegir). Píldora con fondo propio: el texto se lee
+   igual sobre el degradado del tema claro que sobre oscuro y papel. */
+.aprender-hoy-hint {
+    display: inline-block;
+    margin: -2px 0 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.35;
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
 
 /* --- Entrenar --- */
 .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -6415,3 +6432,50 @@ body.dark-mode .vocab-item.known {
 .ve-dl-net { margin: 0 0 8px; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
 .ve-dl-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .ve-dl-actions button { min-height: 44px; padding: 8px 16px; }
+
+/* ════════════════════════════════════════════════════════════════
+   v9.7x — LECCIONES: dos botones-menú HSK / TOCFL (<select> nativo)
+   Reemplazan las filas de chips (.lv-chip se conserva: lo usan los
+   chips DELE). Solo uno resaltado (.on): el del nivel activo. El otro
+   muestra su placeholder ("HSK ▾" / "TOCFL ▾") con fondo suave.
+   Contraste medido a 360 px: texto ≥ 4,84:1 en los tres temas; contorno
+   ≥ 4,2:1 contra la página (borde blanco en claro, por el degradado).
+   ════════════════════════════════════════════════════════════════ */
+.lvsel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.lvsel { position: relative; display: block; }
+.lvsel select {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; min-height: 64px; margin: 0;
+    padding: 8px 24px 22px 12px;
+    border: 2px solid transparent; border-radius: 14px;
+    font: inherit; font-size: 1.15rem; font-weight: 800; line-height: 1.2;
+    text-align: left; cursor: pointer;
+}
+.lvsel select:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 2px; }
+.lvsel option { color: #111; background: #fff; font-weight: 600; }
+.lvsel .lvsel-sub {
+    position: absolute; left: 12px; bottom: 8px;
+    font-size: 0.78rem; font-weight: 600; pointer-events: none;
+}
+.lvsel::after { content: '▾'; position: absolute; right: 9px; top: 14px; font-size: 1.05rem; pointer-events: none; }
+/* HSK — China continental */
+.lvsel-hsk.on select { background: #B91C1C; color: #FFDE00; border-color: #B91C1C; }
+.lvsel-hsk.on .lvsel-sub, .lvsel-hsk.on::after { color: #FFDE00; }
+.lvsel-hsk:not(.on) select { background: #FEF2F2; color: #B91C1C; border-color: #B91C1C; }
+.lvsel-hsk:not(.on) .lvsel-sub, .lvsel-hsk:not(.on)::after { color: #B91C1C; }
+/* TOCFL — Taiwán (franja roja de 6 px a la izquierda) */
+.lvsel-tocfl select { box-shadow: inset 6px 0 0 #DC2626; padding-left: 18px; }
+.lvsel-tocfl .lvsel-sub { left: 18px; }
+.lvsel-tocfl.on select { background: #1E40AF; color: #fff; border-color: #1E40AF; }
+.lvsel-tocfl.on .lvsel-sub, .lvsel-tocfl.on::after { color: #fff; }
+.lvsel-tocfl:not(.on) select { background: #EFF6FF; color: #1E40AF; border-color: #1E40AF; }
+.lvsel-tocfl:not(.on) .lvsel-sub, .lvsel-tocfl:not(.on)::after { color: #1E40AF; }
+/* tema claro: borde blanco en los dos (el fondo es un degradado violeta) */
+body:not(.dark-mode):not(.paper-mode) .lvsel select { border-color: #fff; }
+/* tema oscuro */
+body.dark-mode .lvsel-hsk.on select { border-color: #FFDE00; }
+body.dark-mode .lvsel-tocfl.on select { border-color: #fff; }
+body.dark-mode .lvsel-hsk:not(.on) select { background: transparent; color: #FCA5A5; border-color: #F87171; }
+body.dark-mode .lvsel-hsk:not(.on) .lvsel-sub, body.dark-mode .lvsel-hsk:not(.on)::after { color: #FCA5A5; }
+body.dark-mode .lvsel-tocfl:not(.on) select { background: transparent; color: #BFDBFE; border-color: #fff; }
+body.dark-mode .lvsel-tocfl:not(.on) .lvsel-sub, body.dark-mode .lvsel-tocfl:not(.on)::after { color: #BFDBFE; }

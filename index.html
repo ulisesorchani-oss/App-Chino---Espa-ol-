@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261009a">
+    <link rel="stylesheet" href="style.css?v=20261014c">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -59,6 +59,9 @@
                     <span id="srs-bar-label">Repaso inteligente</span>
                     <span id="srs-bar-badge" class="srs-bar-badge hidden">0</span>
                 </button>
+                <!-- v9.7x: Intercalar vive en Hoy (antes en Aprender): ordena las
+                     tarjetas de ESTA vista y su aviso sale justo abajo, en #module-status. -->
+                <button id="btn-interleaving" class="speed-btn" type="button" title="Práctica intercalada">🔀 Intercalar</button>
             </div>
 
             <!-- Estado del módulo (cargando / sin datos / info) -->
@@ -209,11 +212,7 @@
         <section class="view" id="view-aprender" role="tabpanel" aria-labelledby="nav-aprender">
             <div class="view-head">
                 <h2 class="view-title" data-i18n="viewAprender">Aprender</h2>
-                <p class="view-sub" data-i18n="viewAprenderSub">Elegí qué aprender. Al elegir un módulo volvés a Hoy.</p>
-            </div>
-
-            <div class="aprender-tools">
-                <button id="btn-interleaving" class="speed-btn" type="button" title="Práctica intercalada">🔀 Intercalar</button>
+                <p class="view-sub" data-i18n="viewAprenderSub">Elegí qué aprender.</p>
             </div>
 
             <nav class="module-tabs" id="module-tabs" role="tablist" aria-label="Selectores de contenido">
@@ -229,19 +228,34 @@
                 <div class="tab-panel section-lessons" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
                     <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
                     <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
+                    <!-- v9.7x: dos botones-menú (<select> nativo) en lugar de las filas de
+                         chips. Siguen DENTRO de #lesson-levels: lessons-dele.js lo oculta
+                         en "aprendo español". Solo REFLEJAN data-level de #lesson-list
+                         (lessons-graduated.js); el activo muestra el nivel, el otro su
+                         placeholder deshabilitado ("HSK" / "TOCFL"). -->
                     <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
-                        <div class="lv-row lv-row-hsk">
-                            <button type="button" class="lv-chip active" data-level="1">HSK 1</button>
-                            <button type="button" class="lv-chip" data-level="2">HSK 2</button>
-                            <button type="button" class="lv-chip" data-level="3">HSK 3</button>
-                            <button type="button" class="lv-chip" data-level="4">HSK 4</button>
-                            <button type="button" class="lv-chip" data-level="5">HSK 5</button>
-                            <button type="button" class="lv-chip" data-level="6">HSK 6</button>
-                            <button type="button" class="lv-chip" data-level="7-9">HSK 7-9</button>
+                        <div class="lvsel-row">
+                            <label class="lvsel lvsel-hsk on">
+                                <select id="sel-lv-hsk" aria-label="Lecciones HSK, China continental: elegí el nivel">
+                                    <option value="" disabled hidden>HSK</option>
+                                    <option value="1" selected>HSK 1</option>
+                                    <option value="2">HSK 2</option>
+                                    <option value="3">HSK 3</option>
+                                    <option value="4">HSK 4</option>
+                                    <option value="5">HSK 5</option>
+                                    <option value="6">HSK 6</option>
+                                    <option value="7-9">HSK 7-9</option>
+                                </select>
+                                <span class="lvsel-sub" aria-hidden="true">China continental</span>
+                            </label>
+                            <label class="lvsel lvsel-tocfl">
+                                <!-- opciones generadas en JS desde TOCFL_ORDER (buildTocflOptions) -->
+                                <select id="sel-lv-tocfl" aria-label="Lecciones TOCFL, Taiwán: elegí el nivel">
+                                    <option value="" disabled hidden selected>TOCFL</option>
+                                </select>
+                                <span class="lvsel-sub" aria-hidden="true">Taiwán</span>
+                            </label>
                         </div>
-                        <!-- v9.7x: fila TOCFL generada en JS (buildTocflChips, lessons-graduated.js) —
-                             siempre los 6 niveles (準備→流利), tengan o no lecciones todavía. -->
-                        <div class="lv-row lv-row-tocfl" id="lesson-levels-tocfl"></div>
                     </div>
                     <div class="lesson-list" id="lesson-list" data-level="1"></div>
                 </div>
@@ -250,6 +264,7 @@
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
                     <p class="lessons-intro" data-i18n="examsIntro">Elegí un examen o nivel y practicá su vocabulario con tarjetas de opción simple: cada acierto suma a tu progreso real. ¿No sabés tu nivel? Empezá por el test de colocación.</p>
+                    <p class="aprender-hoy-hint" data-i18n="hoyHintExams">↪ Al elegir un nivel, practicás en Hoy.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
                             title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
@@ -330,6 +345,7 @@
                 <div class="tab-panel section-daily hidden" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
                     <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
                     <p class="lessons-intro" data-i18n="dailyIntro">Elegí una situación cotidiana: primero leés un diálogo corto para entender el contexto, después practicás sus frases sueltas con hueco ___. "Todas" mezcla las oraciones de todas las situaciones.</p>
+                    <p class="aprender-hoy-hint" data-i18n="hoyHintDaily">↪ Al elegir una situación, practicás en Hoy.</p>
                     <div class="category-filter daily-filter">
                         <div class="daily-dropdown" id="daily-dropdown">
                             <button id="btn-daily-toggle" class="daily-main-btn" type="button"
@@ -361,6 +377,7 @@
                 <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
                     <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
                     <p class="lessons-intro" data-i18n="classicsIntro">Elegí un clásico para practicar frases sueltas de sus enseñanzas más conocidas, o tocá 📖 Leer el texto original para recorrer el texto completo por capítulos, con pinyin y traducción.</p>
+                    <p class="aprender-hoy-hint" data-i18n="hoyHintClassics">↪ Al elegir un clásico del menú, practicás en Hoy; el texto original se lee acá.</p>
                     <div class="classics-dropdown" id="classics-dropdown">
                         <button id="btn-classics-toggle" class="classics-main-btn" type="button"
                                 aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
@@ -880,14 +897,14 @@
     <script src="audio-tts.js?v=20260926a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261009a"></script>
+    <script src="app.js?v=20261014a"></script>
     <script src="dict.js?v=20260927a"></script>
     <script src="trazos.js?v=20261006c"></script>
     <script src="srs.js?v=20261006b"></script>
     <script src="reader.js?v=20260928a"></script>
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20260924a"></script>
-    <script src="lessons-graduated.js?v=20261002c"></script>
+    <script src="lessons-graduated.js?v=20261014b"></script>
     <script src="placement-test.js?v=20260924a"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20260927c"></script>
