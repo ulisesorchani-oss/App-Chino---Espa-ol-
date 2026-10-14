@@ -329,16 +329,24 @@ function stopGlobalAudio() {
     }
 }
 
+// v9.7x: los botones de velocidad de Yo → Ajustes y de la hoja 👁 Ver de Hoy
+// muestran el MISMO valor (ac_speed). Los chips de lecciones, clásicos y
+// Podcast tienen su propia etiqueta y no pasan por acá.
+function paintSpeedButtons() {
+    ['btn-speed', 'btn-speed-hoy'].forEach((id) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.textContent = SPEED_LABELS[String(playbackSpeed)];
+        btn.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
+    });
+}
+
 // ===== Botón de velocidad: 0.85x -> 1.0x -> 0.7x =====
 function cycleSpeed() {
     const idx = SPEED_STEPS.indexOf(playbackSpeed);
     playbackSpeed = SPEED_STEPS[(idx + 1) % SPEED_STEPS.length];
     try { localStorage.setItem('ac_speed', String(playbackSpeed)); } catch (e) { /* sin storage */ }
-    const btn = document.getElementById('btn-speed');
-    if (btn) {
-        btn.textContent = SPEED_LABELS[String(playbackSpeed)];
-        btn.title = 'Velocidad del audio: ' + playbackSpeed + 'x (clic para cambiar)';
-    }
+    paintSpeedButtons();
     // v9.40: en vivo SOLO en fallback (api sin speed). Con el server nuevo el
     // audio en curso ya salió sintetizado a la velocidad anterior y el PRÓXIMO
     // pedido sale a la nueva — tocar el rate acá sería doble efecto.

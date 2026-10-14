@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261014d">
+    <link rel="stylesheet" href="style.css?v=20261014e">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -91,8 +91,9 @@
                         <button id="btn-pinyin" class="pinyin-btn active">📖 Pinyin: ON</button>
                         <button id="btn-tones" class="btn-secondary hidden">🎨 Tonos: OFF</button>
                         <button id="btn-tone-info" class="btn-secondary btn-tone-info" type="button" title="Colores por tono: leyenda y esquema de colores" aria-label="Leyenda de colores por tono">ℹ️</button>
-                        <button id="btn-grand" class="speed-btn" type="button" title="Letras grandes para leer cómodo (modo abuelo)">🅰 Grande</button>
-                        <button id="btn-font-mode" class="speed-btn" type="button" title="Cambiar fuente china">字体</button>
+                        <!-- v9.7x: velocidad también acá (misma clave ac_speed que Yo → Ajustes → Audio).
+                             Grande y la fuente china se mudaron a Yo → Ajustes. -->
+                        <button id="btn-speed-hoy" class="speed-btn" type="button" title="Velocidad del audio (clic para cambiar)">🐢 0.85x</button>
                     </div>
                 </div>
 
@@ -572,6 +573,23 @@
                     <span class="set-label" data-i18n="setTheme">Tema</span>
                     <button id="btn-theme" class="theme-toggle set-ctrl" aria-label="Cambiar tema">🌙</button>
                 </div>
+                <!-- v9.7x: cómo se ve el texto chino. 简/繁 es el MISMO estado que el de
+                     la hoja 👁 Ver de Hoy (charType); Grande y la fuente se mudaron desde Hoy. -->
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setScript">Escritura</span>
+                    <div class="set-ctrl script-toggle set-script" role="group" aria-label="Escritura: simplificado o tradicional">
+                        <button id="btn-simplified-set" class="script-btn" type="button">简 简体</button>
+                        <button id="btn-traditional-set" class="script-btn" type="button">繁 繁體</button>
+                    </div>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setGrand">Letra grande</span>
+                    <button id="btn-grand" class="speed-btn set-ctrl" type="button" title="Letras grandes para leer cómodo (modo abuelo)">🅰 Grande</button>
+                </div>
+                <div class="set-row">
+                    <span class="set-label" data-i18n="setFont">Fuente china</span>
+                    <button id="btn-font-mode" class="speed-btn set-ctrl" type="button" title="Cambiar fuente china">字体</button>
+                </div>
                 <div class="set-row">
                     <span class="set-label" data-i18n="setAudio">Audio</span>
                     <div class="set-ctrl set-group">
@@ -894,10 +912,10 @@
     <script src="classics.js?v=20261002b"></script>
     <script src="onboarding.js?v=20261013a"></script>
     <script src="stats.js?v=20260924a"></script>
-    <script src="audio-tts.js?v=20260926a"></script>
+    <script src="audio-tts.js?v=20261014a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261014a"></script>
+    <script src="app.js?v=20261014b"></script>
     <script src="dict.js?v=20260927a"></script>
     <script src="trazos.js?v=20261006c"></script>
     <script src="srs.js?v=20261006b"></script>
