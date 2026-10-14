@@ -395,7 +395,7 @@
             keyWords.map(kw =>
                 '<div class="lq-gloss-item">' +
                 '<span class="lq-gloss-zh" lang="zh">' + escHtml(kw.zh) + '</span>' +
-                '<span class="lq-gloss-py">' + escHtml(pyLine(kw.zhS || kw.zh) || kw.py) + '</span>' +
+                '<span class="lq-gloss-py">' + escHtml(kw.pyFix || pyLine(kw.zhS || kw.zh) || kw.py) + '</span>' +
                 '<span class="lq-gloss-es">' + escHtml(kw.es) + '</span>' +
                 '</div>'
             ).join('') +
@@ -425,9 +425,14 @@
         // v9.7x: minLevel = l.hsk → descarta candidatas más básicas que el
         // nivel de la propia lección (ej. 他/一/工 en una lección HSK6), ver
         // hskLevelOf/extractKeyWords en dict.js.
-        const keyWords = (typeof extractKeyWords === 'function')
-            ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
-            : [];
+        // v9.7x: si la lección trae keywords, el glosario las usa TAL CUAL (sin
+        // diccionario ni corte de palabras), en la escritura elegida y con la
+        // glosa escrita para esa lección; py solo para excepciones.
+        const keyWords = (Array.isArray(l.keywords) && l.keywords.length)
+            ? l.keywords.map(kw => ({ zh: zhKey() === 'trad' ? (kw.zhT || kw.zh) : kw.zh, zhS: kw.zh, pyFix: kw.py || '', es: kw.es }))
+            : (typeof extractKeyWords === 'function')
+                ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
+                : [];
         // v9.7x: el glosario muestra pinyin generado con la misma función que el texto → espera la tabla TOCFL
         pyReady(l).then(() => {
             if (S.lesson !== l || S.view !== 'story') return; // se cerró o se cambió de lección mientras cargaba

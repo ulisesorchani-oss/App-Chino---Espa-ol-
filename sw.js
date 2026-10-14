@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v174'; // — Pinyin por familia: capa «errores» global (还书, 包子, 裙子, 东西, 客气) y convención TOCFL (327 palabras de la lista TOCFL) en Lecciones; el Lector genera el pinyin del tradicional pegado desde el simplificado
+const VERSION = 'v175'; // — Glosario de lecciones: campo opcional keywords (palabras elegidas, en la escritura elegida, pinyin con pinyinFor); 5 palabras en las 8 lecciones TOCFL Prep y A1
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
