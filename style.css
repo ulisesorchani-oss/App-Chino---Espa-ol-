@@ -4994,6 +4994,18 @@ body.paper-mode .tools-gear {
     border-color: #d9c9a3;
 }
 body.paper-mode .tools-gear:hover { background: #f7efdc; }
+/* v9.7x: en el celular el :hover queda "pegado" después de tocar 👁 Ver y su
+   fondo crema le ganaba al azul del estado abierto → texto blanco sobre crema
+   (1,15:1). Abierto, el botón conserva el azul aunque tenga :hover. */
+body.paper-mode .card-tools-header.tools-open .tools-gear,
+body.paper-mode .card-tools-header.tools-open .tools-gear:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+/* v9.7x: botones verdes de la hoja Ver en papel (velocidad): #2f6b4f daba
+   4,37:1 sobre el fondo de la hoja; un tono más oscuro da 5,39:1. */
+body.paper-mode .tools-row .speed-btn { color: #285c44; }
 
 /* --- 2) Audio + grabar: protagonistas, más grandes --- */
 .audio-controls-inline { gap: 8px; }
