@@ -602,7 +602,10 @@ function readerPinyinItems(word) {
     let items = null;
     try {
         if (typeof pinyinPro !== 'undefined' && READER_HANZI.test(word)) {
-            const all = pinyinPro.pinyin(word, { type: 'all' });
+            // v9.7x: pinyinItemsFor (pinyin-familias.js) pasa un texto pegado en
+            // tradicional a simplificado SOLO para generar el pinyin (她還在家 → hái);
+            // el texto que se muestra no cambia.
+            const all = (typeof pinyinItemsFor === 'function') ? pinyinItemsFor(word, 'hsk') : pinyinPro.pinyin(word, { type: 'all' });
             if (all && all.length) items = all;
         }
     } catch (e) { items = null; }
@@ -610,9 +613,11 @@ function readerPinyinItems(word) {
     return items;
 }
 
-function readerWordCols(word, wantPinyin, wantTones) {
+function readerWordCols(word, wantPinyin, wantTones, lineItems) {
     // Columnas ruby de una palabra; si items no aligna 1:1 → degrada a sin pinyin
-    const items = (wantPinyin || wantTones) ? readerPinyinItems(word) : null;
+    // v9.7x: lineItems = el pinyin de ESTA palabra sacado de la línea entera
+    // (con contexto: 我要還書 → huán); si no vino, se calcula por palabra.
+    const items = (wantPinyin || wantTones) ? (lineItems || readerPinyinItems(word)) : null;
     const chars = Array.from(word);
     const useItems = !!(items && items.length === chars.length);
     let cols = '';
@@ -635,6 +640,12 @@ function renderZhLineHtml(line, wantPinyin, wantTones) {
     const segs = readerSegmentLine(line);
     const out = [];
     let lastWord = null;    // palabra en construcción (para pegarle puntuación)
+    // v9.7x: pinyin de la línea completa (pinyin-familias.js), repartido por palabra
+    let lineItems = null;
+    try {
+        if ((wantPinyin || wantTones) && typeof pinyinItemsFor === 'function') lineItems = pinyinItemsFor(line, 'hsk');
+    } catch (e) { lineItems = null; }
+    let off = 0;            // posición (en caracteres) del segmento dentro de la línea
     const flush = () => {
         if (!lastWord) return;
         out.push('<span class="reader-word" data-word="' + escHtml(lastWord.text) + '">'
@@ -644,9 +655,12 @@ function renderZhLineHtml(line, wantPinyin, wantTones) {
 
     for (const seg of segs) {
         if (!seg) continue;
+        const n = Array.from(seg).length;
+        const segItems = (lineItems && lineItems.length === Array.from(line).length) ? lineItems.slice(off, off + n) : null;
+        off += n;
         if (READER_HANZI.test(seg)) {
             flush();
-            lastWord = { text: seg, cols: readerWordCols(seg, wantPinyin, wantTones), punct: '' };
+            lastWord = { text: seg, cols: readerWordCols(seg, wantPinyin, wantTones, segItems), punct: '' };
         } else if (lastWord && seg.length === 1 && READER_STICKY.test(seg)) {
             // puntuación pegada a la palabra anterior (columna propia, sin pinyin)
             lastWord.punct += '<span class="ruby-col ruby-punct"><span class="ruby-char">' + escHtml(seg) + '</span></span>';

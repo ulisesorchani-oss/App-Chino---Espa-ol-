@@ -114,10 +114,17 @@
     const zhKey = () => (typeof ck === 'function') ? ck() : 'simp';
     // v9.7x: escritura de una lección puntual (la lista muestra TOCFL y HSK a la vez)
     const lessonScript = (l) => (typeof scriptFor === 'function') ? scriptFor(l) : zhKey();
+    // v9.7x: pinyin según la familia de la lección abierta (pinyinFor en
+    // pinyin-familias.js: TOCFL = lista TOCFL; HSK y el resto = pinyin-pro).
     const pyLine = (zh) => {
-        try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
-        catch (e) { return ''; }
+        try {
+            if (typeof pinyinFor === 'function') return pinyinFor(zh, S.lesson);
+            return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : '';
+        } catch (e) { return ''; }
     };
+    // v9.7x: la tabla TOCFL se carga la primera vez que una lección TOCFL pide pinyin
+    const pyReady = (l) => (typeof ensureTocflPinyin === 'function' && typeof familyOf === 'function' && familyOf(l) === 'tocfl')
+        ? ensureTocflPinyin() : Promise.resolve(true);
 
     // TTS: reutiliza fetchTTS/Vercel con fallback speechSynthesis (patrón SRS)
     // v9.4: si ✨ Karaoke está ON y la lectura sale de una línea del lector,
@@ -388,7 +395,7 @@
             keyWords.map(kw =>
                 '<div class="lq-gloss-item">' +
                 '<span class="lq-gloss-zh" lang="zh">' + escHtml(kw.zh) + '</span>' +
-                '<span class="lq-gloss-py">' + escHtml(kw.py) + '</span>' +
+                '<span class="lq-gloss-py">' + escHtml(pyLine(kw.zhS || kw.zh) || kw.py) + '</span>' +
                 '<span class="lq-gloss-es">' + escHtml(kw.es) + '</span>' +
                 '</div>'
             ).join('') +
@@ -421,8 +428,12 @@
         const keyWords = (typeof extractKeyWords === 'function')
             ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
             : [];
-        if (keyWords.length >= 3) renderGlossary(l, keyWords);
-        else renderStory(l);
+        // v9.7x: el glosario muestra pinyin generado con la misma función que el texto → espera la tabla TOCFL
+        pyReady(l).then(() => {
+            if (S.lesson !== l || S.view !== 'story') return; // se cerró o se cambió de lección mientras cargaba
+            if (keyWords.length >= 3) renderGlossary(l, keyWords);
+            else renderStory(l);
+        });
     }
     function renderStory(l) {
         const k = zhKey();
@@ -478,10 +489,10 @@
         body.querySelector('#lq-story-pinyin').addEventListener('click', (e) => {
             S.pinyin = !S.pinyin;
             e.target.textContent = '🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF');
-            body.querySelectorAll('.lq-line-py, .lq-who-py').forEach(el => { // v9.7x: también el nombre del hablante
+            pyReady(l).then(() => body.querySelectorAll('.lq-line-py, .lq-who-py').forEach(el => { // v9.7x: también el nombre del hablante
                 if (S.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
                 el.classList.toggle('hidden', !S.pinyin);
-            });
+            }));
         });
         body.querySelector('.lq-lines').addEventListener('click', (e) => {
             // v9.11: SOLO el botón 🔊 de la línea reproduce audio — tocar el
