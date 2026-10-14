@@ -291,7 +291,7 @@
         TOCFL_ORDER.forEach(v => {
             const o = document.createElement('option');
             o.value = 'tocfl:' + v;
-            o.textContent = 'TOCFL ' + v;
+            o.textContent = v; // v9.7x: sin "TOCFL " (lo dice la etiqueta chica de arriba)
             sel.appendChild(o);
         });
     }
@@ -315,7 +315,7 @@
     // v9.7x: los dos <select> (HSK / TOCFL) REFLEJAN data-level de
     // #lesson-list, la única fuente de verdad del nivel. El del examen
     // activo muestra el nivel y queda resaltado (.on); el otro vuelve a su
-    // placeholder deshabilitado ("HSK" / "TOCFL"), que no se puede elegir.
+    // placeholder deshabilitado (el rango: "1–9" / "Prep–C1"), que no se puede elegir.
     function syncLevelSelects() {
         const wrap = $('lesson-list');
         const sh = $('sel-lv-hsk'), st = $('sel-lv-tocfl');

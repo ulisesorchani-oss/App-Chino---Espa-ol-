@@ -6486,8 +6486,8 @@ body.dark-mode .vocab-item.known {
 .lvsel { position: relative; display: block; }
 .lvsel select {
     -webkit-appearance: none; appearance: none;
-    width: 100%; min-height: 56px; margin: 0;
-    padding: 8px 24px 8px 12px;
+    width: 100%; min-height: 60px; margin: 0;
+    padding: 24px 24px 6px 12px; /* arriba: lugar para la etiqueta chica (.lvsel-tag) */
     border: 2px solid transparent; border-radius: 14px;
     font: inherit; font-size: 1.15rem; font-weight: 800; line-height: 1.2;
     text-align: left; cursor: pointer;
@@ -6495,23 +6495,29 @@ body.dark-mode .vocab-item.known {
 .lvsel select:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 2px; }
 .lvsel option { color: #111; background: #fff; font-weight: 600; }
 .lvsel::after { content: '▾'; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 1.05rem; pointer-events: none; }
+/* v9.7x: etiqueta chica del examen, arriba del nivel (mismo color que el texto del botón) */
+.lvsel .lvsel-tag {
+    position: absolute; left: 12px; top: 8px;
+    font-size: 0.74rem; font-weight: 700; letter-spacing: 0.04em; line-height: 1; pointer-events: none;
+}
+.lvsel-tocfl .lvsel-tag { left: 18px; }
 /* HSK */
 .lvsel-hsk.on select { background: #B91C1C; color: #FFDE00; border-color: #B91C1C; }
-.lvsel-hsk.on::after { color: #FFDE00; }
+.lvsel-hsk.on .lvsel-tag, .lvsel-hsk.on::after { color: #FFDE00; }
 .lvsel-hsk:not(.on) select { background: #FEF2F2; color: #B91C1C; border-color: #B91C1C; }
-.lvsel-hsk:not(.on)::after { color: #B91C1C; }
+.lvsel-hsk:not(.on) .lvsel-tag, .lvsel-hsk:not(.on)::after { color: #B91C1C; }
 /* TOCFL (franja roja de 6 px a la izquierda) */
 .lvsel-tocfl select { box-shadow: inset 6px 0 0 #DC2626; padding-left: 18px; }
 .lvsel-tocfl.on select { background: #1E40AF; color: #fff; border-color: #1E40AF; }
-.lvsel-tocfl.on::after { color: #fff; }
+.lvsel-tocfl.on .lvsel-tag, .lvsel-tocfl.on::after { color: #fff; }
 .lvsel-tocfl:not(.on) select { background: #EFF6FF; color: #1E40AF; border-color: #1E40AF; }
-.lvsel-tocfl:not(.on)::after { color: #1E40AF; }
+.lvsel-tocfl:not(.on) .lvsel-tag, .lvsel-tocfl:not(.on)::after { color: #1E40AF; }
 /* tema claro: borde blanco en los dos (el fondo es un degradado violeta) */
 body:not(.dark-mode):not(.paper-mode) .lvsel select { border-color: #fff; }
 /* tema oscuro */
 body.dark-mode .lvsel-hsk.on select { border-color: #FFDE00; }
 body.dark-mode .lvsel-tocfl.on select { border-color: #fff; }
 body.dark-mode .lvsel-hsk:not(.on) select { background: transparent; color: #FCA5A5; border-color: #F87171; }
-body.dark-mode .lvsel-hsk:not(.on)::after { color: #FCA5A5; }
+body.dark-mode .lvsel-hsk:not(.on) .lvsel-tag, body.dark-mode .lvsel-hsk:not(.on)::after { color: #FCA5A5; }
 body.dark-mode .lvsel-tocfl:not(.on) select { background: transparent; color: #BFDBFE; border-color: #fff; }
-body.dark-mode .lvsel-tocfl:not(.on)::after { color: #BFDBFE; }
+body.dark-mode .lvsel-tocfl:not(.on) .lvsel-tag, body.dark-mode .lvsel-tocfl:not(.on)::after { color: #BFDBFE; }
