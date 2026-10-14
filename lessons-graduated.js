@@ -68,10 +68,29 @@
     // popup con su pinyin, su significado y “🔁 Sumar a mi repaso” (el MISMO
     // popup de vocabulario de toda la app). Los no-han quedan como texto.
     const LQ_RE_HANZI = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+    // v9.7x: palabra del diccionario que contiene el carácter tocado (公 o 園
+    // de 公園 → 公園). Si la palabra no está en el diccionario, null → carácter.
+    function lqWordAt(chEl) {
+        const line = chEl.closest('.lq-line');
+        const say = line && line.querySelector('.lq-line-say');
+        const text = say ? say.dataset.zh : '';
+        const o = parseInt(chEl.dataset.o, 10);
+        if (!text || isNaN(o) || typeof zhSegmentAll !== 'function') return null;
+        let pos = 0;
+        for (const s of zhSegmentAll(text)) {
+            if (o >= pos && o < pos + s.length) {
+                return (s.length > 1 && typeof zhIsDictWord === 'function' && zhIsDictWord(s)) ? s : null;
+            }
+            pos += s.length;
+        }
+        return null;
+    }
     function zhCharsHtml(zh) {
-        return String(zh == null ? '' : zh).split('').map(ch =>
+        // v9.7x: data-o = posición en la línea, para que el toque abra la PALABRA
+        // (los spans siguen siendo por carácter: el karaoke no cambia).
+        return String(zh == null ? '' : zh).split('').map((ch, o) =>
             LQ_RE_HANZI.test(ch)
-                ? '<span class="lq-ch" data-ch="' + escHtml(ch) + '">' + escHtml(ch) + '</span>'
+                ? '<span class="lq-ch" data-ch="' + escHtml(ch) + '" data-o="' + o + '">' + escHtml(ch) + '</span>'
                 : escHtml(ch)
         ).join('');
     }
@@ -458,7 +477,7 @@
             const say = e.target.closest('.lq-line-say');
             if (say) { speakZh(say.dataset.zh, say); return; }
             const chEl = e.target.closest('.lq-ch');
-            if (chEl && typeof showVocabPop === 'function') { showVocabPop(chEl.dataset.ch); }
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(lqWordAt(chEl) || chEl.dataset.ch); }
         });
     }
     // ── vista PRÁCTICA ──
