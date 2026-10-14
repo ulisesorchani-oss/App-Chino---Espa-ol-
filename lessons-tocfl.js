@@ -1050,6 +1050,314 @@
                 { z: '报税', t: '報稅', p: 'bàoshuì', e: 'Declaración de impuestos' },
                 { z: '合约', t: '合約', p: 'héyuē', e: 'Contrato' } ] }
         ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 13 · 早上的公園 — TOCFL 準備級 Prep (≈HSK 1) · charla en el parque: horarios y gustos
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-prep-gongyuan',
+        hsk: 1, exam: 'TOCFL', examLvl: 'Prep',
+        emoji: '🌳',
+        titleZh: '早上的公园',
+        titleZhT: '早上的公園',
+        titleEs: 'La mañana en el parque',
+        blurb: 'Dos vecinos se cruzan a las seis de la mañana en el parque: uno camina, la otra baila con sus amigas. Horarios, gustos y una invitación para el día siguiente. Vocabulario básico del TOCFL 準備級.',
+        lines: [
+            { zh: '早！你也来公园运动吗？', zhT: '早！你也來公園運動嗎？', es: '¡Buen día! ¿Vos también venís a hacer ejercicio al parque?' },
+            { zh: '对，我每天早上都来走路。', zhT: '對，我每天早上都來走路。', es: 'Sí, vengo a caminar todas las mañanas.' },
+            { zh: '你几点来公园？', zhT: '你幾點來公園？', es: '¿A qué hora venís al parque?' },
+            { zh: '我六点半来，七点半回家。你呢？', zhT: '我六點半來，七點半回家。你呢？', es: 'Vengo a las seis y media y vuelvo a casa a las siete y media. ¿Y vos?' },
+            { zh: '我六点就来了，我跟朋友一起跳舞。', zhT: '我六點就來了，我跟朋友一起跳舞。', es: 'Yo vine a las seis: bailo con unas amigas.' },
+            { zh: '跳舞？你喜欢跳舞吗？', zhT: '跳舞？你喜歡跳舞嗎？', es: '¿Bailar? ¿Te gusta bailar?' },
+            { zh: '非常喜欢！跳舞很快乐，对身体也很好。', zhT: '非常喜歡！跳舞很快樂，對身體也很好。', es: '¡Me encanta! Bailar es divertido y además hace bien al cuerpo.' },
+            { zh: '我不会跳舞，可是我喜欢唱歌。', zhT: '我不會跳舞，可是我喜歡唱歌。', es: 'Yo no sé bailar, pero me gusta cantar.' },
+            { zh: '那明天你也来吧！我们跳舞，你唱歌。', zhT: '那明天你也來吧！我們跳舞，你唱歌。', es: '¡Entonces mañana vení vos también! Nosotras bailamos y vos cantás.' },
+            { zh: '好，明天早上六点见！', zhT: '好，明天早上六點見！', es: '¡Bueno, nos vemos mañana a las seis!' }
+        ],
+        quiz: [
+            { zh: '早！你也来公园___吗？', zhT: '早！你也來公園___嗎？', es: '¡Buen día! ¿Vos también venís a hacer ejercicio al parque?',
+              opts: [
+                { z: '运动', t: '運動', p: 'yùndòng', e: 'Hacer ejercicio' },
+                { z: '电脑', t: '電腦', p: 'diànnǎo', e: 'Computadora' },
+                { z: '便宜', t: '便宜', p: 'piányi', e: 'Barato' } ] },
+            { zh: '对，我每天早上都来___。', zhT: '對，我每天早上都來___。', es: 'Sí, vengo a caminar todas las mañanas.',
+              opts: [
+                { z: '走路', t: '走路', p: 'zǒulù', e: 'Caminar' },
+                { z: '下雨', t: '下雨', p: 'xiàyǔ', e: 'Llover' },
+                { z: '名字', t: '名字', p: 'míngzi', e: 'Nombre' } ] },
+            { zh: '你___点来公园？', zhT: '你___點來公園？', es: '¿A qué hora venís al parque?',
+              opts: [
+                { z: '几', t: '幾', p: 'jǐ', e: 'Cuántos (¿a qué hora?)' },
+                { z: '谁', t: '誰', p: 'shéi', e: 'Quién' },
+                { z: '很', t: '很', p: 'hěn', e: 'Muy' } ] },
+            { zh: '我六点___来，七点半回家。你呢？', zhT: '我六點___來，七點半回家。你呢？', es: 'Vengo a las seis y media y vuelvo a casa a las siete y media. ¿Y vos?',
+              opts: [
+                { z: '半', t: '半', p: 'bàn', e: 'Media' },
+                { z: '太', t: '太', p: 'tài', e: 'Demasiado' },
+                { z: '吗', t: '嗎', p: 'ma', e: 'Partícula de pregunta sí/no' } ] },
+            { zh: '我六点就来了，我跟朋友一起___。', zhT: '我六點就來了，我跟朋友一起___。', es: 'Yo vine a las seis: bailo con unas amigas.',
+              opts: [
+                { z: '跳舞', t: '跳舞', p: 'tiàowǔ', e: 'Bailar' },
+                { z: '漂亮', t: '漂亮', p: 'piàoliang', e: 'Lindo' },
+                { z: '书', t: '書', p: 'shū', e: 'Libro' } ] },
+            { zh: '跳舞？你___跳舞吗？', zhT: '跳舞？你___跳舞嗎？', es: '¿Bailar? ¿Te gusta bailar?',
+              opts: [
+                { z: '喜欢', t: '喜歡', p: 'xǐhuan', e: 'Gustar' },
+                { z: '便宜', t: '便宜', p: 'piányi', e: 'Barato' },
+                { z: '电视', t: '電視', p: 'diànshì', e: 'Televisión' } ] },
+            { zh: '非常喜欢！跳舞很快乐，对___也很好。', zhT: '非常喜歡！跳舞很快樂，對___也很好。', es: '¡Me encanta! Bailar es divertido y además hace bien al cuerpo.',
+              opts: [
+                { z: '身体', t: '身體', p: 'shēntǐ', e: 'Cuerpo; salud' },
+                { z: '贵', t: '貴', p: 'guì', e: 'Caro' },
+                { z: '再见', t: '再見', p: 'zàijiàn', e: 'Chau' } ] },
+            { zh: '我不会跳舞，___我喜欢唱歌。', zhT: '我不會跳舞，___我喜歡唱歌。', es: 'Yo no sé bailar, pero me gusta cantar.',
+              opts: [
+                { z: '可是', t: '可是', p: 'kěshì', e: 'Pero' },
+                { z: '什么', t: '什麼', p: 'shénme', e: 'Qué' },
+                { z: '多少', t: '多少', p: 'duōshǎo', e: 'Cuánto' } ] },
+            { zh: '那明天你也来吧！我们跳舞，你___。', zhT: '那明天你也來吧！我們跳舞，你___。', es: '¡Entonces mañana vení vos también! Nosotras bailamos y vos cantás.',
+              opts: [
+                { z: '唱歌', t: '唱歌', p: 'chànggē', e: 'Cantar' },
+                { z: '手机', t: '手機', p: 'shǒujī', e: 'Celular' },
+                { z: '公园', t: '公園', p: 'gōngyuán', e: 'Parque' } ] },
+            { zh: '好，明天早上六点___！', zhT: '好，明天早上六點___！', es: '¡Bueno, nos vemos mañana a las seis!',
+              opts: [
+                { z: '见', t: '見', p: 'jiàn', e: 'Verse' },
+                { z: '对不起', t: '對不起', p: 'duìbuqǐ', e: 'Perdón' },
+                { z: '笔', t: '筆', p: 'bǐ', e: 'Lapicera' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 14 · 便利商店的早餐 — TOCFL 準備級 Prep (≈HSK 1) · desayuno, total y vuelto
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-prep-zaocan',
+        hsk: 1, exam: 'TOCFL', examLvl: 'Prep',
+        emoji: '🥪',
+        titleZh: '便利商店的早餐',
+        titleZhT: '便利商店的早餐',
+        titleEs: 'Desayuno en la tienda de conveniencia',
+        blurb: 'Antes de clase, una chica compra el desayuno en un 便利商店 de Taiwán: un bollito al vapor, un café con hielo, el total y el vuelto. Vocabulario básico del TOCFL 準備級.',
+        lines: [
+            { zh: '请问，这里有早餐吗？', zhT: '請問，這裡有早餐嗎？', es: 'Disculpá, ¿acá hay desayuno?' },
+            { zh: '有，那边有面包和包子，你想吃什么？', zhT: '有，那邊有麵包和包子，你想吃什麼？', es: 'Sí, allá hay pan y bollitos al vapor. ¿Qué querés comer?' },
+            { zh: '我要一个包子。包子是热的吗？', zhT: '我要一個包子。包子是熱的嗎？', es: 'Quiero un bollito. ¿Está caliente?' },
+            { zh: '是热的。你要不要喝一杯咖啡？', zhT: '是熱的。你要不要喝一杯咖啡？', es: 'Sí, está caliente. ¿Querés tomar un café?' },
+            { zh: '好，我要一杯冰咖啡。', zhT: '好，我要一杯冰咖啡。', es: 'Bueno, quiero un café con hielo.' },
+            { zh: '一个包子、一杯冰咖啡，一共七十五块。', zhT: '一個包子、一杯冰咖啡，一共七十五塊。', es: 'Un bollito y un café con hielo: son setenta y cinco en total.' },
+            { zh: '七十五块？真便宜！给你一百块。', zhT: '七十五塊？真便宜！給你一百塊。', es: '¿Setenta y cinco? ¡Qué barato! Tomá, te doy cien.' },
+            { zh: '找你二十五块，这是你的咖啡。', zhT: '找你二十五塊，這是你的咖啡。', es: 'Te doy veinticinco de vuelto. Acá tenés tu café.' },
+            { zh: '谢谢！我很喜欢这家便利商店，明天再来。', zhT: '謝謝！我很喜歡這家便利商店，明天再來。', es: '¡Gracias! Me gusta mucho esta tienda; mañana vuelvo.' },
+            { zh: '好，明天见！', zhT: '好，明天見！', es: '¡Bueno, hasta mañana!' }
+        ],
+        quiz: [
+            { zh: '请问，这里有___吗？', zhT: '請問，這裡有___嗎？', es: 'Disculpá, ¿acá hay desayuno?',
+              opts: [
+                { z: '早餐', t: '早餐', p: 'zǎocān', e: 'Desayuno' },
+                { z: '漂亮', t: '漂亮', p: 'piàoliang', e: 'Lindo' },
+                { z: '起床', t: '起床', p: 'qǐchuáng', e: 'Levantarse' } ] },
+            { zh: '有，那边有面包和包子，你想___什么？', zhT: '有，那邊有麵包和包子，你想___什麼？', es: 'Sí, allá hay pan y bollitos al vapor. ¿Qué querés comer?',
+              opts: [
+                { z: '吃', t: '吃', p: 'chī', e: 'Comer' },
+                { z: '睡觉', t: '睡覺', p: 'shuìjiào', e: 'Dormir' },
+                { z: '下雨', t: '下雨', p: 'xiàyǔ', e: 'Llover' } ] },
+            { zh: '我要一个包子。包子是___的吗？', zhT: '我要一個包子。包子是___的嗎？', es: 'Quiero un bollito. ¿Está caliente?',
+              opts: [
+                { z: '热', t: '熱', p: 'rè', e: 'Caliente' },
+                { z: '累', t: '累', p: 'lèi', e: 'Cansado' },
+                { z: '忙', t: '忙', p: 'máng', e: 'Ocupado' } ] },
+            { zh: '是热的。你要不要喝一杯___？', zhT: '是熱的。你要不要喝一杯___？', es: 'Sí, está caliente. ¿Querés tomar un café?',
+              opts: [
+                { z: '咖啡', t: '咖啡', p: 'kāfēi', e: 'Café' },
+                { z: '包子', t: '包子', p: 'bāozi', e: 'Bollito al vapor' },
+                { z: '面包', t: '麵包', p: 'miànbāo', e: 'Pan' } ] },
+            { zh: '好，我要一杯___咖啡。', zhT: '好，我要一杯___咖啡。', es: 'Bueno, quiero un café con hielo.',
+              opts: [
+                { z: '冰', t: '冰', p: 'bīng', e: 'Con hielo; frío' },
+                { z: '胖', t: '胖', p: 'pàng', e: 'Gordo' },
+                { z: '难', t: '難', p: 'nán', e: 'Difícil' } ] },
+            { zh: '一个包子、一杯冰咖啡，___七十五块。', zhT: '一個包子、一杯冰咖啡，___七十五塊。', es: 'Un bollito y un café con hielo: son setenta y cinco en total.',
+              opts: [
+                { z: '一共', t: '一共', p: 'yígòng', e: 'En total' },
+                { z: '谁', t: '誰', p: 'shéi', e: 'Quién' },
+                { z: '为什么', t: '為什麼', p: 'wèishénme', e: 'Por qué' } ] },
+            { zh: '七十五块？真___！给你一百块。', zhT: '七十五塊？真___！給你一百塊。', es: '¿Setenta y cinco? ¡Qué barato! Tomá, te doy cien.',
+              opts: [
+                { z: '便宜', t: '便宜', p: 'piányi', e: 'Barato' },
+                { z: '冷', t: '冷', p: 'lěng', e: 'Frío (clima)' },
+                { z: '矮', t: '矮', p: 'ǎi', e: 'Bajo (de estatura)' } ] },
+            { zh: '___你二十五块，这是你的咖啡。', zhT: '___你二十五塊，這是你的咖啡。', es: 'Te doy veinticinco de vuelto. Acá tenés tu café.',
+              opts: [
+                { z: '找', t: '找', p: 'zhǎo', e: 'Dar el vuelto' },
+                { z: '怕', t: '怕', p: 'pà', e: 'Tener miedo' },
+                { z: '叫', t: '叫', p: 'jiào', e: 'Llamarse' } ] },
+            { zh: '谢谢！我很喜欢这家___，明天再来。', zhT: '謝謝！我很喜歡這家___，明天再來。', es: '¡Gracias! Me gusta mucho esta tienda; mañana vuelvo.',
+              opts: [
+                { z: '便利商店', t: '便利商店', p: 'biànlì shāngdiàn', e: 'Tienda de conveniencia' },
+                { z: '雨', t: '雨', p: 'yǔ', e: 'Lluvia' },
+                { z: '天气', t: '天氣', p: 'tiānqì', e: 'Tiempo (clima)' } ] },
+            { zh: '好，明天___！', zhT: '好，明天___！', es: '¡Bueno, hasta mañana!',
+              opts: [
+                { z: '见', t: '見', p: 'jiàn', e: 'Verse' },
+                { z: '贵', t: '貴', p: 'guì', e: 'Caro' },
+                { z: '笔', t: '筆', p: 'bǐ', e: 'Lapicera' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 15 · 颱風天 — TOCFL 入門級 A1 (≈HSK 1) · avisos, compras y quedarse en casa
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-a1-taifeng',
+        hsk: 1, exam: 'TOCFL', examLvl: 'A1',
+        emoji: '🌀',
+        titleZh: '台风天',
+        titleZhT: '颱風天',
+        titleEs: 'Día de tifón',
+        blurb: 'La tele anuncia un tifón y dos compañeros de departamento se preparan: no hay clases, la heladera está vacía, hay que cerrar las ventanas y avisar a la familia. Vocabulario del TOCFL 入門級.',
+        lines: [
+            { zh: '你看电视了吗？明天有台风。', zhT: '你看電視了嗎？明天有颱風。', es: '¿Viste la tele? Mañana hay tifón.' },
+            { zh: '真的吗？那明天要上课吗？', zhT: '真的嗎？那明天要上課嗎？', es: '¿En serio? Entonces, ¿mañana hay clases?' },
+            { zh: '不上课，很多公司也不上班。', zhT: '不上課，很多公司也不上班。', es: 'No hay clases, y muchas empresas tampoco abren.' },
+            { zh: '太好了！我们要准备什么？', zhT: '太好了！我們要準備什麼？', es: '¡Genial! ¿Qué tenemos que preparar?' },
+            { zh: '冰箱里没有东西了，我们去超级市场吧。', zhT: '冰箱裡沒有東西了，我們去超級市場吧。', es: 'La heladera está vacía: vamos al supermercado.' },
+            { zh: '好，买面包、水和泡面，够吗？', zhT: '好，買麵包、水和泡麵，夠嗎？', es: 'Bueno: pan, agua y fideos instantáneos. ¿Alcanza?' },
+            { zh: '够了，再买一些水果吧。', zhT: '夠了，再買一些水果吧。', es: 'Alcanza. Compremos también algo de fruta.' },
+            { zh: '晚上风雨很大，窗要不要关？', zhT: '晚上風雨很大，窗要不要關？', es: 'A la noche va a haber mucho viento y lluvia. ¿Cerramos la ventana?' },
+            { zh: '要关好。台风天别出去，在家聊天吧。', zhT: '要關好。颱風天別出去，在家聊天吧。', es: 'Sí, hay que cerrarla bien. Con tifón no hay que salir: quedémonos charlando en casa.' },
+            { zh: '好，我先打电话给家人。', zhT: '好，我先打電話給家人。', es: 'Bueno, primero llamo a mi familia.' }
+        ],
+        quiz: [
+            { zh: '你看电视了吗？明天有___。', zhT: '你看電視了嗎？明天有___。', es: '¿Viste la tele? Mañana hay tifón.',
+              opts: [
+                { z: '台风', t: '颱風', p: 'táifēng', e: 'Tifón' },
+                { z: '漂亮', t: '漂亮', p: 'piàoliang', e: 'Lindo' },
+                { z: '容易', t: '容易', p: 'róngyì', e: 'Fácil' } ] },
+            { zh: '真的吗？那明天要___吗？', zhT: '真的嗎？那明天要___嗎？', es: '¿En serio? Entonces, ¿mañana hay clases?',
+              opts: [
+                { z: '上课', t: '上課', p: 'shàngkè', e: 'Tener clase' },
+                { z: '春天', t: '春天', p: 'chūntiān', e: 'Primavera' },
+                { z: '黑板', t: '黑板', p: 'hēibǎn', e: 'Pizarrón' } ] },
+            { zh: '不上课，很多___也不上班。', zhT: '不上課，很多___也不上班。', es: 'No hay clases, y muchas empresas tampoco abren.',
+              opts: [
+                { z: '公司', t: '公司', p: 'gōngsī', e: 'Empresa' },
+                { z: '冰箱', t: '冰箱', p: 'bīngxiāng', e: 'Heladera' },
+                { z: '颜色', t: '顏色', p: 'yánsè', e: 'Color' } ] },
+            { zh: '太好了！我们要___什么？', zhT: '太好了！我們要___什麼？', es: '¡Genial! ¿Qué tenemos que preparar?',
+              opts: [
+                { z: '准备', t: '準備', p: 'zhǔnbèi', e: 'Preparar' },
+                { z: '洗澡', t: '洗澡', p: 'xǐzǎo', e: 'Bañarse' },
+                { z: '结婚', t: '結婚', p: 'jiéhūn', e: 'Casarse' } ] },
+            { zh: '___里没有东西了，我们去超级市场吧。', zhT: '___裡沒有東西了，我們去超級市場吧。', es: 'La heladera está vacía: vamos al supermercado.',
+              opts: [
+                { z: '冰箱', t: '冰箱', p: 'bīngxiāng', e: 'Heladera' },
+                { z: '太阳', t: '太陽', p: 'tàiyáng', e: 'Sol' },
+                { z: '头发', t: '頭髮', p: 'tóufa', e: 'Pelo' } ] },
+            { zh: '好，买面包、水和泡面，___吗？', zhT: '好，買麵包、水和泡麵，___嗎？', es: 'Bueno: pan, agua y fideos instantáneos. ¿Alcanza?',
+              opts: [
+                { z: '够', t: '夠', p: 'gòu', e: 'Alcanzar; ser suficiente' },
+                { z: '哭', t: '哭', p: 'kū', e: 'Llorar' },
+                { z: '年轻', t: '年輕', p: 'niánqīng', e: 'Joven' } ] },
+            { zh: '够了，再买一些___吧。', zhT: '夠了，再買一些___吧。', es: 'Alcanza. Compremos también algo de fruta.',
+              opts: [
+                { z: '水果', t: '水果', p: 'shuǐguǒ', e: 'Fruta' },
+                { z: '台风', t: '颱風', p: 'táifēng', e: 'Tifón' },
+                { z: '作业', t: '作業', p: 'zuòyè', e: 'Tarea' } ] },
+            { zh: '晚上风雨很大，窗要不要___？', zhT: '晚上風雨很大，窗要不要___？', es: 'A la noche va a haber mucho viento y lluvia. ¿Cerramos la ventana?',
+              opts: [
+                { z: '关', t: '關', p: 'guān', e: 'Cerrar' },
+                { z: '吃', t: '吃', p: 'chī', e: 'Comer' },
+                { z: '唱', t: '唱', p: 'chàng', e: 'Cantar' } ] },
+            { zh: '要关好。台风天别___，在家聊天吧。', zhT: '要關好。颱風天別___，在家聊天吧。', es: 'Sí, hay que cerrarla bien. Con tifón no hay que salir: quedémonos charlando en casa.',
+              opts: [
+                { z: '出去', t: '出去', p: 'chūqù', e: 'Salir' },
+                { z: '干净', t: '乾淨', p: 'gānjìng', e: 'Limpio' },
+                { z: '地图', t: '地圖', p: 'dìtú', e: 'Mapa' } ] },
+            { zh: '好，我先打电话给___。', zhT: '好，我先打電話給___。', es: 'Bueno, primero llamo a mi familia.',
+              opts: [
+                { z: '家人', t: '家人', p: 'jiārén', e: 'Familia' },
+                { z: '窗', t: '窗', p: 'chuāng', e: 'Ventana' },
+                { z: '面包', t: '麵包', p: 'miànbāo', e: 'Pan' } ] }
+        ]
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 16 · 一起學語言 — TOCFL 入門級 A1 (≈HSK 1) · intercambio de idiomas
+    // ─────────────────────────────────────────────────────────────
+    {
+        id: 'tocfl-a1-yuyan',
+        hsk: 1, exam: 'TOCFL', examLvl: 'A1',
+        emoji: '💬',
+        titleZh: '一起学语言',
+        titleZhT: '一起學語言',
+        titleEs: 'Intercambio de idiomas',
+        blurb: 'Lucía y Daming se encuentran en un café para practicar: primero chino, después español. Cuánto tiempo hace que estudian, por qué y un pedido muy útil al final. Vocabulario del TOCFL 入門級.',
+        lines: [
+            { zh: '你好！我是露西亚。', zhT: '你好！我是露西亞。', es: '¡Hola! Soy Lucía.' },
+            { zh: '你好，我是大明。请坐！', zhT: '你好，我是大明。請坐！', es: 'Hola, soy Daming. ¡Sentate!' },
+            { zh: '谢谢！我们先说华语，再说西班牙文，好吗？', zhT: '謝謝！我們先說華語，再說西班牙文，好嗎？', es: '¡Gracias! Primero hablamos en chino y después en español, ¿te parece?' },
+            { zh: '好啊！你学华语多久了？', zhT: '好啊！你學華語多久了？', es: '¡Bueno! ¿Hace cuánto que estudiás chino?' },
+            { zh: '一年了。我每天练习，可是我的华语还不好。', zhT: '一年了。我每天練習，可是我的華語還不好。', es: 'Hace un año. Practico todos los días, pero mi chino todavía no es bueno.' },
+            { zh: '哪里！你的华语很清楚，进步很快。', zhT: '哪裡！你的華語很清楚，進步很快。', es: '¡Para nada! Tu chino se entiende muy bien y avanzás rápido.' },
+            { zh: '谢谢！那你为什么想学西班牙文？', zhT: '謝謝！那你為什麼想學西班牙文？', es: '¡Gracias! ¿Y vos por qué querés aprender español?' },
+            { zh: '我明年想去阿根廷旅行，认识那里的文化。', zhT: '我明年想去阿根廷旅行，認識那裡的文化。', es: 'El año que viene quiero viajar a Argentina y conocer su cultura.' },
+            { zh: '太好了！现在说西班牙文吧，你跟我学。', zhT: '太好了！現在說西班牙文吧，你跟我學。', es: '¡Genial! Ahora hablemos en español: aprendé conmigo.' },
+            { zh: '好，可是请你说慢一点！', zhT: '好，可是請你說慢一點！', es: 'Bueno, pero hablá más despacio, por favor.' }
+        ],
+        quiz: [
+            { zh: '你好！我___露西亚。', zhT: '你好！我___露西亞。', es: '¡Hola! Soy Lucía.',
+              opts: [
+                { z: '是', t: '是', p: 'shì', e: 'Ser' },
+                { z: '吗', t: '嗎', p: 'ma', e: 'Partícula de pregunta sí/no' },
+                { z: '很', t: '很', p: 'hěn', e: 'Muy' } ] },
+            { zh: '你好，我是大明。请___！', zhT: '你好，我是大明。請___！', es: 'Hola, soy Daming. ¡Sentate!',
+              opts: [
+                { z: '坐', t: '坐', p: 'zuò', e: 'Sentarse' },
+                { z: '胖', t: '胖', p: 'pàng', e: 'Gordo' },
+                { z: '贵', t: '貴', p: 'guì', e: 'Caro' } ] },
+            { zh: '谢谢！我们先说华语，___说西班牙文，好吗？', zhT: '謝謝！我們先說華語，___說西班牙文，好嗎？', es: '¡Gracias! Primero hablamos en chino y después en español, ¿te parece?',
+              opts: [
+                { z: '再', t: '再', p: 'zài', e: 'Después, luego' },
+                { z: '已经', t: '已經', p: 'yǐjīng', e: 'Ya' },
+                { z: '一共', t: '一共', p: 'yígòng', e: 'En total' } ] },
+            { zh: '好啊！你学华语___了？', zhT: '好啊！你學華語___了？', es: '¡Bueno! ¿Hace cuánto que estudiás chino?',
+              opts: [
+                { z: '多久', t: '多久', p: 'duō jiǔ', e: 'Cuánto tiempo' },
+                { z: '多少钱', t: '多少錢', p: 'duōshǎo qián', e: 'Cuánto cuesta' },
+                { z: '哪里', t: '哪裡', p: 'nǎlǐ', e: 'Dónde' } ] },
+            { zh: '一年了。我每天___，可是我的华语还不好。', zhT: '一年了。我每天___，可是我的華語還不好。', es: 'Hace un año. Practico todos los días, pero mi chino todavía no es bueno.',
+              opts: [
+                { z: '练习', t: '練習', p: 'liànxí', e: 'Practicar' },
+                { z: '聪明', t: '聰明', p: 'cōngming', e: 'Inteligente' },
+                { z: '下雪', t: '下雪', p: 'xiàxuě', e: 'Nevar' } ] },
+            { zh: '哪里！你的华语很___，进步很快。', zhT: '哪裡！你的華語很___，進步很快。', es: '¡Para nada! Tu chino se entiende muy bien y avanzás rápido.',
+              opts: [
+                { z: '清楚', t: '清楚', p: 'qīngchu', e: 'Claro' },
+                { z: '难过', t: '難過', p: 'nánguò', e: 'Triste' },
+                { z: '便宜', t: '便宜', p: 'piányi', e: 'Barato' } ] },
+            { zh: '谢谢！那你___想学西班牙文？', zhT: '謝謝！那你___想學西班牙文？', es: '¡Gracias! ¿Y vos por qué querés aprender español?',
+              opts: [
+                { z: '为什么', t: '為什麼', p: 'wèishénme', e: 'Por qué' },
+                { z: '多少', t: '多少', p: 'duōshǎo', e: 'Cuánto' },
+                { z: '谁', t: '誰', p: 'shéi', e: 'Quién' } ] },
+            { zh: '我明年想去阿根廷___，认识那里的文化。', zhT: '我明年想去阿根廷___，認識那裡的文化。', es: 'El año que viene quiero viajar a Argentina y conocer su cultura.',
+              opts: [
+                { z: '旅行', t: '旅行', p: 'lǚxíng', e: 'Viajar' },
+                { z: '洗澡', t: '洗澡', p: 'xǐzǎo', e: 'Bañarse' },
+                { z: '头发', t: '頭髮', p: 'tóufa', e: 'Pelo' } ] },
+            { zh: '太好了！现在说西班牙文吧，你___我学。', zhT: '太好了！現在說西班牙文吧，你___我學。', es: '¡Genial! Ahora hablemos en español: aprendé conmigo.',
+              opts: [
+                { z: '跟', t: '跟', p: 'gēn', e: 'Con' },
+                { z: '太', t: '太', p: 'tài', e: 'Demasiado' },
+                { z: '吃', t: '吃', p: 'chī', e: 'Comer' } ] },
+            { zh: '好，可是请你说___一点！', zhT: '好，可是請你說___一點！', es: 'Bueno, pero hablá más despacio, por favor.',
+              opts: [
+                { z: '慢', t: '慢', p: 'màn', e: 'Despacio' },
+                { z: '贵', t: '貴', p: 'guì', e: 'Caro' },
+                { z: '胖', t: '胖', p: 'pàng', e: 'Gordo' } ] }
+        ]
     }
 
     ];
