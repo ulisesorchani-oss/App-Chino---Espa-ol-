@@ -348,6 +348,14 @@
         titleZhT: '你好，我叫瑪麗',
         titleEs: 'Hola, me llamo Mary',
         blurb: 'Mary conoce a un profesor de chino en su primer día: nombre, nacionalidad y una charla muy simple. Vocabulario básico del TOCFL 準備級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '高兴', zhT: '高興', es: 'contento; «mucho gusto»' },
+            { zh: '认识', zhT: '認識', es: 'conocer (a alguien)' },
+            { zh: '学生', zhT: '學生', es: 'estudiante' },
+            { zh: '老师', zhT: '老師', es: 'profesor, profesora' },
+            { zh: '中文', zhT: '中文', es: 'chino (el idioma)' }
+        ],
         lines: [
             { zh: '你好！我叫玛丽。', zhT: '你好！我叫瑪麗。', es: '¡Hola! Me llamo Mary.' },
             { zh: '你好，我姓林。很高兴认识你！', zhT: '你好，我姓林。很高興認識你！', es: 'Hola, mi apellido es Lin. ¡Mucho gusto en conocerte!' },
@@ -413,6 +421,14 @@
         titleZhT: '我的一天',
         titleEs: 'Mi día',
         blurb: 'Una descripción muy simple de la familia y la rutina diaria — números, horas y gustos básicos del TOCFL 準備級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '家人', zhT: '家人', es: 'la familia' },
+            { zh: '医生', zhT: '醫生', es: 'médico, médica' },
+            { zh: '起床', zhT: '起床', es: 'levantarse (de la cama)' },
+            { zh: '喜欢', zhT: '喜歡', es: 'gustar' },
+            { zh: '周末', zhT: '週末', es: 'fin de semana' }
+        ],
         lines: [
             { zh: '这是我的家。', zhT: '這是我的家。', es: 'Esta es mi familia.' },
             { zh: '爸爸、妈妈、哥哥和我，一家四口。', zhT: '爸爸、媽媽、哥哥和我，一家四口。', es: 'Papá, mamá, mi hermano mayor y yo, somos cuatro en la familia.' },
@@ -479,6 +495,14 @@
         titleZhT: '去圖書館的路',
         titleEs: 'El camino a la biblioteca',
         blurb: 'Alguien busca la biblioteca y pide indicaciones en la calle — direcciones, distancias y cortesía básica del TOCFL 入門級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '图书馆', zhT: '圖書館', es: 'biblioteca' },
+            { zh: '十字路口', zhT: '十字路口', es: 'cruce, esquina' },
+            { zh: '邮局', zhT: '郵局', es: 'correo (la oficina)' },
+            { zh: '对面', zhT: '對面', es: 'enfrente' },
+            { zh: '还书', zhT: '還書', es: 'devolver un libro' }
+        ],
         lines: [
             { zh: '请问，图书馆怎么走？', zhT: '請問，圖書館怎麼走？', es: 'Disculpe, ¿cómo se llega a la biblioteca?' },
             { zh: '你先往前走，到十字路口左转。', zhT: '你先往前走，到十字路口左轉。', es: 'Primero sigue derecho, en el cruce dobla a la izquierda.' },
@@ -550,6 +574,14 @@
         titleZhT: '朋友的生日禮物',
         titleEs: 'El regalo de cumpleaños de una amiga',
         blurb: 'Dos amigas van de compras para elegir un regalo de cumpleaños — colores, precios y gustos del TOCFL 入門級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '生日', zhT: '生日', es: 'cumpleaños' },
+            { zh: '礼物', zhT: '禮物', es: 'regalo' },
+            { zh: '颜色', zhT: '顏色', es: 'color' },
+            { zh: '裙子', zhT: '裙子', es: 'pollera' },
+            { zh: '便宜', zhT: '便宜', es: 'barato' }
+        ],
         lines: [
             { zh: '下星期是小华的生日。', zhT: '下星期是小華的生日。', es: 'La próxima semana es el cumpleaños de Xiaohua.' },
             { zh: '我们去商店买生日礼物，好不好？', zhT: '我們去商店買生日禮物，好不好？', es: 'Vamos a la tienda a comprar un regalo de cumpleaños, ¿sí?' },
@@ -1063,6 +1095,14 @@
         titleZhT: '早上的公園',
         titleEs: 'La mañana en el parque',
         blurb: 'Dos vecinos se cruzan a las seis de la mañana en el parque: uno camina, la otra baila con sus amigas. Horarios, gustos y una invitación para el día siguiente. Vocabulario básico del TOCFL 準備級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '公园', zhT: '公園', es: 'parque' },
+            { zh: '运动', zhT: '運動', es: 'hacer ejercicio' },
+            { zh: '跳舞', zhT: '跳舞', es: 'bailar' },
+            { zh: '唱歌', zhT: '唱歌', es: 'cantar' },
+            { zh: '早上', zhT: '早上', es: 'la mañana (temprano)' }
+        ],
         lines: [
             { who: '王太太', whoT: '王太太', zh: '早！你也来公园运动吗？', zhT: '早！你也來公園運動嗎？', es: '¡Buen día! ¿Vos también venís a hacer ejercicio al parque?' },
             { who: '李先生', whoT: '李先生', zh: '对，我每天早上都来走路。', zhT: '對，我每天早上都來走路。', es: 'Sí, vengo a caminar todas las mañanas.' },
@@ -1140,6 +1180,14 @@
         titleZhT: '便利商店的早餐',
         titleEs: 'Desayuno en la tienda de conveniencia',
         blurb: 'Antes de clase, una chica compra el desayuno en un 便利商店 de Taiwán: un bollito al vapor, un café con hielo, el total y el vuelto. Vocabulario básico del TOCFL 準備級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '便利商店', zhT: '便利商店', es: 'tienda de conveniencia' },
+            { zh: '早餐', zhT: '早餐', es: 'desayuno' },
+            { zh: '包子', zhT: '包子', es: 'pan al vapor relleno' },
+            { zh: '咖啡', zhT: '咖啡', es: 'café' },
+            { zh: '一共', zhT: '一共', es: 'en total' }
+        ],
         lines: [
             { who: '小美', whoT: '小美', zh: '请问，这里有早餐吗？', zhT: '請問，這裡有早餐嗎？', es: 'Disculpá, ¿acá hay desayuno?' },
             { who: '店员', whoT: '店員', zh: '有，那边有面包和包子，你想吃什么？', zhT: '有，那邊有麵包和包子，你想吃什麼？', es: 'Sí, allá hay pan y bollitos al vapor. ¿Qué querés comer?' },
@@ -1217,6 +1265,14 @@
         titleZhT: '颱風天',
         titleEs: 'Día de tifón',
         blurb: 'La tele anuncia un tifón y dos compañeros de departamento se preparan: no hay clases, la heladera está vacía, hay que cerrar las ventanas y avisar a la familia. Vocabulario del TOCFL 入門級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '台风', zhT: '颱風', es: 'tifón' },
+            { zh: '上课', zhT: '上課', es: 'tener clase, ir a clase' },
+            { zh: '准备', zhT: '準備', es: 'preparar, prepararse' },
+            { zh: '冰箱', zhT: '冰箱', es: 'heladera' },
+            { zh: '泡面', zhT: '泡麵', es: 'fideos instantáneos' }
+        ],
         lines: [
             { who: '小林', whoT: '小林', zh: '你看电视了吗？明天有台风。', zhT: '你看電視了嗎？明天有颱風。', es: '¿Viste la tele? Mañana hay tifón.' },
             { who: '小陈', whoT: '小陳', zh: '真的吗？那明天要上课吗？', zhT: '真的嗎？那明天要上課嗎？', es: '¿En serio? Entonces, ¿mañana hay clases?' },
@@ -1294,6 +1350,14 @@
         titleZhT: '一起學語言',
         titleEs: 'Intercambio de idiomas',
         blurb: 'Lucía y Daming se encuentran en un café para practicar: primero chino, después español. Cuánto tiempo hace que estudian, por qué y un pedido muy útil al final. Vocabulario del TOCFL 入門級.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '华语', zhT: '華語', es: 'chino (el idioma, como se dice en Taiwán)' },
+            { zh: '西班牙文', zhT: '西班牙文', es: 'español (el idioma)' },
+            { zh: '练习', zhT: '練習', es: 'practicar' },
+            { zh: '进步', zhT: '進步', es: 'avanzar, mejorar' },
+            { zh: '旅行', zhT: '旅行', es: 'viajar' }
+        ],
         lines: [
             { who: '露西亚', whoT: '露西亞', zh: '你好！我是露西亚。', zhT: '你好！我是露西亞。', es: '¡Hola! Soy Lucía.' },
             { who: '大明', whoT: '大明', zh: '你好，我是大明。请坐！', zhT: '你好，我是大明。請坐！', es: 'Hola, soy Daming. ¡Sentate!' },
