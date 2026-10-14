@@ -5620,6 +5620,9 @@ main#main { display: block; }
 .view-title { font-size: 1.6rem; margin: 0 0 4px; line-height: 1.15; }
 .view-sub { margin: 0; font-size: 0.92rem; opacity: 0.92; }
 body.paper-mode .view-head { color: #4a3f2e; }
+/* v9.7x: pestañas inactivas de Aprender en papel — el blanco de base no se
+   leía sobre crema (≈1,2:1); mismo marrón que el título "Aprender" (≥ 4,5:1). */
+body.paper-mode .mtab:not(.active) { color: #4a3f2e; }
 .container { padding-bottom: 84px; } /* espacio para la barra inferior */
 .app-nav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
