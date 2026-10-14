@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261014b">
+    <link rel="stylesheet" href="style.css?v=20261014c">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -228,19 +228,34 @@
                 <div class="tab-panel section-lessons" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons">
                     <h3 class="section-title lessons-title"><span data-i18n="lessonsTitle">📖 LECCIONES GRADUADAS</span> <span class="lessons-sub">(mini-dramas HSK 3.0 · TOCFL 華測)</span></h3>
                     <p class="lessons-intro">Leé una historia corta al nivel de tu vocabulario y practicá 10 oraciones sacadas del texto: elegí la palabra que falta entre tres opciones. Historias HSK 3.0 y TOCFL de Taiwán, cada una con su acceso de nivel.</p>
+                    <!-- v9.7x: dos botones-menú (<select> nativo) en lugar de las filas de
+                         chips. Siguen DENTRO de #lesson-levels: lessons-dele.js lo oculta
+                         en "aprendo español". Solo REFLEJAN data-level de #lesson-list
+                         (lessons-graduated.js); el activo muestra el nivel, el otro su
+                         placeholder deshabilitado ("HSK" / "TOCFL"). -->
                     <div class="lesson-levels" id="lesson-levels" role="group" aria-label="Filtrar por nivel">
-                        <div class="lv-row lv-row-hsk">
-                            <button type="button" class="lv-chip active" data-level="1">HSK 1</button>
-                            <button type="button" class="lv-chip" data-level="2">HSK 2</button>
-                            <button type="button" class="lv-chip" data-level="3">HSK 3</button>
-                            <button type="button" class="lv-chip" data-level="4">HSK 4</button>
-                            <button type="button" class="lv-chip" data-level="5">HSK 5</button>
-                            <button type="button" class="lv-chip" data-level="6">HSK 6</button>
-                            <button type="button" class="lv-chip" data-level="7-9">HSK 7-9</button>
+                        <div class="lvsel-row">
+                            <label class="lvsel lvsel-hsk on">
+                                <select id="sel-lv-hsk" aria-label="Lecciones HSK, China continental: elegí el nivel">
+                                    <option value="" disabled hidden>HSK</option>
+                                    <option value="1" selected>HSK 1</option>
+                                    <option value="2">HSK 2</option>
+                                    <option value="3">HSK 3</option>
+                                    <option value="4">HSK 4</option>
+                                    <option value="5">HSK 5</option>
+                                    <option value="6">HSK 6</option>
+                                    <option value="7-9">HSK 7-9</option>
+                                </select>
+                                <span class="lvsel-sub" aria-hidden="true">China continental</span>
+                            </label>
+                            <label class="lvsel lvsel-tocfl">
+                                <!-- opciones generadas en JS desde TOCFL_ORDER (buildTocflOptions) -->
+                                <select id="sel-lv-tocfl" aria-label="Lecciones TOCFL, Taiwán: elegí el nivel">
+                                    <option value="" disabled hidden selected>TOCFL</option>
+                                </select>
+                                <span class="lvsel-sub" aria-hidden="true">Taiwán</span>
+                            </label>
                         </div>
-                        <!-- v9.7x: fila TOCFL generada en JS (buildTocflChips, lessons-graduated.js) —
-                             siempre los 6 niveles (準備→流利), tengan o no lecciones todavía. -->
-                        <div class="lv-row lv-row-tocfl" id="lesson-levels-tocfl"></div>
                     </div>
                     <div class="lesson-list" id="lesson-list" data-level="1"></div>
                 </div>
@@ -889,7 +904,7 @@
     <script src="reader.js?v=20260928a"></script>
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20260924a"></script>
-    <script src="lessons-graduated.js?v=20261002c"></script>
+    <script src="lessons-graduated.js?v=20261014a"></script>
     <script src="placement-test.js?v=20260924a"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20260927c"></script>

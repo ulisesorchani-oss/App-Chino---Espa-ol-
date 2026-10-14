@@ -250,26 +250,38 @@
         });
     }
 
-    // v9.6b: accesos TOCFL junto a los de HSK — un chip por nivel TOCFL, en
-    // su propia fila (#lesson-levels-tocfl, debajo de la fila HSK).
-    // v9.7x: ya NO depende de qué niveles tengan lecciones — se dibujan
-    // los 6 siempre (準備→流利), igual que la fila HSK siempre muestra sus
-    // 7 chips aunque 7-9 todavía no tenga contenido. Un nivel sin
-    // lecciones hoy simplemente muestra el estado vacío al tocarlo.
+    // v9.6b: accesos TOCFL junto a los de HSK.
+    // v9.7x: ya NO depende de qué niveles tengan lecciones — se ofrecen
+    // los 6 siempre (準備→流利), igual que HSK ofrece 7-9 aunque todavía no
+    // tenga contenido. Un nivel sin lecciones muestra el estado vacío.
+    // v9.7x: antes eran chips; ahora son las opciones del <select> TOCFL
+    // (#sel-lv-tocfl), con el mismo valor 'tocfl:XX' que lee renderList.
     const TOCFL_ORDER = ['Prep', 'A1', 'A2', 'B1', 'B2', 'C1'];
-    function buildTocflChips() {
-        const row = $('lesson-levels-tocfl');
-        if (!row) return;
-        row.innerHTML = '';
+    function buildTocflOptions() {
+        const sel = $('sel-lv-tocfl');
+        if (!sel) return;
         TOCFL_ORDER.forEach(v => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'lv-chip lv-chip-tocfl';
-            b.dataset.level = 'tocfl:' + v;
-            b.setAttribute('aria-label', 'Filtrar lecciones TOCFL ' + v);
-            b.textContent = 'TOCFL ' + v;
-            row.appendChild(b);
+            const o = document.createElement('option');
+            o.value = 'tocfl:' + v;
+            o.textContent = 'TOCFL ' + v;
+            sel.appendChild(o);
         });
+    }
+
+    // v9.7x: los dos <select> (HSK / TOCFL) REFLEJAN data-level de
+    // #lesson-list, la única fuente de verdad del nivel. El del examen
+    // activo muestra el nivel y queda resaltado (.on); el otro vuelve a su
+    // placeholder deshabilitado ("HSK" / "TOCFL"), que no se puede elegir.
+    function syncLevelSelects() {
+        const wrap = $('lesson-list');
+        const sh = $('sel-lv-hsk'), st = $('sel-lv-tocfl');
+        if (!wrap || !sh || !st) return;
+        const lv = wrap.dataset.level || '1';
+        const isT = lv.indexOf('tocfl:') === 0;
+        sh.value = isT ? '' : lv;
+        st.value = isT ? lv : '';
+        sh.parentNode.classList.toggle('on', !isT);
+        st.parentNode.classList.toggle('on', isT);
     }
 
     function bindList() {
@@ -283,14 +295,19 @@
             if (btn.dataset.act === 'read') openStory(l);
             else openQuiz(l);
         });
-        const chips = $('lesson-levels');
-        if (chips) chips.addEventListener('click', (e) => {
-            const chip = e.target.closest('.lv-chip');
-            if (!chip) return;
-            chips.querySelectorAll('.lv-chip').forEach(c => c.classList.toggle('active', c === chip));
-            wrap.dataset.level = chip.dataset.level;
-            renderList();
+        // v9.7x: elegir en cualquiera de los dos <select> cambia data-level
+        // (igual que antes el chip) y re-arma la lista, sin cambiar de pestaña.
+        ['sel-lv-hsk', 'sel-lv-tocfl'].forEach(id => {
+            const sel = $(id);
+            if (sel) sel.addEventListener('change', () => {
+                if (!sel.value) return;
+                wrap.dataset.level = sel.value;
+                renderList();
+            });
         });
+        // Si cualquier otro código cambia data-level, los <select> lo siguen.
+        new MutationObserver(syncLevelSelects).observe(wrap, { attributes: true, attributeFilter: ['data-level'] });
+        syncLevelSelects();
     }
 
     // ── overlay: abrir/cerrar ──
@@ -588,7 +605,7 @@
 
     // ── arranque ──
     function boot() {
-        buildTocflChips(); // v9.6b: crea los accesos TOCFL junto a los HSK
+        buildTocflOptions(); // v9.6b/v9.7x: opciones TOCFL del <select>, desde TOCFL_ORDER
         bindList();
         bindPop();
         renderList();
