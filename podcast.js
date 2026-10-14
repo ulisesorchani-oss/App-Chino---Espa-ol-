@@ -115,6 +115,7 @@
         pop.classList.add('hidden');
         try { if (typeof syncBodyScroll === 'function') syncBodyScroll(); else document.body.style.overflow = ''; } catch (e) { }
         S.lesson = null; S.view = null;
+        window.acScriptRef = null; // v9.7x
         showText = false;
     }
 
@@ -260,6 +261,7 @@
         if (!l) return;
         stopAll(); // corta el audio de la lección anterior (⏮/⏭ vienen del propio player)
         S.lesson = l; S.view = 'player'; showText = false;
+        window.acScriptRef = l; // v9.7x: el texto y el audio en la escritura de esta lección
         renderPlayer();
         togglePlayPause(); // arranca solo al elegir una lección
     }

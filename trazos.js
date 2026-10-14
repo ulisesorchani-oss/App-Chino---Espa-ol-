@@ -325,7 +325,7 @@ function wrRenderBody() {
             '<p class="wr-empty">📭 No tenés palabras para repasar hoy — volvé mañana, o sumá alguna desde el diccionario con 🔁 "Sumar a mi repaso".</p>';
         return;
     }
-    const trad = (typeof ck === 'function') && ck() === 'trad';
+    const trad = ((typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp') === 'trad'; // v9.7x: repaso = "HSK y el resto"
     const rows = words.map(function (w) {
         const show = trad ? (w.zt || w.zh) : w.zh;
         const py = w.py || (typeof wordPinyin === 'function' ? wordPinyin(w.zh) : '') || '';

@@ -167,7 +167,7 @@
         const body = document.getElementById('placement-body');
         if (!body) return;
         const card = PL.cur.card;
-        const hanzi = ck() === 'trad'
+        const hanzi = ((typeof scriptFor === 'function') ? scriptFor('hsk') : ck()) === 'trad' // v9.7x: test HSK
             ? (card.chinese_trad_full || card.chinese_simp_full)
             : card.chinese_simp_full;
         const letras = ['A', 'B', 'C', 'D'];

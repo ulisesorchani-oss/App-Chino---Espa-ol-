@@ -232,7 +232,7 @@ function dsEmojiHintsHtml(zh) {
 function dsRenderBody(mod) {
     const story = DAILY_STORIES[mod];
     if (!story) return '';
-    const k = (typeof ck === 'function') ? ck() : 'simp';
+    const k = (typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp';
     const wantPinyin = (typeof state !== 'undefined') ? state.showPinyin : true;
     const wantTones = (typeof showToneColors !== 'undefined') ? showToneColors : false;
     const label = (typeof MODULE_LABELS !== 'undefined' && MODULE_LABELS[mod]) ? MODULE_LABELS[mod] : mod;
@@ -302,7 +302,7 @@ function dsShowScene(mod) {
             const i = parseInt(btn.dataset.dsIdx, 10);
             const line = story.lines[i];
             if (!line) return;
-            const k = (typeof ck === 'function') ? ck() : 'simp';
+            const k = (typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp';
             dsPlayLine((k === 'trad' && line.zt) ? line.zt : line.zh, btn);
         });
     });
