@@ -5793,6 +5793,21 @@ body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-
     color: var(--text-primary);
 }
 
+/* v9.7x: «✔ Elegiste: X [▶ Practicar en Hoy]» (Diaria y Clásicos) — elegir ya
+   no salta a Hoy; esta línea muestra la elección y ofrece el salto explícito */
+.choice-confirm {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    margin: 12px 0; padding: 10px 12px; border-radius: 12px;
+    background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border);
+}
+.choice-confirm.hidden { display: none; }
+.choice-confirm .choice-label { flex: 1 1 12em; min-width: 0; font-weight: 700; font-size: 0.92rem; line-height: 1.35; }
+.choice-confirm .choice-go {
+    min-height: 44px; padding: 8px 16px; border: none; border-radius: 10px; cursor: pointer;
+    background: var(--primary); color: #fff; font: inherit; font-weight: 700; font-size: 0.95rem;
+}
+.choice-confirm .choice-go:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 2px; }
+
 /* --- Entrenar --- */
 .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
 /* v9.69: "Solo oído" se mudó a Hoy → quedan 3 tarjetas (impares) en una
