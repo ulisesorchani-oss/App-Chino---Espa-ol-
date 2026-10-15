@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v183'; // — Lecciones DELE: pista «Niños» (chip siempre visible, estado «próximamente») y entrada «Niños 儿童» en la hoja de módulos (cn-es)
+const VERSION = 'v184'; // — Exámenes: «🎯 Práctica tipo examen» (exam-practice.js): 20 ítems de escuchar, completar y ordenar con las lecciones de TOCFL Prep, TOCFL A1 y HSK 1
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -498,6 +498,7 @@ const PRECACHE = [
   './free-talk.js',        // v9.7x: Pronunciación libre — grabar y ver qué entendió la IA (estilo chat)
   './personal-lessons.js', // v9.7x: Mis lecturas — guardar el texto del Lector en IndexedDB
   './module-sheet.js',     // R3: botón del módulo en Hoy + hoja de módulos
+  './exam-practice.js',    // R5: práctica tipo examen (escuchar, completar, ordenar)
   './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
