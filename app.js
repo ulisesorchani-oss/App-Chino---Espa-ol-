@@ -71,13 +71,14 @@ const MODULE_LABELS = {
     'HSK8': 'HSK 8',
     'HSK9': 'HSK 9',
     // v8.3: TOCFL Band A — lista oficial vigente (華語八千詞表 2023, tocfl.edu.tw)
-    'TOCFL-Prep': 'TOCFL · Preparación (Novice)',
-    'TOCFL-A1': 'TOCFL · Nivel 1 (入門)',
-    'TOCFL-A2': 'TOCFL · Nivel 2 (基礎)',
-    'TOCFL-B3': 'TOCFL · Nivel 3 (進階)',
-    'TOCFL-B4': 'TOCFL · Nivel 4 (高階)',
-    'TOCFL-C': 'TOCFL · Nivel 5 (流利)',
-    'TOCFL': 'TOCFL',
+    // v9.7x: una sola nomenclatura TOCFL (Prep, A1, A2, B1, B2, C); los ids no cambian
+    'TOCFL-Prep': 'TOCFL Prep',
+    'TOCFL-A1': 'TOCFL A1',
+    'TOCFL-A2': 'TOCFL A2',
+    'TOCFL-B3': 'TOCFL B1',
+    'TOCFL-B4': 'TOCFL B2',
+    'TOCFL-C': 'TOCFL C',
+    'TOCFL': 'TOCFL · Frases útiles',
     'DELE-A1-Escolares': 'DELE A1 · Escolares',
     'DELE-A2B1-Escolares': 'DELE A2/B1 · Escolares',
     'Clasicos-Daxue': 'Gran Estudio 大学',
@@ -135,13 +136,15 @@ const DELE_INFO = {
 // hanzi+pinyin de la fuente oficial, traducciones ES: 1.880 reusadas de
 // glosas ya existentes en la app (sobre todo HSK7-9, mismo vocabulario
 // avanzado) y 896 nuevas.
+// v9.7x: badges con la nomenclatura única (antes N1–N5); 'TOCFL' = frases útiles
 const TOCFL_INFO = {
     'TOCFL-Prep': { badge: 'Prep' },
-    'TOCFL-A1':   { badge: 'N1' },
-    'TOCFL-A2':   { badge: 'N2' },
-    'TOCFL-B3':   { badge: 'N3' },
-    'TOCFL-B4':   { badge: 'N4' },
-    'TOCFL-C':    { badge: 'N5' }
+    'TOCFL-A1':   { badge: 'A1' },
+    'TOCFL-A2':   { badge: 'A2' },
+    'TOCFL-B3':   { badge: 'B1' },
+    'TOCFL-B4':   { badge: 'B2' },
+    'TOCFL-C':    { badge: 'C' },
+    'TOCFL':      { badge: 'Frases útiles' }
 };
 
 // Etiqueta visible de un módulo (los clásicos muestran nombre ES + zh según el script activo)
@@ -2039,7 +2042,7 @@ function updateTocflBtnLabel() {
     const lbl = document.getElementById('tocfl-current');
     if (!lbl) return;
     const info = TOCFL_INFO[state.activeModule];
-    lbl.textContent = info ? 'TOCFL · ' + info.badge : 'TOCFL';
+    lbl.textContent = info ? 'TOCFL ' + info.badge : 'TOCFL';
 }
 
 function initTocflDropdown() {

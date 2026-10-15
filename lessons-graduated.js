@@ -266,7 +266,7 @@
             card.className = 'lesson-card';
             card.innerHTML =
                 '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + l.emoji + '</span>' +
-                '<span class="lc-hsk">' + (l.exam ? escHtml(l.exam + ' ' + (l.examLvl || l.hsk)) : 'HSK ' + l.hsk) + '</span>' +
+                '<span class="lc-hsk">' + escHtml(lessonTag(l)) + '</span>' +
                 '<span class="lc-best">🎯 ' + best + flag + '</span></div>' +
                 '<div class="lc-titles"><span class="lc-zh">' + escHtml(lessonScript(l) === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</span>' +
                 '<span class="lc-es">' + escHtml(l.titleEs) + '</span></div>' +
@@ -287,13 +287,18 @@
     // v9.7x: antes eran chips; ahora son las opciones del <select> TOCFL
     // (#sel-lv-tocfl), con el mismo valor 'tocfl:XX' que lee renderList.
     const TOCFL_ORDER = ['Prep', 'A1', 'A2', 'B1', 'B2', 'C1'];
+    // v9.7x: nombre VISIBLE del nivel (nomenclatura única: el C cubre C1-C2);
+    // el valor guardado ('tocfl:C1') y el examLvl de los datos no cambian.
+    const TOCFL_LABEL = { C1: 'C' };
+    const tocflLvlLabel = (v) => TOCFL_LABEL[v] || v;
+    const lessonTag = (l) => l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
     function buildTocflOptions() {
         const sel = $('sel-lv-tocfl');
         if (!sel) return;
         TOCFL_ORDER.forEach(v => {
             const o = document.createElement('option');
             o.value = 'tocfl:' + v;
-            o.textContent = v; // v9.7x: sin "TOCFL " (lo dice la etiqueta chica de arriba)
+            o.textContent = tocflLvlLabel(v); // v9.7x: sin "TOCFL " (lo dice la etiqueta chica de arriba)
             sel.appendChild(o);
         });
     }
@@ -317,7 +322,7 @@
     // v9.7x: los dos <select> (HSK / TOCFL) REFLEJAN data-level de
     // #lesson-list, la única fuente de verdad del nivel. El del examen
     // activo muestra el nivel y queda resaltado (.on); el otro vuelve a su
-    // placeholder deshabilitado (el rango: "1–9" / "Prep–C1"), que no se puede elegir.
+    // placeholder deshabilitado (el rango: "1–9" / "Prep–C"), que no se puede elegir.
     function syncLevelSelects() {
         const wrap = $('lesson-list');
         const sh = $('sel-lv-hsk'), st = $('sel-lv-tocfl');
@@ -468,7 +473,7 @@
         body.innerHTML =
             '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
             '<div><div class="lq-story-zh">' + escHtml(k === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</div>' +
-            '<div class="lq-story-es">' + escHtml(l.titleEs) + ' · ' + (l.exam ? escHtml(l.exam + ' ' + (l.examLvl || l.hsk)) : 'HSK ' + l.hsk) + '</div></div></div>' +
+            '<div class="lq-story-es">' + escHtml(l.titleEs) + ' · ' + escHtml(lessonTag(l)) + '</div></div></div>' +
             '<p class="lq-blurb">' + escHtml(l.blurb) + '</p>' +
             '<div class="lq-lines">' + lines + '</div>' +
             '<div class="lq-story-foot">' +
