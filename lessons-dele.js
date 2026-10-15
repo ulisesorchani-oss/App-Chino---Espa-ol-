@@ -1017,7 +1017,13 @@
     // ── estado de la sesión abierta ──
     const S = { drama: null, view: null, idx: 0, results: [], order: [], answered: false };
     let curLevel = 'all';
-    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina'
+    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina' | 'Niños'
+    // R4: pistas conocidas, en este orden. Sus chips se muestran SIEMPRE (aunque
+    // todavía no tengan dramas): para sumar lecciones a «Niños» alcanza con agregar
+    // un drama con track: 'Niños' (dele: 'A1', titleZh/blurbZh en chino, quiz con
+    // opts[0] correcta). Una pista nueva que no esté acá igual crea su chip sola.
+    const TRACKS = ['Escolares', 'Argentina', 'Niños'];
+    const TRACK_META = { 'Escolares': '🏫 Escolares', 'Argentina': '🇦🇷 Argentina', 'Niños': '🧒 Niños' };
 
     // ── TTS español: mismos motores globales de app.js con guardas ──
     // (este archivo carga ANTES de app.js: los globals solo se tocan al
@@ -1222,7 +1228,6 @@
         if (!chips) return;
         const cnt = $('dele-count'); // v9.33: el contador viaja en esta fila
         chips.innerHTML = '';
-        const meta = { 'Escolares': '🏫 Escolares', 'Argentina': '🇦🇷 Argentina' };
         const mk = (label, value) => {
             const b = document.createElement('button');
             b.type = 'button';
@@ -1232,7 +1237,9 @@
             b.setAttribute('aria-label', 'Filtrar dramas de pista ' + label);
             chips.appendChild(b);
         };
-        DRAMAS.forEach(d => { if (d.track && !chips.querySelector('[data-track="' + d.track + '"]')) mk(meta[d.track] || d.track, d.track); });
+        const names = TRACKS.slice();
+        DRAMAS.forEach(d => { if (d.track && names.indexOf(d.track) === -1) names.push(d.track); });
+        names.forEach(t => mk(TRACK_META[t] || t, t));
         if (cnt) chips.appendChild(cnt); // re-anclaje tras el re-render
     }
     function bestLabel(d) {
@@ -1253,6 +1260,12 @@
         if (cnt) cnt.textContent = (shown.length === DRAMAS.length)
             ? DRAMAS.length + ' mini-dramas'
             : shown.length + ' de ' + DRAMAS.length;
+        if (!shown.length && curTrack !== 'all' && !DRAMAS.some(d => d.track === curTrack)) {
+            // R4: pista conocida que todavía no tiene lecciones (hoy «Niños»)
+            wrap.innerHTML = '<div class="dl-empty dl-soon">' + escHtml(TRACK_META[curTrack] || curTrack) +
+                ': estamos preparando las primeras lecciones 🧒<br><span lang="zh">儿童课文正在准备中，敬请期待</span></div>';
+            return;
+        }
         if (!shown.length) {
             // v9.31: nivel+pista sin dramas (p. ej. DELE C1 × Escolares)
             wrap.innerHTML = '<div class="dl-empty">Todavía no hay dramas de ese nivel en esta pista — probá otra combinación 🧭</div>';
@@ -1529,7 +1542,7 @@
         if (intro && INTRO_ORIG === null) INTRO_ORIG = intro.textContent;
         if (cnMode) {
             if (sub) sub.textContent = '(mini-dramas DELE · 学西班牙语)';
-            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Dos pistas — 🏫 Escolares (A1 a B1) y 🇦🇷 Argentina (A1 a C2) — con niveles separados. Elegí pista y nivel con los chips; el contador te dice cuántos dramas hay.';
+            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Tres pistas — 🏫 Escolares (A1 a B1), 🇦🇷 Argentina (A1 a C2) y 🧒 Niños (lecciones para chicos, en preparación) — con niveles separados. Elegí pista y nivel con los chips; el contador te dice cuántos dramas hay.';
         } else {
             if (sub && SUB_ORIG !== null) sub.textContent = SUB_ORIG;
             if (intro && INTRO_ORIG !== null) intro.textContent = INTRO_ORIG;
@@ -1654,6 +1667,9 @@
             'body.dark-mode .dele-count{color:#94a3b8}',
             '.dl-empty{padding:18px 10px;text-align:center;color:#64748b;font-size:.92rem;border:1.5px dashed rgba(100,116,139,.35);border-radius:12px;margin-top:4px}',
             'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}',
+            // R4: el estado «pista en preparación» va sobre el degradado violeta del tema claro:
+            // ahí el gris de .dl-empty no se leía; en oscuro y papel hereda el de siempre
+            'body:not(.dark-mode):not(.paper-mode) .dl-empty.dl-soon{color:#fff;border-color:rgba(255,255,255,.7)}',
             // v9.32: ocultación a nivel de panel — gana al display:flex de
             // .lesson-levels/.lesson-list aunque app.js re-cree los hijos
             '#panel-lessons.dele-only #lesson-levels,' +
@@ -1687,6 +1703,18 @@
     } else {
         init();
     }
+
+    // R4: API para la hoja de módulos (module-sheet.js): abrir una pista y contar sus dramas.
+    window.DeleLessons = {
+        showTrack: function (track) {
+            curTrack = track || 'all';
+            curLevel = 'all';
+            renderTrackChips();
+            renderChips();
+            renderList();
+        },
+        count: function (track) { return DRAMAS.filter(d => d.track === track).length; }
+    };
 
     // exports para tests/QA (sin efecto en la UI)
     window.DeleDebug = {

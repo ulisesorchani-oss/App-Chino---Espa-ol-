@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v182'; // — Hoy: el distintivo es el botón del módulo (bandera, nombre ▾ · contador) y abre la hoja «¿Qué practicás?» (module-sheet.js; HSK/TOCFL o DELE + Diaria + Clásicos). Exámenes: solo el test de colocación; sin pestaña en «aprendo español»
+const VERSION = 'v183'; // — Lecciones DELE: pista «Niños» (chip siempre visible, estado «próximamente») y entrada «Niños 儿童» en la hoja de módulos (cn-es)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

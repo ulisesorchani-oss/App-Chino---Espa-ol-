@@ -58,7 +58,12 @@
             });
             S.push({ id: 'tocfl', title: '🇹🇼 TOCFL', exam: true, items });
         } else {
-            const items = [{ group: '🎒 青少年（11–17 岁）' }];
+            // R4: lecciones para chicos (pista «Niños» de las mini-dramas DELE): va a
+            // Aprender → Lecciones con la pista ya elegida, no a Hoy (no es un módulo de tarjetas)
+            const kids = (window.DeleLessons && window.DeleLessons.count('Niños')) || 0;
+            const items = [{ group: '🧒 儿童' },
+                { track: 'Niños', code: 'Niños', sub: '儿童', subZh: true, n: kids ? kids + ' 课' : '即将推出' },
+                { group: '🎒 青少年（11–17 岁）' }];
             Object.keys(DELE_INFO).forEach(m => items.push({
                 mod: m, code: DELE_INFO[m].badge, sub: DELE_INFO[m].zh, subZh: true, n: count(m) + ' 句'
             }));
@@ -96,8 +101,8 @@
                 '<span class="ms-cur">' + (curItem ? esc(curItem.code) : '') + '</span></summary>' +
                 '<ul class="ms-list">' + s.items.map(i => i.group
                     ? '<li class="ms-group">' + esc(i.group) + '</li>'
-                    : '<li><button type="button" class="ms-item' + (i.mod === cur ? ' on' : '') + '"' +
-                      (i.dis ? ' disabled' : ' data-module="' + esc(i.mod) + '"') +
+                    : '<li><button type="button" class="ms-item' + (i.mod && i.mod === cur ? ' on' : '') + '"' +
+                      (i.dis ? ' disabled' : i.track ? ' data-track="' + esc(i.track) + '"' : ' data-module="' + esc(i.mod) + '"') +
                       (i.mod === cur ? ' aria-current="true"' : '') + '>' +
                       '<span class="mi-code">' + esc(i.code) + '</span>' +
                       (i.sub ? '<span class="mi-sub"' + (i.subZh ? ' lang="zh"' : '') + '>' + esc(i.sub) + '</span>' : '') +
@@ -211,6 +216,15 @@
         $('btn-mod-sheet-close').addEventListener('click', close);
         ov.addEventListener('click', (e) => {
             if (e.target === ov) { close(); return; }
+            const tr = e.target.closest('.ms-item[data-track]');
+            if (tr) { // R4: pista de lecciones → Aprender → Lecciones, con la pista elegida
+                close();
+                showView('aprender');
+                const tab = $('tab-lessons');
+                if (tab) tab.click();
+                if (window.DeleLessons) window.DeleLessons.showTrack(tr.dataset.track);
+                return;
+            }
             const it = e.target.closest('.ms-item[data-module]');
             if (!it) return;
             close();
