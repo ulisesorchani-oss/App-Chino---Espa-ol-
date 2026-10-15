@@ -4041,11 +4041,9 @@ body.dark-mode .card-tools-header .pinyin-btn.active {
     color: #9ca3af;
 }
 
-@media (max-width: 380px) {
-    .tocfl-menu .ci-py {
-        display: none;
-    }
-}
+/* v9.7x: el código del nivel (Prep, A1… C) va primero y se ve siempre,
+   también en pantallas chicas: es el nombre del nivel en toda la app */
+.tocfl-menu .ci-py { min-width: 2.6em; }
 
 /* --- Dark mode v8.2 (espeja el DELE) --- */
 body.dark-mode .tocfl-main-btn {

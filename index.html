@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261014j">
+    <link rel="stylesheet" href="style.css?v=20261015a">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -256,7 +256,7 @@
                                 <span class="lvsel-tag" aria-hidden="true">TOCFL</span>
                                 <!-- opciones generadas en JS desde TOCFL_ORDER (buildTocflOptions) -->
                                 <select id="sel-lv-tocfl" aria-label="Lecciones TOCFL: elegí el nivel">
-                                    <option value="" disabled hidden selected>Prep–C1</option>
+                                    <option value="" disabled hidden selected>Prep–C</option>
                                 </select>
                             </label>
                         </div>
@@ -267,7 +267,7 @@
                 <!-- Panel Exámenes -->
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
-                    <p class="lessons-intro" data-i18n="examsIntro">Elegí un examen o nivel y practicá su vocabulario con tarjetas de opción simple: cada acierto suma a tu progreso real. ¿No sabés tu nivel? Empezá por el test de colocación.</p>
+                    <p class="lessons-intro" data-i18n="examsIntro">Elegí un examen o nivel y practicá su vocabulario con tarjetas: ves la palabra (o la escuchás) y escribís qué significa. Cada acierto suma a tu progreso real. ¿No sabés tu nivel? Empezá por el test de colocación.</p>
                     <p class="aprender-hoy-hint" data-i18n="hoyHintExams">↪ Al elegir un nivel, practicás en Hoy.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
@@ -305,23 +305,27 @@
                                 <span class="daily-caret" aria-hidden="true">▾</span>
                             </button>
                             <ul id="tocfl-menu" class="tocfl-menu hidden" role="menu" aria-labelledby="btn-tocfl-toggle">
-                                <li class="dele-group-label" role="none">🎯 Band A (Novice → A2)</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Preparación, Novice 1 y 2">
-                                    <span class="ci-zh">準備</span><span class="ci-py">pre-A1</span><span class="ci-es">Preparación · 392 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL Nivel 1, 入門級">
-                                    <span class="ci-zh">入門</span><span class="ci-py">A1</span><span class="ci-es">Nivel 1 · 344 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL Nivel 2, 基礎級">
-                                    <span class="ci-zh">基礎</span><span class="ci-py">A2</span><span class="ci-es">Nivel 2 · 483 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, oraciones de muestra">
-                                    <span class="ci-zh">示例</span><span class="ci-py">muestra</span><span class="ci-es">Oraciones de examen · 20</span></button></li>
+                                <!-- v9.7x: una sola nomenclatura TOCFL (Prep, A1, A2, B1, B2, C); el
+                                     nombre chino solo en listas y hojas. Los data-module NO cambian. -->
+                                <li class="dele-group-label" role="none">🎯 Band A (Prep → A2)</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Prep, 準備, 392 palabras">
+                                    <span class="ci-py">Prep</span><span class="ci-zh">準備</span><span class="ci-es">392 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL A1, 入門, 344 palabras">
+                                    <span class="ci-py">A1</span><span class="ci-zh">入門</span><span class="ci-es">344 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL A2, 基礎, 483 palabras">
+                                    <span class="ci-py">A2</span><span class="ci-zh">基礎</span><span class="ci-es">483 palabras</span></button></li>
                                 <li class="dele-group-label" role="none">🚀 Band B (B1 → B2)</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B3" aria-label="TOCFL Nivel 3, 進階級">
-                                    <span class="ci-zh">進階</span><span class="ci-py">B1</span><span class="ci-es">Nivel 3 · 1091 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B4" aria-label="TOCFL Nivel 4, 高階級">
-                                    <span class="ci-zh">高階</span><span class="ci-py">B2</span><span class="ci-es">Nivel 4 · 2194 palabras</span></button></li>
-                                <li class="dele-group-label" role="none">💫 Band C (流利精通級)</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-C" aria-label="TOCFL Nivel 5, 流利精通級">
-                                    <span class="ci-zh">流利</span><span class="ci-py">C1-C2</span><span class="ci-es">Nivel 5 · 2776 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B3" aria-label="TOCFL B1, 進階, 1091 palabras">
+                                    <span class="ci-py">B1</span><span class="ci-zh">進階</span><span class="ci-es">1091 palabras</span></button></li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B4" aria-label="TOCFL B2, 高階, 2194 palabras">
+                                    <span class="ci-py">B2</span><span class="ci-zh">高階</span><span class="ci-es">2194 palabras</span></button></li>
+                                <li class="dele-group-label" role="none">💫 Band C</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-C" aria-label="TOCFL C, 流利精通, 2776 palabras">
+                                    <span class="ci-py">C</span><span class="ci-zh">流利精通</span><span class="ci-es">2776 palabras</span></button></li>
+                                <!-- v9.7x: las 20 oraciones de muestra no son un nivel: van aparte -->
+                                <li class="dele-group-label" role="none">💬 Fuera de los niveles</li>
+                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, frases útiles, 20 frases">
+                                    <span class="ci-py">Frases útiles</span><span class="ci-zh">常用語</span><span class="ci-es">20 frases</span></button></li>
                             </ul>
                         </div>
                         <div class="dele-dropdown" id="dele-dropdown">
@@ -918,7 +922,7 @@
     <script src="audio-tts.js?v=20261015a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261015a"></script>
+    <script src="app.js?v=20261015b"></script>
     <script src="dict.js?v=20261014b"></script>
     <script src="pinyin-familias.js?v=20261014a"></script>
     <script src="trazos.js?v=20261014s"></script>
@@ -926,7 +930,7 @@
     <script src="reader.js?v=20261014u"></script>
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20261014t"></script>
-    <script src="lessons-graduated.js?v=20261015a"></script>
+    <script src="lessons-graduated.js?v=20261015b"></script>
     <script src="placement-test.js?v=20261014s"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
     <script src="daily-stories.js?v=20261014s"></script>
