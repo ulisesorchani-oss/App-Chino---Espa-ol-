@@ -26,6 +26,14 @@
         titleZhT: '貓和小鳥',
         titleEs: 'El gato y el pajarito',
         blurb: 'Un gatito blanco, un pajarito perdido y la amistad más simple del mundo: jugar, comer y dormir juntos.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '高兴', zhT: '高興', es: 'contento' },
+            { zh: '朋友', zhT: '朋友', es: 'amigo, amiga' },
+            { zh: '什么', zhT: '什麼', es: 'qué' },
+            { zh: '一起', zhT: '一起', es: 'juntos' },
+            { zh: '睡觉', zhT: '睡覺', es: 'dormir' }
+        ],
         lines: [
             { zh: '小王家有一只小猫。', zhT: '小王家有一隻小貓。', es: 'En casa de Xiao Wang hay un gatito.' },
             { zh: '小猫很白，很好看。', zhT: '小貓很白，很好看。', es: 'El gatito es blanco y muy lindo.' },
@@ -105,6 +113,14 @@
         titleZhT: '買水果',
         titleEs: 'Fruta para la clase',
         blurb: 'Mercado, números y fruta: Xiaomei compra manzanas y bananas para compartir con sus compañeros.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '客气', zhT: '客氣', es: 'cortés (不客气: de nada)' },
+            { zh: '香蕉', zhT: '香蕉', es: 'banana' },
+            { zh: '商店', zhT: '商店', es: 'tienda' },
+            { zh: '水果', zhT: '水果', es: 'fruta' },
+            { zh: '好吃', zhT: '好吃', es: 'rico (de comida)' }
+        ],
         lines: [
             { zh: '星期六，小美和妈妈去商店。', zhT: '星期六，小美和媽媽去商店。', es: 'El sábado, Xiaomei y mamá van a la tienda.' },
             { zh: '妈妈说：「我们买水果。」', zhT: '媽媽說：「我們買水果。」', es: 'Mamá dice: «Compramos fruta.»' },
@@ -185,6 +201,14 @@
         titleZhT: '幫媽媽做飯',
         titleEs: 'Ayudo a cocinar',
         blurb: 'Mamá llega muerta de trabajo y Xiaoming se pone el delantal: su primer plato para la familia.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '做饭', zhT: '做飯', es: 'cocinar' },
+            { zh: '已经', zhT: '已經', es: 'ya' },
+            { zh: '然后', zhT: '然後', es: 'después' },
+            { zh: '觉得', zhT: '覺得', es: 'parecer, opinar' },
+            { zh: '干净', zhT: '乾淨', es: 'limpio' }
+        ],
         lines: [
             { zh: '星期天，妈妈很忙。', zhT: '星期天，媽媽很忙。', es: 'El domingo, mamá está muy ocupada.' },
             { zh: '小明说：「妈妈，我帮您做饭。」', zhT: '小明說：「媽媽，我幫您做飯。」', es: 'Xiaoming dice: «Mamá, te ayudo a cocinar.»' },
@@ -265,6 +289,14 @@
         titleZhT: '考試那天',
         titleEs: 'El día del examen',
         blurb: 'Un examen sorpresa, un problema difícil y la lección callada de resolverlo sin copiar.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '担心', zhT: '擔心', es: 'preocuparse' },
+            { zh: '前面', zhT: '前面', es: 'anterior; lo de adelante' },
+            { zh: '可能', zhT: '可能', es: 'tal vez, posible' },
+            { zh: '安静', zhT: '安靜', es: 'tranquilo, en silencio' },
+            { zh: '自己', zhT: '自己', es: 'uno mismo; solo (por su cuenta)' }
+        ],
         lines: [
             { zh: '小云的班上要考试了。', zhT: '小雲的班上要考試了。', es: 'En la clase de Xiaoyun se acerca un examen.' },
             { zh: '她的同学病了，没来上课。', zhT: '她的同學病了，沒來上課。', es: 'Una compañera enfermó y no vino a clase.' },
@@ -347,6 +379,14 @@
         titleZhT: '搬家',
         titleEs: 'La mudanza',
         blurb: 'Cajas, un vecino generoso y una camioneta prestada: la mudanza que termina en amistad.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '邻居', zhT: '鄰居', es: 'vecino' },
+            { zh: '客气', zhT: '客氣', es: 'formalidad (不用客气: no hay de qué)' },
+            { zh: '附近', zhT: '附近', es: 'cerca, aledaño' },
+            { zh: '麻烦', zhT: '麻煩', es: 'complicado, un lío' },
+            { zh: '终于', zhT: '終於', es: 'por fin' }
+        ],
         lines: [
             { zh: '小林一家要搬家了。', zhT: '小林一家要搬家了。', es: 'La familia de Xiaolin se va a mudar.' },
             { zh: '新房子在大学附近，环境很好。', zhT: '新房子在大學附近，環境很好。', es: 'El departamento nuevo queda cerca de la universidad, en un entorno muy agradable.' },
@@ -429,6 +469,14 @@
         titleZhT: '遲到之後',
         titleEs: 'Después de llegar tarde',
         blurb: 'Una noche de estudio, una bici a toda velocidad y la lección más amable sobre el tiempo.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '迟到', zhT: '遲到', es: 'llegar tarde' },
+            { zh: '突然', zhT: '突然', es: 'de repente' },
+            { zh: '开始', zhT: '開始', es: 'empezar' },
+            { zh: '复习', zhT: '復習', es: 'repasar' },
+            { zh: '衣服', zhT: '衣服', es: 'ropa' }
+        ],
         lines: [
             { zh: '李明是个好学生，上学从来不迟到。', zhT: '李明是個好學生，上學從來不遲到。', es: 'Liming es un buen alumno: nunca llega tarde.' },
             { zh: '可是今天，他迟到了二十分钟。', zhT: '可是今天，他遲到了二十分鐘。', es: 'Pero hoy llegó veinte minutos tarde.' },
@@ -512,6 +560,14 @@
         titleZhT: '一次難忘的面試',
         titleEs: 'La entrevista inolvidable',
         blurb: 'Veinte currículums, una sola respuesta y la honestidad convertida en mejor carta de presentación.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '简历', zhT: '簡歷', es: 'currículum' },
+            { zh: '面试', zhT: '面試', es: 'entrevista' },
+            { zh: '诚实', zhT: '誠實', es: 'honesto' },
+            { zh: '消息', zhT: '消息', es: 'noticias; respuesta' },
+            { zh: '紧张', zhT: '緊張', es: 'nervioso' }
+        ],
         lines: [
             { zh: '大学毕业以后，大卫想找一份理想的工作。', zhT: '大學畢業以後，大衛想找一份理想的工作。', es: 'Después de recibirse, David buscaba el trabajo ideal.' },
             { zh: '他在网上发了二十份简历。', zhT: '他在網上發了二十份簡歷。', es: 'Mandó veinte currículums por internet.' },
@@ -594,6 +650,14 @@
         titleZhT: '減肥記',
         titleEs: 'Crónica de una dieta',
         blurb: 'Torta contra fuerza de voluntad: Xiaoli aprende que lo difícil no es empezar, sino seguir.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '忍不住', zhT: '忍不住', es: 'no poder aguantar' },
+            { zh: '放弃', zhT: '放棄', es: 'rendirse, abandonar' },
+            { zh: '锻炼', zhT: '鍛煉', es: 'ejercitarse' },
+            { zh: '减肥', zhT: '減肥', es: 'hacer dieta, adelgazar' },
+            { zh: '效果', zhT: '效果', es: 'efecto, resultado' }
+        ],
         lines: [
             { zh: '小李最近胖了五公斤。', zhT: '小李最近胖了五公斤。', es: 'A Xiaoli, últimamente, le engordaron cinco kilos.' },
             { zh: '医生说：「你要多锻炼，少吃肉。」', zhT: '醫生說：「你要多鍛煉，少吃肉。」', es: 'El médico dice: «Tenés que ejercitarte más y comer menos carne.»' },
@@ -677,6 +741,14 @@
         titleZhT: '網購改變生活',
         titleEs: 'Comprar en línea cambió la vida',
         blurb: 'Debate en dos voces: la comodidad de la compra en línea contra las tiendas de barrio que se apagan.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '冲击', zhT: '衝擊', es: 'golpe, impacto' },
+            { zh: '巨大', zhT: '巨大', es: 'enorme' },
+            { zh: '维持', zhT: '維持', es: 'mantener, sostener' },
+            { zh: '趋势', zhT: '趨勢', es: 'tendencia' },
+            { zh: '家具', zhT: '傢具', es: 'muebles' }
+        ],
         lines: [
             { zh: '最近十年，网购在中国发展得非常快。', zhT: '最近十年，網購在中國發展得非常快。', es: 'En la última década, comprar en línea creció a una velocidad enorme en China.' },
             { zh: '小到文具，大到家具，都可以在网上买。', zhT: '小到文具，大到傢具，都可以在網上買。', es: 'Desde una lapicera hasta un mueble: todo se compra en la red.' },
@@ -759,6 +831,14 @@
         titleZhT: '茶館的一下午',
         titleEs: 'Una tarde de casa de té',
         blurb: 'Té Longjing, pasos exactos y aroma lento: una amistad que aprende a detener el tiempo.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '品尝', zhT: '品嚐', es: 'degustar' },
+            { zh: '布置', zhT: '佈置', es: 'ambientación, decoración' },
+            { zh: '积累', zhT: '積累', es: 'acumulación' },
+            { zh: '文化', zhT: '文化', es: 'cultura' },
+            { zh: '首先', zhT: '首先', es: 'primero' }
+        ],
         lines: [
             { zh: '周六下午，马丽请外国朋友安娜去茶馆。', zhT: '週六下午，馬麗請外國朋友安娜去茶館。', es: 'El sábado a la tarde, Mali invita a su amiga extranjera Anna a una casa de té.' },
             { zh: '茶馆在一条安静的老街上。', zhT: '茶館在一條安靜的老街上。', es: 'La casa de té queda en una calle vieja y tranquila.' },
@@ -843,6 +923,14 @@
         titleZhT: '老字號的抉擇',
         titleEs: 'La decisión del local centenario',
         blurb: 'Doscientos años de salsa, una oferta imposible de rechazar y una conciencia que no está en venta.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '招牌', zhT: '招牌', es: 'marca; cartel del negocio' },
+            { zh: '苛刻', zhT: '苛刻', es: 'duro, exigente' },
+            { zh: '破裂', zhT: '破裂', es: 'quebrarse, frustrarse' },
+            { zh: '固执', zhT: '固執', es: 'terco, obstinado' },
+            { zh: '积淀', zhT: '積澱', es: 'sedimentar, acumularse' }
+        ],
         lines: [
             { zh: '城南有一家两百年的老字号，专卖手工酱油。', zhT: '城南有一家兩百年的老字號，專賣手工醬油。', es: 'Al sur de la ciudad hay un local de doscientos años, de renombre, que vende solo salsa de soja artesanal.' },
             { zh: '店主姓陈，人称陈师傅。', zhT: '店主姓陳，人稱陳師傅。', es: 'El dueño se apellida Chen; todos le dicen maestro Chen.' },
@@ -925,6 +1013,14 @@
         titleZhT: '辯論賽決賽',
         titleEs: 'La gran final de debate',
         blurb: 'La final universitaria: ¿puede la inteligencia artificial reemplazar la creatividad humana? Duelo de oradores.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '苛刻', zhT: '苛刻', es: 'exigente, duro' },
+            { zh: '反驳', zhT: '反駁', es: 'refutar' },
+            { zh: '衡量', zhT: '衡量', es: 'medir, sopesar' },
+            { zh: '环节', zhT: '環節', es: 'ronda, etapa (de un debate)' },
+            { zh: '决赛', zhT: '決賽', es: 'final (de torneo)' }
+        ],
         lines: [
             { zh: '大学中文系的辩论赛进入了决赛。', zhT: '大學中文系的辯論賽進入了決賽。', es: 'El torneo de debate de la facultad de chino llegó a la final.' },
             { zh: '辩题是「人工智能能否取代人类的创造力」。', zhT: '辯題是「人工智能能否取代人類的創造力」。', es: 'El tema: «¿Puede la inteligencia artificial sustituir la creatividad humana?»' },
@@ -1008,6 +1104,14 @@
         titleZhT: '外交談判',
         titleEs: 'La negociación diplomática',
         blurb: 'Dos delegaciones negocian un acuerdo comercial: concesiones, líneas rojas y el arte del compromiso — vocabulario diplomático de nivel avanzado.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '仲裁', zhT: '仲裁', es: 'arbitraje' },
+            { zh: '造福', zhT: '造福', es: 'beneficiar (a la gente)' },
+            { zh: '让步', zhT: '讓步', es: 'hacer concesión' },
+            { zh: '僵局', zhT: '僵局', es: 'punto muerto, estancamiento' },
+            { zh: '底线', zhT: '底線', es: 'línea roja, límite mínimo' }
+        ],
         lines: [
             { zh: '这次双边会谈的主要议题是贸易壁垒与关税减让。', zhT: '這次雙邊會談的主要議題是貿易壁壘與關稅減讓。', es: 'Esta ronda de conversaciones bilaterales tiene como tema principal las barreras comerciales y la reducción arancelaria.' },
             { zh: '甲代表：我们希望贵方能在农产品关税上做出实质性让步。', zhT: '甲代表：我們希望貴方能在農產品關稅上做出實質性讓步。', es: 'Representante A: Esperamos que su parte haga concesiones sustanciales en los aranceles agrícolas.' },
@@ -1149,6 +1253,14 @@
         titleZhT: '認知科學講座',
         titleEs: 'La conferencia de ciencia cognitiva',
         blurb: 'Una ponencia universitaria sobre redes neuronales y cognición humana: hipótesis, evidencia empírica y preguntas del público — registro académico de nivel avanzado.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '点燃', zhT: '點燃', es: 'encender, avivar' },
+            { zh: '难题', zhT: '難題', es: 'problema difícil' },
+            { zh: '拨冗', zhT: '撥冗', es: 'sacar tiempo (a pesar de estar ocupado)' },
+            { zh: '假说', zhT: '假說', es: 'hipótesis' },
+            { zh: '实证研究', zhT: '實證研究', es: 'investigación empírica' }
+        ],
         lines: [
             { zh: '今天的讲座主题是「神经网络与人类认知的异同」。', zhT: '今天的講座主題是「神經網絡與人類認知的異同」。', es: 'El tema de la conferencia de hoy es "Semejanzas y diferencias entre las redes neuronales y la cognición humana".' },
             { zh: '主讲人：感谢大家拨冗前来，我们先从一个基本假说谈起。', zhT: '主講人：感謝大家撥冗前來，我們先從一個基本假說談起。', es: 'Ponente: Gracias a todos por venir a pesar de sus apretadas agendas; comencemos con una hipótesis básica.' },
@@ -1290,6 +1402,14 @@
         titleZhT: '紅樓夢讀書會',
         titleEs: 'El club de lectura: Sueño en el Pabellón Rojo',
         blurb: 'Un grupo de lectores debate el sentido profundo de una gran novela clásica china: destino, decadencia y la fugacidad de la vida — el registro más literario y exigente.',
+        // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
+        keywords: [
+            { zh: '寓意', zhT: '寓意', es: 'significado simbólico, moraleja' },
+            { zh: '预示', zhT: '預示', es: 'presagiar, anticipar' },
+            { zh: '预感', zhT: '預感', es: 'presentimiento' },
+            { zh: '寄托', zhT: '寄託', es: 'expresar, depositar (un sentimiento)' },
+            { zh: '暗示', zhT: '暗示', es: 'insinuar, sugerir' }
+        ],
         lines: [
             { zh: '今晚读书会的主题是《红楼梦》中贾府由盛转衰的寓意。', zhT: '今晚讀書會的主題是《紅樓夢》中賈府由盛轉衰的寓意。', es: 'El tema del club de lectura de esta noche es el simbolismo de la decadencia de la familia Jia en "Sueño en el Pabellón Rojo".' },
             { zh: '主持人：这部小说开篇便以「假作真时真亦假」点明了全书的基调。', zhT: '主持人：這部小說開篇便以「假作真時真亦假」點明了全書的基調。', es: 'Moderador: Desde el inicio, la novela marca el tono de toda la obra con "cuando lo falso se toma por verdadero, lo verdadero también se vuelve falso".' },
