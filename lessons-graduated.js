@@ -161,6 +161,8 @@
             return;
         }
         const myTok = ++lqTok;
+        // v9.7x: voz según la familia de la lección (TOCFL → 🇹🇼 si no se eligió otra)
+        const vz = (typeof voiceZhFor === 'function') ? voiceZhFor(S.lesson) : voiceZh;
         try {
             if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
             if (lqAudio) { lqAudio.pause(); lqAudio = null; }
@@ -169,7 +171,7 @@
             lqPlay = { text: '', btn: null, state: 'idle' };
             KARA.stop(); // nueva lectura → limpia el resaltado anterior
             if (btn) { btn.disabled = true; btn.classList.add('lq-loading'); }
-            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', voiceZh), voiceZh), 12000); // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
+            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', vz), vz), 12000); // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             if (myTok !== lqTok) return; // mientras tanto sonó otra línea → descartar
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
@@ -207,9 +209,9 @@
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(text);
-                    u.lang = ttsLangFor('zh', voiceZh); // v9.49: 🇹🇼 → zh-TW
+                    u.lang = ttsLangFor('zh', vz); // v9.49: 🇹🇼 → zh-TW
                     u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
-                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', voiceZh), voiceZh) : null;
+                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', vz), vz) : null;
                     if (sv) u.voice = sv;
                     KARA.prepare(karaLine); // v9.4: karaoke también con la voz del sistema
                     lqPlay = { text, btn, state: 'playing' };

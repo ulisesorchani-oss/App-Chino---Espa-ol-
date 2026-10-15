@@ -142,8 +142,9 @@
         if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
         if (typeof stopReader === 'function') stopReader();
         const fullText = S.lesson.lines.map(ln => lineText(ln).zh).join('\n');
+        // v9.7x: voz según la familia de la lección (TOCFL → 🇹🇼 si no se eligió otra)
+        const gender = (typeof voiceZhFor === 'function') ? voiceZhFor(S.lesson) : ((typeof voiceZh !== 'undefined') ? voiceZh : 'f');
         try {
-            const gender = (typeof voiceZh !== 'undefined') ? voiceZh : 'f';
             const langCode = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN';
             const reqBody = (typeof ttsBody === 'function') ? ttsBody(fullText, langCode, gender) : { text: fullText, lang: langCode, voice: gender };
             // v7.14/v9.71: timeout escalado con el largo, mismo criterio que reader.js
@@ -177,7 +178,7 @@
             if (myTok !== pTok) return;
             if ('speechSynthesis' in window) {
                 const u = new SpeechSynthesisUtterance(fullText);
-                u.lang = 'zh-CN';
+                u.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN'; // v9.7x: 🇹🇼 → zh-TW también sin red
                 u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
                 pTtsU = u;
                 pState = 'playing';

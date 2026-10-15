@@ -59,6 +59,20 @@ const VOICE_ZH_SEQ = ['f', 'm', 'tw-f', 'tw-m', 'f2', 'm2'];
 const VOICE_ES_SEQ = ['ar-f', 'ar-m', 'f', 'm'];
 function voiceValid(v, seq) { return seq.indexOf(v) !== -1 ? v : seq[0]; }
 let voiceZh = voiceValid(lsGet('ac_voice_zh'), VOICE_ZH_SEQ);
+// v9.7x: voz china por familia. La elección EXPLÍCITA (ac_voice_zh guardada,
+// solo la escribe el botón de voz) gana siempre; sin elección («auto»), la
+// familia TOCFL usa la taiwanesa femenina (tw-f) y HSK y el resto, voiceZh
+// (la continental f). La familia sale de familyOf (app.js), la misma de la escritura.
+function voiceZhExplicit() {
+    const v = lsGet('ac_voice_zh');
+    return VOICE_ZH_SEQ.indexOf(v) !== -1 ? v : null;
+}
+function voiceZhFor(ref) {
+    const v = voiceZhExplicit();
+    if (v) return v;
+    const fam = (typeof familyOf === 'function') ? familyOf(ref) : 'hsk';
+    return fam === 'tocfl' ? 'tw-f' : voiceZh;
+}
 // v9.49: MIGRACIÓN ÚNICA — quien tenía la española f/m guardada pasa a la
 // argentina equivalente UNA sola vez (flag ac_voice_es_v949): es la voz que
 // se percibía perdida. Tocar el botón permite volver a 🇪🇸 y ahí la elección
@@ -248,7 +262,8 @@ async function playAudio(lang) {
     const k = ck();
 
     let text = lang === 'es' ? s.spanish_full : s['chinese_' + k + '_full'];
-    let voiceGender = lang === 'es' ? voiceEs : voiceZh;
+    // v9.7x: la voz china sigue al contexto (módulo TOCFL de Hoy → 🇹🇼 si no se eligió otra)
+    let voiceGender = lang === 'es' ? voiceEs : voiceZhFor(typeof scriptContextRef === 'function' ? scriptContextRef() : null);
     let langCode = ttsLangFor(lang, voiceGender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
 
     // v9.19: si un playAudio anterior dejó su botón esperando ('...'), restaurarlo
@@ -361,8 +376,15 @@ function cycleVoice(lang) {
         voiceEs = VOICE_ES_SEQ[(VOICE_ES_SEQ.indexOf(voiceEs) + 1) % VOICE_ES_SEQ.length];
         try { localStorage.setItem('ac_voice_es', voiceEs); } catch (e) { /* sin storage */ }
     } else {
-        voiceZh = VOICE_ZH_SEQ[(VOICE_ZH_SEQ.indexOf(voiceZh) + 1) % VOICE_ZH_SEQ.length];
-        try { localStorage.setItem('ac_voice_zh', voiceZh); } catch (e) { /* sin storage */ }
+        // v9.7x: «auto» (sin elección guardada) entra en el ciclo:
+        // auto → f → m → tw-f → tw-m → f2 → m2 → auto.
+        const cur = voiceZhExplicit();
+        const next = VOICE_ZH_SEQ[(cur ? VOICE_ZH_SEQ.indexOf(cur) : -1) + 1] || null;
+        voiceZh = next || VOICE_ZH_SEQ[0];
+        try {
+            if (next) localStorage.setItem('ac_voice_zh', next);
+            else localStorage.removeItem('ac_voice_zh');
+        } catch (e) { /* sin storage */ }
     }
     applySavedUI();
     playVoiceSample(lang); // reproduce una frase corta para escuchar la voz nueva
