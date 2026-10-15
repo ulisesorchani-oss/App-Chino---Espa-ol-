@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261016b">
+    <link rel="stylesheet" href="style.css?v=20261016c">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -271,7 +271,7 @@
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
                     <!-- R3: los exámenes y niveles se eligen en la hoja de módulos (botón del módulo, en Hoy) -->
-                    <p class="lessons-intro" data-i18n="examsIntro">¿En qué nivel estás? Hacé el test de colocación: palabras reales del HSK 3.0, 4 opciones, sube de a un nivel. Para practicar un examen, tocá el botón del módulo arriba de la tarjeta, en Hoy. O probá una práctica tipo examen: escuchás, completás y ordenás, sin nota oficial.</p>
+                    <p class="lessons-intro" data-i18n="examsIntro">¿En qué nivel estás? Hacé el test de colocación: palabras reales del HSK 3.0, 4 opciones, sube de a un nivel. Para practicar un examen, tocá el botón del módulo arriba de la tarjeta, en Hoy. O probá una práctica tipo examen: escuchás, leés y ordenás, sin nota oficial.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
                             title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
@@ -282,7 +282,7 @@
                     <!-- R5: práctica tipo examen (exam-practice.js), piloto TOCFL Prep / A1 y HSK 1 -->
                     <button id="btn-exam-practice" class="exam-practice-btn" type="button" aria-haspopup="dialog" aria-controls="exam-pop">
                         <span class="ep-t">🎯 Práctica tipo examen</span>
-                        <span class="ep-d">Escuchar, completar y ordenar · no oficial</span>
+                        <span class="ep-d">Escuchar, leer y ordenar · no oficial</span>
                     </button>
                 </div>
 
@@ -894,7 +894,8 @@
     <script src="feature-tips.js?v=20261009b"></script>
     <script src="app.js?v=20261016a"></script>
     <script src="module-sheet.js?v=20261015b"></script>
-    <script src="exam-practice.js?v=20261016a"></script>
+    <script src="exam-items.js?v=20261016a"></script>
+    <script src="exam-practice.js?v=20261016b"></script>
     <script src="dict.js?v=20261014b"></script>
     <script src="pinyin-familias.js?v=20261014a"></script>
     <script src="trazos.js?v=20261014s"></script>

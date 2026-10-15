@@ -1,15 +1,18 @@
 // ============================================================
 // exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, TOCFL A1, HSK 1)
 // ============================================================
-// Sesión de 20 ítems sin tiempo límite, armada SOLO con lo que ya existe
-// (window.GRADED_LESSONS: líneas y quizzes de las lecciones de cada nivel):
-//   · 🎧 Escuchar (6): suena una línea y se elige qué dice, entre 3 opciones
-//     en español. Los distractores salen primero de la MISMA lección.
-//   · 📖 Completar (8): el quiz de las lecciones (hueco + 3 opciones).
-//   · 🧩 Ordenar (hasta 6): fichas de una oración corta (zhSegmentAll), de a una
-//     cláusula: se acepta solo el orden original. Hay pocas oraciones así
-//     (TOCFL Prep 4, A1 5, HSK 1 9): lo que falte se completa con Escuchar y
-//     Completar para que la tanda sea siempre de 20.
+// Sesión de 20 ítems sin tiempo límite. Se arma con las lecciones de cada nivel
+// (window.GRADED_LESSONS) y, si existe, con el banco escrito de exam-items.js
+// (window.EXAM_ITEMS: diálogos, lecturas y oraciones para ordenar por nivel):
+//   · 🎧 Escuchar (4): suena una línea y se elige qué dice, entre 3 opciones en
+//     español. Los distractores salen primero de la MISMA lección.
+//   · 🎧 Diálogo (3): suena un diálogo de dos voces y se responde una pregunta.
+//   · 📖 Completar (5): el quiz de las lecciones (hueco + 3 opciones).
+//   · 📖 Lectura (3): un texto corto y una pregunta.
+//   · 🧩 Ordenar (5): fichas de una oración de UNA cláusula (zhSegmentAll): se
+//     acepta solo el orden original. Salen del banco escrito y de las lecciones;
+//     si faltan, se compensa con Escuchar y Completar para que sean siempre 20.
+//   Sin banco para un nivel: 6 Escuchar + 8 Completar + 6 Ordenar (como antes).
 // Es PRÁCTICA, no un examen oficial: no copia ítems de exámenes reales ni
 // predice un puntaje. Misma piel que las lecciones (.lq-pop) y los mismos
 // criterios de escritura/voz por familia (scriptFor / voiceZhFor).
@@ -22,7 +25,8 @@
 
     const KEY = 'ac_exam_v1';
     const KEEP = 10;
-    const N_LISTEN = 6, N_CLOZE = 8, N_ORDER = 6;
+    const N_LISTEN = 6, N_CLOZE = 8, N_ORDER = 6;            // sin banco escrito
+    const MIX = { listen: 4, dialogue: 3, cloze: 5, reading: 3, order: 5 }; // con banco (suma 20)
     const $ = (id) => document.getElementById(id);
     const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g,
         c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -34,7 +38,12 @@
         { k: 'HSK1', name: 'HSK 1', pick: l => !l.exam && l.hsk === 1 }
     ];
     const levelOf = (k) => LEVELS.find(x => x.k === k);
-    const SECTIONS = { listen: '🎧 Escuchar', cloze: '📖 Completar', order: '🧩 Ordenar' };
+    const SECTIONS = { listen: '🎧 Escuchar', dialogue: '🎧 Diálogo', cloze: '📖 Completar', reading: '📖 Lectura', order: '🧩 Ordenar' };
+    // el resultado agrupa en 3 partes (y el historial guarda l / c / o)
+    const GROUP = { listen: 'l', dialogue: 'l', cloze: 'c', reading: 'c', order: 'o' };
+    const GROUP_NAME = { l: '🎧 Escuchar', c: '📖 Leer', o: '🧩 Ordenar' };
+    // la voz B de un diálogo es la del otro género en la misma familia
+    const OPP_VOICE = { f: 'm', m: 'f', 'tw-f': 'tw-m', 'tw-m': 'tw-f', f2: 'm2', m2: 'f2' };
 
     // ── historial ──
     function readDB() {
@@ -93,22 +102,28 @@
         });
     }
     const CLAUSE = /[，、；：「」『』…,;:]/;
+    // una oración → ítem de ordenar (o null si no sirve: varias cláusulas, segmentación rara, simétrica)
+    function makeOrder(text, es, min, max) {
+        const t = String(text || '').replace(/[。！？!?.]+$/, '');
+        if (!t || CLAUSE.test(t)) return null; // una sola cláusula: el orden es único
+        let seg = [];
+        try { seg = zhSegmentAll(t); } catch (e) { seg = []; }
+        if (seg.join('') !== t || !seg.every(w => /[㐀-鿿]/.test(w))) return null;
+        if (seg.length < min || seg.length > max) return null;
+        let ch = shuf(seg);
+        if (ch.join('|') === seg.join('|')) ch = seg.slice().reverse();
+        if (ch.join('|') === seg.join('|')) return null; // simétrica: no hay desorden posible
+        return { type: 'order', words: seg, chips: ch, es: es, zh: t };
+    }
     function genOrder(P, trad, n, usedEs) {
         const mk = (min, max) => {
             const out = [];
             for (const x of shuf(P.lines)) {
                 if (out.length >= n) break;
                 if (usedEs.has(x.es)) continue;
-                const t = (trad ? x.zhT : x.zh).replace(/[。！？!?.]+$/, '');
-                if (!t || CLAUSE.test(t)) continue; // una sola cláusula: el orden es único
-                let seg = [];
-                try { seg = zhSegmentAll(t); } catch (e) { seg = []; }
-                if (seg.join('') !== t || !seg.every(s => /[㐀-鿿]/.test(s))) continue;
-                if (seg.length < min || seg.length > max) continue;
-                let ch = shuf(seg);
-                if (ch.join('|') === seg.join('|')) ch = seg.slice().reverse();
-                if (ch.join('|') === seg.join('|')) continue; // simétrica: no hay desorden posible
-                out.push({ type: 'order', words: seg, chips: ch, es: x.es, zh: t });
+                const it = makeOrder(trad ? x.zhT : x.zh, x.es, min, max);
+                if (!it) continue;
+                out.push(it);
                 usedEs.add(x.es);
             }
             return out;
@@ -128,9 +143,41 @@
             opts: shuf(a.q.opts.map((o, i) => ({ z: o.z, t: o.t || o.z, p: o.p, e: o.e, a: o.a, ok: i === 0 ? 1 : 0 })))
         }));
     }
+    // ── banco escrito (exam-items.js) ──
+    const bankOf = (k) => {
+        const b = window.EXAM_ITEMS && window.EXAM_ITEMS[k];
+        return (b && Array.isArray(b.dialogues) && Array.isArray(b.readings) && Array.isArray(b.orders)) ? b : null;
+    };
+    const zhPick = (o, trad) => (trad ? (o.zhT || o.zh) : o.zh);
+    const choices = (q) => shuf(q.opts.map((t, i) => ({ es: t, ok: i === 0 ? 1 : 0 })));
+    function genDialogue(B, trad, n) {
+        return shuf(B.dialogues).slice(0, n).map(d => ({
+            type: 'dialogue', id: d.id, q: d.q.es, opts: choices(d.q),
+            lines: d.lines.map(l => ({ who: l.who, zh: zhPick(l, trad), es: l.es }))
+        }));
+    }
+    function genReading(B, trad, n) {
+        return shuf(B.readings).slice(0, n).map(r => ({
+            type: 'reading', id: r.id, zh: zhPick(r, trad), es: r.es, q: r.q.es, opts: choices(r.q)
+        }));
+    }
     function buildSession(k) {
         const P = poolOf(k);
         const trad = P.ref ? scriptFor(P.ref) === 'trad' : false;
+        const B = bankOf(k);
+        if (B) {
+            const used = new Set();
+            const written = shuf(B.orders).map(o => makeOrder(zhPick(o, trad), o.es, 3, 9)).filter(Boolean);
+            let order = written.slice(0, 3); // 3 escritas + el resto de las lecciones
+            order.forEach(o => used.add(o.es));
+            order = order.concat(genOrder(P, trad, MIX.order - order.length, used));
+            if (order.length < MIX.order) order = order.concat(written.slice(3).filter(o => !used.has(o.es)).slice(0, MIX.order - order.length));
+            const deficit = MIX.order - order.length;
+            const listen = genListen(P, trad, MIX.listen + Math.ceil(deficit / 2), used);
+            listen.forEach(i => used.add(i.es));
+            const cloze = genCloze(P, trad, MIX.cloze + Math.floor(deficit / 2), used);
+            return { k, P, trad, items: listen.concat(genDialogue(B, trad, MIX.dialogue), cloze, genReading(B, trad, MIX.reading), order) };
+        }
         // «Ordenar» primero: es lo más escaso (solo sirven las oraciones de una cláusula).
         // Lo que falte para las 6 fichas se compensa con Escuchar y Completar: siempre 20 ítems.
         const used = new Set();
@@ -159,52 +206,76 @@
         ttsU = null;
         setPlaying(false);
     }
-    async function playText(text) {
+    // Reproduce una lista de partes en orden: [{ text, b }]. b = voz del otro género (diálogos).
+    async function playSeq(parts) {
         const my = ++tok;
         if (au) { try { au.pause(); } catch (e) { /* noop */ } au = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* noop */ }
-        const vz = (typeof voiceZhFor === 'function') ? voiceZhFor(S && S.P.ref) : null;
+        const base = (typeof voiceZhFor === 'function') ? voiceZhFor(S && S.P.ref) : null;
+        const voiceOf = (pt) => (pt.b ? (OPP_VOICE[base] || base) : base);
         const btn = $('ex-play');
-        try {
-            if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
-            if (btn) btn.classList.add('loading');
-            const resp = await fetchTTS(ttsBody(text, ttsLangFor('zh', vz), vz), 12000);
-            if (my !== tok) return;
+        const clip = async (pt) => {
+            const vz = voiceOf(pt);
+            const resp = await fetchTTS(ttsBody(pt.text, ttsLangFor('zh', vz), vz), 12000);
             if (!resp.ok) throw new Error('TTS http ' + resp.status);
             const data = await resp.json();
             if (!data.audio) throw new Error('TTS sin audio');
             const bin = atob(data.audio);
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-            const url = URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' }));
-            au = new Audio(url);
-            try { au.preservesPitch = true; au.webkitPreservesPitch = true; } catch (e) { /* noop */ }
-            applyTtsSpeed(au, data);
-            au.addEventListener('playing', () => applyTtsSpeed(au, data), { once: true });
-            const fin = () => { URL.revokeObjectURL(url); if (my === tok) { au = null; setPlaying(false); } };
-            au.onended = fin; au.onerror = fin;
-            await au.play();
-            if (my !== tok) { au.pause(); return; }
-            setPlaying(true);
+            return { url: URL.createObjectURL(new Blob([bytes], { type: data.mime || 'audio/wav' })), data };
+        };
+        const playClip = (c) => new Promise((resolve, reject) => {
+            const a = new Audio(c.url);
+            au = a;
+            try { a.preservesPitch = true; a.webkitPreservesPitch = true; } catch (e) { /* noop */ }
+            applyTtsSpeed(a, c.data);
+            a.addEventListener('playing', () => applyTtsSpeed(a, c.data), { once: true });
+            const done = () => { URL.revokeObjectURL(c.url); resolve(); };
+            a.onended = done; a.onpause = done; a.onerror = done;
+            a.play().catch(reject);
+        });
+        try {
+            if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
+            if (btn) btn.classList.add('loading');
+            let next = clip(parts[0]);
+            next.catch(() => { /* se maneja al esperarla */ });
+            for (let i = 0; i < parts.length; i++) {
+                const c = await next;
+                if (my !== tok) { URL.revokeObjectURL(c.url); return; }
+                if (i + 1 < parts.length) { next = clip(parts[i + 1]); next.catch(() => { /* idem */ }); }
+                if (btn) btn.classList.remove('loading');
+                setPlaying(true);
+                await playClip(c);
+                if (my !== tok) return;
+            }
+            au = null;
+            setPlaying(false);
         } catch (e) {
             if (my !== tok) return;
             try {
                 if ('speechSynthesis' in window) {
-                    const u = new SpeechSynthesisUtterance(text);
-                    u.lang = ttsLangFor('zh', vz);
-                    u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
-                    const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', vz), vz) : null;
-                    if (sv) u.voice = sv;
-                    ttsU = u;
-                    u.onend = () => { if (ttsU === u) { ttsU = null; setPlaying(false); } };
+                    // respaldo: voz del sistema (el segundo hablante, con tono distinto)
+                    parts.forEach((pt, i) => {
+                        const vz = voiceOf(pt);
+                        const u = new SpeechSynthesisUtterance(pt.text);
+                        u.lang = ttsLangFor('zh', vz);
+                        u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+                        u.pitch = pt.b ? 0.8 : 1.1;
+                        const sv = (typeof sysVoiceFor === 'function') ? sysVoiceFor(ttsLangFor('zh', vz), vz) : null;
+                        if (sv) u.voice = sv;
+                        if (i === parts.length - 1) u.onend = () => { if (my === tok) setPlaying(false); };
+                        ttsU = u;
+                        speechSynthesis.speak(u);
+                    });
                     setPlaying(true);
-                    speechSynthesis.speak(u);
                 }
             } catch (e2) { /* silencioso */ }
         } finally {
             if (btn) btn.classList.remove('loading');
         }
     }
+    const playText = (text) => playSeq([{ text }]);
 
     // ── vistas ──
     function shell(num, res, html) {
@@ -233,7 +304,7 @@
         shell('', null,
             '<span class="ex-pill">Práctica · no oficial</span>' +
             '<h2 class="ex-title">🎯 Práctica tipo examen</h2>' +
-            '<p class="ex-sub">20 ítems en 3 partes: escuchar, completar y ordenar. Sin tiempo límite. No es un examen oficial ni predice tu puntaje.</p>' +
+            '<p class="ex-sub">20 ítems en 3 partes: escuchar (frases y diálogos), leer (completar y lecturas) y ordenar. Sin tiempo límite. No es un examen oficial ni predice tu puntaje.</p>' +
             LEVELS.map(lv => {
                 const P = poolOf(lv.k);
                 const last = lastOf(lv.k);
@@ -251,7 +322,7 @@
         if (!lv) return;
         try { if (typeof ensureTocflPinyin === 'function') await ensureTocflPinyin(); } catch (e) { /* sigue sin pinyin de TOCFL */ }
         const sess = buildSession(k);
-        if (items) sess.items = items.map(x => x.type === 'cloze' ? Object.assign({}, x, { opts: shuf(x.opts) }) : (x.type === 'listen' ? Object.assign({}, x, { opts: shuf(x.opts) }) : Object.assign({}, x, { chips: shuf(x.chips) })));
+        if (items) sess.items = items.map(x => x.opts ? Object.assign({}, x, { opts: shuf(x.opts) }) : Object.assign({}, x, { chips: shuf(x.chips) }));
         if (!sess.items.length) { shell('', null, '<p class="ex-sub">No se pudieron armar ítems para este nivel.</p>'); return; }
         S = Object.assign(sess, { idx: 0, res: new Array(sess.items.length).fill(null), answered: false, retry: !!items, placed: [] });
         window.acScriptRef = S.P.ref;
@@ -270,6 +341,22 @@
             shell(num, S.res, head + '<p class="ex-q">¿Qué dice?</p>' +
                 '<div class="ex-play"><button class="big" id="ex-play" type="button" aria-label="Escuchar la frase">🔊</button>' +
                 '<span class="again">Tocá para escuchar · podés repetir</span></div>' +
+                '<div class="lq-opts" id="ex-opts">' + it.opts.map((o, i) =>
+                    '<button type="button" class="lq-opt" data-i="' + i + '"><span class="lq-opt-letter">' + 'ABC'[i] +
+                    '</span><span class="ex-opt-es">' + esc(o.es) + '</span></button>').join('') + '</div>' +
+                '<div id="ex-fb" class="ex-fbwrap" aria-live="polite"></div>');
+        } else if (it.type === 'dialogue') {
+            shell(num, S.res, head + '<p class="ex-q">Escuchá el diálogo y respondé</p>' +
+                '<div class="ex-play"><button class="big" id="ex-play" type="button" aria-label="Escuchar el diálogo">🔊</button>' +
+                '<span class="again">Dos voces, ' + it.lines.length + ' líneas · podés repetir</span></div>' +
+                '<p class="ex-qtext">' + esc(it.q) + '</p>' +
+                '<div class="lq-opts" id="ex-opts">' + it.opts.map((o, i) =>
+                    '<button type="button" class="lq-opt" data-i="' + i + '"><span class="lq-opt-letter">' + 'ABC'[i] +
+                    '</span><span class="ex-opt-es">' + esc(o.es) + '</span></button>').join('') + '</div>' +
+                '<div id="ex-fb" class="ex-fbwrap" aria-live="polite"></div>');
+        } else if (it.type === 'reading') {
+            shell(num, S.res, head + '<div class="ex-text" lang="zh">' + esc(it.zh) + '</div>' +
+                '<p class="ex-qtext">' + esc(it.q) + '</p>' +
                 '<div class="lq-opts" id="ex-opts">' + it.opts.map((o, i) =>
                     '<button type="button" class="lq-opt" data-i="' + i + '"><span class="lq-opt-letter">' + 'ABC'[i] +
                     '</span><span class="ex-opt-es">' + esc(o.es) + '</span></button>').join('') + '</div>' +
@@ -319,6 +406,22 @@
             const py = pinyinOf(it.zh);
             finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '"><span class="ex-fb-zh" lang="zh">' + esc(it.zh) +
                 '</span>' + (py ? '<span class="py">' + esc(py) + '</span>' : '') + '<span class="es">' + esc(it.es) + '</span></div>');
+            return;
+        }
+        if (it.type === 'dialogue') {
+            stopAudio();
+            finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '">' + it.lines.map(l => {
+                const py = pinyinOf(l.zh);
+                return '<div class="ex-tr"><span class="lq-line-who lq-who-' + l.who + '">' + l.who.toUpperCase() + '</span><div>' +
+                    '<span class="ex-fb-zh" lang="zh">' + esc(l.zh) + '</span>' + (py ? '<span class="py">' + esc(py) + '</span>' : '') +
+                    '<span class="es">' + esc(l.es) + '</span></div></div>';
+            }).join('') + '</div>');
+            return;
+        }
+        if (it.type === 'reading') {
+            const py = pinyinOf(it.zh);
+            finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '">' +
+                (py ? '<span class="py">' + esc(py) + '</span>' : '') + '<span class="es">' + esc(it.es) + '</span></div>');
             return;
         }
         const r = it.opts[right], c = it.opts[i];
@@ -375,10 +478,10 @@
         stopAudio();
         const total = S.items.length;
         const score = S.res.filter(r => r === 1).length;
-        const sec = { listen: [0, 0], cloze: [0, 0], order: [0, 0] };
-        S.items.forEach((it, i) => { sec[it.type][1]++; if (S.res[i] === 1) sec[it.type][0]++; });
+        const sec = { l: [0, 0], c: [0, 0], o: [0, 0] };
+        S.items.forEach((it, i) => { const g = GROUP[it.type]; sec[g][1]++; if (S.res[i] === 1) sec[g][0]++; });
         const wrong = S.items.filter((it, i) => S.res[i] !== 1);
-        if (!S.retry) pushResult(S.k, { t: Date.now(), s: score, n: total, sec: { l: sec.listen, c: sec.cloze, o: sec.order } });
+        if (!S.retry) pushResult(S.k, { t: Date.now(), s: score, n: total, sec: { l: sec.l, c: sec.c, o: sec.o } });
         const pct = score / total;
         const msg = pct >= 0.85 ? '¡Muy bien! Este nivel ya te resulta familiar.'
             : pct >= 0.6 ? 'Buen avance. Repasá los errores y probá otra tanda.'
@@ -389,7 +492,7 @@
             '<h2 class="ex-title">' + (S.retry ? 'Repaso de errores' : 'Terminaste') + ': ' + esc(S.P.lv.name) + zhName + '</h2>' +
             '<div class="ex-score">' + score + '<span>/' + total + '</span></div>' +
             Object.keys(sec).filter(t => sec[t][1]).map(t =>
-                '<div class="ex-bar"><span class="nm">' + SECTIONS[t] + '</span><span class="tr"><span class="fl" style="width:' +
+                '<div class="ex-bar"><span class="nm">' + GROUP_NAME[t] + '</span><span class="tr"><span class="fl" style="width:' +
                 Math.round(sec[t][0] / sec[t][1] * 100) + '%"></span></span><span class="n">' + sec[t][0] + '/' + sec[t][1] + '</span></div>').join('') +
             '<p class="ex-msg">' + msg + '</p>' +
             '<p class="ex-note">Práctica con el vocabulario y las lecciones de tu nivel. No equivale al examen oficial.</p>' +
@@ -431,7 +534,14 @@
             const t = e.target;
             const lv = t.closest('.ex-lv');
             if (lv) { startSession(lv.dataset.k); return; }
-            if (t.closest('#ex-play')) { if (S) playText(S.items[S.idx].zh); return; }
+            if (t.closest('#ex-play')) {
+                if (S) {
+                    const cur = S.items[S.idx];
+                    if (cur.type === 'dialogue') playSeq(cur.lines.map(l => ({ text: l.zh, b: l.who === 'b' })));
+                    else playText(cur.zh);
+                }
+                return;
+            }
             const op = t.closest('#ex-opts .lq-opt');
             if (op && S) { answerChoice(Number(op.dataset.i)); return; }
             const pc = t.closest('#ex-pool .ex-chip');
