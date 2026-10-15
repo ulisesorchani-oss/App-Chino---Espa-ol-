@@ -705,8 +705,9 @@ const UI_STRINGS = {
     viewAprender: 'Aprender', viewAprenderSub: 'Elegí qué aprender.',
     // v9.7x: aviso en los paneles que SÍ saltan a Hoy al elegir (setModule)
     hoyHintExams: '↪ Al elegir un nivel, practicás en Hoy.',
-    hoyHintDaily: '↪ Al elegir una situación, practicás en Hoy.',
-    hoyHintClassics: '↪ Al elegir un clásico del menú, practicás en Hoy; el texto original se lee acá.',
+    hoyHintDaily: '↪ Elegí una situación y tocá ▶ Practicar en Hoy.',
+    hoyHintClassics: '↪ Elegí un clásico del menú y tocá ▶ Practicar en Hoy; el texto original se lee acá.',
+    choiceChosen: '✔ Elegiste: ', choiceGo: '▶ Practicar en Hoy',
     viewEntrenar: 'Entrenar', viewEntrenarSub: 'Ejercicios sueltos para el oído, la voz y la mano.',
     viewYo: 'Yo', viewYoSub: 'Tu progreso, tu repaso y los ajustes de la app.',
     yoProgress: '📈 Progreso', yoSettings: '⚙️ Ajustes',
@@ -787,8 +788,9 @@ const UI_STRINGS = {
     navHoy: '今天', navAprender: '学习', navEntrenar: '训练', navYo: '我',
     viewAprender: '学习', viewAprenderSub: '选择要学什么。',
     hoyHintExams: '↪ 选好级别后，在“今天”练习。',
-    hoyHintDaily: '↪ 选好场景后，在“今天”练习。',
-    hoyHintClassics: '↪ 从菜单选好经典后，在“今天”练习；原文在这里阅读。',
+    hoyHintDaily: '↪ 选好场景，再点 ▶ 去“今天”练习。',
+    hoyHintClassics: '↪ 从菜单选好经典，再点 ▶ 去“今天”练习；原文在这里阅读。',
+    choiceChosen: '✔ 已选：', choiceGo: '▶ 去“今天”练习',
     viewEntrenar: '训练', viewEntrenarSub: '听力、发音和书写的单项练习。',
     viewYo: '我', viewYoSub: '你的进度、复习和应用设置。',
     yoProgress: '📈 进度', yoSettings: '⚙️ 设置',
@@ -1729,9 +1731,12 @@ function setupEventListeners() {
                 typeof DAILY_STORIES !== 'undefined' && DAILY_STORIES[mod]) {
                 if (openDailyStory(mod)) return;
             }
-            setModule(mod);
+            // v9.7x: en Diaria y Clásicos elegir NO salta a Hoy (✔ Elegiste + ▶ Practicar en Hoy)
+            setModule(mod, { stay: !!btn.closest('#daily-menu, #classics-menu') });
         });
     });
+    // v9.7x: «▶ Practicar en Hoy» — el salto explícito
+    document.querySelectorAll('.choice-go').forEach(b => b.addEventListener('click', () => showView('hoy')));
     // (Los clásicos van por dropdown: sus ítems .cat-btn ya quedaron conectados arriba)
     initDailyDropdown();
     initClassicsDropdown();
@@ -1850,7 +1855,9 @@ function setCharType(ct) {
     try { document.dispatchEvent(new CustomEvent('ac-script-change')); } catch (e) { }
 }
 
-function setModule(mod) {
+// v9.7x: opts.stay = cargar el módulo SIN saltar a Hoy (Diaria y Clásicos:
+// la elección queda a la vista con «▶ Practicar en Hoy»).
+function setModule(mod, opts) {
     state.activeModule = mod;
     state.currentIndex = 0;
     state.translationRevealed = false;
@@ -1870,12 +1877,27 @@ function setModule(mod) {
     loadSentences().then(() => {
         renderCurrentSentence();
         updateStats();
-        if (state._uiReady) showView('hoy'); // v10 UX: elegir un módulo vuelve a practicar
+        if (state._uiReady && !(opts && opts.stay)) showView('hoy'); // v10 UX: elegir un módulo vuelve a practicar
     });
 }
 
 // ===== Dropdown de Práctica Diaria (v6.9) =====
+// v9.7x: «✔ Elegiste: X [▶ Practicar en Hoy]» en Diaria y Clásicos — refleja el
+// módulo activo si es de ese panel (se repinta con setModule y al cambiar de idioma).
+function updateChoiceConfirm() {
+    const mod = state.activeModule;
+    [['daily-choice', DAILY_MODULES.includes(mod)], ['classics-choice', !!CLASSICS_INFO[mod]]].forEach(([id, mine]) => {
+        const box = document.getElementById(id);
+        if (!box) return;
+        box.classList.toggle('hidden', !mine);
+        if (!mine) return;
+        box.querySelector('.choice-label').textContent = uiT('choiceChosen') + moduleLabel(mod);
+        box.querySelector('.choice-go').textContent = uiT('choiceGo');
+    });
+}
+
 function updateDailyBtnLabel() {
+    updateChoiceConfirm();
     const lbl = document.getElementById('daily-current');
     if (!lbl) return;
     if (DAILY_MODULES.includes(state.activeModule) && state.activeModule !== 'todas') {

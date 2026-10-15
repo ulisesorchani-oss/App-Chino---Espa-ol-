@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v180'; // — TOCFL con una sola nomenclatura visible (Prep, A1, A2, B1, B2, C); «Frases útiles» fuera de la lista de niveles; intro de Exámenes corregida; código de nivel del menú TOCFL con contraste ≥ 4,5:1
+const VERSION = 'v181'; // — Diaria y Clásicos: elegir ya no salta a Hoy; queda «✔ Elegiste: X [▶ Practicar en Hoy]» (setModule con stay)
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con

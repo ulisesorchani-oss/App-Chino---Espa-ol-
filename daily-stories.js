@@ -310,7 +310,8 @@ function dsShowScene(mod) {
     if (practiceBtn) {
         practiceBtn.addEventListener('click', () => {
             closeDailyStory();
-            if (typeof setModule === 'function') setModule(mod);
+            // v9.7x: sin salto a Hoy — en Diaria queda «✔ Elegiste: X [▶ Practicar en Hoy]»
+            if (typeof setModule === 'function') setModule(mod, { stay: true });
         });
     }
 }

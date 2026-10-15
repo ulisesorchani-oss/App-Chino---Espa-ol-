@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261015b">
+    <link rel="stylesheet" href="style.css?v=20261015c">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -353,7 +353,7 @@
                 <div class="tab-panel section-daily hidden" id="panel-daily" role="tabpanel" aria-labelledby="tab-daily">
                     <h3 class="section-title" data-i18n="dailyTitle">📚 PRÁCTICA DIARIA</h3>
                     <p class="lessons-intro" data-i18n="dailyIntro">Elegí una situación cotidiana: primero leés un diálogo corto para entender el contexto, después practicás sus frases sueltas con hueco ___. "Todas" mezcla las oraciones de todas las situaciones.</p>
-                    <p class="aprender-hoy-hint" data-i18n="hoyHintDaily">↪ Al elegir una situación, practicás en Hoy.</p>
+                    <p class="aprender-hoy-hint" data-i18n="hoyHintDaily">↪ Elegí una situación y tocá ▶ Practicar en Hoy.</p>
                     <div class="category-filter daily-filter">
                         <div class="daily-dropdown" id="daily-dropdown">
                             <button id="btn-daily-toggle" class="daily-main-btn" type="button"
@@ -379,13 +379,18 @@
                             </ul>
                         </div>
                     </div>
+                    <!-- v9.7x: elegir NO salta a Hoy; queda la elección a la vista y el salto es explícito -->
+                    <div class="choice-confirm hidden" id="daily-choice" role="status" aria-live="polite">
+                        <span class="choice-label"></span>
+                        <button type="button" class="choice-go">▶ Practicar en Hoy</button>
+                    </div>
                 </div>
 
                 <!-- Panel Clásicos -->
                 <div class="tab-panel section-classics hidden" id="panel-classics" role="tabpanel" aria-labelledby="tab-classics">
                     <h3 class="section-title classics-title"><span data-i18n="classicsTitle">📜 CLÁSICOS ANTIGUOS</span> <span class="classics-sub">(Sabiduría Milenaria)</span></h3>
                     <p class="lessons-intro" data-i18n="classicsIntro">Elegí un clásico para practicar frases sueltas de sus enseñanzas más conocidas, o tocá 📖 Leer el texto original para recorrer el texto completo por capítulos, con pinyin y traducción.</p>
-                    <p class="aprender-hoy-hint" data-i18n="hoyHintClassics">↪ Al elegir un clásico del menú, practicás en Hoy; el texto original se lee acá.</p>
+                    <p class="aprender-hoy-hint" data-i18n="hoyHintClassics">↪ Elegí un clásico del menú y tocá ▶ Practicar en Hoy; el texto original se lee acá.</p>
                     <div class="classics-dropdown" id="classics-dropdown">
                         <button id="btn-classics-toggle" class="classics-main-btn" type="button"
                                 aria-haspopup="menu" aria-expanded="false" aria-controls="classics-menu"
@@ -413,6 +418,11 @@
                             <li role="none"><button type="button" class="cat-btn classic-item" role="menuitem" data-module="Clasicos-Jingangjing" aria-label="Sutra del Diamante, Jīngāngjīng">
                                 <span class="ci-zh" lang="zh">金刚经</span><span class="ci-py">Jīngāngjīng</span><span class="ci-es">Sutra del Diamante</span></button></li>
                         </ul>
+                    </div>
+                    <!-- v9.7x: elegir NO salta a Hoy; queda la elección a la vista y el salto es explícito -->
+                    <div class="choice-confirm hidden" id="classics-choice" role="status" aria-live="polite">
+                        <span class="choice-label"></span>
+                        <button type="button" class="choice-go">▶ Practicar en Hoy</button>
                     </div>
                     <h4 class="cread-head">📖 Leer el texto original <span class="cread-sub">por bloques, como las lecciones</span></h4>
                     <div class="cread-list" id="cread-list" role="group" aria-label="Leer el texto original de un clásico"></div>
@@ -922,7 +932,7 @@
     <script src="audio-tts.js?v=20261015a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261015b"></script>
+    <script src="app.js?v=20261015c"></script>
     <script src="dict.js?v=20261014b"></script>
     <script src="pinyin-familias.js?v=20261014a"></script>
     <script src="trazos.js?v=20261014s"></script>
@@ -933,7 +943,7 @@
     <script src="lessons-graduated.js?v=20261015b"></script>
     <script src="placement-test.js?v=20261014s"></script>
     <script src="minimal-pairs.js?v=20260925a"></script>
-    <script src="daily-stories.js?v=20261014s"></script>
+    <script src="daily-stories.js?v=20261015a"></script>
     <script src="podcast.js?v=20261015a"></script>
     <script src="free-talk.js?v=20261009a"></script>
     <script src="personal-lessons.js?v=20260928a"></script>
