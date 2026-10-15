@@ -4015,7 +4015,7 @@ body.dark-mode .card-tools-header .pinyin-btn.active {
 .tocfl-menu .ci-py {
     font-style: italic;
     font-size: 0.75rem;
-    color: #0d9488;
+    color: #0f766e; /* v9.7x: antes #0d9488 (3,3:1 en el ítem activo); el código del nivel es la info principal → ≥ 4,5:1 */
     white-space: nowrap;
 }
 
