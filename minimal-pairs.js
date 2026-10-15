@@ -82,11 +82,98 @@
         { id: 'yuan',   words: [{ zh: '元', py: 'yuán', es: 'yuan (moneda)' }, { zh: '远', py: 'yuǎn', es: 'lejos' }] },
         { id: 'xing',   words: [{ zh: '星', py: 'xīng', es: 'estrella' }, { zh: '姓', py: 'xìng', es: 'apellido' }] },
         { id: 'ting',   words: [{ zh: '听', py: 'tīng', es: 'escuchar' }, { zh: '停', py: 'tíng', es: 'parar' }] },
-        { id: 'shu-shu', words: [{ zh: '书', py: 'shū', es: 'libro' }, { zh: '树', py: 'shù', es: 'árbol' }] },
-        { id: 'ma-triada', words: [{ zh: '妈', py: 'mā', es: 'mamá' }, { zh: '马', py: 'mǎ', es: 'caballo' }, { zh: '骂', py: 'mà', es: 'regañar' }] }
+       { id: 'shu-shu', words: [{ zh: '书', py: 'shū', es: 'libro' }, { zh: '树', py: 'shù', es: 'árbol' }] },
+        { id: 'ma-triada', words: [{ zh: '妈', py: 'mā', es: 'mamá' }, { zh: '马', py: 'mǎ', es: 'caballo' }, { zh: '骂', py: 'mà', es: 'regañar' }] },
+            
+        // Tanda HSK 1: Contrastes fundamentales
+        {
+          id: 'ba-pa',
+          words: [
+            { zh: '爸', py: 'bà', es: 'papá' },
+            { zh: '怕', py: 'pà', es: 'tener miedo' }
+          ]
+        },
+        {
+          id: 'hao-hao',
+          words: [
+            { zh: '好', py: 'hǎo', es: 'bueno / bien' },
+            { zh: '号', py: 'hào', es: 'número / día del mes' }
+          ]
+        },
+        {
+          id: 'bei-bei',
+          words: [
+            { zh: '杯', py: 'bēi', es: 'vaso / taza' },
+            { zh: '北', py: 'běi', es: 'norte' }
+          ]
+        },
+        {
+          id: 'qi-ji',
+          words: [
+            { zh: '七', py: 'qī', es: 'siete' },
+            { zh: '鸡', py: 'jī', es: 'pollo' }
+          ]
+        },
+        {
+          id: 'si-shi',
+          words: [
+            { zh: '四', py: 'sì', es: 'cuatro' },
+            { zh: '是', py: 'shì', es: 'ser' }
+          ]
+        },
+        {
+          id: 'chi-zhi',
+          words: [
+            { zh: '吃', py: 'chī', es: 'comer' },
+            { zh: '知', py: 'zhī', es: 'saber' }
+          ]
+        },
+
+        // Tanda HSK 2: Contrastes intermedios
+        {
+          id: 'tang-tang',
+          words: [
+            { zh: '汤', py: 'tāng', es: 'sopa' },
+            { zh: '糖', py: 'táng', es: 'azúcar / caramelo' }
+          ]
+        },
+        {
+          id: 'ke-ke',
+          words: [
+            { zh: '课', py: 'kè', es: 'clase / lección' },
+            { zh: '渴', py: 'kě', es: 'sediento' }
+          ]
+        },
+        {
+          id: 'wan-wan',
+          words: [
+            { zh: '碗', py: 'wǎn', es: 'tazón' },
+            { zh: '完', py: 'wán', es: 'terminar' }
+          ]
+        },
+        {
+          id: 'san-shan',
+          words: [
+            { zh: '三', py: 'sān', es: 'tres' },
+            { zh: '山', py: 'shān', es: 'montaña' }
+          ]
+        },
+        {
+          id: 'cuo-zuo',
+          words: [
+            { zh: '错', py: 'cuò', es: 'error / equivocado' },
+            { zh: '做', py: 'zuò', es: 'hacer' }
+          ]
+        },
+        {
+          id: 'jin-jing',
+          words: [
+            { zh: '今', py: 'jīn', es: 'hoy / presente' },
+            { zh: '经', py: 'jīng', es: 'pasar por / ya' }
+          ]
+        }
     ];
     /* v9.20-PURE-DATA-END */
-
     // ── puro: secuencia de tonos desde pinyin con marcas ('mǎi'→[3]);
     //    cada vocal marcada suma un tono (así "xiāng" = 1 y "nǐhǎo" sin
     //    espacio = 3-3); sílabas sin marca = tono neutro 0 y no se anuncian ──
