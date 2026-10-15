@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261015d">
+    <link rel="stylesheet" href="style.css?v=20261016b">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -271,7 +271,7 @@
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
                     <!-- R3: los exámenes y niveles se eligen en la hoja de módulos (botón del módulo, en Hoy) -->
-                    <p class="lessons-intro" data-i18n="examsIntro">¿En qué nivel estás? Hacé el test de colocación: palabras reales del HSK 3.0, 4 opciones, sube de a un nivel. Para practicar un examen, tocá el botón del módulo arriba de la tarjeta, en Hoy.</p>
+                    <p class="lessons-intro" data-i18n="examsIntro">¿En qué nivel estás? Hacé el test de colocación: palabras reales del HSK 3.0, 4 opciones, sube de a un nivel. Para practicar un examen, tocá el botón del módulo arriba de la tarjeta, en Hoy. O probá una práctica tipo examen: escuchás, completás y ordenás, sin nota oficial.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
                             title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
@@ -279,6 +279,11 @@
                         🎯 Test de colocación — descubrí tu nivel
                     </button>
                     <p id="placement-status" class="placement-status hidden" role="status"></p>
+                    <!-- R5: práctica tipo examen (exam-practice.js), piloto TOCFL Prep / A1 y HSK 1 -->
+                    <button id="btn-exam-practice" class="exam-practice-btn" type="button" aria-haspopup="dialog" aria-controls="exam-pop">
+                        <span class="ep-t">🎯 Práctica tipo examen</span>
+                        <span class="ep-d">Escuchar, completar y ordenar · no oficial</span>
+                    </button>
                 </div>
 
                 <!-- Panel Diaria -->
@@ -762,6 +767,18 @@
         </div>
     </div>
 
+    <!-- R5: PRÁCTICA TIPO EXAMEN (exam-practice.js; Atrás = ✕ vía nav.js) -->
+    <div id="exam-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Práctica tipo examen">
+        <div class="lq-inner">
+            <div class="lq-header">
+                <span id="ex-num" class="lq-progress-num"></span>
+                <div id="ex-seg" class="lq-segments" aria-hidden="true"></div>
+                <button id="ex-close" class="lq-x" type="button" aria-label="Cerrar">✕</button>
+            </div>
+            <div id="ex-body" class="lq-body"></div>
+        </div>
+    </div>
+
     <!-- v9.2: LECTOR DE CLÁSICOS -->
     <div id="cread-pop" class="lq-pop hidden" role="dialog" aria-modal="true" aria-label="Leer clásico">
         <div class="lq-inner">
@@ -875,8 +892,9 @@
     <script src="audio-tts.js?v=20261015a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261015d"></script>
+    <script src="app.js?v=20261016a"></script>
     <script src="module-sheet.js?v=20261015b"></script>
+    <script src="exam-practice.js?v=20261016a"></script>
     <script src="dict.js?v=20261014b"></script>
     <script src="pinyin-familias.js?v=20261014a"></script>
     <script src="trazos.js?v=20261014s"></script>
@@ -891,7 +909,7 @@
     <script src="podcast.js?v=20261015a"></script>
     <script src="free-talk.js?v=20261009a"></script>
     <script src="personal-lessons.js?v=20260928a"></script>
-    <script src="nav.js?v=20261015a"></script>
+    <script src="nav.js?v=20261016a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
