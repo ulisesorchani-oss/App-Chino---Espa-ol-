@@ -258,11 +258,7 @@
     function plGoPractice(level) {
         plClose();
         const lv = Math.min(Math.max(level || 1, 1), MAX_LV);
-        const sel = document.getElementById('select-hsk-level');
-        if (sel) sel.value = 'HSK' + lv;  // el selector refleja el nivel recomendado
-        setModule('HSK' + lv);            // carga el módulo (insignia + conteo real)
-        const tab = document.getElementById('tab-exams');
-        if (tab) tab.click();             // muestra Exámenes (persiste ac_tab)
+        setModule('HSK' + lv);            // carga el módulo y lleva a Hoy (botón del módulo + conteo real)
     }
 
     function plRenderIntro() {

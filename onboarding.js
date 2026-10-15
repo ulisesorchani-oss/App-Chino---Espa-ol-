@@ -281,7 +281,7 @@
                     ['🎯', 'Entrenar', 'oído, escritura y lectura'],
                     ['🙂', 'Yo', 'tu progreso, ajustes y esta guía']
                 ],
-                done: { cero: 'Empezar ▶', test: 'Hacer el test ▶', examen: 'Ver exámenes ▶', none: 'Listo' }
+                done: { cero: 'Empezar ▶', test: 'Hacer el test ▶', examen: 'Elegir examen ▶', none: 'Listo' }
             },
             // Sin "te damos una pista": ante un error cualquiera la app solo
             // da otra oportunidad (hintGeneric); la pista real aparece solo si
@@ -723,9 +723,9 @@
                     var b = $('btn-placement');
                     if (b) b.click();
                 } else if (choice === 'examen') {
-                    if (typeof window.showView === 'function') window.showView('aprender');
-                    var t = $('tab-exams');
-                    if (t) t.click();
+                    // R3: la hoja de módulos en Hoy, abierta en HSK y TOCFL
+                    if (typeof window.showView === 'function') window.showView('hoy');
+                    if (window.ModSheet) window.ModSheet.open({ exam: true });
                 }
             } catch (e) { console.warn('[guía] no se pudo aplicar la elección:', e); }
             armFirstCard();

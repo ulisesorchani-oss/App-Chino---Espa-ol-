@@ -6534,3 +6534,155 @@ body.dark-mode .lvsel-hsk:not(.on) select { background: transparent; color: #FCA
 body.dark-mode .lvsel-hsk:not(.on) .lvsel-tag, body.dark-mode .lvsel-hsk:not(.on)::after { color: #FCA5A5; }
 body.dark-mode .lvsel-tocfl:not(.on) select { background: transparent; color: #BFDBFE; border-color: #fff; }
 body.dark-mode .lvsel-tocfl:not(.on) .lvsel-tag, body.dark-mode .lvsel-tocfl:not(.on)::after { color: #BFDBFE; }
+
+/* ===================================================================
+   R3 — Botón del módulo en Hoy + hoja «¿Qué practicás?» (module-sheet.js)
+   =================================================================== */
+/* texto secundario de estas piezas: >= 4,5:1 medido en píxeles en los tres temas
+   (--text-secondary queda en ~4:1 con letra chica en claro y papel) */
+body { --ms-muted: #475569; }
+body.dark-mode { --ms-muted: var(--text-secondary); }
+body.paper-mode { --ms-muted: #6b5a3e; }
+.mod-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.mod-btn:hover { border-color: var(--primary); }
+.mod-btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.mod-btn .mb-flag:empty { display: none; }
+.mod-btn .mb-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mod-btn .mb-caret { font-size: 0.8em; opacity: 0.8; }
+.mod-btn .mb-count { font-weight: 600; color: var(--ms-muted); }
+.mod-btn .mb-count .card-number { text-align: left; }
+/* si no entra en una línea, cede primero el contador (nunca la bandera) */
+.mod-btn.no-count .mb-count { display: none; }
+/* aviso de una sola vez: el botón late tres veces */
+.mod-btn.mb-pulse { animation: mbPulse 1.1s ease-in-out 3; }
+@keyframes mbPulse {
+    0%, 100% { box-shadow: 0 0 0 0 transparent; }
+    50% { box-shadow: 0 0 0 4px var(--primary); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .mod-btn.mb-pulse { animation-duration: 0.01s; outline: 3px solid var(--primary); outline-offset: 2px; }
+}
+.practice-meta .mod-btn + .card-attempts,
+.practice-meta .card-mixed-chip { white-space: nowrap; }
+
+/* Móvil: el botón en su propio renglón, el audio debajo a la derecha */
+@media (max-width: 480px) {
+    .practice-top-row {
+        grid-template-areas:
+            "meta meta"
+            "actions actions"
+            "progress progress";
+    }
+    .practice-audio-actions { justify-self: end; }
+}
+
+.ms-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.5);
+}
+.ms-overlay.hidden { display: none; }
+.ms-sheet {
+    width: 100%;
+    max-width: 520px;
+    max-height: 82vh;
+    max-height: 82dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.25);
+    animation: vocabPopUp 0.22s ease;
+}
+.ms-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--border);
+}
+.ms-head h3 { margin: 0; font-size: 1.05rem; }
+.ms-close {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+.ms-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.ms-sec { border-bottom: 1px solid var(--border); }
+.ms-sec > summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 4px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.ms-sec > summary::-webkit-details-marker { display: none; }
+.ms-sec > summary .ms-cur { margin-left: auto; font-size: 0.78rem; font-weight: 700; color: var(--ms-muted); }
+.ms-sec > summary::after { content: '▾'; margin-left: 6px; transition: transform 0.15s; }
+.ms-sec:not([open]) > summary::after { transform: rotate(-90deg); }
+.ms-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.ms-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.ms-item:hover:not(:disabled) { background: rgba(37, 99, 235, 0.07); }
+.ms-item:disabled { opacity: 0.5; cursor: default; }
+.ms-item .mi-code { font-weight: 800; min-width: 3.2em; }
+.ms-item .mi-sub { font-weight: 700; }
+.ms-item .mi-n { margin-left: auto; padding-left: 8px; font-size: 0.8rem; color: var(--ms-muted); white-space: nowrap; }
+.ms-item.on { background: rgba(37, 99, 235, 0.12); box-shadow: inset 3px 0 0 var(--primary); }
+.ms-item.on .mi-code::before { content: '✓ '; }
+.ms-group {
+    padding: 6px 10px 2px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ms-muted);
+}
+.ms-note { margin: 0 10px 10px; font-size: 0.78rem; color: var(--ms-muted); }
