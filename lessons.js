@@ -546,6 +546,13 @@ window.GRADED_LESSONS = [
   "titleZh": "第一天",
   "titleZhT": "第一天",
   "blurb": "Xiaoming empieza a estudiar chino. Su maestro lo recibe con una pregunta.",
+  "keywords": [
+   { "zh": "名字", "zhT": "名字", "es": "nombre" },
+   { "zh": "汉语", "zhT": "漢語", "es": "chino (el idioma)" },
+   { "zh": "朋友", "zhT": "朋友", "es": "amigo, amiga" },
+   { "zh": "高兴", "zhT": "高興", "es": "contento" },
+   { "zh": "老师", "zhT": "老師", "es": "maestro, maestra" }
+  ],
   "lines": [
    {
     "zh": "今天是小明学汉语的第一天。",
@@ -960,6 +967,13 @@ window.GRADED_LESSONS = [
   "titleZh": "去奶奶家",
   "titleZhT": "去奶奶家",
   "blurb": "Domingo de familia: fruta, una película china y un té con la abuela.",
+  "keywords": [
+   { "zh": "干净", "zhT": "乾淨", "es": "limpio" },
+   { "zh": "水果", "zhT": "水果", "es": "fruta" },
+   { "zh": "电视", "zhT": "電視", "es": "televisión, tele" },
+   { "zh": "电影", "zhT": "電影", "es": "película" },
+   { "zh": "好看", "zhT": "好看", "es": "lindo; que se disfruta de ver" }
+  ],
   "lines": [
    {
     "zh": "星期日，小美去奶奶家。",
@@ -1371,6 +1385,13 @@ window.GRADED_LESSONS = [
   "titleZh": "生日礼物",
   "titleZhT": "生日禮物",
   "blurb": "Xiaomei cumple años. Su amiga busca el regalo perfecto en el centro comercial.",
+  "keywords": [
+   { "zh": "礼物", "zhT": "禮物", "es": "regalo" },
+   { "zh": "快乐", "zhT": "快樂", "es": "feliz" },
+   { "zh": "生日", "zhT": "生日", "es": "cumpleaños" },
+   { "zh": "商场", "zhT": "商場", "es": "centro comercial" },
+   { "zh": "看见", "zhT": "看見", "es": "ver" }
+  ],
   "lines": [
    {
     "zh": "五月十二日是小美的生日。",
@@ -1793,6 +1814,13 @@ window.GRADED_LESSONS = [
   "titleZh": "小丽生病了",
   "titleZhT": "小麗生病了",
   "blurb": "Dolor de cabeza, un teléfono al maestro y dos días de reposo con mucha agua.",
+  "keywords": [
+   { "zh": "舒服", "zhT": "舒服", "es": "cómodo; sentirse bien" },
+   { "zh": "应该", "zhT": "應該", "es": "deber" },
+   { "zh": "可以", "zhT": "可以", "es": "poder (tener permiso)" },
+   { "zh": "以后", "zhT": "以後", "es": "después" },
+   { "zh": "上课", "zhT": "上課", "es": "tener clase" }
+  ],
   "lines": [
    {
     "zh": "星期一早上，小丽觉得不舒服。",
@@ -2192,6 +2220,13 @@ window.GRADED_LESSONS = [
   "titleZh": "坏手机",
   "titleZhT": "壞手機",
   "blurb": "Un teléfono prestado, una caída y una disculpa que salva la amistad.",
+  "keywords": [
+   { "zh": "突然", "zhT": "突然", "es": "de repente" },
+   { "zh": "紧张", "zhT": "緊張", "es": "nervioso" },
+   { "zh": "没关系", "zhT": "沒關係", "es": "no pasa nada; no importa" },
+   { "zh": "小心", "zhT": "小心", "es": "cuidado; tener cuidado" },
+   { "zh": "说话", "zhT": "說話", "es": "hablar" }
+  ],
   "lines": [
    {
     "zh": "小李和小张住在一个房间里。",
@@ -2606,6 +2641,13 @@ window.GRADED_LESSONS = [
   "titleZh": "周末计划",
   "titleZhT": "週末計劃",
   "blurb": "Subir la montaña, ir a nadar o quedarse: un clásico debate entre amigos.",
+  "keywords": [
+   { "zh": "游泳", "zhT": "游泳", "es": "nadar" },
+   { "zh": "决定", "zhT": "決定", "es": "decidir" },
+   { "zh": "讨论", "zhT": "討論", "es": "discutir" },
+   { "zh": "计划", "zhT": "計劃", "es": "planificar" },
+   { "zh": "机会", "zhT": "機會", "es": "oportunidad" }
+  ],
   "lines": [
    {
     "zh": "星期五晚上，小李和同学们讨论周末的计划。",
@@ -3037,6 +3079,13 @@ window.GRADED_LESSONS = [
   "titleZh": "爱唱歌的邻居",
   "titleZhT": "愛唱歌的鄰居",
   "blurb": "Un departamento nuevo, una voz de ópera hasta las tantas y un final que nadie imaginaba.",
+  "keywords": [
+   { "zh": "安静", "zhT": "安靜", "es": "tranquilo" },
+   { "zh": "声音", "zhT": "聲音", "es": "sonido; ruido" },
+   { "zh": "应该", "zhT": "應該", "es": "deber" },
+   { "zh": "热情", "zhT": "熱情", "es": "amable, cálido" },
+   { "zh": "小心", "zhT": "小心", "es": "cuidado; tener cuidado" }
+  ],
   "lines": [
    {
     "zh": "小陈搬进了新家。",
@@ -3464,6 +3513,13 @@ window.GRADED_LESSONS = [
   "titleZh": "奶奶的味道",
   "titleZhT": "奶奶的味道",
   "blurb": "Un plato heredado, diez años de práctica y un secreto que no está en la receta.",
+  "keywords": [
+   { "zh": "失败", "zhT": "失敗", "es": "fracasar" },
+   { "zh": "父母", "zhT": "父母", "es": "padres" },
+   { "zh": "去世", "zhT": "去世", "es": "morir, fallecer" },
+   { "zh": "屋子", "zhT": "屋子", "es": "casa, habitación" },
+   { "zh": "味道", "zhT": "味道", "es": "sabor" }
+  ],
   "lines": [
    {
     "zh": "周末，小美回家看父母。",
@@ -3880,6 +3936,13 @@ window.GRADED_LESSONS = [
   "titleZh": "迟到的信",
   "titleZhT": "遲到的信",
   "blurb": "Una carta vieja encontrada al mudarse revive el amor en tiempos sin teléfonos.",
+  "keywords": [
+   { "zh": "城市", "zhT": "城市", "es": "ciudad" },
+   { "zh": "注意", "zhT": "注意", "es": "prestar atención" },
+   { "zh": "表达", "zhT": "表達", "es": "expresar" },
+   { "zh": "发现", "zhT": "發現", "es": "descubrir" },
+   { "zh": "春天", "zhT": "春天", "es": "primavera" }
+  ],
   "lines": [
    {
     "zh": "搬家的时候，小林发现了一封旧信。",
@@ -4298,6 +4361,13 @@ window.GRADED_LESSONS = [
   "titleZh": "爷爷桥",
   "titleZhT": "爺爺橋",
   "blurb": "Un anciano, un río sin puente y la obstinación callada que cambia un pueblo entero.",
+  "keywords": [
+   { "zh": "开通", "zhT": "開通", "es": "habilitar, inaugurar" },
+   { "zh": "感人", "zhT": "感人", "es": "conmovedor" },
+   { "zh": "建成", "zhT": "建成", "es": "terminar de construir" },
+   { "zh": "交通", "zhT": "交通", "es": "transporte" },
+   { "zh": "生活", "zhT": "生活", "es": "vida" }
+  ],
   "lines": [
    {
     "zh": "山里有一条小河，交通很不方便。",
