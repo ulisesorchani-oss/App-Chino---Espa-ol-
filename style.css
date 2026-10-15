@@ -6778,3 +6778,15 @@ body.paper-mode .ex-chip.in { background: #f3e6c4; border-color: #8a7a5f; }
 .ex-fbwrap .lq-verdict.bad { color: #b91c1c; }
 body.dark-mode .ex-fbwrap .lq-verdict.ok { color: #86efac; }
 body.dark-mode .ex-fbwrap .lq-verdict.bad { color: #fca5a5; }
+
+/* ===================================================================
+   R6 — Banco escrito: Diálogo y Lectura (exam-practice.js + exam-items.js)
+   =================================================================== */
+.ex-qtext { font-size: 1.02rem; font-weight: 800; margin: 0 0 10px; color: var(--text-primary); }
+.ex-text {
+    font-size: 1.35rem; font-weight: 700; line-height: 1.75; padding: 14px; margin: 6px 0 14px;
+    border: 2px solid var(--border, #e2e8f0); border-radius: 14px; background: var(--bg-card, #fff); color: var(--text-primary);
+}
+.ex-tr { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; }
+.ex-tr .lq-line-who { flex: none; margin: 3px 0 0; }
+.ex-tr .ex-fb-zh { font-size: 1.15rem; }
