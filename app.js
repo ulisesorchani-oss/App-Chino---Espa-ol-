@@ -124,9 +124,10 @@ const CLASSICS_INFO = {
 // Info de los exámenes DELE para el dropdown (v7.4): badge del botón
 // (DELE · A1 Escolares) y de la insignia de la tarjeta (🇪🇸 DELE A1).
 // Los exámenes para adultos se agregarán a DELE_INFO cuando lleguen.
+// R3: zh = nivel para la hoja de módulos (DELE solo se ve en «aprendo español»)
 const DELE_INFO = {
-    'DELE-A1-Escolares':   { badge: 'A1' },
-    'DELE-A2B1-Escolares': { badge: 'A2/B1' }
+    'DELE-A1-Escolares':   { badge: 'A1', zh: '初级' },
+    'DELE-A2B1-Escolares': { badge: 'A2/B1', zh: '中级' }
 };
 
 // v8.2: badge de la insignia de tarjeta para los módulos de vocabulario TOCFL
@@ -137,14 +138,15 @@ const DELE_INFO = {
 // glosas ya existentes en la app (sobre todo HSK7-9, mismo vocabulario
 // avanzado) y 896 nuevas.
 // v9.7x: badges con la nomenclatura única (antes N1–N5); 'TOCFL' = frases útiles
+// R3: zh = nombre chino del nivel (solo en listas y hojas, no en botones)
 const TOCFL_INFO = {
-    'TOCFL-Prep': { badge: 'Prep' },
-    'TOCFL-A1':   { badge: 'A1' },
-    'TOCFL-A2':   { badge: 'A2' },
-    'TOCFL-B3':   { badge: 'B1' },
-    'TOCFL-B4':   { badge: 'B2' },
-    'TOCFL-C':    { badge: 'C' },
-    'TOCFL':      { badge: 'Frases útiles' }
+    'TOCFL-Prep': { badge: 'Prep', zh: '準備' },
+    'TOCFL-A1':   { badge: 'A1', zh: '入門' },
+    'TOCFL-A2':   { badge: 'A2', zh: '基礎' },
+    'TOCFL-B3':   { badge: 'B1', zh: '進階' },
+    'TOCFL-B4':   { badge: 'B2', zh: '高階' },
+    'TOCFL-C':    { badge: 'C', zh: '流利精通' },
+    'TOCFL':      { badge: 'Frases útiles', zh: '常用語' }
 };
 
 // Etiqueta visible de un módulo (los clásicos muestran nombre ES + zh según el script activo)
@@ -152,6 +154,20 @@ function moduleLabel(mod) {
     const info = CLASSICS_INFO[mod];
     if (info) return info.es + ' ' + (scriptFor(mod) === 'trad' ? info.zhT : info.zh);
     return MODULE_LABELS[mod] || mod;
+}
+
+// R3: nombre corto del módulo para el botón de Hoy; la bandera va aparte
+// (si falta lugar cede el contador, nunca la bandera).
+function moduleShort(mod) {
+    const t = TOCFL_INFO[mod], d = DELE_INFO[mod], c = CLASSICS_INFO[mod];
+    if (t) return { flag: '🇹🇼', name: 'TOCFL ' + t.badge };
+    if (d) return { flag: '🇪🇸', name: 'DELE ' + d.badge };
+    if (c) return { flag: '📜', name: state.mode === 'cn-es' ? (scriptFor(mod) === 'trad' ? c.zhT : c.zh) : c.es };
+    const part = { HSK7: 1, HSK8: 2, HSK9: 3 }[mod];
+    if (part) return { flag: '', name: 'HSK 7-9 (' + part + '/3)' };
+    if (/^HSK\d$/.test(mod)) return { flag: '', name: 'HSK ' + mod.slice(3) };
+    if (mod === 'todas') return { flag: '📚', name: uiT('modAllDaily') };
+    return { flag: '📚', name: MODULE_LABELS[mod] || mod };
 }
 
 function moduleStatus(msg, isError) {
@@ -704,7 +720,6 @@ const UI_STRINGS = {
     navHoy: 'Hoy', navAprender: 'Aprender', navEntrenar: 'Entrenar', navYo: 'Yo',
     viewAprender: 'Aprender', viewAprenderSub: 'Elegí qué aprender.',
     // v9.7x: aviso en los paneles que SÍ saltan a Hoy al elegir (setModule)
-    hoyHintExams: '↪ Al elegir un nivel, practicás en Hoy.',
     hoyHintDaily: '↪ Elegí una situación y tocá ▶ Practicar en Hoy.',
     hoyHintClassics: '↪ Elegí un clásico del menú y tocá ▶ Practicar en Hoy; el texto original se lee acá.',
     choiceChosen: '✔ Elegiste: ', choiceGo: '▶ Practicar en Hoy',
@@ -749,7 +764,7 @@ const UI_STRINGS = {
     toolsGearTitle: 'Herramientas de estudio: 简/繁 · pinyin · tonos · velocidad · voces…',
     needAnswer: 'Escribe una respuesta antes de verificar.',
     correctWord: '✅ ¡Correcto! ', validWrong: '❌ Respuestas válidas: ', validReveal: '💡 Respuestas válidas: ',
-    lvlClassic: '📜 Clásico', lvlPre: 'Nivel ', lvlSuf: '', lvlVocabSuf: ' · vocabulario',
+    modAllDaily: 'Diaria · todas',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
     attChip: '🎯 {n}', attTitle: 'Esta tarjeta: {n} prácticas · {ok} correctas · {ft} al primer intento',
     mixedChip: '🔀 {mod}', mixedTitle: 'Intercalada de otra situación de Práctica Diaria ({mod}) para mezclar temas — así se recuerda mejor que practicando uno solo seguido',
@@ -787,7 +802,6 @@ const UI_STRINGS = {
     btnCheck: '检查', btnReveal: '不会，显示答案', btnKnow: '简单', btnRepeat: '再来', btnGood: '记得', btnPrev: '‹ 上一句',
     navHoy: '今天', navAprender: '学习', navEntrenar: '训练', navYo: '我',
     viewAprender: '学习', viewAprenderSub: '选择要学什么。',
-    hoyHintExams: '↪ 选好级别后，在“今天”练习。',
     hoyHintDaily: '↪ 选好场景，再点 ▶ 去“今天”练习。',
     hoyHintClassics: '↪ 从菜单选好经典，再点 ▶ 去“今天”练习；原文在这里阅读。',
     choiceChosen: '✔ 已选：', choiceGo: '▶ 去“今天”练习',
@@ -832,7 +846,7 @@ const UI_STRINGS = {
     toolsGearTitle: '学习工具：简/繁 · 拼音 · 声调 · 语速 · 语音…',
     needAnswer: '请先输入答案再检查。',
     correctWord: '✅ 答对！', validWrong: '❌ 有效答案：', validReveal: '💡 有效答案：',
-    lvlClassic: '📜 古文', lvlPre: '第', lvlSuf: '級', lvlVocabSuf: ' · 詞彙',
+    modAllDaily: '日常 · 全部',
     // v9.47: contador de intentos por tarjeta (chip 🎯)
     attChip: '🎯 {n}次', attTitle: '这张卡：练过 {n} 次 · 答对 {ok} 次 · 首次就答对 {ft} 次',
     mixedChip: '🔀 {mod}', mixedTitle: '穿插自「日常练习」的另一个场景（{mod}），混合练习有助于记忆——比连续练同一个场景效果更好',
@@ -895,9 +909,14 @@ function updateUILanguage(mode) {
 
     // 4) Lógica condicional estricta: exámenes según el sentido del estudio
     const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
-    show('dele-dropdown', cnMode);        // DELE solo aprendiendo ESPAÑOL
-    show('tocfl-dropdown', !cnMode);      // TOCFL solo aprendiendo chino
-    show('hsk-selector', !cnMode);        // selector de nivel HSK ídem
+    // R3: HSK/TOCFL/DELE se eligen en la hoja de módulos (según el modo). En
+    // «aprendo español» Exámenes solo tendría el test HSK (oculto): sin pestaña.
+    show('tab-exams', !cnMode);
+    const tabEx = document.getElementById('tab-exams');
+    if (cnMode && tabEx && tabEx.classList.contains('active')) {
+        const tabL = document.getElementById('tab-lessons');
+        if (tabL) tabL.click();
+    }
     show('btn-placement', !cnMode);       // test de colocación HSK (exámenes)
     show('btn-placement-daily', !cnMode); // test de colocación (diaria)
 
@@ -941,6 +960,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateVocabularyPanel();
     renderLastSessionNote(); // v9.62: Gagné evento 3 — "la vez pasada..." en Hoy
     state._uiReady = true; // v10 UX: a partir de acá, elegir módulo vuelve a Hoy
+    const vHoy = document.getElementById('view-hoy');
+    if (window.ModSheet && vHoy && !vHoy.classList.contains('hidden')) window.ModSheet.onHoy(); // R3
 
     // ===== v9.46: WARMUP del motor de voz (evaluación más rápida) =====
     // ~6 s después de abrir, en idle, se precarga el motor + UNA inferencia
@@ -982,8 +1003,6 @@ function applySavedUI() {
     });
     updateDailyBtnLabel();
     updateClassicsBtnLabel();
-    updateDeleBtnLabel();
-    updateTocflBtnLabel(); // v8.2
     updateClassicsScript();
 
     const pinyinBtn = document.getElementById('btn-pinyin');
@@ -1740,56 +1759,6 @@ function setupEventListeners() {
     // (Los clásicos van por dropdown: sus ítems .cat-btn ya quedaron conectados arriba)
     initDailyDropdown();
     initClassicsDropdown();
-    initDeleDropdown();
-    initTocflDropdown(); // v8.2
-
-    const hskSelect = document.getElementById('select-hsk-level');
-    if (hskSelect) {
-        hskSelect.addEventListener('change', (e) => setModule(e.target.value));
-        renderHskOptions(hskSelect); // Paso 4 (auditoría HSK): conteo real, no hardcodeado
-    }
-}
-
-// ===== Paso 4 (auditoría de datos HSK): opciones del select con el
-// conteo REAL, calculado una sola vez al cargar (hskCumulativeCounts()
-// en data-embedded.js está memoizada — esto no recalcula nada, solo
-// pinta el texto una vez). Reemplaza el conteo hardcodeado que traía
-// index.html (fuente de la confusión 467/497 de la auditoría: un
-// número copiado a mano que se desincronizó del dato real).
-//
-// Acumulado, no aislado por nivel: HSK N = vocabulario de HSK1 a HSK N
-// inclusive, con el total fijo como marco de referencia explícito —
-// "(N de 10.944 palabras)" en vez de un número suelto sin contexto.
-//
-// HSK7-9: el estándar GF0025-2021 los define como UN tramo combinado
-// (ver data/MANIFIESTO.json); acá se reparten en tercios por frecuencia
-// para dosificar el estudio, así que el nombre lo deja explícito
-// ("HSK 7-9 · Avanzado (parte N de 3)") en vez de sugerir con un
-// "HSK7" pelado que son tres certificaciones independientes. HSK1-6 SÍ
-// son niveles oficiales independientes → mantienen su nombre de siempre,
-// solo cambia el número.
-const HSK_OPTION_NAMES = {
-    1: 'HSK 1 · Elemental',
-    2: 'HSK 2 · Elemental',
-    3: 'HSK 3 · Elemental',
-    4: 'HSK 4 · Intermedio',
-    5: 'HSK 5 · Intermedio',
-    6: 'HSK 6 · Intermedio',
-    7: 'HSK 7-9 · Avanzado (parte 1 de 3)',
-    8: 'HSK 7-9 · Avanzado (parte 2 de 3)',
-    9: 'HSK 7-9 · Avanzado (parte 3 de 3)'
-};
-function renderHskOptions(hskSelect) {
-    if (typeof hskCumulativeCounts !== 'function') return; // data-embedded.js no cargó
-    const counts = hskCumulativeCounts();
-    const total = counts.TOTAL;
-    Array.from(hskSelect.options).forEach((opt) => {
-        const n = parseInt(String(opt.value).replace('HSK', ''), 10);
-        const name = HSK_OPTION_NAMES[n];
-        const acc = counts['HSK' + n];
-        if (!name || !acc) return; // opción inesperada: no la tocamos
-        opt.textContent = name + ' (' + acc.toLocaleString('es-AR') + ' de ' + total.toLocaleString('es-AR') + ' palabras)';
-    });
 }
 
 // ===== Funciones de Estado =====
@@ -1868,8 +1837,6 @@ function setModule(mod, opts) {
     });
     updateDailyBtnLabel();
     updateClassicsBtnLabel();
-    updateDeleBtnLabel();
-    updateTocflBtnLabel(); // v8.2
     updateClassicsScript();
     paintScriptButtons(ck()); // v9.7x: otra familia puede tener otra escritura
     
@@ -2033,141 +2000,6 @@ function initClassicsDropdown() {
     });
 
     // navegación por teclado (menú ARIA estándar)
-    menu.addEventListener('keydown', (e) => {
-        const its = items();
-        const i = its.indexOf(document.activeElement);
-        if (e.key === 'Escape') {
-            closeMenu(true); e.stopPropagation();
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault(); its[(i + 1) % its.length].focus();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault(); its[(i - 1 + its.length) % its.length].focus();
-        } else if (e.key === 'Home') {
-            e.preventDefault(); its[0].focus();
-        } else if (e.key === 'End') {
-            e.preventDefault(); its[its.length - 1].focus();
-        } else if (e.key === 'Tab') {
-            closeMenu(false);
-        }
-    });
-    btn.addEventListener('keydown', (e) => {
-        if (!isOpen() && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault(); openMenu();
-        }
-    });
-}
-// ===== Dropdown de TOCFL (v8.2) — mismo patrón que DELE =====
-// Band A: Preparación (Novice) + Nivel 1 (入門) + Nivel 2 (基礎) + las 20
-// oraciones de muestra; v9.5 suma Band B completa: Nivel 3 (進階 B1) y
-// Nivel 4 (高階 B2) — lista oficial vigente 華語八千詞表 2023.
-function updateTocflBtnLabel() {
-    const lbl = document.getElementById('tocfl-current');
-    if (!lbl) return;
-    const info = TOCFL_INFO[state.activeModule];
-    lbl.textContent = info ? 'TOCFL ' + info.badge : 'TOCFL';
-}
-
-function initTocflDropdown() {
-    const wrap = document.getElementById('tocfl-dropdown');
-    const btn = document.getElementById('btn-tocfl-toggle');
-    const menu = document.getElementById('tocfl-menu');
-    if (!wrap || !btn || !menu) return;
-
-    const items = () => Array.from(menu.querySelectorAll('[role="menuitem"]:not([disabled])'));
-    const isOpen = () => !menu.classList.contains('hidden');
-
-    function openMenu() {
-        menu.classList.remove('hidden');
-        btn.setAttribute('aria-expanded', 'true');
-        const active = items().find(it => it.dataset.module === state.activeModule) || items()[0];
-        if (active) active.focus();
-    }
-    function closeMenu(focusBack) {
-        menu.classList.add('hidden');
-        btn.setAttribute('aria-expanded', 'false');
-        if (focusBack) btn.focus();
-    }
-
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        isOpen() ? closeMenu(false) : openMenu();
-    });
-
-    menu.addEventListener('click', (e) => {
-        if (e.target.closest('[role="menuitem"]')) closeMenu(false);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (isOpen() && !wrap.contains(e.target)) closeMenu(false);
-    });
-
-    menu.addEventListener('keydown', (e) => {
-        const its = items();
-        const i = its.indexOf(document.activeElement);
-        if (e.key === 'Escape') {
-            closeMenu(true); e.stopPropagation();
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault(); its[(i + 1) % its.length].focus();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault(); its[(i - 1 + its.length) % its.length].focus();
-        } else if (e.key === 'Home') {
-            e.preventDefault(); its[0].focus();
-        } else if (e.key === 'End') {
-            e.preventDefault(); its[its.length - 1].focus();
-        } else if (e.key === 'Tab') {
-            closeMenu(false);
-        }
-    });
-    btn.addEventListener('keydown', (e) => {
-        if (!isOpen() && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault(); openMenu();
-        }
-    });
-}
-// ===== Dropdown de DELE (v7.4) — mismo patrón que Clásicos =====
-// El botón muestra el examen activo (o "DELE") y el menú agrupa
-// Escolares (11 a 17 años) primero; para adultos se sumará después.
-function updateDeleBtnLabel() {
-    const lbl = document.getElementById('dele-current');
-    if (!lbl) return;
-    const info = DELE_INFO[state.activeModule];
-    lbl.textContent = info ? 'DELE · ' + info.badge + ' Escolares' : 'DELE';
-}
-
-function initDeleDropdown() {
-    const wrap = document.getElementById('dele-dropdown');
-    const btn = document.getElementById('btn-dele-toggle');
-    const menu = document.getElementById('dele-menu');
-    if (!wrap || !btn || !menu) return;
-
-    const items = () => Array.from(menu.querySelectorAll('[role="menuitem"]:not([disabled])'));
-    const isOpen = () => !menu.classList.contains('hidden');
-
-    function openMenu() {
-        menu.classList.remove('hidden');
-        btn.setAttribute('aria-expanded', 'true');
-        const active = items().find(it => it.dataset.module === state.activeModule) || items()[0];
-        if (active) active.focus();
-    }
-    function closeMenu(focusBack) {
-        menu.classList.add('hidden');
-        btn.setAttribute('aria-expanded', 'false');
-        if (focusBack) btn.focus();
-    }
-
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        isOpen() ? closeMenu(false) : openMenu();
-    });
-
-    menu.addEventListener('click', (e) => {
-        if (e.target.closest('[role="menuitem"]')) closeMenu(false);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (isOpen() && !wrap.contains(e.target)) closeMenu(false);
-    });
-
     menu.addEventListener('keydown', (e) => {
         const its = items();
         const i = its.indexOf(document.activeElement);
@@ -2370,16 +2202,12 @@ function renderCurrentSentence() {
     const learningChinese = state.mode === 'es-cn';
     const k = ck();
 
-    // Actualizar Header (los clásicos muestran su propia insignia)
-    const deleInfo = DELE_INFO[s.module];
-    const tocflInfo = TOCFL_INFO[s.module]; // v8.2: vocabulario TOCFL Band A
-    document.getElementById('card-level').textContent =
-        (s.module || '').startsWith('Clasicos-') ? uiT('lvlClassic') :
-        (deleInfo ? '🇪🇸 DELE ' + deleInfo.badge :
-        (tocflInfo ? '🇹🇼 TOCFL ' + tocflInfo.badge :
-        (s.w ? uiT('lvlPre') + s.level + uiT('lvlSuf') + uiT('lvlVocabSuf')
-             : uiT('lvlPre') + s.level + uiT('lvlSuf'))));
+    // R3: el distintivo es el botón del módulo (abre la hoja de módulos)
+    const short = moduleShort(state.activeModule);
+    document.getElementById('card-flag').textContent = short.flag;
+    document.getElementById('card-level').textContent = short.name;
     document.getElementById('card-number').textContent = (state.currentIndex + 1) + '/' + filtered.length;
+    if (window.ModSheet) window.ModSheet.fit();
 
     // v9.47: chip 🎯 con el historial de esta tarjeta (oculto si nunca la vio)
     const attEl = document.getElementById('card-attempts');
@@ -3185,6 +3013,7 @@ function showView(name, save) {
         try { localStorage.setItem('ac_view_v1', name); } catch (e) { /* noop */ }
         try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
     }
+    if (name === 'hoy' && window.ModSheet) window.ModSheet.onHoy(); // R3: medir el botón y aviso de una vez
 }
 function rovingTabs(container, sel, activate) {
     container.addEventListener('keydown', (e) => {
@@ -3220,7 +3049,7 @@ function setupAppNav() {
 function syncBodyScroll() {
     let open = false;
     try {
-        open = !!document.querySelector('.lq-pop:not(.hidden), #writer-practice-banner:not(.hidden), #handwrite-banner:not(.hidden)');
+        open = !!document.querySelector('.lq-pop:not(.hidden), #writer-practice-banner:not(.hidden), #handwrite-banner:not(.hidden), #mod-sheet:not(.hidden)');
     } catch (e) { /* selector no soportado */ }
     try { document.body.style.overflow = open ? 'hidden' : ''; } catch (e) { /* noop */ }
 }

@@ -42,6 +42,7 @@ const LAYERS = [
     { id: 'backup-pop', close: '#btn-backup-close' },
     { id: 'guide-pop', close: '#btn-guide-close' },
     { id: 'install-help', close: '#btn-install-help-close' },
+    { id: 'mod-sheet', close: '#btn-mod-sheet-close' }, // R3: hoja de módulos (module-sheet.js)
     // Tip: Atrás cancela (no abre la función que venía detrás); se marca visto igual que con ✕.
     { id: 'feature-tip-pop', close: '#btn-feature-tip-close',
       back: () => (typeof window.cancelFeatureTip === 'function' ? (window.cancelFeatureTip(), true) : false) },

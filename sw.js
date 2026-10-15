@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v181'; // — Diaria (menú y «Todas») y Clásicos: elegir ya no salta a Hoy; queda «✔ Elegiste: X [▶ Practicar en Hoy]» (setModule con stay). «Practicar frases sueltas» de la escena sigue saltando
+const VERSION = 'v182'; // — Hoy: el distintivo es el botón del módulo (bandera, nombre ▾ · contador) y abre la hoja «¿Qué practicás?» (module-sheet.js; HSK/TOCFL o DELE + Diaria + Clásicos). Exámenes: solo el test de colocación; sin pestaña en «aprendo español»
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -497,6 +497,7 @@ const PRECACHE = [
   './podcast.js',          // v9.70: escuchar una lección de Aprender de corrido, manos libres
   './free-talk.js',        // v9.7x: Pronunciación libre — grabar y ver qué entendió la IA (estilo chat)
   './personal-lessons.js', // v9.7x: Mis lecturas — guardar el texto del Lector en IndexedDB
+  './module-sheet.js',     // R3: botón del módulo en Hoy + hoja de módulos
   './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)

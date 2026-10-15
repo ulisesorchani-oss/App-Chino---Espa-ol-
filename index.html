@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261015c">
+    <link rel="stylesheet" href="style.css?v=20261015d">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -99,8 +99,11 @@
 
                 <div class="card-header practice-top-row">
                     <div class="practice-meta">
-                        <span class="card-level" id="card-level">Nivel 1</span>
-                        <span class="card-number" id="card-number">1/20</span>
+                        <!-- R3: el distintivo es un botón: abre la hoja de módulos (module-sheet.js).
+                             Si no entra en una línea, cede primero el contador, nunca la bandera. -->
+                        <button type="button" class="mod-btn" id="mod-btn" aria-haspopup="dialog" aria-controls="mod-sheet">
+                            <span class="mb-flag" id="card-flag" aria-hidden="true"></span><span class="mb-name card-level" id="card-level">HSK 1</span><span class="mb-caret" aria-hidden="true">▾</span><span class="mb-count">· <span class="card-number" id="card-number">1/20</span></span>
+                        </button>
                         <!-- v9.47: contador de intentos históricos de esta tarjeta -->
                         <span class="card-attempts hidden" id="card-attempts"></span>
                         <!-- v9.63: chip de origen cuando la tarjeta viene de OTRA situación de Diaria (interleaving real) -->
@@ -267,8 +270,8 @@
                 <!-- Panel Exámenes -->
                 <div class="tab-panel section-exams hidden" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams">
                     <h3 class="section-title" data-i18n="examsTitle">🎓 EXÁMENES INTERNACIONALES</h3>
-                    <p class="lessons-intro" data-i18n="examsIntro">Elegí un examen o nivel y practicá su vocabulario con tarjetas: ves la palabra (o la escuchás) y escribís qué significa. Cada acierto suma a tu progreso real. ¿No sabés tu nivel? Empezá por el test de colocación.</p>
-                    <p class="aprender-hoy-hint" data-i18n="hoyHintExams">↪ Al elegir un nivel, practicás en Hoy.</p>
+                    <!-- R3: los exámenes y niveles se eligen en la hoja de módulos (botón del módulo, en Hoy) -->
+                    <p class="lessons-intro" data-i18n="examsIntro">¿En qué nivel estás? Hacé el test de colocación: palabras reales del HSK 3.0, 4 opciones, sube de a un nivel. Para practicar un examen, tocá el botón del módulo arriba de la tarjeta, en Hoy.</p>
                     <!-- v10: único punto de entrada al test de colocación -->
                     <button id="btn-placement" class="placement-btn" type="button"
                             title="2 aciertos por nivel y subimos: descubrí en qué nivel HSK estás hoy"
@@ -276,78 +279,6 @@
                         🎯 Test de colocación — descubrí tu nivel
                     </button>
                     <p id="placement-status" class="placement-status hidden" role="status"></p>
-                    <div class="hsk-level-selector" id="hsk-selector">
-                        <!-- v9.7x (Paso 4, auditoría de datos HSK): el texto de acá abajo es
-                             solo un fallback estático (por si algo bloquea el JS) — la fuente
-                             de verdad es hskCumulativeCounts() en data-embedded.js, calculada
-                             del vocabulario real y pintada por renderHskOptions() (app.js) al
-                             cargar. Si el vocabulario embebido cambia, ESTE texto NO se
-                             actualiza solo: es a propósito (evita otro hardcodeo invisible),
-                             el número que el usuario ve siempre sale del cálculo en vivo. -->
-                        <select id="select-hsk-level" class="level-dropdown" aria-label="Nivel HSK">
-                            <option value="HSK1">HSK 1 · Elemental (497 de 10.944 palabras)</option>
-                            <option value="HSK2">HSK 2 · Elemental (1.244 de 10.944 palabras)</option>
-                            <option value="HSK3">HSK 3 · Elemental (2.193 de 10.944 palabras)</option>
-                            <option value="HSK4">HSK 4 · Intermedio (3.166 de 10.944 palabras)</option>
-                            <option value="HSK5">HSK 5 · Intermedio (4.223 de 10.944 palabras)</option>
-                            <option value="HSK6">HSK 6 · Intermedio (5.342 de 10.944 palabras)</option>
-                            <option value="HSK7">HSK 7-9 · Avanzado (parte 1 de 3) (7.207 de 10.944 palabras)</option>
-                            <option value="HSK8">HSK 7-9 · Avanzado (parte 2 de 3) (9.073 de 10.944 palabras)</option>
-                            <option value="HSK9">HSK 7-9 · Avanzado (parte 3 de 3) (10.944 de 10.944 palabras)</option>
-                        </select>
-                    </div>
-                    <div class="category-filter exams-filters">
-                        <div class="tocfl-dropdown" id="tocfl-dropdown">
-                            <button id="btn-tocfl-toggle" class="tocfl-main-btn" type="button"
-                                    aria-haspopup="menu" aria-expanded="false" aria-controls="tocfl-menu"
-                                    title="Elegí un nivel TOCFL">
-                                <span aria-hidden="true">🇹🇼</span> <span id="tocfl-current">TOCFL</span>
-                                <span class="daily-caret" aria-hidden="true">▾</span>
-                            </button>
-                            <ul id="tocfl-menu" class="tocfl-menu hidden" role="menu" aria-labelledby="btn-tocfl-toggle">
-                                <!-- v9.7x: una sola nomenclatura TOCFL (Prep, A1, A2, B1, B2, C); el
-                                     nombre chino solo en listas y hojas. Los data-module NO cambian. -->
-                                <li class="dele-group-label" role="none">🎯 Band A (Prep → A2)</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-Prep" aria-label="TOCFL Prep, 準備, 392 palabras">
-                                    <span class="ci-py">Prep</span><span class="ci-zh">準備</span><span class="ci-es">392 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A1" aria-label="TOCFL A1, 入門, 344 palabras">
-                                    <span class="ci-py">A1</span><span class="ci-zh">入門</span><span class="ci-es">344 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-A2" aria-label="TOCFL A2, 基礎, 483 palabras">
-                                    <span class="ci-py">A2</span><span class="ci-zh">基礎</span><span class="ci-es">483 palabras</span></button></li>
-                                <li class="dele-group-label" role="none">🚀 Band B (B1 → B2)</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B3" aria-label="TOCFL B1, 進階, 1091 palabras">
-                                    <span class="ci-py">B1</span><span class="ci-zh">進階</span><span class="ci-es">1091 palabras</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-B4" aria-label="TOCFL B2, 高階, 2194 palabras">
-                                    <span class="ci-py">B2</span><span class="ci-zh">高階</span><span class="ci-es">2194 palabras</span></button></li>
-                                <li class="dele-group-label" role="none">💫 Band C</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL-C" aria-label="TOCFL C, 流利精通, 2776 palabras">
-                                    <span class="ci-py">C</span><span class="ci-zh">流利精通</span><span class="ci-es">2776 palabras</span></button></li>
-                                <!-- v9.7x: las 20 oraciones de muestra no son un nivel: van aparte -->
-                                <li class="dele-group-label" role="none">💬 Fuera de los niveles</li>
-                                <li role="none"><button type="button" class="cat-btn tocfl-item" role="menuitem" data-module="TOCFL" aria-label="TOCFL, frases útiles, 20 frases">
-                                    <span class="ci-py">Frases útiles</span><span class="ci-zh">常用語</span><span class="ci-es">20 frases</span></button></li>
-                            </ul>
-                        </div>
-                        <div class="dele-dropdown" id="dele-dropdown">
-                            <button id="btn-dele-toggle" class="dele-main-btn" type="button"
-                                    aria-haspopup="menu" aria-expanded="false" aria-controls="dele-menu"
-                                    title="Elegí un examen DELE">
-                                <span aria-hidden="true">🇪🇸</span> <span id="dele-current">DELE</span>
-                                <span class="daily-caret" aria-hidden="true">▾</span>
-                            </button>
-                            <ul id="dele-menu" class="dele-menu hidden" role="menu" aria-labelledby="btn-dele-toggle">
-                                <li class="dele-group-label" role="none">🎒 Escolares (11 a 17 años)</li>
-                                <button class="track-btn" data-track="ninos">🧒 Niños</button>
-                                <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A1-Escolares" aria-label="DELE A1 para escolares">
-                                    <span class="ci-zh">A1</span><span class="ci-py">inicial</span><span class="ci-es">Escolares</span></button></li>
-                                <li role="none"><button type="button" class="cat-btn dele-item" role="menuitem" data-module="DELE-A2B1-Escolares" aria-label="DELE A2/B1 para escolares">
-                                    <span class="ci-zh">A2/B1</span><span class="ci-py">intermedio</span><span class="ci-es">Escolares</span></button></li>
-                                <li class="dele-group-label" role="none">🌍 Adultos (próximamente)</li>
-                                <li role="none"><button type="button" class="cat-btn dele-item dele-soon" role="menuitem" disabled aria-disabled="true">
-                                    <span class="ci-zh">A1–C2</span><span class="ci-py">en camino</span><span class="ci-es">para adultos</span></button></li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Panel Diaria -->
@@ -768,6 +699,17 @@
         <div id="daily-story-body"></div>
     </div>
 
+    <!-- R3: hoja de módulos «¿Qué practicás?» (module-sheet.js; Atrás = ✕ vía nav.js) -->
+    <div id="mod-sheet" class="ms-overlay hidden">
+        <div class="ms-sheet" role="dialog" aria-modal="true" aria-labelledby="ms-title">
+            <div class="ms-head">
+                <h3 id="ms-title">¿Qué practicás?</h3>
+                <button type="button" class="ms-close" id="btn-mod-sheet-close" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="ms-body" id="ms-body"></div>
+        </div>
+    </div>
+
     <!-- v9.67: POPUP guía corta, una sola vez por sección (feature-tips.js) -->
     <div id="feature-tip-pop" class="vocab-pop hidden" role="dialog" aria-modal="true" aria-label="Guía rápida">
         <button id="btn-feature-tip-close" class="vocab-pop-close" type="button" aria-label="Cerrar">✕</button>
@@ -928,12 +870,13 @@
     <script src="lessons-extra.js?v=20261015a"></script>
     <script src="lessons-dele.js?v=20261009a"></script>
     <script src="classics.js?v=20261002b"></script>
-    <script src="onboarding.js?v=20261013a"></script>
+    <script src="onboarding.js?v=20261015a"></script>
     <script src="stats.js?v=20260924a"></script>
     <script src="audio-tts.js?v=20261015a"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261015c"></script>
+    <script src="app.js?v=20261015d"></script>
+    <script src="module-sheet.js?v=20261015a"></script>
     <script src="dict.js?v=20261014b"></script>
     <script src="pinyin-familias.js?v=20261014a"></script>
     <script src="trazos.js?v=20261014s"></script>
@@ -942,13 +885,13 @@
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20261014t"></script>
     <script src="lessons-graduated.js?v=20261015b"></script>
-    <script src="placement-test.js?v=20261014s"></script>
-    <script src="minimal-pairs.js?v=20260925a"></script>
+    <script src="placement-test.js?v=20261015a"></script>
+    <script src="minimal-pairs.js?v=20261015a"></script>
     <script src="daily-stories.js?v=20261014s"></script>
     <script src="podcast.js?v=20261015a"></script>
     <script src="free-talk.js?v=20261009a"></script>
     <script src="personal-lessons.js?v=20260928a"></script>
-    <script src="nav.js?v=20261009a"></script>
+    <script src="nav.js?v=20261015a"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
