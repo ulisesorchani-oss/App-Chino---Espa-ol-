@@ -992,8 +992,14 @@ function applySavedUI() {
     // Botones de voz (v9.49: bandera dentro del icono — 🇨🇳/🇹🇼 y 🇦🇷/🇪🇸)
     const btnVoiceZh = document.getElementById('btn-voice-zh');
     if (btnVoiceZh) {
-        btnVoiceZh.textContent = VOICE_ICONS_ZH[voiceZh] || ('🇨🇳 ' + voiceZh);
-        btnVoiceZh.title = 'Voz china: ' + (VOICE_NAMES[voiceZh] || voiceZh) + ' (clic para cambiar)';
+        // v9.7x: sin elección guardada la voz es automática por familia (voiceZhFor)
+        if (typeof voiceZhExplicit === 'function' && !voiceZhExplicit()) {
+            btnVoiceZh.textContent = VOICE_ICONS_ZH.f + ' · ' + VOICE_ICONS_ZH['tw-f'] + ' auto';
+            btnVoiceZh.title = 'Voz china: automática — China para HSK, Taiwán para TOCFL (clic para elegir una)';
+        } else {
+            btnVoiceZh.textContent = VOICE_ICONS_ZH[voiceZh] || ('🇨🇳 ' + voiceZh);
+            btnVoiceZh.title = 'Voz china: ' + (VOICE_NAMES[voiceZh] || voiceZh) + ' (clic para cambiar)';
+        }
     }
     const btnVoiceEs = document.getElementById('btn-voice-es');
     if (btnVoiceEs) {

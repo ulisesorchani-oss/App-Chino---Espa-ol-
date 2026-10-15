@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v177'; // — Glosario de lecciones HSK: 5 palabras clave elegidas (keywords) en las 25 lecciones HSK, en lugar del glosario automático
+const VERSION = 'v178'; // — Voz china por familia: sin elección guardada (ac_voice_zh), TOCFL usa la taiwanesa (tw-f) y HSK y el resto la continental; el botón muestra «auto» y vuelve a «auto» al final del ciclo
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
