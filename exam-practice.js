@@ -1,5 +1,5 @@
 // ============================================================
-// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, TOCFL A1, HSK 1, HSK 3 y HSK 5)
+// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, A1 y B1, HSK 1, HSK 3 y HSK 5)
 // ============================================================
 // Sesión de 20 ítems sin tiempo límite. Se arma con las lecciones de cada nivel
 // (window.GRADED_LESSONS) y, si existe, con el banco escrito de exam-items.js
@@ -15,7 +15,7 @@
 //     confirmación (st: 'pend') no salen. Baraja guardada entre tandas ('ac_order_deck_v1'): no se
 //     repite ninguna hasta usar todas las del nivel. Si faltan, se compensa con Escuchar y Completar.
 //   Sin banco para un nivel: 6 Escuchar + 8 Completar + 6 Ordenar (como antes).
-//   R9 — Niveles con LECTURAS (window.READINGS, readings-*.js: HSK 3 y HSK 5): la tanda lleva
+//   R9 — Niveles con LECTURAS (window.READINGS, readings-*.js: HSK 3, HSK 5 y TOCFL B1): la tanda lleva
 //   un texto con 3 o 4 preguntas («📖 Texto», cuentan en la parte «Leer») + Escuchar y Completar
 //   hasta los 20; sin «Ordenar» (no hay banco revisado para esos niveles). El texto va PLANO
 //   mientras se responde (es un examen) y al responder se vuelve tocable, con pinyin y
@@ -46,7 +46,9 @@
         { k: 'TOCFL-A1', name: 'TOCFL A1', pick: l => l.exam === 'TOCFL' && l.examLvl === 'A1' },
         { k: 'HSK1', name: 'HSK 1', pick: l => !l.exam && l.hsk === 1 },
         { k: 'HSK3', name: 'HSK 3', pick: l => !l.exam && l.hsk === 3, reads: 3 },
-        { k: 'HSK5', name: 'HSK 5', pick: l => !l.exam && l.hsk === 5, reads: 5 }
+        { k: 'HSK5', name: 'HSK 5', pick: l => !l.exam && l.hsk === 5, reads: 5 },
+        // TOCFL B1 (módulo 'TOCFL-B3' en la app): lecturas de readings-tocfl.js
+        { k: 'TOCFL-B3', name: 'TOCFL B1', pick: l => l.exam === 'TOCFL' && l.examLvl === 'B1', reads: { exam: 'TOCFL', lvl: 'B1' } }
     ];
     const levelOf = (k) => LEVELS.find(x => x.k === k);
     const SECTIONS = { listen: '🎧 Escuchar', dialogue: '🎧 Diálogo', cloze: '📖 Completar', reading: '📖 Lectura', rtext: '📖 Texto', order: '🧩 Ordenar' };
@@ -234,7 +236,9 @@
     // ── lecturas con varias preguntas (R9) ──
     const readingsOf = (k) => {
         const h = (levelOf(k) || {}).reads;
-        return h ? (window.READINGS || []).filter(r => r && r.kind === 'reading' && r.hsk === h && Array.isArray(r.questions) && r.questions.length && Array.isArray(r.lines)) : [];
+        if (!h) return [];
+        const same = (typeof h === 'object') ? (r => r.exam === h.exam && r.examLvl === h.lvl) : (r => !r.exam && r.hsk === h);
+        return (window.READINGS || []).filter(r => r && r.kind === 'reading' && same(r) && Array.isArray(r.questions) && r.questions.length && Array.isArray(r.lines));
     };
     // rota: sale el texto que hace más tiempo que no aparece (los que nunca salieron, primero)
     function pickReading(k) {
