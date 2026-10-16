@@ -9,9 +9,11 @@
 //   · 🎧 Diálogo (3): suena un diálogo de dos voces y se responde una pregunta.
 //   · 📖 Completar (5): el quiz de las lecciones (hueco + 3 opciones).
 //   · 📖 Lectura (3): un texto corto y una pregunta.
-//   · 🧩 Ordenar (5): fichas de una oración de UNA cláusula (zhSegmentAll): se
-//     acepta solo el orden original. Salen del banco escrito y de las lecciones;
-//     si faltan, se compensa con Escuchar y Completar para que sean siempre 20.
+//   · 🧩 Ordenar (3): fichas de una oración de UNA cláusula, SOLO del banco escrito y revisado
+//     (nada de las lecciones). Cada ítem trae sus fichas a mano y la lista de órdenes ACEPTADOS
+//     (el original + las variantes confirmadas, mismas fichas en otro orden); las que esperan
+//     confirmación (st: 'pend') no salen. Baraja guardada entre tandas ('ac_order_deck_v1'): no se
+//     repite ninguna hasta usar todas las del nivel. Si faltan, se compensa con Escuchar y Completar.
 //   Sin banco para un nivel: 6 Escuchar + 8 Completar + 6 Ordenar (como antes).
 //   R9 — Niveles con LECTURAS (window.READINGS, readings-*.js: HSK 3 y HSK 5): la tanda lleva
 //   un texto con 3 o 4 preguntas («📖 Texto», cuentan en la parte «Leer») + Escuchar y Completar
@@ -32,7 +34,8 @@
     const KEY = 'ac_exam_v1';
     const KEEP = 10;
     const N_LISTEN = 6, N_CLOZE = 8, N_ORDER = 6;            // sin banco escrito
-    const MIX = { listen: 4, dialogue: 3, cloze: 5, reading: 3, order: 5 }; // con banco (suma 20)
+    const MIX = { listen: 5, dialogue: 3, cloze: 6, reading: 3, order: 3 }; // con banco (suma 20)
+    const DECK_KEY = 'ac_order_deck_v1';
     const $ = (id) => document.getElementById(id);
     const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g,
         c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -140,6 +143,65 @@
         if (out.length < n) { const more = mk(3, 9); out = out.concat(more).slice(0, n); }
         return out;
     }
+    // ── «Ordenar» del banco escrito: fichas a mano, órdenes aceptados y baraja guardada ──
+    const activeOrders = (B) => (B.orders || []).filter(o => o.st === 'ok' && Array.isArray(o.w) && o.w.length >= 3);
+    function readDeck() {
+        try { const o = JSON.parse(localStorage.getItem(DECK_KEY) || '{}'); return (o && typeof o === 'object') ? o : {}; }
+        catch (e) { return {}; }
+    }
+    // Baraja guardada: una COLA de oraciones armada con «bolsas» (cada bolsa = todas las del nivel, una vez cada
+    // una → salen parejo). Cada tanda saca `n` de la cola. Al faltar se arma otra bolsa al azar pero respetando una
+    // SEPARACIÓN mínima entre dos apariciones de la misma oración (3 tandas = 3·n lugares; si no entra, 2 tandas,
+    // y si no, 1): con 9 o más oraciones no hay repetidas en 3 tandas seguidas, y nunca dentro de una tanda.
+    // Estado en 'ac_order_deck_v1': { [nivel]: { d: cola, l: última tanda, u: último lugar de cada una, i: lugar de d[0] } }
+    function planBag(ids, u, idx0, gap) {
+        const rel = (id) => (typeof u[id] === 'number') ? u[id] + gap : -Infinity;
+        const feasible = (rem, idx) => rem.map(rel).sort((x, y) => x - y).every((v, j) => v <= idx + j);
+        const bag = [], rem = ids.slice();
+        for (let idx = idx0; rem.length; idx++) {
+            const okIds = rem.filter(id => rel(id) <= idx && feasible(rem.filter(x => x !== id), idx + 1));
+            if (!okIds.length) return null;
+            const id = okIds[Math.floor(Math.random() * okIds.length)];
+            bag.push(id); rem.splice(rem.indexOf(id), 1);
+        }
+        return bag;
+    }
+    function drawOrders(k, B, n) {
+        const act = activeOrders(B), ids = act.map(o => o.id);
+        if (!ids.length) return [];
+        const db = readDeck(), cur = (db[k] && typeof db[k] === 'object') ? db[k] : {};
+        let q = (Array.isArray(cur.d) ? cur.d : []).filter((id, i, a) => ids.indexOf(id) !== -1 && a.indexOf(id) === i);
+        const u = {};
+        ids.forEach(id => { if (cur.u && typeof cur.u[id] === 'number') u[id] = cur.u[id]; });
+        let i0 = (typeof cur.i === 'number') ? cur.i : 0;
+        const take = Math.min(n, ids.length);
+        if (q.length < take) {
+            const at = i0 + q.length;
+            let bag = planBag(ids, u, at, 3 * take) || planBag(ids, u, at, 2 * take) || planBag(ids, u, at, take);
+            if (!bag) bag = shuf(ids).sort((a, b) => (typeof u[a] === 'number' ? u[a] : -1) - (typeof u[b] === 'number' ? u[b] : -1));
+            bag.forEach((id, j) => { u[id] = at + j; });
+            q = q.concat(bag);
+        }
+        const pick = q.slice(0, take);
+        db[k] = { d: q.slice(take), l: pick, u: u, i: i0 + take };
+        try { localStorage.setItem(DECK_KEY, JSON.stringify(db)); } catch (e) { /* sin storage: sale al azar */ }
+        return pick.map(id => act.find(o => o.id === id));
+    }
+    // lo que se muestra nunca es ya una respuesta válida
+    function shufChips(words, accept) {
+        let ch = shuf(words), t = 0;
+        while (accept.indexOf(ch.join('')) !== -1 && t++ < 30) ch = shuf(words);
+        if (accept.indexOf(ch.join('')) !== -1) ch = words.slice().reverse();
+        return ch;
+    }
+    function makeBankOrder(o, trad) {
+        const words = trad ? o.wT : o.w;
+        if (!Array.isArray(words) || words.length < 3) return null;
+        const zh = words.join('');
+        const accept = [zh].concat(((trad ? o.altT : o.alt) || []).filter(a => a !== zh));
+        return { type: 'order', words: words, chips: shufChips(words, accept), es: o.es, zh: zh, accept: accept };
+    }
+    const isAcceptedOrder = (it, mine) => (it.accept || [it.words.join('')]).indexOf(mine) !== -1;
     function genCloze(P, trad, n, usedEs) {
         const all = [];
         P.ls.forEach(l => (l.quiz || []).forEach(q => all.push({ lesson: l.id, q })));
@@ -213,11 +275,8 @@
         }
         if (B) {
             const used = new Set();
-            const written = shuf(B.orders).map(o => makeOrder(zhPick(o, trad), o.es, 3, 9)).filter(Boolean);
-            let order = written.slice(0, 3); // 3 escritas + el resto de las lecciones
+            const order = drawOrders(k, B, MIX.order).map(o => makeBankOrder(o, trad)).filter(Boolean); // solo del banco revisado
             order.forEach(o => used.add(o.es));
-            order = order.concat(genOrder(P, trad, MIX.order - order.length, used));
-            if (order.length < MIX.order) order = order.concat(written.slice(3).filter(o => !used.has(o.es)).slice(0, MIX.order - order.length));
             const deficit = MIX.order - order.length;
             const listen = genListen(P, trad, MIX.listen + Math.ceil(deficit / 2), used);
             listen.forEach(i => used.add(i.es));
@@ -370,8 +429,12 @@
         const lv = levelOf(k);
         if (!lv) return;
         try { if (typeof ensureTocflPinyin === 'function') await ensureTocflPinyin(); } catch (e) { /* sigue sin pinyin de TOCFL */ }
-        const sess = buildSession(k);
-        if (items) sess.items = items.map(x => x.opts ? Object.assign({}, x, { opts: shuf(x.opts) }) : Object.assign({}, x, { chips: shuf(x.chips) }));
+        let sess;
+        if (items) { // el repaso de errores no arma una tanda nueva (no gasta la baraja de «Ordenar»)
+            const P = poolOf(k);
+            sess = { k, P, trad: P.ref ? scriptFor(P.ref) === 'trad' : false };
+            sess.items = items.map(x => x.opts ? Object.assign({}, x, { opts: shuf(x.opts) }) : Object.assign({}, x, { chips: shufChips(x.words, x.accept || [x.words.join('')]) }));
+        } else sess = buildSession(k);
         if (!sess.items.length) { shell('', null, '<p class="ex-sub">No se pudieron armar ítems para este nivel.</p>'); return; }
         S = Object.assign(sess, { idx: 0, res: new Array(sess.items.length).fill(null), answered: false, retry: !!items, placed: [] });
         window.acScriptRef = S.P.ref;
@@ -546,14 +609,17 @@
     function checkOrder() {
         const it = S.items[S.idx];
         const mine = S.placed.map(ci => it.chips[ci]).join('');
-        const ok = mine === it.words.join('');
+        const ok = isAcceptedOrder(it, mine);
+        const canon = it.words.join('');
+        const shown = ok ? mine : canon; // si valía otro orden, se muestra el tuyo
         document.querySelectorAll('#ex-pool .ex-chip, #ex-tray .ex-chip').forEach(b => { b.disabled = true; });
         $('ex-act').classList.add('hidden');
         $('ex-tray').classList.add(ok ? 'is-right' : 'is-wrong');
-        const py = pinyinOf(it.zh);
+        const py = pinyinOf(shown);
         finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '">' + (ok ? '' : 'La oración era ') +
-            '<span class="ex-fb-zh" lang="zh">' + esc(it.words.join('')) + '</span>' + (py ? '<span class="py">' + esc(py) + '</span>' : '') +
-            '<span class="es">' + esc(it.es) + '</span></div>');
+            '<span class="ex-fb-zh" lang="zh">' + esc(shown) + '</span>' + (py ? '<span class="py">' + esc(py) + '</span>' : '') +
+            '<span class="es">' + esc(it.es) + '</span>' +
+            (ok && mine !== canon ? '<span class="es">También se dice: <b lang="zh">' + esc(canon) + '</b></span>' : '') + '</div>');
     }
 
     // ── resultado ──
@@ -658,5 +724,5 @@
     else init();
 
     // solo lectura: pruebas E2E
-    window.ExamDebug = { build: buildSession, open, close, state: () => S, levels: LEVELS };
+    window.ExamDebug = { build: buildSession, open, close, state: () => S, levels: LEVELS, accepts: isAcceptedOrder, deck: readDeck, draw: drawOrders, bankOrder: makeBankOrder };
 })();
