@@ -1933,20 +1933,20 @@ window.EXAM_ITEMS = {
    },
    {
     "id": "h1-o9",
-    "zh": "这杯茶很好喝",
-    "zhT": "這杯茶很好喝",
-    "es": "Este té está muy rico.",
+    "zh": "这杯茶很热",
+    "zhT": "這杯茶很熱",
+    "es": "Este té está muy caliente.",
     "w": [
      "这杯",
      "茶",
      "很",
-     "好喝"
+     "热"
     ],
     "wT": [
      "這杯",
      "茶",
      "很",
-     "好喝"
+     "熱"
     ],
     "st": "ok"
    },
