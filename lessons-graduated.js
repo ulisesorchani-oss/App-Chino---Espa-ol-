@@ -303,7 +303,7 @@
     // el valor guardado ('tocfl:C1') y el examLvl de los datos no cambian.
     const TOCFL_LABEL = { C1: 'C' };
     const tocflLvlLabel = (v) => TOCFL_LABEL[v] || v;
-    const lessonTag = (l) => isRd(l) ? 'Lectura · HSK ' + l.hsk + ' (aprox.)' : l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
+    const lessonTag = (l) => isRd(l) ? 'Lectura · ' + (l.exam === 'TOCFL' ? 'TOCFL ' + tocflLvlLabel(l.examLvl || '') : 'HSK ' + l.hsk) + ' (aprox.)' : l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
     function buildTocflOptions() {
         const sel = $('sel-lv-tocfl');
         if (!sel) return;
@@ -837,7 +837,8 @@
         const breakdown = Object.keys(by).map(t => '<li><span>' + escHtml(RD_TYPE[t] || t) + '</span><b>' + by[t].ok + '/' + by[t].n + '</b></li>').join('');
         const msg = score === n ? '¡Perfecto! Entendiste todo el texto.' : score / n >= 0.66 ? '¡Muy bien! Entendiste lo esencial.' : 'Releé el texto con calma y probá de nuevo.';
         const others = READS().filter(x => x.id !== l.id);
-        const next = others.find(x => x.hsk === l.hsk && !rprog(x.id).done) || others.find(x => !rprog(x.id).done) || others[0];
+        const lvOf = (x) => (x.exam || 'HSK') + (x.examLvl || x.hsk);
+        const next = others.find(x => lvOf(x) === lvOf(l) && !rprog(x.id).done) || others.find(x => !rprog(x.id).done) || others[0];
         body.innerHTML =
             '<div class="lq-final"><div class="lq-final-emoji">' + l.emoji + '</div>' +
             '<div class="lq-final-score">' + score + '/' + n + '</div>' +

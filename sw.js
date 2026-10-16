@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v190'; // — HSK 1: «这杯茶很热» reemplaza «这杯茶很好喝» (好喝 no está en la lista HSK 1). v189: «Ordenar» con banco revisado
+const VERSION = 'v191'; // — lecturas TOCFL B1 (readings-tocfl.js) en Exámenes y en la práctica. v190: HSK 1 «这杯茶很热»
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -501,6 +501,7 @@ const PRECACHE = [
   './exam-items.js',       // R6: banco escrito de la práctica (diálogos, lecturas, oraciones para ordenar)
   './exam-practice.js',    // R5: práctica tipo examen (escuchar, completar, ordenar)
   './readings-pilot.js',   // R8: lecturas tipo examen — datos del piloto (HSK 3 y HSK 5)
+  './readings-tocfl.js',   // R11: lecturas tipo examen — TOCFL B1
   './readings-ui.js',      // R8: lista «Lecturas tipo examen» en Exámenes (abre el visor de lessons-graduated.js)
   './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
