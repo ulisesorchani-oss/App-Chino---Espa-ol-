@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261016d">
+    <link rel="stylesheet" href="style.css?v=20261017a">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -279,6 +279,12 @@
                         🎯 Test de colocación — descubrí tu nivel
                     </button>
                     <p id="placement-status" class="placement-status hidden" role="status"></p>
+                    <!-- R8: lecturas tipo examen (readings-pilot.js + readings-ui.js; el visor es el de lecciones) -->
+                    <section class="rd-section" aria-labelledby="rd-title">
+                        <h4 id="rd-title" class="rd-title">📖 Lecturas tipo examen</h4>
+                        <p class="lessons-intro rd-intro">Textos cortos con preguntas de comprensión, como en la parte de lectura de los exámenes. Son textos originales de la app: el nivel es aproximado y <b>no es oficial</b>.</p>
+                        <div id="reading-list" class="rd-list"></div>
+                    </section>
                 </div>
 
                 <!-- Panel Diaria -->
@@ -905,7 +911,9 @@
     <script src="reader.js?v=20261014u"></script>
     <script src="karaoke.js?v=20260926a"></script>
     <script src="classics-reader.js?v=20261014t"></script>
-    <script src="lessons-graduated.js?v=20261015b"></script>
+    <script src="readings-pilot.js?v=20261017a"></script>
+    <script src="lessons-graduated.js?v=20261017a"></script>
+    <script src="readings-ui.js?v=20261017a"></script>
     <script src="placement-test.js?v=20261015a"></script>
     <script src="minimal-pairs.js?v=20261015a"></script>
     <script src="daily-stories.js?v=20261014s"></script>

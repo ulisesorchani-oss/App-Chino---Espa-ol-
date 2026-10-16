@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v186'; // — «Práctica tipo examen» se muda de Exámenes a Entrenar (tarjeta, solo en «aprendo chino»); la intro de Exámenes ya no la menciona
+const VERSION = 'v187'; // — «Lecturas tipo examen» en Exámenes (readings-pilot.js + readings-ui.js; el visor es el de lecciones). v186: «Práctica tipo examen» se muda de Exámenes a Entrenar
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -500,6 +500,8 @@ const PRECACHE = [
   './module-sheet.js',     // R3: botón del módulo en Hoy + hoja de módulos
   './exam-items.js',       // R6: banco escrito de la práctica (diálogos, lecturas, oraciones para ordenar)
   './exam-practice.js',    // R5: práctica tipo examen (escuchar, completar, ordenar)
+  './readings-pilot.js',   // R8: lecturas tipo examen — datos del piloto (HSK 3 y HSK 5)
+  './readings-ui.js',      // R8: lista «Lecturas tipo examen» en Exámenes (abre el visor de lessons-graduated.js)
   './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
