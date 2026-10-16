@@ -29,6 +29,7 @@
 const LAYERS = [
     { id: 'lesson-pop', close: '#lq-close' },
     { id: 'dele-pop', close: '#dele-close' },
+    { id: 'nino-pop', close: '#nino-close' }, // R12: lecciones para niños (ninos-ui.js)
     { id: 'cread-pop', close: '#cr-close' },
     { id: 'podcast-pop', close: '#pd-close' },
     { id: 'daily-story-pop', close: '#btn-daily-story-close' },

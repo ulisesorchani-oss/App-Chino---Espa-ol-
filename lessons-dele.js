@@ -1031,10 +1031,12 @@
     let dAudio = null, dTok = 0;
     let dPlay = { text: '', btn: null, state: 'idle' }; // 'idle' | 'playing' | 'paused'
     let dQueue = null, dQIdx = 0;   // reproducción continua (▶️ Escuchar todo)
+    let dQHook = null;              // R12: gancho de la cola para la pista «Niños» (ninos-ui.js): se llama con el índice que suena (y -1 al terminar)
 
     // v9.31: la cola terminó sola (última línea) → restaurar el botón
     function resetPlayAll() {
         dQueue = null; dQIdx = 0;
+        if (dQHook) { const h = dQHook; dQHook = null; try { h(-1); } catch (e) { /* el gancho nunca rompe el audio */ } }
         const b = $('dele-playall');
         if (b) b.textContent = '▶️ Escuchar todo';
     }
@@ -1183,6 +1185,7 @@
             return;
         }
         const lineBtn = $('dele-body').querySelector('.dl-line[data-i="' + dQIdx + '"] .lq-line-say');
+        if (dQHook) { try { dQHook(dQIdx); } catch (e) { /* idem */ } }
         const text = dQueue[dQIdx++];
         speakEs(text, lineBtn || $('dele-body').querySelector('.lq-line-say'));
     }
@@ -1260,6 +1263,12 @@
         if (cnt) cnt.textContent = (shown.length === DRAMAS.length)
             ? DRAMAS.length + ' mini-dramas'
             : shown.length + ' de ' + DRAMAS.length;
+        // R12: la pista «Niños» tiene su propia pantalla (ninos-ui.js: tarjetas grandes, juegos con dibujos, estrellas)
+        if (curTrack === 'Niños' && window.NinosUI && window.NinosUI.count() > 0) {
+            const nk = window.NinosUI.renderList(wrap, curLevel);
+            if (cnt) cnt.textContent = nk + ' lecciones';
+            return;
+        }
         if (!shown.length && curTrack !== 'all' && !DRAMAS.some(d => d.track === curTrack)) {
             // R4: pista conocida que todavía no tiene lecciones (hoy «Niños»)
             wrap.innerHTML = '<div class="dl-empty dl-soon">' + escHtml(TRACK_META[curTrack] || curTrack) +
@@ -1713,7 +1722,23 @@
             renderChips();
             renderList();
         },
-        count: function (track) { return DRAMAS.filter(d => d.track === track).length; }
+        count: function (track) {
+            if (track === 'Niños' && window.NinosUI) return window.NinosUI.count(); // R12: lecciones de ninos-ui.js (lessons-ninos.js)
+            return DRAMAS.filter(d => d.track === track).length;
+        },
+        // R12: audio y cola de la pista «Niños» (mismo motor de voz argentina, velocidad ⚡ y cola que las mini-dramas)
+        speak: function (text, btn) { return speakEs(text, btn); },
+        stop: function () { stopSpeak(); dQHook = null; },
+        playQueue: function (texts, hook) {
+            stopSpeak();
+            dQueue = texts.slice(); dQIdx = 0; dQHook = hook || null;
+            playQueueStep(null);
+        },
+        stopQueue: function () {
+            const h = dQHook; dQHook = null; dQueue = null; dQIdx = 0; stopSpeak();
+            if (h) { try { h(-1); } catch (e) { /* idem */ } }
+        },
+        isQueue: function () { return !!dQueue; }
     };
 
     // exports para tests/QA (sin efecto en la UI)

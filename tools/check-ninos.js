@@ -44,7 +44,7 @@ LES.forEach((l, li) => {
     if (SIMP.test(x.zhT)) E('línea ' + (i + 1) + ': zhT con rasgos simplificados'); if (TRAD.test(x.zh)) E('línea ' + (i + 1) + ': zh con rasgos tradicionales');
     if (deleLines.has(norm(x.sp))) E('línea ' + (i + 1) + ' repite una mini-drama DELE existente: ' + x.sp); });
   const W = l.words || []; if (!W.length || W.length > 8) E('palabras nuevas: 1 a 8 (hay ' + W.length + ')');
-  W.forEach(w => { if (!w.sp || !w.zh || !w.zhT || !('art' in w)) E('palabra incompleta ' + w.sp);
+  W.forEach(w => { if (!w.sp || !w.zh || !w.zhT || !('art' in w) || !w.emoji) E('palabra incompleta (zh, zhT, emoji, art) ' + w.sp);
     if (!linesText(l).includes(norm(w.sp))) E('la palabra «' + w.sp + '» no aparece en las líneas'); });
   // reciclaje hacia atrás: cada lección (salvo la primera) reutiliza en sus líneas al menos 2 palabras nuevas de las anteriores
   const earlier = new Set(); LES.filter(o => o.order < l.order).forEach(o => (o.words || []).forEach(w => tokens(w.sp).forEach(t => earlier.add(t))));

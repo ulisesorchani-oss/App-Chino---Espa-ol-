@@ -43,7 +43,7 @@ window.NINOS_LESSONS = [
     "sp": "buen día",
     "zh": "早上好",
     "zhT": "早上好",
-    "emoji": null,
+    "emoji": "🌞",
     "art": null
    },
    {
@@ -57,21 +57,21 @@ window.NINOS_LESSONS = [
     "sp": "me llamo",
     "zh": "我叫",
     "zhT": "我叫",
-    "emoji": null,
+    "emoji": "🙋",
     "art": null
    },
    {
     "sp": "¿cómo te llamás?",
     "zh": "你叫什么名字？",
     "zhT": "你叫什麼名字？",
-    "emoji": null,
+    "emoji": "❓",
     "art": null
    },
    {
     "sp": "jugar",
     "zh": "玩",
     "zhT": "玩",
-    "emoji": null,
+    "emoji": "🎲",
     "art": null
    },
    {
@@ -407,21 +407,21 @@ window.NINOS_LESSONS = [
     "sp": "¿dónde está?",
     "zh": "在哪里？",
     "zhT": "在哪裡？",
-    "emoji": null,
+    "emoji": "📍",
     "art": null
    },
    {
     "sp": "acá",
     "zh": "这里",
     "zhT": "這裡",
-    "emoji": null,
+    "emoji": "👇",
     "art": null
    },
    {
     "sp": "escribir",
     "zh": "写字",
     "zhT": "寫字",
-    "emoji": null,
+    "emoji": "✍️",
     "art": null
    }
   ],
@@ -722,35 +722,35 @@ window.NINOS_LESSONS = [
     "sp": "no entiendo",
     "zh": "我不明白",
     "zhT": "我不明白",
-    "emoji": null,
+    "emoji": "🤷",
     "art": null
    },
    {
     "sp": "otra vez",
     "zh": "再一次",
     "zhT": "再一次",
-    "emoji": null,
+    "emoji": "🔁",
     "art": null
    },
    {
     "sp": "me prestás",
     "zh": "你借给我",
     "zhT": "你借給我",
-    "emoji": null,
+    "emoji": "🤲",
     "art": null
    },
    {
     "sp": "tomá",
     "zh": "拿去吧",
     "zhT": "拿去吧",
-    "emoji": null,
+    "emoji": "🤝",
     "art": null
    },
    {
     "sp": "tengo sed",
     "zh": "我渴了",
     "zhT": "我渴了",
-    "emoji": null,
+    "emoji": "🥤",
     "art": null
    },
    {
@@ -1051,14 +1051,14 @@ window.NINOS_LESSONS = [
     "sp": "merienda",
     "zh": "下午点心",
     "zhT": "下午點心",
-    "emoji": null,
+    "emoji": "🍪",
     "art": null
    },
    {
     "sp": "tengo hambre",
     "zh": "我饿了",
     "zhT": "我餓了",
-    "emoji": null,
+    "emoji": "🍽️",
     "art": null
    },
    {
@@ -1086,21 +1086,21 @@ window.NINOS_LESSONS = [
     "sp": "¡qué rico!",
     "zh": "真好吃！",
     "zhT": "真好吃！",
-    "emoji": null,
+    "emoji": "😋",
     "art": null
    },
    {
     "sp": "más",
     "zh": "更多",
     "zhT": "更多",
-    "emoji": null,
+    "emoji": "➕",
     "art": null
    },
    {
     "sp": "lleno",
     "zh": "饱",
     "zhT": "飽",
-    "emoji": null,
+    "emoji": "😌",
     "art": null
    }
   ],
@@ -1394,14 +1394,14 @@ window.NINOS_LESSONS = [
     "sp": "me duele la panza",
     "zh": "我肚子疼",
     "zhT": "我肚子疼",
-    "emoji": null,
+    "emoji": "😣",
     "art": null
    },
    {
     "sp": "¿qué te pasa?",
     "zh": "你怎么了？",
     "zhT": "你怎麼了？",
-    "emoji": null,
+    "emoji": "🤔",
     "art": null
    },
    {
@@ -1429,7 +1429,7 @@ window.NINOS_LESSONS = [
     "sp": "descansá",
     "zh": "休息一下",
     "zhT": "休息一下",
-    "emoji": null,
+    "emoji": "🛌",
     "art": null
    },
    {
@@ -1443,7 +1443,7 @@ window.NINOS_LESSONS = [
     "sp": "mejor",
     "zh": "更好",
     "zhT": "更好",
-    "emoji": null,
+    "emoji": "👍",
     "art": null
    }
   ],
@@ -1751,21 +1751,21 @@ window.NINOS_LESSONS = [
     "sp": "¡dale!",
     "zh": "好啊！",
     "zhT": "好啊！",
-    "emoji": null,
+    "emoji": "🙌",
     "art": null
    },
    {
     "sp": "pasame",
     "zh": "传给我",
     "zhT": "傳給我",
-    "emoji": null,
+    "emoji": "➡️",
     "art": null
    },
    {
     "sp": "te toca a vos",
     "zh": "轮到你了",
     "zhT": "輪到你了",
-    "emoji": null,
+    "emoji": "👉",
     "art": null
    },
    {
@@ -1779,7 +1779,7 @@ window.NINOS_LESSONS = [
     "sp": "jugás",
     "zh": "你玩",
     "zhT": "你玩",
-    "emoji": null,
+    "emoji": "🏃",
     "art": null
    }
   ],
