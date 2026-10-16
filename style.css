@@ -5810,12 +5810,10 @@ body.dark-mode .record-summary { background: var(--bg-light); color: var(--text-
 
 /* --- Entrenar --- */
 .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-/* v9.69: "Solo oído" se mudó a Hoy → quedan 3 tarjetas (impares) en una
-   grilla de 2 columnas. Mientras no se sume la reemplazante (Prompt B),
-   la 3.ª/última ocupa el ancho completo en vez de dejar un hueco a su
-   lado. Deja de aplicar solo (nth-child dejará de coincidir con
-   last-child) apenas vuelva a haber 4 tarjetas. */
-.train-grid > .train-card:nth-child(3):last-child { grid-column: 1 / -1; }
+/* La grilla es de 2 columnas: si la última tarjeta queda impar, ocupa el ancho
+   completo en vez de dejar un hueco a su lado. */
+/* R7: con la práctica tipo examen son 5 tarjetas: la última (impar) ocupa el ancho completo */
+.train-grid > .train-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .train-card {
     display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left;
     min-height: 112px; padding: 14px; border-radius: 16px; border: 2px solid transparent;
@@ -6691,19 +6689,6 @@ body.paper-mode { --ms-muted: #6b5a3e; }
    R5 — Práctica tipo examen (exam-practice.js). Piel de las lecciones
    (.lq-pop / .lq-opt / .lq-seg) + piezas propias .ex-*
    =================================================================== */
-.exam-practice-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    width: 100%; min-height: 56px; padding: 10px 14px; margin-bottom: 12px;
-    border: 2px solid #4338ca; border-radius: 14px;
-    background: var(--bg-card); color: #3730a3; font: inherit; cursor: pointer;
-}
-.exam-practice-btn .ep-t { font-size: 1rem; font-weight: 800; }
-.exam-practice-btn .ep-d { font-size: 0.8rem; font-weight: 600; color: var(--ms-muted); }
-.exam-practice-btn:hover { border-color: #3730a3; }
-.exam-practice-btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
-body.dark-mode .exam-practice-btn { color: #c7d2fe; border-color: #818cf8; }
-body.paper-mode .exam-practice-btn { color: #4338ca; }
-
 .ex-pill {
     display: inline-block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
     padding: 3px 10px; border-radius: 999px; border: 1.5px solid #b45309; color: #92400e; background: #fffbeb;

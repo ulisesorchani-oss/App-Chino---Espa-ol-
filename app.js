@@ -723,7 +723,7 @@ const UI_STRINGS = {
     hoyHintDaily: '↪ Elegí una situación y tocá ▶ Practicar en Hoy.',
     hoyHintClassics: '↪ Elegí un clásico del menú y tocá ▶ Practicar en Hoy; el texto original se lee acá.',
     choiceChosen: '✔ Elegiste: ', choiceGo: '▶ Practicar en Hoy',
-    viewEntrenar: 'Entrenar', viewEntrenarSub: 'Ejercicios sueltos para el oído, la voz y la mano.',
+    viewEntrenar: 'Entrenar', viewEntrenarSub: 'Ejercicios sueltos: oído, voz, mano y práctica de examen.',
     viewYo: 'Yo', viewYoSub: 'Tu progreso, tu repaso y los ajustes de la app.',
     yoProgress: '📈 Progreso', yoSettings: '⚙️ Ajustes',
     setMode: 'Estoy aprendiendo', setTheme: 'Tema', setAudio: 'Audio', setSession: 'Meta diaria', setData: 'Datos',
@@ -927,7 +927,8 @@ function updateUILanguage(mode) {
     //    glosas en español: para el alumno cn-es no pintan nada.
     // v9.70: ídem Podcast — GRADED_LESSONS son mini-dramas en chino con
     //    glosa en español, mismo alcance que btn-listen/btn-mp-pairs.
-    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen', 'btn-mp-pairs', 'btn-podcast'].forEach((id) => show(id, !cnMode));
+    // R7: la práctica tipo examen (Entrenar) es solo de HSK/TOCFL: tampoco se ofrece en «aprendo español»
+    ['btn-pinyin', 'btn-tones', 'btn-tone-info', 'btn-listen', 'btn-mp-pairs', 'btn-podcast', 'btn-exam-practice'].forEach((id) => show(id, !cnMode));
 
     // 6) v9.11: UN solo botón de audio — siempre el idioma que se aprende.
     //    Aprendiendo chino (es-cn): 🔊 CN suena la oración china; 🔊 ES oculto.

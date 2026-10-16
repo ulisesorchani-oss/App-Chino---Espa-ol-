@@ -278,7 +278,7 @@
                 tabs: [
                     ['📚', 'Aprender', 'elegís qué estudiar'],
                     ['🀄', 'Hoy', 'practicás frases'],
-                    ['🎯', 'Entrenar', 'oído, escritura y lectura'],
+                    ['🎯', 'Entrenar', 'oído, escritura, lectura y práctica de examen'],
                     ['🙂', 'Yo', 'tu progreso, ajustes y esta guía']
                 ],
                 done: { cero: 'Empezar ▶', test: 'Hacer el test ▶', examen: 'Elegir examen ▶', none: 'Listo' }
