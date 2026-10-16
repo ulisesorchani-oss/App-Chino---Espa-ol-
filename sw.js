@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v192'; // — pista «Niños» (lessons-ninos.js + ninos-ui.js) en Aprender → Lecciones (aprendo español). v191: lecturas TOCFL B1
+const VERSION = 'v193'; // — 3 lecciones nuevas de Niños (familia, colores y números, mascotas). v192: pista «Niños» (lessons-ninos.js + ninos-ui.js) en Aprender → Lecciones (aprendo español). v191: lecturas TOCFL B1
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
@@ -515,7 +515,7 @@ const PRECACHE = [
   './lessons-tocfl.js',     // v9.6: mini-dramas TOCFL (se concatenan a GRADED_LESSONS)
   './lessons-extra.js',     // v9.6c: mini-dramas HSK extra (+2 por nivel)
   './lessons-dele.js',      // v9.30: mini-dramas DELE para cn-es (aprendices de español)
-  './lessons-ninos.js',     // R12: lecciones para niños (datos, 6 piloto)
+  './lessons-ninos.js',     // R12: lecciones para niños (datos: 6 piloto + unidades)
   './ninos-ui.js',          // R12: pista «Niños»: tarjetas, lectura, juegos con dibujos, estrellas
   './classics.js',          // v9.2: TEXTO ORIGINAL de los 9 clásicos por bloques (lector de clásicos)
   './onboarding.js',        // v9.22: guía interactiva de bienvenida (bilingüe según modo)
