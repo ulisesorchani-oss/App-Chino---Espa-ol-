@@ -7,9 +7,13 @@
 //       4 a 6 líneas de dos voces + una pregunta en español con 3 opciones.
 //   · readings (6):  { id, zh, zhT, es, q: { es, opts } }
 //       texto corto + pregunta en español con 3 opciones.
-//   · orders (8):    { id, zh, zhT, es }
-//       oración de UNA sola cláusula (sin puntuación), de 3 a 9 palabras al
-//       segmentar: el orden correcto tiene que ser único.
+//   · orders (9 a 12 por nivel): { id, zh, zhT, es, w, wT, alt?, altT?, st }
+//       oración de UNA sola cláusula (sin puntuación). w / wT = las FICHAS escritas a mano
+//       (simplificado / tradicional; de 3 a 9) y su concatenación es la oración. El orden correcto
+//       es el original MÁS los de alt / altT (otro orden de las MISMAS fichas, revisado una por una).
+//       st: 'ok' = revisada y activa · 'pend' = espera la confirmación del revisor: NO sale en las
+//       tandas. Las tandas sacan 3 por nivel con una baraja guardada ('ac_order_deck_v1').
+//       No se toman oraciones de las lecciones.
 // q.opts[0] es la correcta; el orden visible se baraja en cada sesión.
 // zh = simplificado, zhT = tradicional (se muestra el de la escritura de la
 // familia: TOCFL tradicional, HSK simplificado, salvo elección explícita 简/繁).
@@ -362,52 +366,269 @@ window.EXAM_ITEMS = {
   ],
   "orders": [
    {
-    "id": "prep-o1",
-    "zh": "我想吃一碗面",
-    "zhT": "我想吃一碗麵",
-    "es": "Quiero comer un cuenco de fideos."
-   },
-   {
     "id": "prep-o2",
     "zh": "他有两个孩子",
     "zhT": "他有兩個孩子",
-    "es": "Tiene dos hijos."
+    "es": "Tiene dos hijos.",
+    "w": [
+     "他有",
+     "两个",
+     "孩子"
+    ],
+    "wT": [
+     "他有",
+     "兩個",
+     "孩子"
+    ],
+    "st": "ok"
    },
    {
     "id": "prep-o3",
     "zh": "这本书很便宜",
     "zhT": "這本書很便宜",
-    "es": "Este libro es muy barato."
-   },
-   {
-    "id": "prep-o4",
-    "zh": "我喜欢吃水果",
-    "zhT": "我喜歡吃水果",
-    "es": "Me gusta comer fruta."
-   },
-   {
-    "id": "prep-o5",
-    "zh": "弟弟想喝牛奶",
-    "zhT": "弟弟想喝牛奶",
-    "es": "Mi hermano menor quiere tomar leche."
-   },
-   {
-    "id": "prep-o6",
-    "zh": "老师在教室里",
-    "zhT": "老師在教室裡",
-    "es": "El maestro está en el aula."
+    "es": "Este libro es muy barato.",
+    "w": [
+     "这本书",
+     "很",
+     "便宜"
+    ],
+    "wT": [
+     "這本書",
+     "很",
+     "便宜"
+    ],
+    "st": "ok"
    },
    {
     "id": "prep-o7",
     "zh": "那个学生很高",
     "zhT": "那個學生很高",
-    "es": "Ese estudiante es muy alto."
+    "es": "Ese estudiante es muy alto.",
+    "w": [
+     "那个",
+     "学生",
+     "很高"
+    ],
+    "wT": [
+     "那個",
+     "學生",
+     "很高"
+    ],
+    "st": "ok"
+   },
+   {
+    "id": "prep-o4",
+    "zh": "我喜欢吃水果",
+    "zhT": "我喜歡吃水果",
+    "es": "Me gusta comer fruta.",
+    "w": [
+     "我",
+     "喜欢",
+     "吃",
+     "水果"
+    ],
+    "wT": [
+     "我",
+     "喜歡",
+     "吃",
+     "水果"
+    ],
+    "alt": [
+     "水果我喜欢吃"
+    ],
+    "altT": [
+     "水果我喜歡吃"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o5",
+    "zh": "弟弟想喝牛奶",
+    "zhT": "弟弟想喝牛奶",
+    "es": "Mi hermano menor quiere tomar leche.",
+    "w": [
+     "弟弟",
+     "想喝",
+     "牛奶"
+    ],
+    "wT": [
+     "弟弟",
+     "想喝",
+     "牛奶"
+    ],
+    "alt": [
+     "牛奶弟弟想喝"
+    ],
+    "altT": [
+     "牛奶弟弟想喝"
+    ],
+    "st": "pend"
    },
    {
     "id": "prep-o8",
     "zh": "我可以坐这里吗",
     "zhT": "我可以坐這裡嗎",
-    "es": "¿Puedo sentarme aquí?"
+    "es": "¿Puedo sentarme aquí?",
+    "w": [
+     "我",
+     "可以",
+     "坐",
+     "这里",
+     "吗"
+    ],
+    "wT": [
+     "我",
+     "可以",
+     "坐",
+     "這裡",
+     "嗎"
+    ],
+    "alt": [
+     "这里我可以坐吗"
+    ],
+    "altT": [
+     "這裡我可以坐嗎"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o9",
+    "zh": "这碗面很好吃",
+    "zhT": "這碗麵很好吃",
+    "es": "Estos fideos están muy ricos.",
+    "w": [
+     "这碗",
+     "面",
+     "很",
+     "好吃"
+    ],
+    "wT": [
+     "這碗",
+     "麵",
+     "很",
+     "好吃"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o10",
+    "zh": "教室里有很多学生",
+    "zhT": "教室裡有很多學生",
+    "es": "En el aula hay muchos estudiantes.",
+    "w": [
+     "教室",
+     "里",
+     "有",
+     "很多",
+     "学生"
+    ],
+    "wT": [
+     "教室",
+     "裡",
+     "有",
+     "很多",
+     "學生"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o11",
+    "zh": "你家有几个房间",
+    "zhT": "你家有幾個房間",
+    "es": "¿Cuántas habitaciones tiene tu casa?",
+    "w": [
+     "你",
+     "家",
+     "有",
+     "几个",
+     "房间"
+    ],
+    "wT": [
+     "你",
+     "家",
+     "有",
+     "幾個",
+     "房間"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o12",
+    "zh": "我的电脑很新",
+    "zhT": "我的電腦很新",
+    "es": "Mi computadora es muy nueva.",
+    "w": [
+     "我的",
+     "电脑",
+     "很",
+     "新"
+    ],
+    "wT": [
+     "我的",
+     "電腦",
+     "很",
+     "新"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o13",
+    "zh": "他的手机很旧",
+    "zhT": "他的手機很舊",
+    "es": "Su celular es muy viejo.",
+    "w": [
+     "他的",
+     "手机",
+     "很",
+     "旧"
+    ],
+    "wT": [
+     "他的",
+     "手機",
+     "很",
+     "舊"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o14",
+    "zh": "这个蛋糕很甜",
+    "zhT": "這個蛋糕很甜",
+    "es": "Esta torta es muy dulce.",
+    "w": [
+     "这个",
+     "蛋糕",
+     "很",
+     "甜"
+    ],
+    "wT": [
+     "這個",
+     "蛋糕",
+     "很",
+     "甜"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "prep-o15",
+    "zh": "桌子上有一本书",
+    "zhT": "桌子上有一本書",
+    "es": "Hay un libro sobre la mesa.",
+    "w": [
+     "桌子",
+     "上",
+     "有",
+     "一本",
+     "书"
+    ],
+    "wT": [
+     "桌子",
+     "上",
+     "有",
+     "一本",
+     "書"
+    ],
+    "st": "pend"
    }
   ]
  },
@@ -760,52 +981,292 @@ window.EXAM_ITEMS = {
   ],
   "orders": [
    {
-    "id": "a1-o1",
-    "zh": "我想买一件新外套",
-    "zhT": "我想買一件新外套",
-    "es": "Quiero comprar un abrigo nuevo."
-   },
-   {
     "id": "a1-o2",
     "zh": "他不想去上班",
     "zhT": "他不想去上班",
-    "es": "No quiere ir a trabajar."
+    "es": "No quiere ir a trabajar.",
+    "w": [
+     "他不",
+     "想去",
+     "上班"
+    ],
+    "wT": [
+     "他不",
+     "想去",
+     "上班"
+    ],
+    "st": "ok"
    },
    {
     "id": "a1-o3",
     "zh": "图书馆的书很多",
     "zhT": "圖書館的書很多",
-    "es": "La biblioteca tiene muchos libros."
-   },
-   {
-    "id": "a1-o4",
-    "zh": "我想看那部电影",
-    "zhT": "我想看那部電影",
-    "es": "Quiero ver esa película."
+    "es": "La biblioteca tiene muchos libros.",
+    "w": [
+     "图书馆",
+     "的",
+     "书",
+     "很多"
+    ],
+    "wT": [
+     "圖書館",
+     "的",
+     "書",
+     "很多"
+    ],
+    "st": "ok"
    },
    {
     "id": "a1-o5",
     "zh": "这家商店的衣服很便宜",
     "zhT": "這家商店的衣服很便宜",
-    "es": "La ropa de esta tienda es muy barata."
-   },
-   {
-    "id": "a1-o6",
-    "zh": "老板在办公室里",
-    "zhT": "老闆在辦公室裡",
-    "es": "El jefe está en la oficina."
-   },
-   {
-    "id": "a1-o7",
-    "zh": "我朋友喜欢吃辣的",
-    "zhT": "我朋友喜歡吃辣的",
-    "es": "A mi amigo le gusta comer picante."
+    "es": "La ropa de esta tienda es muy barata.",
+    "w": [
+     "这家",
+     "商店",
+     "的",
+     "衣服",
+     "很",
+     "便宜"
+    ],
+    "wT": [
+     "這家",
+     "商店",
+     "的",
+     "衣服",
+     "很",
+     "便宜"
+    ],
+    "st": "ok"
    },
    {
     "id": "a1-o8",
     "zh": "请你把窗关上",
     "zhT": "請你把窗關上",
-    "es": "Por favor, cerrá la ventana."
+    "es": "Por favor, cerrá la ventana.",
+    "w": [
+     "请",
+     "你",
+     "把",
+     "窗",
+     "关上"
+    ],
+    "wT": [
+     "請",
+     "你",
+     "把",
+     "窗",
+     "關上"
+    ],
+    "st": "ok"
+   },
+   {
+    "id": "a1-o4",
+    "zh": "我想看那部电影",
+    "zhT": "我想看那部電影",
+    "es": "Quiero ver esa película.",
+    "w": [
+     "我想",
+     "看",
+     "那部",
+     "电影"
+    ],
+    "wT": [
+     "我想",
+     "看",
+     "那部",
+     "電影"
+    ],
+    "alt": [
+     "那部电影我想看"
+    ],
+    "altT": [
+     "那部電影我想看"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o7",
+    "zh": "我朋友喜欢吃辣的",
+    "zhT": "我朋友喜歡吃辣的",
+    "es": "A mi amigo le gusta comer picante.",
+    "w": [
+     "我",
+     "朋友",
+     "喜欢",
+     "吃",
+     "辣",
+     "的"
+    ],
+    "wT": [
+     "我",
+     "朋友",
+     "喜歡",
+     "吃",
+     "辣",
+     "的"
+    ],
+    "alt": [
+     "辣的我朋友喜欢吃"
+    ],
+    "altT": [
+     "辣的我朋友喜歡吃"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o9",
+    "zh": "这件外套很轻",
+    "zhT": "這件外套很輕",
+    "es": "Este abrigo es muy liviano.",
+    "w": [
+     "这件",
+     "外套",
+     "很",
+     "轻"
+    ],
+    "wT": [
+     "這件",
+     "外套",
+     "很",
+     "輕"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o10",
+    "zh": "老板的办公室很大",
+    "zhT": "老闆的辦公室很大",
+    "es": "La oficina del jefe es muy grande.",
+    "w": [
+     "老板的",
+     "办公室",
+     "很",
+     "大"
+    ],
+    "wT": [
+     "老闆的",
+     "辦公室",
+     "很",
+     "大"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o11",
+    "zh": "厨房里有很多东西",
+    "zhT": "廚房裡有很多東西",
+    "es": "En la cocina hay muchas cosas.",
+    "w": [
+     "厨房",
+     "里",
+     "有",
+     "很多",
+     "东西"
+    ],
+    "wT": [
+     "廚房",
+     "裡",
+     "有",
+     "很多",
+     "東西"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o12",
+    "zh": "这个城市很大",
+    "zhT": "這個城市很大",
+    "es": "Esta ciudad es muy grande.",
+    "w": [
+     "这个",
+     "城市",
+     "很",
+     "大"
+    ],
+    "wT": [
+     "這個",
+     "城市",
+     "很",
+     "大"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o13",
+    "zh": "他的头发很长",
+    "zhT": "他的頭髮很長",
+    "es": "Su pelo es muy largo.",
+    "w": [
+     "他的",
+     "头发",
+     "很",
+     "长"
+    ],
+    "wT": [
+     "他的",
+     "頭髮",
+     "很",
+     "長"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o14",
+    "zh": "我的房租很贵",
+    "zhT": "我的房租很貴",
+    "es": "Mi alquiler es muy caro.",
+    "w": [
+     "我的",
+     "房租",
+     "很",
+     "贵"
+    ],
+    "wT": [
+     "我的",
+     "房租",
+     "很",
+     "貴"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o15",
+    "zh": "冰箱里有很多水果",
+    "zhT": "冰箱裡有很多水果",
+    "es": "En la heladera hay mucha fruta.",
+    "w": [
+     "冰箱",
+     "里",
+     "有",
+     "很多",
+     "水果"
+    ],
+    "wT": [
+     "冰箱",
+     "裡",
+     "有",
+     "很多",
+     "水果"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "a1-o16",
+    "zh": "洗手间在哪里",
+    "zhT": "洗手間在哪裡",
+    "es": "¿Dónde está el baño?",
+    "w": [
+     "洗手间",
+     "在",
+     "哪里"
+    ],
+    "wT": [
+     "洗手間",
+     "在",
+     "哪裡"
+    ],
+    "st": "pend"
    }
   ]
  },
@@ -1140,52 +1601,284 @@ window.EXAM_ITEMS = {
   ],
   "orders": [
    {
-    "id": "h1-o1",
-    "zh": "我想喝一杯水",
-    "zhT": "我想喝一杯水",
-    "es": "Quiero tomar un vaso de agua."
-   },
-   {
-    "id": "h1-o2",
-    "zh": "他喜欢看电影",
-    "zhT": "他喜歡看電影",
-    "es": "Le gusta ver películas."
-   },
-   {
     "id": "h1-o3",
     "zh": "这本书很好看",
     "zhT": "這本書很好看",
-    "es": "Este libro es muy bueno."
-   },
-   {
-    "id": "h1-o4",
-    "zh": "妈妈想买衣服",
-    "zhT": "媽媽想買衣服",
-    "es": "Mamá quiere comprar ropa."
-   },
-   {
-    "id": "h1-o5",
-    "zh": "我的朋友会说汉语",
-    "zhT": "我的朋友會說漢語",
-    "es": "Mi amigo sabe hablar chino."
+    "es": "Este libro es muy bueno.",
+    "w": [
+     "这本书",
+     "很",
+     "好看"
+    ],
+    "wT": [
+     "這本書",
+     "很",
+     "好看"
+    ],
+    "st": "ok"
    },
    {
     "id": "h1-o6",
     "zh": "你想去哪儿",
     "zhT": "你想去哪兒",
-    "es": "¿Adónde querés ir?"
+    "es": "¿Adónde querés ir?",
+    "w": [
+     "你",
+     "想去",
+     "哪儿"
+    ],
+    "wT": [
+     "你",
+     "想去",
+     "哪兒"
+    ],
+    "st": "ok"
    },
    {
     "id": "h1-o7",
     "zh": "弟弟不想吃肉",
     "zhT": "弟弟不想吃肉",
-    "es": "Mi hermano menor no quiere comer carne."
+    "es": "Mi hermano menor no quiere comer carne.",
+    "w": [
+     "弟弟",
+     "不想",
+     "吃肉"
+    ],
+    "wT": [
+     "弟弟",
+     "不想",
+     "吃肉"
+    ],
+    "st": "ok"
    },
    {
     "id": "h1-o8",
     "zh": "这个手机不贵",
     "zhT": "這個手機不貴",
-    "es": "Este teléfono no es caro."
+    "es": "Este teléfono no es caro.",
+    "w": [
+     "这个",
+     "手机",
+     "不",
+     "贵"
+    ],
+    "wT": [
+     "這個",
+     "手機",
+     "不",
+     "貴"
+    ],
+    "st": "ok"
+   },
+   {
+    "id": "h1-o2",
+    "zh": "他喜欢看电影",
+    "zhT": "他喜歡看電影",
+    "es": "Le gusta ver películas.",
+    "w": [
+     "他",
+     "喜欢",
+     "看",
+     "电影"
+    ],
+    "wT": [
+     "他",
+     "喜歡",
+     "看",
+     "電影"
+    ],
+    "alt": [
+     "电影他喜欢看"
+    ],
+    "altT": [
+     "電影他喜歡看"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o4",
+    "zh": "妈妈想买衣服",
+    "zhT": "媽媽想買衣服",
+    "es": "Mamá quiere comprar ropa.",
+    "w": [
+     "妈妈",
+     "想",
+     "买",
+     "衣服"
+    ],
+    "wT": [
+     "媽媽",
+     "想",
+     "買",
+     "衣服"
+    ],
+    "alt": [
+     "衣服妈妈想买"
+    ],
+    "altT": [
+     "衣服媽媽想買"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o5",
+    "zh": "我的朋友会说汉语",
+    "zhT": "我的朋友會說漢語",
+    "es": "Mi amigo sabe hablar chino.",
+    "w": [
+     "我的",
+     "朋友",
+     "会说",
+     "汉语"
+    ],
+    "wT": [
+     "我的",
+     "朋友",
+     "會說",
+     "漢語"
+    ],
+    "alt": [
+     "汉语我的朋友会说"
+    ],
+    "altT": [
+     "漢語我的朋友會說"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o9",
+    "zh": "这杯茶很好喝",
+    "zhT": "這杯茶很好喝",
+    "es": "Este té está muy rico.",
+    "w": [
+     "这杯",
+     "茶",
+     "很",
+     "好喝"
+    ],
+    "wT": [
+     "這杯",
+     "茶",
+     "很",
+     "好喝"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o10",
+    "zh": "我的手机很新",
+    "zhT": "我的手機很新",
+    "es": "Mi celular es muy nuevo.",
+    "w": [
+     "我的",
+     "手机",
+     "很",
+     "新"
+    ],
+    "wT": [
+     "我的",
+     "手機",
+     "很",
+     "新"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o11",
+    "zh": "这个杯子很大",
+    "zhT": "這個杯子很大",
+    "es": "Este vaso es muy grande.",
+    "w": [
+     "这个",
+     "杯子",
+     "很",
+     "大"
+    ],
+    "wT": [
+     "這個",
+     "杯子",
+     "很",
+     "大"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o12",
+    "zh": "学校的书店很大",
+    "zhT": "學校的書店很大",
+    "es": "La librería de la escuela es muy grande.",
+    "w": [
+     "学校的",
+     "书店",
+     "很",
+     "大"
+    ],
+    "wT": [
+     "學校的",
+     "書店",
+     "很",
+     "大"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o13",
+    "zh": "你的名字很好听",
+    "zhT": "你的名字很好聽",
+    "es": "Tu nombre suena muy lindo.",
+    "w": [
+     "你的",
+     "名字",
+     "很",
+     "好听"
+    ],
+    "wT": [
+     "你的",
+     "名字",
+     "很",
+     "好聽"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o14",
+    "zh": "书包里有三本书",
+    "zhT": "書包裡有三本書",
+    "es": "En la mochila hay tres libros.",
+    "w": [
+     "书包",
+     "里",
+     "有",
+     "三本",
+     "书"
+    ],
+    "wT": [
+     "書包",
+     "裡",
+     "有",
+     "三本",
+     "書"
+    ],
+    "st": "pend"
+   },
+   {
+    "id": "h1-o15",
+    "zh": "你的书包很重",
+    "zhT": "你的書包很重",
+    "es": "Tu mochila es muy pesada.",
+    "w": [
+     "你的",
+     "书包",
+     "很",
+     "重"
+    ],
+    "wT": [
+     "你的",
+     "書包",
+     "很",
+     "重"
+    ],
+    "st": "pend"
    }
   ]
  }
