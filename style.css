@@ -6838,3 +6838,15 @@ body.paper-mode .rd-text > summary, body.paper-mode .rd-q-zh, body.paper-mode .r
 body.paper-mode .rd-q-zh + .rd-q-es, body.paper-mode .rd-opt-zh + .rd-opt-es { color: #6b5b40; }
 body.paper-mode .rd-breakdown li { border-bottom-color: #e6dabf; }
 body.paper-mode .rd-why-bad { color: #991b1b; }
+
+/* R9 — texto de la práctica tipo examen: plano mientras se responde, tocable después */
+.rd-plain p { margin: 0 0 8px; font-size: 1.08rem; line-height: 1.75; font-weight: 600; color: var(--text-primary); }
+.rd-plain p:last-child { margin-bottom: 0; }
+.rd-plain { padding-top: 2px; }
+/* R9: en el texto de lecturas la traducción y el pinyin se ven por defecto (práctica) → contraste ≥ 4,5:1 */
+.rd-lines .lq-line-es { color: #475569; }
+.rd-lines .lq-line-py { color: #5b3fd0; }
+body.dark-mode .rd-lines .lq-line-es { color: #cbd5e1; }
+body.dark-mode .rd-lines .lq-line-py { color: #c7d2fe; }
+body.paper-mode .rd-lines .lq-line-es { color: #6b5b40; }
+body.paper-mode .rd-lines .lq-line-py { color: #92400e; }

@@ -1,5 +1,5 @@
 // ============================================================
-// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, TOCFL A1, HSK 1)
+// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, TOCFL A1, HSK 1, HSK 3 y HSK 5)
 // ============================================================
 // Sesión de 20 ítems sin tiempo límite. Se arma con las lecciones de cada nivel
 // (window.GRADED_LESSONS) y, si existe, con el banco escrito de exam-items.js
@@ -13,6 +13,12 @@
 //     acepta solo el orden original. Salen del banco escrito y de las lecciones;
 //     si faltan, se compensa con Escuchar y Completar para que sean siempre 20.
 //   Sin banco para un nivel: 6 Escuchar + 8 Completar + 6 Ordenar (como antes).
+//   R9 — Niveles con LECTURAS (window.READINGS, readings-*.js: HSK 3 y HSK 5): la tanda lleva
+//   un texto con 3 o 4 preguntas («📖 Texto», cuentan en la parte «Leer») + Escuchar y Completar
+//   hasta los 20; sin «Ordenar» (no hay banco revisado para esos niveles). El texto va PLANO
+//   mientras se responde (es un examen) y al responder se vuelve tocable, con pinyin y
+//   traducción (window.LQ_TEXT de lessons-graduated.js). El historial suma rd: [{ id, s, n }].
+//   Rota los textos: sale primero el que hace más tiempo que no aparece.
 // Es PRÁCTICA, no un examen oficial: no copia ítems de exámenes reales ni
 // predice un puntaje. Misma piel que las lecciones (.lq-pop) y los mismos
 // criterios de escritura/voz por familia (scriptFor / voiceZhFor).
@@ -35,12 +41,14 @@
     const LEVELS = [
         { k: 'TOCFL-Prep', name: 'TOCFL Prep', pick: l => l.exam === 'TOCFL' && l.examLvl === 'Prep' },
         { k: 'TOCFL-A1', name: 'TOCFL A1', pick: l => l.exam === 'TOCFL' && l.examLvl === 'A1' },
-        { k: 'HSK1', name: 'HSK 1', pick: l => !l.exam && l.hsk === 1 }
+        { k: 'HSK1', name: 'HSK 1', pick: l => !l.exam && l.hsk === 1 },
+        { k: 'HSK3', name: 'HSK 3', pick: l => !l.exam && l.hsk === 3, reads: 3 },
+        { k: 'HSK5', name: 'HSK 5', pick: l => !l.exam && l.hsk === 5, reads: 5 }
     ];
     const levelOf = (k) => LEVELS.find(x => x.k === k);
-    const SECTIONS = { listen: '🎧 Escuchar', dialogue: '🎧 Diálogo', cloze: '📖 Completar', reading: '📖 Lectura', order: '🧩 Ordenar' };
+    const SECTIONS = { listen: '🎧 Escuchar', dialogue: '🎧 Diálogo', cloze: '📖 Completar', reading: '📖 Lectura', rtext: '📖 Texto', order: '🧩 Ordenar' };
     // el resultado agrupa en 3 partes (y el historial guarda l / c / o)
-    const GROUP = { listen: 'l', dialogue: 'l', cloze: 'c', reading: 'c', order: 'o' };
+    const GROUP = { listen: 'l', dialogue: 'l', cloze: 'c', reading: 'c', rtext: 'c', order: 'o' };
     const GROUP_NAME = { l: '🎧 Escuchar', c: '📖 Leer', o: '🧩 Ordenar' };
     // la voz B de un diálogo es la del otro género en la misma familia
     const OPP_VOICE = { f: 'm', m: 'f', 'tw-f': 'tw-m', 'tw-m': 'tw-f', f2: 'm2', m2: 'f2' };
@@ -161,10 +169,48 @@
             type: 'reading', id: r.id, zh: zhPick(r, trad), es: r.es, q: r.q.es, opts: choices(r.q)
         }));
     }
+    // ── lecturas con varias preguntas (R9) ──
+    const readingsOf = (k) => {
+        const h = (levelOf(k) || {}).reads;
+        return h ? (window.READINGS || []).filter(r => r && r.kind === 'reading' && r.hsk === h && Array.isArray(r.questions) && r.questions.length && Array.isArray(r.lines)) : [];
+    };
+    // rota: sale el texto que hace más tiempo que no aparece (los que nunca salieron, primero)
+    function pickReading(k) {
+        const rs = readingsOf(k);
+        if (!rs.length) return null;
+        const hist = Array.isArray(readDB()[k]) ? readDB()[k] : [];
+        const recent = hist.map(r => (r.rd && r.rd[0]) ? r.rd[0].id : null);
+        const age = (r) => recent.lastIndexOf(r.id); // -1 = nunca; más alto = más reciente
+        const min = Math.min.apply(null, rs.map(age));
+        return shuf(rs.filter(r => age(r) === min))[0];
+    }
+    function genRText(r, trad) {
+        const pk = (a, aT) => (trad && aT) ? aT : a;
+        return r.questions.map((q, qi) => {
+            const zhQ = !!q.qZh; // desde HSK 5 la pregunta va en chino
+            return {
+                type: 'rtext', rid: r.id, qi: qi, rd: r, trad: trad,
+                q: q.es, qzh: zhQ ? pk(q.qZh, q.qZhT) : '', why: pk(q.why, q.whyT),
+                opts: shuf(q.opts.map((t, i) => ({
+                    es: t, zh: zhQ ? pk(q.optsZh[i], (q.optsZhT || [])[i]) : '', ok: i === 0 ? 1 : 0,
+                    whyNot: i ? pk((q.whyNot || [])[i - 1], (q.whyNotT || [])[i - 1]) : ''
+                })))
+            };
+        });
+    }
     function buildSession(k) {
         const P = poolOf(k);
         const trad = P.ref ? scriptFor(P.ref) === 'trad' : false;
         const B = bankOf(k);
+        const R = B ? null : pickReading(k);
+        if (R) {
+            const texto = genRText(R, trad);
+            const rest = 20 - texto.length, used = new Set();
+            const listen = genListen(P, trad, Math.ceil(rest * 0.45), used);
+            listen.forEach(i => used.add(i.es));
+            const cloze = genCloze(P, trad, rest - listen.length, used);
+            return { k, P, trad, rd: R, items: listen.concat(cloze, texto) };
+        }
         if (B) {
             const used = new Set();
             const written = shuf(B.orders).map(o => makeOrder(zhPick(o, trad), o.es, 3, 9)).filter(Boolean);
@@ -201,6 +247,7 @@
     }
     function stopAudio() {
         tok++;
+        if (window.LQ_TEXT) { try { window.LQ_TEXT.stop(); } catch (e) { /* noop */ } }
         if (au) { try { au.pause(); } catch (e) { /* noop */ } au = null; }
         try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* noop */ }
         ttsU = null;
@@ -311,10 +358,12 @@
                 const info = (typeof TOCFL_INFO !== 'undefined' && TOCFL_INFO[lv.k]) ? ' ' + TOCFL_INFO[lv.k].zh : '';
                 const words = (typeof EMBEDDED_MODULE_DATA !== 'undefined' && EMBEDDED_MODULE_DATA[lv.k] || []).length;
                 return '<button type="button" class="ex-lv" data-k="' + lv.k + '"><span><span class="t">' + esc(lv.name) +
-                    '<span lang="zh">' + esc(info) + '</span></span><span class="d">' + words + ' palabras · ' + P.ls.length + ' lecciones</span></span>' +
+                    '<span lang="zh">' + esc(info) + '</span></span><span class="d">' + words + ' palabras · ' + P.ls.length + ' lecciones' + (readingsOf(lv.k).length ? ' · lecturas' : '') + '</span></span>' +
                     '<span class="last">' + (last ? 'Último ' + last.s + '/' + last.n : '—') + '</span></button>';
             }).join('') +
-            '<p class="ex-note">Los ítems se arman con las lecciones y el vocabulario de cada nivel.</p>');
+            '<p class="ex-note">Los ítems se arman con las lecciones y el vocabulario de cada nivel.</p>' +
+            (LEVELS.some(lv => readingsOf(lv.k).length)
+                ? '<p class="ex-note">En los niveles con «lecturas» la tanda trae un texto con varias preguntas (nivel aproximado) y, por ahora, no trae «Ordenar».</p>' : ''));
     }
 
     async function startSession(k, items) {
@@ -361,6 +410,22 @@
                     '<button type="button" class="lq-opt" data-i="' + i + '"><span class="lq-opt-letter">' + 'ABC'[i] +
                     '</span><span class="ex-opt-es">' + esc(o.es) + '</span></button>').join('') + '</div>' +
                 '<div id="ex-fb" class="ex-fbwrap" aria-live="polite"></div>');
+        } else if (it.type === 'rtext') {
+            const zhQ = !!it.qzh;
+            shell(num, S.res, head +
+                '<details class="rd-text"' + (S.rTextOpen === false ? '' : ' open') + '><summary>📄 Texto</summary>' +
+                '<div class="lq-lines rd-lines rd-plain" id="ex-rtext" lang="zh">' + it.rd.lines.map(l => '<p>' + esc(it.trad ? (l.zhT || l.zh) : l.zh) + '</p>').join('') + '</div></details>' +
+                '<div class="rd-q">' + (zhQ
+                    ? '<div class="rd-q-zh" lang="zh">' + esc(it.qzh) + '</div><div class="rd-q-es hidden" id="rd-q-es">' + esc(it.q) + '</div>' +
+                      '<button type="button" class="lq-btn lq-ghost lq-mini" id="ex-rd-es">🇪🇸 Ver en español</button>'
+                    : '<div class="rd-q-es" id="rd-q-es">' + esc(it.q) + '</div>') +
+                '<div class="lq-opts rd-opts" id="ex-opts">' + it.opts.map((o, i) =>
+                    '<button type="button" class="lq-opt rd-opt" data-i="' + i + '"><span class="lq-opt-letter">' + 'ABCD'[i] + '</span><span class="rd-opt-body">' + (zhQ
+                        ? '<span class="rd-opt-zh" lang="zh">' + esc(o.zh) + '</span><span class="rd-opt-es hidden">' + esc(o.es) + '</span>'
+                        : '<span class="rd-opt-es">' + esc(o.es) + '</span>') + '</span></button>').join('') + '</div>' +
+                '<div id="ex-fb" class="ex-fbwrap" aria-live="polite"></div></div>');
+            const det = body.querySelector('.rd-text');
+            if (det) det.addEventListener('toggle', (e) => { S.rTextOpen = e.target.open; });
         } else if (it.type === 'cloze') {
             const parts = it.zh.split('___');
             shell(num, S.res, head +
@@ -416,6 +481,24 @@
                     '<span class="ex-fb-zh" lang="zh">' + esc(l.zh) + '</span>' + (py ? '<span class="py">' + esc(py) + '</span>' : '') +
                     '<span class="es">' + esc(l.es) + '</span></div></div>';
             }).join('') + '</div>');
+            return;
+        }
+        if (it.type === 'rtext') {
+            // tras responder: todo en español, explicación y el texto pasa a ser tocable (pinyin + traducción)
+            document.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.remove('hidden'));
+            const eb = $('ex-rd-es'); if (eb) eb.classList.add('hidden');
+            const chosen = it.opts[i];
+            finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '">' +
+                (ok ? '' : '<span class="es"><b>Tu respuesta:</b> ' + esc(chosen.whyNot) + '</span>') +
+                '<span class="es">' + (ok ? '' : '<b>La correcta (' + 'ABCD'[right] + '):</b> ') + esc(it.why) + '</span></div>');
+            const box = $('ex-rtext');
+            if (box && window.LQ_TEXT) {
+                box.classList.remove('rd-plain');
+                box.removeAttribute('lang');
+                box.innerHTML = window.LQ_TEXT.linesHtml(it.rd, true);
+                window.LQ_TEXT.bind(box);
+                window.LQ_TEXT.showPinyin(box, S.P.ref);
+            }
             return;
         }
         if (it.type === 'reading') {
@@ -481,7 +564,10 @@
         const sec = { l: [0, 0], c: [0, 0], o: [0, 0] };
         S.items.forEach((it, i) => { const g = GROUP[it.type]; sec[g][1]++; if (S.res[i] === 1) sec[g][0]++; });
         const wrong = S.items.filter((it, i) => S.res[i] !== 1);
-        if (!S.retry) pushResult(S.k, { t: Date.now(), s: score, n: total, sec: { l: sec.l, c: sec.c, o: sec.o } });
+        const rec = { t: Date.now(), s: score, n: total, sec: { l: sec.l, c: sec.c, o: sec.o } };
+        const rq = S.items.map((it, i) => ({ it, ok: S.res[i] === 1 })).filter(x => x.it.type === 'rtext');
+        if (rq.length) rec.rd = [{ id: rq[0].it.rid, s: rq.filter(x => x.ok).length, n: rq.length }]; // R9: la lectura de la tanda
+        if (!S.retry) pushResult(S.k, rec);
         const pct = score / total;
         const msg = pct >= 0.85 ? '¡Muy bien! Este nivel ya te resulta familiar.'
             : pct >= 0.6 ? 'Buen avance. Repasá los errores y probá otra tanda.'
@@ -534,6 +620,12 @@
             const t = e.target;
             const lv = t.closest('.ex-lv');
             if (lv) { startSession(lv.dataset.k); return; }
+            if (t.closest('#ex-rd-es') && S) {
+                const hid = $('rd-q-es').classList.contains('hidden');
+                document.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.toggle('hidden', !hid));
+                $('ex-rd-es').textContent = hid ? '🇨🇳 Ocultar el español' : '🇪🇸 Ver en español';
+                return;
+            }
             if (t.closest('#ex-play')) {
                 if (S) {
                     const cur = S.items[S.idx];
@@ -556,7 +648,10 @@
             if (t.closest('#ex-levels')) { renderEntry(); return; }
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !pop.classList.contains('hidden')) { e.stopImmediatePropagation(); close(); }
+            if (e.key === 'Escape' && !pop.classList.contains('hidden')) {
+                if (typeof topLayerOpen === 'function' && topLayerOpen()) return; // una ficha de palabra encima: esa cierra primero
+                e.stopImmediatePropagation(); close();
+            }
         }, true);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
