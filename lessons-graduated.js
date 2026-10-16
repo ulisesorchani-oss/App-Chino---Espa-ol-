@@ -870,6 +870,22 @@
     else boot();
 
     // API de solo lectura para pruebas E2E
+    // R9: la práctica tipo examen (exam-practice.js) muestra el texto plano mientras se responde y, al
+    // responder, lo vuelve tocable con pinyin y traducción usando estas mismas piezas (sin duplicarlas).
+    window.LQ_TEXT = {
+        linesHtml: (l, withEs) => linesHtml(l, withEs),   // l = { lines:[{ zh, zhT, es, who? }] }
+        bind: (root) => bindLines(root),                  // ficha de palabra al tocar + 🔊 por línea
+        showPinyin: (root, ref) => {                      // rellena y muestra el pinyin generado de cada línea
+            root.querySelectorAll('.lq-line-py, .lq-who-py').forEach(el => {
+                if (!el.textContent) {
+                    try { el.textContent = (typeof pinyinFor === 'function') ? pinyinFor(el.dataset.zh, ref)
+                        : ((typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(el.dataset.zh) : ''); } catch (e) { /* sin pinyin */ }
+                }
+                el.classList.remove('hidden');
+            });
+        },
+        stop: () => stopSpeak()
+    };
     // R8: la lista «Lecturas tipo examen» (readings-ui.js, pestaña Exámenes) abre el visor y lee el progreso
     window.LQ_READING = {
         open(id, mode) {
