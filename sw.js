@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v189'; // — «Ordenar» con banco revisado: fichas a mano, órdenes aceptados y baraja guardada (fix/ordenar-banco). v188: HSK 3 y HSK 5 con texto de varias preguntas
+const VERSION = 'v190'; // — HSK 1: «这杯茶很热» reemplaza «这杯茶很好喝» (好喝 no está en la lista HSK 1). v189: «Ordenar» con banco revisado
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
