@@ -50,6 +50,18 @@
     const saveLB = () => { try { localStorage.setItem(LKEY, JSON.stringify(LB)); } catch (e) { } };
     const progOf = (id) => LB[id] || {};
 
+    // ── LECTURAS tipo examen (window.READINGS, readings-*.js) ──
+    // Mismo visor que las lecciones (texto tocable, glosario, audio, karaoke) +
+    // preguntas de comprensión con el texto a la vista. Progreso aparte
+    // ('ac_reading_v1'): comprensión no se mezcla con los huecos de ac_lessons_v1.
+    const RKEY = 'ac_reading_v1';
+    let RB = {};
+    try { RB = JSON.parse(localStorage.getItem(RKEY) || '{}') || {}; } catch (e) { RB = {}; }
+    const saveRB = () => { try { localStorage.setItem(RKEY, JSON.stringify(RB)); } catch (e) { } };
+    const READS = () => (Array.isArray(window.READINGS) ? window.READINGS : []);
+    const isRd = (l) => !!l && l.kind === 'reading';
+    const nPractice = (l) => isRd(l) ? l.questions.length : l.quiz.length;
+
     // ── estado de la sesión abierta ──
     const S = { lesson: null, view: null, idx: 0, results: [], answered: false, pinyin: false };
     // v9.1: traducción OCULTA por defecto (lector y práctica) — el alumno elige
@@ -291,7 +303,7 @@
     // el valor guardado ('tocfl:C1') y el examLvl de los datos no cambian.
     const TOCFL_LABEL = { C1: 'C' };
     const tocflLvlLabel = (v) => TOCFL_LABEL[v] || v;
-    const lessonTag = (l) => l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
+    const lessonTag = (l) => isRd(l) ? 'Lectura · HSK ' + l.hsk + ' (aprox.)' : l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
     function buildTocflOptions() {
         const sel = $('sel-lv-tocfl');
         if (!sel) return;
@@ -374,6 +386,7 @@
         S.lesson = null; S.view = null;
         window.acScriptRef = null; // v9.7x: vuelve el contexto de Hoy
         renderList(); // refresca el mejor puntaje
+        document.dispatchEvent(new Event('ac-reading-change')); // la lista de Exámenes refresca su puntaje
     }
     function bindPop() {
         $('lq-close').addEventListener('click', closePop);
@@ -417,37 +430,9 @@
         if (cont) cont.addEventListener('click', () => renderStory(l));
     }
 
-    // ── vista LECTURA ──
-    function openStory(l) {
-        S.lesson = l; S.view = 'story'; S.pinyin = false;
-        window.acScriptRef = l; // v9.7x: ck() = escritura de ESTA lección (scriptFor) mientras está abierta
-        openPop();
-        progNum.textContent = '📖';
-        segs.innerHTML = '';
-        // v9.70: marca la última lección ABIERTA (no solo completada, como LB) —
-        // la usa podcast.js para preseleccionar "seguir con lo último que viste".
-        // Storage propio, de solo lectura para quien la consulta: no es progreso,
-        // no toca LB/ac_lessons_v1 ni state.
-        try { localStorage.setItem('ac_last_lesson_id', l.id); } catch (e) { /* sin storage: podcast.js no preselecciona nada */ }
-        // v9.7x: minLevel = l.hsk → descarta candidatas más básicas que el
-        // nivel de la propia lección (ej. 他/一/工 en una lección HSK6), ver
-        // hskLevelOf/extractKeyWords en dict.js.
-        // v9.7x: si la lección trae keywords, el glosario las usa TAL CUAL (sin
-        // diccionario ni corte de palabras), en la escritura elegida y con la
-        // glosa escrita para esa lección; py solo para excepciones.
-        const keyWords = (Array.isArray(l.keywords) && l.keywords.length)
-            ? l.keywords.map(kw => ({ zh: zhKey() === 'trad' ? (kw.zhT || kw.zh) : kw.zh, zhS: kw.zh, pyFix: kw.py || '', es: kw.es }))
-            : (typeof extractKeyWords === 'function')
-                ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
-                : [];
-        // v9.7x: el glosario muestra pinyin generado con la misma función que el texto → espera la tabla TOCFL
-        pyReady(l).then(() => {
-            if (S.lesson !== l || S.view !== 'story') return; // se cerró o se cambió de lección mientras cargaba
-            if (keyWords.length >= 3) renderGlossary(l, keyWords);
-            else renderStory(l);
-        });
-    }
-    function renderStory(l) {
+    // R8: líneas del texto (tocables, con 🔊, pinyin y traducción ocultos) — las usan la lectura de
+    // lecciones, la de lecturas y el texto que queda a la vista al responder.
+    function linesHtml(l, withEs) {
         const k = zhKey();
         // v9.7x: hablantes (who/whoT opcionales) — etiqueta chica arriba de la
         // línea, FUERA de .lq-line-zh: no entra en el karaoke, ni en el audio,
@@ -468,8 +453,57 @@
                 '<div class="lq-line-zh">' + zhCharsHtml(zh) + '</div>' +
                 '<button type="button" class="lq-line-say" data-zh="' + escHtml(zh) + '" aria-label="Escuchar la línea">🔊</button>' +
                 '<div class="lq-line-py hidden" data-zh="' + escHtml(ln.zh) + '"></div>' +
-                '<div class="lq-line-es' + (verEs ? '' : ' hidden') + '">' + escHtml(ln.es) + '</div></div>';
+                '<div class="lq-line-es' + (withEs ? '' : ' hidden') + '">' + escHtml(ln.es) + '</div></div>';
         }).join('');
+        return lines;
+    }
+    // clic en un carácter (ficha de palabra) o en 🔊 (audio de la línea); S.lesson fija voz y pinyin
+    function bindLines(root) {
+        root.addEventListener('click', (e) => {
+            // v9.11: SOLO el botón 🔊 de la línea reproduce audio — tocar el
+            // panel de la oración ya NO dispara lectura (pedido del usuario).
+            // Los caracteres tocados siguen abriendo su ficha en el popup.
+            const say = e.target.closest('.lq-line-say');
+            if (say) { speakZh(say.dataset.zh, say); return; }
+            const chEl = e.target.closest('.lq-ch');
+            if (chEl && typeof showVocabPop === 'function') { showVocabPop(lqWordAt(chEl) || chEl.dataset.ch); }
+        });
+    }
+
+    // ── vista LECTURA ──
+    function openStory(l) {
+        S.lesson = l; S.view = 'story'; S.pinyin = false;
+        window.acScriptRef = l; // v9.7x: ck() = escritura de ESTA lección (scriptFor) mientras está abierta
+        openPop();
+        progNum.textContent = '📖';
+        segs.innerHTML = '';
+        // v9.70: marca la última lección ABIERTA (no solo completada, como LB) —
+        // la usa podcast.js para preseleccionar "seguir con lo último que viste".
+        // Storage propio, de solo lectura para quien la consulta: no es progreso,
+        // no toca LB/ac_lessons_v1 ni state.
+        // R8: las lecturas no son lecciones del podcast: no pisan el marcador
+        if (!isRd(l)) { try { localStorage.setItem('ac_last_lesson_id', l.id); } catch (e) { /* sin storage: podcast.js no preselecciona nada */ } }
+        // v9.7x: minLevel = l.hsk → descarta candidatas más básicas que el
+        // nivel de la propia lección (ej. 他/一/工 en una lección HSK6), ver
+        // hskLevelOf/extractKeyWords en dict.js.
+        // v9.7x: si la lección trae keywords, el glosario las usa TAL CUAL (sin
+        // diccionario ni corte de palabras), en la escritura elegida y con la
+        // glosa escrita para esa lección; py solo para excepciones.
+        const keyWords = (Array.isArray(l.keywords) && l.keywords.length)
+            ? l.keywords.map(kw => ({ zh: zhKey() === 'trad' ? (kw.zhT || kw.zh) : kw.zh, zhS: kw.zh, pyFix: kw.py || '', es: kw.es }))
+            : (typeof extractKeyWords === 'function')
+                ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
+                : [];
+        // v9.7x: el glosario muestra pinyin generado con la misma función que el texto → espera la tabla TOCFL
+        pyReady(l).then(() => {
+            if (S.lesson !== l || S.view !== 'story') return; // se cerró o se cambió de lección mientras cargaba
+            if (keyWords.length >= 3) renderGlossary(l, keyWords);
+            else renderStory(l);
+        });
+    }
+    function renderStory(l) {
+        const k = zhKey();
+        const lines = linesHtml(l, verEs);
         body.innerHTML =
             '<div class="lq-story-head"><span class="lq-story-emoji">' + l.emoji + '</span>' +
             '<div><div class="lq-story-zh">' + escHtml(k === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</div>' +
@@ -481,7 +515,9 @@
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-pinyin">🔤 Pinyin: OFF</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-speed">⚡ …</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="lq-story-kara">✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF') + '</button>' +
-            '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">🎯 Practicar ' + l.quiz.length + '</button>' +
+            '<button type="button" class="lq-btn lq-primary" id="lq-story-practice">' + (isRd(l)
+                ? '🎯 Responder ' + l.questions.length + ' pregunta' + (l.questions.length === 1 ? '' : 's')
+                : '🎯 Practicar ' + l.quiz.length) + '</button>' +
             '</div>';
         bindSpeedChip(body.querySelector('#lq-story-speed'));
         body.querySelector('#lq-story-kara').addEventListener('click', (e) => {
@@ -492,7 +528,7 @@
             if (!v) KARA.stop();
             e.target.textContent = '✨ Karaoke: ' + (v ? 'ON' : 'OFF');
         });
-        body.querySelector('#lq-story-practice').addEventListener('click', () => openQuiz(l));
+        body.querySelector('#lq-story-practice').addEventListener('click', () => (isRd(l) ? openReadingQuiz(l) : openQuiz(l)));
         body.querySelector('#lq-story-es').addEventListener('click', (e) => {
             setVerEs(!verEs);
             e.target.textContent = '🇪🇸 Español: ' + (verEs ? 'ON' : 'OFF');
@@ -506,15 +542,7 @@
                 el.classList.toggle('hidden', !S.pinyin);
             }));
         });
-        body.querySelector('.lq-lines').addEventListener('click', (e) => {
-            // v9.11: SOLO el botón 🔊 de la línea reproduce audio — tocar el
-            // panel de la oración ya NO dispara lectura (pedido del usuario).
-            // Los caracteres tocados siguen abriendo su ficha en el popup.
-            const say = e.target.closest('.lq-line-say');
-            if (say) { speakZh(say.dataset.zh, say); return; }
-            const chEl = e.target.closest('.lq-ch');
-            if (chEl && typeof showVocabPop === 'function') { showVocabPop(lqWordAt(chEl) || chEl.dataset.ch); }
-        });
+        bindLines(body.querySelector('.lq-lines'));
     }
     // ── vista PRÁCTICA ──
     function openQuiz(l) {
@@ -680,6 +708,154 @@
         body.querySelector('#lq-final-close').addEventListener('click', closePop);
     }
 
+
+    // ═══════════════════════════════════════════════════════════════
+    // R8 — LECTURAS tipo examen: preguntas de comprensión con el texto a la vista
+    // -------------------------------------------------------------------
+    // Reusa el visor de lecciones (linesHtml/bindLines: texto tocable, 🔊, pinyin) y el
+    // mismo overlay. HSK 3: pregunta y opciones en español. Desde HSK 5: en chino, con
+    // «Ver en español» (pregunta + opciones) y la traducción completa tras responder.
+    // Datos: window.READINGS (readings-*.js; opts[0] = correcta). Progreso: 'ac_reading_v1'.
+    // Comprensión no toca el SRS ni las palabras aprendidas (solo mide lectura).
+    // ═══════════════════════════════════════════════════════════════
+    const RD_TYPE = { detalle: 'Detalle', idea: 'Idea principal', inferencia: 'Inferencia', vocabulario: 'Vocabulario' };
+    const rprog = (id) => RB[id] || {};
+    function permOf(n) {
+        const d = Array.from({ length: n }, (_, i) => i);
+        for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+        return d;
+    }
+    function openReadingQuiz(l) {
+        S.lesson = l; S.view = 'rquiz'; S.idx = 0; S.picks = [];
+        S.results = new Array(l.questions.length).fill(null);
+        S.order = l.questions.map(q => permOf(q.opts.length)); // la correcta (índice 0) cambia de lugar en cada sesión
+        S.pinyin = false; S.rTextOpen = true;
+        window.acScriptRef = l;
+        openPop();
+        renderReadingQ();
+    }
+    function renderReadingQ() {
+        const l = S.lesson, q = l.questions[S.idx], ord = S.order[S.idx], k = zhKey(), n = l.questions.length;
+        const zhQ = !!q.qZh; // desde HSK 5 la pregunta va en chino
+        S.answered = false;
+        progNum.textContent = (S.idx + 1) + '/' + n;
+        renderSegments();
+        const pick = (a, aT) => (k === 'trad' && aT) ? aT : a;
+        const optHtml = ord.map((di, pos) =>
+            '<button type="button" class="lq-opt rd-opt" data-pos="' + pos + '"><span class="lq-opt-letter">' + 'ABCD'[pos] + '</span>' +
+            '<span class="rd-opt-body">' + (zhQ
+                ? '<span class="rd-opt-zh" lang="zh">' + escHtml(pick(q.optsZh[di], (q.optsZhT || [])[di])) + '</span><span class="rd-opt-es hidden">' + escHtml(q.opts[di]) + '</span>'
+                : '<span class="rd-opt-es">' + escHtml(q.opts[di]) + '</span>') +
+            '</span></button>').join('');
+        body.innerHTML =
+            '<div class="lq-tag-row"><div class="lq-lesson-tag">' + l.emoji + ' ' + escHtml(l.titleEs) + '</div>' +
+            '<span class="rd-approx">' + escHtml(lessonTag(l)) + ' · no oficial</span></div>' +
+            '<details class="rd-text"' + (S.rTextOpen === false ? '' : ' open') + '><summary>📄 Texto <span lang="zh">' +
+            escHtml(pick(l.titleZh, l.titleZhT)) + '</span></summary>' +
+            '<div class="lq-lines rd-lines">' + linesHtml(l, false) + '</div>' +
+            '<div class="rd-text-tools"><button type="button" class="lq-btn lq-ghost lq-mini" id="rd-py">🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF') + '</button></div></details>' +
+            '<div class="rd-q"><div class="rd-q-meta">Pregunta ' + (S.idx + 1) + ' de ' + n + ' · ' + escHtml(RD_TYPE[q.type] || q.type) + '</div>' +
+            (zhQ
+                ? '<div class="rd-q-zh" lang="zh">' + zhCharsHtml(pick(q.qZh, q.qZhT)) + '</div>' +
+                  '<div class="rd-q-es hidden" id="rd-q-es">' + escHtml(q.es) + '</div>' +
+                  '<button type="button" class="lq-btn lq-ghost lq-mini" id="rd-es">🇪🇸 Ver en español</button>'
+                : '<div class="rd-q-es" id="rd-q-es">' + escHtml(q.es) + '</div>') +
+            '<div class="lq-opts rd-opts" id="lq-opts">' + optHtml + '</div>' +
+            '<div class="lq-feedback hidden" id="lq-feedback"></div>' +
+            '<div class="lq-foot"><button type="button" class="lq-btn lq-primary hidden" id="lq-next">' +
+            (S.idx === n - 1 ? 'Ver resultado 🏁' : 'Siguiente ▶') + '</button></div></div>';
+        bindLines(body.querySelector('.rd-lines'));
+        body.querySelector('.rd-text').addEventListener('toggle', (e) => { S.rTextOpen = e.target.open; });
+        const applyPy = () => pyReady(l).then(() => body.querySelectorAll('.rd-lines .lq-line-py').forEach(el => {
+            if (S.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
+            el.classList.toggle('hidden', !S.pinyin);
+        }));
+        if (S.pinyin) applyPy();
+        body.querySelector('#rd-py').addEventListener('click', (e) => {
+            S.pinyin = !S.pinyin;
+            e.target.textContent = '🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF');
+            applyPy();
+        });
+        const esBtn = body.querySelector('#rd-es');
+        const showEs = (on) => body.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.toggle('hidden', !on));
+        if (esBtn) esBtn.addEventListener('click', () => {
+            const on = body.querySelector('#rd-q-es').classList.contains('hidden');
+            showEs(on);
+            esBtn.textContent = on ? '🇨🇳 Ocultar el español' : '🇪🇸 Ver en español';
+        });
+        const qz = body.querySelector('.rd-q-zh');
+        if (qz) qz.addEventListener('click', (e) => {
+            const chEl = e.target.closest('.lq-ch');
+            if (chEl && typeof showVocabPop === 'function') showVocabPop(chEl.dataset.ch);
+        });
+        body.querySelector('#lq-opts').addEventListener('click', (e) => {
+            const b = e.target.closest('.lq-opt');
+            if (b && !S.answered) answerReading(+b.dataset.pos);
+        });
+        body.querySelector('#lq-next').addEventListener('click', nextReading);
+    }
+    function answerReading(pos) {
+        const l = S.lesson, q = l.questions[S.idx], ord = S.order[S.idx], k = zhKey();
+        S.answered = true;
+        const di = ord[pos], ok = di === 0;
+        S.results[S.idx] = ok; S.picks[S.idx] = di;
+        renderSegments();
+        body.querySelectorAll('.lq-opt').forEach((b, bi) => {
+            b.disabled = true;
+            if (bi === ord.indexOf(0)) b.classList.add('is-right');
+            else if (bi === pos) b.classList.add('is-wrong');
+        });
+        // tras responder se ve todo en español (la pregunta y cada opción)
+        body.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.remove('hidden'));
+        const esBtn = body.querySelector('#rd-es');
+        if (esBtn) esBtn.classList.add('hidden');
+        const tr = (a, aT) => (k === 'trad' && aT) ? aT : a;
+        const why = tr(q.why, q.whyT);
+        const whyNot = di > 0 ? tr((q.whyNot || [])[di - 1], (q.whyNotT || [])[di - 1]) : '';
+        const fb = ok
+            ? '<div class="lq-verdict ok">✓ ¡Correcto!</div><p class="rd-why">' + escHtml(why) + '</p>'
+            : '<div class="lq-verdict bad">✗ No es esa</div>' +
+              '<p class="rd-why rd-why-bad"><b>Tu respuesta:</b> ' + escHtml(whyNot) + '</p>' +
+              '<p class="rd-why"><b>La correcta (' + 'ABCD'[ord.indexOf(0)] + '):</b> ' + escHtml(why) + '</p>';
+        const fbel = body.querySelector('#lq-feedback');
+        fbel.innerHTML = fb;
+        fbel.classList.remove('hidden');
+        const nx = body.querySelector('#lq-next');
+        nx.classList.remove('hidden');
+        try { nx.scrollIntoView({ block: 'nearest' }); } catch (e) { }
+    }
+    function nextReading() {
+        const l = S.lesson, n = l.questions.length;
+        if (S.idx < n - 1) { S.idx++; renderReadingQ(); return; }
+        const score = S.results.filter(Boolean).length;
+        const prev = rprog(l.id);
+        RB[l.id] = { best: Math.max(prev.best || 0, score), of: n, done: true, last: localDay(), tries: (prev.tries || 0) + 1, qs: S.results.map(Boolean) };
+        saveRB();
+        progNum.textContent = '🏁'; segs.innerHTML = '';
+        const by = {};
+        l.questions.forEach((q, i) => { const t = by[q.type] || (by[q.type] = { ok: 0, n: 0 }); t.n++; if (S.results[i]) t.ok++; });
+        const breakdown = Object.keys(by).map(t => '<li><span>' + escHtml(RD_TYPE[t] || t) + '</span><b>' + by[t].ok + '/' + by[t].n + '</b></li>').join('');
+        const msg = score === n ? '¡Perfecto! Entendiste todo el texto.' : score / n >= 0.66 ? '¡Muy bien! Entendiste lo esencial.' : 'Releé el texto con calma y probá de nuevo.';
+        const others = READS().filter(x => x.id !== l.id);
+        const next = others.find(x => x.hsk === l.hsk && !rprog(x.id).done) || others.find(x => !rprog(x.id).done) || others[0];
+        body.innerHTML =
+            '<div class="lq-final"><div class="lq-final-emoji">' + l.emoji + '</div>' +
+            '<div class="lq-final-score">' + score + '/' + n + '</div>' +
+            '<div class="lq-final-msg">' + msg + '</div>' +
+            '<ul class="rd-breakdown">' + breakdown + '</ul>' +
+            '<div class="lq-final-actions">' +
+            '<button type="button" class="lq-btn lq-ghost" id="rd-final-read">📖 Releer el texto</button>' +
+            '<button type="button" class="lq-btn lq-ghost" id="rd-final-retry">🔁 Repetir las preguntas</button>' +
+            (next ? '<button type="button" class="lq-btn lq-ghost" id="rd-final-next">➡️ Otro texto</button>' : '') +
+            '<button type="button" class="lq-btn lq-primary" id="lq-final-close">Seguir ✕</button>' +
+            '</div></div>';
+        body.querySelector('#rd-final-read').addEventListener('click', () => openStory(l));
+        body.querySelector('#rd-final-retry').addEventListener('click', () => openReadingQuiz(l));
+        const nb = body.querySelector('#rd-final-next');
+        if (nb) nb.addEventListener('click', () => openStory(next));
+        body.querySelector('#lq-final-close').addEventListener('click', closePop);
+    }
+
     // ── arranque ──
     function boot() {
         buildTocflOptions(); // v9.6b/v9.7x: opciones TOCFL del <select>, desde TOCFL_ORDER
@@ -694,9 +870,19 @@
     else boot();
 
     // API de solo lectura para pruebas E2E
+    // R8: la lista «Lecturas tipo examen» (readings-ui.js, pestaña Exámenes) abre el visor y lee el progreso
+    window.LQ_READING = {
+        open(id, mode) {
+            const l = READS().find(x => x.id === id);
+            if (!l) return false;
+            if (mode === 'quiz') openReadingQuiz(l); else openStory(l);
+            return true;
+        },
+        progress(id) { return rprog(id); }
+    };
     window.LQ_DEBUG = {
         get lessons() { return LESSONS.length; },
         get state() { return { view: S.view, idx: S.idx, answered: S.answered, results: S.results.slice() }; },
-        get rightPos() { return (S.view === 'quiz' && S.order) ? S.order[S.idx].indexOf(0) : -1; }
+        get rightPos() { return ((S.view === 'quiz' || S.view === 'rquiz') && S.order) ? S.order[S.idx].indexOf(0) : -1; }
     };
 })();

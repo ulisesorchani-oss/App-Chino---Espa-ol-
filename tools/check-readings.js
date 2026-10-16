@@ -15,7 +15,7 @@ let pw; for (const m of ['playwright', '/opt/node22/lib/node_modules/playwright'
 if (!pw) { console.error('Falta playwright'); process.exit(2); }
 const ROOT = path.resolve(__dirname, '..');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
-const FILES = (process.argv.slice(2).length ? process.argv.slice(2) : fs.readdirSync(ROOT).filter(f => /^readings-.*\.js$/.test(f)));
+const FILES = (process.argv.slice(2).length ? process.argv.slice(2) : fs.readdirSync(ROOT).filter(f => /^readings-.*\.js$/.test(f) && f !== 'readings-ui.js'));
 const srv = http.createServer((q, s) => {
     const p = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]).replace(/^\/+$/, '/index.html'));
     if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { s.writeHead(404); return s.end(); }
@@ -28,7 +28,8 @@ const srv = http.createServer((q, s) => {
     const b = await pw.chromium.launch(exe ? { executablePath: exe } : {});
     const pg = await b.newPage();
     await pg.goto('http://localhost:' + port + '/index.html'); await pg.waitForTimeout(1800);
-    for (const f of FILES) await pg.addScriptTag({ url: '/' + f });
+    // los datos que index.html ya carga no se vuelven a cargar (ids repetidos)
+    for (const f of FILES) if (!(await pg.$('script[src^="' + f + '"]'))) await pg.addScriptTag({ url: '/' + f });
     const res = await pg.evaluate(() => {
         const HAN = /[㐀-鿿]/, RANGE = { 3: [80, 160, 3], 5: [200, 330, 4] };
         const SIMP = /[们这个来说时为会应对还么开关东车门问间进过现发长]/, TRAD = /[們這個來說時為會應對還麼開關東車門問間進過現發長]/;
