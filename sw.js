@@ -444,7 +444,7 @@
 //        (popup #daily-story-pop) y desde ahí "▶ Practicar frases sueltas"
 //        sigue el flujo de siempre (setModule). Toca app.js (wiring de
 //        #daily-menu), index.html, style.css, sw.js; daily-stories.js NUEVO.
-const VERSION = 'v193'; // — 3 lecciones nuevas de Niños (familia, colores y números, mascotas). v192: pista «Niños» (lessons-ninos.js + ninos-ui.js) en Aprender → Lecciones (aprendo español). v191: lecturas TOCFL B1
+const VERSION = 'v194'; // — tanda 2 de Niños (cumple, kiosco, ropa y tiempo). v193: 3 lecciones nuevas de Niños (familia, colores y números, mascotas). v192: pista «Niños» (lessons-ninos.js + ninos-ui.js) en Aprender → Lecciones (aprendo español). v191: lecturas TOCFL B1
 
 // v9.36: (1) v10 UX integrada — rediseño completo: nav inferior de 4
 //       vistas (Hoy / Aprender / Entrenar / Yo), header reducido con
