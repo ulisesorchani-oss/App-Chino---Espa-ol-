@@ -64,7 +64,7 @@ LES.forEach((l, li) => {
   rows.push({ id: l.id, franja: l.band, unidad: l.unit, líneas: nl, 'palabras habladas': tw, 'máx. por línea': longest, 'nuevas': W.length, 'reciclaje': recycled, escuchar: Ls.length, completar: Q.length, errores: err.length });
   err.forEach(e => { bad++; console.log('✗', l.id, e); }); warn.forEach(w => console.log('⚠', l.id, w));
 });
-if (LES.length !== 6) { bad++; console.log('✗ el piloto son 6 lecciones (hay ' + LES.length + ')'); }
+if (LES.length < 6) { bad++; console.log('✗ el piloto son al menos 6 lecciones (hay ' + LES.length + ')'); }
 const bands = LES.reduce((m, l) => { m[l.band] = (m[l.band] || 0) + 1; return m; }, {}); if (!bands.A || !bands.B) { bad++; console.log('✗ faltan lecciones de una franja ' + JSON.stringify(bands)); }
 console.table(rows);
 console.log(LES.length + ' lecciones · franjas ' + JSON.stringify(bands) + ' · ' + (bad ? bad + ' error(es)' : 'todo en regla'));
