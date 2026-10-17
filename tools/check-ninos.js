@@ -10,6 +10,7 @@
 //   · chino: zh y zhT en todo; sin rasgos tradicionales en zh ni simplificados en zhT
 //   · «Escuchá y tocá»: 4 opciones por ítem de 3 con emoji distintos; opts[0] correcta; las etiquetas son
 //     palabras de las propias lecciones; «Completar»: 5 ítems, un solo ___, 3 opciones, la frase sale de una línea
+//   · orden: sin repetidos y siguiendo las unidades (la unidad no baja al subir el orden)
 //   · originalidad: ninguna línea coincide con una de las mini-dramas DELE que ya existen
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
@@ -65,6 +66,9 @@ LES.forEach((l, li) => {
   err.forEach(e => { bad++; console.log('✗', l.id, e); }); warn.forEach(w => console.log('⚠', l.id, w));
 });
 if (LES.length < 6) { bad++; console.log('✗ el piloto son al menos 6 lecciones (hay ' + LES.length + ')'); }
+const byOrder = LES.slice().sort((a, b) => a.order - b.order);
+if (new Set(LES.map(l => l.order)).size !== LES.length) { bad++; console.log('✗ órdenes repetidos'); }
+byOrder.forEach((l, i) => { if (i && l.unit < byOrder[i - 1].unit) { bad++; console.log('✗ el orden no sigue las unidades: ' + l.id + ' (unidad ' + l.unit + ') va después de ' + byOrder[i - 1].id + ' (unidad ' + byOrder[i - 1].unit + ')'); } });
 const bands = LES.reduce((m, l) => { m[l.band] = (m[l.band] || 0) + 1; return m; }, {}); if (!bands.A || !bands.B) { bad++; console.log('✗ faltan lecciones de una franja ' + JSON.stringify(bands)); }
 console.table(rows);
 console.log(LES.length + ' lecciones · franjas ' + JSON.stringify(bands) + ' · ' + (bad ? bad + ' error(es)' : 'todo en regla'));
