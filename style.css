@@ -6960,3 +6960,28 @@ body.paper-mode .nino-say { background: #f0e6cd; color: #7c2d12; }
 body.paper-mode .nino-blank { background: #f3ead2; color: #7c2d12; border-color: #b45309; }
 body.paper-mode .nino-parent { background: #f7efdd; border-color: #b8a47a; }
 body.paper-mode .nino-fb.try { background: #fdf1cf; }
+
+/* ═══ R13 — «Sonidos del español» (Niños): tarjetas que comparan cada sonido con el pinyin ═══ */
+.nino-extra { padding: 14px; }
+.nino-snd-intro { margin: 4px 0 4px; font-size: 0.95rem; line-height: 1.55; font-weight: 600; color: #334155; }
+.nino-snd { margin: 14px 0 0; padding: 12px; border: 2px solid #c7d2fe; border-radius: 16px; background: #fff; }
+.nino-snd-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.nino-snd-letters { flex: none; min-width: 3.4rem; padding: 6px 8px; border-radius: 12px; background: #eef2ff; border: 2px solid #c7d2fe; font-size: 1.15rem; font-weight: 800; color: #1e1b4b; text-align: center; line-height: 1.2; }
+.nino-snd-titles { flex: 1 1 auto; min-width: 0; }
+.nino-snd-es { font-size: 1.05rem; font-weight: 800; color: #1e293b; line-height: 1.25; }
+.nino-snd-zh { font-size: 0.95rem; font-weight: 700; color: #4338ca; margin-top: 2px; }
+.nino-snd-rule { margin: 0 0 10px; font-size: 0.95rem; line-height: 1.6; color: #334155; }
+.nino-word-like { font-size: 0.8rem; font-weight: 700; color: #475569; text-align: center; line-height: 1.2; }
+.nino-snd-note { margin: 16px 0 4px; font-size: 0.88rem; line-height: 1.55; color: #475569; }
+/* oscuro */
+body.dark-mode .nino-snd { background: #0f172a; border-color: #4338ca; }
+body.dark-mode .nino-snd-letters { background: #1e1b4b; border-color: #4338ca; color: #e0e7ff; }
+body.dark-mode .nino-snd-es { color: #e2e8f0; }
+body.dark-mode .nino-snd-zh { color: #a5b4fc; }
+body.dark-mode .nino-snd-intro, body.dark-mode .nino-snd-rule, body.dark-mode .nino-snd-note, body.dark-mode .nino-word-like { color: #cbd5e1; }
+/* papel */
+body.paper-mode .nino-snd { background: #fffdf6; border-color: #e6dabf; }
+body.paper-mode .nino-snd-letters { background: #f3ead2; border-color: #d8c79c; color: #3d3327; }
+body.paper-mode .nino-snd-es { color: #3d3327; }
+body.paper-mode .nino-snd-zh { color: #7c2d12; }
+body.paper-mode .nino-snd-intro, body.paper-mode .nino-snd-rule, body.paper-mode .nino-snd-note, body.paper-mode .nino-word-like { color: #5a4a30; }

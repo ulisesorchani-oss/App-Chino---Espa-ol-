@@ -11,6 +11,8 @@
 // anuncios, sin micrófono: el audio sale del mismo motor de voz de las mini-dramas (window.DeleLessons.speak),
 // que envía solo el texto de la frase al servidor de voz.
 // Resumen para el adulto (en chino) al final de cada lección. 简/繁 según la escritura elegida.
+// Extra «🔊 Sonidos del español» (window.NINOS_SONIDOS, ninos-sonidos.js): tarjeta al final de la lista; 📖 compara cada
+// letra o sonido con el pinyin (palabras tocables con voz argentina) y 🎮 es un «Escuchá y tocá» de 9 ítems (mismas estrellas).
 // ============================================================
 (function ninosUiInit() {
     'use strict';
@@ -73,6 +75,23 @@
                 '</div>';
             wrap.appendChild(card);
         });
+        const sl = (level === 'all' || level === 'A1') ? soundLesson() : null;
+        if (sl) {
+            const p = progOf(sl.id), card = document.createElement('div');
+            card.className = 'lesson-card nino-extra';
+            card.dataset.id = sl.id;
+            card.innerHTML =
+                '<div class="nino-card-top">' + pic(sl, 'nino-card-emoji') +
+                '<div class="nino-card-titles"><div class="nino-card-es">' + esc(sl.titleEs) + '</div>' +
+                '<div class="nino-card-zh" lang="zh">' + esc(zhOf(sl, 'titleZh')) + '</div></div></div>' +
+                '<p class="lc-blurb nino-card-blurb" lang="zh">' + esc(zhOf(sl, 'blurbZh')) + '</p>' +
+                '<div class="nino-card-stars" aria-label="' + (p.stars || 0) + ' / 3">' + starsOf(p.stars || 0) + '</div>' +
+                '<div class="lc-actions">' +
+                '<button type="button" class="lq-btn nino-go" data-act="read" data-id="' + esc(sl.id) + '">📖 Leer · ' + esc(T('读', '讀')) + '</button>' +
+                '<button type="button" class="lq-btn lq-primary nino-go" data-act="play" data-id="' + esc(sl.id) + '">🎮 Jugar · ' + esc(T('玩', '玩')) + '</button>' +
+                '</div>';
+            wrap.appendChild(card);
+        }
         return list.length;
     }
 
@@ -106,10 +125,23 @@
         S.l = null; S.view = null;
         document.dispatchEvent(new Event('ac-ninos-change')); // refresca estrellas en la lista
     }
-    const lessonById = (id) => LES().find(x => x.id === id);
+    // ── «Sonidos del español»: se presenta como una pieza más (id ni-sonidos) que comparte el juego y las estrellas ──
+    const SND = () => (window.NINOS_SONIDOS && Array.isArray(window.NINOS_SONIDOS.cards) && window.NINOS_SONIDOS.cards.length ? window.NINOS_SONIDOS : null);
+    let sndLesson = null;
+    function soundLesson() {
+        const d = SND(); if (!d) return null;
+        if (!sndLesson) sndLesson = {
+            id: 'ni-sonidos', sounds: true, order: 9999, band: 'A', emoji: d.emoji, art: d.art || null,
+            titleEs: d.titleEs, titleZh: d.titleZh, titleZhT: d.titleZhT, blurbZh: d.blurbZh, blurbZhT: d.blurbZhT,
+            words: d.cards.map(c => ({ sp: c.letters, zh: c.titleZh, zhT: c.titleZhT })), lines: [], listen: d.listen, quiz: []
+        };
+        return sndLesson;
+    }
+    const lessonById = (id) => LES().find(x => x.id === id) || (id === 'ni-sonidos' ? soundLesson() : null);
 
     // ═════════ 1) Leer ═════════
     function openStory(l) {
+        if (l.sounds) return openSounds(l);
         inject();
         stopAudio();
         S.l = l; S.view = 'story';
@@ -134,6 +166,29 @@
             '<div class="nino-foot"><button type="button" class="lq-btn" id="nino-playall">▶️ Escuchar todo</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="nino-zh">🇨🇳 ' + esc(T('中文', '中文')) + ': ' + (showZh ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-primary nino-big" id="nino-play">🎮 Jugar · ' + esc(T('玩游戏', '玩遊戲')) + '</button></div>';
+        body.scrollTop = 0;
+    }
+    function openSounds(l) {
+        const d = SND(); if (!d) return;
+        inject();
+        stopAudio();
+        S.l = l; S.view = 'story';
+        openPop();
+        num.textContent = '🔊'; segs.innerHTML = '';
+        const cards = d.cards.map((c, ci) =>
+            '<section class="nino-snd" data-s="' + ci + '"><div class="nino-snd-head"><span class="nino-snd-letters" translate="no">' + esc(c.letters) + '</span>' +
+            '<div class="nino-snd-titles"><div class="nino-snd-es">' + esc(c.titleEs) + '</div><div class="nino-snd-zh" lang="zh">' + esc(zhOf(c, 'titleZh')) + '</div></div></div>' +
+            '<p class="nino-snd-rule" lang="zh">' + esc(zhOf(c, 'ruleZh')) + '</p>' +
+            '<div class="nino-words">' + c.words.map((w, wi) =>
+                '<button type="button" class="nino-word" data-s="' + ci + '" data-w="' + wi + '" aria-label="' + esc(w.sp) + '">' + pic(w, 'nino-word-pic') +
+                '<span class="nino-word-es">' + esc(w.sp) + '</span><span class="nino-word-zh" lang="zh">' + esc(zhOf(w, 'zh')) + '</span>' +
+                (w.like ? '<span class="nino-word-like" translate="no">≈ ' + esc(w.like) + '</span>' : '') + '</button>').join('') + '</div></section>').join('');
+        body.innerHTML =
+            '<div class="nino-head">' + pic(l, 'nino-head-emoji') + '<div><h2 class="nino-title">' + esc(l.titleEs) + '</h2>' +
+            '<div class="nino-title-zh" lang="zh">' + esc(zhOf(l, 'titleZh')) + '</div></div></div>' +
+            '<p class="nino-snd-intro" lang="zh">' + esc(zhOf(l, 'blurbZh')) + '</p>' + cards +
+            '<p class="nino-snd-note" lang="zh">' + esc(zhOf(d, 'noteZh')) + '</p>' +
+            '<div class="nino-foot"><button type="button" class="lq-btn lq-primary nino-big" id="nino-play">🎮 Jugar · ' + esc(T('玩游戏', '玩遊戲')) + '</button></div>';
         body.scrollTop = 0;
     }
     function markStep(idx) { // gancho de «Escuchar todo»: resalta la línea que suena
@@ -238,14 +293,14 @@
         savePB();
         num.textContent = '🏁'; segs.innerHTML = dots();
         const words = l.words.map(w => esc(w.sp) + '（' + esc(zhOf(w, 'zh')) + '）').join('、');
-        const nextL = LES().find(x => x.order > l.order);
+        const nextL = l.sounds ? null : LES().find(x => x.order > l.order);
         const msg = stars === 3 ? '¡Genial! 🎉' : stars === 2 ? '¡Muy bien! 👏' : '¡Buen intento! 💪';
         body.innerHTML =
             '<div class="nino-end">' + pic(l, 'nino-end-emoji') + '<div class="nino-end-stars" aria-label="' + stars + ' / 3">' + starsOf(stars) + '</div>' +
             '<div class="nino-end-msg">' + msg + '</div><div class="nino-end-score">' + ok + '/' + total + ' <span lang="zh">' + esc(T('一次答对', '一次答對')) + '</span></div></div>' +
             '<div class="nino-parent"><h3 lang="zh">👪 ' + esc(T('家长小结', '家長小結')) + '</h3>' +
             '<p lang="zh">' + esc(T('今天的课：', '今天的課：')) + esc(zhOf(l, 'titleZh')) + '（' + esc(l.titleEs) + '）</p>' +
-            '<p lang="zh">' + esc(T('新词：', '新詞：')) + words + '</p>' +
+            '<p lang="zh">' + esc(l.sounds ? T('学过的发音：', '學過的發音：') : T('新词：', '新詞：')) + words + '</p>' +
             '<p lang="zh">' + esc(T('第一次就答对 ' + ok + ' 题，共 ' + total + ' 题。', '第一次就答對 ' + ok + ' 題，共 ' + total + ' 題。')) + '</p>' +
             '<p lang="zh">' + esc(T('小建议：每天玩 5 分钟，大声跟着读对话，比一次学很久更有效。', '小建議：每天玩 5 分鐘，大聲跟著讀對話，比一次學很久更有效。')) + '</p></div>' +
             '<div class="nino-actions nino-end-actions">' +
@@ -260,6 +315,12 @@
     function onBodyClick(e) {
         const t = e.target, l = S.l;
         if (!l) return;
+        if (S.view === 'story' && l.sounds) {
+            const w = t.closest('.nino-word'), d = SND();
+            if (w && d) { const x = d.cards[+w.dataset.s].words[+w.dataset.w]; if (x) { speak(x.sp, null); w.classList.add('nino-tapped'); setTimeout(() => w.classList.remove('nino-tapped'), 600); } return; }
+            if (t.closest('#nino-play')) openPlay(l);
+            return;
+        }
         if (S.view === 'story') {
             const w = t.closest('.nino-word');
             if (w) { const x = l.words[+w.dataset.w]; if (x) { speak(x.sp, null); w.classList.add('nino-tapped'); setTimeout(() => w.classList.remove('nino-tapped'), 600); } return; }
@@ -321,6 +382,7 @@
     window.NinosUI = {
         count: () => LES().length,
         renderList: renderList,
+        sounds: () => SND(),
         open: (id, mode) => { const l = lessonById(id); if (!l) return false; (mode === 'play' ? openPlay : openStory)(l); return true; },
         progress: progOf,
         state: () => ({ view: S.view, i: S.i, n: S.steps.length, res: S.res.slice(), id: S.l && S.l.id })
