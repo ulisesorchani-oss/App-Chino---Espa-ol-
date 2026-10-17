@@ -11,6 +11,8 @@
 //   · «Escuchá y tocá»: 4 opciones por ítem de 3 con emoji distintos; opts[0] correcta; las etiquetas son
 //     palabras de las propias lecciones; «Completar»: 5 ítems, un solo ___, 3 opciones, la frase sale de una línea
 //   · orden: sin repetidos y siguiendo las unidades (la unidad no baja al subir el orden)
+//   · «Sonidos del español» (ninos-sonidos.js, si existe): esquema, pat (la letra está en cada palabra), 3–5 palabras con emoji
+//     distintos, `like` en pinyin sin tonos, regla en chino ≤120 caracteres, 1 «Escuchá y tocá» por tarjeta, 简/繁 sin mezclar
 //   · originalidad: ninguna línea coincide con una de las mini-dramas DELE que ya existen
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
@@ -70,6 +72,47 @@ const byOrder = LES.slice().sort((a, b) => a.order - b.order);
 if (new Set(LES.map(l => l.order)).size !== LES.length) { bad++; console.log('✗ órdenes repetidos'); }
 byOrder.forEach((l, i) => { if (i && l.unit < byOrder[i - 1].unit) { bad++; console.log('✗ el orden no sigue las unidades: ' + l.id + ' (unidad ' + l.unit + ') va después de ' + byOrder[i - 1].id + ' (unidad ' + byOrder[i - 1].unit + ')'); } });
 const bands = LES.reduce((m, l) => { m[l.band] = (m[l.band] || 0) + 1; return m; }, {}); if (!bands.A || !bands.B) { bad++; console.log('✗ faltan lecciones de una franja ' + JSON.stringify(bands)); }
+// ── «Sonidos del español» (ninos-sonidos.js): se valida si el archivo existe ──
+let nSon = 0;
+const fSon = path.join(ROOT, 'ninos-sonidos.js');
+if (fs.existsSync(fSon)) {
+  const c2 = { window: {} }; vm.createContext(c2); vm.runInContext(fs.readFileSync(fSon, 'utf8'), c2);
+  const SO = c2.window.NINOS_SONIDOS, E2 = m => { bad++; console.log('✗ sonidos: ' + m); };
+  if (!SO || !Array.isArray(SO.cards) || SO.cards.length < 6) E2('faltan tarjetas');
+  else {
+    nSon = SO.cards.length;
+    ['titleEs', 'titleZh', 'titleZhT', 'blurbZh', 'blurbZhT', 'noteZh', 'noteZhT', 'emoji'].forEach(k => { if (!SO[k]) E2('falta ' + k); });
+    const ids = new Set(), tiles = new Set();
+    SO.cards.forEach((c, i) => {
+      const n = c.id || ('tarjeta ' + (i + 1));
+      if (!c.id || ids.has(c.id)) E2(n + ': id vacío o repetido'); ids.add(c.id);
+      if (c.order !== i + 1) E2(n + ': order debe ser ' + (i + 1));
+      ['letters', 'emoji', 'pat', 'titleEs', 'titleZh', 'titleZhT', 'ruleZh', 'ruleZhT'].forEach(k => { if (!c[k]) E2(n + ': falta ' + k); });
+      if (!('art' in c)) E2(n + ': falta art');
+      [c.titleZh, c.ruleZh].forEach(t => { if (TRAD.test(t || '')) E2(n + ': zh con rasgos tradicionales'); });
+      [c.titleZhT, c.ruleZhT].forEach(t => { if (SIMP.test(t || '')) E2(n + ': zhT con rasgos simplificados'); });
+      if (!/[一-鿿]/.test(c.ruleZh || '') || (c.ruleZh || '').length > 120) E2(n + ': la regla en chino debe tener texto y no pasar de 120 caracteres');
+      let re = null; try { re = new RegExp(c.pat || '(', 'i'); } catch (e) { E2(n + ': pat inválido'); }
+      const W = c.words || []; if (W.length < 3 || W.length > 5) E2(n + ': de 3 a 5 palabras (hay ' + W.length + ')');
+      W.forEach(w => {
+        if (!w.sp || !w.emoji || w.emoji.length > 12 || !w.zh || !w.zhT || !('art' in w)) E2(n + ': palabra incompleta ' + w.sp);
+        if (re && !re.test(w.sp)) E2(n + ': «' + w.sp + '» no cumple el patrón ' + c.pat);
+        if (w.like != null && !/^[a-zñ'\- ]+$/.test(w.like)) E2(n + ': like «' + w.like + '» debe ir en letras de pinyin sin tonos');
+        if (TU.test(w.sp) || ESPANISMOS.test(w.sp)) E2(n + ': tuteo o españolismo en «' + w.sp + '»');
+        if (SIMP.test(w.zhT || '') || TRAD.test(w.zh || '')) E2(n + ': escritura mezclada en «' + w.sp + '»');
+        tiles.add(w.sp);
+      });
+      if (new Set(W.map(w => w.emoji)).size !== W.length) E2(n + ': emoji repetidos dentro de la tarjeta');
+    });
+    const Ls = SO.listen || []; if (Ls.length !== SO.cards.length) E2('un «Escuchá y tocá» por tarjeta (hay ' + Ls.length + ')');
+    Ls.forEach((x, i) => { const n = 'listen ' + (i + 1);
+      if (!x.say || !Array.isArray(x.opts) || x.opts.length !== 3) { E2(n + ': 3 opciones'); return; }
+      if (new Set(x.opts.map(o => o.emoji)).size !== 3 || new Set(x.opts.map(o => o.sp)).size !== 3) E2(n + ': opciones distintas');
+      if (norm(x.say) !== norm(x.opts[0].sp)) E2(n + ': lo que suena debe ser la correcta «' + x.opts[0].sp + '»');
+      if (!SO.cards[i] || !SO.cards[i].words.some(w => w.sp === x.opts[0].sp)) E2(n + ': la correcta debe ser palabra de su tarjeta');
+      x.opts.forEach(o => { if (!tiles.has(o.sp)) E2(n + ': «' + o.sp + '» no es palabra de ninguna tarjeta'); if (!o.zh || !o.zhT || !('art' in o)) E2(n + ': opción incompleta'); }); });
+  }
+}
 console.table(rows);
-console.log(LES.length + ' lecciones · franjas ' + JSON.stringify(bands) + ' · ' + (bad ? bad + ' error(es)' : 'todo en regla'));
+console.log(LES.length + ' lecciones · franjas ' + JSON.stringify(bands) + (nSon ? ' · ' + nSon + ' tarjetas de sonidos' : '') + ' · ' + (bad ? bad + ' error(es)' : 'todo en regla'));
 process.exit(bad ? 1 : 0);
