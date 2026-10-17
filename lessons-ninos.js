@@ -1,9 +1,8 @@
 // ============================================================
-// lessons-ninos.js — Lecciones para NIÑOS (6–10 años) · PILOTO (6 lecciones, solo datos)
+// lessons-ninos.js — Lecciones para NIÑOS (6–10 años) · piloto + unidades (se amplía de a 3 lecciones)
 // ------------------------------------------------------------
 // Chicos de habla china que aprenden español en Argentina (español rioplatense, voseo).
-// SOLO DATOS (sin pantalla): la pista «🧒 Niños» y los ejercicios con dibujos llegan en una rama
-// posterior. Aún no se carga en index.html. Textos escritos para la app; nivel A1 adaptado,
+// La pantalla vive en ninos-ui.js (pista «🧒 Niños»). Textos escritos para la app; nivel A1 adaptado,
 // NO oficial (el DELE Escolar arranca a los 11 años).
 //
 // Esquema por lección (window.NINOS_LESSONS):
@@ -2047,6 +2046,2094 @@ window.NINOS_LESSONS = [
       "w": "juega",
       "e": "他玩",
       "eT": "他玩"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-familia",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 3,
+  "order": 7,
+  "emoji": "👪",
+  "art": null,
+  "titleEs": "Mi familia",
+  "titleZh": "我的家人",
+  "titleZhT": "我的家人",
+  "blurb": "Sofi le muestra a Lin las fotos de su familia: mamá, papá, abuela y hermanito.",
+  "blurbZh": "索菲给林看她家人的照片：妈妈、爸爸、奶奶和小弟弟。",
+  "blurbZhT": "索菲給林看她家人的照片：媽媽、爸爸、奶奶和小弟弟。",
+  "words": [
+   {
+    "sp": "mirá",
+    "zh": "看",
+    "zhT": "看",
+    "emoji": "👀",
+    "art": null
+   },
+   {
+    "sp": "familia",
+    "zh": "家人",
+    "zhT": "家人",
+    "emoji": "👪",
+    "art": null
+   },
+   {
+    "sp": "mamá",
+    "zh": "妈妈",
+    "zhT": "媽媽",
+    "emoji": "👩",
+    "art": null
+   },
+   {
+    "sp": "papá",
+    "zh": "爸爸",
+    "zhT": "爸爸",
+    "emoji": "👨",
+    "art": null
+   },
+   {
+    "sp": "abuela",
+    "zh": "奶奶 / 外婆",
+    "zhT": "奶奶 / 外婆",
+    "emoji": "👵",
+    "art": null
+   },
+   {
+    "sp": "hermanito",
+    "zh": "小弟弟",
+    "zhT": "小弟弟",
+    "emoji": "👦",
+    "art": null
+   },
+   {
+    "sp": "hermana mayor",
+    "zh": "姐姐",
+    "zhT": "姐姐",
+    "emoji": "👧",
+    "art": null
+   },
+   {
+    "sp": "¿y vos?",
+    "zh": "你呢？",
+    "zhT": "你呢？",
+    "emoji": "💬",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Sofi",
+    "sp": "¡Hola, Lin! Mirá mi familia.",
+    "zh": "你好，林！看看我的家人。",
+    "zhT": "你好，林！看看我的家人。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Ella es mi mamá.",
+    "zh": "她是我妈妈。",
+    "zhT": "她是我媽媽。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Él es mi papá.",
+    "zh": "他是我爸爸。",
+    "zhT": "他是我爸爸。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Y ella es mi abuela.",
+    "zh": "她是我奶奶。",
+    "zhT": "她是我奶奶。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Tenés hermanos?",
+    "zh": "你有兄弟姐妹吗？",
+    "zhT": "你有兄弟姐妹嗎？"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Sí, un hermanito.",
+    "zh": "有，一个小弟弟。",
+    "zhT": "有，一個小弟弟。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¿Y vos, Lin?",
+    "zh": "你呢，林？",
+    "zhT": "你呢，林？"
+   },
+   {
+    "who": "Lin",
+    "sp": "Tengo una hermana mayor.",
+    "zh": "我有一个姐姐。",
+    "zhT": "我有一個姐姐。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Qué linda familia!",
+    "zh": "多么可爱的一家人！",
+    "zhT": "多麼可愛的一家人！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "Mi papá",
+    "opts": [
+     {
+      "emoji": "👨",
+      "sp": "papá",
+      "zh": "爸爸",
+      "zhT": "爸爸",
+      "art": null
+     },
+     {
+      "emoji": "👩",
+      "sp": "mamá",
+      "zh": "妈妈",
+      "zhT": "媽媽",
+      "art": null
+     },
+     {
+      "emoji": "👵",
+      "sp": "abuela",
+      "zh": "奶奶",
+      "zhT": "奶奶",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La abuela",
+    "opts": [
+     {
+      "emoji": "👵",
+      "sp": "abuela",
+      "zh": "奶奶",
+      "zhT": "奶奶",
+      "art": null
+     },
+     {
+      "emoji": "👨",
+      "sp": "papá",
+      "zh": "爸爸",
+      "zhT": "爸爸",
+      "art": null
+     },
+     {
+      "emoji": "👦",
+      "sp": "hermanito",
+      "zh": "小弟弟",
+      "zhT": "小弟弟",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Mi familia",
+    "opts": [
+     {
+      "emoji": "👪",
+      "sp": "familia",
+      "zh": "家人",
+      "zhT": "家人",
+      "art": null
+     },
+     {
+      "emoji": "🎒",
+      "sp": "mochila",
+      "zh": "书包",
+      "zhT": "書包",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El hermanito",
+    "opts": [
+     {
+      "emoji": "👦",
+      "sp": "hermanito",
+      "zh": "小弟弟",
+      "zhT": "小弟弟",
+      "art": null
+     },
+     {
+      "emoji": "👩",
+      "sp": "mamá",
+      "zh": "妈妈",
+      "zhT": "媽媽",
+      "art": null
+     },
+     {
+      "emoji": "🥛",
+      "sp": "leche",
+      "zh": "牛奶",
+      "zhT": "牛奶",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "Ella es mi ___.",
+    "zh": "她是我妈妈。",
+    "zhT": "她是我媽媽。",
+    "opts": [
+     {
+      "w": "mamá",
+      "e": "妈妈",
+      "eT": "媽媽"
+     },
+     {
+      "w": "papá",
+      "e": "爸爸",
+      "eT": "爸爸"
+     },
+     {
+      "w": "hermanito",
+      "e": "小弟弟",
+      "eT": "小弟弟"
+     }
+    ]
+   },
+   {
+    "sp": "Él es mi ___.",
+    "zh": "他是我爸爸。",
+    "zhT": "他是我爸爸。",
+    "opts": [
+     {
+      "w": "papá",
+      "e": "爸爸",
+      "eT": "爸爸"
+     },
+     {
+      "w": "mamá",
+      "e": "妈妈",
+      "eT": "媽媽"
+     },
+     {
+      "w": "abuela",
+      "e": "奶奶",
+      "eT": "奶奶"
+     }
+    ]
+   },
+   {
+    "sp": "Y ella es mi ___.",
+    "zh": "她是我奶奶。",
+    "zhT": "她是我奶奶。",
+    "opts": [
+     {
+      "w": "abuela",
+      "e": "奶奶",
+      "eT": "奶奶"
+     },
+     {
+      "w": "papá",
+      "e": "爸爸",
+      "eT": "爸爸"
+     },
+     {
+      "w": "hermanito",
+      "e": "小弟弟",
+      "eT": "小弟弟"
+     }
+    ]
+   },
+   {
+    "sp": "Tengo una ___ mayor.",
+    "zh": "我有一个姐姐。",
+    "zhT": "我有一個姐姐。",
+    "opts": [
+     {
+      "w": "hermana",
+      "e": "姐妹",
+      "eT": "姐妹"
+     },
+     {
+      "w": "hermano",
+      "e": "兄弟",
+      "eT": "兄弟"
+     },
+     {
+      "w": "hermanito",
+      "e": "小弟弟",
+      "eT": "小弟弟"
+     }
+    ]
+   },
+   {
+    "sp": "¡Qué linda ___!",
+    "zh": "多么可爱的一家人！",
+    "zhT": "多麼可愛的一家人！",
+    "opts": [
+     {
+      "w": "familia",
+      "e": "家人",
+      "eT": "家人"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-colores",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 7,
+  "order": 8,
+  "emoji": "🎨",
+  "art": null,
+  "titleEs": "Colores y números",
+  "titleZh": "颜色和数字",
+  "titleZhT": "顏色和數字",
+  "blurb": "En la clase de plástica, Lin y Sofi eligen colores y cuentan lápices del uno al cuatro.",
+  "blurbZh": "美术课上，林和索菲选颜色，还从一数到四。",
+  "blurbZhT": "美術課上，林和索菲選顏色，還從一數到四。",
+  "words": [
+   {
+    "sp": "color",
+    "zh": "颜色",
+    "zhT": "顏色",
+    "emoji": "🎨",
+    "art": null
+   },
+   {
+    "sp": "rojo",
+    "zh": "红色",
+    "zhT": "紅色",
+    "emoji": "🔴",
+    "art": null
+   },
+   {
+    "sp": "verde",
+    "zh": "绿色",
+    "zhT": "綠色",
+    "emoji": "🟢",
+    "art": null
+   },
+   {
+    "sp": "amarillo",
+    "zh": "黄色",
+    "zhT": "黃色",
+    "emoji": "🟡",
+    "art": null
+   },
+   {
+    "sp": "uno",
+    "zh": "一",
+    "zhT": "一",
+    "emoji": "1️⃣",
+    "art": null
+   },
+   {
+    "sp": "dos",
+    "zh": "二",
+    "zhT": "二",
+    "emoji": "2️⃣",
+    "art": null
+   },
+   {
+    "sp": "tres",
+    "zh": "三",
+    "zhT": "三",
+    "emoji": "3️⃣",
+    "art": null
+   },
+   {
+    "sp": "cuatro",
+    "zh": "四",
+    "zhT": "四",
+    "emoji": "4️⃣",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Seño",
+    "sp": "¡A pintar, chicos!",
+    "zh": "孩子们，来画画吧！",
+    "zhT": "孩子們，來畫畫吧！"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¿Qué color querés, Lin?",
+    "zh": "林，你想要什么颜色？",
+    "zhT": "林，你想要什麼顏色？"
+   },
+   {
+    "who": "Lin",
+    "sp": "Quiero el rojo. ¿Y vos?",
+    "zh": "我想要红色的。你呢？",
+    "zhT": "我想要紅色的。你呢？"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Yo quiero el verde.",
+    "zh": "我想要绿色的。",
+    "zhT": "我想要綠色的。"
+   },
+   {
+    "who": "Seño",
+    "sp": "El sol es amarillo.",
+    "zh": "太阳是黄色的。",
+    "zhT": "太陽是黃色的。"
+   },
+   {
+    "who": "Lin",
+    "sp": "Tengo un lápiz amarillo.",
+    "zh": "我有一支黄色的铅笔。",
+    "zhT": "我有一支黃色的鉛筆。"
+   },
+   {
+    "who": "Seño",
+    "sp": "¿Cuántos lápices hay?",
+    "zh": "有几支铅笔？",
+    "zhT": "有幾支鉛筆？"
+   },
+   {
+    "who": "Lin",
+    "sp": "Uno, dos, tres, cuatro.",
+    "zh": "一、二、三、四。",
+    "zhT": "一、二、三、四。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Qué lindos colores!",
+    "zh": "多漂亮的颜色啊！",
+    "zhT": "多漂亮的顏色啊！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "Rojo",
+    "opts": [
+     {
+      "emoji": "🔴",
+      "sp": "rojo",
+      "zh": "红色",
+      "zhT": "紅色",
+      "art": null
+     },
+     {
+      "emoji": "🟢",
+      "sp": "verde",
+      "zh": "绿色",
+      "zhT": "綠色",
+      "art": null
+     },
+     {
+      "emoji": "🟡",
+      "sp": "amarillo",
+      "zh": "黄色",
+      "zhT": "黃色",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Tres",
+    "opts": [
+     {
+      "emoji": "3️⃣",
+      "sp": "tres",
+      "zh": "三",
+      "zhT": "三",
+      "art": null
+     },
+     {
+      "emoji": "1️⃣",
+      "sp": "uno",
+      "zh": "一",
+      "zhT": "一",
+      "art": null
+     },
+     {
+      "emoji": "4️⃣",
+      "sp": "cuatro",
+      "zh": "四",
+      "zhT": "四",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Verde",
+    "opts": [
+     {
+      "emoji": "🟢",
+      "sp": "verde",
+      "zh": "绿色",
+      "zhT": "綠色",
+      "art": null
+     },
+     {
+      "emoji": "🔴",
+      "sp": "rojo",
+      "zh": "红色",
+      "zhT": "紅色",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Cuatro",
+    "opts": [
+     {
+      "emoji": "4️⃣",
+      "sp": "cuatro",
+      "zh": "四",
+      "zhT": "四",
+      "art": null
+     },
+     {
+      "emoji": "2️⃣",
+      "sp": "dos",
+      "zh": "二",
+      "zhT": "二",
+      "art": null
+     },
+     {
+      "emoji": "🟡",
+      "sp": "amarillo",
+      "zh": "黄色",
+      "zhT": "黃色",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¿Qué color ___, Lin?",
+    "zh": "林，你想要什么颜色？",
+    "zhT": "林，你想要什麼顏色？",
+    "opts": [
+     {
+      "w": "querés",
+      "e": "你想要",
+      "eT": "你想要"
+     },
+     {
+      "w": "quiero",
+      "e": "我想要",
+      "eT": "我想要"
+     },
+     {
+      "w": "quiere",
+      "e": "他想要",
+      "eT": "他想要"
+     }
+    ]
+   },
+   {
+    "sp": "El sol es ___.",
+    "zh": "太阳是黄色的。",
+    "zhT": "太陽是黃色的。",
+    "opts": [
+     {
+      "w": "amarillo",
+      "e": "黄色",
+      "eT": "黃色"
+     },
+     {
+      "w": "verde",
+      "e": "绿色",
+      "eT": "綠色"
+     },
+     {
+      "w": "azul",
+      "e": "蓝色",
+      "eT": "藍色"
+     }
+    ]
+   },
+   {
+    "sp": "Uno, dos, ___, cuatro.",
+    "zh": "一、二、三、四。",
+    "zhT": "一、二、三、四。",
+    "opts": [
+     {
+      "w": "tres",
+      "e": "三",
+      "eT": "三"
+     },
+     {
+      "w": "seis",
+      "e": "六",
+      "eT": "六"
+     },
+     {
+      "w": "diez",
+      "e": "十",
+      "eT": "十"
+     }
+    ]
+   },
+   {
+    "sp": "¿Cuántos ___ hay?",
+    "zh": "有几支铅笔？",
+    "zhT": "有幾支鉛筆？",
+    "opts": [
+     {
+      "w": "lápices",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     },
+     {
+      "w": "pelotas",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "mochilas",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "¡Qué lindos ___!",
+    "zh": "多漂亮的颜色啊！",
+    "zhT": "多漂亮的顏色啊！",
+    "opts": [
+     {
+      "w": "colores",
+      "e": "颜色",
+      "eT": "顏色"
+     },
+     {
+      "w": "plazas",
+      "e": "公园",
+      "eT": "公園"
+     },
+     {
+      "w": "medialunas",
+      "e": "牛角包",
+      "eT": "牛角包"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-animales",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 8,
+  "order": 9,
+  "emoji": "🐶",
+  "art": null,
+  "titleEs": "Mi mascota",
+  "titleZh": "我的宠物",
+  "titleZhT": "我的寵物",
+  "blurb": "La seño pregunta por las mascotas: Sofi tiene un perro llamado Firulais y Lin, un gato.",
+  "blurbZh": "老师问起宠物：索菲有一只叫菲鲁莱斯的狗，林有一只猫。",
+  "blurbZhT": "老師問起寵物：索菲有一隻叫菲魯萊斯的狗，林有一隻貓。",
+  "words": [
+   {
+    "sp": "mascota",
+    "zh": "宠物",
+    "zhT": "寵物",
+    "emoji": "🐾",
+    "art": null
+   },
+   {
+    "sp": "perro",
+    "zh": "狗",
+    "zhT": "狗",
+    "emoji": "🐶",
+    "art": null
+   },
+   {
+    "sp": "gato",
+    "zh": "猫",
+    "zhT": "貓",
+    "emoji": "🐱",
+    "art": null
+   },
+   {
+    "sp": "pájaro",
+    "zh": "小鸟",
+    "zhT": "小鳥",
+    "emoji": "🐦",
+    "art": null
+   },
+   {
+    "sp": "grande",
+    "zh": "大",
+    "zhT": "大",
+    "emoji": "🐘",
+    "art": null
+   },
+   {
+    "sp": "chiquito",
+    "zh": "很小",
+    "zhT": "很小",
+    "emoji": "🤏",
+    "art": null
+   },
+   {
+    "sp": "simpático",
+    "zh": "讨人喜欢",
+    "zhT": "討人喜歡",
+    "emoji": "😊",
+    "art": null
+   },
+   {
+    "sp": "se llama",
+    "zh": "它叫",
+    "zhT": "它叫",
+    "emoji": "🏷️",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Seño",
+    "sp": "Sofi, ¿tenés mascota?",
+    "zh": "索菲，你有宠物吗？",
+    "zhT": "索菲，你有寵物嗎？"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Sí, tengo un perro.",
+    "zh": "有，我有一只狗。",
+    "zhT": "有，我有一隻狗。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Se llama Firulais.",
+    "zh": "它叫菲鲁莱斯。",
+    "zhT": "它叫菲魯萊斯。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Es grande?",
+    "zh": "它大吗？",
+    "zhT": "它大嗎？"
+   },
+   {
+    "who": "Sofi",
+    "sp": "No, es chiquito y muy simpático.",
+    "zh": "不大，它很小，而且很讨人喜欢。",
+    "zhT": "不大，它很小，而且很討人喜歡。"
+   },
+   {
+    "who": "Seño",
+    "sp": "¿Y vos, Lin? ¿Tenés mascota?",
+    "zh": "林，你呢？你有宠物吗？",
+    "zhT": "林，你呢？你有寵物嗎？"
+   },
+   {
+    "who": "Lin",
+    "sp": "Sí, tengo un gato.",
+    "zh": "有，我有一只猫。",
+    "zhT": "有，我有一隻貓。"
+   },
+   {
+    "who": "Lin",
+    "sp": "Le gusta tomar leche.",
+    "zh": "它爱喝牛奶。",
+    "zhT": "它愛喝牛奶。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Qué lindo! Yo quiero un pájaro.",
+    "zh": "真可爱！我想要一只小鸟。",
+    "zhT": "真可愛！我想要一隻小鳥。"
+   }
+  ],
+  "listen": [
+   {
+    "say": "El perro",
+    "opts": [
+     {
+      "emoji": "🐶",
+      "sp": "perro",
+      "zh": "狗",
+      "zhT": "狗",
+      "art": null
+     },
+     {
+      "emoji": "🐱",
+      "sp": "gato",
+      "zh": "猫",
+      "zhT": "貓",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El gato",
+    "opts": [
+     {
+      "emoji": "🐱",
+      "sp": "gato",
+      "zh": "猫",
+      "zhT": "貓",
+      "art": null
+     },
+     {
+      "emoji": "🐶",
+      "sp": "perro",
+      "zh": "狗",
+      "zhT": "狗",
+      "art": null
+     },
+     {
+      "emoji": "🥛",
+      "sp": "leche",
+      "zh": "牛奶",
+      "zhT": "牛奶",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Un pájaro",
+    "opts": [
+     {
+      "emoji": "🐦",
+      "sp": "pájaro",
+      "zh": "小鸟",
+      "zhT": "小鳥",
+      "art": null
+     },
+     {
+      "emoji": "🐶",
+      "sp": "perro",
+      "zh": "狗",
+      "zhT": "狗",
+      "art": null
+     },
+     {
+      "emoji": "🎒",
+      "sp": "mochila",
+      "zh": "书包",
+      "zhT": "書包",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Mi mascota",
+    "opts": [
+     {
+      "emoji": "🐾",
+      "sp": "mascota",
+      "zh": "宠物",
+      "zhT": "寵物",
+      "art": null
+     },
+     {
+      "emoji": "🌳",
+      "sp": "plaza",
+      "zh": "公园",
+      "zhT": "公園",
+      "art": null
+     },
+     {
+      "emoji": "🧃",
+      "sp": "jugo",
+      "zh": "果汁",
+      "zhT": "果汁",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "Se ___ Firulais.",
+    "zh": "它叫菲鲁莱斯。",
+    "zhT": "它叫菲魯萊斯。",
+    "opts": [
+     {
+      "w": "llama",
+      "e": "叫",
+      "eT": "叫"
+     },
+     {
+      "w": "llamo",
+      "e": "我叫",
+      "eT": "我叫"
+     },
+     {
+      "w": "llamás",
+      "e": "你叫",
+      "eT": "你叫"
+     }
+    ]
+   },
+   {
+    "sp": "No, es chiquito y muy ___.",
+    "zh": "不大，它很小，而且很讨人喜欢。",
+    "zhT": "不大，它很小，而且很討人喜歡。",
+    "opts": [
+     {
+      "w": "simpático",
+      "e": "讨人喜欢",
+      "eT": "討人喜歡"
+     },
+     {
+      "w": "plaza",
+      "e": "公园",
+      "eT": "公園"
+     },
+     {
+      "w": "baño",
+      "e": "厕所",
+      "eT": "廁所"
+     }
+    ]
+   },
+   {
+    "sp": "Le gusta tomar ___.",
+    "zh": "它爱喝牛奶。",
+    "zhT": "它愛喝牛奶。",
+    "opts": [
+     {
+      "w": "leche",
+      "e": "牛奶",
+      "eT": "牛奶"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "Sí, tengo un ___.",
+    "zh": "有，我有一只猫。",
+    "zhT": "有，我有一隻貓。",
+    "opts": [
+     {
+      "w": "gato",
+      "e": "猫",
+      "eT": "貓"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     }
+    ]
+   },
+   {
+    "sp": "Sofi, ¿___ mascota?",
+    "zh": "索菲，你有宠物吗？",
+    "zhT": "索菲，你有寵物嗎？",
+    "opts": [
+     {
+      "w": "tenés",
+      "e": "你有",
+      "eT": "你有"
+     },
+     {
+      "w": "tengo",
+      "e": "我有",
+      "eT": "我有"
+     },
+     {
+      "w": "tiene",
+      "e": "他有",
+      "eT": "他有"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-cumple",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 9,
+  "order": 10,
+  "emoji": "🎂",
+  "art": null,
+  "titleEs": "¡Feliz cumple!",
+  "titleZh": "生日快乐！",
+  "titleZhT": "生日快樂！",
+  "blurb": "Hoy es el cumple de Sofi: regalo, torta, velitas y un «¡hip, hip, hurra!».",
+  "blurbZh": "今天是索菲的生日：礼物、蛋糕、小蜡烛，还有一声“嘿嘿呼啦！”。",
+  "blurbZhT": "今天是索菲的生日：禮物、蛋糕、小蠟燭，還有一聲“嘿嘿呼啦！”。",
+  "words": [
+   {
+    "sp": "cumple",
+    "zh": "生日",
+    "zhT": "生日",
+    "emoji": "🎉",
+    "art": null
+   },
+   {
+    "sp": "¡feliz cumple!",
+    "zh": "生日快乐！",
+    "zhT": "生日快樂！",
+    "emoji": "🥳",
+    "art": null
+   },
+   {
+    "sp": "regalo",
+    "zh": "礼物",
+    "zhT": "禮物",
+    "emoji": "🎁",
+    "art": null
+   },
+   {
+    "sp": "torta",
+    "zh": "蛋糕",
+    "zhT": "蛋糕",
+    "emoji": "🎂",
+    "art": null
+   },
+   {
+    "sp": "velitas",
+    "zh": "小蜡烛",
+    "zhT": "小蠟燭",
+    "emoji": "🕯️",
+    "art": null
+   },
+   {
+    "sp": "siete",
+    "zh": "七",
+    "zhT": "七",
+    "emoji": "7️⃣",
+    "art": null
+   },
+   {
+    "sp": "años",
+    "zh": "岁",
+    "zhT": "歲",
+    "emoji": "🎈",
+    "art": null
+   },
+   {
+    "sp": "soplá",
+    "zh": "吹一吹",
+    "zhT": "吹一吹",
+    "emoji": "💨",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Sofi",
+    "sp": "¡Hoy es mi cumple!",
+    "zh": "今天是我的生日！",
+    "zhT": "今天是我的生日！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Feliz cumple, Sofi!",
+    "zh": "生日快乐，索菲！",
+    "zhT": "生日快樂，索菲！"
+   },
+   {
+    "who": "Lin",
+    "sp": "Tomá, es un regalo.",
+    "zh": "拿着，这是礼物。",
+    "zhT": "拿著，這是禮物。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Gracias! Cumplo siete años.",
+    "zh": "谢谢！我今天七岁了。",
+    "zhT": "謝謝！我今天七歲了。"
+   },
+   {
+    "who": "Seño",
+    "sp": "Acá está la torta.",
+    "zh": "蛋糕来啦。",
+    "zhT": "蛋糕來啦。"
+   },
+   {
+    "who": "Seño",
+    "sp": "Tiene siete velitas.",
+    "zh": "上面有七根小蜡烛。",
+    "zhT": "上面有七根小蠟燭。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Soplá las velitas!",
+    "zh": "吹蜡烛吧！",
+    "zhT": "吹蠟燭吧！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Hip, hip, hurra!",
+    "zh": "嘿，嘿，呼啦！",
+    "zhT": "嘿，嘿，呼啦！"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Qué rica torta!",
+    "zh": "多好吃的蛋糕啊！",
+    "zhT": "多好吃的蛋糕啊！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "La torta",
+    "opts": [
+     {
+      "emoji": "🎂",
+      "sp": "torta",
+      "zh": "蛋糕",
+      "zhT": "蛋糕",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "🥛",
+      "sp": "leche",
+      "zh": "牛奶",
+      "zhT": "牛奶",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Un regalo",
+    "opts": [
+     {
+      "emoji": "🎁",
+      "sp": "regalo",
+      "zh": "礼物",
+      "zhT": "禮物",
+      "art": null
+     },
+     {
+      "emoji": "🎒",
+      "sp": "mochila",
+      "zh": "书包",
+      "zhT": "書包",
+      "art": null
+     },
+     {
+      "emoji": "✏️",
+      "sp": "lápiz",
+      "zh": "铅笔",
+      "zhT": "鉛筆",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Las velitas",
+    "opts": [
+     {
+      "emoji": "🕯️",
+      "sp": "velitas",
+      "zh": "小蜡烛",
+      "zhT": "小蠟燭",
+      "art": null
+     },
+     {
+      "emoji": "🥐",
+      "sp": "medialunas",
+      "zh": "牛角包",
+      "zhT": "牛角包",
+      "art": null
+     },
+     {
+      "emoji": "👨",
+      "sp": "papá",
+      "zh": "爸爸",
+      "zhT": "爸爸",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Siete",
+    "opts": [
+     {
+      "emoji": "7️⃣",
+      "sp": "siete",
+      "zh": "七",
+      "zhT": "七",
+      "art": null
+     },
+     {
+      "emoji": "3️⃣",
+      "sp": "tres",
+      "zh": "三",
+      "zhT": "三",
+      "art": null
+     },
+     {
+      "emoji": "4️⃣",
+      "sp": "cuatro",
+      "zh": "四",
+      "zhT": "四",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¡Feliz ___, Sofi!",
+    "zh": "生日快乐，索菲！",
+    "zhT": "生日快樂，索菲！",
+    "opts": [
+     {
+      "w": "cumple",
+      "e": "生日",
+      "eT": "生日"
+     },
+     {
+      "w": "plaza",
+      "e": "公园",
+      "eT": "公園"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   },
+   {
+    "sp": "Tomá, es un ___.",
+    "zh": "拿着，这是礼物。",
+    "zhT": "拿著，這是禮物。",
+    "opts": [
+     {
+      "w": "regalo",
+      "e": "礼物",
+      "eT": "禮物"
+     },
+     {
+      "w": "torta",
+      "e": "蛋糕",
+      "eT": "蛋糕"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "Acá está la ___.",
+    "zh": "蛋糕来啦。",
+    "zhT": "蛋糕來啦。",
+    "opts": [
+     {
+      "w": "torta",
+      "e": "蛋糕",
+      "eT": "蛋糕"
+     },
+     {
+      "w": "regalo",
+      "e": "礼物",
+      "eT": "禮物"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "¡Soplá las ___!",
+    "zh": "吹蜡烛吧！",
+    "zhT": "吹蠟燭吧！",
+    "opts": [
+     {
+      "w": "velitas",
+      "e": "小蜡烛",
+      "eT": "小蠟燭"
+     },
+     {
+      "w": "regalos",
+      "e": "礼物",
+      "eT": "禮物"
+     },
+     {
+      "w": "lápices",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "¡Gracias! Cumplo siete ___.",
+    "zh": "谢谢！我今天七岁了。",
+    "zhT": "謝謝！我今天七歲了。",
+    "opts": [
+     {
+      "w": "años",
+      "e": "岁",
+      "eT": "歲"
+     },
+     {
+      "w": "tortas",
+      "e": "蛋糕",
+      "eT": "蛋糕"
+     },
+     {
+      "w": "regalos",
+      "e": "礼物",
+      "eT": "禮物"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-kiosco",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 10,
+  "order": 11,
+  "emoji": "🏪",
+  "art": null,
+  "titleEs": "En el kiosco",
+  "titleZh": "在小卖部",
+  "titleZhT": "在小賣部",
+  "blurb": "Lin va al kiosco con mamá y compra un alfajor de dulce de leche.",
+  "blurbZh": "林和妈妈去小卖部，买了一个牛奶焦糖阿尔法霍饼干。",
+  "blurbZhT": "林和媽媽去小賣部，買了一個牛奶焦糖阿爾法霍餅乾。",
+  "words": [
+   {
+    "sp": "kiosco",
+    "zh": "小卖部",
+    "zhT": "小賣部",
+    "emoji": "🏪",
+    "art": null
+   },
+   {
+    "sp": "alfajor",
+    "zh": "阿尔法霍饼干",
+    "zhT": "阿爾法霍餅乾",
+    "emoji": "🍪",
+    "art": null
+   },
+   {
+    "sp": "chocolate",
+    "zh": "巧克力",
+    "zhT": "巧克力",
+    "emoji": "🍫",
+    "art": null
+   },
+   {
+    "sp": "dulce de leche",
+    "zh": "牛奶焦糖酱",
+    "zhT": "牛奶焦糖醬",
+    "emoji": "🍮",
+    "art": null
+   },
+   {
+    "sp": "por favor",
+    "zh": "请",
+    "zhT": "請",
+    "emoji": "🙏",
+    "art": null
+   },
+   {
+    "sp": "¿cuánto sale?",
+    "zh": "多少钱？",
+    "zhT": "多少錢？",
+    "emoji": "💰",
+    "art": null
+   },
+   {
+    "sp": "pesos",
+    "zh": "比索",
+    "zhT": "比索",
+    "emoji": "💵",
+    "art": null
+   },
+   {
+    "sp": "diez",
+    "zh": "十",
+    "zhT": "十",
+    "emoji": "🔟",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Mamá",
+    "sp": "Vamos al kiosco, Lin.",
+    "zh": "我们去小卖部吧，林。",
+    "zhT": "我們去小賣部吧，林。"
+   },
+   {
+    "who": "Lin",
+    "sp": "Hola, quiero un alfajor.",
+    "zh": "你好，我想要一个阿尔法霍饼干。",
+    "zhT": "你好，我想要一個阿爾法霍餅乾。"
+   },
+   {
+    "who": "Kiosquero",
+    "sp": "¿De chocolate o de dulce de leche?",
+    "zh": "要巧克力的，还是牛奶焦糖的？",
+    "zhT": "要巧克力的，還是牛奶焦糖的？"
+   },
+   {
+    "who": "Lin",
+    "sp": "De dulce de leche, por favor.",
+    "zh": "请给我牛奶焦糖的。",
+    "zhT": "請給我牛奶焦糖的。"
+   },
+   {
+    "who": "Kiosquero",
+    "sp": "Acá tenés.",
+    "zh": "给你。",
+    "zhT": "給你。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Cuánto sale?",
+    "zh": "多少钱？",
+    "zhT": "多少錢？"
+   },
+   {
+    "who": "Kiosquero",
+    "sp": "Sale diez pesos.",
+    "zh": "十比索。",
+    "zhT": "十比索。"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Tomá, diez pesos.",
+    "zh": "拿着，十比索。",
+    "zhT": "拿著，十比索。"
+   },
+   {
+    "who": "Kiosquero",
+    "sp": "¡Gracias! ¡Chau!",
+    "zh": "谢谢！再见！",
+    "zhT": "謝謝！再見！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "El alfajor",
+    "opts": [
+     {
+      "emoji": "🍪",
+      "sp": "alfajor",
+      "zh": "阿尔法霍饼干",
+      "zhT": "阿爾法霍餅乾",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "🥛",
+      "sp": "leche",
+      "zh": "牛奶",
+      "zhT": "牛奶",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El kiosco",
+    "opts": [
+     {
+      "emoji": "🏪",
+      "sp": "kiosco",
+      "zh": "小卖部",
+      "zhT": "小賣部",
+      "art": null
+     },
+     {
+      "emoji": "🌳",
+      "sp": "plaza",
+      "zh": "公园",
+      "zhT": "公園",
+      "art": null
+     },
+     {
+      "emoji": "🚻",
+      "sp": "baño",
+      "zh": "厕所",
+      "zhT": "廁所",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Chocolate",
+    "opts": [
+     {
+      "emoji": "🍫",
+      "sp": "chocolate",
+      "zh": "巧克力",
+      "zhT": "巧克力",
+      "art": null
+     },
+     {
+      "emoji": "🍪",
+      "sp": "alfajor",
+      "zh": "阿尔法霍饼干",
+      "zhT": "阿爾法霍餅乾",
+      "art": null
+     },
+     {
+      "emoji": "🧃",
+      "sp": "jugo",
+      "zh": "果汁",
+      "zhT": "果汁",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Diez",
+    "opts": [
+     {
+      "emoji": "🔟",
+      "sp": "diez",
+      "zh": "十",
+      "zhT": "十",
+      "art": null
+     },
+     {
+      "emoji": "4️⃣",
+      "sp": "cuatro",
+      "zh": "四",
+      "zhT": "四",
+      "art": null
+     },
+     {
+      "emoji": "3️⃣",
+      "sp": "tres",
+      "zh": "三",
+      "zhT": "三",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "Vamos al ___, Lin.",
+    "zh": "我们去小卖部吧，林。",
+    "zhT": "我們去小賣部吧，林。",
+    "opts": [
+     {
+      "w": "kiosco",
+      "e": "小卖部",
+      "eT": "小賣部"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "Hola, quiero un ___.",
+    "zh": "你好，我想要一个阿尔法霍饼干。",
+    "zhT": "你好，我想要一個阿爾法霍餅乾。",
+    "opts": [
+     {
+      "w": "alfajor",
+      "e": "阿尔法霍饼干",
+      "eT": "阿爾法霍餅乾"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     }
+    ]
+   },
+   {
+    "sp": "¿De chocolate o de dulce de ___?",
+    "zh": "要巧克力的，还是牛奶焦糖的？",
+    "zhT": "要巧克力的，還是牛奶焦糖的？",
+    "opts": [
+     {
+      "w": "leche",
+      "e": "牛奶",
+      "eT": "牛奶"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "¿Cuánto ___?",
+    "zh": "多少钱？",
+    "zhT": "多少錢？",
+    "opts": [
+     {
+      "w": "sale",
+      "e": "（价格）是",
+      "eT": "（價格）是"
+     },
+     {
+      "w": "salgo",
+      "e": "我出去",
+      "eT": "我出去"
+     },
+     {
+      "w": "salís",
+      "e": "你出去",
+      "eT": "你出去"
+     }
+    ]
+   },
+   {
+    "sp": "Sale diez ___.",
+    "zh": "十比索。",
+    "zhT": "十比索。",
+    "opts": [
+     {
+      "w": "pesos",
+      "e": "比索",
+      "eT": "比索"
+     },
+     {
+      "w": "patios",
+      "e": "操场",
+      "eT": "操場"
+     },
+     {
+      "w": "mochilas",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-ropa",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 11,
+  "order": 12,
+  "emoji": "☔",
+  "art": null,
+  "titleEs": "Hoy llueve",
+  "titleZh": "今天下雨",
+  "titleZhT": "今天下雨",
+  "blurb": "Antes de ir al cole, mamá ayuda a Lin: guardapolvo, zapatillas, campera y paraguas.",
+  "blurbZh": "上学前，妈妈帮林准备：校服罩衫、运动鞋、外套和雨伞。",
+  "blurbZhT": "上學前，媽媽幫林準備：校服罩衫、運動鞋、外套和雨傘。",
+  "words": [
+   {
+    "sp": "hoy",
+    "zh": "今天",
+    "zhT": "今天",
+    "emoji": "📅",
+    "art": null
+   },
+   {
+    "sp": "llueve",
+    "zh": "下雨",
+    "zhT": "下雨",
+    "emoji": "🌧️",
+    "art": null
+   },
+   {
+    "sp": "hace frío",
+    "zh": "天气冷",
+    "zhT": "天氣冷",
+    "emoji": "🥶",
+    "art": null
+   },
+   {
+    "sp": "llevá",
+    "zh": "带上",
+    "zhT": "帶上",
+    "emoji": "🧳",
+    "art": null
+   },
+   {
+    "sp": "ponete",
+    "zh": "穿上",
+    "zhT": "穿上",
+    "emoji": "👚",
+    "art": null
+   },
+   {
+    "sp": "guardapolvo",
+    "zh": "校服罩衫",
+    "zhT": "校服罩衫",
+    "emoji": "🥼",
+    "art": null
+   },
+   {
+    "sp": "zapatillas",
+    "zh": "运动鞋",
+    "zhT": "運動鞋",
+    "emoji": "👟",
+    "art": null
+   },
+   {
+    "sp": "paraguas",
+    "zh": "雨伞",
+    "zhT": "雨傘",
+    "emoji": "☂️",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Mamá",
+    "sp": "Hoy llueve, Lin.",
+    "zh": "今天下雨，林。",
+    "zhT": "今天下雨，林。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Hace frío?",
+    "zh": "冷吗？",
+    "zhT": "冷嗎？"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Sí, hace frío. Llevá la campera.",
+    "zh": "冷，带上外套。",
+    "zhT": "冷，帶上外套。"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Ponete el guardapolvo y las zapatillas.",
+    "zh": "穿上校服罩衫和运动鞋。",
+    "zhT": "穿上校服罩衫和運動鞋。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Y el paraguas?",
+    "zh": "那雨伞呢？",
+    "zhT": "那雨傘呢？"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Acá está, en la mochila.",
+    "zh": "在这里，在书包里。",
+    "zhT": "在這裡，在書包裡。"
+   },
+   {
+    "who": "Lin",
+    "sp": "Gracias, mamá. ¡Chau!",
+    "zh": "谢谢妈妈。再见！",
+    "zhT": "謝謝媽媽。再見！"
+   },
+   {
+    "who": "Mamá",
+    "sp": "¡Chau! ¡Portate bien!",
+    "zh": "再见！要乖哦！",
+    "zhT": "再見！要乖哦！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "El guardapolvo",
+    "opts": [
+     {
+      "emoji": "🥼",
+      "sp": "guardapolvo",
+      "zh": "校服罩衫",
+      "zhT": "校服罩衫",
+      "art": null
+     },
+     {
+      "emoji": "🧥",
+      "sp": "campera",
+      "zh": "外套",
+      "zhT": "外套",
+      "art": null
+     },
+     {
+      "emoji": "🎒",
+      "sp": "mochila",
+      "zh": "书包",
+      "zhT": "書包",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Las zapatillas",
+    "opts": [
+     {
+      "emoji": "👟",
+      "sp": "zapatillas",
+      "zh": "运动鞋",
+      "zhT": "運動鞋",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "✏️",
+      "sp": "lápiz",
+      "zh": "铅笔",
+      "zhT": "鉛筆",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El paraguas",
+    "opts": [
+     {
+      "emoji": "☂️",
+      "sp": "paraguas",
+      "zh": "雨伞",
+      "zhT": "雨傘",
+      "art": null
+     },
+     {
+      "emoji": "🍵",
+      "sp": "té",
+      "zh": "茶",
+      "zhT": "茶",
+      "art": null
+     },
+     {
+      "emoji": "🐱",
+      "sp": "gato",
+      "zh": "猫",
+      "zhT": "貓",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La campera",
+    "opts": [
+     {
+      "emoji": "🧥",
+      "sp": "campera",
+      "zh": "外套",
+      "zhT": "外套",
+      "art": null
+     },
+     {
+      "emoji": "👟",
+      "sp": "zapatillas",
+      "zh": "运动鞋",
+      "zhT": "運動鞋",
+      "art": null
+     },
+     {
+      "emoji": "👨",
+      "sp": "papá",
+      "zh": "爸爸",
+      "zhT": "爸爸",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "Hoy ___, Lin.",
+    "zh": "今天下雨，林。",
+    "zhT": "今天下雨，林。",
+    "opts": [
+     {
+      "w": "llueve",
+      "e": "下雨",
+      "eT": "下雨"
+     },
+     {
+      "w": "llevo",
+      "e": "我带",
+      "eT": "我帶"
+     },
+     {
+      "w": "llama",
+      "e": "叫",
+      "eT": "叫"
+     }
+    ]
+   },
+   {
+    "sp": "Sí, hace frío. Llevá la ___.",
+    "zh": "冷，带上外套。",
+    "zhT": "冷，帶上外套。",
+    "opts": [
+     {
+      "w": "campera",
+      "e": "外套",
+      "eT": "外套"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "Ponete el ___ y las zapatillas.",
+    "zh": "穿上校服罩衫和运动鞋。",
+    "zhT": "穿上校服罩衫和運動鞋。",
+    "opts": [
+     {
+      "w": "guardapolvo",
+      "e": "校服罩衫",
+      "eT": "校服罩衫"
+     },
+     {
+      "w": "campera",
+      "e": "外套",
+      "eT": "外套"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "¿Y el ___?",
+    "zh": "那雨伞呢？",
+    "zhT": "那雨傘呢？",
+    "opts": [
+     {
+      "w": "paraguas",
+      "e": "雨伞",
+      "eT": "雨傘"
+     },
+     {
+      "w": "campera",
+      "e": "外套",
+      "eT": "外套"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "Acá está, en la ___.",
+    "zh": "在这里，在书包里。",
+    "zhT": "在這裡，在書包裡。",
+    "opts": [
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "paraguas",
+      "e": "雨伞",
+      "eT": "雨傘"
+     },
+     {
+      "w": "guardapolvo",
+      "e": "校服罩衫",
+      "eT": "校服罩衫"
      }
     ]
    }
