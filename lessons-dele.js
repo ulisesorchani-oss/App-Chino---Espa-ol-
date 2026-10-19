@@ -1094,6 +1094,7 @@
             if (typeof stopReader === 'function') { try { stopReader(); } catch (e0) { } }
         } catch (e) { }
         let url = null;
+        let data = null; // respuesta del server: vive fuera del try porque applyTtsSpeed(dAudio, data) la usa más abajo
         try {
             if (typeof fetchTTS === 'function') {
                 const vEs = (typeof voiceEs !== 'undefined') ? voiceEs : 'f';
@@ -1103,7 +1104,7 @@
                 const resp = await fetchTTS((typeof ttsBody === 'function') ? ttsBody(text, langEs, vEs) : { text: text, lang: langEs, voice: vEs }, 12000); // v9.40: +speed
                 if (myTok !== dTok) return; // mientras tanto sonó otra línea
                 if (!resp.ok) throw new Error('TTS http ' + resp.status);
-                const data = await resp.json();
+                data = await resp.json();
                 if (!data.audio) throw new Error('TTS sin audio');
                 const bin = atob(data.audio);
                 const bytes = new Uint8Array(bin.length);
