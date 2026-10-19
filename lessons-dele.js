@@ -1017,7 +1017,8 @@
     // ── estado de la sesión abierta ──
     const S = { drama: null, view: null, idx: 0, results: [], order: [], answered: false };
     let curLevel = 'all';
-    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina' | 'Niños'
+    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina' | 'Niños'  (R14: 'Niños' = botón «Niños»; el resto = botón «DELE» + sub-filtro de pista)
+    let curBand = 'all';  // R14: franja de Niños: 'all' | 'A' (🌱 6–7) | 'B' (🌿 8–10)
     // R4: pistas conocidas, en este orden. Sus chips se muestran SIEMPRE (aunque
     // todavía no tengan dramas): para sumar lecciones a «Niños» alcanza con agregar
     // un drama con track: 'Niños' (dele: 'A1', titleZh/blurbZh en chino, quiz con
@@ -1196,55 +1197,89 @@
     // (los 5 dramas que lo usaban pasan a A2 o B1 según su contenido).
     const DELE_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     function levelLabel(v) { return 'DELE ' + v; }
+    // R14: pantalla en dos botones — «Niños» y «DELE». DELE junta Escolares y Argentina (sub-filtro Todas / Escolares / Argentina);
+    // los chips de nivel salen en una fila que salta de línea, cada uno con su conteo, y se apagan los niveles sin lecciones en la
+    // pista elegida. En Niños no hay chips de nivel si sus lecciones no tienen niveles distintos (hoy todas son «A1 adaptado»).
+    const isKids = () => curTrack === 'Niños';
+    const kidsStats = () => (window.NinosUI && window.NinosUI.stats) ? window.NinosUI.stats() : { total: 0, bands: {}, levels: {} };
+    const deleOf = (track) => DRAMAS.filter(d => d.track !== 'Niños' && (track === 'all' || d.track === track));
+    function deleLevelCounts() {
+        const c = {};
+        deleOf(curTrack).forEach(d => { c[d.dele] = (c[d.dele] || 0) + 1; });
+        return c;
+    }
+    const levelRank = (v) => { const i = DELE_ORDER.indexOf(v); return i === -1 ? 99 : i; };
+    const trackRank = (t) => { const i = TRACKS.indexOf(t); return i === -1 ? 99 : i; };
+    function mkChip(label, n, attrs, active, aria) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'lv-chip lv-chip-dele' + (active ? ' active' : '');
+        Object.keys(attrs).forEach(k => { b.dataset[k] = attrs[k]; });
+        b.appendChild(document.createTextNode(label));
+        if (n != null) {
+            const c = document.createElement('span');
+            c.className = 'dele-n'; c.textContent = n;
+            b.appendChild(c);
+        }
+        b.setAttribute('aria-label', aria + (n != null ? ' (' + n + ')' : ''));
+        if (active) b.setAttribute('aria-pressed', 'true'); else b.setAttribute('aria-pressed', 'false');
+        return b;
+    }
     function renderChips() {
         const chips = $('dele-levels');
         if (!chips) return;
         chips.innerHTML = '';
-        const mk = (label, value) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'lv-chip lv-chip-dele' + (curLevel === value ? ' active' : '');
-            b.dataset.level = value;
-            b.textContent = label;
-            b.setAttribute('aria-label', value === 'all' ? 'Mostrar todos los niveles' : 'Filtrar mini-dramas DELE ' + label);
+        if (isKids()) {
+            // niveles de Niños: solo si hay 2 o más distintos (hoy todas son «A1 adaptado» → sin filtro)
+            const lv = kidsStats().levels, keys = Object.keys(lv).sort((a, b) => levelRank(a) - levelRank(b));
+            if (keys.length < 2) { chips.hidden = true; return; }
+            chips.hidden = false;
+            chips.appendChild(mkChip('Todos', kidsStats().total, { level: 'all' }, curLevel === 'all', 'Mostrar todos los niveles'));
+            keys.forEach(v => chips.appendChild(mkChip(v, lv[v], { level: v }, curLevel === v, 'Filtrar por nivel ' + v)));
+            return;
+        }
+        chips.hidden = false;
+        const counts = deleLevelCounts();
+        const total = deleOf(curTrack).length;
+        chips.appendChild(mkChip('Todos', total, { level: 'all' }, curLevel === 'all', 'Mostrar todos los niveles'));
+        // siempre los 6 niveles (A1…C2); los que no existen en la pista elegida se apagan
+        const lvls = DELE_ORDER.slice();
+        DRAMAS.forEach(d => { if (d.track !== 'Niños' && lvls.indexOf(d.dele) === -1) lvls.push(d.dele); });
+        lvls.forEach(v => {
+            const n = counts[v] || 0;
+            const b = mkChip(v, n, { level: v }, curLevel === v, 'Filtrar mini-dramas ' + levelLabel(v));
+            if (!n) { b.disabled = true; b.classList.add('is-off'); b.setAttribute('aria-disabled', 'true'); }
             chips.appendChild(b);
-        };
-        // v9.33: UN solo botón "mostrar todo" y va AQUÍ, en niveles; el
-        // redundante "Todas" de pistas desaparece de renderTrackChips.
-        mk('Todas', 'all');
-        const lvls = [];
-        DRAMAS.forEach(d => { if (lvls.indexOf(d.dele) === -1) lvls.push(d.dele); });
-        lvls.sort((a, b) => {
-            const ia = DELE_ORDER.indexOf(a), ib = DELE_ORDER.indexOf(b);
-            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
         });
-        // labels cortos (A1…C2): el "DELE X" completo ya viaja en cada
-        // tarjeta y en el aria-label — la fila queda compacta en móvil.
-        lvls.forEach(v => mk(v, v));
     }
-    // v9.33: chips de pista SIN "Todas" — solo las pistas reales, con emoji
-    // para distinguir la fila de la de niveles de un golpe de vista. "Ver
-    // todas las pistas" = tocar de nuevo el chip activo (toggle, v9.33) o
-    // tocar "Todas" en la fila de niveles. Se generan de los datos, igual
-    // que los de nivel, para que una pista nueva cree su chip solo.
+    // R14: fila superior [🧒 Niños | 🇪🇸 DELE] + una fila de sub-filtro (DELE: Todas / Escolares / Argentina · Niños: Todas / 🌱 / 🌿)
     function renderTrackChips() {
-        const chips = $('dele-tracks');
-        if (!chips) return;
-        const cnt = $('dele-count'); // v9.33: el contador viaja en esta fila
-        chips.innerHTML = '';
-        const mk = (label, value) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'lv-chip lv-chip-dele' + (curTrack === value ? ' active' : '');
-            b.dataset.track = value;
-            b.textContent = label;
-            b.setAttribute('aria-label', 'Filtrar dramas de pista ' + label);
-            chips.appendChild(b);
-        };
-        const names = TRACKS.slice();
-        DRAMAS.forEach(d => { if (d.track && names.indexOf(d.track) === -1) names.push(d.track); });
-        names.forEach(t => mk(TRACK_META[t] || t, t));
-        if (cnt) chips.appendChild(cnt); // re-anclaje tras el re-render
+        const root = $('dele-tracks');
+        if (!root) return;
+        root.innerHTML = '';
+        const kids = isKids(), ks = kidsStats();
+        const seg = document.createElement('div');
+        seg.className = 'dele-seg'; seg.id = 'dele-seg';
+        const sk = mkChip('🧒 Niños', ks.total, { seg: 'ninos', track: 'Niños' }, kids, 'Lecciones para chicos');
+        const sd = mkChip('🇪🇸 DELE', deleOf('all').length, { seg: 'dele' }, !kids, 'Mini-dramas DELE (Escolares y Argentina)');
+        seg.appendChild(sk); seg.appendChild(sd);
+        root.appendChild(seg);
+        const sub = document.createElement('div');
+        sub.className = 'dele-chips dele-sub'; sub.id = 'dele-sub';
+        if (kids) {
+            const bands = Object.keys(ks.bands).filter(k => ks.bands[k] > 0);
+            if (bands.length > 1) {
+                const BL = { A: ['🌱 6–7', 'Franja 6 a 7 años'], B: ['🌿 8–10', 'Franja 8 a 10 años'] };
+                sub.appendChild(mkChip('Todas', null, { band: 'all' }, curBand === 'all', 'Todas las lecciones'));
+                bands.sort().forEach(k => sub.appendChild(mkChip((BL[k] || [k])[0], ks.bands[k], { band: k }, curBand === k, (BL[k] || [k, k])[1])));
+            }
+        } else {
+            sub.appendChild(mkChip('Todas', null, { track: 'all' }, curTrack === 'all', 'Todas las pistas'));
+            const names = TRACKS.filter(t => t !== 'Niños');
+            DRAMAS.forEach(d => { if (d.track && d.track !== 'Niños' && names.indexOf(d.track) === -1) names.push(d.track); });
+            names.forEach(t => sub.appendChild(mkChip(TRACK_META[t] || t, deleOf(t).length, { track: t }, curTrack === t, 'Filtrar dramas de pista ' + (TRACK_META[t] || t))));
+        }
+        if (sub.children.length) root.appendChild(sub);
     }
     function bestLabel(d) {
         const p = progOf(d.id);
@@ -1255,21 +1290,18 @@
         const wrap = $('dele-list');
         if (!wrap) return;
         wrap.innerHTML = '';
-        const shown = DRAMAS.filter(d =>
-            (curLevel === 'all' || d.dele === curLevel) &&
-            (curTrack === 'all' || d.track === curTrack));
-        // v9.33: contador de resultados — cuántos dramas se ven del total
-        // (estado inicial: "24 mini-dramas"; filtrado: "5 de 24").
-        const cnt = $('dele-count');
-        if (cnt) cnt.textContent = (shown.length === DRAMAS.length)
-            ? DRAMAS.length + ' mini-dramas'
-            : shown.length + ' de ' + DRAMAS.length;
         // R12: la pista «Niños» tiene su propia pantalla (ninos-ui.js: tarjetas grandes, juegos con dibujos, estrellas)
-        if (curTrack === 'Niños' && window.NinosUI && window.NinosUI.count() > 0) {
-            const nk = window.NinosUI.renderList(wrap, curLevel);
-            if (cnt) cnt.textContent = nk + ' lecciones';
+        if (isKids() && window.NinosUI && window.NinosUI.count() > 0) {
+            window.NinosUI.renderList(wrap, curLevel, curBand);
             return;
         }
+        // R14: DELE junta Escolares y Argentina, ordenado por nivel (A1→C2) y, dentro de cada nivel, Escolares antes que Argentina
+        const shown = DRAMAS.filter(d =>
+            (curLevel === 'all' || d.dele === curLevel) &&
+            (curTrack === 'all' ? d.track !== 'Niños' : d.track === curTrack))
+            .map(d => ({ d: d, i: DRAMAS.indexOf(d) }))
+            .sort((x, y) => (levelRank(x.d.dele) - levelRank(y.d.dele)) || (trackRank(x.d.track) - trackRank(y.d.track)) || (x.i - y.i))
+            .map(x => x.d);
         if (!shown.length && curTrack !== 'all' && !DRAMAS.some(d => d.track === curTrack)) {
             // R4: pista conocida que todavía no tiene lecciones (hoy «Niños»)
             wrap.innerHTML = '<div class="dl-empty dl-soon">' + escHtml(TRACK_META[curTrack] || curTrack) +
@@ -1283,10 +1315,12 @@
         }
         shown.forEach(d => {
             const card = document.createElement('div');
-            card.className = 'lesson-card';
+            card.className = 'lesson-card dele-card';
+            const tk = ({ 'Escolares': 'esc', 'Argentina': 'arg' })[d.track] || 'otra';
             card.innerHTML =
                 '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + d.emoji + '</span>' +
-                '<span class="lc-hsk">🇪🇸 ' + escHtml(levelLabel(d.dele)) + ' · ' + escHtml(d.track) + '</span>' +
+                '<span class="lc-hsk">🇪🇸 ' + escHtml(levelLabel(d.dele)) + '</span>' +
+                '<span class="lc-track lc-track-' + tk + '">' + escHtml(TRACK_META[d.track] || d.track) + '</span>' +
                 '<span class="lc-best">' + bestLabel(d) + '</span></div>' +
                 '<div class="lc-titles"><span class="lc-zh">' + escHtml(d.titleEs) + '</span>' +
                 '<span class="lc-es">' + escHtml(d.titleZh) + '</span></div>' +
@@ -1313,8 +1347,8 @@
         const chips = $('dele-levels');
         if (chips) chips.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
-            if (!chip || !chip.dataset.level) return; // (los de pista van en #dele-tracks)
-            // v9.33: re-tap en el nivel activo vuelve a "Todas" (toggle)
+            if (!chip || chip.disabled || !chip.dataset.level) return;
+            // v9.33: re-tap en el nivel activo vuelve a «Todos» (toggle)
             curLevel = (curLevel === chip.dataset.level) ? 'all' : chip.dataset.level;
             renderChips();
             renderList();
@@ -1322,11 +1356,19 @@
         const tracks = $('dele-tracks');
         if (tracks) tracks.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
-            if (!chip || !chip.dataset.track) return;
-            // v9.31: filtro por pista · v9.33: re-tap = ver TODAS las pistas
-            // (por eso esta fila ya no necesita un chip "Todas" propio)
-            curTrack = (curTrack === chip.dataset.track) ? 'all' : chip.dataset.track;
+            if (!chip) return;
+            if (chip.dataset.seg) {                           // R14: botón superior «Niños» / «DELE»
+                const wantKids = chip.dataset.seg === 'ninos';
+                if (wantKids === isKids()) return;
+                curTrack = wantKids ? 'Niños' : 'all'; curLevel = 'all'; curBand = 'all';
+            } else if (chip.dataset.band) {                   // R14: franja de Niños
+                curBand = (curBand === chip.dataset.band) ? 'all' : chip.dataset.band;
+            } else if (chip.dataset.track) {                  // R14: sub-filtro de pista de DELE (re-tap = Todas)
+                curTrack = (curTrack === chip.dataset.track) ? 'all' : chip.dataset.track;
+                if (curLevel !== 'all' && !deleLevelCounts()[curLevel]) curLevel = 'all'; // el nivel elegido ya no existe en esta pista
+            } else return;
             renderTrackChips();
+            renderChips();
             renderList();
         });
     }
@@ -1552,7 +1594,7 @@
         if (intro && INTRO_ORIG === null) INTRO_ORIG = intro.textContent;
         if (cnMode) {
             if (sub) sub.textContent = '(mini-dramas DELE · 学西班牙语)';
-            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Tres pistas — 🏫 Escolares (A1 a B1), 🇦🇷 Argentina (A1 a C2) y 🧒 Niños (lecciones para chicos, en preparación) — con niveles separados. Elegí pista y nivel con los chips; el contador te dice cuántos dramas hay.';
+            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Elegí 🧒 Niños (con dibujos y juegos) o 🇪🇸 DELE (🏫 Escolares y 🇦🇷 Argentina, de A1 a C2): cada chip muestra cuántas lecciones tiene.';
         } else {
             if (sub && SUB_ORIG !== null) sub.textContent = SUB_ORIG;
             if (intro && INTRO_ORIG !== null) intro.textContent = INTRO_ORIG;
@@ -1615,10 +1657,8 @@
         wrap.id = 'dele-wrap';
         wrap.className = 'hidden'; // se muestra solo en cn-es (applyMode)
         wrap.innerHTML =
-            '<div class="lesson-levels dele-tracks-row" id="dele-tracks" role="group" aria-label="Filtrar por pista">' +
-            '<span id="dele-count" class="dele-count" aria-live="polite"></span>' +
-            '</div>' +
-            '<div class="lesson-levels" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
+            '<div class="dele-tracks" id="dele-tracks" role="group" aria-label="Tipo de lecciones y filtro de pista"></div>' +
+            '<div class="dele-chips" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
             '<div class="lesson-list" id="dele-list" data-level="all"></div>';
         // v9.32: ARRIBA del bloque chino (después del intro) y no al final —
         // report v9.31: "los chips de lecciones en español quedaron todos
@@ -1668,13 +1708,7 @@
             'body.dark-mode .dl-opt.bad{background:#450a0a}',
             'body.dark-mode .dl-fb.ok{background:#052e16;color:#bbf7d0}',
             'body.dark-mode .dl-fb.bad{background:#450a0a;color:#fecaca}',
-            // v9.31: fila de pistas + estado vacío
-            '.dele-tracks-row{margin-bottom:6px}',
-            '.dele-tracks-row .lv-chip{opacity:.92}',
-            // v9.33: contador de resultados a la derecha de la fila de pistas
-            '.dele-tracks-row{align-items:center}',
-            '.dele-count{margin-left:auto;font-size:.78rem;font-weight:600;color:#64748b;white-space:nowrap}',
-            'body.dark-mode .dele-count{color:#94a3b8}',
+            // R14: la fila de pistas, los chips de nivel y las marcas de pista viven en style.css (bloque «R14 — Lecciones»)
             '.dl-empty{padding:18px 10px;text-align:center;color:#64748b;font-size:.92rem;border:1.5px dashed rgba(100,116,139,.35);border-radius:12px;margin-top:4px}',
             'body.dark-mode .dl-empty{color:#94a3b8;border-color:rgba(148,163,184,.3)}',
             // R4: el estado «pista en preparación» va sobre el degradado violeta del tema claro:
@@ -1719,6 +1753,7 @@
         showTrack: function (track) {
             curTrack = track || 'all';
             curLevel = 'all';
+            curBand = 'all';
             renderTrackChips();
             renderChips();
             renderList();
