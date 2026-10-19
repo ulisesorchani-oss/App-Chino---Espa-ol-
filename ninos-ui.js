@@ -48,8 +48,9 @@
         : '<span class="' + cls + '" aria-hidden="true">' + esc((o && o.emoji) || '🙂') + '</span>';
 
     // ═════════ lista (dentro de #dele-list) ═════════
-    function renderList(wrap, level) {
-        const list = LES().filter(l => level === 'all' || l.dele === level);
+    function renderList(wrap, level, band) {
+        const okBand = (b) => !band || band === 'all' || b === band;   // R14: filtro de franja 🌱 / 🌿
+        const list = LES().filter(l => (level === 'all' || l.dele === level) && okBand(l.band));
         wrap.innerHTML = '';
         if (!list.length) {
             wrap.innerHTML = '<div class="dl-empty">Todavía no hay lecciones de ese nivel en esta pista — probá con «Todas» 🧭</div>';
@@ -75,7 +76,7 @@
                 '</div>';
             wrap.appendChild(card);
         });
-        const sl = (level === 'all' || level === 'A1') ? soundLesson() : null;
+        const sl = ((level === 'all' || level === 'A1') && okBand('A')) ? soundLesson() : null;   // «Sonidos» es de la franja 🌱
         if (sl) {
             const p = progOf(sl.id), card = document.createElement('div');
             card.className = 'lesson-card nino-extra';
@@ -381,6 +382,8 @@
 
     window.NinosUI = {
         count: () => LES().length,
+        // R14: lo que necesita lessons-dele.js para los botones y chips: total, lecciones por franja y por nivel
+        stats: () => { const st = { total: 0, bands: {}, levels: {} }; LES().forEach(l => { st.total++; st.bands[l.band] = (st.bands[l.band] || 0) + 1; st.levels[l.dele] = (st.levels[l.dele] || 0) + 1; }); return st; },
         renderList: renderList,
         sounds: () => SND(),
         open: (id, mode) => { const l = lessonById(id); if (!l) return false; (mode === 'play' ? openPlay : openStory)(l); return true; },

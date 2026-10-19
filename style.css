@@ -6985,3 +6985,36 @@ body.paper-mode .nino-snd-letters { background: #f3ead2; border-color: #d8c79c; 
 body.paper-mode .nino-snd-es { color: #3d3327; }
 body.paper-mode .nino-snd-zh { color: #7c2d12; }
 body.paper-mode .nino-snd-intro, body.paper-mode .nino-snd-rule, body.paper-mode .nino-snd-note, body.paper-mode .nino-word-like { color: #5a4a30; }
+
+/* ═══ R14 — Lecciones (Aprender → Lecciones en «aprendo español»): fila Niños / DELE, filtros compactos, marca de pista ═══
+   Antes los chips colgaban de .lesson-levels (columna flex pensada para los selectores HSK/TOCFL) y quedaban uno por línea
+   y a todo el ancho. Ahora: dos botones arriba, un sub-filtro y los chips de nivel en filas que saltan de línea. */
+.dele-tracks { display: flex; flex-direction: column; gap: 8px; margin: 0 0 8px; }
+.dele-seg { display: flex; gap: 8px; }
+.dele-seg .lv-chip {
+    flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 8px; font-size: 0.95rem; font-weight: 800; border-radius: 14px; white-space: nowrap;
+}
+.dele-chips { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
+.dele-chips[hidden] { display: none; }
+.dele-tracks .dele-chips { margin: 0; }
+.dele-chips .lv-chip { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 8px; font-size: 0.78rem; white-space: nowrap; }
+.dele-n { font-size: 0.7rem; font-weight: 800; line-height: 1; padding: 3px 6px; border-radius: 999px; background: rgba(100, 116, 139, .16); }
+.lv-chip.active .dele-n { background: rgba(255, 255, 255, .24); }
+.dele-chips .lv-chip:disabled, .dele-chips .lv-chip.is-off { opacity: .5; border-style: dashed; cursor: default; }
+/* tarjetas de DELE: el nivel, la marca de pista y el mejor puntaje caben en 320 px (saltan de línea si hace falta) */
+.dele-card .lc-top { flex-wrap: wrap; row-gap: 4px; }
+.lc-track { font-size: 0.68rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; letter-spacing: .02em; white-space: nowrap; }
+.lc-track-esc { background: #fef3c7; color: #92400e; }
+.lc-track-arg { background: #e0f2fe; color: #075985; }
+.lc-track-otra { background: #f1f5f9; color: #334155; }
+/* oscuro */
+body.dark-mode .dele-n { background: rgba(148, 163, 184, .22); }
+body.dark-mode .lc-track-esc { background: #451a03; color: #fde68a; }
+body.dark-mode .lc-track-arg { background: #082f49; color: #bae6fd; }
+body.dark-mode .lc-track-otra { background: #1e293b; color: #cbd5e1; }
+/* papel */
+body.paper-mode .dele-n { background: rgba(122, 90, 40, .14); }
+body.paper-mode .lc-track-esc { background: #f6e7c1; color: #7c2d12; }
+body.paper-mode .lc-track-arg { background: #e2eef0; color: #0c4a6e; }
+body.paper-mode .lc-track-otra { background: #efe6cf; color: #43382a; }
