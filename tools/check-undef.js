@@ -51,8 +51,7 @@ const UMD = ['module', 'exports', 'require', 'define'];
 // ── hallazgos ya revisados (archivo + nombre + cuántas veces como máximo). Un hallazgo NUEVO, o uno repetido más veces, sí falla ──
 //   'falso-positivo': el código es correcto; ESLint no entiende la guarda.      'pendiente': bug real, se avisa en cada corrida hasta corregirlo.
 const KNOWN = [
-  { file: 'text-utils.js', name: 'root', max: 1, kind: 'falso-positivo', note: "`typeof root !== 'undefined' && root.PronunciationConfig`: la guarda con typeof corta antes de usar `root`" },
-  { file: 'classics-reader.js', name: 'mod', max: 1, kind: 'pendiente', note: 'cqOptions() usa `mod` (línea «key === mod») pero no es parámetro ni variable: lanza ReferenceError cuando el clásico no tiene 2 distractores propios y se buscan en otros. Candidato a corregir con `CR.mod`, que openCq() fija antes de llamar' }
+  { file: 'text-utils.js', name: 'root', max: 1, kind: 'falso-positivo', note: "`typeof root !== 'undefined' && root.PronunciationConfig`: la guarda con typeof corta antes de usar `root`" }
 ];
 
 const asObj = (names) => names.reduce((o, n) => { o[n] = 'readonly'; return o; }, {});
