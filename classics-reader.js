@@ -404,7 +404,7 @@
         }
         if (pool.length < 2 && typeof EMBEDDED_MODULE_DATA !== 'undefined') {
             outer: for (const key of Object.keys(EMBEDDED_MODULE_DATA)) {
-                if (key === mod || key.indexOf('Clasicos-') !== 0) continue;
+                if (key === CR.mod || key.indexOf('Clasicos-') !== 0) continue; // CR.mod: openCq() lo fija antes de armar las opciones (antes decía `mod`, que no existe acá)
                 for (const x of EMBEDDED_MODULE_DATA[key]) {
                     const a = String(x.chinese_simp_answer || '').trim();
                     if (!a || seen.has(a)) continue;
