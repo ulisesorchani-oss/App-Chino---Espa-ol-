@@ -1,17 +1,19 @@
 #!/usr/bin/env node
-// tools/test-dele-layout.js — disposición de la pantalla «Lecciones» (mini-dramas DELE y pista Niños) a 320, 360 y 412 px.
-//   node tools/test-dele-layout.js         → código de salida 1 si algo falla
-//   SKIP_CONTRAST=1 node tools/test-dele-layout.js   → omite la medida de contraste (queda para verificación manual)
+// tools/test-dele-layout.js — pantalla «Lecciones» (mini-dramas DELE y pista Niños): disposición a 320, 360 y 412 px en los tres temas.
+//   node tools/test-dele-layout.js                    → código de salida 1 si algo falla
+//   SKIP_CONTRAST=1 node tools/test-dele-layout.js    → omite la medida de contraste (queda para verificación manual)
+//   SHOTS_DIR=/ruta node tools/test-dele-layout.js    → además guarda capturas
 //
-// Qué verifica (servidor estático local + Chromium con Playwright, sin red real):
-//   · fila superior con DOS botones (Niños · DELE): en la misma línea, mismo ancho, ≥ 44 px de alto, DELE activo al abrir
-//   · DELE: sub-filtro Todas / Escolares / Argentina; chips de nivel (Todos + A1…C2) en filas que saltan de línea (ninguno a todo el
-//     ancho), cada uno con su conteo; los niveles sin lecciones en la pista elegida quedan apagados; la suma de conteos = total
-//   · la lista une Escolares y Argentina, ordenada por nivel y con Escolares antes que Argentina, con la marca de pista en cada tarjeta
-//   · Niños: lista directa, sin chips de nivel (todas sus lecciones son «A1 adaptado»), sub-filtro de franja 🌱 / 🌿 con conteos
-//   · sin desborde horizontal ni texto cortado (scrollWidth ≤ clientWidth) en botones, chips, marcas y títulos
-//   · la primera tarjeta queda a la vista sin bajar una pantalla entera
-//   · contraste ≥ 4,5:1 medido sobre píxeles reales (tres temas, 360 px) — se puede omitir con SKIP_CONTRAST=1
+// Qué verifica (servidor estático local + Chromium con Playwright, sin red real), para cada ancho × tema (claro, oscuro, papel):
+//   · fila superior con DOS botones (🧒 Niños · 🎓 DELE): misma línea, mismo ancho, ≥ 44 px, DELE activo al abrir, con sus conteos
+//   · DELE: SIN sub-filtro de pista y SIN chips de nivel; un único <select> de nivel (Todos + A1…C2) con el conteo de cada uno
+//   · la lista une Escolares y Argentina, ordenada por nivel y, dentro de cada nivel, por variante (España antes que Argentina)
+//   · cada tarjeta: pastilla de nivel «DELE A1» SIN bandera y UNA pastilla de país con la bandera de la tabla variante→bandera
+//   · todas las lecciones tienen un `variant` presente en la tabla única (lessons-dele.js · VARIANTES)
+//   · DeleLessons.showTrack: 'Escolares', 'Argentina' y 'all' abren DELE; 'Niños' abre Niños
+//   · Niños sin cambios: lista directa, sin menú ni chips de nivel, sub-filtro de franja 🌱 / 🌿 con conteos
+//   · sin desborde horizontal ni texto cortado; la primera tarjeta queda a la vista sin bajar una pantalla entera
+//   · contraste ≥ 4,5:1 medido sobre píxeles reales (360 px, tres temas) — SKIP_CONTRAST=1 lo omite
 const fs = require('fs'), path = require('path'), http = require('http');
 const ROOT = path.resolve(__dirname, '..');
 let chromium;
@@ -27,6 +29,7 @@ const server = http.createServer((req, res) => {
 let n = 0, fails = 0;
 const ok = (c, m) => { n++; if (!c) { fails++; console.log('FAIL ' + m); } };
 const SKIP_CONTRAST = !!process.env.SKIP_CONTRAST;
+const FLAG = /[\u{1F1E6}-\u{1F1FF}]/u;
 
 // contraste real: el color de fondo es el más repetido del recorte; el texto, el píxel más lejano en luminancia
 async function contrast(p, el) {
@@ -66,85 +69,101 @@ async function contrast(p, el) {
     const r = (e) => { const x = e.getBoundingClientRect(); return { l: x.left, t: x.top, r: x.right, b: x.bottom, w: x.width, h: x.height }; };
     const wrap = document.getElementById('dele-wrap'), W = r(wrap);
     const vis = (e) => e && e.offsetParent !== null;
-    const chips = (sel) => [...document.querySelectorAll(sel)].filter(vis).map(e => ({ txt: e.textContent.trim(), n: (e.querySelector('.dele-n') ? +e.querySelector('.dele-n').textContent : null), label: [...e.childNodes].filter(x => x.nodeType === 3).map(x => x.textContent).join('').trim(), ...r(e), clip: e.scrollWidth > e.clientWidth + 1, off: e.disabled, active: e.classList.contains('active'), data: { ...e.dataset } }));
-    const cards = [...document.querySelectorAll('#dele-list .dele-card')].map(c => ({ ...r(c), lvl: (c.querySelector('.lc-hsk') || {}).textContent, trk: (c.querySelector('.lc-track') || {}).textContent, trkRect: c.querySelector('.lc-track') ? r(c.querySelector('.lc-track')) : null,
-      clip: [...c.querySelectorAll('.lc-top > *, .lc-titles > *, .lc-actions > *')].some(e => e.getBoundingClientRect().right > c.getBoundingClientRect().right + 0.5 || (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).display !== 'inline')) }));
-    const nino = [...document.querySelectorAll('#dele-list .nino-card, #dele-list .nino-extra')].map(c => r(c));
+    const chips = (sel) => [...document.querySelectorAll(sel)].filter(vis).map(e => ({ txt: e.textContent.trim(), n: (e.querySelector('.dele-n') ? +e.querySelector('.dele-n').textContent : null), label: [...e.childNodes].filter(x => x.nodeType === 3).map(x => x.textContent).join('').trim(), ...r(e), clip: e.scrollWidth > e.clientWidth + 1, active: e.classList.contains('active') }));
+    const sel = document.getElementById('dele-level-sel');
+    const cards = [...document.querySelectorAll('#dele-list .dele-card')].map(c => {
+      const lv = c.querySelector('.lc-hsk'), vr = [...c.querySelectorAll('.lc-var')], cr = c.getBoundingClientRect();
+      return { ...r(c), lvl: lv ? lv.textContent : null, vars: vr.map(v => ({ txt: v.textContent, variant: v.dataset.variant, cls: v.className, right: v.getBoundingClientRect().right })), oldTrack: !!c.querySelector('.lc-track'),
+        clip: [...c.querySelectorAll('.lc-top > *, .lc-titles > *, .lc-actions > *')].some(e => e.getBoundingClientRect().right > cr.right + 0.5 || (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).display !== 'inline')) };
+    });
     return { vw: innerWidth, vh: innerHeight, W, docOverflow: document.documentElement.scrollWidth > innerWidth + 1,
-      seg: chips('#dele-seg .lv-chip'), sub: chips('#dele-sub .lv-chip'), lvl: chips('#dele-levels .lv-chip'), lvlHidden: !vis(document.getElementById('dele-levels')),
-      cards, nino, countEl: !!document.getElementById('dele-count'),
+      seg: chips('#dele-seg .lv-chip'), sub: chips('#dele-sub .lv-chip'), levelChips: chips('#dele-levels .lv-chip'), anyTrackChip: document.querySelectorAll('.lv-chip[data-track]:not([data-seg])').length,
+      selVisible: !!(sel && vis(sel)), selRect: sel && vis(sel) ? r(sel) : null, selClip: sel ? sel.scrollWidth > sel.clientWidth + 1 : false,
+      selOpts: sel ? [...sel.options].map(o => ({ v: o.value, t: o.textContent, off: o.disabled, sel: o.selected })) : [], selValue: sel ? sel.value : null,
+      selFit: (() => { if (!sel || !vis(sel)) return null; const cs = getComputedStyle(sel), c2 = document.createElement('canvas').getContext('2d'); c2.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+        const avail = sel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); return { avail: Math.round(avail), widest: Math.round(Math.max(...[...sel.options].map(o => c2.measureText(o.textContent).width))) }; })(),
+      tagSame: (() => { const t = document.querySelector('.lvsel-dele .lvsel-tag'); return !!sel && !!t && getComputedStyle(t).color === getComputedStyle(sel).color; })(),
+      selInside: !!sel && !!sel.closest('.lvsel-dele'), levelboxHidden: document.getElementById('dele-levelbox').hidden || !vis(document.getElementById('dele-levelbox')),
+      cards, nino: [...document.querySelectorAll('#dele-list .nino-card, #dele-list .nino-extra')].map(c => r(c)),
       overflowing: [...wrap.querySelectorAll('*')].filter(e => vis(e) && e.getBoundingClientRect().right > innerWidth + 0.5).map(e => e.className || e.tagName).slice(0, 5) };
   });
-  const data = async (p) => p.evaluate(() => {
-    const dele = DeleDebug.data.filter(d => d.track !== 'Niños'), by = (f) => dele.filter(f);
-    const lv = {}; ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].forEach(v => { lv[v] = { all: by(d => d.dele === v).length, esc: by(d => d.dele === v && d.track === 'Escolares').length, arg: by(d => d.dele === v && d.track === 'Argentina').length }; });
-    return { total: dele.length, esc: by(d => d.track === 'Escolares').length, arg: by(d => d.track === 'Argentina').length, lv, kids: (() => { const st = { total: 0, bands: {}, levels: {} }; NINOS_LESSONS.forEach(l => { st.total++; st.bands[l.band] = (st.bands[l.band] || 0) + 1; st.levels[l.dele] = (st.levels[l.dele] || 0) + 1; }); return st; })() };
+  const data = (p) => p.evaluate(() => {
+    const dele = DeleDebug.data.filter(d => d.track !== 'Niños'), lv = {};
+    ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].forEach(v => { lv[v] = dele.filter(d => d.dele === v).length; });
+    const kids = { total: 0, bands: {} }; NINOS_LESSONS.forEach(l => { kids.total++; kids.bands[l.band] = (kids.bands[l.band] || 0) + 1; });
+    return { total: dele.length, lv, kids, variantes: DeleDebug.variantes, rows: dele.map(d => ({ id: d.id, dele: d.dele, variant: d.variant })) };
   });
-  const rows = (arr) => new Set(arr.map(c => Math.round(c.t))).size;
-  const num = (c) => c.n;
+  const LV = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
-  for (const w of [320, 360, 412]) {
-    const tag = w + 'px ';
-    const { ctx, p, errs } = await open(w);
-    const D = await data(p);
-    let m = await measure(p);
-    const inside = (c) => c.l >= m.W.l - 0.5 && c.r <= m.W.r + 0.5;
+  for (const theme of ['light', 'dark', 'paper']) {
+    for (const w of [320, 360, 412]) {
+      const tag = w + 'px/' + theme + ' ';
+      const { ctx, p, errs } = await open(w, theme);
+      const D = await data(p); const VK = Object.keys(D.variantes);
+      let m = await measure(p);
+      const inside = (c) => c.l >= m.W.l - 0.5 && c.r <= m.W.r + 0.5;
 
-    // ── DELE (vista por defecto) ──
-    ok(m.seg.length === 2 && Math.abs(m.seg[0].t - m.seg[1].t) < 1 && Math.abs(m.seg[0].w - m.seg[1].w) <= 2, tag + 'DELE: dos botones arriba, en la misma línea y del mismo ancho ' + JSON.stringify(m.seg.map(x => [x.txt, Math.round(x.t), Math.round(x.w)])));
-    ok(m.seg.every(x => x.h >= 43.5 && inside(x) && !x.clip), tag + 'DELE: botones superiores ≥ 44 px, dentro del contenedor y sin texto cortado');
-    ok(/Niños/.test(m.seg[0].label) && num(m.seg[0]) === D.kids.total && /DELE/.test(m.seg[1].label) && num(m.seg[1]) === D.total && m.seg[1].active && !m.seg[0].active, tag + 'DELE: abre en DELE (activo) y los botones muestran sus conteos ' + m.seg.map(x => x.txt).join(' | '));
-    ok(m.sub.map(x => x.label).join('|') === 'Todas|🏫 Escolares|🇦🇷 Argentina' && num(m.sub[1]) === D.esc && num(m.sub[2]) === D.arg, tag + 'DELE: sub-filtro Todas / Escolares / Argentina con conteos ' + m.sub.map(x => x.txt).join(' | '));
-    ok(m.lvl.length === 7 && m.lvl[0].label === 'Todos' && num(m.lvl[0]) === D.total, tag + 'DELE: chips Todos + A1…C2 (7) ' + m.lvl.map(x => x.txt).join(' | '));
-    ok(m.lvl.slice(1).every((c, i) => num(c) === D.lv['A1 A2 B1 B2 C1 C2'.split(' ')[i]].all) && m.lvl.slice(1).reduce((s, c) => s + num(c), 0) === D.total, tag + 'DELE: cada chip de nivel muestra su conteo y la suma da ' + D.total);
-    ok(m.lvl.every(c => c.w < m.W.w * 0.6 && c.h >= 43.5 && inside(c) && !c.clip) && m.sub.every(c => c.w < m.W.w * 0.7 && c.h >= 43.5 && inside(c) && !c.clip), tag + 'chips compactos: ninguno a todo el ancho, ≥ 44 px, dentro y sin texto cortado');
-    ok(rows(m.lvl) >= 2 && rows(m.lvl) <= 2, tag + 'chips de nivel en 2 filas que saltan de línea (' + rows(m.lvl) + ')');
-    ok(!m.docOverflow && m.overflowing.length === 0, tag + 'sin desborde horizontal ' + m.overflowing.join(','));
-    ok(!m.countEl, tag + 'el contador «24 mini-dramas» ya no existe');
-    ok(m.cards.length === D.total, tag + 'la lista junta Escolares y Argentina (' + m.cards.length + ' tarjetas)');
-    const lvlOf = (c) => c.lvl.replace(/\D*DELE\s*/, '').trim(), order = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-    let sorted = true; for (let i = 1; i < m.cards.length; i++) { const a = m.cards[i - 1], c = m.cards[i], la = order.indexOf(lvlOf(a)), lc = order.indexOf(lvlOf(c)); if (lc < la || (lc === la && /Argentina/.test(a.trk) && /Escolares/.test(c.trk))) sorted = false; }
-    ok(sorted, tag + 'orden por nivel y, dentro de cada nivel, Escolares antes que Argentina');
-    ok(m.cards.every(c => /Escolares|Argentina/.test(c.trk || '') && c.trkRect && c.trkRect.r <= c.r + 0.5) && m.cards.every(c => !c.clip), tag + 'cada tarjeta lleva su marca de pista y nada se corta dentro de la tarjeta');
-    ok(m.cards[0] && m.cards[0].t < m.vh - 60, tag + 'la primera tarjeta queda a la vista sin bajar una pantalla (top ' + Math.round(m.cards[0].t) + ' de ' + m.vh + ')');
-    if (OUT) await p.screenshot({ path: path.join(OUT, 'dele-' + w + '.png') });
+      // ── datos: la tabla única variante → bandera ──
+      ok(D.rows.every(r => r.variant && D.variantes[r.variant] && FLAG.test(D.variantes[r.variant].flag) && D.variantes[r.variant].nombre), tag + 'todas las lecciones tienen `variant` y está en la tabla variante→bandera');
+      ok(D.rows.length === D.total && D.rows.filter(r => r.variant === 'es-ES').length === 6 && D.rows.filter(r => r.variant === 'es-AR').length === 18, tag + 'variantes: 6 de España y 18 de Argentina');
 
-    // ── Escolares: se apagan B2, C1 y C2 ──
-    await p.click('#dele-sub .lv-chip[data-track="Escolares"]'); await p.waitForTimeout(250); m = await measure(p);
-    ok(m.cards.length === D.esc && m.cards.every(c => /Escolares/.test(c.trk)), tag + 'Escolares: ' + D.esc + ' tarjetas, todas de esa pista');
-    ok(m.lvl.slice(1).every((c, i) => num(c) === D.lv['A1 A2 B1 B2 C1 C2'.split(' ')[i]].esc && c.off === (D.lv['A1 A2 B1 B2 C1 C2'.split(' ')[i]].esc === 0)) && num(m.lvl[0]) === D.esc, tag + 'Escolares: los niveles sin lecciones quedan apagados y los demás muestran su conteo ' + m.lvl.map(x => x.txt + (x.off ? '✗' : '')).join(' | '));
-    const stuck = await p.evaluate(() => { const off = document.querySelector('#dele-levels .lv-chip:disabled'); off.click(); return document.querySelectorAll('#dele-list .dele-card').length; });
-    ok(stuck === D.esc, tag + 'un chip apagado no filtra');
-    // nivel elegido que no existe en la pista siguiente → vuelve a «Todos»
-    await p.click('#dele-sub .lv-chip[data-track="Escolares"]'); await p.waitForTimeout(150);      // re-tap → Todas
-    await p.click('#dele-levels .lv-chip[data-level="C1"]'); await p.waitForTimeout(150);
-    let cnt = await p.evaluate(() => document.querySelectorAll('#dele-list .dele-card').length);
-    ok(cnt === D.lv.C1.all, tag + 'nivel C1: ' + D.lv.C1.all + ' tarjetas');
-    await p.click('#dele-sub .lv-chip[data-track="Escolares"]'); await p.waitForTimeout(200); m = await measure(p);
-    ok(m.lvl[0].active && m.cards.length === D.esc, tag + 'al pasar a Escolares el nivel C1 (que no existe ahí) vuelve a «Todos» (' + m.cards.length + ' tarjetas)');
-    // Argentina: los 6 niveles existen
-    await p.click('#dele-sub .lv-chip[data-track="Argentina"]'); await p.waitForTimeout(250); m = await measure(p);
-    ok(m.cards.length === D.arg && m.lvl.every(c => !c.off) && m.lvl.slice(1).every((c, i) => num(c) === D.lv['A1 A2 B1 B2 C1 C2'.split(' ')[i]].arg), tag + 'Argentina: ' + D.arg + ' tarjetas y los 6 niveles activos');
-    ok(!m.docOverflow && m.cards.every(c => !c.clip), tag + 'Argentina: sin desborde ni texto cortado');
-    await p.click('#dele-sub .lv-chip[data-track="Todas"], #dele-sub .lv-chip[data-track="all"]'); await p.waitForTimeout(200);
+      // ── botones superiores ──
+      ok(m.seg.length === 2 && Math.abs(m.seg[0].t - m.seg[1].t) < 1 && Math.abs(m.seg[0].w - m.seg[1].w) <= 2, tag + 'dos botones arriba, en la misma línea y del mismo ancho ' + JSON.stringify(m.seg.map(x => [x.txt, Math.round(x.t), Math.round(x.w)])));
+      ok(m.seg.every(x => x.h >= 43.5 && inside(x) && !x.clip), tag + 'botones superiores ≥ 44 px, dentro y sin texto cortado');
+      ok(m.seg[0].label === '🧒 Niños' && m.seg[0].n === D.kids.total && m.seg[1].label === '🎓 DELE' && m.seg[1].n === D.total && m.seg[1].active && !m.seg[0].active && !FLAG.test(m.seg[1].label), tag + 'abre en DELE (activo, sin bandera) y los botones muestran sus conteos ' + m.seg.map(x => x.txt).join(' | '));
 
-    // ── Niños ──
-    await p.click('#dele-seg .lv-chip[data-seg="ninos"]'); await p.waitForTimeout(350); m = await measure(p);
-    ok(m.seg[0].active && !m.seg[1].active, tag + 'Niños: el botón Niños queda activo');
-    ok(m.lvlHidden && m.lvl.length === 0, tag + 'Niños: sin chips de nivel (todas sus lecciones son A1 adaptado)');
-    ok(m.sub.map(x => x.label).join('|') === 'Todas|🌱 6–7|🌿 8–10' && num(m.sub[1]) === D.kids.bands.A && num(m.sub[2]) === D.kids.bands.B, tag + 'Niños: sub-filtro de franja con conteos ' + m.sub.map(x => x.txt).join(' | '));
-    ok(m.sub.every(c => c.h >= 43.5 && inside(c) && !c.clip) && m.seg.every(c => inside(c) && !c.clip), tag + 'Niños: botones y chips ≥ 44 px, dentro y sin texto cortado');
-    ok(m.nino.length === D.kids.total + 1 && m.cards.length === 0, tag + 'Niños: lista directa (' + D.kids.total + ' lecciones + tarjeta de sonidos)');
-    ok(m.nino[0] && m.nino[0].t < m.vh - 60 && !m.docOverflow && m.overflowing.length === 0, tag + 'Niños: la primera tarjeta queda a la vista (top ' + Math.round((m.nino[0] || {}).t) + ') y no hay desborde');
-    if (OUT) await p.screenshot({ path: path.join(OUT, 'ninos-' + w + '.png') });
-    await p.click('#dele-sub .lv-chip[data-band="A"]'); await p.waitForTimeout(250); m = await measure(p);
-    ok(m.nino.length === D.kids.bands.A + 1, tag + 'franja 🌱: ' + D.kids.bands.A + ' lecciones + sonidos (' + m.nino.length + ')');
-    await p.click('#dele-sub .lv-chip[data-band="B"]'); await p.waitForTimeout(250); m = await measure(p);
-    ok(m.nino.length === D.kids.bands.B, tag + 'franja 🌿: ' + D.kids.bands.B + ' lecciones y sin la tarjeta de sonidos (' + m.nino.length + ')');
-    await p.click('#dele-seg .lv-chip[data-seg="dele"]'); await p.waitForTimeout(300); m = await measure(p);
-    ok(m.seg[1].active && m.lvl.length === 7 && m.cards.length === D.total && !m.lvlHidden, tag + 'volver a DELE: filtros y lista completos');
-    ok(errs.length === 0, tag + 'sin errores JS: ' + errs.join(' | '));
-    await ctx.close();
+      // ── DELE: sin sub-filtro ni chips; un solo menú ──
+      ok(m.sub.length === 0 && m.levelChips.length === 0 && m.anyTrackChip === 0, tag + 'DELE: sin sub-filtro de pista ni chips de nivel');
+      ok(m.selVisible && m.selInside && m.selRect.h >= 43.5 && inside(m.selRect) && !m.selClip, tag + 'DELE: un <select> de nivel (.lvsel-dele), ≥ 44 px, dentro y sin texto cortado');
+      ok(m.selFit && m.selFit.widest <= m.selFit.avail, tag + 'ninguna opción del menú queda cortada (la más larga ' + JSON.stringify(m.selFit) + ')');
+      ok(m.tagSame, tag + 'la etiqueta «NIVEL DELE» lleva el mismo color que el texto del menú (convención .lvsel)');
+      ok(m.selOpts.map(o => o.v).join() === 'all,' + LV.join(), tag + 'opciones: Todos + A1…C2 ' + m.selOpts.map(o => o.v).join());
+      ok(m.selOpts[0].t === 'Todos los niveles (' + D.total + ')' && LV.every((v, i) => m.selOpts[i + 1].t === v + ' (' + D.lv[v] + ')') && m.selOpts.every(o => !o.off), tag + 'cada opción muestra su conteo ' + m.selOpts.map(o => o.t).join(' | '));
+      ok(m.selValue === 'all' && m.cards.length === D.total, tag + 'DELE: «Todos los niveles» y ' + D.total + ' tarjetas (Escolares y Argentina juntas)');
+      ok(!m.docOverflow && m.overflowing.length === 0, tag + 'sin desborde horizontal ' + m.overflowing.join(','));
+      ok(m.cards[0] && m.cards[0].t < m.vh - 60, tag + 'la primera tarjeta queda a la vista sin bajar una pantalla (top ' + Math.round(m.cards[0].t) + ' de ' + m.vh + ')');
+
+      // ── tarjetas: nivel sin bandera, un solo país con bandera, orden ──
+      ok(m.cards.every(c => /^DELE [ABC][12]$/.test(c.lvl) && !FLAG.test(c.lvl)), tag + 'pastilla de nivel «DELE A1» sin bandera');
+      ok(m.cards.every(c => c.vars.length === 1 && !c.oldTrack && c.vars[0].txt === D.variantes[c.vars[0].variant].flag + ' ' + D.variantes[c.vars[0].variant].nombre && c.vars[0].right <= c.r + 0.5), tag + 'una sola pastilla de país, con la bandera y el nombre de la tabla');
+      const rowOf = (c, i) => D.rows.filter(r => r.dele === c.lvl.replace('DELE ', ''))[0];
+      let sorted = true;
+      for (let i = 1; i < m.cards.length; i++) { const a = m.cards[i - 1], c = m.cards[i], la = LV.indexOf(a.lvl.replace('DELE ', '')), lc = LV.indexOf(c.lvl.replace('DELE ', '')); if (lc < la || (lc === la && VK.indexOf(c.vars[0].variant) < VK.indexOf(a.vars[0].variant))) sorted = false; }
+      ok(sorted, tag + 'orden por nivel y, dentro de cada nivel, por variante (' + VK.join(' → ') + ')');
+      ok(m.cards.every(c => !c.clip), tag + 'nada se corta dentro de las tarjetas');
+      if (OUT && theme === 'light') await p.screenshot({ path: path.join(OUT, 'dele-' + w + '.png') });
+
+      // ── el menú filtra y conserva el foco ──
+      await p.focus('#dele-level-sel'); await p.evaluate(() => { window.__sel = document.getElementById('dele-level-sel'); });
+      await p.selectOption('#dele-level-sel', 'A2'); await p.waitForTimeout(250); m = await measure(p);
+      const focus = await p.evaluate(() => (document.activeElement && document.activeElement.id) + '|' + (document.getElementById('dele-level-sel') === window.__sel ? 'mismo-elemento' : 'se-redibujo'));
+      ok(m.cards.length === D.lv.A2 && m.cards.every(c => c.lvl === 'DELE A2') && m.selValue === 'A2', tag + 'nivel A2: ' + D.lv.A2 + ' tarjetas, todas «DELE A2»');
+      ok(focus === 'dele-level-sel|mismo-elemento', tag + 'al elegir, el menú no se vuelve a dibujar y conserva el foco (' + focus + ')');
+      await p.selectOption('#dele-level-sel', 'C2'); await p.waitForTimeout(200); m = await measure(p);
+      ok(m.cards.length === D.lv.C2 && m.cards.every(c => c.vars.length === 1), tag + 'nivel C2: ' + D.lv.C2 + ' tarjeta');
+      await p.selectOption('#dele-level-sel', 'all'); await p.waitForTimeout(200);
+
+      // ── showTrack ──
+      for (const tr of ['Escolares', 'Argentina', 'all']) {
+        await p.evaluate(t => DeleLessons.showTrack(t), tr); await p.waitForTimeout(250); m = await measure(p);
+        ok(m.seg[1].active && m.selVisible && m.selValue === 'all' && m.cards.length === D.total && m.sub.length === 0, tag + "showTrack('" + tr + "') abre DELE con todos los niveles (" + m.cards.length + ' tarjetas)');
+      }
+
+      // ── Niños: sin cambios ──
+      await p.click('#dele-seg .lv-chip[data-seg="ninos"]'); await p.waitForTimeout(350); m = await measure(p);
+      ok(m.seg[0].active && !m.seg[1].active && !m.selVisible && m.levelChips.length === 0 && m.levelboxHidden, tag + 'Niños: sin menú ni chips de nivel');
+      ok(m.sub.map(x => x.label).join('|') === 'Todas|🌱 6–7|🌿 8–10' && m.sub[1].n === D.kids.bands.A && m.sub[2].n === D.kids.bands.B && m.sub.every(c => c.h >= 43.5 && inside(c) && !c.clip), tag + 'Niños: sub-filtro de franja con conteos ' + m.sub.map(x => x.txt).join(' | '));
+      ok(m.nino.length === D.kids.total + 1 && m.cards.length === 0 && m.nino[0].t < m.vh - 60 && !m.docOverflow && m.overflowing.length === 0, tag + 'Niños: lista directa (' + D.kids.total + ' lecciones + sonidos), primera tarjeta a la vista y sin desborde');
+      if (OUT && theme === 'light') await p.screenshot({ path: path.join(OUT, 'ninos-' + w + '.png') });
+      await p.click('#dele-sub .lv-chip[data-band="B"]'); await p.waitForTimeout(250); m = await measure(p);
+      ok(m.nino.length === D.kids.bands.B, tag + 'franja 🌿: ' + D.kids.bands.B + ' lecciones (sin la tarjeta de sonidos)');
+      await p.evaluate(() => DeleLessons.showTrack('Niños')); await p.waitForTimeout(250); m = await measure(p);
+      ok(m.seg[0].active && m.nino.length === D.kids.total + 1, tag + "showTrack('Niños') abre Niños");
+      await p.click('#dele-seg .lv-chip[data-seg="dele"]'); await p.waitForTimeout(300); m = await measure(p);
+      ok(m.seg[1].active && m.selVisible && m.cards.length === D.total && m.sub.length === 0, tag + 'volver a DELE: menú y lista completos');
+      ok(errs.length === 0, tag + 'sin errores JS: ' + errs.join(' | '));
+      await ctx.close();
+    }
   }
 
   // ── contraste (verificación opcional; SKIP_CONTRAST=1 la omite) ──
@@ -152,18 +171,17 @@ async function contrast(p, el) {
     const crs = [];
     for (const th of ['light', 'dark', 'paper']) {
       const { ctx, p } = await open(360, th);
-      const grab = async (label, sel) => { const e = await p.$(sel); if (e) crs.push([th + ' ' + label, await contrast(p, e)]); };
+      const grab = async (label, sel) => { const e = await p.$(sel); if (e) crs.push([th + ' ' + label, await contrast(p, e)]); else crs.push([th + ' ' + label + ' (no encontrado)', 0]); };
       await grab('botón Niños (inactivo)', '#dele-seg .lv-chip[data-seg="ninos"]');
-      await grab('botón DELE (activo)', '#dele-seg .lv-chip[data-seg="dele"]');
-      await grab('chip Escolares', '#dele-sub .lv-chip[data-track="Escolares"]');
-      await grab('chip nivel A1', '#dele-levels .lv-chip[data-level="A1"]');
-      await grab('marca Escolares', '.lc-track-esc');
-      await grab('marca Argentina', '.lc-track-arg');
-      // chip activo = texto blanco sobre un degradado: se calcula con los colores extremos del degradado (el recorte de píxeles lo subestima)
-      const g = await p.evaluate(() => { const e = document.querySelector('#dele-sub .lv-chip.active'); const cols = (getComputedStyle(e).backgroundImage.match(/rgb\([^)]*\)/g) || []).map(c => c.match(/\d+/g).map(Number));
+      await grab('menú de nivel', '.lvsel-dele select');
+      await grab('pastilla de nivel', '.dele-card .lc-hsk');
+      await grab('pastilla España', '.dele-card .lc-var-es');
+      await grab('pastilla Argentina', '.dele-card .lc-var-ar');
+      // botón activo = texto blanco sobre un degradado: se calcula con los colores extremos del degradado (el recorte de píxeles lo subestima)
+      const g = await p.evaluate(() => { const e = document.querySelector('#dele-seg .lv-chip.active'); const cols = (getComputedStyle(e).backgroundImage.match(/rgb\([^)]*\)/g) || []).map(c => c.match(/\d+/g).map(Number));
         const L = (r, g2, b2) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g2) + 0.0722 * f(b2); };
         return { cols: cols.length, min: Math.min(...cols.map(c => Math.round(1.05 / (L(...c) + 0.05) * 100) / 100)) }; });
-      crs.push([th + ' chip activo (blanco sobre degradado, ' + g.cols + ' colores)', g.cols ? g.min : 0]);
+      crs.push([th + ' botón DELE activo (blanco sobre degradado, ' + g.cols + ' colores)', g.cols ? g.min : 0]);
       await p.click('#dele-seg .lv-chip[data-seg="ninos"]'); await p.waitForTimeout(300);
       await grab('chip franja 🌱', '#dele-sub .lv-chip[data-band="A"]');
       await ctx.close();

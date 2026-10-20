@@ -60,7 +60,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a1-primer-dia',
-            dele: 'A1', track: 'Escolares',
+            dele: 'A1', track: 'Escolares', variant: 'es-ES',
             emoji: '🏫',
             titleEs: 'Primer día de clase',
             titleZh: '开学第一天',
@@ -97,7 +97,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a1-kiosco',
-            dele: 'A1', track: 'Escolares',
+            dele: 'A1', track: 'Escolares', variant: 'es-ES',
             emoji: '🧃',
             titleEs: 'En el kiosco del colegio',
             titleZh: '学校的小卖部',
@@ -134,7 +134,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a1-recreo',
-            dele: 'A1', track: 'Escolares',
+            dele: 'A1', track: 'Escolares', variant: 'es-ES',
             emoji: '⚽',
             titleEs: 'Fútbol en el recreo',
             titleZh: '课间足球',
@@ -171,7 +171,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-excursion',
-            dele: 'A2', track: 'Escolares',
+            dele: 'A2', track: 'Escolares', variant: 'es-ES',
             emoji: '🚌',
             titleEs: 'La excursión al museo',
             titleZh: '博物馆远足',
@@ -210,7 +210,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-enfermeria',
-            dele: 'A2', track: 'Escolares',
+            dele: 'A2', track: 'Escolares', variant: 'es-ES',
             emoji: '🩹',
             titleEs: 'En la enfermería',
             titleZh: '在医务室',
@@ -247,7 +247,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-talento',
-            dele: 'B1', track: 'Escolares',
+            dele: 'B1', track: 'Escolares', variant: 'es-ES',
             emoji: '🎤',
             titleEs: 'El festival de talento',
             titleZh: '才艺节',
@@ -286,7 +286,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-mate',
-            dele: 'A2', track: 'Argentina',
+            dele: 'A2', track: 'Argentina', variant: 'es-AR',
             emoji: '🧉',
             titleEs: 'El primer mate',
             titleZh: '第一次喝马黛茶',
@@ -325,7 +325,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2b1-bariloche',
-            dele: 'A2', track: 'Argentina',
+            dele: 'A2', track: 'Argentina', variant: 'es-AR',
             emoji: '🎫',
             titleEs: 'Pasajes a Bariloche',
             titleZh: '去巴里洛切的车票',
@@ -365,7 +365,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b1-pena-salta',
-            dele: 'B1', track: 'Argentina',
+            dele: 'B1', track: 'Argentina', variant: 'es-AR',
             emoji: '🏜️',
             titleEs: 'Una peña en Salta',
             titleZh: '萨尔塔的民俗酒馆',
@@ -406,7 +406,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b1-tren-nubes',
-            dele: 'B1', track: 'Argentina',
+            dele: 'B1', track: 'Argentina', variant: 'es-AR',
             emoji: '🚂',
             titleEs: 'El tren a las nubes',
             titleZh: '云端列车',
@@ -447,7 +447,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b2-iguazu',
-            dele: 'B2', track: 'Argentina',
+            dele: 'B2', track: 'Argentina', variant: 'es-AR',
             emoji: '💦',
             titleEs: 'Iguazú y la memoria guaraní',
             titleZh: '伊瓜苏与瓜拉尼的记忆',
@@ -488,7 +488,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b2-vendimia',
-            dele: 'B2', track: 'Argentina',
+            dele: 'B2', track: 'Argentina', variant: 'es-AR',
             emoji: '🍷',
             titleEs: 'Vendimia en Mendoza',
             titleZh: '门多萨的葡萄收获节',
@@ -529,7 +529,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b2-glaciar',
-            dele: 'B2', track: 'Argentina',
+            dele: 'B2', track: 'Argentina', variant: 'es-AR',
             emoji: '🧊',
             titleEs: 'El glaciar Perito Moreno',
             titleZh: '莫雷诺大冰川',
@@ -569,7 +569,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-c1-telar-mapuche',
-            dele: 'C1', track: 'Argentina',
+            dele: 'C1', track: 'Argentina', variant: 'es-AR',
             emoji: '🧶',
             titleEs: 'El telar de la abuela mapuche',
             titleZh: '马普切外婆的织机',
@@ -610,7 +610,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-c1-pachamama',
-            dele: 'C1', track: 'Argentina',
+            dele: 'C1', track: 'Argentina', variant: 'es-AR',
             emoji: '🌽',
             titleEs: 'La Pachamama en Tilcara',
             titleZh: '蒂尔卡拉的大地母亲节',
@@ -651,7 +651,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-c2-radio-turismo',
-            dele: 'C2', track: 'Argentina',
+            dele: 'C2', track: 'Argentina', variant: 'es-AR',
             emoji: '📻',
             titleEs: 'Debate: ¿turismo para quién?',
             titleZh: '辩论：旅游业为了谁？',
@@ -691,7 +691,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a1-cafe',
-            dele: 'A1', track: 'Argentina',
+            dele: 'A1', track: 'Argentina', variant: 'es-AR',
             emoji: '☕',
             titleEs: 'Café con medialunas',
             titleZh: '咖啡配牛角面包',
@@ -729,7 +729,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a1-colectivo',
-            dele: 'A1', track: 'Argentina',
+            dele: 'A1', track: 'Argentina', variant: 'es-AR',
             emoji: '🚏',
             titleEs: 'El colectivo a Palermo',
             titleZh: '去巴勒莫的公交车',
@@ -767,7 +767,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-feria',
-            dele: 'A2', track: 'Argentina',
+            dele: 'A2', track: 'Argentina', variant: 'es-AR',
             emoji: '🍅',
             titleEs: 'La feria del barrio',
             titleZh: '社区集市',
@@ -805,7 +805,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-a2-cumple',
-            dele: 'A2', track: 'Argentina',
+            dele: 'A2', track: 'Argentina', variant: 'es-AR',
             emoji: '🎂',
             titleEs: 'El cumpleaños de Sofía',
             titleZh: '索菲亚的生日',
@@ -843,7 +843,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b1-cancha',
-            dele: 'B1', track: 'Argentina',
+            dele: 'B1', track: 'Argentina', variant: 'es-AR',
             emoji: '🏟️',
             titleEs: 'Ir a la cancha',
             titleZh: '去球场看球',
@@ -882,7 +882,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b1-milonga',
-            dele: 'B1', track: 'Argentina',
+            dele: 'B1', track: 'Argentina', variant: 'es-AR',
             emoji: '💃',
             titleEs: 'Una milonga en San Telmo',
             titleZh: '圣特尔莫的探戈舞会',
@@ -921,7 +921,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b2-asado',
-            dele: 'B2', track: 'Argentina',
+            dele: 'B2', track: 'Argentina', variant: 'es-AR',
             emoji: '🥩',
             titleEs: 'El asado del domingo',
             titleZh: '周日的烤肉',
@@ -960,7 +960,7 @@
         // ─────────────────────────────────────────────────────────
         {
             id: 'dele-b2-entrevista',
-            dele: 'B2', track: 'Argentina',
+            dele: 'B2', track: 'Argentina', variant: 'es-AR',
             emoji: '💼',
             titleEs: 'La entrevista de trabajo',
             titleZh: '求职面试',
@@ -1017,14 +1017,17 @@
     // ── estado de la sesión abierta ──
     const S = { drama: null, view: null, idx: 0, results: [], order: [], answered: false };
     let curLevel = 'all';
-    let curTrack = 'all'; // v9.31: 'all' | 'Escolares' | 'Argentina' | 'Niños'  (R14: 'Niños' = botón «Niños»; el resto = botón «DELE» + sub-filtro de pista)
+    let curTrack = 'all'; // R15: 'all' = botón «DELE» (Escolares y Argentina juntas) · 'Niños' = botón «Niños». La pista (track) ya no se filtra: queda en los datos.
     let curBand = 'all';  // R14: franja de Niños: 'all' | 'A' (🌱 6–7) | 'B' (🌿 8–10)
-    // R4: pistas conocidas, en este orden. Sus chips se muestran SIEMPRE (aunque
-    // todavía no tengan dramas): para sumar lecciones a «Niños» alcanza con agregar
-    // un drama con track: 'Niños' (dele: 'A1', titleZh/blurbZh en chino, quiz con
-    // opts[0] correcta). Una pista nueva que no esté acá igual crea su chip sola.
-    const TRACKS = ['Escolares', 'Argentina', 'Niños'];
-    const TRACK_META = { 'Escolares': '🏫 Escolares', 'Argentina': '🇦🇷 Argentina', 'Niños': '🧒 Niños' };
+    // R15: variante del español de cada lección (campo `variant`) → bandera y nombre del país. UNA sola tabla: la usan la pastilla
+    // de la tarjeta y el orden de la lista (el orden de las claves es el de desempate: España antes que Argentina).
+    // `cls` = sufijo de la clase de color de la pastilla (style.css, .lc-var-*).
+    const VARIANTES = {
+        'es-ES': { flag: '🇪🇸', nombre: 'España', cls: 'es' },
+        'es-AR': { flag: '🇦🇷', nombre: 'Argentina', cls: 'ar' }
+    };
+    // R4: «Niños» es una pista con su propia pantalla (ninos-ui.js); las demás lecciones son DELE (R15: sin filtro de pista).
+    const TRACK_META = { 'Niños': '🧒 Niños' };
 
     // ── TTS español: mismos motores globales de app.js con guardas ──
     // (este archivo carga ANTES de app.js: los globals solo se tocan al
@@ -1197,19 +1200,19 @@
     // (los 5 dramas que lo usaban pasan a A2 o B1 según su contenido).
     const DELE_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     function levelLabel(v) { return 'DELE ' + v; }
-    // R14: pantalla en dos botones — «Niños» y «DELE». DELE junta Escolares y Argentina (sub-filtro Todas / Escolares / Argentina);
-    // los chips de nivel salen en una fila que salta de línea, cada uno con su conteo, y se apagan los niveles sin lecciones en la
-    // pista elegida. En Niños no hay chips de nivel si sus lecciones no tienen niveles distintos (hoy todas son «A1 adaptado»).
+    // R15: pantalla en dos botones — «Niños» y «DELE». DELE junta Escolares y Argentina en una sola lista, ordenada por nivel y con
+    // un único menú (<select>) de nivel que muestra cuántas lecciones tiene cada uno. Cada tarjeta lleva una pastilla de nivel
+    // («DELE A1», sin bandera) y una de país con la bandera de su variante. Niños: lista directa y, si hay 2 o más franjas, sub-filtro 🌱 / 🌿.
     const isKids = () => curTrack === 'Niños';
     const kidsStats = () => (window.NinosUI && window.NinosUI.stats) ? window.NinosUI.stats() : { total: 0, bands: {}, levels: {} };
-    const deleOf = (track) => DRAMAS.filter(d => d.track !== 'Niños' && (track === 'all' || d.track === track));
+    const deleAll = () => DRAMAS.filter(d => d.track !== 'Niños');
     function deleLevelCounts() {
         const c = {};
-        deleOf(curTrack).forEach(d => { c[d.dele] = (c[d.dele] || 0) + 1; });
+        deleAll().forEach(d => { c[d.dele] = (c[d.dele] || 0) + 1; });
         return c;
     }
     const levelRank = (v) => { const i = DELE_ORDER.indexOf(v); return i === -1 ? 99 : i; };
-    const trackRank = (t) => { const i = TRACKS.indexOf(t); return i === -1 ? 99 : i; };
+    const variantRank = (v) => { const i = Object.keys(VARIANTES).indexOf(v); return i === -1 ? 99 : i; };
     function mkChip(label, n, attrs, active, aria) {
         const b = document.createElement('button');
         b.type = 'button';
@@ -1225,12 +1228,14 @@
         if (active) b.setAttribute('aria-pressed', 'true'); else b.setAttribute('aria-pressed', 'false');
         return b;
     }
+    // Niveles: en DELE, un <select> (mismo estilo .lvsel que los menús HSK/TOCFL); en Niños, chips SOLO si sus lecciones tienen 2 o más
+    // niveles distintos (hoy todas son «A1 adaptado» → sin filtro de nivel).
     function renderChips() {
-        const chips = $('dele-levels');
-        if (!chips) return;
-        chips.innerHTML = '';
+        const box = $('dele-levelbox'), chips = $('dele-levels');
+        if (!box || !chips) return;
+        box.innerHTML = ''; chips.innerHTML = '';
         if (isKids()) {
-            // niveles de Niños: solo si hay 2 o más distintos (hoy todas son «A1 adaptado» → sin filtro)
+            box.hidden = true;
             const lv = kidsStats().levels, keys = Object.keys(lv).sort((a, b) => levelRank(a) - levelRank(b));
             if (keys.length < 2) { chips.hidden = true; return; }
             chips.hidden = false;
@@ -1238,21 +1243,29 @@
             keys.forEach(v => chips.appendChild(mkChip(v, lv[v], { level: v }, curLevel === v, 'Filtrar por nivel ' + v)));
             return;
         }
-        chips.hidden = false;
-        const counts = deleLevelCounts();
-        const total = deleOf(curTrack).length;
-        chips.appendChild(mkChip('Todos', total, { level: 'all' }, curLevel === 'all', 'Mostrar todos los niveles'));
-        // siempre los 6 niveles (A1…C2); los que no existen en la pista elegida se apagan
+        chips.hidden = true; box.hidden = false;
+        const counts = deleLevelCounts(), total = deleAll().length;
         const lvls = DELE_ORDER.slice();
-        DRAMAS.forEach(d => { if (d.track !== 'Niños' && lvls.indexOf(d.dele) === -1) lvls.push(d.dele); });
-        lvls.forEach(v => {
-            const n = counts[v] || 0;
-            const b = mkChip(v, n, { level: v }, curLevel === v, 'Filtrar mini-dramas ' + levelLabel(v));
-            if (!n) { b.disabled = true; b.classList.add('is-off'); b.setAttribute('aria-disabled', 'true'); }
-            chips.appendChild(b);
-        });
+        deleAll().forEach(d => { if (lvls.indexOf(d.dele) === -1) lvls.push(d.dele); });
+        const lab = document.createElement('label');
+        lab.className = 'lvsel lvsel-dele';
+        const tag = document.createElement('span');
+        tag.className = 'lvsel-tag'; tag.setAttribute('aria-hidden', 'true'); tag.textContent = 'NIVEL DELE';
+        const sel = document.createElement('select');
+        sel.id = 'dele-level-sel';
+        sel.setAttribute('aria-label', 'Filtrar las mini-dramas por nivel DELE');
+        const opt = (value, text, off) => {
+            const o = document.createElement('option');
+            o.value = value; o.textContent = text; if (off) o.disabled = true;
+            if (value === curLevel) o.selected = true;
+            sel.appendChild(o);
+        };
+        opt('all', 'Todos los niveles (' + total + ')', false);
+        lvls.forEach(v => opt(v, v + ' (' + (counts[v] || 0) + ')', !counts[v]));   // un nivel sin lecciones queda deshabilitado
+        lab.appendChild(tag); lab.appendChild(sel);
+        box.appendChild(lab);
     }
-    // R14: fila superior [🧒 Niños | 🇪🇸 DELE] + una fila de sub-filtro (DELE: Todas / Escolares / Argentina · Niños: Todas / 🌱 / 🌿)
+    // R15: fila superior [🧒 Niños | 🎓 DELE] y, solo en Niños, el sub-filtro de franja (Todas / 🌱 / 🌿)
     function renderTrackChips() {
         const root = $('dele-tracks');
         if (!root) return;
@@ -1261,25 +1274,20 @@
         const seg = document.createElement('div');
         seg.className = 'dele-seg'; seg.id = 'dele-seg';
         const sk = mkChip('🧒 Niños', ks.total, { seg: 'ninos', track: 'Niños' }, kids, 'Lecciones para chicos');
-        const sd = mkChip('🇪🇸 DELE', deleOf('all').length, { seg: 'dele' }, !kids, 'Mini-dramas DELE (Escolares y Argentina)');
+        const sd = mkChip('🎓 DELE', deleAll().length, { seg: 'dele' }, !kids, 'Mini-dramas DELE (de A1 a C2)');
         seg.appendChild(sk); seg.appendChild(sd);
         root.appendChild(seg);
-        const sub = document.createElement('div');
-        sub.className = 'dele-chips dele-sub'; sub.id = 'dele-sub';
         if (kids) {
             const bands = Object.keys(ks.bands).filter(k => ks.bands[k] > 0);
             if (bands.length > 1) {
+                const sub = document.createElement('div');
+                sub.className = 'dele-chips dele-sub'; sub.id = 'dele-sub';
                 const BL = { A: ['🌱 6–7', 'Franja 6 a 7 años'], B: ['🌿 8–10', 'Franja 8 a 10 años'] };
                 sub.appendChild(mkChip('Todas', null, { band: 'all' }, curBand === 'all', 'Todas las lecciones'));
                 bands.sort().forEach(k => sub.appendChild(mkChip((BL[k] || [k])[0], ks.bands[k], { band: k }, curBand === k, (BL[k] || [k, k])[1])));
+                root.appendChild(sub);
             }
-        } else {
-            sub.appendChild(mkChip('Todas', null, { track: 'all' }, curTrack === 'all', 'Todas las pistas'));
-            const names = TRACKS.filter(t => t !== 'Niños');
-            DRAMAS.forEach(d => { if (d.track && d.track !== 'Niños' && names.indexOf(d.track) === -1) names.push(d.track); });
-            names.forEach(t => sub.appendChild(mkChip(TRACK_META[t] || t, deleOf(t).length, { track: t }, curTrack === t, 'Filtrar dramas de pista ' + (TRACK_META[t] || t))));
         }
-        if (sub.children.length) root.appendChild(sub);
     }
     function bestLabel(d) {
         const p = progOf(d.id);
@@ -1295,12 +1303,12 @@
             window.NinosUI.renderList(wrap, curLevel, curBand);
             return;
         }
-        // R14: DELE junta Escolares y Argentina, ordenado por nivel (A1→C2) y, dentro de cada nivel, Escolares antes que Argentina
+        // R15: DELE junta Escolares y Argentina, ordenado por nivel (A1→C2) y, dentro de cada nivel, por variante (España antes que Argentina)
         const shown = DRAMAS.filter(d =>
             (curLevel === 'all' || d.dele === curLevel) &&
             (curTrack === 'all' ? d.track !== 'Niños' : d.track === curTrack))
             .map(d => ({ d: d, i: DRAMAS.indexOf(d) }))
-            .sort((x, y) => (levelRank(x.d.dele) - levelRank(y.d.dele)) || (trackRank(x.d.track) - trackRank(y.d.track)) || (x.i - y.i))
+            .sort((x, y) => (levelRank(x.d.dele) - levelRank(y.d.dele)) || (variantRank(x.d.variant) - variantRank(y.d.variant)) || (x.i - y.i))
             .map(x => x.d);
         if (!shown.length && curTrack !== 'all' && !DRAMAS.some(d => d.track === curTrack)) {
             // R4: pista conocida que todavía no tiene lecciones (hoy «Niños»)
@@ -1309,18 +1317,17 @@
             return;
         }
         if (!shown.length) {
-            // v9.31: nivel+pista sin dramas (p. ej. DELE C1 × Escolares)
-            wrap.innerHTML = '<div class="dl-empty">Todavía no hay dramas de ese nivel en esta pista — probá otra combinación 🧭</div>';
+            wrap.innerHTML = '<div class="dl-empty">Todavía no hay dramas de ese nivel — probá con «Todos los niveles» 🧭</div>';
             return;
         }
         shown.forEach(d => {
             const card = document.createElement('div');
             card.className = 'lesson-card dele-card';
-            const tk = ({ 'Escolares': 'esc', 'Argentina': 'arg' })[d.track] || 'otra';
+            const vr = VARIANTES[d.variant] || { flag: '🌐', nombre: d.variant || '—', cls: 'otra' };
             card.innerHTML =
                 '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + d.emoji + '</span>' +
-                '<span class="lc-hsk">🇪🇸 ' + escHtml(levelLabel(d.dele)) + '</span>' +
-                '<span class="lc-track lc-track-' + tk + '">' + escHtml(TRACK_META[d.track] || d.track) + '</span>' +
+                '<span class="lc-hsk">' + escHtml(levelLabel(d.dele)) + '</span>' +
+                '<span class="lc-var lc-var-' + vr.cls + '" data-variant="' + escHtml(d.variant || '') + '">' + vr.flag + ' ' + escHtml(vr.nombre) + '</span>' +
                 '<span class="lc-best">' + bestLabel(d) + '</span></div>' +
                 '<div class="lc-titles"><span class="lc-zh">' + escHtml(d.titleEs) + '</span>' +
                 '<span class="lc-es">' + escHtml(d.titleZh) + '</span></div>' +
@@ -1344,12 +1351,19 @@
             if (btn.dataset.act === 'read') openStory(d);
             else openQuiz(d);
         });
+        // R15: menú de nivel (DELE). No se vuelve a dibujar al elegir (el foco se queda), solo cambia la lista.
+        const box = $('dele-levelbox');
+        if (box) box.addEventListener('change', (e) => {
+            if (!e.target || e.target.id !== 'dele-level-sel') return;
+            curLevel = e.target.value || 'all';
+            renderList();
+        });
+        // chips de nivel de Niños (solo si algún día tienen 2 o más niveles)
         const chips = $('dele-levels');
         if (chips) chips.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
             if (!chip || chip.disabled || !chip.dataset.level) return;
-            // v9.33: re-tap en el nivel activo vuelve a «Todos» (toggle)
-            curLevel = (curLevel === chip.dataset.level) ? 'all' : chip.dataset.level;
+            curLevel = (curLevel === chip.dataset.level) ? 'all' : chip.dataset.level;   // re-tap en el nivel activo vuelve a «Todos»
             renderChips();
             renderList();
         });
@@ -1357,15 +1371,12 @@
         if (tracks) tracks.addEventListener('click', (e) => {
             const chip = e.target.closest('.lv-chip');
             if (!chip) return;
-            if (chip.dataset.seg) {                           // R14: botón superior «Niños» / «DELE»
+            if (chip.dataset.seg) {                           // botón superior «Niños» / «DELE»
                 const wantKids = chip.dataset.seg === 'ninos';
                 if (wantKids === isKids()) return;
                 curTrack = wantKids ? 'Niños' : 'all'; curLevel = 'all'; curBand = 'all';
-            } else if (chip.dataset.band) {                   // R14: franja de Niños
+            } else if (chip.dataset.band) {                   // franja de Niños
                 curBand = (curBand === chip.dataset.band) ? 'all' : chip.dataset.band;
-            } else if (chip.dataset.track) {                  // R14: sub-filtro de pista de DELE (re-tap = Todas)
-                curTrack = (curTrack === chip.dataset.track) ? 'all' : chip.dataset.track;
-                if (curLevel !== 'all' && !deleLevelCounts()[curLevel]) curLevel = 'all'; // el nivel elegido ya no existe en esta pista
             } else return;
             renderTrackChips();
             renderChips();
@@ -1594,7 +1605,7 @@
         if (intro && INTRO_ORIG === null) INTRO_ORIG = intro.textContent;
         if (cnMode) {
             if (sub) sub.textContent = '(mini-dramas DELE · 学西班牙语)';
-            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz 🇪🇸 y practicá con ejercicios de completar. Elegí 🧒 Niños (con dibujos y juegos) o 🇪🇸 DELE (🏫 Escolares y 🇦🇷 Argentina, de A1 a C2): cada chip muestra cuántas lecciones tiene.';
+            if (intro) intro.textContent = 'Leé un diálogo al nivel DELE de tu examen, escuchalo con la voz y practicá con ejercicios de completar. Elegí 🧒 Niños (con dibujos y juegos) o 🎓 DELE (de A1 a C2, con textos de España y de Argentina): filtrá por nivel con el menú y mirá el país en cada tarjeta.';
         } else {
             if (sub && SUB_ORIG !== null) sub.textContent = SUB_ORIG;
             if (intro && INTRO_ORIG !== null) intro.textContent = INTRO_ORIG;
@@ -1657,8 +1668,9 @@
         wrap.id = 'dele-wrap';
         wrap.className = 'hidden'; // se muestra solo en cn-es (applyMode)
         wrap.innerHTML =
-            '<div class="dele-tracks" id="dele-tracks" role="group" aria-label="Tipo de lecciones y filtro de pista"></div>' +
-            '<div class="dele-chips" id="dele-levels" role="group" aria-label="Filtrar por nivel DELE"></div>' +
+            '<div class="dele-tracks" id="dele-tracks" role="group" aria-label="Tipo de lecciones"></div>' +
+            '<div class="dele-levelbox" id="dele-levelbox"></div>' +
+            '<div class="dele-chips" id="dele-levels" role="group" aria-label="Filtrar por nivel" hidden></div>' +
             '<div class="lesson-list" id="dele-list" data-level="all"></div>';
         // v9.32: ARRIBA del bloque chino (después del intro) y no al final —
         // report v9.31: "los chips de lecciones en español quedaron todos
@@ -1751,7 +1763,7 @@
     // R4: API para la hoja de módulos (module-sheet.js): abrir una pista y contar sus dramas.
     window.DeleLessons = {
         showTrack: function (track) {
-            curTrack = track || 'all';
+            curTrack = (track === 'Niños') ? 'Niños' : 'all';   // R15: 'Escolares' / 'Argentina' / 'all' abren DELE (sin filtro de pista)
             curLevel = 'all';
             curBand = 'all';
             renderTrackChips();
@@ -1784,6 +1796,7 @@
         progOf: progOf,
         applyMode: applyMode,
         renderList: renderList,
+        variantes: VARIANTES,
         // v9.31: ganchos de test para la cola ▶️ y el filtro de modo
         playAll: playAll,
         speakEs: speakEs,
