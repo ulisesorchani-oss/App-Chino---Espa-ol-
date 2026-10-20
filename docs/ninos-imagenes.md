@@ -34,10 +34,47 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
 
    - **Lin** — 7-year-old Chinese boy, short straight black hair with a small fringe, round friendly face, big dark eyes; at school he wears a white Argentine school smock (guardapolvo) over a red sweater and a blue backpack; at home a yellow T-shirt
    - **Sofi** — 7-year-old Argentine girl, light-brown wavy hair in two ponytails with sky-blue ribbons, warm tan skin, freckles, big smile; white school smock (guardapolvo)
+   - **Mei** — 7-year-old Chinese girl, straight black hair in two cute high buns with small red ribbons, round friendly face, big dark eyes, sweet cheerful smile; at school she wears a white Argentine school smock (guardapolvo) over a soft yellow sweater; at home a lavender T-shirt
+     *Mei (梅): niña china de 7 años, carita redonda y sonriente, ojos oscuros expresivos, cabello negro lacio en dos rodetitos altos con cintas rojas. Curiosa, alegre, le encanta compartir meriendas y útiles.*
+   - **Mati** — 7-year-old Argentine boy, messy short wavy dark-brown hair, warm tan skin, lively big smile; white school smock (guardapolvo) over a light-blue sweatshirt and green sneakers
+     *Mati: niño argentino de 7 años, piel tostada cálida, pelo castaño oscuro ondulado y un poco despeinado, mirada pícara y sonrisa amplia; guardapolvo blanco sobre un buzo celeste clásico y zapatillas verdes. Muy enérgico, compañero de patio para correr o jugar a la pelota.*
    - **Seño** — young woman teacher in her thirties, shoulder-length dark brown hair, round glasses, kind smile; white school smock (guardapolvo) over a light-blue blouse
    - **Mamá** — Chinese woman in her thirties, black hair in a low ponytail, gentle smile; green cardigan, often with a kitchen apron
    - **Kiosquero** — friendly middle-aged Argentine man with a grey moustache and a flat cap, striped apron, behind the window of a small street kiosk
    - **Familia de Sofi** — father (short dark beard, plaid shirt), mother (curly hair, orange top), grandmother (grey hair in a bun, lilac cardigan), little brother (toddler, round cheeks)
+
+   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Mei y Mati es la ficha original, las demás están armadas con la misma plantilla:
+
+   *Mei y Mati:*
+
+   ```text
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese girl named Mei and 7-year-old Argentine boy named Mati standing together, Mei with two high buns and red hair ties in white guardapolvo smock, Mati with short wavy brown hair in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   ```
+
+   *Lin y Sofi:*
+
+   ```text
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese boy named Lin and 7-year-old Argentine girl named Sofi standing together, Lin with short straight black hair and a small fringe in white guardapolvo smock over a red sweater with a blue backpack, Sofi with light-brown wavy hair in two ponytails with sky-blue ribbons in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   ```
+
+   *Seño y Mamá:*
+
+   ```text
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, a young woman teacher called Seño (shoulder-length dark brown hair, round glasses, white guardapolvo smock over a light-blue blouse) and Lin's mother called Mamá (Chinese woman in her thirties, black hair in a low ponytail, green cardigan with a kitchen apron) standing together, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   ```
+
+   *Kiosquero:*
+
+   ```text
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, a friendly middle-aged Argentine man called Kiosquero with a grey moustache, a flat cap and a striped apron, standing next to a small street kiosk window, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   ```
+
+   *Familia de Sofi:*
+
+   ```text
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, Sofi's family standing together: father (short dark beard, plaid shirt), mother (curly hair, orange top), grandmother (grey hair in a bun, lilac cardigan) and little brother (toddler, round cheeks), full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   ```
+
 
 5. **Formato y archivos:**
 
