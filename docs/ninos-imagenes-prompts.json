@@ -4,7 +4,7 @@
  "personajes": {
   "Lin": "Lin: 7-year-old Chinese boy, short straight black hair with a small fringe, round friendly face, big dark eyes; at school he wears a white Argentine school smock (guardapolvo) over a red sweater and a blue backpack; at home a yellow T-shirt",
   "Sofi": "Sofi: 7-year-old Argentine girl, light-brown wavy hair in two ponytails with sky-blue ribbons, warm tan skin, freckles, big smile; white school smock (guardapolvo)",
-  "Tian": "Tian: 7-year-old Chinese girl, straight black hair in two cute high buns with small red ribbons, round friendly face, big dark eyes, sweet cheerful smile; at school she wears a white Argentine school smock (guardapolvo) over a soft yellow sweater; at home a lavender T-shirt",
+  "Ruei": "Ruei: 7-year-old Chinese girl, straight black hair in two cute high buns with small red ribbons, round friendly face, big dark eyes, sweet cheerful smile; at school she wears a white Argentine school smock (guardapolvo) over a soft yellow sweater; at home a lavender T-shirt",
   "Mati": "Mati: 7-year-old Argentine boy, messy short wavy dark-brown hair, warm tan skin, lively big smile; white school smock (guardapolvo) over a light-blue sweatshirt and green sneakers",
   "Seño": "Seño: young woman teacher in her thirties, shoulder-length dark brown hair, round glasses, kind smile; white school smock (guardapolvo) over a light-blue blouse",
   "Mamá": "Mamá (Lin's mother): Chinese woman in her thirties, black hair in a low ponytail, gentle smile; green cardigan, often with a kitchen apron",
@@ -189,7 +189,7 @@
   "ni-cole": "classroom scene: Lin at his desk searching in his open backpack for a pencil, Sofi pointing helpfully, Seño at a blank blackboard",
   "ni-frases-utiles": "Lin raising his hand in class to ask the teacher; thought bubbles with small pictograms (a toilet, a water glass, a pencil) instead of words",
   "ni-familia": "Sofi shows Lin a framed family photo (father, mother, grandmother, little brother) in a classroom; Lin smiles",
-  "ni-merienda": "home kitchen table in afternoon light: Mamá serves milk and medialunas to Lin",
+  "ni-merienda": "home kitchen table in afternoon light: Mamá serves milk and medialunas to Lin; Mati peeks in at the doorway with big hungry eyes",
   "ni-me-duele": "Lin on the sofa wrapped in a blanket holding his tummy; Mamá brings a cup of hot tea and a jacket",
   "ni-plaza": "Sofi and Lin playing soccer in a sunny neighborhood plaza with trees and a swing, celebrating a goal",
   "ni-colores": "art class: Lin and Sofi painting at easels with red and green paint, colored pencils in a cup, Seño smiling, four pencils on the desk",
@@ -200,9 +200,9 @@
   "ni-cuerpo": "gym class: Seño in front of a line of kids (Lin, Sofi) all touching their heads, playing «Simón dice» in a sports hall",
   "ni-almuerzo": "family lunch table: Lin and Mamá sitting with milanesa and mashed potatoes, a salad bowl, glasses of water and juice",
   "ni-dias": "classroom wall with a big colorful weekly calendar (seven columns, no readable text); Seño points, Lin and Sofi raise their hands",
-  "ni-compartimos": "classroom at recess: Tian (new classmate) breaks a cookie in half and offers it to Lin; Tian hands Lin an eraser; both smile; Sofi watches in the background",
+  "ni-compartimos": "classroom at recess: Ruei (new classmate) breaks a cookie in half and offers it to Lin; Ruei hands Lin an eraser; both smile; Sofi watches in the background",
   "ni-mati": "school playground: Mati running fast, Lin hurrying behind him saying slow down, Mati jumping rope, Sofi waiting with a soccer ball in her hands",
-  "ni-escondidas": "school yard: Mati facing a tree counting with his eyes covered; Lin, Sofi and Tian hiding behind a tree, a bench and a bush, peeking out; sunny afternoon"
+  "ni-escondidas": "school yard: Mati facing a tree counting with his eyes covered; Lin, Sofi and Ruei hiding behind a tree, a bench and a bush, peeking out; sunny afternoon"
  },
  "sonidos": {
   "sonidos-general": "a smiling cartoon mouth and an ear connected by sound waves and musical notes, in Chinese red and Argentine sky blue",
@@ -237,11 +237,11 @@
   }
  },
  "rasgos": {
-  "Tian": "Tian (甜甜): niña china de 7 años, carita redonda y sonriente, ojos oscuros expresivos, cabello negro lacio en dos rodetitos altos con cintas rojas. Curiosa, alegre, le encanta compartir meriendas y útiles. (Se llama Tian y no Mei para no confundirla con Mei (梅), la adulta de tres mini-dramas DELE de Argentina.)",
+  "Ruei": "Ruei (瑞瑞): niña china de 7 años, carita redonda y sonriente, ojos oscuros expresivos, cabello negro lacio en dos rodetitos altos con cintas rojas. Curiosa, alegre, le encanta compartir meriendas y útiles. (Se llama Ruei y no Mei para no confundirla con Mei (梅), la adulta de tres mini-dramas DELE de Argentina.)",
   "Mati": "Mati: niño argentino de 7 años, piel tostada cálida, pelo castaño oscuro ondulado y un poco despeinado, mirada pícara y sonrisa amplia; guardapolvo blanco sobre un buzo celeste clásico y zapatillas verdes. Muy enérgico, compañero de patio para correr o jugar a la pelota."
  },
  "hojas": {
-  "Tian y Mati": "Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese girl named Tian and 7-year-old Argentine boy named Mati standing together, Tian with two high buns and red hair ties in white guardapolvo smock, Mati with short wavy brown hair in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children",
+  "Ruei y Mati": "Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese girl named Ruei and 7-year-old Argentine boy named Mati standing together, Ruei with two high buns and red hair ties in white guardapolvo smock, Mati with short wavy brown hair in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children",
   "Lin y Sofi": "Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese boy named Lin and 7-year-old Argentine girl named Sofi standing together, Lin with short straight black hair and a small fringe in white guardapolvo smock over a red sweater with a blue backpack, Sofi with light-brown wavy hair in two ponytails with sky-blue ribbons in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children",
   "Seño y Mamá": "Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, a young woman teacher called Seño (shoulder-length dark brown hair, round glasses, white guardapolvo smock over a light-blue blouse) and Lin's mother called Mamá (Chinese woman in her thirties, black hair in a low ponytail, green cardigan with a kitchen apron) standing together, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children",
   "Kiosquero": "Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, a friendly middle-aged Argentine man called Kiosquero with a grey moustache, a flat cap and a striped apron, standing next to a small street kiosk window, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children",

@@ -1042,9 +1042,9 @@ window.NINOS_LESSONS = [
   "titleEs": "Tengo hambre",
   "titleZh": "我饿了",
   "titleZhT": "我餓了",
-  "blurb": "Es la hora de la merienda: leche, medialunas y un «¡qué rico!».",
-  "blurbZh": "到吃点心的时间了：牛奶、牛角包和一句“真好吃！”。",
-  "blurbZhT": "到吃點心的時間了：牛奶、牛角包和一句“真好吃！”。",
+  "blurb": "Es la hora de la merienda: leche, medialunas y un «¡qué rico!». Al final llega Mati, con mucha hambre.",
+  "blurbZh": "到吃点心的时间了：牛奶、牛角包和一句“真好吃！”。最后马蒂也来了，肚子饿极了。",
+  "blurbZhT": "到吃點心的時間了：牛奶、牛角包和一句“真好吃！”。最後馬蒂也來了，肚子餓極了。",
   "words": [
    {
     "sp": "merienda",
@@ -1151,6 +1151,12 @@ window.NINOS_LESSONS = [
     "sp": "No, gracias. ¡Estoy lleno!",
     "zh": "不要了，谢谢。我吃饱了！",
     "zhT": "不要了，謝謝。我吃飽了！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Yo sí quiero más!",
+    "zh": "我可还想再吃点！",
+    "zhT": "我可還想再吃點！"
    }
   ],
   "listen": [
@@ -5186,9 +5192,9 @@ window.NINOS_LESSONS = [
   "titleEs": "¡Compartimos!",
   "titleZh": "我们一起分享！",
   "titleZhT": "我們一起分享！",
-  "blurb": "Tian, una compañera nueva, comparte su galletita y le presta la goma a Lin.",
-  "blurbZh": "新同学甜甜把小饼干分给林，还借给他橡皮。",
-  "blurbZhT": "新同學甜甜把小餅乾分給林，還借給他橡皮。",
+  "blurb": "Ruei, una compañera nueva, comparte su galletita y le presta la goma a Lin.",
+  "blurbZh": "新同学瑞瑞把小饼干分给林，还借给他橡皮。",
+  "blurbZhT": "新同學瑞瑞把小餅乾分給林，還借給他橡皮。",
   "words": [
    {
     "sp": "compartir",
@@ -5249,13 +5255,13 @@ window.NINOS_LESSONS = [
   ],
   "lines": [
    {
-    "who": "Tian",
-    "sp": "¡Hola, Lin! Yo soy Tian.",
-    "zh": "你好，林！我是甜甜。",
-    "zhT": "你好，林！我是甜甜。"
+    "who": "Ruei",
+    "sp": "¡Hola, Lin! Yo soy Ruei.",
+    "zh": "你好，林！我是瑞瑞。",
+    "zhT": "你好，林！我是瑞瑞。"
    },
    {
-    "who": "Tian",
+    "who": "Ruei",
     "sp": "¿Querés una galletita?",
     "zh": "你想吃一块小饼干吗？",
     "zhT": "你想吃一塊小餅乾嗎？"
@@ -5267,7 +5273,7 @@ window.NINOS_LESSONS = [
     "zhT": "好，謝謝！"
    },
    {
-    "who": "Tian",
+    "who": "Ruei",
     "sp": "Una para vos y una para mí.",
     "zh": "一块给你，一块给我。",
     "zhT": "一塊給你，一塊給我。"
@@ -5279,7 +5285,7 @@ window.NINOS_LESSONS = [
     "zhT": "我喜歡分享。"
    },
    {
-    "who": "Tian",
+    "who": "Ruei",
     "sp": "Yo también. ¿Tenés goma?",
     "zh": "我也是。你有橡皮吗？",
     "zhT": "我也是。你有橡皮嗎？"
@@ -5291,16 +5297,16 @@ window.NINOS_LESSONS = [
     "zhT": "沒有。你能借我一塊嗎？"
    },
    {
-    "who": "Tian",
+    "who": "Ruei",
     "sp": "¡Claro! Tomá, Lin.",
     "zh": "当然！拿着，林。",
     "zhT": "當然！拿著，林。"
    },
    {
     "who": "Lin",
-    "sp": "¡Sos buena amiga, Tian!",
-    "zh": "甜甜，你真是个好朋友！",
-    "zhT": "甜甜，你真是個好朋友！"
+    "sp": "¡Sos buena amiga, Ruei!",
+    "zh": "瑞瑞，你真是个好朋友！",
+    "zhT": "瑞瑞，你真是個好朋友！"
    }
   ],
   "listen": [
@@ -5499,9 +5505,9 @@ window.NINOS_LESSONS = [
     ]
    },
    {
-    "sp": "¡Sos buena ___, Tian!",
-    "zh": "甜甜，你真是个好朋友！",
-    "zhT": "甜甜，你真是個好朋友！",
+    "sp": "¡Sos buena ___, Ruei!",
+    "zh": "瑞瑞，你真是个好朋友！",
+    "zhT": "瑞瑞，你真是個好朋友！",
     "opts": [
      {
       "w": "amiga",
@@ -5877,9 +5883,9 @@ window.NINOS_LESSONS = [
   "titleEs": "Jugamos a las escondidas",
   "titleZh": "我们来玩捉迷藏",
   "titleZhT": "我們來玩捉迷藏",
-  "blurb": "Los cuatro amigos —Lin, Sofi, Tian y Mati— juegan a las escondidas: Mati cuenta hasta diez.",
-  "blurbZh": "四个好朋友林、索菲、甜甜和马蒂玩捉迷藏：马蒂数到十。",
-  "blurbZhT": "四個好朋友林、索菲、甜甜和馬蒂玩捉迷藏：馬蒂數到十。",
+  "blurb": "Los cuatro amigos —Lin, Sofi, Ruei y Mati— juegan a las escondidas: Mati cuenta hasta diez.",
+  "blurbZh": "四个好朋友林、索菲、瑞瑞和马蒂玩捉迷藏：马蒂数到十。",
+  "blurbZhT": "四個好朋友林、索菲、瑞瑞和馬蒂玩捉迷藏：馬蒂數到十。",
   "words": [
    {
     "sp": "las escondidas",
@@ -5965,12 +5971,12 @@ window.NINOS_LESSONS = [
    },
    {
     "who": "Mati",
-    "sp": "¡Te encontré, Tian!",
-    "zh": "甜甜，我找到你了！",
-    "zhT": "甜甜，我找到你了！"
+    "sp": "¡Te encontré, Ruei!",
+    "zh": "瑞瑞，我找到你了！",
+    "zhT": "瑞瑞，我找到你了！"
    },
    {
-    "who": "Tian",
+    "who": "Ruei",
     "sp": "¡Uy, qué rápido!",
     "zh": "哎呀，真快！",
     "zhT": "哎呀，真快！"
@@ -6184,9 +6190,9 @@ window.NINOS_LESSONS = [
     ]
    },
    {
-    "sp": "¡Te ___, Tian!",
-    "zh": "甜甜，我找到你了！",
-    "zhT": "甜甜，我找到你了！",
+    "sp": "¡Te ___, Ruei!",
+    "zh": "瑞瑞，我找到你了！",
+    "zhT": "瑞瑞，我找到你了！",
     "opts": [
      {
       "w": "encontré",

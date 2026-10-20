@@ -90,7 +90,7 @@ w('4. **Personajes** (usar SIEMPRE el mismo texto para que se parezcan en todas 
 w();
 chars.forEach(n => { w('   - **' + n + '** — ' + P.personajes[n].replace(/^[^:]+:\s*/, '')); if ((P.rasgos || {})[n]) w('     *' + P.rasgos[n] + '*'); });
 w();
-w('   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Tian y Mati es la ficha original (los personajes nuevos), las demás están armadas con la misma plantilla:');
+w('   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Ruei y Mati es la ficha original (los personajes nuevos), las demás están armadas con la misma plantilla:');
 w();
 Object.keys(P.hojas || {}).forEach(k => { w('   *' + k + ':*'); w(); w('   ```text'); w('   ' + P.hojas[k]); w('   ```'); w(); });
 w();
