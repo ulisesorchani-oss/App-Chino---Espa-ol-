@@ -7,10 +7,10 @@
 
 | Qué | Cantidad |
 |---|---|
-| Imágenes de palabras (se reutilizan entre lecciones) | **144** |
-| Portadas de lección (escena con los personajes) | **15** |
+| Imágenes de palabras (se reutilizan entre lecciones) | **171** |
+| Portadas de lección (escena con los personajes) | **18** |
 | Portadas de «Sonidos del español» (1 general + 9 tarjetas) | **10** |
-| **Total** | **169** |
+| **Total** | **199** |
 
 Hoy la app usa emoji; el campo `art` (`null`) de cada lección, palabra y opción de «Escuchá y tocá» está reservado para estas imágenes.
 
@@ -34,8 +34,8 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
 
    - **Lin** — 7-year-old Chinese boy, short straight black hair with a small fringe, round friendly face, big dark eyes; at school he wears a white Argentine school smock (guardapolvo) over a red sweater and a blue backpack; at home a yellow T-shirt
    - **Sofi** — 7-year-old Argentine girl, light-brown wavy hair in two ponytails with sky-blue ribbons, warm tan skin, freckles, big smile; white school smock (guardapolvo)
-   - **Mei** — 7-year-old Chinese girl, straight black hair in two cute high buns with small red ribbons, round friendly face, big dark eyes, sweet cheerful smile; at school she wears a white Argentine school smock (guardapolvo) over a soft yellow sweater; at home a lavender T-shirt
-     *Mei (梅): niña china de 7 años, carita redonda y sonriente, ojos oscuros expresivos, cabello negro lacio en dos rodetitos altos con cintas rojas. Curiosa, alegre, le encanta compartir meriendas y útiles.*
+   - **Ruei** — 7-year-old Chinese girl, straight black hair in two cute high buns with small red ribbons, round friendly face, big dark eyes, sweet cheerful smile; at school she wears a white Argentine school smock (guardapolvo) over a soft yellow sweater; at home a lavender T-shirt
+     *Ruei (瑞瑞): niña china de 7 años, carita redonda y sonriente, ojos oscuros expresivos, cabello negro lacio en dos rodetitos altos con cintas rojas. Curiosa, alegre, le encanta compartir meriendas y útiles. (Se llama Ruei y no Mei para no confundirla con Mei (梅), la adulta de tres mini-dramas DELE de Argentina.)*
    - **Mati** — 7-year-old Argentine boy, messy short wavy dark-brown hair, warm tan skin, lively big smile; white school smock (guardapolvo) over a light-blue sweatshirt and green sneakers
      *Mati: niño argentino de 7 años, piel tostada cálida, pelo castaño oscuro ondulado y un poco despeinado, mirada pícara y sonrisa amplia; guardapolvo blanco sobre un buzo celeste clásico y zapatillas verdes. Muy enérgico, compañero de patio para correr o jugar a la pelota.*
    - **Seño** — young woman teacher in her thirties, shoulder-length dark brown hair, round glasses, kind smile; white school smock (guardapolvo) over a light-blue blouse
@@ -43,12 +43,12 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
    - **Kiosquero** — friendly middle-aged Argentine man with a grey moustache and a flat cap, striped apron, behind the window of a small street kiosk
    - **Familia de Sofi** — father (short dark beard, plaid shirt), mother (curly hair, orange top), grandmother (grey hair in a bun, lilac cardigan), little brother (toddler, round cheeks)
 
-   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Mei y Mati es la ficha original, las demás están armadas con la misma plantilla:
+   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Ruei y Mati es la ficha original (los personajes nuevos), las demás están armadas con la misma plantilla:
 
-   *Mei y Mati:*
+   *Ruei y Mati:*
 
    ```text
-   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese girl named Mei and 7-year-old Argentine boy named Mati standing together, Mei with two high buns and red hair ties in white guardapolvo smock, Mati with short wavy brown hair in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
+   Children's picture-book illustration, flat vector style with soft rounded shapes and clean medium-weight outlines, warm bright pastel palette, friendly and simple, plain white background, character design model sheet, 7-year-old Chinese girl named Ruei and 7-year-old Argentine boy named Mati standing together, Ruei with two high buns and red hair ties in white guardapolvo smock, Mati with short wavy brown hair in white guardapolvo smock, full body front and three-quarter views, clean outlines, no text, no letters, no logos, safe for children
    ```
 
    *Lin y Sofi:*
@@ -86,7 +86,7 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
 
    Nombre de archivo = el que figura en cada tabla (minúsculas, sin acentos, `ñ` → `ny`). Fondo blanco liso (o transparente) y sin texto dentro de la imagen.
 
-6. **Cómo se conectan** (cuando haya imágenes; hoy no hace falta tocar nada): en `lessons-ninos.js` / `ninos-sonidos.js`, el campo `art` de la pieza pasa de `null` a `{ "src": "img/ninos/palabras/pelota.webp", "alt": "Una pelota de fútbol" }`. `ninos-ui.js` ya dibuja el `<img>` cuando hay `art.src` y el emoji cuando no, así que se puede ir cargando de a poco. Al sumar las imágenes habrá que decidir qué se precachea en `sw.js` (169 imágenes de ~40–120 KB son varios MB: conviene cachear al usarlas, no todas de entrada).
+6. **Cómo se conectan** (cuando haya imágenes; hoy no hace falta tocar nada): en `lessons-ninos.js` / `ninos-sonidos.js`, el campo `art` de la pieza pasa de `null` a `{ "src": "img/ninos/palabras/pelota.webp", "alt": "Una pelota de fútbol" }`. `ninos-ui.js` ya dibuja el `<img>` cuando hay `art.src` y el emoji cuando no, así que se puede ir cargando de a poco. Al sumar las imágenes habrá que decidir qué se precachea en `sw.js` (199 imágenes de ~40–120 KB son varios MB: conviene cachear al usarlas, no todas de entrada).
 
 ## 2. Lección por lección
 
@@ -197,9 +197,9 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
 
 **Portada** · `img/ninos/portadas/ni-merienda.webp` · 4:3 · emoji hoy: 🥐
 
-> home kitchen table in afternoon light: Mamá serves milk and medialunas to Lin
+> home kitchen table in afternoon light: Mamá serves milk and medialunas to Lin; Mati peeks in at the doorway with big hungry eyes
 >
-> *Personajes:* Lin (copiar su descripción de la sección 1).
+> *Personajes:* Lin, Mati (copiar su descripción de la sección 1).
 
 | # | Español | 中文 | Emoji hoy | Archivo (`img/ninos/palabras/`) | Prompt (agregar el estilo antes) |
 |---|---|---|---|---|---|
@@ -455,6 +455,80 @@ text, letters, words, numbers, watermark, logo, brand names, realistic photo, sc
 | 6 | viernes | 星期五 | 🟦 | `viernes.webp` | a weekly calendar page with the fifth column highlighted in blue |
 | 7 | sábado | 星期六 | 🟪 | `sabado.webp` | a weekly calendar page with the sixth column highlighted in purple, a small soccer ball beside it |
 | 8 | domingo | 星期天 | ⬜ | `domingo.webp` | a weekly calendar page with the seventh column highlighted in white with a sun, a cozy house beside it |
+
+### 16 · ¡Compartimos! — 我们一起分享！ · `ni-compartimos` · 🌿 8–10 · unidad 15
+
+**Portada** · `img/ninos/portadas/ni-compartimos.webp` · 4:3 · emoji hoy: 🤝
+
+> classroom at recess: Ruei (new classmate) breaks a cookie in half and offers it to Lin; Ruei hands Lin an eraser; both smile; Sofi watches in the background
+>
+> *Personajes:* Lin, Sofi, Ruei (copiar su descripción de la sección 1).
+
+| # | Español | 中文 | Emoji hoy | Archivo (`img/ninos/palabras/`) | Prompt (agregar el estilo antes) |
+|---|---|---|---|---|---|
+| 1 | compartir | 分享 | 🤝 | `compartir.webp` | two children sharing a snack, one breaking a cookie in half and handing a piece to the other, both smiling |
+| 2 | galletita | 小饼干 | 🍪 | `galletita.webp` | a small round cookie with chocolate chips |
+| 3 | goma | 橡皮 | 🧽 | `goma.webp` | a white and blue rubber eraser next to a pencil |
+| 4 | para vos | 给你 | 👉 | `para-vos.webp` | a child holding out a cookie toward the viewer with an arrow pointing to the viewer |
+| 5 | para mí | 给我 | 👈 | `para-mi.webp` | a child pointing at their own chest while holding a cookie |
+| 6 | me gusta | 我喜欢 | 👍 | `me-gusta.webp` | a child hugging a cookie with heart eyes and a big thumbs up |
+| 7 | ¡claro! | 当然！ | ✅ | `claro.webp` | a child nodding happily with a green check mark above |
+| 8 | amiga | 朋友（女） | 🤗 | `amiga.webp` | two girls holding hands and smiling at each other, best friends |
+| 9 | medialunas *(opción de «Escuchá y tocá»)* | 牛角包 | 🥐 | `medialunas.webp` | ↩ misma imagen que en `ni-merienda` (ya descrita) |
+| 10 | torta *(opción de «Escuchá y tocá»)* | 蛋糕 | 🎂 | `torta.webp` | ↩ misma imagen que en `ni-cumple` (ya descrita) |
+| 11 | lápiz *(opción de «Escuchá y tocá»)* | 铅笔 | ✏️ | `lapiz.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 12 | cuaderno *(opción de «Escuchá y tocá»)* | 本子 | 📓 | `cuaderno.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 13 | mamá *(opción de «Escuchá y tocá»)* | 妈妈 | 👩 | `mama.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 14 | abuela *(opción de «Escuchá y tocá»)* | 奶奶 | 👵 | `abuela.webp` | ↩ misma imagen que en `ni-familia` (ya descrita) |
+| 15 | jugar *(opción de «Escuchá y tocá»)* | 玩 | 🎲 | `jugar.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 16 | escribir *(opción de «Escuchá y tocá»)* | 写字 | ✍️ | `escribir.webp` | ↩ misma imagen que en `ni-cole` (ya descrita) |
+
+### 17 · ¡Mati, a correr! — 马蒂，去跑步！ · `ni-mati` · 🌱 6–7 · unidad 16
+
+**Portada** · `img/ninos/portadas/ni-mati.webp` · 4:3 · emoji hoy: 🏃
+
+> school playground: Mati running fast, Lin hurrying behind him saying slow down, Mati jumping rope, Sofi waiting with a soccer ball in her hands
+>
+> *Personajes:* Lin, Sofi, Mati (copiar su descripción de la sección 1).
+
+| # | Español | 中文 | Emoji hoy | Archivo (`img/ninos/palabras/`) | Prompt (agregar el estilo antes) |
+|---|---|---|---|---|---|
+| 1 | ¡vamos! | 我们走！ | 🏁 | `vamos.webp` | two children running toward a finish flag, both smiling |
+| 2 | ¡corré! | 快跑！ | 🏃 | `corre.webp` | a boy running fast with motion lines behind him |
+| 3 | despacio | 慢 | 🐢 | `despacio.webp` | a tiny snail crawling slowly on a leaf |
+| 4 | rápido | 快 | 🐇 | `rapido.webp` | a rabbit sprinting fast with speed lines |
+| 5 | ¡saltá! | 跳！ | 🦘 | `salta.webp` | a child jumping high over a jump rope with arms up |
+| 6 | ¡atrapá! | 接住！ | 🧤 | `atrapa.webp` | a child catching a ball with both hands, eyes wide |
+| 7 | ¡qué bien! | 真棒！ | 👏 | `que-bien.webp` | a child clapping with a big smile and little stars around |
+| 8 | patio *(opción de «Escuchá y tocá»)* | 操场 | 🏫 | `patio.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 9 | pelota *(opción de «Escuchá y tocá»)* | 球 | ⚽ | `pelota.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+
+### 18 · Jugamos a las escondidas — 我们来玩捉迷藏 · `ni-escondidas` · 🌿 8–10 · unidad 17
+
+**Portada** · `img/ninos/portadas/ni-escondidas.webp` · 4:3 · emoji hoy: 🙈
+
+> school yard: Mati facing a tree counting with his eyes covered; Lin, Sofi and Ruei hiding behind a tree, a bench and a bush, peeking out; sunny afternoon
+>
+> *Personajes:* Lin, Sofi, Ruei, Mati (copiar su descripción de la sección 1).
+
+| # | Español | 中文 | Emoji hoy | Archivo (`img/ninos/palabras/`) | Prompt (agregar el estilo antes) |
+|---|---|---|---|---|---|
+| 1 | las escondidas | 捉迷藏 | 🙈 | `las-escondidas.webp` | a child covering their eyes against a tree counting while other children peek from behind bushes |
+| 2 | ¡yo cuento! | 我来数！ | 🗣️ | `yo-cuento.webp` | a boy facing a tree with his eyes covered, counting out loud, a speech bubble with small dots instead of numbers |
+| 3 | ustedes | 你们 | 👥 | `ustedes.webp` | a boy pointing with an open hand toward a group of three children |
+| 4 | se esconden | 藏起来 | 🫣 | `se-esconden.webp` | three children tiptoeing and hiding behind a tree, a bench and a bush |
+| 5 | ¡ya está! | 好了！ | ✅ | `ya-esta.webp` | a boy opening his eyes and lifting both hands in a finished gesture |
+| 6 | ¿dónde están? | 你们在哪里？ | 🔎 | `donde-estan.webp` | a boy looking around with a hand above his eyes, hiding spots around, a question mark above |
+| 7 | ¡te encontré! | 我找到你了！ | 🎯 | `te-encontre.webp` | a boy pointing happily at a girl found behind a tree, her surprised face |
+| 8 | ¡una más! | 再来一次！ | 🔁 | `una-mas.webp` | children raising a finger saying one more time with a circular repeat arrow |
+| 9 | escondidas *(opción de «Escuchá y tocá»)* | 捉迷藏 | 🙈 | `escondidas.webp` | a child peeking from behind a tree trunk with only the eyes and hands showing |
+| 10 | pelota *(opción de «Escuchá y tocá»)* | 球 | ⚽ | `pelota.webp` | ↩ misma imagen que en `ni-hola` (ya descrita) |
+| 11 | plaza *(opción de «Escuchá y tocá»)* | 公园 | 🌳 | `plaza.webp` | ↩ misma imagen que en `ni-cole` (ya descrita) |
+| 12 | seis *(opción de «Escuchá y tocá»)* | 六 | 6️⃣ | `seis.webp` | six small apples in two rows of three |
+| 13 | ocho *(opción de «Escuchá y tocá»)* | 八 | 8️⃣ | `ocho.webp` | eight small stars in two rows of four |
+| 14 | nueve *(opción de «Escuchá y tocá»)* | 九 | 9️⃣ | `nueve.webp` | nine small flowers in three rows of three |
+| 15 | diez *(opción de «Escuchá y tocá»)* | 十 | 🔟 | `diez.webp` | ↩ misma imagen que en `ni-kiosco` (ya descrita) |
+| 16 | siete *(opción de «Escuchá y tocá»)* | 七 | 7️⃣ | `siete.webp` | ↩ misma imagen que en `ni-cumple` (ya descrita) |
 
 ## 3. Sonidos del español
 

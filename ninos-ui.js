@@ -40,7 +40,7 @@
     const setShowZh = (v) => { showZh = !!v; try { localStorage.setItem('ac_ninos_zh', showZh ? '1' : '0'); } catch (e) { /* sin storage */ } };
 
     const BAND = { A: ['🌱', '6–7', '6–7 岁'], B: ['🌿', '8–10', '8–10 岁'] };
-    const WHO = { 'Seño': '👩‍🏫', 'Mamá': '👩', 'Lin': '🧒', 'Sofi': '👧', 'Kiosquero': '🧔' };
+    const WHO = { 'Seño': '👩‍🏫', 'Mamá': '👩', 'Lin': '🧒', 'Sofi': '👧', 'Kiosquero': '🧔', 'Ruei': '👧🏻', 'Mati': '👦🏽' };
     const starsOf = (n) => '⭐'.repeat(n) + '☆'.repeat(3 - n);
     // gráfico futuro: si la pieza trae art.src se usa la imagen; si no, el emoji
     const pic = (o, cls) => (o && o.art && o.art.src)

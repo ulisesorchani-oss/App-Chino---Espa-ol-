@@ -1042,9 +1042,9 @@ window.NINOS_LESSONS = [
   "titleEs": "Tengo hambre",
   "titleZh": "我饿了",
   "titleZhT": "我餓了",
-  "blurb": "Es la hora de la merienda: leche, medialunas y un «¡qué rico!».",
-  "blurbZh": "到吃点心的时间了：牛奶、牛角包和一句“真好吃！”。",
-  "blurbZhT": "到吃點心的時間了：牛奶、牛角包和一句“真好吃！”。",
+  "blurb": "Es la hora de la merienda: leche, medialunas y un «¡qué rico!». Al final llega Mati, con mucha hambre.",
+  "blurbZh": "到吃点心的时间了：牛奶、牛角包和一句“真好吃！”。最后马蒂也来了，肚子饿极了。",
+  "blurbZhT": "到吃點心的時間了：牛奶、牛角包和一句“真好吃！”。最後馬蒂也來了，肚子餓極了。",
   "words": [
    {
     "sp": "merienda",
@@ -1151,6 +1151,12 @@ window.NINOS_LESSONS = [
     "sp": "No, gracias. ¡Estoy lleno!",
     "zh": "不要了，谢谢。我吃饱了！",
     "zhT": "不要了，謝謝。我吃飽了！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Yo sí quiero más!",
+    "zh": "我可还想再吃点！",
+    "zhT": "我可還想再吃點！"
    }
   ],
   "listen": [
@@ -5168,6 +5174,1040 @@ window.NINOS_LESSONS = [
       "w": "jueves",
       "e": "星期四",
       "eT": "星期四"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-compartimos",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 15,
+  "order": 16,
+  "emoji": "🤝",
+  "art": null,
+  "titleEs": "¡Compartimos!",
+  "titleZh": "我们一起分享！",
+  "titleZhT": "我們一起分享！",
+  "blurb": "Ruei, una compañera nueva, comparte su galletita y le presta la goma a Lin.",
+  "blurbZh": "新同学瑞瑞把小饼干分给林，还借给他橡皮。",
+  "blurbZhT": "新同學瑞瑞把小餅乾分給林，還借給他橡皮。",
+  "words": [
+   {
+    "sp": "compartir",
+    "zh": "分享",
+    "zhT": "分享",
+    "emoji": "🤝",
+    "art": null
+   },
+   {
+    "sp": "galletita",
+    "zh": "小饼干",
+    "zhT": "小餅乾",
+    "emoji": "🍪",
+    "art": null
+   },
+   {
+    "sp": "goma",
+    "zh": "橡皮",
+    "zhT": "橡皮",
+    "emoji": "🧽",
+    "art": null
+   },
+   {
+    "sp": "para vos",
+    "zh": "给你",
+    "zhT": "給你",
+    "emoji": "👉",
+    "art": null
+   },
+   {
+    "sp": "para mí",
+    "zh": "给我",
+    "zhT": "給我",
+    "emoji": "👈",
+    "art": null
+   },
+   {
+    "sp": "me gusta",
+    "zh": "我喜欢",
+    "zhT": "我喜歡",
+    "emoji": "👍",
+    "art": null
+   },
+   {
+    "sp": "¡claro!",
+    "zh": "当然！",
+    "zhT": "當然！",
+    "emoji": "✅",
+    "art": null
+   },
+   {
+    "sp": "amiga",
+    "zh": "朋友（女）",
+    "zhT": "朋友（女）",
+    "emoji": "🤗",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Ruei",
+    "sp": "¡Hola, Lin! Yo soy Ruei.",
+    "zh": "你好，林！我是瑞瑞。",
+    "zhT": "你好，林！我是瑞瑞。"
+   },
+   {
+    "who": "Ruei",
+    "sp": "¿Querés una galletita?",
+    "zh": "你想吃一块小饼干吗？",
+    "zhT": "你想吃一塊小餅乾嗎？"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Sí, gracias!",
+    "zh": "好，谢谢！",
+    "zhT": "好，謝謝！"
+   },
+   {
+    "who": "Ruei",
+    "sp": "Una para vos y una para mí.",
+    "zh": "一块给你，一块给我。",
+    "zhT": "一塊給你，一塊給我。"
+   },
+   {
+    "who": "Lin",
+    "sp": "Me gusta compartir.",
+    "zh": "我喜欢分享。",
+    "zhT": "我喜歡分享。"
+   },
+   {
+    "who": "Ruei",
+    "sp": "Yo también. ¿Tenés goma?",
+    "zh": "我也是。你有橡皮吗？",
+    "zhT": "我也是。你有橡皮嗎？"
+   },
+   {
+    "who": "Lin",
+    "sp": "No. ¿Me prestás una?",
+    "zh": "没有。你能借我一块吗？",
+    "zhT": "沒有。你能借我一塊嗎？"
+   },
+   {
+    "who": "Ruei",
+    "sp": "¡Claro! Tomá, Lin.",
+    "zh": "当然！拿着，林。",
+    "zhT": "當然！拿著，林。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Sos buena amiga, Ruei!",
+    "zh": "瑞瑞，你真是个好朋友！",
+    "zhT": "瑞瑞，你真是個好朋友！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "La galletita",
+    "opts": [
+     {
+      "emoji": "🍪",
+      "sp": "galletita",
+      "zh": "小饼干",
+      "zhT": "小餅乾",
+      "art": null
+     },
+     {
+      "emoji": "🥐",
+      "sp": "medialunas",
+      "zh": "牛角包",
+      "zhT": "牛角包",
+      "art": null
+     },
+     {
+      "emoji": "🎂",
+      "sp": "torta",
+      "zh": "蛋糕",
+      "zhT": "蛋糕",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La goma",
+    "opts": [
+     {
+      "emoji": "🧽",
+      "sp": "goma",
+      "zh": "橡皮",
+      "zhT": "橡皮",
+      "art": null
+     },
+     {
+      "emoji": "✏️",
+      "sp": "lápiz",
+      "zh": "铅笔",
+      "zhT": "鉛筆",
+      "art": null
+     },
+     {
+      "emoji": "📓",
+      "sp": "cuaderno",
+      "zh": "本子",
+      "zhT": "本子",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Una amiga",
+    "opts": [
+     {
+      "emoji": "🤗",
+      "sp": "amiga",
+      "zh": "朋友（女）",
+      "zhT": "朋友（女）",
+      "art": null
+     },
+     {
+      "emoji": "👩",
+      "sp": "mamá",
+      "zh": "妈妈",
+      "zhT": "媽媽",
+      "art": null
+     },
+     {
+      "emoji": "👵",
+      "sp": "abuela",
+      "zh": "奶奶",
+      "zhT": "奶奶",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Compartir",
+    "opts": [
+     {
+      "emoji": "🤝",
+      "sp": "compartir",
+      "zh": "分享",
+      "zhT": "分享",
+      "art": null
+     },
+     {
+      "emoji": "🎲",
+      "sp": "jugar",
+      "zh": "玩",
+      "zhT": "玩",
+      "art": null
+     },
+     {
+      "emoji": "✍️",
+      "sp": "escribir",
+      "zh": "写字",
+      "zhT": "寫字",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¿Querés una ___?",
+    "zh": "你想吃一块小饼干吗？",
+    "zhT": "你想吃一塊小餅乾嗎？",
+    "opts": [
+     {
+      "w": "galletita",
+      "e": "小饼干",
+      "eT": "小餅乾"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   },
+   {
+    "sp": "Una para vos y una para ___.",
+    "zh": "一块给你，一块给我。",
+    "zhT": "一塊給你，一塊給我。",
+    "opts": [
+     {
+      "w": "mí",
+      "e": "我",
+      "eT": "我"
+     },
+     {
+      "w": "yo",
+      "e": "我（主语）",
+      "eT": "我（主語）"
+     },
+     {
+      "w": "me",
+      "e": "我（宾格）",
+      "eT": "我（賓格）"
+     }
+    ]
+   },
+   {
+    "sp": "Me gusta ___.",
+    "zh": "我喜欢分享。",
+    "zhT": "我喜歡分享。",
+    "opts": [
+     {
+      "w": "compartir",
+      "e": "分享",
+      "eT": "分享"
+     },
+     {
+      "w": "tomá",
+      "e": "拿着",
+      "eT": "拿著"
+     },
+     {
+      "w": "gracias",
+      "e": "谢谢",
+      "eT": "謝謝"
+     }
+    ]
+   },
+   {
+    "sp": "No. ¿Me ___ una?",
+    "zh": "没有。你能借我一块吗？",
+    "zhT": "沒有。你能借我一塊嗎？",
+    "opts": [
+     {
+      "w": "prestás",
+      "e": "你借",
+      "eT": "你借"
+     },
+     {
+      "w": "prestamos",
+      "e": "我们借",
+      "eT": "我們借"
+     },
+     {
+      "w": "prestaron",
+      "e": "他们借了",
+      "eT": "他們借了"
+     }
+    ]
+   },
+   {
+    "sp": "¡Sos buena ___, Ruei!",
+    "zh": "瑞瑞，你真是个好朋友！",
+    "zhT": "瑞瑞，你真是個好朋友！",
+    "opts": [
+     {
+      "w": "amiga",
+      "e": "朋友（女）",
+      "eT": "朋友（女）"
+     },
+     {
+      "w": "amigo",
+      "e": "朋友（男）",
+      "eT": "朋友（男）"
+     },
+     {
+      "w": "amigos",
+      "e": "朋友们",
+      "eT": "朋友們"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-mati",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 16,
+  "order": 17,
+  "emoji": "🏃",
+  "art": null,
+  "titleEs": "¡Mati, a correr!",
+  "titleZh": "马蒂，去跑步！",
+  "titleZhT": "馬蒂，去跑步！",
+  "blurb": "Mati no para en el recreo: corre, salta y le pasa la pelota a Sofi.",
+  "blurbZh": "马蒂在课间一刻不停：跑、跳，还把球传给索菲。",
+  "blurbZhT": "馬蒂在課間一刻不停：跑、跳，還把球傳給索菲。",
+  "words": [
+   {
+    "sp": "¡vamos!",
+    "zh": "我们走！",
+    "zhT": "我們走！",
+    "emoji": "🏁",
+    "art": null
+   },
+   {
+    "sp": "¡corré!",
+    "zh": "快跑！",
+    "zhT": "快跑！",
+    "emoji": "🏃",
+    "art": null
+   },
+   {
+    "sp": "despacio",
+    "zh": "慢",
+    "zhT": "慢",
+    "emoji": "🐢",
+    "art": null
+   },
+   {
+    "sp": "rápido",
+    "zh": "快",
+    "zhT": "快",
+    "emoji": "🐇",
+    "art": null
+   },
+   {
+    "sp": "¡saltá!",
+    "zh": "跳！",
+    "zhT": "跳！",
+    "emoji": "🦘",
+    "art": null
+   },
+   {
+    "sp": "¡atrapá!",
+    "zh": "接住！",
+    "zhT": "接住！",
+    "emoji": "🧤",
+    "art": null
+   },
+   {
+    "sp": "¡qué bien!",
+    "zh": "真棒！",
+    "zhT": "真棒！",
+    "emoji": "👏",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Mati",
+    "sp": "¡Vamos al patio, Lin!",
+    "zh": "林，我们去操场！",
+    "zhT": "林，我們去操場！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Corré, corré!",
+    "zh": "快跑，快跑！",
+    "zhT": "快跑，快跑！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Más despacio, Mati!",
+    "zh": "慢一点，马蒂！",
+    "zhT": "慢一點，馬蒂！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Dale, más rápido!",
+    "zh": "来吧，再快一点！",
+    "zhT": "來吧，再快一點！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Saltá, Lin!",
+    "zh": "跳，林！",
+    "zhT": "跳，林！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Uno, dos, tres!",
+    "zh": "一、二、三！",
+    "zhT": "一、二、三！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Qué bien saltás!",
+    "zh": "你跳得真好！",
+    "zhT": "你跳得真好！"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Pasame la pelota, Mati!",
+    "zh": "马蒂，把球传给我！",
+    "zhT": "馬蒂，把球傳給我！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Atrapá, Sofi!",
+    "zh": "接住，索菲！",
+    "zhT": "接住，索菲！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "Despacio",
+    "opts": [
+     {
+      "emoji": "🐢",
+      "sp": "despacio",
+      "zh": "慢",
+      "zhT": "慢",
+      "art": null
+     },
+     {
+      "emoji": "🐇",
+      "sp": "rápido",
+      "zh": "快",
+      "zhT": "快",
+      "art": null
+     },
+     {
+      "emoji": "🏫",
+      "sp": "patio",
+      "zh": "操场",
+      "zhT": "操場",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Rápido",
+    "opts": [
+     {
+      "emoji": "🐇",
+      "sp": "rápido",
+      "zh": "快",
+      "zhT": "快",
+      "art": null
+     },
+     {
+      "emoji": "🐢",
+      "sp": "despacio",
+      "zh": "慢",
+      "zhT": "慢",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El patio",
+    "opts": [
+     {
+      "emoji": "🏫",
+      "sp": "patio",
+      "zh": "操场",
+      "zhT": "操場",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "🐢",
+      "sp": "despacio",
+      "zh": "慢",
+      "zhT": "慢",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La pelota",
+    "opts": [
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "🏫",
+      "sp": "patio",
+      "zh": "操场",
+      "zhT": "操場",
+      "art": null
+     },
+     {
+      "emoji": "🐇",
+      "sp": "rápido",
+      "zh": "快",
+      "zhT": "快",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¡Vamos al ___, Lin!",
+    "zh": "林，我们去操场！",
+    "zhT": "林，我們去操場！",
+    "opts": [
+     {
+      "w": "patio",
+      "e": "操场",
+      "eT": "操場"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     },
+     {
+      "w": "té",
+      "e": "茶",
+      "eT": "茶"
+     }
+    ]
+   },
+   {
+    "sp": "¡Más ___, Mati!",
+    "zh": "慢一点，马蒂！",
+    "zhT": "慢一點，馬蒂！",
+    "opts": [
+     {
+      "w": "despacio",
+      "e": "慢",
+      "eT": "慢"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   },
+   {
+    "sp": "¡Dale, más ___!",
+    "zh": "来吧，再快一点！",
+    "zhT": "來吧，再快一點！",
+    "opts": [
+     {
+      "w": "rápido",
+      "e": "快",
+      "eT": "快"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "té",
+      "e": "茶",
+      "eT": "茶"
+     }
+    ]
+   },
+   {
+    "sp": "¡Qué bien ___!",
+    "zh": "你跳得真好！",
+    "zhT": "你跳得真好！",
+    "opts": [
+     {
+      "w": "saltás",
+      "e": "你跳",
+      "eT": "你跳"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "patio",
+      "e": "操场",
+      "eT": "操場"
+     }
+    ]
+   },
+   {
+    "sp": "¡Pasame la ___, Mati!",
+    "zh": "马蒂，把球传给我！",
+    "zhT": "馬蒂，把球傳給我！",
+    "opts": [
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "patio",
+      "e": "操场",
+      "eT": "操場"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-escondidas",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 17,
+  "order": 18,
+  "emoji": "🙈",
+  "art": null,
+  "titleEs": "Jugamos a las escondidas",
+  "titleZh": "我们来玩捉迷藏",
+  "titleZhT": "我們來玩捉迷藏",
+  "blurb": "Los cuatro amigos —Lin, Sofi, Ruei y Mati— juegan a las escondidas: Mati cuenta hasta diez.",
+  "blurbZh": "四个好朋友林、索菲、瑞瑞和马蒂玩捉迷藏：马蒂数到十。",
+  "blurbZhT": "四個好朋友林、索菲、瑞瑞和馬蒂玩捉迷藏：馬蒂數到十。",
+  "words": [
+   {
+    "sp": "las escondidas",
+    "zh": "捉迷藏",
+    "zhT": "捉迷藏",
+    "emoji": "🙈",
+    "art": null
+   },
+   {
+    "sp": "¡yo cuento!",
+    "zh": "我来数！",
+    "zhT": "我來數！",
+    "emoji": "🗣️",
+    "art": null
+   },
+   {
+    "sp": "ustedes",
+    "zh": "你们",
+    "zhT": "你們",
+    "emoji": "👥",
+    "art": null
+   },
+   {
+    "sp": "se esconden",
+    "zh": "藏起来",
+    "zhT": "藏起來",
+    "emoji": "🫣",
+    "art": null
+   },
+   {
+    "sp": "¡ya está!",
+    "zh": "好了！",
+    "zhT": "好了！",
+    "emoji": "✅",
+    "art": null
+   },
+   {
+    "sp": "¿dónde están?",
+    "zh": "你们在哪里？",
+    "zhT": "你們在哪裡？",
+    "emoji": "🔎",
+    "art": null
+   },
+   {
+    "sp": "¡te encontré!",
+    "zh": "我找到你了！",
+    "zhT": "我找到你了！",
+    "emoji": "🎯",
+    "art": null
+   },
+   {
+    "sp": "¡una más!",
+    "zh": "再来一次！",
+    "zhT": "再來一次！",
+    "emoji": "🔁",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Sofi",
+    "sp": "¡Jugamos a las escondidas!",
+    "zh": "我们来玩捉迷藏！",
+    "zhT": "我們來玩捉迷藏！"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Yo cuento! Ustedes se esconden.",
+    "zh": "我来数！你们去藏起来。",
+    "zhT": "我來數！你們去藏起來。"
+   },
+   {
+    "who": "Mati",
+    "sp": "Seis, siete, ocho, nueve, diez.",
+    "zh": "六、七、八、九、十。",
+    "zhT": "六、七、八、九、十。"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Ya está! ¿Dónde están?",
+    "zh": "好了！你们在哪里？",
+    "zhT": "好了！你們在哪裡？"
+   },
+   {
+    "who": "Mati",
+    "sp": "¡Te encontré, Ruei!",
+    "zh": "瑞瑞，我找到你了！",
+    "zhT": "瑞瑞，我找到你了！"
+   },
+   {
+    "who": "Ruei",
+    "sp": "¡Uy, qué rápido!",
+    "zh": "哎呀，真快！",
+    "zhT": "哎呀，真快！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Acá estoy, Mati!",
+    "zh": "马蒂，我在这里！",
+    "zhT": "馬蒂，我在這裡！"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Una más, por favor!",
+    "zh": "再来一次，拜托！",
+    "zhT": "再來一次，拜託！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "Las escondidas",
+    "opts": [
+     {
+      "emoji": "🙈",
+      "sp": "escondidas",
+      "zh": "捉迷藏",
+      "zhT": "捉迷藏",
+      "art": null
+     },
+     {
+      "emoji": "⚽",
+      "sp": "pelota",
+      "zh": "球",
+      "zhT": "球",
+      "art": null
+     },
+     {
+      "emoji": "🌳",
+      "sp": "plaza",
+      "zh": "公园",
+      "zhT": "公園",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Seis",
+    "opts": [
+     {
+      "emoji": "6️⃣",
+      "sp": "seis",
+      "zh": "六",
+      "zhT": "六",
+      "art": null
+     },
+     {
+      "emoji": "8️⃣",
+      "sp": "ocho",
+      "zh": "八",
+      "zhT": "八",
+      "art": null
+     },
+     {
+      "emoji": "9️⃣",
+      "sp": "nueve",
+      "zh": "九",
+      "zhT": "九",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Diez",
+    "opts": [
+     {
+      "emoji": "🔟",
+      "sp": "diez",
+      "zh": "十",
+      "zhT": "十",
+      "art": null
+     },
+     {
+      "emoji": "7️⃣",
+      "sp": "siete",
+      "zh": "七",
+      "zhT": "七",
+      "art": null
+     },
+     {
+      "emoji": "6️⃣",
+      "sp": "seis",
+      "zh": "六",
+      "zhT": "六",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Ocho",
+    "opts": [
+     {
+      "emoji": "8️⃣",
+      "sp": "ocho",
+      "zh": "八",
+      "zhT": "八",
+      "art": null
+     },
+     {
+      "emoji": "9️⃣",
+      "sp": "nueve",
+      "zh": "九",
+      "zhT": "九",
+      "art": null
+     },
+     {
+      "emoji": "🔟",
+      "sp": "diez",
+      "zh": "十",
+      "zhT": "十",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¡Jugamos a las ___!",
+    "zh": "我们来玩捉迷藏！",
+    "zhT": "我們來玩捉迷藏！",
+    "opts": [
+     {
+      "w": "escondidas",
+      "e": "捉迷藏",
+      "eT": "捉迷藏"
+     },
+     {
+      "w": "mochilas",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "tortas",
+      "e": "蛋糕",
+      "eT": "蛋糕"
+     }
+    ]
+   },
+   {
+    "sp": "¡Yo cuento! Ustedes se ___.",
+    "zh": "我来数！你们去藏起来。",
+    "zhT": "我來數！你們去藏起來。",
+    "opts": [
+     {
+      "w": "esconden",
+      "e": "藏",
+      "eT": "藏"
+     },
+     {
+      "w": "escondo",
+      "e": "我藏",
+      "eT": "我藏"
+     },
+     {
+      "w": "esconde",
+      "e": "他藏",
+      "eT": "他藏"
+     }
+    ]
+   },
+   {
+    "sp": "Seis, siete, ocho, nueve, ___.",
+    "zh": "六、七、八、九、十。",
+    "zhT": "六、七、八、九、十。",
+    "opts": [
+     {
+      "w": "diez",
+      "e": "十",
+      "eT": "十"
+     },
+     {
+      "w": "tres",
+      "e": "三",
+      "eT": "三"
+     },
+     {
+      "w": "cuatro",
+      "e": "四",
+      "eT": "四"
+     }
+    ]
+   },
+   {
+    "sp": "¡Una más, por ___!",
+    "zh": "再来一次，拜托！",
+    "zhT": "再來一次，拜託！",
+    "opts": [
+     {
+      "w": "favor",
+      "e": "请",
+      "eT": "請"
+     },
+     {
+      "w": "patio",
+      "e": "操场",
+      "eT": "操場"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "¡Te ___, Ruei!",
+    "zh": "瑞瑞，我找到你了！",
+    "zhT": "瑞瑞，我找到你了！",
+    "opts": [
+     {
+      "w": "encontré",
+      "e": "我找到",
+      "eT": "我找到"
+     },
+     {
+      "w": "esconde",
+      "e": "他藏",
+      "eT": "他藏"
+     },
+     {
+      "w": "corré",
+      "e": "快跑",
+      "eT": "快跑"
      }
     ]
    }
