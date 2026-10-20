@@ -120,8 +120,8 @@ const ok = (c, m) => { n++; if (!c) { fails++; console.log('FAIL ' + m); } };
   for (const track of ['Escolares', 'Argentina']) {
     await reset('ok');
     await p.evaluate(() => { showView('aprender'); document.getElementById('tab-lessons').click(); }); await p.waitForTimeout(300);
-    await p.click('#dele-tracks .lv-chip[data-track="' + track + '"]'); await p.waitForTimeout(250);
-    await p.click('#dele-list .lesson-card [data-act="read"]'); await p.waitForTimeout(400);
+    // R15: ya no hay filtro de pista; se abre la primera lección de cada país (pastilla .lc-var-es / .lc-var-ar)
+    await p.click('#dele-list .dele-card:has(.lc-var-' + (track === 'Escolares' ? 'es' : 'ar') + ') [data-act="read"]'); await p.waitForTimeout(400);
     await p.evaluate(() => document.querySelector('#dele-body .lq-line-say').click()); await p.waitForTimeout(500);
     s = await state();
     ok(s.audios.length === 1 && s.audios[0].plays === 1 && s.errs.length === 0, '6) ' + track + ': el 🔊 de la línea suena ' + JSON.stringify(s.audios));
@@ -129,7 +129,7 @@ const ok = (c, m) => { n++; if (!c) { fails++; console.log('FAIL ' + m); } };
   }
   await reset('ok');
   await p.evaluate(() => { showView('aprender'); document.getElementById('tab-lessons').click(); }); await p.waitForTimeout(300);
-  await p.click('#dele-tracks .lv-chip[data-track="Niños"]'); await p.waitForTimeout(250);
+  await p.click('#dele-tracks .lv-chip[data-seg="ninos"]'); await p.waitForTimeout(250);
   await p.click('.nino-card[data-id="ni-hola"] .nino-go[data-act="read"]'); await p.waitForTimeout(400);
   await p.evaluate(() => document.querySelector('#nino-body .nino-say').click()); await p.waitForTimeout(500); s = await state();
   ok(s.audios.length === 1 && s.audios[0].plays === 1 && s.errs.length === 0, '6) Niños: el 🔊 de la línea suena ' + JSON.stringify(s.audios));

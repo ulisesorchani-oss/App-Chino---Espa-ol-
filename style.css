@@ -7002,19 +7002,33 @@ body.paper-mode .nino-snd-intro, body.paper-mode .nino-snd-rule, body.paper-mode
 .dele-n { font-size: 0.7rem; font-weight: 800; line-height: 1; padding: 3px 6px; border-radius: 999px; background: rgba(100, 116, 139, .16); }
 .lv-chip.active .dele-n { background: rgba(255, 255, 255, .24); }
 .dele-chips .lv-chip:disabled, .dele-chips .lv-chip.is-off { opacity: .5; border-style: dashed; cursor: default; }
-/* tarjetas de DELE: el nivel, la marca de pista y el mejor puntaje caben en 320 px (saltan de línea si hace falta) */
+/* tarjetas de DELE: el nivel, el país y el mejor puntaje caben en 320 px (saltan de línea si hace falta) */
 .dele-card .lc-top { flex-wrap: wrap; row-gap: 4px; }
-.lc-track { font-size: 0.68rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; letter-spacing: .02em; white-space: nowrap; }
-.lc-track-esc { background: #fef3c7; color: #92400e; }
-.lc-track-arg { background: #e0f2fe; color: #075985; }
-.lc-track-otra { background: #f1f5f9; color: #334155; }
+/* R15: pastilla de país (una sola, con la bandera de la variante: tabla VARIANTES en lessons-dele.js) */
+.lc-var { font-size: 0.68rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; letter-spacing: .02em; white-space: nowrap; }
+.lc-var-es { background: #fef3c7; color: #92400e; }
+.lc-var-ar { background: #e0f2fe; color: #075985; }
+.lc-var-otra { background: #f1f5f9; color: #334155; }
 /* oscuro */
 body.dark-mode .dele-n { background: rgba(148, 163, 184, .22); }
-body.dark-mode .lc-track-esc { background: #451a03; color: #fde68a; }
-body.dark-mode .lc-track-arg { background: #082f49; color: #bae6fd; }
-body.dark-mode .lc-track-otra { background: #1e293b; color: #cbd5e1; }
+body.dark-mode .lc-var-es { background: #451a03; color: #fde68a; }
+body.dark-mode .lc-var-ar { background: #082f49; color: #bae6fd; }
+body.dark-mode .lc-var-otra { background: #1e293b; color: #cbd5e1; }
 /* papel */
 body.paper-mode .dele-n { background: rgba(122, 90, 40, .14); }
-body.paper-mode .lc-track-esc { background: #f6e7c1; color: #7c2d12; }
-body.paper-mode .lc-track-arg { background: #e2eef0; color: #0c4a6e; }
-body.paper-mode .lc-track-otra { background: #efe6cf; color: #43382a; }
+body.paper-mode .lc-var-es { background: #f6e7c1; color: #7c2d12; }
+body.paper-mode .lc-var-ar { background: #e2eef0; color: #0c4a6e; }
+body.paper-mode .lc-var-otra { background: #efe6cf; color: #43382a; }
+
+/* ═══ R15 — Lecciones DELE: un solo menú de nivel (.lvsel como el de HSK/TOCFL) con los conteos ═══
+   Reemplaza al sub-filtro de pista y a los chips de nivel de R14. En Niños el menú no se muestra. */
+.dele-levelbox { margin: 0 0 10px; }
+.dele-levelbox[hidden] { display: none; }
+.lvsel-dele select { background: #fff; color: #3730a3; border-color: #c7d2fe; }
+.lvsel-dele .lvsel-tag, .lvsel-dele::after { color: #3730a3; }   /* la etiqueta lleva el mismo color que el texto del menú (convención de .lvsel) */
+.lvsel-dele select option:disabled { color: #94a3b8; }
+body.dark-mode .lvsel-dele select { background: #262f3d; color: #e0e7ff; border-color: #3a4558; }
+body.dark-mode .lvsel-dele .lvsel-tag, body.dark-mode .lvsel-dele::after { color: #e0e7ff; }
+body.dark-mode .lvsel-dele select option { background: #1e293b; color: #e2e8f0; }
+body.paper-mode .lvsel-dele select { background: #fffdf6; color: #43382a; border-color: #d9c9a3; }
+body.paper-mode .lvsel-dele .lvsel-tag, body.paper-mode .lvsel-dele::after { color: #43382a; }
