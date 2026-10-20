@@ -43,6 +43,9 @@ Object.keys(need).forEach(sec => {
   need[sec].forEach(k => { if (!P[sec] || !P[sec][k]) problems.push('falta el prompt de ' + sec + '/' + k); });
   Object.keys(P[sec] || {}).forEach(k => { if (!need[sec].has(k)) problems.push('prompt huérfano (ya no se usa): ' + sec + '/' + k); });
 });
+Object.keys(P.rasgos || {}).forEach(k => { if (!P.personajes[k]) problems.push('«rasgos» de un personaje que no existe: ' + k); });
+Object.keys(P.hojas || {}).forEach(k => { if (!k.split(/ y /).every(n => P.personajes[n] || P.personajes['Familia de ' + n] || n === 'Familia de Sofi')) problems.push('hoja de personaje con un nombre que no está en «personajes»: ' + k); });
+Object.keys(P.personajes).forEach(n => { if (!Object.keys(P.hojas || {}).some(k => k.split(/ y /).includes(n) || k === n)) problems.push('el personaje «' + n + '» no aparece en ninguna hoja de personaje'); });
 ['estilo', 'negativo', 'personajes', 'formato'].forEach(k => { if (!P[k]) problems.push('falta «' + k + '» en el JSON'); });
 
 // ── el .md ──
@@ -85,7 +88,11 @@ w('3. **Prompt completo** = `ESTILO` + `, ` + el texto de la tabla. En las **por
 w();
 w('4. **Personajes** (usar SIEMPRE el mismo texto para que se parezcan en todas las escenas; si el generador acepta imágenes de referencia o una semilla, generá primero una hoja de personaje —frente, perfil y tres cuartos, cara neutra y feliz— y usala de referencia):');
 w();
-chars.forEach(n => w('   - **' + n + '** — ' + P.personajes[n].replace(/^[^:]+:\s*/, '')));
+chars.forEach(n => { w('   - **' + n + '** — ' + P.personajes[n].replace(/^[^:]+:\s*/, '')); if ((P.rasgos || {})[n]) w('     *' + P.rasgos[n] + '*'); });
+w();
+w('   **Hoja de personaje (model sheet)** — generala primero y usala de referencia en todas las escenas. Una por pareja o grupo; la de Mei y Mati es la ficha original, las demás están armadas con la misma plantilla:');
+w();
+Object.keys(P.hojas || {}).forEach(k => { w('   *' + k + ':*'); w(); w('   ```text'); w('   ' + P.hojas[k]); w('   ```'); w(); });
 w();
 w('5. **Formato y archivos:**');
 w();
