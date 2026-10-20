@@ -4138,5 +4138,1039 @@ window.NINOS_LESSONS = [
     ]
    }
   ]
+ },
+ {
+  "id": "ni-cuerpo",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 12,
+  "order": 13,
+  "emoji": "🙌",
+  "art": null,
+  "titleEs": "Simón dice",
+  "titleZh": "西蒙说",
+  "titleZhT": "西蒙說",
+  "blurb": "En gimnasia, la seño juega a «Simón dice»: cabeza, manos, pies, ojos y nariz.",
+  "blurbZh": "体育课上，老师带大家玩“西蒙说”：头、手、脚、眼睛和鼻子。",
+  "blurbZhT": "體育課上，老師帶大家玩“西蒙說”：頭、手、腳、眼睛和鼻子。",
+  "words": [
+   {
+    "sp": "Simón dice",
+    "zh": "西蒙说",
+    "zhT": "西蒙說",
+    "emoji": "🗣️",
+    "art": null
+   },
+   {
+    "sp": "cabeza",
+    "zh": "头",
+    "zhT": "頭",
+    "emoji": "😃",
+    "art": null
+   },
+   {
+    "sp": "manos",
+    "zh": "手",
+    "zhT": "手",
+    "emoji": "🙌",
+    "art": null
+   },
+   {
+    "sp": "pies",
+    "zh": "脚",
+    "zhT": "腳",
+    "emoji": "🦶",
+    "art": null
+   },
+   {
+    "sp": "ojos",
+    "zh": "眼睛",
+    "zhT": "眼睛",
+    "emoji": "👀",
+    "art": null
+   },
+   {
+    "sp": "nariz",
+    "zh": "鼻子",
+    "zhT": "鼻子",
+    "emoji": "👃",
+    "art": null
+   },
+   {
+    "sp": "arriba",
+    "zh": "上面；向上",
+    "zhT": "上面；向上",
+    "emoji": "⬆️",
+    "art": null
+   },
+   {
+    "sp": "¡qué risa!",
+    "zh": "真好笑！",
+    "zhT": "真好笑！",
+    "emoji": "😂",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Seño",
+    "sp": "¡Jugamos a Simón dice!",
+    "zh": "我们来玩“西蒙说”！",
+    "zhT": "我們來玩“西蒙說”！"
+   },
+   {
+    "who": "Seño",
+    "sp": "Simón dice: ¡tocá la cabeza!",
+    "zh": "西蒙说：摸摸头！",
+    "zhT": "西蒙說：摸摸頭！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Acá está mi cabeza!",
+    "zh": "这是我的头！",
+    "zhT": "這是我的頭！"
+   },
+   {
+    "who": "Seño",
+    "sp": "Simón dice: ¡manos arriba!",
+    "zh": "西蒙说：举起手来！",
+    "zhT": "西蒙說：舉起手來！"
+   },
+   {
+    "who": "Seño",
+    "sp": "Simón dice: ¡tocá los pies!",
+    "zh": "西蒙说：摸摸脚！",
+    "zhT": "西蒙說：摸摸腳！"
+   },
+   {
+    "who": "Seño",
+    "sp": "Simón dice: ¡tocá los ojos!",
+    "zh": "西蒙说：摸摸眼睛！",
+    "zhT": "西蒙說：摸摸眼睛！"
+   },
+   {
+    "who": "Seño",
+    "sp": "¡Tocá la nariz!",
+    "zh": "摸摸鼻子！",
+    "zhT": "摸摸鼻子！"
+   },
+   {
+    "who": "Seño",
+    "sp": "¡Uy! Simón no dijo.",
+    "zh": "哎呀！西蒙没说。",
+    "zhT": "哎呀！西蒙沒說。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Ay, qué risa!",
+    "zh": "哎呀，真好笑！",
+    "zhT": "哎呀，真好笑！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "La cabeza",
+    "opts": [
+     {
+      "emoji": "😃",
+      "sp": "cabeza",
+      "zh": "头",
+      "zhT": "頭",
+      "art": null
+     },
+     {
+      "emoji": "👃",
+      "sp": "nariz",
+      "zh": "鼻子",
+      "zhT": "鼻子",
+      "art": null
+     },
+     {
+      "emoji": "🦶",
+      "sp": "pies",
+      "zh": "脚",
+      "zhT": "腳",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Los pies",
+    "opts": [
+     {
+      "emoji": "🦶",
+      "sp": "pies",
+      "zh": "脚",
+      "zhT": "腳",
+      "art": null
+     },
+     {
+      "emoji": "🙌",
+      "sp": "manos",
+      "zh": "手",
+      "zhT": "手",
+      "art": null
+     },
+     {
+      "emoji": "👀",
+      "sp": "ojos",
+      "zh": "眼睛",
+      "zhT": "眼睛",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La nariz",
+    "opts": [
+     {
+      "emoji": "👃",
+      "sp": "nariz",
+      "zh": "鼻子",
+      "zhT": "鼻子",
+      "art": null
+     },
+     {
+      "emoji": "😃",
+      "sp": "cabeza",
+      "zh": "头",
+      "zhT": "頭",
+      "art": null
+     },
+     {
+      "emoji": "👀",
+      "sp": "ojos",
+      "zh": "眼睛",
+      "zhT": "眼睛",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Los ojos",
+    "opts": [
+     {
+      "emoji": "👀",
+      "sp": "ojos",
+      "zh": "眼睛",
+      "zhT": "眼睛",
+      "art": null
+     },
+     {
+      "emoji": "🙌",
+      "sp": "manos",
+      "zh": "手",
+      "zhT": "手",
+      "art": null
+     },
+     {
+      "emoji": "😃",
+      "sp": "cabeza",
+      "zh": "头",
+      "zhT": "頭",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "Simón dice: ¡tocá la ___!",
+    "zh": "西蒙说：摸摸头！",
+    "zhT": "西蒙說：摸摸頭！",
+    "opts": [
+     {
+      "w": "cabeza",
+      "e": "头",
+      "eT": "頭"
+     },
+     {
+      "w": "pies",
+      "e": "脚",
+      "eT": "腳"
+     },
+     {
+      "w": "ojos",
+      "e": "眼睛",
+      "eT": "眼睛"
+     }
+    ]
+   },
+   {
+    "sp": "Simón dice: ¡tocá los ___!",
+    "zh": "西蒙说：摸摸脚！",
+    "zhT": "西蒙說：摸摸腳！",
+    "opts": [
+     {
+      "w": "pies",
+      "e": "脚",
+      "eT": "腳"
+     },
+     {
+      "w": "cabeza",
+      "e": "头",
+      "eT": "頭"
+     },
+     {
+      "w": "nariz",
+      "e": "鼻子",
+      "eT": "鼻子"
+     }
+    ]
+   },
+   {
+    "sp": "Simón dice: ¡tocá los ___!",
+    "zh": "西蒙说：摸摸眼睛！",
+    "zhT": "西蒙說：摸摸眼睛！",
+    "opts": [
+     {
+      "w": "ojos",
+      "e": "眼睛",
+      "eT": "眼睛"
+     },
+     {
+      "w": "nariz",
+      "e": "鼻子",
+      "eT": "鼻子"
+     },
+     {
+      "w": "cabeza",
+      "e": "头",
+      "eT": "頭"
+     }
+    ]
+   },
+   {
+    "sp": "¡Tocá la ___!",
+    "zh": "摸摸鼻子！",
+    "zhT": "摸摸鼻子！",
+    "opts": [
+     {
+      "w": "nariz",
+      "e": "鼻子",
+      "eT": "鼻子"
+     },
+     {
+      "w": "pies",
+      "e": "脚",
+      "eT": "腳"
+     },
+     {
+      "w": "manos",
+      "e": "手",
+      "eT": "手"
+     }
+    ]
+   },
+   {
+    "sp": "¡Jugamos a Simón ___!",
+    "zh": "我们来玩“西蒙说”！",
+    "zhT": "我們來玩“西蒙說”！",
+    "opts": [
+     {
+      "w": "dice",
+      "e": "说",
+      "eT": "說"
+     },
+     {
+      "w": "come",
+      "e": "吃",
+      "eT": "吃"
+     },
+     {
+      "w": "duerme",
+      "e": "睡觉",
+      "eT": "睡覺"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-almuerzo",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "B",
+  "unit": 13,
+  "order": 14,
+  "emoji": "🍽️",
+  "art": null,
+  "titleEs": "¡A comer!",
+  "titleZh": "吃饭啦！",
+  "titleZhT": "吃飯啦！",
+  "blurb": "Hora del almuerzo en casa: milanesa con puré, ensalada, agua y postre.",
+  "blurbZh": "在家吃午饭：炸肉排配土豆泥、沙拉、水和甜点。",
+  "blurbZhT": "在家吃午飯：炸肉排配土豆泥、沙拉、水和甜點。",
+  "words": [
+   {
+    "sp": "¡a comer!",
+    "zh": "吃饭啦！",
+    "zhT": "吃飯啦！",
+    "emoji": "🍽️",
+    "art": null
+   },
+   {
+    "sp": "¿qué hay de comer?",
+    "zh": "有什么吃的？",
+    "zhT": "有什麼吃的？",
+    "emoji": "❓",
+    "art": null
+   },
+   {
+    "sp": "milanesa",
+    "zh": "炸肉排",
+    "zhT": "炸肉排",
+    "emoji": "🥩",
+    "art": null
+   },
+   {
+    "sp": "puré",
+    "zh": "土豆泥",
+    "zhT": "土豆泥",
+    "emoji": "🥔",
+    "art": null
+   },
+   {
+    "sp": "ensalada",
+    "zh": "沙拉",
+    "zhT": "沙拉",
+    "emoji": "🥗",
+    "art": null
+   },
+   {
+    "sp": "tenedor",
+    "zh": "叉子",
+    "zhT": "叉子",
+    "emoji": "🍴",
+    "art": null
+   },
+   {
+    "sp": "postre",
+    "zh": "甜点",
+    "zhT": "甜點",
+    "emoji": "🍨",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Mamá",
+    "sp": "¡Lin, a comer!",
+    "zh": "林，吃饭啦！",
+    "zhT": "林，吃飯啦！"
+   },
+   {
+    "who": "Lin",
+    "sp": "¿Qué hay de comer?",
+    "zh": "有什么吃的？",
+    "zhT": "有什麼吃的？"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Hay milanesa con puré.",
+    "zh": "有炸肉排配土豆泥。",
+    "zhT": "有炸肉排配土豆泥。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Qué rico! ¿Hay ensalada?",
+    "zh": "真好吃！有沙拉吗？",
+    "zhT": "真好吃！有沙拉嗎？"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Sí. Tomá el tenedor, Lin.",
+    "zh": "有的。拿着叉子，林。",
+    "zhT": "有的。拿著叉子，林。"
+   },
+   {
+    "who": "Lin",
+    "sp": "¡Mmm, la milanesa está rica!",
+    "zh": "嗯，炸肉排真香！",
+    "zhT": "嗯，炸肉排真香！"
+   },
+   {
+    "who": "Mamá",
+    "sp": "¿Querés agua o jugo?",
+    "zh": "你想喝水还是果汁？",
+    "zhT": "你想喝水還是果汁？"
+   },
+   {
+    "who": "Lin",
+    "sp": "Agua, por favor.",
+    "zh": "请给我水。",
+    "zhT": "請給我水。"
+   },
+   {
+    "who": "Mamá",
+    "sp": "Después hay postre.",
+    "zh": "一会儿还有甜点。",
+    "zhT": "一會兒還有甜點。"
+   }
+  ],
+  "listen": [
+   {
+    "say": "La milanesa",
+    "opts": [
+     {
+      "emoji": "🥩",
+      "sp": "milanesa",
+      "zh": "炸肉排",
+      "zhT": "炸肉排",
+      "art": null
+     },
+     {
+      "emoji": "🥗",
+      "sp": "ensalada",
+      "zh": "沙拉",
+      "zhT": "沙拉",
+      "art": null
+     },
+     {
+      "emoji": "🍴",
+      "sp": "tenedor",
+      "zh": "叉子",
+      "zhT": "叉子",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "La ensalada",
+    "opts": [
+     {
+      "emoji": "🥗",
+      "sp": "ensalada",
+      "zh": "沙拉",
+      "zhT": "沙拉",
+      "art": null
+     },
+     {
+      "emoji": "🥔",
+      "sp": "puré",
+      "zh": "土豆泥",
+      "zhT": "土豆泥",
+      "art": null
+     },
+     {
+      "emoji": "🧃",
+      "sp": "jugo",
+      "zh": "果汁",
+      "zhT": "果汁",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El tenedor",
+    "opts": [
+     {
+      "emoji": "🍴",
+      "sp": "tenedor",
+      "zh": "叉子",
+      "zhT": "叉子",
+      "art": null
+     },
+     {
+      "emoji": "🥩",
+      "sp": "milanesa",
+      "zh": "炸肉排",
+      "zhT": "炸肉排",
+      "art": null
+     },
+     {
+      "emoji": "💧",
+      "sp": "agua",
+      "zh": "水",
+      "zhT": "水",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "El postre",
+    "opts": [
+     {
+      "emoji": "🍨",
+      "sp": "postre",
+      "zh": "甜点",
+      "zhT": "甜點",
+      "art": null
+     },
+     {
+      "emoji": "🥔",
+      "sp": "puré",
+      "zh": "土豆泥",
+      "zhT": "土豆泥",
+      "art": null
+     },
+     {
+      "emoji": "🍴",
+      "sp": "tenedor",
+      "zh": "叉子",
+      "zhT": "叉子",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¡Lin, a ___!",
+    "zh": "林，吃饭啦！",
+    "zhT": "林，吃飯啦！",
+    "opts": [
+     {
+      "w": "comer",
+      "e": "吃饭",
+      "eT": "吃飯"
+     },
+     {
+      "w": "plaza",
+      "e": "公园",
+      "eT": "公園"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     }
+    ]
+   },
+   {
+    "sp": "Hay milanesa con ___.",
+    "zh": "有炸肉排配土豆泥。",
+    "zhT": "有炸肉排配土豆泥。",
+    "opts": [
+     {
+      "w": "puré",
+      "e": "土豆泥",
+      "eT": "土豆泥"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     }
+    ]
+   },
+   {
+    "sp": "Sí. Tomá el ___, Lin.",
+    "zh": "有的。拿着叉子，林。",
+    "zhT": "有的。拿著叉子，林。",
+    "opts": [
+     {
+      "w": "tenedor",
+      "e": "叉子",
+      "eT": "叉子"
+     },
+     {
+      "w": "ensalada",
+      "e": "沙拉",
+      "eT": "沙拉"
+     },
+     {
+      "w": "milanesa",
+      "e": "炸肉排",
+      "eT": "炸肉排"
+     }
+    ]
+   },
+   {
+    "sp": "¿Querés agua o ___?",
+    "zh": "你想喝水还是果汁？",
+    "zhT": "你想喝水還是果汁？",
+    "opts": [
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "plaza",
+      "e": "公园",
+      "eT": "公園"
+     }
+    ]
+   },
+   {
+    "sp": "Después hay ___.",
+    "zh": "一会儿还有甜点。",
+    "zhT": "一會兒還有甜點。",
+    "opts": [
+     {
+      "w": "postre",
+      "e": "甜点",
+      "eT": "甜點"
+     },
+     {
+      "w": "mochila",
+      "e": "书包",
+      "eT": "書包"
+     },
+     {
+      "w": "baño",
+      "e": "厕所",
+      "eT": "廁所"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ni-dias",
+  "track": "Niños",
+  "dele": "A1",
+  "kid": true,
+  "band": "A",
+  "unit": 14,
+  "order": 15,
+  "emoji": "📅",
+  "art": null,
+  "titleEs": "¿Qué día es hoy?",
+  "titleZh": "今天星期几？",
+  "titleZhT": "今天星期幾？",
+  "blurb": "La seño pregunta por los días de la semana: cinco días de cole y el fin de semana para jugar.",
+  "blurbZh": "老师问起星期几：上学五天，周末可以玩。",
+  "blurbZhT": "老師問起星期幾：上學五天，週末可以玩。",
+  "words": [
+   {
+    "sp": "¿qué día es hoy?",
+    "zh": "今天星期几？",
+    "zhT": "今天星期幾？",
+    "emoji": "📅",
+    "art": null
+   },
+   {
+    "sp": "lunes",
+    "zh": "星期一",
+    "zhT": "星期一",
+    "emoji": "🟥",
+    "art": null
+   },
+   {
+    "sp": "martes",
+    "zh": "星期二",
+    "zhT": "星期二",
+    "emoji": "🟧",
+    "art": null
+   },
+   {
+    "sp": "miércoles",
+    "zh": "星期三",
+    "zhT": "星期三",
+    "emoji": "🟨",
+    "art": null
+   },
+   {
+    "sp": "jueves",
+    "zh": "星期四",
+    "zhT": "星期四",
+    "emoji": "🟩",
+    "art": null
+   },
+   {
+    "sp": "viernes",
+    "zh": "星期五",
+    "zhT": "星期五",
+    "emoji": "🟦",
+    "art": null
+   },
+   {
+    "sp": "sábado",
+    "zh": "星期六",
+    "zhT": "星期六",
+    "emoji": "🟪",
+    "art": null
+   },
+   {
+    "sp": "domingo",
+    "zh": "星期天",
+    "zhT": "星期天",
+    "emoji": "⬜",
+    "art": null
+   }
+  ],
+  "lines": [
+   {
+    "who": "Seño",
+    "sp": "¿Qué día es hoy?",
+    "zh": "今天星期几？",
+    "zhT": "今天星期幾？"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Hoy es lunes.",
+    "zh": "今天是星期一。",
+    "zhT": "今天是星期一。"
+   },
+   {
+    "who": "Seño",
+    "sp": "¡Muy bien, Sofi!",
+    "zh": "说得好，索菲！",
+    "zhT": "說得好，索菲！"
+   },
+   {
+    "who": "Lin",
+    "sp": "Lunes, martes, miércoles.",
+    "zh": "星期一、星期二、星期三。",
+    "zhT": "星期一、星期二、星期三。"
+   },
+   {
+    "who": "Sofi",
+    "sp": "Jueves, viernes.",
+    "zh": "星期四、星期五。",
+    "zhT": "星期四、星期五。"
+   },
+   {
+    "who": "Seño",
+    "sp": "¡Cinco días de cole!",
+    "zh": "上学五天！",
+    "zhT": "上學五天！"
+   },
+   {
+    "who": "Lin",
+    "sp": "Sábado y domingo: ¡a jugar!",
+    "zh": "星期六和星期天：去玩吧！",
+    "zhT": "星期六和星期天：去玩吧！"
+   },
+   {
+    "who": "Sofi",
+    "sp": "¡Qué lindo, el domingo!",
+    "zh": "星期天真好！",
+    "zhT": "星期天真好！"
+   }
+  ],
+  "listen": [
+   {
+    "say": "Lunes",
+    "opts": [
+     {
+      "emoji": "🟥",
+      "sp": "lunes",
+      "zh": "星期一",
+      "zhT": "星期一",
+      "art": null
+     },
+     {
+      "emoji": "🟧",
+      "sp": "martes",
+      "zh": "星期二",
+      "zhT": "星期二",
+      "art": null
+     },
+     {
+      "emoji": "⬜",
+      "sp": "domingo",
+      "zh": "星期天",
+      "zhT": "星期天",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Viernes",
+    "opts": [
+     {
+      "emoji": "🟦",
+      "sp": "viernes",
+      "zh": "星期五",
+      "zhT": "星期五",
+      "art": null
+     },
+     {
+      "emoji": "🟩",
+      "sp": "jueves",
+      "zh": "星期四",
+      "zhT": "星期四",
+      "art": null
+     },
+     {
+      "emoji": "🟪",
+      "sp": "sábado",
+      "zh": "星期六",
+      "zhT": "星期六",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Sábado",
+    "opts": [
+     {
+      "emoji": "🟪",
+      "sp": "sábado",
+      "zh": "星期六",
+      "zhT": "星期六",
+      "art": null
+     },
+     {
+      "emoji": "🟥",
+      "sp": "lunes",
+      "zh": "星期一",
+      "zhT": "星期一",
+      "art": null
+     },
+     {
+      "emoji": "🟦",
+      "sp": "viernes",
+      "zh": "星期五",
+      "zhT": "星期五",
+      "art": null
+     }
+    ]
+   },
+   {
+    "say": "Domingo",
+    "opts": [
+     {
+      "emoji": "⬜",
+      "sp": "domingo",
+      "zh": "星期天",
+      "zhT": "星期天",
+      "art": null
+     },
+     {
+      "emoji": "🟨",
+      "sp": "miércoles",
+      "zh": "星期三",
+      "zhT": "星期三",
+      "art": null
+     },
+     {
+      "emoji": "🟧",
+      "sp": "martes",
+      "zh": "星期二",
+      "zhT": "星期二",
+      "art": null
+     }
+    ]
+   }
+  ],
+  "quiz": [
+   {
+    "sp": "¿Qué ___ es hoy?",
+    "zh": "今天星期几？",
+    "zhT": "今天星期幾？",
+    "opts": [
+     {
+      "w": "día",
+      "e": "天",
+      "eT": "天"
+     },
+     {
+      "w": "lápiz",
+      "e": "铅笔",
+      "eT": "鉛筆"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   },
+   {
+    "sp": "Lunes, martes, ___.",
+    "zh": "星期一、星期二、星期三。",
+    "zhT": "星期一、星期二、星期三。",
+    "opts": [
+     {
+      "w": "miércoles",
+      "e": "星期三",
+      "eT": "星期三"
+     },
+     {
+      "w": "viernes",
+      "e": "星期五",
+      "eT": "星期五"
+     },
+     {
+      "w": "domingo",
+      "e": "星期天",
+      "eT": "星期天"
+     }
+    ]
+   },
+   {
+    "sp": "Jueves, ___.",
+    "zh": "星期四、星期五。",
+    "zhT": "星期四、星期五。",
+    "opts": [
+     {
+      "w": "viernes",
+      "e": "星期五",
+      "eT": "星期五"
+     },
+     {
+      "w": "lunes",
+      "e": "星期一",
+      "eT": "星期一"
+     },
+     {
+      "w": "domingo",
+      "e": "星期天",
+      "eT": "星期天"
+     }
+    ]
+   },
+   {
+    "sp": "¡Cinco días de ___!",
+    "zh": "上学五天！",
+    "zhT": "上學五天！",
+    "opts": [
+     {
+      "w": "cole",
+      "e": "学校",
+      "eT": "學校"
+     },
+     {
+      "w": "pelota",
+      "e": "球",
+      "eT": "球"
+     },
+     {
+      "w": "jugo",
+      "e": "果汁",
+      "eT": "果汁"
+     }
+    ]
+   },
+   {
+    "sp": "Sábado y ___: ¡a jugar!",
+    "zh": "星期六和星期天：去玩吧！",
+    "zhT": "星期六和星期天：去玩吧！",
+    "opts": [
+     {
+      "w": "domingo",
+      "e": "星期天",
+      "eT": "星期天"
+     },
+     {
+      "w": "martes",
+      "e": "星期二",
+      "eT": "星期二"
+     },
+     {
+      "w": "jueves",
+      "e": "星期四",
+      "eT": "星期四"
+     }
+    ]
+   }
+  ]
  }
 ];
