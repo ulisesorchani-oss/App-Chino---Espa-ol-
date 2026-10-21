@@ -1,0 +1,977 @@
+[
+ {
+  "id": "rx-h4-tren",
+  "nivel": 4,
+  "genero": "narración",
+  "emoji": "🚄",
+  "titulo": {
+   "zh": "错过的火车",
+   "es": "El tren que se fue"
+  },
+  "parrafos": [
+   {
+    "zh": "小林要去上海参加朋友的婚礼。早上六点他就出门了，可是路上堵车，到火车站的时候，火车已经开走了。",
+    "es": "Xiao Lin va a Shanghái a la boda de un amigo. Salió de casa a las seis de la mañana, pero había mucho tránsito en el camino y, cuando llegó a la estación, el tren ya se había ido."
+   },
+   {
+    "zh": "他很着急，马上给朋友打电话。朋友笑着说：“别担心，婚礼下午才开始，你坐下一班车吧。”",
+    "es": "Muy nervioso, llamó enseguida a su amigo. El amigo le dijo, riendo: «No te preocupes, la boda empieza recién por la tarde; tomá el próximo tren»."
+   },
+   {
+    "zh": "他松了一口气，在车站旁边的小饭馆吃了一碗面。没想到下一班车也晚点了一个小时。他到的时候，婚礼已经开始了，他一边擦汗，一边悄悄找座位，可是大家还是都看见了他。",
+    "es": "Suspiró aliviado y comió un tazón de fideos en un restaurante chico cerca de la estación. Pero, para sorpresa suya, el siguiente tren también se retrasó una hora. Cuando llegó, la boda ya había empezado; mientras se secaba el sudor buscaba su asiento sin hacer ruido, pero igual todos lo vieron."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "参加",
+    "categoria": "verbo",
+    "es": "asistir, participar en"
+   },
+   {
+    "zh": "婚礼",
+    "categoria": "sustantivo",
+    "es": "la boda"
+   },
+   {
+    "zh": "堵车",
+    "categoria": "verbo",
+    "es": "haber mucho tránsito"
+   },
+   {
+    "zh": "着急",
+    "categoria": "adjetivo",
+    "es": "estar impaciente, nervioso"
+   },
+   {
+    "zh": "晚点",
+    "categoria": "verbo",
+    "es": "retrasarse (un transporte)"
+   },
+   {
+    "zh": "松了一口气",
+    "categoria": "expresión",
+    "es": "suspirar aliviado"
+   },
+   {
+    "zh": "没想到",
+    "categoria": "expresión",
+    "es": "no imaginaba que; para sorpresa suya"
+   },
+   {
+    "zh": "一边…一边…",
+    "categoria": "estructura",
+    "es": "mientras…, a la vez que…"
+   },
+   {
+    "zh": "擦汗",
+    "categoria": "expresión",
+    "es": "secarse el sudor"
+   },
+   {
+    "zh": "悄悄",
+    "categoria": "adverbio",
+    "es": "en silencio, sin hacer ruido"
+   },
+   {
+    "zh": "座位",
+    "categoria": "sustantivo",
+    "es": "el asiento"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Por qué Xiao Lin perdió el primer tren?",
+    "opts": [
+     "Había mucho tránsito en el camino.",
+     "Salió de su casa demasiado tarde.",
+     "Se equivocó de estación.",
+     "Su amigo lo llamó por teléfono."
+    ],
+    "why": "El texto dice que salió a las seis, pero «路上堵车» (había mucho tránsito en el camino).",
+    "whyNot": [
+     "Salió temprano, a las seis de la mañana.",
+     "Llegó a la estación correcta; el tren ya había salido.",
+     "La llamada ocurre después de perder el tren, no antes."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Qué pasó al final?",
+    "opts": [
+     "Llegó cuando la boda ya había empezado.",
+     "Llegó a la boda antes que los invitados.",
+     "Se volvió a su casa sin ir a la boda.",
+     "Esperó a su amigo en la estación."
+    ],
+    "why": "Último párrafo: «他到的时候，婚礼已经开始了».",
+    "whyNot": [
+     "El segundo tren también se retrasó, así que llegó tarde.",
+     "Sí fue a la boda: buscó asiento y todos lo vieron.",
+     "Quien lo esperaba era la boda; no hay nadie en la estación."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "路上堵车，到火车站的时候，火车已经开走了",
+     "resp": "堵车"
+    },
+    {
+     "frase": "他很着急，马上给朋友打电话",
+     "resp": "着急"
+    },
+    {
+     "frase": "在车站旁边的小饭馆吃了一碗面",
+     "resp": "碗"
+    },
+    {
+     "frase": "没想到下一班车也晚点了一个小时",
+     "resp": "晚点"
+    },
+    {
+     "frase": "他到的时候，婚礼已经开始了",
+     "resp": "开始"
+    },
+    {
+     "frase": "他一边擦汗，一边悄悄找座位",
+     "resp": "擦"
+    }
+   ],
+   "sobrantes": [
+    "护照",
+    "机场"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "别＿＿，婚礼下午才开始，你坐下一班车吧。",
+    "opts": [
+     "担心",
+     "关心",
+     "小心"
+    ],
+    "ok": [
+     0
+    ],
+    "why": "担心 es «preocuparse»; 关心 es «interesarse por alguien, cuidar de él» y 小心 es «tener cuidado». Solo 担心 encaja con «别… (no te preocupes)»."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "他一边擦汗，一边找座位。",
+     "es": "一边…一边… une dos acciones simultáneas: «mientras se secaba el sudor, buscaba asiento»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "参加婚礼",
+     "es": "asistir a una boda"
+    },
+    {
+     "zh": "松了一口气",
+     "es": "suspirar aliviado"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "他一边擦汗，一边悄悄找座位",
+     "resultado": "sin coincidencia exacta (resultados sin relación)"
+    },
+    {
+     "zh": "到火车站的时候，火车已经开走了",
+     "resultado": "sin coincidencia exacta (solo páginas generales sobre perder un tren)"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
+  },
+  "nombres": [
+   "小林",
+   "上海"
+  ],
+  "revision": "revisado"
+ },
+ {
+  "id": "rx-h4-encuesta",
+  "nivel": 4,
+  "genero": "expositivo",
+  "emoji": "📱",
+  "titulo": {
+   "zh": "你每天用多长时间手机？",
+   "es": "¿Cuánto tiempo usás el celular por día?"
+  },
+  "parrafos": [
+   {
+    "zh": "一所大学最近调查了三百名学生，问他们每天用多长时间手机。",
+    "es": "Una universidad encuestó hace poco a trescientos estudiantes y les preguntó cuánto tiempo usan el celular por día."
+   },
+   {
+    "zh": "结果发现，百分之四十的学生每天用手机超过五个小时，百分之三十五的学生用三到五个小时，其他学生用得比较少。大部分同学用手机聊天、看视频和查资料。",
+    "es": "El resultado: el 40 % de los estudiantes usa el celular más de cinco horas por día, el 35 % lo usa de tres a cinco horas y los demás lo usan relativamente poco. La mayoría usa el celular para chatear, ver videos y buscar información."
+   },
+   {
+    "zh": "调查还发现，晚上十一点以后还在玩手机的学生，第二天上课时更容易觉得累。老师建议大家睡觉前一个小时把手机放在别的房间里。",
+    "es": "La encuesta también mostró que los estudiantes que siguen pegados al celular después de las once de la noche se sienten más cansados en clase al día siguiente. El docente recomienda dejar el celular en otra habitación una hora antes de dormir."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "调查",
+    "categoria": "verbo / sustantivo",
+    "es": "encuestar; la encuesta"
+   },
+   {
+    "zh": "超过",
+    "categoria": "verbo",
+    "es": "superar, pasar de"
+   },
+   {
+    "zh": "百分之",
+    "categoria": "estructura",
+    "es": "por ciento (百分之四十 = 40 %)"
+   },
+   {
+    "zh": "其他",
+    "categoria": "pronombre",
+    "es": "los demás, otros"
+   },
+   {
+    "zh": "比较",
+    "categoria": "adverbio",
+    "es": "relativamente, bastante"
+   },
+   {
+    "zh": "大部分",
+    "categoria": "sustantivo",
+    "es": "la mayor parte"
+   },
+   {
+    "zh": "聊天",
+    "categoria": "verbo",
+    "es": "charlar, chatear"
+   },
+   {
+    "zh": "查资料",
+    "categoria": "expresión",
+    "es": "buscar información"
+   },
+   {
+    "zh": "容易",
+    "categoria": "adjetivo",
+    "es": "fácil; propenso a"
+   },
+   {
+    "zh": "建议",
+    "categoria": "verbo",
+    "es": "recomendar, sugerir"
+   },
+   {
+    "zh": "视频",
+    "categoria": "sustantivo",
+    "es": "el video"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Qué porcentaje de los estudiantes usa el celular más de cinco horas por día?",
+    "opts": [
+     "El 40 %",
+     "El 35 %",
+     "El 25 %",
+     "El 75 %"
+    ],
+    "why": "Segundo párrafo: «百分之四十的学生每天用手机超过五个小时».",
+    "whyNot": [
+     "El 35 % es el grupo que lo usa de tres a cinco horas.",
+     "El 25 % no aparece en el texto; es lo que queda para «los demás» si se suman los otros dos grupos.",
+     "El 75 % sería la suma de los dos primeros grupos (más de tres horas), no solo el de más de cinco."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Qué recomienda el docente?",
+    "opts": [
+     "Dejar el celular en otra habitación antes de dormir.",
+     "Usar el celular solo para estudiar.",
+     "Apagar el celular durante las clases.",
+     "Comprarse un celular nuevo."
+    ],
+    "why": "Última oración: «老师建议大家睡觉前一个小时把手机放在别的房间里» (recomienda dejar el celular en otra habitación una hora antes de dormir).",
+    "whyNot": [
+     "El texto no habla de limitar el celular a los estudios; solo menciona para qué lo usan.",
+     "No se menciona nada sobre las clases, sino sobre la noche antes de dormir.",
+     "Ninguna parte del texto sugiere comprar un celular."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "一所大学最近调查了三百名学生",
+     "resp": "调查"
+    },
+    {
+     "frase": "百分之四十的学生每天用手机超过五个小时",
+     "resp": "超过"
+    },
+    {
+     "frase": "其他学生用得比较少",
+     "resp": "比较"
+    },
+    {
+     "frase": "大部分同学用手机聊天、看视频和查资料",
+     "resp": "查"
+    },
+    {
+     "frase": "第二天上课时更容易觉得累",
+     "resp": "累"
+    },
+    {
+     "frase": "老师建议大家睡觉前一个小时把手机放在别的房间里",
+     "resp": "建议"
+    }
+   ],
+   "sobrantes": [
+    "比赛",
+    "照片"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "百分之四十的学生每天用手机＿＿五个小时。",
+    "opts": [
+     "超过",
+     "经过",
+     "通过"
+    ],
+    "ok": [
+     0
+    ],
+    "why": "超过 = «pasar de, superar» (una cantidad). 经过 = «pasar por, atravesar» y 通过 = «pasar a través de; por medio de»: no sirven para comparar con una cifra."
+   },
+   {
+    "frase": "老师建议大家睡觉前一个小时把手机放在＿＿房间里。",
+    "opts": [
+     "别的",
+     "其他",
+     "另外"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "别的 y 其他 significan «otro/otros» y ambos funcionan aquí. 另外 es «además, por otra parte» y no se pone delante de «房间»."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "百分之四十",
+     "es": "Los porcentajes se dicen 百分之 + número: 百分之四十 = 40 %."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "做调查",
+     "es": "hacer una encuesta"
+    },
+    {
+     "zh": "查资料",
+     "es": "buscar información"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "百分之四十的学生每天用手机超过五个小时",
+     "resultado": "sin coincidencia exacta (solo encuestas reales con otras cifras)"
+    },
+    {
+     "zh": "睡觉前一个小时把手机放在别的房间里",
+     "resultado": "sin coincidencia exacta (consejos generales de sueño, otra redacción)"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
+  },
+  "revision": "revisado"
+ },
+ {
+  "id": "rx-h4-chunlian",
+  "nivel": 4,
+  "genero": "cultural",
+  "emoji": "🧧",
+  "titulo": {
+   "zh": "贴春联",
+   "es": "Pegar los pareados de Año Nuevo Chino"
+  },
+  "parrafos": [
+   {
+    "zh": "春节前，中国的家家户户都会在门口贴红色的春联。春联是两句字数相同、意思相配的话，写在红纸上，左右各一句。",
+    "es": "Antes del Año Nuevo Chino (la Fiesta de la Primavera), todas las casas de China pegan en la puerta pareados rojos. Son dos frases con el mismo número de caracteres y de sentido complementario, escritas en papel rojo, una a cada lado."
+   },
+   {
+    "zh": "按传统习惯，站在门外看，上联贴在右边，下联贴在左边，门上面还会贴一张短短的横批。春联里常常有“平安”“幸福”“健康”这样的好词，人们希望新的一年一切顺利。",
+    "es": "Según la costumbre tradicional, mirando la puerta desde afuera, el primer verso (上联) se pega a la derecha y el segundo (下联) a la izquierda; arriba de la puerta se suele pegar además una tira corta, el 横批. Los pareados llevan a menudo palabras auspiciosas como «paz», «felicidad» y «salud»: la gente desea que todo salga bien en el año nuevo."
+   },
+   {
+    "zh": "有的家庭自己用毛笔写春联，有的去市场买现成的。不管是写的还是买的，贴上春联以后，屋子里就有了过年的气氛。",
+    "es": "Algunas familias escriben los pareados con pincel; otras los compran ya hechos en el mercado. Sean escritos o comprados, una vez pegados ya se respira el clima de Año Nuevo."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "春联",
+    "categoria": "sustantivo",
+    "es": "pareado de Año Nuevo Chino"
+   },
+   {
+    "zh": "家家户户",
+    "categoria": "expresión",
+    "es": "todas las familias, cada casa"
+   },
+   {
+    "zh": "相配",
+    "categoria": "verbo",
+    "es": "combinar, hacer juego"
+   },
+   {
+    "zh": "上联",
+    "categoria": "sustantivo",
+    "es": "primer verso del pareado"
+   },
+   {
+    "zh": "下联",
+    "categoria": "sustantivo",
+    "es": "segundo verso del pareado"
+   },
+   {
+    "zh": "横批",
+    "categoria": "sustantivo",
+    "es": "tira horizontal sobre la puerta"
+   },
+   {
+    "zh": "平安",
+    "categoria": "adjetivo",
+    "es": "en paz, a salvo"
+   },
+   {
+    "zh": "顺利",
+    "categoria": "adjetivo",
+    "es": "sin contratiempos"
+   },
+   {
+    "zh": "毛笔",
+    "categoria": "sustantivo",
+    "es": "pincel de escritura"
+   },
+   {
+    "zh": "现成",
+    "categoria": "adjetivo",
+    "es": "ya hecho, listo para usar"
+   },
+   {
+    "zh": "气氛",
+    "categoria": "sustantivo",
+    "es": "el clima, la atmósfera"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "Según el texto, mirando la puerta desde afuera, ¿dónde se pega el primer verso (上联)?",
+    "opts": [
+     "A la derecha de la puerta.",
+     "A la izquierda de la puerta.",
+     "Encima de la puerta.",
+     "Dentro de la casa."
+    ],
+    "why": "Segundo párrafo: «上联贴在右边».",
+    "whyNot": [
+     "A la izquierda va el segundo verso (下联).",
+     "Encima de la puerta se pega la tira corta, el 横批.",
+     "El texto habla de la puerta de entrada, no del interior."
+    ]
+   },
+   {
+    "tipo": "vf",
+    "es": "Todas las familias escriben ellas mismas los pareados con pincel.",
+    "vf": false,
+    "why": "Falso: «有的家庭自己用毛笔写…，有的去市场买现成的». Algunas los escriben y otras los compran."
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "上联贴在右边",
+     "resp": "右"
+    },
+    {
+     "frase": "门上面还会贴一张短短的横批",
+     "resp": "横批"
+    },
+    {
+     "frase": "人们希望新的一年一切顺利",
+     "resp": "顺利"
+    },
+    {
+     "frase": "有的家庭自己用毛笔写春联",
+     "resp": "写"
+    },
+    {
+     "frase": "有的去市场买现成的",
+     "resp": "现成"
+    },
+    {
+     "frase": "屋子里就有了过年的气氛",
+     "resp": "气氛"
+    }
+   ],
+   "sobrantes": [
+    "头发",
+    "医院"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "人们＿＿新的一年一切顺利。",
+    "opts": [
+     "希望",
+     "愿望",
+     "失望"
+    ],
+    "ok": [
+     0
+    ],
+    "why": "希望 es el verbo «esperar, desear que». 愿望 es el sustantivo «deseo» (no lleva complemento así) y 失望 significa «decepcionarse»."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "家家户户",
+     "es": "Duplicación de 家 y 户: «cada casa, todas las familias». Sirve para decir «todo el mundo»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "贴春联",
+     "es": "pegar los pareados de Año Nuevo Chino"
+    },
+    {
+     "zh": "过年的气氛",
+     "es": "el clima de Año Nuevo"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "上联贴在右边，下联贴在左边，门上面还会贴一张短短的横批",
+     "resultado": "sin coincidencia exacta; la costumbre (上联 a la derecha de quien mira la puerta) sí coincide con las fuentes, que también aclaran que hoy hay variantes → se agregó «按传统习惯»"
+    },
+    {
+     "zh": "屋子里就有了过年的气氛",
+     "resultado": "sin coincidencia exacta"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
+  },
+  "tipo": "estudio",
+  "dentro": [
+   "都会"
+  ],
+  "revision": "revisado"
+ },
+ {
+  "id": "rx-h4-casa",
+  "nivel": 4,
+  "genero": "cotidiano",
+  "emoji": "🏠",
+  "titulo": {
+   "zh": "找房子",
+   "es": "Buscar casa"
+  },
+  "parrafos": [
+   {
+    "zh": "我下个月要搬家，所以最近一直在找房子。上周末我看了两个地方。",
+    "es": "El mes que viene me mudo, así que últimamente estoy buscando casa. El fin de semana pasado fui a ver dos lugares."
+   },
+   {
+    "zh": "第一个离公司很近，走路只要十分钟，不过房间有点儿小，一个月一千八。第二个在郊区，房间大一些，一个月只要一千二，可是坐地铁要一个小时。",
+    "es": "El primero queda muy cerca de la oficina, a solo diez minutos a pie, pero la habitación es un poco chica y cuesta 1.800 por mes. El segundo está en las afueras, la habitación es algo más grande y cuesta solo 1.200 por mes, pero en subte se tarda una hora."
+   },
+   {
+    "zh": "我想了很久，最后选了第二个，因为我想省点儿钱，而且可以在地铁上看书，时间也不算浪费。",
+    "es": "Lo pensé mucho y al final elegí el segundo, porque quiero ahorrar un poco y, además, puedo leer en el subte, así que el tiempo tampoco se desperdicia."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "搬家",
+    "categoria": "verbo",
+    "es": "mudarse"
+   },
+   {
+    "zh": "一直",
+    "categoria": "adverbio",
+    "es": "todo el tiempo, sin parar"
+   },
+   {
+    "zh": "郊区",
+    "categoria": "sustantivo",
+    "es": "las afueras"
+   },
+   {
+    "zh": "地铁",
+    "categoria": "sustantivo",
+    "es": "el subte, el metro"
+   },
+   {
+    "zh": "不过",
+    "categoria": "conjunción",
+    "es": "pero, sin embargo"
+   },
+   {
+    "zh": "房间",
+    "categoria": "sustantivo",
+    "es": "la habitación"
+   },
+   {
+    "zh": "省",
+    "categoria": "verbo",
+    "es": "ahorrar"
+   },
+   {
+    "zh": "而且",
+    "categoria": "conjunción",
+    "es": "además, y también"
+   },
+   {
+    "zh": "浪费",
+    "categoria": "verbo",
+    "es": "desperdiciar"
+   },
+   {
+    "zh": "算",
+    "categoria": "verbo",
+    "es": "contar como, considerarse"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Cuánto cuesta por mes el lugar que queda cerca de la oficina?",
+    "opts": [
+     "1.800",
+     "1.200",
+     "2.000",
+     "1.000"
+    ],
+    "why": "Segundo párrafo: «第一个离公司很近…一个月一千八».",
+    "whyNot": [
+     "1.200 es el precio del segundo lugar, el de las afueras.",
+     "2.000 no aparece en el texto.",
+     "1.000 no aparece en el texto."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Por qué elige el segundo lugar?",
+    "opts": [
+     "Quiere ahorrar y puede leer en el viaje.",
+     "Le queda más cerca de la oficina.",
+     "La habitación es más pequeña.",
+     "Allí vive un amigo suyo."
+    ],
+    "why": "Último párrafo: «我想省点儿钱，而且可以在地铁上看书».",
+    "whyNot": [
+     "La oficina queda cerca del primero; el segundo queda a una hora en subte.",
+     "La habitación pequeña es del primer lugar, y no es una ventaja.",
+     "El texto no menciona a ningún amigo."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "我下个月要搬家，所以最近一直在找房子",
+     "resp": "搬家"
+    },
+    {
+     "frase": "第一个离公司很近",
+     "resp": "近"
+    },
+    {
+     "frase": "走路只要十分钟，不过房间有点儿小",
+     "resp": "小"
+    },
+    {
+     "frase": "第二个在郊区，房间大一些",
+     "resp": "郊区"
+    },
+    {
+     "frase": "我想了很久，最后选了第二个",
+     "resp": "选"
+    },
+    {
+     "frase": "因为我想省点儿钱",
+     "resp": "省"
+    }
+   ],
+   "sobrantes": [
+    "热闹",
+    "周围"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "因为我想＿＿点儿钱。",
+    "opts": [
+     "省",
+     "花",
+     "浪费"
+    ],
+    "ok": [
+     0
+    ],
+    "why": "省 = «ahorrar». 花 = «gastar» y 浪费 = «desperdiciar»: ambas van en contra de «因为我想… (porque quiero…)», que da la razón de elegir lo más barato."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "房间有点儿小 / 房间大一些",
+     "es": "有点儿 + adjetivo expresa un matiz poco deseado («un poco chico»). Adjetivo + 一些 compara: «algo más grande»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "搬家",
+     "es": "mudarse"
+    },
+    {
+     "zh": "省钱",
+     "es": "ahorrar dinero"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "第二个在郊区，房间大一些",
+     "resultado": "sin coincidencia exacta (solo una oración de diccionario con otra redacción)"
+    },
+    {
+     "zh": "可以在地铁上看书，时间也不算浪费",
+     "resultado": "sin coincidencia exacta (solo notas sobre leer en el metro)"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
+  },
+  "dentro": [
+   "不算"
+  ],
+  "revision": "revisado"
+ },
+ {
+  "id": "rx-h4-jiaozi",
+  "nivel": 4,
+  "genero": "cultural",
+  "emoji": "🥟",
+  "revision": "pendiente",
+  "titulo": {
+   "zh": "过年包饺子",
+   "es": "Envolver dumplings en Año Nuevo"
+  },
+  "parrafos": [
+   {
+    "zh": "春节是中国最热闹的节日。在我们家，大年三十的晚上，全家人一起包饺子，这是我们家好多年的传统。",
+    "es": "El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, en la Nochevieja china (大年三十), toda la familia se junta a envolver dumplings: es una tradición de hace muchísimos años."
+   },
+   {
+    "zh": "奶奶准备好面和菜，爸爸妈妈负责包，我和妹妹也来帮忙。我们包得不太好看，但是大家都很开心。奶奶还会在其中一个饺子里放一块糖，谁吃到了，新的一年就会很顺利。",
+    "es": "Mi abuela prepara la masa y el relleno, mis papás se encargan de envolverlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un terrón de azúcar en uno de los dumplings: al que le toca, le va a ir bien todo el año."
+   },
+   {
+    "zh": "吃完饺子，我们一边看电视，一边等着十二点放鞭炮。那时候，外面特别热闹，家人团圆，互相说着祝福的话。我觉得，这就是春节最好的样子。",
+    "es": "Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos decimos palabras de buenos deseos. Para mí, así es el mejor Año Nuevo."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "节日",
+    "categoria": "sustantivo",
+    "es": "la fiesta, el día festivo"
+   },
+   {
+    "zh": "热闹",
+    "categoria": "adjetivo",
+    "es": "animado, con mucho bullicio"
+   },
+   {
+    "zh": "传统",
+    "categoria": "sustantivo",
+    "es": "la tradición"
+   },
+   {
+    "zh": "准备",
+    "categoria": "verbo",
+    "es": "preparar"
+   },
+   {
+    "zh": "负责",
+    "categoria": "verbo",
+    "es": "encargarse de"
+   },
+   {
+    "zh": "帮忙",
+    "categoria": "verbo",
+    "es": "dar una mano, ayudar"
+   },
+   {
+    "zh": "顺利",
+    "categoria": "adjetivo",
+    "es": "sin contratiempos, que sale bien"
+   },
+   {
+    "zh": "一边…一边…",
+    "categoria": "estructura",
+    "es": "mientras…, a la vez que…"
+   },
+   {
+    "zh": "放鞭炮",
+    "categoria": "expresión",
+    "es": "tirar petardos"
+   },
+   {
+    "zh": "团圆",
+    "categoria": "verbo",
+    "es": "reunirse la familia"
+   },
+   {
+    "zh": "祝福",
+    "categoria": "sustantivo / verbo",
+    "es": "buenos deseos; desear lo mejor"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Quiénes se encargan de envolver los dumplings?",
+    "opts": [
+     "Los papás.",
+     "La abuela.",
+     "Los chicos solos.",
+     "Los vecinos."
+    ],
+    "why": "Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de envolver).",
+    "whyNot": [
+     "La abuela prepara la masa y el relleno, pero no los envuelve.",
+     "Los chicos solo ayudan («也来帮忙»).",
+     "Los vecinos no aparecen en el texto."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Qué quiere decir el narrador en la última oración?",
+    "opts": [
+     "Que el mejor Año Nuevo es el que pasa en familia.",
+     "Que lo más lindo son los petardos.",
+     "Que prefiere comer afuera esa noche.",
+     "Que los dumplings le quedan perfectos."
+    ],
+    "why": "Última oración: «我觉得，这就是春节最好的样子» (para él, esa noche en familia es el mejor Año Nuevo).",
+    "whyNot": [
+     "Los petardos son parte de la noche, pero lo que valora es estar con la familia reunida.",
+     "Todo ocurre en su casa; nunca habla de salir a comer.",
+     "Dice que no les quedan muy lindos."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "春节是中国最热闹的节日",
+     "resp": "节日"
+    },
+    {
+     "frase": "全家人一起包饺子",
+     "resp": "包"
+    },
+    {
+     "frase": "奶奶准备好面和菜",
+     "resp": "准备"
+    },
+    {
+     "frase": "爸爸妈妈负责包",
+     "resp": "负责"
+    },
+    {
+     "frase": "但是大家都很开心",
+     "resp": "开心"
+    },
+    {
+     "frase": "那时候，外面特别热闹",
+     "resp": "热闹"
+    }
+   ],
+   "sobrantes": [
+    "医院",
+    "地铁"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "这是我们家好多年的＿＿。",
+    "opts": [
+     "传统",
+     "习惯",
+     "风格"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "传统 es «tradición» y 习惯 es «costumbre, hábito»: ambas sirven para algo que la familia hace desde hace años. 风格 es «estilo» (de una obra o de una persona) y no se dice de una actividad familiar."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "谁吃到了，新的一年就会很顺利。",
+     "es": "谁…就…: acá 谁 no pregunta «¿quién?»; significa «el que…, ese…»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "包饺子",
+     "es": "envolver dumplings"
+    },
+    {
+     "zh": "放鞭炮",
+     "es": "tirar petardos"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "全家人一起包饺子，这是我们家好多年的传统",
+     "resultado": "sin coincidencia exacta (solo relatos y notas sobre la costumbre de 包饺子 en Año Nuevo, con otra redacción)"
+    },
+    {
+     "zh": "外面特别热闹，家人团圆，互相说着祝福的话",
+     "resultado": "sin coincidencia exacta (solo páginas generales sobre 团圆 y felicitaciones de Año Nuevo)"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas"
+  }
+ }
+]
