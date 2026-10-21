@@ -39,7 +39,7 @@ const alinear = (frase, palabra, id) => { const tf = Array.from(T(frase)), zf = 
 // ── 3) armado del esquema v2 ──
 const corregidas = strings.filter((zh, i) => oc.raw[i] !== oc.t[i]).length;
 const built = src.map(r => {
-    const o = { id: r.id, schema: 2, tipo: r.tipo || 'examen', nivel: r.nivel, genero: r.genero, emoji: r.emoji, revision: 'pendiente',
+    const o = { id: r.id, schema: 2, tipo: r.tipo || 'examen', nivel: r.nivel, genero: r.genero, emoji: r.emoji, revision: r.revision || 'pendiente',
         titulo: { zh: r.titulo.zh, zhT: T(r.titulo.zh), es: r.titulo.es },
         parrafos: r.parrafos.map(p => ({ zh: p.zh, zhT: T(p.zh), es: p.es })),
         nombres: (r.nombres || []).map(n => ({ zh: n, zhT: T(n) })),
@@ -61,6 +61,7 @@ const built = src.map(r => {
         capa2: r.capa2 ? { notas: (r.capa2.notas || []).map(n => ({ zh: n.zh, zhT: T(n.zh), es: n.es })), colocaciones: (r.capa2.colocaciones || []).map(n => ({ zh: n.zh, zhT: T(n.zh), es: n.es })) } : undefined
     };
     if (!o.capa2) delete o.capa2;
+    if (r.revisor) o.revisor = r.revisor;
     if (!o.nombres.length) delete o.nombres;
     if (!o.dentroDeNivel.length) delete o.dentroDeNivel;
     return o;
@@ -71,7 +72,7 @@ const esc = x => String(x).replace(/\|/g, '\\|');
 const VERIF = [['悄悄', '悄悄'], ['擦', '擦'], ['郊區', '郊区'], ['視頻', '视频'], ['春聯', '春联'], ['毛筆', '毛笔'], ['氣氛', '气氛'], ['現成', '现成'], ['橫批', '横批'], ['婚禮', '婚礼'], ['晚點', '晚点'], ['堵車', '堵车'], ['座位', '座位'], ['省', '省']]; // pedidas en la revisión: [tradicional, simplificado] ¿en qué nivel están?
 function hoja(rs, ctl, meta) {
     const L = ['# Lecturas tipo examen · HSK 4 · hoja de revisión', '',
-        'GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproximado, no oficial. Los textos son originales, escritos para la app. `revision: pendiente` hasta que un hablante nativo los revise.', '',
+        'GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproximado, no oficial. Los textos son originales, escritos para la app. `revision`: `pendiente` (sin revisar) · `revisado` (lo revisó el autor de la app) · `nativo` (lo confirmó una profesora o un hablante; exige `revisor`).', '',
         '**Lista de referencia: ' + meta.lista + '**, tal como está embebida en la app (`EMBEDDED_MODULE_DATA`): HSK 1–4 acumulado = ' + meta.conteo[4] + ' palabras (HSK 1 = ' + meta.conteo[1] + ' · 1–2 = ' + meta.conteo[2] + ' · 1–3 = ' + meta.conteo[3] + ' · 1–9 = ' + meta.conteo[9] + '). ' +
         'El encabezado de `data-embedded.js` avisa que HSK 4–9 no se re-verificó contra el original, así que «no está» significa «no está en la lista de la app».', '',
         '**Regla de nivel (por palabras):** una palabra está dentro si figura en HSK 1..n (simplificado o tradicional, con erhua 儿 y partes fijas de patrones como …分之…) o se arma con palabras de la lista; si la lista la pone en un nivel más alto (毛笔 = HSK 5) está fuera aunque sus caracteres sean conocidos. Los nombres propios no cuentan. `*` = fuera de nivel. Detalle en `tools/lecturas-examen/nivel.js`.', '',
@@ -79,7 +80,7 @@ function hoja(rs, ctl, meta) {
     Object.keys(CFG.tipos).forEach(t => L.push('| `' + t + '` | ' + CFG.tipos[t].coberturaMinima + ' % | ' + (CFG.tipos[t].maxFuera === null ? 'sin tope (entra solo como estudio, no en la práctica de examen)' : CFG.tipos[t].maxFuera) + ' |'));
     L.push('', '## Verificación contra las listas embebidas', '', '| Tradicional | Simplificado | Nivel en la lista | Significado en la lista | ¿Dentro de HSK 4? |', '|---|---|---|---|---|');
     meta.verif.forEach(v => L.push('| ' + v.t + ' | ' + v.s + ' | ' + (v.nivel === null ? '**no está**' : 'HSK ' + v.nivel) + ' | ' + (v.es || '—') + ' | ' + (v.nivel !== null && v.nivel <= 4 ? 'sí' : '**no** *') + ' |'));
-    L.push('', 'Nota: la lista registra 省 solo como «provincia» (HSK 2); el sentido «ahorrar» del texto 4 comparte la entrada pero no está registrado como tal. Se deja sin * por la entrada, a confirmar.', '', '---', '');
+    L.push('', 'Nota: la lista registra 省 solo como «provincia» (HSK 2); el sentido «ahorrar» del texto 4 comparte la entrada pero no está registrado como tal. Decisión de la revisión: 省 va sin *.', '', '---', '');
     rs.forEach((r, i) => { const c = ctl[i], f = (src[i].control || {}).frases || [], letra = 'ABCD', rg = CFG.largo[r.nivel], tp = CFG.tipos[r.tipo];
         L.push('## ' + (i + 1) + '. ' + r.emoji + ' ' + r.titulo.zh + ' / ' + r.titulo.zhT + ' — ' + r.titulo.es, '', '`' + r.id + '` · ' + r.genero + ' · HSK ' + r.nivel + ' · tipo: `' + r.tipo + '`' + (r.tipo === 'estudio' ? ' (fuera de la práctica de examen)' : '') + ' · revision: ' + r.revision, '',
             '### Tabla de control', '', '| Control | Resultado |', '|---|---|',
@@ -146,7 +147,8 @@ const srv = http.createServer((q, s) => {
         '// tipo: \'examen\' (corto, entra en la práctica de examen: ≥ 90 % de nivel y ≤ 5 palabras fuera) | \'estudio\' (solo lectura/estudio, fuera de la práctica de examen).',
         '//',
         '// Aditivo y separado de window.READINGS (v1): la rama de interfaz unificará ambas en una sola fuente.',
-        '//   { id, schema: 2, tipo: \'examen\', nivel: 3|4|5, genero, emoji, revision: \'pendiente\'|\'nativo\',',
+        '//   { id, schema: 2, tipo: \'examen\', nivel: 3|4|5, genero, emoji, revision: \'pendiente\'|\'revisado\'|\'nativo\',',
+        '//     revisor?: \'nombre\',                             // obligatorio si revision = \'nativo\' (quién lo confirmó)',
         '//     titulo: { zh, zhT, es },',
         '//     parrafos: [{ zh, zhT, es }],                     // el texto, por párrafos (visible durante las preguntas)',
         '//     nombres?: [{ zh, zhT }],                         // nombres propios del texto: no cuentan para el nivel',

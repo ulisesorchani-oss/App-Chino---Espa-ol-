@@ -1,6 +1,6 @@
 # Lecturas tipo examen · HSK 4 · hoja de revisión
 
-GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproximado, no oficial. Los textos son originales, escritos para la app. `revision: pendiente` hasta que un hablante nativo los revise.
+GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproximado, no oficial. Los textos son originales, escritos para la app. `revision`: `pendiente` (sin revisar) · `revisado` (lo revisó el autor de la app) · `nativo` (lo confirmó una profesora o un hablante; exige `revisor`).
 
 **Lista de referencia: HSK 3.0 (GF0025-2021)**, tal como está embebida en la app (`EMBEDDED_MODULE_DATA`): HSK 1–4 acumulado = 3166 palabras (HSK 1 = 497 · 1–2 = 1244 · 1–3 = 2193 · 1–9 = 10944). El encabezado de `data-embedded.js` avisa que HSK 4–9 no se re-verificó contra el original, así que «no está» significa «no está en la lista de la app».
 
@@ -30,13 +30,13 @@ GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproxima
 | 座位 | 座位 | HSK 2 | Asiento | sí |
 | 省 | 省 | HSK 2 | Provincia | sí |
 
-Nota: la lista registra 省 solo como «provincia» (HSK 2); el sentido «ahorrar» del texto 4 comparte la entrada pero no está registrado como tal. Se deja sin * por la entrada, a confirmar.
+Nota: la lista registra 省 solo como «provincia» (HSK 2); el sentido «ahorrar» del texto 4 comparte la entrada pero no está registrado como tal. Decisión de la revisión: 省 va sin *.
 
 ---
 
 ## 1. 🚄 错过的火车 / 錯過的火車 — El tren que se fue
 
-`rx-h4-tren` · narración · HSK 4 · tipo: `examen` · revision: pendiente
+`rx-h4-tren` · narración · HSK 4 · tipo: `examen` · revision: revisado
 
 ### Tabla de control
 
@@ -119,7 +119,7 @@ Palabras del banco: 堵车 · 着急 · 碗 · 晚点 · 开始 · 擦 · 护照
 
 ## 2. 📱 你每天用多长时间手机？ / 你每天用多長時間手機？ — ¿Cuánto tiempo usás el celular por día?
 
-`rx-h4-encuesta` · expositivo · HSK 4 · tipo: `examen` · revision: pendiente
+`rx-h4-encuesta` · expositivo · HSK 4 · tipo: `examen` · revision: revisado
 
 ### Tabla de control
 
@@ -204,7 +204,7 @@ Palabras del banco: 调查 · 超过 · 比较 · 查 · 累 · 建议 · 比赛
 
 ## 3. 🧧 贴春联 / 貼春聯 — Pegar los pareados de Año Nuevo Chino
 
-`rx-h4-chunlian` · cultural · HSK 4 · tipo: `estudio` (fuera de la práctica de examen) · revision: pendiente
+`rx-h4-chunlian` · cultural · HSK 4 · tipo: `estudio` (fuera de la práctica de examen) · revision: revisado
 
 ### Tabla de control
 
@@ -284,7 +284,7 @@ Palabras del banco: 右 · 横批 · 顺利 · 写 · 现成 · 气氛 · 头发
 
 ## 4. 🏠 找房子 / 找房子 — Buscar casa
 
-`rx-h4-casa` · cotidiano · HSK 4 · tipo: `examen` · revision: pendiente
+`rx-h4-casa` · cotidiano · HSK 4 · tipo: `examen` · revision: revisado
 
 ### Tabla de control
 
@@ -361,5 +361,88 @@ Palabras del banco: 搬家 · 近 · 小 · 郊区 · 选 · 省 · 热闹 · �
 - Nota: **房间有点儿小 / 房间大一些** — 有点儿 + adjetivo expresa un matiz poco deseado («un poco chico»). Adjetivo + 一些 compara: «algo más grande».
 - Colocación: **搬家** (搬家) — mudarse
 - Colocación: **省钱** (省錢) — ahorrar dinero
+
+---
+
+## 5. 🥟 过年包饺子 / 過年包餃子 — Envolver dumplings en Año Nuevo
+
+`rx-h4-jiaozi` · cultural · HSK 4 · tipo: `examen` · revision: pendiente
+
+### Tabla de control
+
+| Control | Resultado |
+|---|---|
+| Largo | 164 hanzi (rango HSK 4: 120–200) |
+| Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 98.2 % (mínimo 90 %) · 113 palabras |
+| Palabras fuera de nivel en el texto | 鞭炮* (HSK 7) · 团圆* (HSK 9) — 2 de 5 permitidas |
+| Nombres propios (no cuentan) | — |
+| Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | — |
+| Glosario | 11 palabras, 2 con * |
+| Frase buscada 1 | «全家人一起包饺子，这是我们家好多年的传统» → sin coincidencia exacta (solo relatos y notas sobre la costumbre de 包饺子 en Año Nuevo, con otra redacción) |
+| Frase buscada 2 | «外面特别热闹，家人团圆，互相说着祝福的话» → sin coincidencia exacta (solo páginas generales sobre 团圆 y felicitaciones de Año Nuevo) |
+
+### Texto
+
+| 简体 | 繁體 (s2tw) | Español |
+|---|---|---|
+| 春节是中国最热闹的节日。在我们家，大年三十的晚上，全家人一起包饺子，这是我们家好多年的传统。 | 春節是中國最熱鬧的節日。在我們家，大年三十的晚上，全家人一起包餃子，這是我們家好多年的傳統。 | El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, en la Nochevieja china (大年三十), toda la familia se junta a envolver dumplings: es una tradición de hace muchísimos años. |
+| 奶奶准备好面和菜，爸爸妈妈负责包，我和妹妹也来帮忙。我们包得不太好看，但是大家都很开心。奶奶还会在其中一个饺子里放一块糖，谁吃到了，新的一年就会很顺利。 | 奶奶準備好麵和菜，爸爸媽媽負責包，我和妹妹也來幫忙。我們包得不太好看，但是大家都很開心。奶奶還會在其中一個餃子裡放一塊糖，誰吃到了，新的一年就會很順利。 | Mi abuela prepara la masa y el relleno, mis papás se encargan de envolverlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un terrón de azúcar en uno de los dumplings: al que le toca, le va a ir bien todo el año. |
+| 吃完饺子，我们一边看电视，一边等着十二点放鞭炮。那时候，外面特别热闹，家人团圆，互相说着祝福的话。我觉得，这就是春节最好的样子。 | 吃完餃子，我們一邊看電視，一邊等著十二點放鞭炮。那時候，外面特別熱鬧，家人團圓，互相說著祝福的話。我覺得，這就是春節最好的樣子。 | Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos decimos palabras de buenos deseos. Para mí, así es el mejor Año Nuevo. |
+
+### Comprensión (✅ = correcta)
+
+1. **¿Quiénes se encargan de envolver los dumplings?** _(detalle)_
+   - A) ✅ Los papás. — Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de envolver).
+   - B) La abuela. — La abuela prepara la masa y el relleno, pero no los envuelve.
+   - C) Los chicos solos. — Los chicos solo ayudan («也来帮忙»).
+   - D) Los vecinos. — Los vecinos no aparecen en el texto.
+
+2. **¿Qué quiere decir el narrador en la última oración?** _(idea)_
+   - A) ✅ Que el mejor Año Nuevo es el que pasa en familia. — Última oración: «我觉得，这就是春节最好的样子» (para él, esa noche en familia es el mejor Año Nuevo).
+   - B) Que lo más lindo son los petardos. — Los petardos son parte de la noche, pero lo que valora es estar con la familia reunida.
+   - C) Que prefiere comer afuera esa noche. — Todo ocurre en su casa; nunca habla de salir a comer.
+   - D) Que los dumplings le quedan perfectos. — Dice que no les quedan muy lindos.
+
+_(En pantalla el orden de las opciones se baraja; acá la correcta va primera.)_
+
+### Banco de palabras
+
+| # | Frase con hueco | Respuesta |
+|---|---|---|
+| 1 | 春节是中国最热闹的＿＿ | **节日** |
+| 2 | 全家人一起＿＿饺子 | **包** |
+| 3 | 奶奶＿＿好面和菜 | **准备** |
+| 4 | 爸爸妈妈＿＿包 | **负责** |
+| 5 | 但是大家都很＿＿ | **开心** |
+| 6 | 那时候，外面特别＿＿ | **热闹** |
+
+Palabras del banco: 节日 · 包 · 准备 · 负责 · 开心 · 热闹 · 医院 · 地铁 (sobrantes: 医院 · 地铁)
+
+### Palabras parecidas
+
+1. 这是我们家好多年的＿＿。  →  ✅ 传统 · ✅ 习惯 · ❌ 风格
+   - 传统 es «tradición» y 习惯 es «costumbre, hábito»: ambas sirven para algo que la familia hace desde hace años. 风格 es «estilo» (de una obra o de una persona) y no se dice de una actividad familiar.
+
+### Glosario (* = fuera de nivel)
+
+| 简体 | 繁體 | Categoría | Español | Nivel en la lista |
+|---|---|---|---|---|
+| 节日 | 節日 | sustantivo | la fiesta, el día festivo | HSK 2 |
+| 热闹 | 熱鬧 | adjetivo | animado, con mucho bullicio | HSK 4 |
+| 传统 | 傳統 | sustantivo | la tradición | HSK 4 |
+| 准备 | 準備 | verbo | preparar | HSK 1 |
+| 负责 | 負責 | verbo | encargarse de | HSK 3 |
+| 帮忙 | 幫忙 | verbo | dar una mano, ayudar | HSK 1 |
+| 顺利 | 順利 | adjetivo | sin contratiempos, que sale bien | HSK 2 |
+| 一边…一边… | 一邊…一邊… | estructura | mientras…, a la vez que… | no está (se arma con palabras del nivel) |
+| 放鞭炮* | 放鞭炮* | expresión | tirar petardos | no está |
+| 团圆* | 團圓* | verbo | reunirse la familia | HSK 9 |
+| 祝福 | 祝福 | sustantivo / verbo | buenos deseos; desear lo mejor | HSK 4 |
+
+### Capa 2 (opcional)
+
+- Nota: **谁吃到了，新的一年就会很顺利。** — 谁…就…: acá 谁 no pregunta «¿quién?»; significa «el que…, ese…».
+- Colocación: **包饺子** (包餃子) — envolver dumplings
+- Colocación: **放鞭炮** (放鞭炮) — tirar petardos
 
 ---

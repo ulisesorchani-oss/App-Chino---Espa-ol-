@@ -98,7 +98,7 @@ const srv = http.createServer((q, s) => {
             if (r.schema !== 2) E('schema debe ser 2'); if (!cfg.tipos[r.tipo]) E('tipo: ' + Object.keys(cfg.tipos).join(' | '));
             const nv = r.nivel, rgL = cfg.largo[nv]; if (!rgL) E('nivel ' + nv + ' sin configuración');
             if (!cfg.generos.includes(r.genero)) E('genero «' + r.genero + '» fuera de la lista'); if (!r.emoji) E('falta emoji');
-            if (!['pendiente', 'nativo'].includes(r.revision)) E('revision: pendiente | nativo'); if (nv === 5 && r.revision !== 'pendiente') E('HSK 5 nace con revision: pendiente');
+            if (!['pendiente', 'revisado', 'nativo'].includes(r.revision)) E('revision: pendiente | revisado | nativo'); if (r.revision === 'nativo' && !String(r.revisor || '').trim()) E('revision «nativo» exige revisor (quién lo confirmó: profesora o hablante)'); else if (r.revisor && r.revision !== 'nativo') E('revisor solo va con revision «nativo»');
             const T = r.titulo || {}; if (!T.zh || !T.zhT || !T.es) E('titulo incompleto');
             const ps = r.parrafos || []; if (!ps.length) E('sin párrafos');
             ps.forEach((p, i) => { if (!p.zh || !p.zhT || !p.es) E('párrafo ' + (i + 1) + ' incompleto'); });

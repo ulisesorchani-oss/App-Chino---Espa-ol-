@@ -8,7 +8,8 @@
 // tipo: 'examen' (corto, entra en la práctica de examen: ≥ 90 % de nivel y ≤ 5 palabras fuera) | 'estudio' (solo lectura/estudio, fuera de la práctica de examen).
 //
 // Aditivo y separado de window.READINGS (v1): la rama de interfaz unificará ambas en una sola fuente.
-//   { id, schema: 2, tipo: 'examen', nivel: 3|4|5, genero, emoji, revision: 'pendiente'|'nativo',
+//   { id, schema: 2, tipo: 'examen', nivel: 3|4|5, genero, emoji, revision: 'pendiente'|'revisado'|'nativo',
+//     revisor?: 'nombre',                             // obligatorio si revision = 'nativo' (quién lo confirmó)
 //     titulo: { zh, zhT, es },
 //     parrafos: [{ zh, zhT, es }],                     // el texto, por párrafos (visible durante las preguntas)
 //     nombres?: [{ zh, zhT }],                         // nombres propios del texto: no cuentan para el nivel
@@ -30,7 +31,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 4,
   "genero": "narración",
   "emoji": "🚄",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "错过的火车",
    "zhT": "錯過的火車",
@@ -297,7 +298,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 4,
   "genero": "expositivo",
   "emoji": "📱",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "你每天用多长时间手机？",
    "zhT": "你每天用多長時間手機？",
@@ -573,7 +574,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 4,
   "genero": "cultural",
   "emoji": "🧧",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "贴春联",
    "zhT": "貼春聯",
@@ -823,7 +824,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 4,
   "genero": "cotidiano",
   "emoji": "🏠",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "找房子",
    "zhT": "找房子",
@@ -1064,6 +1065,264 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
      "zh": "省钱",
      "zhT": "省錢",
      "es": "ahorrar dinero"
+    }
+   ]
+  }
+ },
+ {
+  "id": "rx-h4-jiaozi",
+  "schema": 2,
+  "tipo": "examen",
+  "nivel": 4,
+  "genero": "cultural",
+  "emoji": "🥟",
+  "revision": "pendiente",
+  "titulo": {
+   "zh": "过年包饺子",
+   "zhT": "過年包餃子",
+   "es": "Envolver dumplings en Año Nuevo"
+  },
+  "parrafos": [
+   {
+    "zh": "春节是中国最热闹的节日。在我们家，大年三十的晚上，全家人一起包饺子，这是我们家好多年的传统。",
+    "zhT": "春節是中國最熱鬧的節日。在我們家，大年三十的晚上，全家人一起包餃子，這是我們家好多年的傳統。",
+    "es": "El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, en la Nochevieja china (大年三十), toda la familia se junta a envolver dumplings: es una tradición de hace muchísimos años."
+   },
+   {
+    "zh": "奶奶准备好面和菜，爸爸妈妈负责包，我和妹妹也来帮忙。我们包得不太好看，但是大家都很开心。奶奶还会在其中一个饺子里放一块糖，谁吃到了，新的一年就会很顺利。",
+    "zhT": "奶奶準備好麵和菜，爸爸媽媽負責包，我和妹妹也來幫忙。我們包得不太好看，但是大家都很開心。奶奶還會在其中一個餃子裡放一塊糖，誰吃到了，新的一年就會很順利。",
+    "es": "Mi abuela prepara la masa y el relleno, mis papás se encargan de envolverlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un terrón de azúcar en uno de los dumplings: al que le toca, le va a ir bien todo el año."
+   },
+   {
+    "zh": "吃完饺子，我们一边看电视，一边等着十二点放鞭炮。那时候，外面特别热闹，家人团圆，互相说着祝福的话。我觉得，这就是春节最好的样子。",
+    "zhT": "吃完餃子，我們一邊看電視，一邊等著十二點放鞭炮。那時候，外面特別熱鬧，家人團圓，互相說著祝福的話。我覺得，這就是春節最好的樣子。",
+    "es": "Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos decimos palabras de buenos deseos. Para mí, así es el mejor Año Nuevo."
+   }
+  ],
+  "largo": 164,
+  "glosario": [
+   {
+    "zh": "节日",
+    "zhT": "節日",
+    "categoria": "sustantivo",
+    "es": "la fiesta, el día festivo",
+    "nivelLista": 2,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "热闹",
+    "zhT": "熱鬧",
+    "categoria": "adjetivo",
+    "es": "animado, con mucho bullicio",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "传统",
+    "zhT": "傳統",
+    "categoria": "sustantivo",
+    "es": "la tradición",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "准备",
+    "zhT": "準備",
+    "categoria": "verbo",
+    "es": "preparar",
+    "nivelLista": 1,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "负责",
+    "zhT": "負責",
+    "categoria": "verbo",
+    "es": "encargarse de",
+    "nivelLista": 3,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "帮忙",
+    "zhT": "幫忙",
+    "categoria": "verbo",
+    "es": "dar una mano, ayudar",
+    "nivelLista": 1,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "顺利",
+    "zhT": "順利",
+    "categoria": "adjetivo",
+    "es": "sin contratiempos, que sale bien",
+    "nivelLista": 2,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "一边…一边…",
+    "zhT": "一邊…一邊…",
+    "categoria": "estructura",
+    "es": "mientras…, a la vez que…",
+    "nivelLista": null,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "放鞭炮",
+    "zhT": "放鞭炮",
+    "categoria": "expresión",
+    "es": "tirar petardos",
+    "nivelLista": null,
+    "fueraDeNivel": true
+   },
+   {
+    "zh": "团圆",
+    "zhT": "團圓",
+    "categoria": "verbo",
+    "es": "reunirse la familia",
+    "nivelLista": 9,
+    "fueraDeNivel": true
+   },
+   {
+    "zh": "祝福",
+    "zhT": "祝福",
+    "categoria": "sustantivo / verbo",
+    "es": "buenos deseos; desear lo mejor",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Quiénes se encargan de envolver los dumplings?",
+    "opts": [
+     "Los papás.",
+     "La abuela.",
+     "Los chicos solos.",
+     "Los vecinos."
+    ],
+    "why": "Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de envolver).",
+    "whyNot": [
+     "La abuela prepara la masa y el relleno, pero no los envuelve.",
+     "Los chicos solo ayudan («也来帮忙»).",
+     "Los vecinos no aparecen en el texto."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Qué quiere decir el narrador en la última oración?",
+    "opts": [
+     "Que el mejor Año Nuevo es el que pasa en familia.",
+     "Que lo más lindo son los petardos.",
+     "Que prefiere comer afuera esa noche.",
+     "Que los dumplings le quedan perfectos."
+    ],
+    "why": "Última oración: «我觉得，这就是春节最好的样子» (para él, esa noche en familia es el mejor Año Nuevo).",
+    "whyNot": [
+     "Los petardos son parte de la noche, pero lo que valora es estar con la familia reunida.",
+     "Todo ocurre en su casa; nunca habla de salir a comer.",
+     "Dice que no les quedan muy lindos."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "zh": "春节是中国最热闹的＿＿",
+     "zhT": "春節是中國最熱鬧的＿＿",
+     "resp": "节日",
+     "respT": "節日"
+    },
+    {
+     "zh": "全家人一起＿＿饺子",
+     "zhT": "全家人一起＿＿餃子",
+     "resp": "包",
+     "respT": "包"
+    },
+    {
+     "zh": "奶奶＿＿好面和菜",
+     "zhT": "奶奶＿＿好麵和菜",
+     "resp": "准备",
+     "respT": "準備"
+    },
+    {
+     "zh": "爸爸妈妈＿＿包",
+     "zhT": "爸爸媽媽＿＿包",
+     "resp": "负责",
+     "respT": "負責"
+    },
+    {
+     "zh": "但是大家都很＿＿",
+     "zhT": "但是大家都很＿＿",
+     "resp": "开心",
+     "respT": "開心"
+    },
+    {
+     "zh": "那时候，外面特别＿＿",
+     "zhT": "那時候，外面特別＿＿",
+     "resp": "热闹",
+     "respT": "熱鬧"
+    }
+   ],
+   "palabras": [
+    "节日",
+    "包",
+    "准备",
+    "负责",
+    "开心",
+    "热闹",
+    "医院",
+    "地铁"
+   ],
+   "palabrasT": [
+    "節日",
+    "包",
+    "準備",
+    "負責",
+    "開心",
+    "熱鬧",
+    "醫院",
+    "地鐵"
+   ]
+  },
+  "parecidas": [
+   {
+    "zh": "这是我们家好多年的＿＿。",
+    "zhT": "這是我們家好多年的＿＿。",
+    "opts": [
+     "传统",
+     "习惯",
+     "风格"
+    ],
+    "optsT": [
+     "傳統",
+     "習慣",
+     "風格"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "传统 es «tradición» y 习惯 es «costumbre, hábito»: ambas sirven para algo que la familia hace desde hace años. 风格 es «estilo» (de una obra o de una persona) y no se dice de una actividad familiar."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "谁吃到了，新的一年就会很顺利。",
+     "zhT": "誰吃到了，新的一年就會很順利。",
+     "es": "谁…就…: acá 谁 no pregunta «¿quién?»; significa «el que…, ese…»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "包饺子",
+     "zhT": "包餃子",
+     "es": "envolver dumplings"
+    },
+    {
+     "zh": "放鞭炮",
+     "zhT": "放鞭炮",
+     "es": "tirar petardos"
     }
    ]
   }

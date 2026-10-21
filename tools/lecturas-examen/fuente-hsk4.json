@@ -193,7 +193,8 @@
   "nombres": [
    "小林",
    "上海"
-  ]
+  ],
+  "revision": "revisado"
  },
  {
   "id": "rx-h4-encuesta",
@@ -398,7 +399,8 @@
     }
    ],
    "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
-  }
+  },
+  "revision": "revisado"
  },
  {
   "id": "rx-h4-chunlian",
@@ -584,7 +586,8 @@
   "tipo": "estudio",
   "dentro": [
    "都会"
-  ]
+  ],
+  "revision": "revisado"
  },
  {
   "id": "rx-h4-casa",
@@ -774,6 +777,201 @@
   },
   "dentro": [
    "不算"
-  ]
+  ],
+  "revision": "revisado"
+ },
+ {
+  "id": "rx-h4-jiaozi",
+  "nivel": 4,
+  "genero": "cultural",
+  "emoji": "🥟",
+  "revision": "pendiente",
+  "titulo": {
+   "zh": "过年包饺子",
+   "es": "Envolver dumplings en Año Nuevo"
+  },
+  "parrafos": [
+   {
+    "zh": "春节是中国最热闹的节日。在我们家，大年三十的晚上，全家人一起包饺子，这是我们家好多年的传统。",
+    "es": "El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, en la Nochevieja china (大年三十), toda la familia se junta a envolver dumplings: es una tradición de hace muchísimos años."
+   },
+   {
+    "zh": "奶奶准备好面和菜，爸爸妈妈负责包，我和妹妹也来帮忙。我们包得不太好看，但是大家都很开心。奶奶还会在其中一个饺子里放一块糖，谁吃到了，新的一年就会很顺利。",
+    "es": "Mi abuela prepara la masa y el relleno, mis papás se encargan de envolverlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un terrón de azúcar en uno de los dumplings: al que le toca, le va a ir bien todo el año."
+   },
+   {
+    "zh": "吃完饺子，我们一边看电视，一边等着十二点放鞭炮。那时候，外面特别热闹，家人团圆，互相说着祝福的话。我觉得，这就是春节最好的样子。",
+    "es": "Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos decimos palabras de buenos deseos. Para mí, así es el mejor Año Nuevo."
+   }
+  ],
+  "glosario": [
+   {
+    "zh": "节日",
+    "categoria": "sustantivo",
+    "es": "la fiesta, el día festivo"
+   },
+   {
+    "zh": "热闹",
+    "categoria": "adjetivo",
+    "es": "animado, con mucho bullicio"
+   },
+   {
+    "zh": "传统",
+    "categoria": "sustantivo",
+    "es": "la tradición"
+   },
+   {
+    "zh": "准备",
+    "categoria": "verbo",
+    "es": "preparar"
+   },
+   {
+    "zh": "负责",
+    "categoria": "verbo",
+    "es": "encargarse de"
+   },
+   {
+    "zh": "帮忙",
+    "categoria": "verbo",
+    "es": "dar una mano, ayudar"
+   },
+   {
+    "zh": "顺利",
+    "categoria": "adjetivo",
+    "es": "sin contratiempos, que sale bien"
+   },
+   {
+    "zh": "一边…一边…",
+    "categoria": "estructura",
+    "es": "mientras…, a la vez que…"
+   },
+   {
+    "zh": "放鞭炮",
+    "categoria": "expresión",
+    "es": "tirar petardos"
+   },
+   {
+    "zh": "团圆",
+    "categoria": "verbo",
+    "es": "reunirse la familia"
+   },
+   {
+    "zh": "祝福",
+    "categoria": "sustantivo / verbo",
+    "es": "buenos deseos; desear lo mejor"
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "detalle",
+    "es": "¿Quiénes se encargan de envolver los dumplings?",
+    "opts": [
+     "Los papás.",
+     "La abuela.",
+     "Los chicos solos.",
+     "Los vecinos."
+    ],
+    "why": "Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de envolver).",
+    "whyNot": [
+     "La abuela prepara la masa y el relleno, pero no los envuelve.",
+     "Los chicos solo ayudan («也来帮忙»).",
+     "Los vecinos no aparecen en el texto."
+    ]
+   },
+   {
+    "tipo": "idea",
+    "es": "¿Qué quiere decir el narrador en la última oración?",
+    "opts": [
+     "Que el mejor Año Nuevo es el que pasa en familia.",
+     "Que lo más lindo son los petardos.",
+     "Que prefiere comer afuera esa noche.",
+     "Que los dumplings le quedan perfectos."
+    ],
+    "why": "Última oración: «我觉得，这就是春节最好的样子» (para él, esa noche en familia es el mejor Año Nuevo).",
+    "whyNot": [
+     "Los petardos son parte de la noche, pero lo que valora es estar con la familia reunida.",
+     "Todo ocurre en su casa; nunca habla de salir a comer.",
+     "Dice que no les quedan muy lindos."
+    ]
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "frase": "春节是中国最热闹的节日",
+     "resp": "节日"
+    },
+    {
+     "frase": "全家人一起包饺子",
+     "resp": "包"
+    },
+    {
+     "frase": "奶奶准备好面和菜",
+     "resp": "准备"
+    },
+    {
+     "frase": "爸爸妈妈负责包",
+     "resp": "负责"
+    },
+    {
+     "frase": "但是大家都很开心",
+     "resp": "开心"
+    },
+    {
+     "frase": "那时候，外面特别热闹",
+     "resp": "热闹"
+    }
+   ],
+   "sobrantes": [
+    "医院",
+    "地铁"
+   ]
+  },
+  "parecidas": [
+   {
+    "frase": "这是我们家好多年的＿＿。",
+    "opts": [
+     "传统",
+     "习惯",
+     "风格"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "传统 es «tradición» y 习惯 es «costumbre, hábito»: ambas sirven para algo que la familia hace desde hace años. 风格 es «estilo» (de una obra o de una persona) y no se dice de una actividad familiar."
+   }
+  ],
+  "capa2": {
+   "notas": [
+    {
+     "zh": "谁吃到了，新的一年就会很顺利。",
+     "es": "谁…就…: acá 谁 no pregunta «¿quién?»; significa «el que…, ese…»."
+    }
+   ],
+   "colocaciones": [
+    {
+     "zh": "包饺子",
+     "es": "envolver dumplings"
+    },
+    {
+     "zh": "放鞭炮",
+     "es": "tirar petardos"
+    }
+   ]
+  },
+  "control": {
+   "frases": [
+    {
+     "zh": "全家人一起包饺子，这是我们家好多年的传统",
+     "resultado": "sin coincidencia exacta (solo relatos y notas sobre la costumbre de 包饺子 en Año Nuevo, con otra redacción)"
+    },
+    {
+     "zh": "外面特别热闹，家人团圆，互相说着祝福的话",
+     "resultado": "sin coincidencia exacta (solo páginas generales sobre 团圆 y felicitaciones de Año Nuevo)"
+    }
+   ],
+   "busqueda": "WebSearch (modo estándar), frase entre comillas"
+  }
  }
 ]
