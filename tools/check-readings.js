@@ -105,8 +105,9 @@ const srv = http.createServer((q, s) => {
             const scr = (s, w) => { if (SIMP.test(s.zhT || '')) E(w + ': zhT con rasgos simplificados'); if (TRAD.test(s.zh || '')) E(w + ': zh con rasgos tradicionales'); };
             scr(T, 'titulo'); ps.forEach((p, i) => scr(p, 'párrafo ' + (i + 1)));
             const text = ps.map(p => p.zh).join(''), textT = ps.map(p => p.zhT).join(''), H = hz(text), HT = hz(textT);
-            const tp = cfg.tipos[r.tipo] || cfg.tipos.examen, nom = (r.nombres || []).map(n => n.zh), dentro = r.dentroDeNivel || [];
+            const tp = cfg.tipos[r.tipo] || cfg.tipos.examen, nom = (r.nombres || []).map(n => n.zh), dentro = r.dentroDeNivel || [], manual = r.fueraDeNivelDeclarado || [];
             (r.nombres || []).forEach(n => { if (!n.zh || !n.zhT) E('nombre incompleto'); else { if (!H.includes(hz(n.zh))) E('nombre «' + n.zh + '» no aparece en el texto'); if (!HT.includes(hz(n.zhT))) E('nombre «' + n.zhT + '» no aparece en el texto (zhT)'); } });
+            manual.forEach(x => { if (!H.includes(hz(x))) E('fueraDeNivelDeclarado «' + x + '» no aparece en el texto'); else if (LN.fueraEntrada(x, nv)) E('fueraDeNivelDeclarado «' + x + '» sobra: el cálculo ya lo da como fuera de nivel'); });
             dentro.forEach(x => { if (!H.includes(hz(x))) E('dentroDeNivel «' + x + '» no aparece en el texto'); else if (!LN.alto(nv).has(x)) E('dentroDeNivel «' + x + '» no coincide con ninguna palabra de nivel más alto (sobra)'); });
             // largo (calculado) y rango
             const largo = H.length; if (r.largo !== largo) E('largo guardado ' + r.largo + ' ≠ calculado ' + largo); if (rgL && !rng(largo, rgL)) E('largo ' + largo + ' hanzi fuera de ' + rgL.join('–'));
@@ -116,15 +117,15 @@ const srv = http.createServer((q, s) => {
             if (new Set(gl.map(g => g.zh)).size !== gl.length) E('glosario con palabras repetidas');
             gl.forEach(g => { if (!g.zh || !g.zhT || !g.categoria || !g.es || typeof g.fueraDeNivel !== 'boolean' || !('nivelLista' in g)) { E('glosario «' + g.zh + '» incompleto'); return; }
                 scr(g, 'glosario «' + g.zh + '»');
-                const calc = LN.fueraEntrada(g.zh, nv), lv = LN.nivelExacto(g.zh); if (calc !== g.fueraDeNivel) E('glosario «' + g.zh + '»: fueraDeNivel guardado ' + g.fueraDeNivel + ' ≠ calculado ' + calc); if (lv !== g.nivelLista) E('glosario «' + g.zh + '»: nivelLista guardado ' + g.nivelLista + ' ≠ calculado ' + lv);
+                const calc = LN.fueraEntrada(g.zh, nv, manual), lv = LN.nivelExacto(g.zh); if (calc !== g.fueraDeNivel) E('glosario «' + g.zh + '»: fueraDeNivel guardado ' + g.fueraDeNivel + ' ≠ calculado ' + calc); if (lv !== g.nivelLista) E('glosario «' + g.zh + '»: nivelLista guardado ' + g.nivelLista + ' ≠ calculado ' + lv);
                 if (!g.zh.split('…').filter(Boolean).every(x => H.includes(hz(x)))) E('glosario «' + g.zh + '» no aparece en el texto'); if (!g.zhT.split('…').filter(Boolean).every(x => HT.includes(hz(x)))) E('glosario «' + g.zhT + '» no aparece en el texto (zhT)'); });
             // nivel por palabras (lista de referencia: LN.LISTA) y tope de palabras fuera, según el tipo
             const cubierta = x => gl.some(g => g.zh.split('…').some(pt => pt && (pt.includes(x) || x.includes(pt))));
-            const an = LN.analizar(ps.map(p => p.zh), nv, { nombres: nom, dentro });
+            const an = LN.analizar(ps.map(p => p.zh), nv, { nombres: nom, dentro, manual });
             if (an.cobertura < tp.coberturaMinima) E('nivel por palabras ' + an.cobertura.toFixed(1) + ' % < ' + tp.coberturaMinima + ' % (' + r.tipo + ')');
             if (tp.maxFuera !== null && an.fuera.length > tp.maxFuera) E(an.fuera.length + ' palabras fuera de nivel (' + an.fuera.join(' ') + ') > tope ' + tp.maxFuera + ' en tipo ' + r.tipo);
             const sinGl = an.fuera.filter(x => !cubierta(x)); if (sinGl.length) E('fuera de nivel sin glosario: ' + sinGl.join(' '));
-            const lvl = (texts, w) => { const c = LN.analizar(texts, nv, { nombres: nom }).fuera.filter(x => !cubierta(x)); if (c.length) E(w + ': fuera de nivel sin glosario: ' + c.join(' ')); };
+            const lvl = (texts, w) => { const c = LN.analizar(texts, nv, { nombres: nom, manual }).fuera.filter(x => !cubierta(x)); if (c.length) E(w + ': fuera de nivel sin glosario: ' + c.join(' ')); };
             // comprensión
             const qs = r.comprension || [], nOpt = cfg.opcionesComprension[nv], rgQ = cfg.comprension[nv]; let longest = 0, nOptQ = 0;
             if (rgQ && !rng(qs.length, rgQ)) E('comprensión: ' + rgQ.join(' a ') + ' preguntas (hay ' + qs.length + ')');
@@ -163,7 +164,7 @@ const srv = http.createServer((q, s) => {
                 if (!Array.isArray(p.opts) || p.opts.length < 3 || p.opts.length > 4 || new Set(p.opts).size !== p.opts.length || !Array.isArray(p.optsT) || p.optsT.length !== p.opts.length) { E(n + ': 3 o 4 opciones distintas (y optsT)'); return; }
                 if (!Array.isArray(p.ok) || !p.ok.length || new Set(p.ok).size !== p.ok.length || p.ok.some(k => !Number.isInteger(k) || k < 0 || k >= p.opts.length) || p.ok.length >= p.opts.length) E(n + ': ok debe ser un conjunto de índices válidos y dejar al menos una opción incorrecta');
                 if (!p.why) E(n + ' sin why');
-                else if (Array.isArray(p.ok) && p.ok.every(k => H.includes(hz(p.zh.replace(BLANK, p.opts[k]))) === false)) W(n + ': ninguna opción válida reproduce la frase del texto');
+                else if (p.delTexto !== false && Array.isArray(p.ok) && p.ok.every(k => H.includes(hz(p.zh.replace(BLANK, p.opts[k]))) === false)) W(n + ': ninguna opción válida reproduce la frase del texto');
                 lvl([p.zh.split(BLANK).join('')].concat(p.opts), n); });
             // capa 2
             const c2 = r.capa2; if (c2) ['notas', 'colocaciones'].forEach(k => { (c2[k] || []).forEach((x, i) => { if (!x.zh || !x.zhT || !x.es) E('capa2.' + k + ' ' + (i + 1) + ' incompleto'); scr(x, 'capa2.' + k + ' ' + (i + 1)); }); lvl((c2[k] || []).map(x => x.zh), 'capa2.' + k); });
