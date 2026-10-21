@@ -11,7 +11,7 @@
   "parrafos": [
    {
     "zh": "小林要去上海参加朋友的婚礼。早上六点他就出门了，可是路上堵车，到火车站的时候，火车已经开走了。",
-    "es": "Xiao Lin va a Shanghái a la boda de un amigo. Salió de casa a las seis de la mañana, pero había atasco en el camino y, cuando llegó a la estación, el tren ya se había ido."
+    "es": "Xiao Lin va a Shanghái a la boda de un amigo. Salió de casa a las seis de la mañana, pero había mucho tránsito en el camino y, cuando llegó a la estación, el tren ya se había ido."
    },
    {
     "zh": "他很着急，马上给朋友打电话。朋友笑着说：“别担心，婚礼下午才开始，你坐下一班车吧。”",
@@ -19,7 +19,7 @@
    },
    {
     "zh": "他松了一口气，在车站旁边的小饭馆吃了一碗面。没想到下一班车也晚点了一个小时。他到的时候，婚礼已经开始了，他一边擦汗，一边悄悄找座位，可是大家还是都看见了他。",
-    "es": "Suspiró aliviado y comió un bol de fideos en un pequeño restaurante junto a la estación. Pero, para su sorpresa, el siguiente tren también se retrasó una hora. Cuando llegó, la boda ya había empezado; mientras se secaba el sudor buscaba su asiento sin hacer ruido, pero igual todos lo vieron."
+    "es": "Suspiró aliviado y comió un tazón de fideos en un restaurante chico cerca de la estación. Pero, para sorpresa suya, el siguiente tren también se retrasó una hora. Cuando llegó, la boda ya había empezado; mientras se secaba el sudor buscaba su asiento sin hacer ruido, pero igual todos lo vieron."
    }
   ],
   "glosario": [
@@ -36,7 +36,7 @@
    {
     "zh": "堵车",
     "categoria": "verbo",
-    "es": "haber atasco"
+    "es": "haber mucho tránsito"
    },
    {
     "zh": "着急",
@@ -56,7 +56,7 @@
    {
     "zh": "没想到",
     "categoria": "expresión",
-    "es": "no imaginaba que, para sorpresa de"
+    "es": "no imaginaba que; para sorpresa suya"
    },
    {
     "zh": "一边…一边…",
@@ -84,12 +84,12 @@
     "tipo": "detalle",
     "es": "¿Por qué Xiao Lin perdió el primer tren?",
     "opts": [
-     "Había mucho tráfico en el camino.",
+     "Había mucho tránsito en el camino.",
      "Salió de su casa demasiado tarde.",
      "Se equivocó de estación.",
      "Su amigo lo llamó por teléfono."
     ],
-    "why": "El texto dice que salió a las seis, pero «路上堵车» (había atasco en el camino).",
+    "why": "El texto dice que salió a las seis, pero «路上堵车» (había mucho tránsito en el camino).",
     "whyNot": [
      "Salió temprano, a las seis de la mañana.",
      "Llegó a la estación correcta; el tren ya había salido.",
@@ -189,7 +189,11 @@
     }
    ],
    "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
-  }
+  },
+  "nombres": [
+   "小林",
+   "上海"
+  ]
  },
  {
   "id": "rx-h4-encuesta",
@@ -211,7 +215,7 @@
    },
    {
     "zh": "调查还发现，晚上十一点以后还在玩手机的学生，第二天上课时更容易觉得累。老师建议大家睡觉前一个小时把手机放在别的房间里。",
-    "es": "La encuesta también mostró que los estudiantes que siguen con el celular después de las once de la noche se sienten más cansados en clase al día siguiente. El docente recomienda dejar el celular en otra habitación una hora antes de dormir."
+    "es": "La encuesta también mostró que los estudiantes que siguen pegados al celular después de las once de la noche se sienten más cansados en clase al día siguiente. El docente recomienda dejar el celular en otra habitación una hora antes de dormir."
    }
   ],
   "glosario": [
@@ -403,12 +407,12 @@
   "emoji": "🧧",
   "titulo": {
    "zh": "贴春联",
-   "es": "Pegar los pareados de Año Nuevo"
+   "es": "Pegar los pareados de Año Nuevo Chino"
   },
   "parrafos": [
    {
     "zh": "春节前，中国的家家户户都会在门口贴红色的春联。春联是两句字数相同、意思相配的话，写在红纸上，左右各一句。",
-    "es": "Antes de la Fiesta de la Primavera, todas las casas de China pegan en la puerta pareados rojos. Son dos frases con el mismo número de caracteres y de sentido complementario, escritas en papel rojo, una a cada lado."
+    "es": "Antes del Año Nuevo Chino (la Fiesta de la Primavera), todas las casas de China pegan en la puerta pareados rojos. Son dos frases con el mismo número de caracteres y de sentido complementario, escritas en papel rojo, una a cada lado."
    },
    {
     "zh": "按传统习惯，站在门外看，上联贴在右边，下联贴在左边，门上面还会贴一张短短的横批。春联里常常有“平安”“幸福”“健康”这样的好词，人们希望新的一年一切顺利。",
@@ -416,14 +420,14 @@
    },
    {
     "zh": "有的家庭自己用毛笔写春联，有的去市场买现成的。不管是写的还是买的，贴上春联以后，屋子里就有了过年的气氛。",
-    "es": "Algunas familias escriben los pareados con pincel; otras los compran ya hechos en el mercado. Sean escritos o comprados, una vez pegados la casa ya tiene el ambiente de las fiestas."
+    "es": "Algunas familias escriben los pareados con pincel; otras los compran ya hechos en el mercado. Sean escritos o comprados, una vez pegados ya se respira el clima de Año Nuevo."
    }
   ],
   "glosario": [
    {
     "zh": "春联",
     "categoria": "sustantivo",
-    "es": "pareado de Año Nuevo"
+    "es": "pareado de Año Nuevo Chino"
    },
    {
     "zh": "家家户户",
@@ -473,7 +477,7 @@
    {
     "zh": "气氛",
     "categoria": "sustantivo",
-    "es": "el ambiente"
+    "es": "el clima, la atmósfera"
    }
   ],
   "comprension": [
@@ -556,11 +560,11 @@
    "colocaciones": [
     {
      "zh": "贴春联",
-     "es": "pegar los pareados de Año Nuevo"
+     "es": "pegar los pareados de Año Nuevo Chino"
     },
     {
      "zh": "过年的气氛",
-     "es": "el ambiente de las fiestas de Año Nuevo"
+     "es": "el clima de Año Nuevo"
     }
    ]
   },
@@ -576,7 +580,11 @@
     }
    ],
    "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
-  }
+  },
+  "tipo": "estudio",
+  "dentro": [
+   "都会"
+  ]
  },
  {
   "id": "rx-h4-casa",
@@ -597,8 +605,8 @@
     "es": "El primero queda muy cerca de la oficina, a solo diez minutos a pie, pero la habitación es un poco chica y cuesta 1.800 por mes. El segundo está en las afueras, la habitación es algo más grande y cuesta solo 1.200 por mes, pero en subte se tarda una hora."
    },
    {
-    "zh": "我想了很久，最后选了第二个。因为我想省点儿钱，而且可以在地铁上看书，时间也不算浪费。",
-    "es": "Lo pensé mucho y al final elegí el segundo. Quiero ahorrar un poco y, además, puedo leer en el subte, así que el tiempo tampoco se desperdicia."
+    "zh": "我想了很久，最后选了第二个，因为我想省点儿钱，而且可以在地铁上看书，时间也不算浪费。",
+    "es": "Lo pensé mucho y al final elegí el segundo, porque quiero ahorrar un poco y, además, puedo leer en el subte, así que el tiempo tampoco se desperdicia."
    }
   ],
   "glosario": [
@@ -763,6 +771,9 @@
     }
    ],
    "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-21"
-  }
+  },
+  "dentro": [
+   "不算"
+  ]
  }
 ]

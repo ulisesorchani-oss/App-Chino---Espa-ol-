@@ -2,16 +2,16 @@
  "_nota": "Parámetros de las lecturas v2 (los usa tools/check-readings.js). Borrador: el largo se ajusta acá, no en el código. Nivel aproximado, no oficial.",
  "largo": {
   "3": [
-   60,
-   100
+   70,
+   130
   ],
   "4": [
-   100,
+   120,
    200
   ],
   "5": [
-   250,
-   350
+   220,
+   380
   ]
  },
  "opcionesComprension": {
@@ -47,7 +47,6 @@
   1,
   2
  ],
- "coberturaMinima": 90,
  "generos": [
   "narración",
   "expositivo",
@@ -86,5 +85,16 @@
     "櫃台"
    ]
   ]
+ },
+ "lista": "HSK 3.0 (GF0025-2021)",
+ "tipos": {
+  "examen": {
+   "coberturaMinima": 90,
+   "maxFuera": 5
+  },
+  "estudio": {
+   "coberturaMinima": 80,
+   "maxFuera": null
+  }
  }
 }

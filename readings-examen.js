@@ -4,13 +4,17 @@
 // GENERADO por tools/build-readings-examen.js desde tools/lecturas-examen/fuente-*.json — NO editar a mano:
 // tools/check-readings.js vuelve a calcular largo, fueraDeNivel y el tradicional y falla si no coinciden.
 // Textos originales escritos para la app. Nivel aproximado, NO oficial. Tradicional: OpenCC s2tw (ida y vuelta tw2s verificada).
+// Lista de referencia del nivel: HSK 3.0 (GF0025-2021), la embebida en la app (ver tools/lecturas-examen/nivel.js).
+// tipo: 'examen' (corto, entra en la práctica de examen: ≥ 90 % de nivel y ≤ 5 palabras fuera) | 'estudio' (solo lectura/estudio, fuera de la práctica de examen).
 //
 // Aditivo y separado de window.READINGS (v1): la rama de interfaz unificará ambas en una sola fuente.
 //   { id, schema: 2, tipo: 'examen', nivel: 3|4|5, genero, emoji, revision: 'pendiente'|'nativo',
 //     titulo: { zh, zhT, es },
 //     parrafos: [{ zh, zhT, es }],                     // el texto, por párrafos (visible durante las preguntas)
+//     nombres?: [{ zh, zhT }],                         // nombres propios del texto: no cuentan para el nivel
+//     dentroDeNivel?: [zh],                            // coincidencias con una palabra de nivel más alto revisadas a mano (都会 = 都 + 会)
 //     largo,                                           // hanzi del texto — CALCULADO
-//     glosario: [{ zh, zhT, categoria, es, fueraDeNivel }],  // 8–12; fueraDeNivel CALCULADO (pinyin: pinyinFor en pantalla)
+//     glosario: [{ zh, zhT, categoria, es, nivelLista, fueraDeNivel }],  // 8–12; nivelLista = HSK 1–9 de la entrada exacta o null; ambos CALCULADOS
 //     comprension: [ { tipo: idea|detalle|vocabulario, es, opts[], why, whyNot[] }   // opts[0] = CORRECTA (se baraja al mostrar)
 //                  | { tipo: 'vf', es, vf: true|false, why } ],                    // verdadero/falso: la pantalla lo resuelve la rama de interfaz
 //     banco: { huecos: [{ zh (con ＿＿), zhT, resp, respT }], palabras[], palabrasT[] },  // palabras = respuestas + 1–2 sobrantes
@@ -36,7 +40,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
    {
     "zh": "小林要去上海参加朋友的婚礼。早上六点他就出门了，可是路上堵车，到火车站的时候，火车已经开走了。",
     "zhT": "小林要去上海參加朋友的婚禮。早上六點他就出門了，可是路上堵車，到火車站的時候，火車已經開走了。",
-    "es": "Xiao Lin va a Shanghái a la boda de un amigo. Salió de casa a las seis de la mañana, pero había atasco en el camino y, cuando llegó a la estación, el tren ya se había ido."
+    "es": "Xiao Lin va a Shanghái a la boda de un amigo. Salió de casa a las seis de la mañana, pero había mucho tránsito en el camino y, cuando llegó a la estación, el tren ya se había ido."
    },
    {
     "zh": "他很着急，马上给朋友打电话。朋友笑着说：“别担心，婚礼下午才开始，你坐下一班车吧。”",
@@ -46,7 +50,17 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
    {
     "zh": "他松了一口气，在车站旁边的小饭馆吃了一碗面。没想到下一班车也晚点了一个小时。他到的时候，婚礼已经开始了，他一边擦汗，一边悄悄找座位，可是大家还是都看见了他。",
     "zhT": "他鬆了一口氣，在車站旁邊的小飯館吃了一碗麵。沒想到下一班車也晚點了一個小時。他到的時候，婚禮已經開始了，他一邊擦汗，一邊悄悄找座位，可是大家還是都看見了他。",
-    "es": "Suspiró aliviado y comió un bol de fideos en un pequeño restaurante junto a la estación. Pero, para su sorpresa, el siguiente tren también se retrasó una hora. Cuando llegó, la boda ya había empezado; mientras se secaba el sudor buscaba su asiento sin hacer ruido, pero igual todos lo vieron."
+    "es": "Suspiró aliviado y comió un tazón de fideos en un restaurante chico cerca de la estación. Pero, para sorpresa suya, el siguiente tren también se retrasó una hora. Cuando llegó, la boda ya había empezado; mientras se secaba el sudor buscaba su asiento sin hacer ruido, pero igual todos lo vieron."
+   }
+  ],
+  "nombres": [
+   {
+    "zh": "小林",
+    "zhT": "小林"
+   },
+   {
+    "zh": "上海",
+    "zhT": "上海"
    }
   ],
   "largo": 146,
@@ -56,6 +70,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "參加",
     "categoria": "verbo",
     "es": "asistir, participar en",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -63,13 +78,15 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "婚禮",
     "categoria": "sustantivo",
     "es": "la boda",
+    "nivelLista": 4,
     "fueraDeNivel": false
    },
    {
     "zh": "堵车",
     "zhT": "堵車",
     "categoria": "verbo",
-    "es": "haber atasco",
+    "es": "haber mucho tránsito",
+    "nivelLista": 4,
     "fueraDeNivel": false
    },
    {
@@ -77,6 +94,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "著急",
     "categoria": "adjetivo",
     "es": "estar impaciente, nervioso",
+    "nivelLista": 4,
     "fueraDeNivel": false
    },
    {
@@ -84,6 +102,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "晚點",
     "categoria": "verbo",
     "es": "retrasarse (un transporte)",
+    "nivelLista": 4,
     "fueraDeNivel": false
    },
    {
@@ -91,13 +110,15 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "鬆了一口氣",
     "categoria": "expresión",
     "es": "suspirar aliviado",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
     "zh": "没想到",
     "zhT": "沒想到",
     "categoria": "expresión",
-    "es": "no imaginaba que, para sorpresa de",
+    "es": "no imaginaba que; para sorpresa suya",
+    "nivelLista": 4,
     "fueraDeNivel": false
    },
    {
@@ -105,6 +126,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "一邊…一邊…",
     "categoria": "estructura",
     "es": "mientras…, a la vez que…",
+    "nivelLista": null,
     "fueraDeNivel": false
    },
    {
@@ -112,6 +134,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "擦汗",
     "categoria": "expresión",
     "es": "secarse el sudor",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -119,6 +142,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "悄悄",
     "categoria": "adverbio",
     "es": "en silencio, sin hacer ruido",
+    "nivelLista": 5,
     "fueraDeNivel": true
    },
    {
@@ -126,6 +150,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "座位",
     "categoria": "sustantivo",
     "es": "el asiento",
+    "nivelLista": 2,
     "fueraDeNivel": false
    }
   ],
@@ -134,12 +159,12 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "tipo": "detalle",
     "es": "¿Por qué Xiao Lin perdió el primer tren?",
     "opts": [
-     "Había mucho tráfico en el camino.",
+     "Había mucho tránsito en el camino.",
      "Salió de su casa demasiado tarde.",
      "Se equivocó de estación.",
      "Su amigo lo llamó por teléfono."
     ],
-    "why": "El texto dice que salió a las seis, pero «路上堵车» (había atasco en el camino).",
+    "why": "El texto dice que salió a las seis, pero «路上堵车» (había mucho tránsito en el camino).",
     "whyNot": [
      "Salió temprano, a las seis de la mañana.",
      "Llegó a la estación correcta; el tren ya había salido.",
@@ -292,7 +317,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
    {
     "zh": "调查还发现，晚上十一点以后还在玩手机的学生，第二天上课时更容易觉得累。老师建议大家睡觉前一个小时把手机放在别的房间里。",
     "zhT": "調查還發現，晚上十一點以後還在玩手機的學生，第二天上課時更容易覺得累。老師建議大家睡覺前一個小時把手機放在別的房間裡。",
-    "es": "La encuesta también mostró que los estudiantes que siguen con el celular después de las once de la noche se sienten más cansados en clase al día siguiente. El docente recomienda dejar el celular en otra habitación una hora antes de dormir."
+    "es": "La encuesta también mostró que los estudiantes que siguen pegados al celular después de las once de la noche se sienten más cansados en clase al día siguiente. El docente recomienda dejar el celular en otra habitación una hora antes de dormir."
    }
   ],
   "largo": 146,
@@ -302,6 +327,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "調查",
     "categoria": "verbo / sustantivo",
     "es": "encuestar; la encuesta",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -309,6 +335,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "超過",
     "categoria": "verbo",
     "es": "superar, pasar de",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -316,13 +343,15 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "百分之",
     "categoria": "estructura",
     "es": "por ciento (百分之四十 = 40 %)",
-    "fueraDeNivel": true
+    "nivelLista": null,
+    "fueraDeNivel": false
    },
    {
     "zh": "其他",
     "zhT": "其他",
     "categoria": "pronombre",
     "es": "los demás, otros",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -330,6 +359,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "比較",
     "categoria": "adverbio",
     "es": "relativamente, bastante",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -337,6 +367,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "大部分",
     "categoria": "sustantivo",
     "es": "la mayor parte",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -344,6 +375,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "聊天",
     "categoria": "verbo",
     "es": "charlar, chatear",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -351,6 +383,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "查資料",
     "categoria": "expresión",
     "es": "buscar información",
+    "nivelLista": null,
     "fueraDeNivel": false
    },
    {
@@ -358,6 +391,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "容易",
     "categoria": "adjetivo",
     "es": "fácil; propenso a",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -365,6 +399,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "建議",
     "categoria": "verbo",
     "es": "recomendar, sugerir",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -372,6 +407,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "視頻",
     "categoria": "sustantivo",
     "es": "el video",
+    "nivelLista": 5,
     "fueraDeNivel": true
    }
   ],
@@ -533,7 +569,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
  {
   "id": "rx-h4-chunlian",
   "schema": 2,
-  "tipo": "examen",
+  "tipo": "estudio",
   "nivel": 4,
   "genero": "cultural",
   "emoji": "🧧",
@@ -541,13 +577,13 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "titulo": {
    "zh": "贴春联",
    "zhT": "貼春聯",
-   "es": "Pegar los pareados de Año Nuevo"
+   "es": "Pegar los pareados de Año Nuevo Chino"
   },
   "parrafos": [
    {
     "zh": "春节前，中国的家家户户都会在门口贴红色的春联。春联是两句字数相同、意思相配的话，写在红纸上，左右各一句。",
     "zhT": "春節前，中國的家家戶戶都會在門口貼紅色的春聯。春聯是兩句字數相同、意思相配的話，寫在紅紙上，左右各一句。",
-    "es": "Antes de la Fiesta de la Primavera, todas las casas de China pegan en la puerta pareados rojos. Son dos frases con el mismo número de caracteres y de sentido complementario, escritas en papel rojo, una a cada lado."
+    "es": "Antes del Año Nuevo Chino (la Fiesta de la Primavera), todas las casas de China pegan en la puerta pareados rojos. Son dos frases con el mismo número de caracteres y de sentido complementario, escritas en papel rojo, una a cada lado."
    },
    {
     "zh": "按传统习惯，站在门外看，上联贴在右边，下联贴在左边，门上面还会贴一张短短的横批。春联里常常有“平安”“幸福”“健康”这样的好词，人们希望新的一年一切顺利。",
@@ -557,8 +593,11 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
    {
     "zh": "有的家庭自己用毛笔写春联，有的去市场买现成的。不管是写的还是买的，贴上春联以后，屋子里就有了过年的气氛。",
     "zhT": "有的家庭自己用毛筆寫春聯，有的去市場買現成的。不管是寫的還是買的，貼上春聯以後，屋子裡就有了過年的氣氛。",
-    "es": "Algunas familias escriben los pareados con pincel; otras los compran ya hechos en el mercado. Sean escritos o comprados, una vez pegados la casa ya tiene el ambiente de las fiestas."
+    "es": "Algunas familias escriben los pareados con pincel; otras los compran ya hechos en el mercado. Sean escritos o comprados, una vez pegados ya se respira el clima de Año Nuevo."
    }
+  ],
+  "dentroDeNivel": [
+   "都会"
   ],
   "largo": 157,
   "glosario": [
@@ -566,7 +605,8 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zh": "春联",
     "zhT": "春聯",
     "categoria": "sustantivo",
-    "es": "pareado de Año Nuevo",
+    "es": "pareado de Año Nuevo Chino",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -574,6 +614,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "家家戶戶",
     "categoria": "expresión",
     "es": "todas las familias, cada casa",
+    "nivelLista": 8,
     "fueraDeNivel": true
    },
    {
@@ -581,6 +622,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "相配",
     "categoria": "verbo",
     "es": "combinar, hacer juego",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -588,6 +630,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "上聯",
     "categoria": "sustantivo",
     "es": "primer verso del pareado",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -595,6 +638,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "下聯",
     "categoria": "sustantivo",
     "es": "segundo verso del pareado",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -602,6 +646,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "橫批",
     "categoria": "sustantivo",
     "es": "tira horizontal sobre la puerta",
+    "nivelLista": null,
     "fueraDeNivel": true
    },
    {
@@ -609,6 +654,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "平安",
     "categoria": "adjetivo",
     "es": "en paz, a salvo",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -616,6 +662,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "順利",
     "categoria": "adjetivo",
     "es": "sin contratiempos",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -623,6 +670,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "毛筆",
     "categoria": "sustantivo",
     "es": "pincel de escritura",
+    "nivelLista": 5,
     "fueraDeNivel": true
    },
    {
@@ -630,13 +678,15 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "現成",
     "categoria": "adjetivo",
     "es": "ya hecho, listo para usar",
+    "nivelLista": 9,
     "fueraDeNivel": true
    },
    {
     "zh": "气氛",
     "zhT": "氣氛",
     "categoria": "sustantivo",
-    "es": "el ambiente",
+    "es": "el clima, la atmósfera",
+    "nivelLista": 6,
     "fueraDeNivel": true
    }
   ],
@@ -756,12 +806,12 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     {
      "zh": "贴春联",
      "zhT": "貼春聯",
-     "es": "pegar los pareados de Año Nuevo"
+     "es": "pegar los pareados de Año Nuevo Chino"
     },
     {
      "zh": "过年的气氛",
      "zhT": "過年的氣氛",
-     "es": "el ambiente de las fiestas de Año Nuevo"
+     "es": "el clima de Año Nuevo"
     }
    ]
   }
@@ -791,10 +841,13 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "es": "El primero queda muy cerca de la oficina, a solo diez minutos a pie, pero la habitación es un poco chica y cuesta 1.800 por mes. El segundo está en las afueras, la habitación es algo más grande y cuesta solo 1.200 por mes, pero en subte se tarda una hora."
    },
    {
-    "zh": "我想了很久，最后选了第二个。因为我想省点儿钱，而且可以在地铁上看书，时间也不算浪费。",
-    "zhT": "我想了很久，最後選了第二個。因為我想省點兒錢，而且可以在地鐵上看書，時間也不算浪費。",
-    "es": "Lo pensé mucho y al final elegí el segundo. Quiero ahorrar un poco y, además, puedo leer en el subte, así que el tiempo tampoco se desperdicia."
+    "zh": "我想了很久，最后选了第二个，因为我想省点儿钱，而且可以在地铁上看书，时间也不算浪费。",
+    "zhT": "我想了很久，最後選了第二個，因為我想省點兒錢，而且可以在地鐵上看書，時間也不算浪費。",
+    "es": "Lo pensé mucho y al final elegí el segundo, porque quiero ahorrar un poco y, además, puedo leer en el subte, así que el tiempo tampoco se desperdicia."
    }
+  ],
+  "dentroDeNivel": [
+   "不算"
   ],
   "largo": 122,
   "glosario": [
@@ -803,6 +856,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "搬家",
     "categoria": "verbo",
     "es": "mudarse",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -810,6 +864,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "一直",
     "categoria": "adverbio",
     "es": "todo el tiempo, sin parar",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -817,6 +872,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "郊區",
     "categoria": "sustantivo",
     "es": "las afueras",
+    "nivelLista": 5,
     "fueraDeNivel": true
    },
    {
@@ -824,6 +880,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "地鐵",
     "categoria": "sustantivo",
     "es": "el subte, el metro",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -831,6 +888,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "不過",
     "categoria": "conjunción",
     "es": "pero, sin embargo",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -838,6 +896,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "房間",
     "categoria": "sustantivo",
     "es": "la habitación",
+    "nivelLista": 1,
     "fueraDeNivel": false
    },
    {
@@ -845,6 +904,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "省",
     "categoria": "verbo",
     "es": "ahorrar",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -852,6 +912,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "而且",
     "categoria": "conjunción",
     "es": "además, y también",
+    "nivelLista": 2,
     "fueraDeNivel": false
    },
    {
@@ -859,6 +920,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "浪費",
     "categoria": "verbo",
     "es": "desperdiciar",
+    "nivelLista": 3,
     "fueraDeNivel": false
    },
    {
@@ -866,6 +928,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "zhT": "算",
     "categoria": "verbo",
     "es": "contar como, considerarse",
+    "nivelLista": 2,
     "fueraDeNivel": false
    }
   ],

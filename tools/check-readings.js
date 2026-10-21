@@ -32,9 +32,10 @@ const srv = http.createServer((q, s) => {
     await pg.goto('http://localhost:' + port + '/index.html'); await pg.waitForTimeout(1800);
     // los datos que index.html ya carga no se vuelven a cargar (ids repetidos)
     for (const f of FILES) if (!(await pg.$('script[src^="' + f + '"]'))) await pg.addScriptTag({ url: '/' + f });
-    const res = await pg.evaluate(async () => {
+    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'lecturas-examen', 'config.json'), 'utf8'));
+    const res = await pg.evaluate(async (cfgL) => {
         if (typeof ensureTocflPinyin === 'function') { try { await ensureTocflPinyin(); } catch (e) { /* sin tabla TOCFL */ } }
-        const HAN = /[㐀-鿿]/, RANGE = { HSK3: [80, 160, 3, false], HSK5: [200, 330, 4, true], 'TOCFL-B1': [150, 260, 4, false] }; // [mín hanzi, máx, opciones, pregunta en chino]
+        const HAN = /[㐀-鿿]/, RANGE = { HSK3: cfgL[3].concat([3, false]), HSK5: cfgL[5].concat([4, true]), 'TOCFL-B1': [150, 260, 4, false] }; // [mín hanzi, máx, opciones, pregunta en chino]
         const keyOf = r => r.exam === 'TOCFL' ? 'TOCFL-' + r.examLvl : 'HSK' + r.hsk;
         const SIMP = /[们这个来说时为会应对还么开关东车门问间进过现发长]/, TRAD = /[們這個來說時為會應對還麼開關東車門問間進過現發長]/;
         const CUM = k => ({ HSK3: ['HSK1', 'HSK2', 'HSK3'], HSK5: ['HSK1', 'HSK2', 'HSK3', 'HSK4', 'HSK5'], 'TOCFL-B1': ['TOCFL-Prep', 'TOCFL-A1', 'TOCFL-A2', 'TOCFL-B3'] })[k] || []; // acumuladas
@@ -82,20 +83,19 @@ const srv = http.createServer((q, s) => {
             out.push({ id: r.id, hsk: key, chars, lines: r.lines.length, q: qs.length, cov: +cs.cov.toFixed(1), covT: +ct.cov.toFixed(1), kw: (r.keywords || []).length, fuera: cs.bad.join(' '), err, warn });
         });
         return { n: L.length, out };
-    });
+    }, cfg.largo);
     // ── lecturas v2 (window.READINGS_V2, readings-examen.js): reglas y parámetros en tools/lecturas-examen/config.json ──
-    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'lecturas-examen', 'config.json'), 'utf8'));
+    await pg.addScriptTag({ content: fs.readFileSync(path.join(__dirname, 'lecturas-examen', 'nivel.js'), 'utf8') });
     const res2 = await pg.evaluate(async (cfg) => {
         const HAN = /[㐀-鿿]/, BLANK = '＿＿', SIMP = /[们这个来说时为会应对还么开关东车门问间进过现发长]/, TRAD = /[們這個來說時為會應對還麼開關東車門問間進過現發長]/;
-        const hz = s => String(s || '').replace(/[^㐀-鿿]/g, ''), setsC = {};
-        const setOf = n => setsC[n] || (setsC[n] = (() => { const w = new Set(), c = new Set(); for (let i = 1; i <= n; i++) EMBEDDED_MODULE_DATA['HSK' + i].forEach(e => [e[0], e[1]].forEach(x => { if (x) { w.add(x); Array.from(x).forEach(ch => c.add(ch)); } })); return { w, c }; })());
+        const hz = s => String(s || '').replace(/[^㐀-鿿]/g, ''), LN = window.LecNivel;
         const L = window.READINGS_V2 || [], seen = new Set(), out = [], pairs = [], v1pairs = [];
         const used = new Set((window.READINGS || []).map(r => r.id).concat((window.GRADED_LESSONS || []).map(l => l.id)));
         const rng = (v, a) => v >= a[0] && v <= a[1];
         L.forEach(r => {
             const err = [], warn = [], E = m => err.push(m), W = m => warn.push(m);
             if (!r.id || seen.has(r.id) || used.has(r.id)) E('id vacío o repetido (también contra v1 y las lecciones)'); seen.add(r.id);
-            if (r.schema !== 2) E('schema debe ser 2'); if (!['examen', 'estudio'].includes(r.tipo)) E('tipo: examen | estudio');
+            if (r.schema !== 2) E('schema debe ser 2'); if (!cfg.tipos[r.tipo]) E('tipo: ' + Object.keys(cfg.tipos).join(' | '));
             const nv = r.nivel, rgL = cfg.largo[nv]; if (!rgL) E('nivel ' + nv + ' sin configuración');
             if (!cfg.generos.includes(r.genero)) E('genero «' + r.genero + '» fuera de la lista'); if (!r.emoji) E('falta emoji');
             if (!['pendiente', 'nativo'].includes(r.revision)) E('revision: pendiente | nativo'); if (nv === 5 && r.revision !== 'pendiente') E('HSK 5 nace con revision: pendiente');
@@ -105,25 +105,26 @@ const srv = http.createServer((q, s) => {
             const scr = (s, w) => { if (SIMP.test(s.zhT || '')) E(w + ': zhT con rasgos simplificados'); if (TRAD.test(s.zh || '')) E(w + ': zh con rasgos tradicionales'); };
             scr(T, 'titulo'); ps.forEach((p, i) => scr(p, 'párrafo ' + (i + 1)));
             const text = ps.map(p => p.zh).join(''), textT = ps.map(p => p.zhT).join(''), H = hz(text), HT = hz(textT);
-            const set = setOf(nv || 4);
+            const tp = cfg.tipos[r.tipo] || cfg.tipos.examen, nom = (r.nombres || []).map(n => n.zh), dentro = r.dentroDeNivel || [];
+            (r.nombres || []).forEach(n => { if (!n.zh || !n.zhT) E('nombre incompleto'); else { if (!H.includes(hz(n.zh))) E('nombre «' + n.zh + '» no aparece en el texto'); if (!HT.includes(hz(n.zhT))) E('nombre «' + n.zhT + '» no aparece en el texto (zhT)'); } });
+            dentro.forEach(x => { if (!H.includes(hz(x))) E('dentroDeNivel «' + x + '» no aparece en el texto'); else if (!LN.alto(nv).has(x)) E('dentroDeNivel «' + x + '» no coincide con ninguna palabra de nivel más alto (sobra)'); });
             // largo (calculado) y rango
             const largo = H.length; if (r.largo !== largo) E('largo guardado ' + r.largo + ' ≠ calculado ' + largo); if (rgL && !rng(largo, rgL)) E('largo ' + largo + ' hanzi fuera de ' + rgL.join('–'));
             // glosario
             const gl = r.glosario || [], glChars = new Set(); gl.forEach(g => [g.zh, g.zhT].forEach(x => Array.from(x || '').forEach(ch => glChars.add(ch))));
             if (!rng(gl.length, cfg.glosario)) E('glosario: ' + cfg.glosario.join(' a ') + ' palabras (hay ' + gl.length + ')');
             if (new Set(gl.map(g => g.zh)).size !== gl.length) E('glosario con palabras repetidas');
-            gl.forEach(g => { if (!g.zh || !g.zhT || !g.categoria || !g.es || typeof g.fueraDeNivel !== 'boolean') { E('glosario «' + g.zh + '» incompleto'); return; }
+            gl.forEach(g => { if (!g.zh || !g.zhT || !g.categoria || !g.es || typeof g.fueraDeNivel !== 'boolean' || !('nivelLista' in g)) { E('glosario «' + g.zh + '» incompleto'); return; }
                 scr(g, 'glosario «' + g.zh + '»');
-                const calc = zhSegmentAll(g.zh).filter(x => HAN.test(x)).some(x => !set.w.has(x)); if (calc !== g.fueraDeNivel) E('glosario «' + g.zh + '»: fueraDeNivel guardado ' + g.fueraDeNivel + ' ≠ calculado ' + calc);
+                const calc = LN.fueraEntrada(g.zh, nv), lv = LN.nivelExacto(g.zh); if (calc !== g.fueraDeNivel) E('glosario «' + g.zh + '»: fueraDeNivel guardado ' + g.fueraDeNivel + ' ≠ calculado ' + calc); if (lv !== g.nivelLista) E('glosario «' + g.zh + '»: nivelLista guardado ' + g.nivelLista + ' ≠ calculado ' + lv);
                 if (!g.zh.split('…').filter(Boolean).every(x => H.includes(hz(x)))) E('glosario «' + g.zh + '» no aparece en el texto'); if (!g.zhT.split('…').filter(Boolean).every(x => HT.includes(hz(x)))) E('glosario «' + g.zhT + '» no aparece en el texto (zhT)'); });
-            // cobertura del nivel
-            const cover = (texts, strict) => { let tok = 0, ok = 0; const bad = new Set(), unc = new Set();
-                texts.forEach(t => zhSegmentAll(t).filter(x => HAN.test(x)).forEach(x => { tok++; const inl = set.w.has(x) || Array.from(x).every(ch => set.c.has(ch)); if (inl) ok++; else { bad.add(x); if (!Array.from(x).every(ch => set.c.has(ch) || glChars.has(ch))) unc.add(x); } }));
-                return { tok, cov: tok ? 100 * ok / tok : 100, bad: [...bad], unc: [...unc] }; };
-            const cs = cover(ps.map(p => p.zh)), ct = cover(ps.map(p => p.zhT));
-            if (cs.cov < cfg.coberturaMinima) E('cobertura zh ' + cs.cov.toFixed(1) + ' % < ' + cfg.coberturaMinima); if (ct.cov < cfg.coberturaMinima) E('cobertura zhT ' + ct.cov.toFixed(1) + ' % < ' + cfg.coberturaMinima);
-            if (cs.unc.length) E('fuera de nivel sin glosario (zh): ' + cs.unc.join(' ')); if (ct.unc.length) E('fuera de nivel sin glosario (zhT): ' + ct.unc.join(' '));
-            const lvl = (texts, w) => { const c = cover(texts); if (c.unc.length) E(w + ': fuera de nivel sin glosario: ' + c.unc.join(' ')); };
+            // nivel por palabras (lista de referencia: LN.LISTA) y tope de palabras fuera, según el tipo
+            const cubierta = x => gl.some(g => g.zh.split('…').some(pt => pt && (pt.includes(x) || x.includes(pt))));
+            const an = LN.analizar(ps.map(p => p.zh), nv, { nombres: nom, dentro });
+            if (an.cobertura < tp.coberturaMinima) E('nivel por palabras ' + an.cobertura.toFixed(1) + ' % < ' + tp.coberturaMinima + ' % (' + r.tipo + ')');
+            if (tp.maxFuera !== null && an.fuera.length > tp.maxFuera) E(an.fuera.length + ' palabras fuera de nivel (' + an.fuera.join(' ') + ') > tope ' + tp.maxFuera + ' en tipo ' + r.tipo);
+            const sinGl = an.fuera.filter(x => !cubierta(x)); if (sinGl.length) E('fuera de nivel sin glosario: ' + sinGl.join(' '));
+            const lvl = (texts, w) => { const c = LN.analizar(texts, nv, { nombres: nom }).fuera.filter(x => !cubierta(x)); if (c.length) E(w + ': fuera de nivel sin glosario: ' + c.join(' ')); };
             // comprensión
             const qs = r.comprension || [], nOpt = cfg.opcionesComprension[nv], rgQ = cfg.comprension[nv]; let longest = 0, nOptQ = 0;
             if (rgQ && !rng(qs.length, rgQ)) E('comprensión: ' + rgQ.join(' a ') + ' preguntas (hay ' + qs.length + ')');
@@ -174,13 +175,13 @@ const srv = http.createServer((q, s) => {
             pal.forEach((w, i) => { if (!resps.includes(w)) P('palabra sobrante', w, (bk.palabrasT || [])[i]); });
             pc.forEach(p => (p.opts || []).forEach((o, i) => { if (p.zh && p.zhT) P('parecida', p.zh.replace(BLANK, o), p.zhT.replace(BLANK, (p.optsT || [])[i] || '')); }));
             if (c2) ['notas', 'colocaciones'].forEach(k => (c2[k] || []).forEach(x => P('capa2', x.zh, x.zhT)));
-            out.push({ id: r.id, nivel: nv, largo, cov: +cs.cov.toFixed(1), covT: +ct.cov.toFixed(1), fuera: cs.bad.join(' '), gl: gl.length, glFuera: gl.filter(g => g.fueraDeNivel).length, q: qs.length, huecos: hu.length, sobr: extra.length, par: pc.length, err, warn });
+            out.push({ id: r.id, tipo: r.tipo, nivel: nv, largo, cov: +an.cobertura.toFixed(1), fuera: an.fuera.join(' '), nFuera: an.fuera.length, gl: gl.length, glFuera: gl.filter(g => g.fueraDeNivel).length, q: qs.length, huecos: hu.length, sobr: extra.length, par: pc.length, err, warn });
         });
         // v1 (sin cambios): se listan sus pares para ver si usan la misma conversión
         (window.READINGS || []).forEach(r => { const P = (w, zh, zhT) => { if (zh || zhT) v1pairs.push({ id: r.id, w, zh, zhT }); };
             P('titulo', r.titleZh, r.titleZhT); (r.lines || []).forEach((l, i) => P('línea ' + (i + 1), l.zh, l.zhT)); (r.keywords || []).forEach(k => P('keyword', k.zh, k.zhT));
             (r.names || []).forEach((n, i) => P('nombre', n, (r.namesT || [])[i])); (r.questions || []).forEach((q, i) => { P('P' + (i + 1) + ' pregunta', q.qZh, q.qZhT); (q.optsZh || []).forEach((o, k) => P('P' + (i + 1) + ' opción', o, (q.optsZhT || [])[k])); }); });
-        return { n: L.length, out, pairs, v1pairs };
+        return { n: L.length, out, pairs, v1pairs, lista: LN.LISTA, conteo: [LN.conteo(1), LN.conteo(2), LN.conteo(3), LN.conteo(4)].join(' / ').replace(/^/, '1: ').replace(' / ', ' · 1–2: ').replace(' / ', ' · 1–3: ').replace(' / ', ' · 1–4: ') };
     }, cfg);
     // ida y vuelta con OpenCC s2tw / tw2s: lo guardado debe ser EXACTAMENTE s2tw(zh) y tw2s(zhT) debe devolver zh
     const rt = { diffsV2: [], diffsV1: [], skipped: null, total: 0 };
@@ -197,8 +198,8 @@ const srv = http.createServer((q, s) => {
     let bad = 0; res.out.forEach(o => { o.err.forEach(e => { bad++; console.log('✗', o.id, e); }); o.warn.forEach(w => console.log('⚠', o.id, w)); });
     console.log(res.n + ' lecturas v1 · ' + (bad ? bad + ' error(es)' : 'todo en regla'));
     // ── v2 ──
-    console.log('\nLecturas v2 (READINGS_V2) — control por texto');
-    if (res2.n) console.table(res2.out.map(o => ({ id: o.id, nivel: 'HSK ' + o.nivel, hanzi: o.largo, 'cob zh %': o.cov, 'cob zhT %': o.covT, 'fuera de lista': o.fuera, glosario: o.gl + ' (' + o.glFuera + ' fuera)', preg: o.q, huecos: o.huecos + '+' + o.sobr, parecidas: o.par })));
+    console.log('\nLecturas v2 (READINGS_V2) — control por texto · lista de referencia: ' + res2.lista + ' (embebida; palabras acumuladas HSK ' + res2.conteo + ')');
+    if (res2.n) console.table(res2.out.map(o => ({ id: o.id, tipo: o.tipo, nivel: 'HSK ' + o.nivel, hanzi: o.largo, 'nivel % (palabras)': o.cov, 'fuera de nivel': o.nFuera + ': ' + o.fuera, glosario: o.gl + ' (' + o.glFuera + ' fuera)', preg: o.q, huecos: o.huecos + '+' + o.sobr, parecidas: o.par })));
     let bad2 = 0; res2.out.forEach(o => { o.err.forEach(e => { bad2++; console.log('✗', o.id, e); }); o.warn.forEach(w => console.log('⚠', o.id, w)); });
     if (rt.skipped) { bad2++; console.log('✗ no pude correr OpenCC (pip install opencc): ' + rt.skipped); }
     else {
