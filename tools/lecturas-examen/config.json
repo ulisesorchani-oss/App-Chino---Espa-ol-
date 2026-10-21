@@ -1,0 +1,90 @@
+{
+ "_nota": "Parámetros de las lecturas v2 (los usa tools/check-readings.js). Borrador: el largo se ajusta acá, no en el código. Nivel aproximado, no oficial.",
+ "largo": {
+  "3": [
+   60,
+   100
+  ],
+  "4": [
+   100,
+   200
+  ],
+  "5": [
+   250,
+   350
+  ]
+ },
+ "opcionesComprension": {
+  "3": 3,
+  "4": 4,
+  "5": 4
+ },
+ "comprension": {
+  "3": [
+   1,
+   2
+  ],
+  "4": [
+   1,
+   2
+  ],
+  "5": [
+   3,
+   5
+  ]
+ },
+ "parecidasDesdeNivel": 4,
+ "parecidas": [
+  1,
+  2
+ ],
+ "glosario": [
+  8,
+  12
+ ],
+ "huecos": 6,
+ "sobrantes": [
+  1,
+  2
+ ],
+ "coberturaMinima": 90,
+ "generos": [
+  "narración",
+  "expositivo",
+  "cultural",
+  "cotidiano",
+  "aviso",
+  "nota",
+  "carta",
+  "artículo"
+ ],
+ "correccionesS2tw": {
+  "_nota": "Fallos conocidos de OpenCC s2tw que ya corregimos a mano en los textos v1 (regex → reemplazo). La misma tabla la aplican el generador y el validador: así v1 y v2 usan exactamente lo mismo.",
+  "reglas": [
+   [
+    "彆(?!扭)",
+    "別"
+   ],
+   [
+    "箇",
+    "個"
+   ],
+   [
+    "溼",
+    "濕"
+   ],
+   [
+    "發黴",
+    "發霉"
+   ],
+   [
+    "盡量",
+    "儘量"
+   ],
+   [
+    "櫃檯",
+    "櫃台"
+   ]
+  ]
+ }
+}
