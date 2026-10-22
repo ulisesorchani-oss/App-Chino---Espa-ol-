@@ -36,6 +36,32 @@ const SHOTS = process.env.SHOTS_DIR || '';
   const b = await chromium.launch(launch);
   const sleep = (p, ms) => p.waitForTimeout(ms);
 
+  // ── ayudas de la práctica encadenada (se ejecutan dentro de la página) ──
+  // rellena el banco: wrongPairs = [[i, j]] intercambia las respuestas de esos dos huecos (queda mal); si no, todo bien
+  const fillBank = (p, swap) => p.evaluate((swap) => {
+    const r = window.LQ_UI.state.lesson, hs = r.banco.huecos, want = hs.map(h => h.resp);
+    if (swap) { const t = want[swap[0]]; want[swap[0]] = want[swap[1]]; want[swap[1]] = t; }
+    const word = (w) => { const ci = r.banco.palabras.indexOf(w); return window.LQ_UI.zhKey() === 'trad' && r.banco.palabrasT ? r.banco.palabrasT[ci] : w; };
+    for (let i = 0; i < hs.length; i++) {
+      const bl = document.querySelector('.rd-blank[data-i="' + i + '"]');
+      if (!bl.classList.contains('is-sel')) bl.click(); // un hueco ya elegido no se vuelve a tocar (volver a tocarlo lo suelta)
+      const chip = [...document.querySelectorAll('.rd-chip')].find(c => !c.disabled && c.textContent === word(want[i]));
+      if (!chip) return 'sin ficha para ' + want[i];
+      chip.click();
+    }
+    return 'ok';
+  }, swap || null);
+  // termina lo que falte de una práctica v2 (banco bien, parecidas con la primera opción) y cierra desde el resumen
+  const finishChain = async (p) => {
+    for (let g = 0; g < 8; g++) {
+      const v = await p.evaluate(() => LQ_DEBUG.state.view);
+      if (v === 'rbanco') { await fillBank(p); await p.click('#rd-check'); await sleep(p, 100); await p.click('#lq-next'); await sleep(p, 200); }
+      else if (v === 'rparec') { await p.evaluate(() => document.querySelectorAll('#lq-opts .lq-opt')[0].click()); await sleep(p, 100); await p.click('#lq-next'); await sleep(p, 200); }
+      else if (v === 'rsum') { await p.evaluate(() => document.getElementById('lq-final-close').click()); await sleep(p, 250); return; }
+      else break;
+    }
+  };
+
   for (const w of [320, 360]) for (const th of ['light', 'paper', 'dark']) {
     const tag = w + '/' + th;
     const ctx = await b.newContext({ viewport: { width: w, height: 740 }, serviceWorkers: 'block' });
@@ -117,7 +143,7 @@ const SHOTS = process.env.SHOTS_DIR || '';
 
     // ── Practicar v2: 4 opciones ──
     await p.evaluate(() => { window.__srs = 0; if (typeof window.acSrsMiss === 'function') { const o = window.acSrsMiss; window.acSrsMiss = function () { window.__srs++; return o.apply(this, arguments); }; } });
-    await p.evaluate(() => LQ_READING.save('rx-h4-tren', { best: 1, of: 2, done: true, tries: 1, last: '2026-01-01', qs: [true, false], bk: { best: 4, of: 6 } })); // exports de lessons-graduated.js
+    await p.evaluate(() => LQ_READING.save('rx-h4-tren', { best: 1, of: 2, done: true, tries: 1, last: '2026-01-01', qs: [true, false], bk: { best: 5, of: 6, tries: 2 }, otra: { clave: 1 } })); // exports de lessons-graduated.js
     await p.click('[data-id="rx-h4-tren"][data-act="practice"]'); await sleep(p, 600);
     let Q = await p.evaluate(() => ({ view: LQ_DEBUG.state.view, stack: Nav.stack.join(), n: document.querySelectorAll('#lq-opts .lq-opt').length, letters: [...document.querySelectorAll('#lq-opts .lq-opt-letter')].map(x => x.textContent).join(''),
       meta: document.querySelector('.rd-q-meta').textContent, q: document.getElementById('rd-q-es').textContent, textOpen: document.querySelector('.rd-text').open, lines: document.querySelectorAll('.rd-lines .lq-line').length,
@@ -135,14 +161,62 @@ const SHOTS = process.env.SHOTS_DIR || '';
     const okPos = await p.evaluate(() => [...document.querySelectorAll('#lq-opts .lq-opt')].findIndex(b => /Llegó cuando la boda ya había empezado/.test(b.textContent)));
     await p.evaluate((pos) => document.querySelectorAll('#lq-opts .lq-opt')[pos].click(), okPos); await sleep(p, 200);
     ok(await p.evaluate(() => /¡Correcto!/.test(document.getElementById('lq-feedback').innerText)), tag + ' respuesta correcta: «¡Correcto!»');
+    await p.click('#lq-next'); await sleep(p, 300); // fin de la comprensión → 2.ª parte (banco)
+    const C = await p.evaluate(() => ({ rb: JSON.parse(localStorage.getItem('ac_reading_v1') || '{}')['rx-h4-tren'], view: LQ_DEBUG.state.view }));
+    ok(C.view === 'rbanco' && C.rb && C.rb.best === 1 && C.rb.of === 2 && C.rb.done === true && C.rb.tries === 2 && JSON.stringify(C.rb.qs) === '[false,true]' && /^\d{4}-\d{2}-\d{2}$/.test(C.rb.last), tag + ' al terminar la comprensión: pasa al banco y el progreso queda en ac_reading_v1 con la forma de siempre ' + JSON.stringify(C.rb));
+    ok(C.rb.otra && C.rb.otra.clave === 1 && C.rb.bk && C.rb.bk.best === 5 && C.rb.bk.tries === 2, tag + ' el registro conserva las claves que ya tuviera (bk y una ajena)');
+
+    // ── 🧩 banco: se toca un HUECO y después una FICHA ──
+    const Bk = await p.evaluate(() => ({ sec: document.querySelector('.rd-sec').textContent, blanks: document.querySelectorAll('.rd-blank').length, chips: document.querySelectorAll('.rd-chip').length, hint: document.getElementById('rd-hint').textContent,
+      check: document.getElementById('rd-check').disabled, gloss: document.querySelectorAll('.lq-glossary, .lq-gloss-item, .lq-gloss-star').length, lbl: document.querySelector('.rd-approx').textContent, ovf: document.documentElement.scrollWidth > innerWidth + 1,
+      mins: [...document.querySelectorAll('.rd-blank, .rd-chip, #rd-check')].map(b => b.getBoundingClientRect().height), items: document.querySelectorAll('.rd-bank-item').length,
+      view: LQ_DEBUG.state.view, mine: window.LQ_UI.state.lesson.banco.palabras.length }));
+    ok(Bk.view === 'rbanco' && Bk.sec === 'Parte 2 de 3 · 🧩 Palabras' && Bk.blanks === 6 && Bk.items === 6 && Bk.chips === 8 && Bk.mine === 8 && Bk.check === true && /Sobran 2 fichas/.test(Bk.hint), tag + ' banco: 6 huecos, 8 fichas (2 sobran), «Comprobar» apagado ' + JSON.stringify([Bk.sec, Bk.blanks, Bk.chips, Bk.hint]));
+    ok(Bk.gloss === 0 && Bk.lbl === 'Nivel aproximado: HSK 4 · no oficial' && !Bk.ovf && Bk.mins.every(h => h >= 44), tag + ' banco: el glosario NO se muestra, etiqueta común, sin desborde y objetivos ≥ 44 px');
+    if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'banco-' + w + '-' + th + '.png') });
+    await p.evaluate(() => document.querySelector('.rd-chip').click()); await sleep(p, 100); // ficha SIN hueco elegido: no rellena nada
+    const B0 = await p.evaluate(() => ({ warn: document.getElementById('rd-hint').classList.contains('is-warn'), hint: document.getElementById('rd-hint').textContent, filled: document.querySelectorAll('.rd-blank.is-filled').length, used: document.querySelectorAll('.rd-chip.is-used').length }));
+    ok(B0.warn && /Primero tocá un hueco/.test(B0.hint) && B0.filled === 0 && B0.used === 0, tag + ' ficha sin hueco elegido: avisa «Primero tocá un hueco» y no rellena ' + JSON.stringify(B0));
+    await p.evaluate(() => document.querySelector('.rd-blank[data-i="0"]').click()); await sleep(p, 80);
+    const B1 = await p.evaluate(() => ({ sel: document.querySelector('.rd-blank[data-i="0"]').classList.contains('is-sel'), pressed: document.querySelector('.rd-blank[data-i="0"]').getAttribute('aria-pressed') }));
+    await p.evaluate(() => [...document.querySelectorAll('.rd-chip')][0].click()); await sleep(p, 80);
+    const B2 = await p.evaluate(() => ({ txt: document.querySelector('.rd-blank[data-i="0"]').textContent, chip: [...document.querySelectorAll('.rd-chip')][0].textContent, used: document.querySelectorAll('.rd-chip.is-used').length,
+      dis: [...document.querySelectorAll('.rd-chip.is-used')].every(c => c.disabled), sel: document.querySelectorAll('.rd-blank.is-sel').length }));
+    ok(B1.sel && B1.pressed === 'true' && B2.txt === B2.chip && B2.used === 1 && B2.dis && B2.sel === 0, tag + ' hueco y después ficha: el hueco elegido se rellena y la ficha queda usada ' + JSON.stringify([B1, B2]));
+    await p.evaluate(() => document.querySelector('.rd-blank[data-i="0"]').click()); await sleep(p, 80); // tocar un hueco lleno devuelve la ficha
+    const B3 = await p.evaluate(() => ({ txt: document.querySelector('.rd-blank[data-i="0"]').textContent, used: document.querySelectorAll('.rd-chip.is-used').length, sel: document.querySelector('.rd-blank[data-i="0"]').classList.contains('is-sel') }));
+    ok(B3.txt === '＿＿' && B3.used === 0 && B3.sel, tag + ' tocar un hueco lleno devuelve la ficha al banco y deja el hueco elegido ' + JSON.stringify(B3));
+    ok(await fillBank(p, [0, 1]) === 'ok' && await p.evaluate(() => !document.getElementById('rd-check').disabled && document.querySelectorAll('.rd-blank.is-filled').length === 6), tag + ' con los 6 huecos llenos «Comprobar» se enciende (huecos 1 y 2 intercambiados a propósito)');
+    await p.click('#rd-check'); await sleep(p, 150);
+    const Bc = await p.evaluate(() => { const r = window.LQ_UI.state.lesson, hs = r.banco.huecos;
+      return { right: document.querySelectorAll('.rd-blank.is-right').length, wrong: document.querySelectorAll('.rd-blank.is-wrong').length, fb: document.getElementById('lq-feedback').innerText, fix: [...document.querySelectorAll('.rd-fix li')].map(l => l.textContent),
+        want: [0, 1].map(i => (i + 1) + '. ' + hs[i].zh.replace('＿＿', hs[i].resp)), next: document.getElementById('lq-next').textContent, dis: [...document.querySelectorAll('.rd-blank, .rd-chip')].every(b => b.disabled),
+        rb: JSON.parse(localStorage.getItem('ac_reading_v1'))['rx-h4-tren'] }; });
+    ok(Bc.right === 4 && Bc.wrong === 2 && /4 de 6 bien/.test(Bc.fb) && Bc.fix.length === 2 && Bc.fix.join('|') === Bc.want.join('|') && /Siguiente parte/.test(Bc.next) && Bc.dis, tag + ' banco corregido: 4 de 6, muestra cómo va cada hueco errado ' + JSON.stringify([Bc.right, Bc.wrong, Bc.fix]));
+    ok(Bc.rb.bk.best === 5 && Bc.rb.bk.of === 6 && Bc.rb.bk.tries === 3 && /^\d{4}-\d{2}-\d{2}$/.test(Bc.rb.bk.last) && Bc.rb.otra.clave === 1 && Bc.rb.best === 1, tag + ' bk guarda {best (el mejor), of, last, tries} y no pisa lo demás ' + JSON.stringify(Bc.rb.bk));
+    await p.click('#lq-next'); await sleep(p, 250);
+
+    // ── 🔀 parecidas ──
+    const Pc = await p.evaluate(() => ({ view: LQ_DEBUG.state.view, sec: document.querySelector('.rd-sec').textContent, opts: [...document.querySelectorAll('#lq-opts .rd-opt-zh')].map(x => x.textContent).sort().join(), sent: document.querySelector('.rd-par-sentence').textContent,
+      gloss: document.querySelectorAll('.lq-glossary, .lq-gloss-item').length, next: document.getElementById('lq-next').textContent, ovf: document.documentElement.scrollWidth > innerWidth + 1 }));
+    ok(Pc.view === 'rparec' && Pc.sec === 'Parte 3 de 3 · 🔀 Palabras parecidas' && Pc.opts === '关心,小心,担心' && /＿＿/.test(Pc.sent) && Pc.gloss === 0 && /Ver resultado/.test(Pc.next) && !Pc.ovf, tag + ' parecidas: 3 opciones, oración con hueco, sin glosario ' + JSON.stringify([Pc.sec, Pc.opts, Pc.sent]));
+    if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'parecidas-' + w + '-' + th + '.png') });
+    await p.evaluate(() => [...document.querySelectorAll('#lq-opts .lq-opt')].find(b => /关心/.test(b.textContent)).click()); await sleep(p, 150);
+    const Pw = await p.evaluate(() => ({ right: [...document.querySelectorAll('#lq-opts .is-right')].map(b => b.querySelector('.rd-opt-zh').textContent).join(), wrong: [...document.querySelectorAll('#lq-opts .is-wrong')].map(b => b.querySelector('.rd-opt-zh').textContent).join(), fb: document.getElementById('lq-feedback').innerText }));
+    ok(Pw.right === '担心' && Pw.wrong === '关心' && /No sirve/.test(Pw.fb) && /Tu respuesta: 关心/.test(Pw.fb) && /Vale: 担心/.test(Pw.fb) && /preocuparse/.test(Pw.fb), tag + ' parecidas incorrecta: marca la válida, explica y da el porqué ' + JSON.stringify(Pw.fb.slice(0, 60)));
     await p.click('#lq-next'); await sleep(p, 300);
-    const Fin = await p.evaluate(() => ({ score: document.querySelector('.lq-final-score').textContent, rb: JSON.parse(localStorage.getItem('ac_reading_v1') || '{}')['rx-h4-tren'], srs: window.__srs || 0,
-      btns: [...document.querySelectorAll('.lq-final-actions .lq-btn')].map(x => x.textContent.trim()).join('|'), brk: [...document.querySelectorAll('.rd-breakdown li')].map(li => li.innerText.replace(/\s+/g, ' ')).join(';') }));
-    ok(Fin.score === '1/2' && Fin.rb && Fin.rb.best === 1 && Fin.rb.of === 2 && Fin.rb.done === true && Fin.rb.tries === 2 && JSON.stringify(Fin.rb.qs) === '[false,true]' && /^\d{4}-\d{2}-\d{2}$/.test(Fin.rb.last), tag + ' progreso en ac_reading_v1 con la forma de siempre {best, of, done, last, tries, qs} ' + JSON.stringify(Fin.rb));
-    ok(Fin.rb && Fin.rb.bk && Fin.rb.bk.best === 4 && Fin.rb.bk.of === 6, tag + ' el registro conserva las claves que ya tuviera (p. ej. un puntaje de otra sección)');
-    ok(Fin.srs === 0 && /Detalle 0\/1/.test(Fin.brk) && /Idea principal 1\/1/.test(Fin.brk) && /Releer/.test(Fin.btns), tag + ' resumen por tipo, botones finales y el SRS (acSrsMiss) sin llamadas ' + Fin.brk);
-    await p.evaluate(() => document.getElementById('lq-final-close').click()); await sleep(p, 250);
-    ok(await p.evaluate(() => document.querySelector('[data-id="rx-h4-tren"]').closest('.rd-card').querySelector('.lc-best').textContent.trim()) === '🎯 1/2 ✓', tag + ' la lista refresca el puntaje (🎯 1/2 ✓) al cerrar');
+
+    // ── resumen: una línea por parte, SIN total ──
+    const Fin = await p.evaluate(() => ({ view: LQ_DEBUG.state.view, rows: [...document.querySelectorAll('.rd-summary li')].map(li => li.innerText.replace(/\s+/g, ' ')), score: !!document.querySelector('.lq-final-score'), all: document.getElementById('lq-body').innerText,
+      btns: [...document.querySelectorAll('.lq-final-actions .lq-btn')].map(x => x.textContent.trim()).join('|'), srs: window.__srs || 0, rb: JSON.parse(localStorage.getItem('ac_reading_v1'))['rx-h4-tren'] }));
+    if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'resumen-' + w + '-' + th + '.png') });
+    ok(Fin.view === 'rsum' && Fin.rows.join('|') === '📖 Comprensión 1/2|🧩 Palabras 4/6|🔀 Palabras parecidas 0/1', tag + ' resumen por parte ' + JSON.stringify(Fin.rows));
+    ok(!Fin.score && !/total/i.test(Fin.all) && !/\b5\/9\b|\b5 de 9\b/.test(Fin.all) && /Releer/.test(Fin.btns) && /Repetir la práctica/.test(Fin.btns) && Fin.srs === 0, tag + ' sin total (ni número grande ni suma) y el SRS (acSrsMiss) sin llamadas');
+    ok(Fin.rb.pc && Fin.rb.pc.best === 0 && Fin.rb.pc.of === 1 && Fin.rb.pc.tries === 1, tag + ' pc guarda el puntaje de parecidas ' + JSON.stringify(Fin.rb.pc));
+    await p.evaluate(() => document.getElementById('rd-final-retry').click()); await sleep(p, 300);
+    ok(await p.evaluate(() => LQ_DEBUG.state.view === 'rquiz2' && document.querySelector('.rd-sec').textContent === 'Parte 1 de 3 · 📖 Comprensión'), tag + ' «Repetir la práctica» vuelve a la 1.ª parte');
+    await p.evaluate(() => document.getElementById('lq-close').click()); await sleep(p, 250);
+    ok(await p.evaluate(() => document.querySelector('[data-id="rx-h4-tren"]').closest('.rd-card').querySelector('.lc-best').textContent.trim()) === '🎯 1/2 ✓', tag + ' la lista refresca el puntaje de comprensión (🎯 1/2 ✓) al cerrar');
 
     // ── Practicar v2: Verdadero/Falso (texto de estudio «貼春聯»: 1.ª comprensión, 2.ª V/F) ──
     await p.click('[data-id="rx-h4-chunlian"][data-act="practice"]'); await sleep(p, 500);
@@ -157,8 +231,40 @@ const SHOTS = process.env.SHOTS_DIR || '';
     const VF = await p.evaluate(() => ({ fb: document.getElementById('lq-feedback').innerText, right: [...document.querySelectorAll('#lq-opts .is-right')].map(b => b.textContent.trim()).join(), wrong: [...document.querySelectorAll('#lq-opts .is-wrong')].map(b => b.textContent.trim()).join() }));
     ok(/No es esa/.test(VF.fb) && /La afirmación es falsa\./.test(VF.fb) && /有的家庭自己用毛笔写/.test(VF.fb) && /Falso/.test(VF.right) && /Verdadero/.test(VF.wrong), tag + ' V/F incorrecta: marca «Falso», dice que la afirmación es falsa y cita el texto ' + JSON.stringify(VF.fb.slice(0, 70)));
     await p.click('#lq-next'); await sleep(p, 300);
-    ok(await p.evaluate(() => JSON.parse(localStorage.getItem('ac_reading_v1'))['rx-h4-chunlian'].of) === 2, tag + ' el puntaje de V/F entra en el mismo registro (of = 2)');
+    ok(await p.evaluate(() => JSON.parse(localStorage.getItem('ac_reading_v1'))['rx-h4-chunlian'].of === 2 && LQ_DEBUG.state.view === 'rbanco'), tag + ' el puntaje de V/F entra en el mismo registro (of = 2) y sigue el banco');
+    await finishChain(p);
+    const Cj = await p.evaluate(() => JSON.parse(localStorage.getItem('ac_reading_v1'))['rx-h4-chunlian']);
+    ok(Cj.bk && Cj.bk.best === 6 && Cj.pc && Cj.pc.of === 1, tag + ' práctica completa del texto de estudio: bk 6/6 y pc guardados ' + JSON.stringify([Cj.bk, Cj.pc]));
+
+    // ── parecidas con conjunto de válidas (texto 2: «別的 / 其他») y partes sin material ──
+    await p.click('[data-id="rx-h4-encuesta"][data-act="practice"]'); await sleep(p, 500);
+    for (let i = 0; i < 2; i++) { await p.evaluate(() => document.querySelectorAll('#lq-opts .lq-opt')[0].click()); await sleep(p, 80); await p.click('#lq-next'); await sleep(p, 200); }
+    await fillBank(p); await p.click('#rd-check'); await sleep(p, 100); await p.click('#lq-next'); await sleep(p, 250);
+    await p.evaluate(() => [...document.querySelectorAll('#lq-opts .lq-opt')].find(b => /超过/.test(b.textContent)).click()); await sleep(p, 100); await p.click('#lq-next'); await sleep(p, 250); // 1.ª parecida (超过)
+    await p.evaluate(() => [...document.querySelectorAll('#lq-opts .lq-opt')].find(b => /其他/.test(b.textContent)).click()); await sleep(p, 150);
+    const Pj = await p.evaluate(() => ({ right: [...document.querySelectorAll('#lq-opts .is-right')].map(b => b.querySelector('.rd-opt-zh').textContent).sort().join(), wrong: document.querySelectorAll('#lq-opts .is-wrong').length, fb: document.getElementById('lq-feedback').innerText, prog: document.getElementById('lq-progress-num').textContent }));
+    ok(Pj.prog === '2/2' && Pj.right === '其他,别的' && Pj.wrong === 0 && /¡Correcto!/.test(Pj.fb) && /Valen 别的 y 其他/.test(Pj.fb), tag + ' parecidas con conjunto: elegir 其他 vale y se marcan las dos válidas ' + JSON.stringify(Pj));
+    await p.click('#lq-next'); await sleep(p, 250);
+    ok(/^📖 Comprensión \d\/2\|🧩 Palabras 6\/6\|🔀 Palabras parecidas 2\/2$/.test(await p.evaluate(() => [...document.querySelectorAll('.rd-summary li')].map(li => li.innerText.replace(/\s+/g, ' ')).join('|'))), tag + ' resumen del texto 2 (comprensión · 6/6 · 2/2), sin total');
     await p.evaluate(() => document.getElementById('lq-final-close').click()); await sleep(p, 250);
+    // sin banco ni parecidas (se simula quitando el material): solo comprensión, sin «Parte i de n» y resumen de una línea
+    await p.evaluate(() => { const r = LECTURAS_API.get('rx-h4-casa'); window.__bk = r.banco; window.__pc = r.parecidas; r.banco = null; r.parecidas = []; });
+    await p.click('[data-id="rx-h4-casa"][data-act="practice"]'); await sleep(p, 400);
+    const O1 = await p.evaluate(() => ({ sec: !!document.querySelector('.rd-sec'), next: document.getElementById('lq-next').textContent }));
+    await p.evaluate(() => document.querySelectorAll('#lq-opts .lq-opt')[0].click()); await sleep(p, 80); await p.click('#lq-next'); await sleep(p, 200);
+    await p.evaluate(() => document.querySelectorAll('#lq-opts .lq-opt')[0].click()); await sleep(p, 80);
+    const O2 = await p.evaluate(() => document.getElementById('lq-next').textContent);
+    await p.click('#lq-next'); await sleep(p, 250);
+    const O3 = await p.evaluate(() => ({ view: LQ_DEBUG.state.view, rows: [...document.querySelectorAll('.rd-summary li')].map(li => li.innerText.replace(/\s+/g, ' ')) }));
+    ok(!O1.sec && /Siguiente/.test(O1.next) && /Ver resultado/.test(O2) && O3.view === 'rsum' && O3.rows.length === 1 && /^📖 Comprensión \d\/2$/.test(O3.rows[0]), tag + ' sin material para banco y parecidas: se omiten (solo comprensión) ' + JSON.stringify(O3.rows));
+    await p.evaluate(() => document.getElementById('lq-final-close').click()); await sleep(p, 250);
+    // solo falta parecidas → «Parte 1 de 2» y «Parte 2 de 2 · Palabras»
+    await p.evaluate(() => { const r = LECTURAS_API.get('rx-h4-casa'); r.banco = window.__bk; r.parecidas = []; });
+    await p.click('[data-id="rx-h4-casa"][data-act="practice"]'); await sleep(p, 400);
+    const O4 = await p.evaluate(() => document.querySelector('.rd-sec').textContent);
+    await p.evaluate(() => { const r = LECTURAS_API.get('rx-h4-casa'); r.parecidas = window.__pc; });
+    ok(O4 === 'Parte 1 de 2 · 📖 Comprensión', tag + ' solo con banco: la práctica tiene 2 partes ' + O4);
+    await p.evaluate(() => document.getElementById('lq-close').click()); await sleep(p, 250);
 
     // ── Practicar v1: camino de siempre ──
     await p.click('[data-id="rd-h3-bici"][data-act="practice"]'); await sleep(p, 600);
