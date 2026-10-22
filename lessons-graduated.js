@@ -895,7 +895,15 @@
             if (mode === 'quiz') openReadingQuiz(l); else openStory(l);
             return true;
         },
-        progress(id) { return rprog(id); }
+        progress(id) { return rprog(id); },
+        save(id, rec) { RB[id] = rec; saveRB(); } // R12: la comprensión de las lecturas v2 (readings-ui.js) guarda acá, en 'ac_reading_v1'
+    };
+    // R12: piezas del visor que usa readings-ui.js (la UI de las lecturas v2 vive allá; acá NO se agrega lógica)
+    window.LQ_UI = {
+        state: S, els: { pop, body, segs, progNum },
+        openPop, closePop, renderSegments, linesHtml, bindLines, zhCharsHtml, zhKey, escHtml,
+        pyLine, pyReady, bindSpeedChip, stopSpeak,
+        getVerEs: () => verEs, setVerEs
     };
     window.LQ_DEBUG = {
         get lessons() { return LESSONS.length; },

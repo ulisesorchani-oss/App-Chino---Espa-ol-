@@ -184,6 +184,26 @@ const srv = http.createServer((q, s) => {
             (r.names || []).forEach((n, i) => P('nombre', n, (r.namesT || [])[i])); (r.questions || []).forEach((q, i) => { P('P' + (i + 1) + ' pregunta', q.qZh, q.qZhT); (q.optsZh || []).forEach((o, k) => P('P' + (i + 1) + ' opción', o, (q.optsZhT || [])[k])); }); });
         return { n: L.length, out, pairs, v1pairs, lista: LN.LISTA, conteo: [LN.conteo(1), LN.conteo(2), LN.conteo(3), LN.conteo(4)].join(' / ').replace(/^/, '1: ').replace(' / ', ' · 1–2: ').replace(' / ', ' · 1–3: ').replace(' / ', ' · 1–4: ') };
     }, cfg);
+    // ── fuente única (readings-unify.js → window.LECTURAS): invariantes de la lista que leen las pantallas ──
+    const res3 = await pg.evaluate(() => {
+        const L = window.LECTURAS || [], raw1 = (window.READINGS || []).filter(r => r.kind === 'reading'), raw2 = window.READINGS_V2 || [], err = [];
+        if (L.length !== raw1.length + raw2.length) err.push('LECTURAS tiene ' + L.length + ' textos y hay ' + (raw1.length + raw2.length) + ' en READINGS + READINGS_V2');
+        const ids = L.map(r => r.id); ids.filter((x, i) => ids.indexOf(x) !== i).forEach(x => err.push('id repetido entre v1 y v2: ' + x));
+        L.forEach(r => {
+            const w = r.id + ': ';
+            if (!['v1', 'v2'].includes(r.origen) || !['examen', 'estudio'].includes(r.tipo) || !['pendiente', 'revisado', 'nativo'].includes(r.revision)) err.push(w + 'origen/tipo/revision');
+            if (!r.nivelKey || !r.nivelLabel || !r.lines.length || !r.preguntas.length) err.push(w + 'faltan nivel, líneas o preguntas');
+            r.preguntas.forEach((q, i) => {
+                if (!Number.isInteger(q.ok) || q.ok < 0 || q.ok >= q.opts.length) err.push(w + 'P' + (i + 1) + ' ok fuera de las opciones');
+                if (q.type === 'vf' && (r.origen !== 'v2' || q.opts.length !== 2 || !q.fixed)) err.push(w + 'P' + (i + 1) + ' V/F solo en v2, con 2 opciones fijas');
+                if (r.origen === 'v1' && (q.ok !== 0 || q.fixed)) err.push(w + 'P' + (i + 1) + ' v1 conserva «correcta = índice 0»');
+                if (q.type !== 'vf' && q.opts.length > 1 && (q.whyNot || []).length !== q.opts.length - 1) err.push(w + 'P' + (i + 1) + ' whyNot incompleto');
+            });
+        });
+        return { n: L.length, err };
+    });
+    res3.err.forEach(e => console.log('✗ LECTURAS', e));
+    console.log('LECTURAS (fuente única): ' + res3.n + ' textos · ' + (res3.err.length ? res3.err.length + ' error(es)' : 'todo en regla'));
     // ida y vuelta con OpenCC s2tw / tw2s: lo guardado debe ser EXACTAMENTE s2tw(zh) y tw2s(zhT) debe devolver zh
     const rt = { diffsV2: [], diffsV1: [], skipped: null, total: 0 };
     const all = res2.pairs.map(p => Object.assign({ v: 2 }, p)).concat(res2.v1pairs.map(p => Object.assign({ v: 1 }, p)));
@@ -209,5 +229,5 @@ const srv = http.createServer((q, s) => {
         rt.diffsV1.forEach(d => console.log('  ≠ v1', d.id, d.w, '«' + d.zh + '» guardado «' + d.guardado + '» · s2tw «' + d.s2tw + '» · tw2s «' + d.vuelta + '»  [' + d.d.join('; ') + ']'));
     }
     console.log(res2.n + ' lecturas v2 · ' + (bad2 ? bad2 + ' error(es)' : 'todo en regla'));
-    process.exit(bad || bad2 || !res.n ? 1 : 0);
+    process.exit(bad || bad2 || res3.err.length || !res.n ? 1 : 0);
 })();
