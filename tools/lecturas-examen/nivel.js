@@ -59,8 +59,9 @@
     }
     // analiza textos (lista de cadenas) al nivel n. opts.nombres = nombres propios que no cuentan; opts.dentro = coincidencias con una palabra de nivel más alto
     // que, en ese texto, son otras palabras del nivel (都会 = 都 + 会, no «metrópolis»): lista revisada a mano y declarada en el texto.
+    // opts.manual = palabras que el cálculo da como «dentro» (se arman con palabras de la lista) pero el autor declara FUERA de nivel (大年三十); cuentan como fuera.
     function analizar(textos, n, opts) {
-        const w = lex(n), hi = alto(n), nombres = (opts && opts.nombres) || [], dentro = (opts && opts.dentro) || []; let cub = 0, nruns = 0; const fuera = new Set();
+        const w = lex(n), hi = alto(n), nombres = (opts && opts.nombres) || [], dentro = (opts && opts.dentro) || [], manual = (opts && opts.manual) || []; let cub = 0, nruns = 0; const fuera = new Set();
         const pieza = toks => {
             if (!toks.length) return; const txt = toks.join(''), r = dp(txt, w); cub += r.cubiertos; nruns += r.runs.length; if (!r.runs.length) return;
             const spans = []; let p = 0; toks.forEach(tk => { const l = Array.from(tk).length; spans.push([p, p + l, tk]); p += l; });
@@ -68,10 +69,16 @@
         };
         textos.forEach(t => {
             let s = String(t); nombres.forEach(x => { s = s.split(x).join('、'); });
-            (s.match(/[㐀-鿿]+/g) || []).forEach(chunk => {
+            (s.match(/[㐀-鿿]+/g) || []).forEach(chunk0 => {
+                // las palabras declaradas a mano se sacan del tramo: cada una cuenta como una palabra fuera de nivel
+                let partes = [chunk0]; manual.forEach(m => { partes = partes.flatMap(pt => typeof pt !== 'string' ? [pt] : pt.split(m).flatMap((x, i, a) => i < a.length - 1 ? [x, { m }] : [x])); });
+                partes.forEach(pt => {
+                    if (typeof pt !== 'string') { nruns++; fuera.add(pt.m); return; }
+                    const chunk = pt; if (!chunk) return;
                 const toks = (typeof zhSegmentAll === 'function') ? zhSegmentAll(chunk) : [chunk];
                 if (toks.join('') !== chunk) { pieza([chunk]); return; }
                 let buf = []; toks.forEach(tk => { if (hi.has(tk) && !dentro.includes(tk)) { pieza(buf); buf = []; nruns++; fuera.add(tk); } else buf.push(tk); }); pieza(buf);
+                });
             });
         });
         const tot = cub + nruns;
@@ -79,7 +86,8 @@
         return { cobertura: tot ? 100 * cub / tot : 100, segmentos: tot, fuera: lista };
     }
     // ¿la entrada del glosario (o cualquier palabra suelta) está fuera del nivel n? Fuera = figura en un nivel MÁS ALTO de la lista, o no se arma con palabras del nivel
-    function fueraEntrada(zh, n) {
+    function fueraEntrada(zh, n, manual) {
+        if ((manual || []).includes(zh)) return true;
         const ex = nivelExacto(zh); if (ex !== null && ex > n && !lex(n).has(zh)) return true; if (ex !== null && ex <= n) return false;
         return analizar(String(zh).split('…'), n, {}).fuera.length > 0;
     }

@@ -44,6 +44,7 @@ const built = src.map(r => {
         parrafos: r.parrafos.map(p => ({ zh: p.zh, zhT: T(p.zh), es: p.es })),
         nombres: (r.nombres || []).map(n => ({ zh: n, zhT: T(n) })),
         dentroDeNivel: r.dentro || [],
+        fueraDeNivelDeclarado: r.fueraManual || [],
         largo: 0,
         glosario: r.glosario.map(g => ({ zh: g.zh, zhT: T(g.zh), categoria: g.categoria, es: g.es, nivelLista: null, fueraDeNivel: false })),
         comprension: r.comprension.map(q => {
@@ -57,13 +58,14 @@ const built = src.map(r => {
             palabrasT: r.banco.huecos.map(h => alinear(h.frase, h.resp, r.id).palabraT).concat(r.banco.sobrantes.map(T))
         },
         parecidas: r.parecidas.map(p => { const llenas = p.opts.map(o => alinear(p.frase.replace(BLANK, o), o, r.id));
-            return { zh: p.frase, zhT: llenas[p.ok[0]].fraseT, opts: p.opts, optsT: llenas.map(x => x.palabraT), ok: p.ok, why: p.why }; }),
+            const o = { zh: p.frase, zhT: llenas[p.ok[0]].fraseT, opts: p.opts, optsT: llenas.map(x => x.palabraT), ok: p.ok, why: p.why }; if (p.delTexto === false) o.delTexto = false; return o; }),
         capa2: r.capa2 ? { notas: (r.capa2.notas || []).map(n => ({ zh: n.zh, zhT: T(n.zh), es: n.es })), colocaciones: (r.capa2.colocaciones || []).map(n => ({ zh: n.zh, zhT: T(n.zh), es: n.es })) } : undefined
     };
     if (!o.capa2) delete o.capa2;
     if (r.revisor) o.revisor = r.revisor;
     if (!o.nombres.length) delete o.nombres;
     if (!o.dentroDeNivel.length) delete o.dentroDeNivel;
+    if (!o.fueraDeNivelDeclarado.length) delete o.fueraDeNivelDeclarado;
     return o;
 });
 
@@ -86,8 +88,10 @@ function hoja(rs, ctl, meta) {
             '### Tabla de control', '', '| Control | Resultado |', '|---|---|',
             '| Largo | ' + r.largo + ' hanzi (rango HSK ' + r.nivel + ': ' + rg[0] + '–' + rg[1] + ') |', '| Nivel por palabras (' + meta.lista + ', HSK 1–' + r.nivel + ') | ' + c.cob.toFixed(1) + ' % (mínimo ' + tp.coberturaMinima + ' %) · ' + c.segmentos + ' palabras |',
             '| Palabras fuera de nivel en el texto | ' + (c.fuera.length ? c.fuera.map(x => x.zh + '* (' + x.nivel + ')').join(' · ') : 'ninguna') + ' — ' + c.fuera.length + (tp.maxFuera === null ? ' (sin tope)' : ' de ' + tp.maxFuera + ' permitidas') + ' |',
+            '| Chino | ' + ({ pendiente: 'pendiente de revisión', revisado: 'revisado por el docente; sin confirmación de hablante nativo', nativo: 'confirmado por hablante nativo' + (r.revisor ? ' (' + r.revisor + ')' : '') })[r.revision] + ' |',
             '| Nombres propios (no cuentan) | ' + ((r.nombres || []).map(n => n.zh).join(' · ') || '—') + ' |',
             '| Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | ' + ((r.dentroDeNivel || []).join(' · ') || '—') + ' |',
+            '| Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | ' + ((r.fueraDeNivelDeclarado || []).join(' · ') || '—') + ' |',
             '| Glosario | ' + r.glosario.length + ' palabras, ' + r.glosario.filter(g => g.fueraDeNivel).length + ' con * |');
         f.forEach((x, k) => L.push('| Frase buscada ' + (k + 1) + ' | «' + x.zh + '» → ' + x.resultado + ' |'));
         L.push('', '### Texto', '', '| 简体 | 繁體 (s2tw) | Español |', '|---|---|---|');
@@ -99,8 +103,11 @@ function hoja(rs, ctl, meta) {
             L.push(''); });
         L.push('_(En pantalla el orden de las opciones se baraja; acá la correcta va primera.)_', '', '### Banco de palabras', '', '| # | Frase con hueco | Respuesta |', '|---|---|---|');
         r.banco.huecos.forEach((h, k) => L.push('| ' + (k + 1) + ' | ' + h.zh + ' | **' + h.resp + '** |'));
-        L.push('', 'Palabras del banco: ' + r.banco.palabras.join(' · ') + ' (sobrantes: ' + r.banco.palabras.slice(r.banco.huecos.length).join(' · ') + ')', '', '### Palabras parecidas', '');
-        r.parecidas.forEach((p, k) => { L.push((k + 1) + '. ' + p.zh + '  →  ' + p.opts.map((o, j) => (p.ok.includes(j) ? '✅ ' : '❌ ') + o).join(' · '), '   - ' + p.why); }); L.push('');
+        L.push('', 'Palabras del banco: ' + r.banco.palabras.join(' · ') + ' (sobrantes: ' + r.banco.palabras.slice(r.banco.huecos.length).join(' · ') + ')');
+        const pq = src[i].banco.porQue;
+        if (pq) { L.push('', '**Por qué ningún sobrante encaja en un hueco:**', ''); r.banco.palabras.slice(r.banco.huecos.length).forEach(sb => { L.push('- **' + sb + '**'); (pq[sb] || []).forEach(x => L.push('  - ' + x)); }); }
+        L.push('', '### Palabras parecidas', '');
+        r.parecidas.forEach((p, k) => { L.push((k + 1) + '. ' + (p.delTexto === false ? '_(oración nueva, no está en el texto)_ ' : '') + p.zh + '  →  ' + p.opts.map((o, j) => (p.ok.includes(j) ? '✅ ' : '❌ ') + o).join(' · '), '   - ' + p.why); }); L.push('');
         L.push('### Glosario (* = fuera de nivel)', '', '| 简体 | 繁體 | Categoría | Español | Nivel en la lista |', '|---|---|---|---|---|');
         r.glosario.forEach(g => L.push('| ' + g.zh + (g.fueraDeNivel ? '*' : '') + ' | ' + g.zhT + (g.fueraDeNivel ? '*' : '') + ' | ' + g.categoria + ' | ' + g.es + ' | ' + (g.nivelLista === null ? 'no está' + (g.fueraDeNivel ? '' : ' (se arma con palabras del nivel)') : 'HSK ' + g.nivelLista) + ' |'));
         if (r.capa2) { L.push('', '### Capa 2 (opcional)', ''); r.capa2.notas.forEach(n => L.push('- Nota: **' + n.zh + '** — ' + n.es)); r.capa2.colocaciones.forEach(n => L.push('- Colocación: **' + n.zh + '** (' + n.zhT + ') — ' + n.es)); }
@@ -126,12 +133,12 @@ const srv = http.createServer((q, s) => {
         return { lista: LN.LISTA, conteo: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => LN.conteo(n)),
             verif: verif.map(([t, sm]) => { const hit = (() => { for (let i = 1; i <= 9; i++) { const e = EMBEDDED_MODULE_DATA['HSK' + i].find(e => e[0] === sm || e[1] === t); if (e) return e; } return null; })(); return { t, s: sm, nivel: LN.nivelExacto(sm) === null ? LN.nivelExacto(t) : LN.nivelExacto(sm), es: hit ? hit[3] : '' }; }),
             items: items.map(r => {
-                const opts = { nombres: r.nombres, dentro: r.dentro }, a = LN.analizar(r.parrafos, r.nivel, opts);
+                const opts = { nombres: r.nombres, dentro: r.dentro, manual: r.manual }, a = LN.analizar(r.parrafos, r.nivel, opts);
                 return { cob: a.cobertura, segmentos: a.segmentos, fuera: a.fuera.map(x => ({ zh: x, nivel: LN.nivelExacto(x) === null ? 'no está' : 'HSK ' + LN.nivelExacto(x) })),
                     largo: Array.from(r.parrafos.join('')).filter(ch => HAN.test(ch)).length,
-                    gl: r.glosario.map(g => ({ nivelLista: LN.nivelExacto(g), fuera: LN.fueraEntrada(g, r.nivel) })) };
+                    gl: r.glosario.map(g => ({ nivelLista: LN.nivelExacto(g), fuera: LN.fueraEntrada(g, r.nivel, r.manual) })) };
             }) };
-    }, [built.map(r => ({ nivel: r.nivel, parrafos: r.parrafos.map(p => p.zh), nombres: (r.nombres || []).map(n => n.zh), dentro: r.dentroDeNivel || [], glosario: r.glosario.map(g => g.zh) })), VERIF]);
+    }, [built.map(r => ({ nivel: r.nivel, parrafos: r.parrafos.map(p => p.zh), nombres: (r.nombres || []).map(n => n.zh), dentro: r.dentroDeNivel || [], manual: r.fueraDeNivelDeclarado || [], glosario: r.glosario.map(g => g.zh) })), VERIF]);
     await b.close(); srv.close();
     built.forEach((r, i) => { const c = calc.items[i]; r.control = c; r.largo = c.largo; r.glosario.forEach((g, j) => { g.nivelLista = c.gl[j].nivelLista; g.fueraDeNivel = c.gl[j].fuera; }); });
 
@@ -153,12 +160,13 @@ const srv = http.createServer((q, s) => {
         '//     parrafos: [{ zh, zhT, es }],                     // el texto, por párrafos (visible durante las preguntas)',
         '//     nombres?: [{ zh, zhT }],                         // nombres propios del texto: no cuentan para el nivel',
         '//     dentroDeNivel?: [zh],                            // coincidencias con una palabra de nivel más alto revisadas a mano (都会 = 都 + 会)',
+        '//     fueraDeNivelDeclarado?: [zh],                    // el cálculo las da como dentro (se arman con palabras de la lista) pero el autor las declara fuera (大年三十); el validador falla si sobran',
         '//     largo,                                           // hanzi del texto — CALCULADO',
         '//     glosario: [{ zh, zhT, categoria, es, nivelLista, fueraDeNivel }],  // 8–12; nivelLista = HSK 1–9 de la entrada exacta o null; ambos CALCULADOS',
         '//     comprension: [ { tipo: idea|detalle|vocabulario, es, opts[], why, whyNot[] }   // opts[0] = CORRECTA (se baraja al mostrar)',
         '//                  | { tipo: \'vf\', es, vf: true|false, why } ],                    // verdadero/falso: la pantalla lo resuelve la rama de interfaz',
         '//     banco: { huecos: [{ zh (con ＿＿), zhT, resp, respT }], palabras[], palabrasT[] },  // palabras = respuestas + 1–2 sobrantes',
-        '//     parecidas: [{ zh (con ＿＿), zhT, opts[], optsT[], ok: [índices válidos], why }],   // desde HSK 4',
+        '//     parecidas: [{ zh (con ＿＿), zhT, opts[], optsT[], ok: [índices válidos], why, delTexto?: false }],   // desde HSK 4; delTexto:false = oración nueva',
         '//     capa2?: { notas: [{ zh, zhT, es }], colocaciones: [{ zh, zhT, es }] } }',
         '// Progreso: clave ac_reading_v1 (la misma de las lecturas v1).',
         '// ============================================================'

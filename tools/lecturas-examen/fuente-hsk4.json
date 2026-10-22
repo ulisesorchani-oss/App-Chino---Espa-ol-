@@ -785,35 +785,50 @@
   "nivel": 4,
   "genero": "cultural",
   "emoji": "🥟",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "过年包饺子",
-   "es": "Envolver dumplings en Año Nuevo"
+   "es": "Armar dumplings en Año Nuevo"
   },
   "parrafos": [
    {
     "zh": "春节是中国最热闹的节日。在我们家，大年三十的晚上，全家人一起包饺子，这是我们家好多年的传统。",
-    "es": "El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, en la Nochevieja china (大年三十), toda la familia se junta a envolver dumplings: es una tradición de hace muchísimos años."
+    "es": "El Año Nuevo Chino (la Fiesta de la Primavera) es la fiesta más animada de China. En mi casa, la noche de la víspera de Año Nuevo, toda la familia se junta a armar dumplings: es una tradición de hace muchísimos años."
    },
    {
     "zh": "奶奶准备好面和菜，爸爸妈妈负责包，我和妹妹也来帮忙。我们包得不太好看，但是大家都很开心。奶奶还会在其中一个饺子里放一块糖，谁吃到了，新的一年就会很顺利。",
-    "es": "Mi abuela prepara la masa y el relleno, mis papás se encargan de envolverlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un terrón de azúcar en uno de los dumplings: al que le toca, le va a ir bien todo el año."
+    "es": "Mi abuela prepara la masa y las verduras, mis papás se encargan de armarlos y mi hermanita y yo damos una mano. No nos quedan muy lindos, pero la pasamos bárbaro. Mi abuela además pone un caramelo en uno de los dumplings: al que le toca, le va a ir bien todo el año."
    },
    {
     "zh": "吃完饺子，我们一边看电视，一边等着十二点放鞭炮。那时候，外面特别热闹，家人团圆，互相说着祝福的话。我觉得，这就是春节最好的样子。",
-    "es": "Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos decimos palabras de buenos deseos. Para mí, así es el mejor Año Nuevo."
+    "es": "Después de comer, miramos tele mientras esperamos las doce para tirar petardos. A esa hora afuera hay muchísimo bullicio; la familia está reunida y nos deseamos lo mejor. Para mí, así es el Año Nuevo en su mejor versión."
    }
   ],
   "glosario": [
    {
-    "zh": "节日",
-    "categoria": "sustantivo",
-    "es": "la fiesta, el día festivo"
+    "zh": "顺利",
+    "categoria": "adjetivo",
+    "es": "sin contratiempos, que sale bien"
    },
    {
     "zh": "热闹",
     "categoria": "adjetivo",
     "es": "animado, con mucho bullicio"
+   },
+   {
+    "zh": "大年三十",
+    "categoria": "expresión",
+    "es": "la víspera de Año Nuevo Chino (último día del año lunar)"
+   },
+   {
+    "zh": "包",
+    "categoria": "verbo",
+    "es": "envolver, armar (un dumpling)"
+   },
+   {
+    "zh": "饺子",
+    "categoria": "sustantivo",
+    "es": "dumpling; empanadilla china"
    },
    {
     "zh": "传统",
@@ -831,24 +846,14 @@
     "es": "encargarse de"
    },
    {
-    "zh": "帮忙",
-    "categoria": "verbo",
-    "es": "dar una mano, ayudar"
-   },
-   {
-    "zh": "顺利",
-    "categoria": "adjetivo",
-    "es": "sin contratiempos, que sale bien"
-   },
-   {
     "zh": "一边…一边…",
     "categoria": "estructura",
     "es": "mientras…, a la vez que…"
    },
    {
-    "zh": "放鞭炮",
-    "categoria": "expresión",
-    "es": "tirar petardos"
+    "zh": "鞭炮",
+    "categoria": "sustantivo",
+    "es": "petardo"
    },
    {
     "zh": "团圆",
@@ -864,17 +869,17 @@
   "comprension": [
    {
     "tipo": "detalle",
-    "es": "¿Quiénes se encargan de envolver los dumplings?",
+    "es": "¿Quiénes se encargan de armar los dumplings?",
     "opts": [
      "Los papás.",
      "La abuela.",
      "Los chicos solos.",
      "Los vecinos."
     ],
-    "why": "Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de envolver).",
+    "why": "Segundo párrafo: «爸爸妈妈负责包» (los papás se encargan de armarlos).",
     "whyNot": [
-     "La abuela prepara la masa y el relleno, pero no los envuelve.",
-     "Los chicos solo ayudan («也来帮忙»).",
+     "La abuela prepara la masa y las verduras, pero no los arma.",
+     "Los chicos solo dan una mano («也来帮忙»).",
      "Los vecinos no aparecen en el texto."
     ]
    },
@@ -882,14 +887,14 @@
     "tipo": "idea",
     "es": "¿Qué quiere decir el narrador en la última oración?",
     "opts": [
-     "Que el mejor Año Nuevo es el que pasa en familia.",
-     "Que lo más lindo son los petardos.",
+     "Que esa escena —la familia junta, el bullicio, los buenos deseos— es lo mejor del Año Nuevo.",
+     "Que lo único que importa son los petardos.",
      "Que prefiere comer afuera esa noche.",
      "Que los dumplings le quedan perfectos."
     ],
-    "why": "Última oración: «我觉得，这就是春节最好的样子» (para él, esa noche en familia es el mejor Año Nuevo).",
+    "why": "Última oración: «我觉得，这就是春节最好的样子» («esto» es la escena de las líneas anteriores: la familia junta, el bullicio y los buenos deseos).",
     "whyNot": [
-     "Los petardos son parte de la noche, pero lo que valora es estar con la familia reunida.",
+     "Los petardos son solo una parte de la noche: el narrador no dice que sean lo único que importa, valora la escena completa.",
      "Todo ocurre en su casa; nunca habla de salir a comer.",
      "Dice que no les quedan muy lindos."
     ]
@@ -923,23 +928,42 @@
     }
    ],
    "sobrantes": [
-    "医院",
-    "地铁"
-   ]
+    "节目",
+    "礼物"
+   ],
+   "porQue": {
+    "节目": [
+     "Hueco 1 (春节是中国最热闹的＿＿): gramaticalmente entra, pero diría que el Año Nuevo es «el programa más animado»; 节目 es un programa de tele o un número artístico, no una fiesta (eso es 节日).",
+     "Hueco 2 (全家人一起＿＿饺子): ahí va un verbo; 节目 es sustantivo.",
+     "Hueco 3 (奶奶＿＿好面和菜): ahí va un verbo; 节目 es sustantivo.",
+     "Hueco 4 (爸爸妈妈＿＿包): ahí va un verbo; 节目 es sustantivo.",
+     "Hueco 5 (但是大家都很＿＿): después de 很 va un adjetivo o un verbo de estado; 节目 es sustantivo.",
+     "Hueco 6 (那时候，外面特别＿＿): «特别节目» existe («programa especial»), pero la oración quedaría sin predicado («afuera, programa especial») y no diría cómo estaba el lugar."
+    ],
+    "礼物": [
+     "Hueco 1: un regalo no es una fiesta ni algo «animado»; no designa un día festivo.",
+     "Hueco 2: ahí va un verbo; 礼物 es sustantivo.",
+     "Hueco 3: ahí va un verbo; 礼物 es sustantivo.",
+     "Hueco 4: ahí va un verbo; 礼物 es sustantivo.",
+     "Hueco 5: después de 很 va un adjetivo o un verbo de estado; 礼物 es sustantivo.",
+     "Hueco 6: después de 特别 hace falta un adjetivo; «外面特别礼物» no tiene sentido."
+    ]
+   }
   },
   "parecidas": [
    {
-    "frase": "这是我们家好多年的＿＿。",
+    "frase": "在中国，过年吃饺子是很多家庭的＿＿。",
     "opts": [
-     "传统",
      "习惯",
+     "传统",
      "风格"
     ],
     "ok": [
      0,
      1
     ],
-    "why": "传统 es «tradición» y 习惯 es «costumbre, hábito»: ambas sirven para algo que la familia hace desde hace años. 风格 es «estilo» (de una obra o de una persona) y no se dice de una actividad familiar."
+    "delTexto": false,
+    "why": "习惯 es «costumbre, hábito» y 传统 es «tradición»: las dos sirven para algo que muchas familias hacen cada año. 风格 es «estilo» (de una obra o de una persona) y no se dice de lo que hace una familia en una fiesta."
    }
   ],
   "capa2": {
@@ -952,7 +976,7 @@
    "colocaciones": [
     {
      "zh": "包饺子",
-     "es": "envolver dumplings"
+     "es": "armar dumplings (envolverlos)"
     },
     {
      "zh": "放鞭炮",
@@ -972,6 +996,9 @@
     }
    ],
    "busqueda": "WebSearch (modo estándar), frase entre comillas"
-  }
+  },
+  "fueraManual": [
+   "大年三十"
+  ]
  }
 ]
