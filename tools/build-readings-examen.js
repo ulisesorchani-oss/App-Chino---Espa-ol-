@@ -88,6 +88,7 @@ function hoja(rs, ctl, meta) {
             '### Tabla de control', '', '| Control | Resultado |', '|---|---|',
             '| Largo | ' + r.largo + ' hanzi (rango HSK ' + r.nivel + ': ' + rg[0] + '–' + rg[1] + ') |', '| Nivel por palabras (' + meta.lista + ', HSK 1–' + r.nivel + ') | ' + c.cob.toFixed(1) + ' % (mínimo ' + tp.coberturaMinima + ' %) · ' + c.segmentos + ' palabras |',
             '| Palabras fuera de nivel en el texto | ' + (c.fuera.length ? c.fuera.map(x => x.zh + '* (' + x.nivel + ')').join(' · ') : 'ninguna') + ' — ' + c.fuera.length + (tp.maxFuera === null ? ' (sin tope)' : ' de ' + tp.maxFuera + ' permitidas') + ' |',
+            '| Chino | ' + ({ pendiente: 'pendiente de revisión', revisado: 'revisado por el docente; sin confirmación de hablante nativo', nativo: 'confirmado por hablante nativo' + (r.revisor ? ' (' + r.revisor + ')' : '') })[r.revision] + ' |',
             '| Nombres propios (no cuentan) | ' + ((r.nombres || []).map(n => n.zh).join(' · ') || '—') + ' |',
             '| Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | ' + ((r.dentroDeNivel || []).join(' · ') || '—') + ' |',
             '| Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | ' + ((r.fueraDeNivelDeclarado || []).join(' · ') || '—') + ' |',

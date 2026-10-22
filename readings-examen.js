@@ -1077,7 +1077,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 4,
   "genero": "cultural",
   "emoji": "🥟",
-  "revision": "pendiente",
+  "revision": "revisado",
   "titulo": {
    "zh": "过年包饺子",
    "zhT": "過年包餃子",

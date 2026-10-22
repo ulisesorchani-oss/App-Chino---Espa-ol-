@@ -45,6 +45,7 @@ Nota: la lista registra 省 solo como «provincia» (HSK 2); el sentido «ahorra
 | Largo | 146 hanzi (rango HSK 4: 120–200) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 97.0 % (mínimo 90 %) · 99 palabras |
 | Palabras fuera de nivel en el texto | 口气* (HSK 8) · 擦汗* (no está) · 悄悄* (HSK 5) — 3 de 5 permitidas |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | 小林 · 上海 |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | — |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | — |
@@ -129,6 +130,7 @@ Palabras del banco: 堵车 · 着急 · 碗 · 晚点 · 开始 · 擦 · 护照
 | Largo | 146 hanzi (rango HSK 4: 120–200) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 98.0 % (mínimo 90 %) · 102 palabras |
 | Palabras fuera de nivel en el texto | 聊天* (no está) · 视频* (HSK 5) — 2 de 5 permitidas |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | — |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | — |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | — |
@@ -215,6 +217,7 @@ Palabras del banco: 调查 · 超过 · 比较 · 查 · 累 · 建议 · 比赛
 | Largo | 157 hanzi (rango HSK 4: 120–200) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 89.7 % (mínimo 80 %) · 117 palabras |
 | Palabras fuera de nivel en el texto | 春联* (no está) · 相配* (no está) · 横* (HSK 6) · 毛笔* (HSK 5) · 现成* (HSK 9) · 气氛* (HSK 6) — 6 (sin tope) |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | — |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | 都会 |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | — |
@@ -296,6 +299,7 @@ Palabras del banco: 右 · 横批 · 顺利 · 写 · 现成 · 气氛 · 头发
 | Largo | 122 hanzi (rango HSK 4: 120–200) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 98.9 % (mínimo 90 %) · 90 palabras |
 | Palabras fuera de nivel en el texto | 郊区* (HSK 5) — 1 de 5 permitidas |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | — |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | 不算 |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | — |
@@ -370,7 +374,7 @@ Palabras del banco: 搬家 · 近 · 小 · 郊区 · 选 · 省 · 热闹 · �
 
 ## 5. 🥟 过年包饺子 / 過年包餃子 — Armar dumplings en Año Nuevo
 
-`rx-h4-jiaozi` · cultural · HSK 4 · tipo: `examen` · revision: pendiente
+`rx-h4-jiaozi` · cultural · HSK 4 · tipo: `examen` · revision: revisado
 
 ### Tabla de control
 
@@ -379,6 +383,7 @@ Palabras del banco: 搬家 · 近 · 小 · 郊区 · 选 · 省 · 热闹 · �
 | Largo | 164 hanzi (rango HSK 4: 120–200) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–4) | 97.3 % (mínimo 90 %) · 110 palabras |
 | Palabras fuera de nivel en el texto | 大年三十* (no está) · 鞭炮* (HSK 7) · 团圆* (HSK 9) — 3 de 5 permitidas |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | — |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | — |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | 大年三十 |
