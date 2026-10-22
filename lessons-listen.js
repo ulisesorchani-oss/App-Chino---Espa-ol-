@@ -41,12 +41,43 @@
         return !!s && s.view === 'story' && !!s.lesson && s.lesson.kind !== 'reading' && Array.isArray(s.lesson.lines);
     };
 
+    // ───────────── iconos: solo si el dispositivo tiene la fuente; si no, solo texto ─────────────
+    // Un carácter sin glifo se dibuja como el «tofu» (□) o en blanco: se compara su dibujo en un <canvas> con el de U+FFFF (tofu garantizado)
+    // y con el vacío. Si no se puede dibujar (sin canvas), se dejan los iconos de siempre.
+    const ICON_CHARS = { play: '▶️', pause: '⏸', resume: '▶', stop: '⏹', wait: '⏳' };
+    const ICON_ALT = { wait: '…' }; // lo que va en lugar del icono si falta (el resto queda en texto solo)
+    let ICONS = null; // { play, pause, resume, stop, wait } → icono o '' (solo texto)
+    function glyphSig(ch) {
+        const c = document.createElement('canvas'); c.width = 40; c.height = 40;
+        const x = c.getContext('2d'); if (!x) return null;
+        x.textBaseline = 'top'; x.fillStyle = '#000';
+        x.font = '28px sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
+        x.fillText(ch, 4, 4);
+        const d = x.getImageData(0, 0, 40, 40).data; let h = 0;
+        for (let i = 0; i < d.length; i += 4) h = (h * 31 + d[i + 3] + d[i] * 7) | 0;
+        return h;
+    }
+    function hasGlyph(ch) {
+        try {
+            const a = glyphSig(ch); if (a === null) return true;
+            return a !== glyphSig('\uFFFF') && a !== glyphSig('');
+        } catch (e) { return true; }
+    }
+    function icons() {
+        if (ICONS) return ICONS;
+        ICONS = {};
+        Object.keys(ICON_CHARS).forEach((k) => { ICONS[k] = hasGlyph(ICON_CHARS[k].replace(/\uFE0F/g, '')) ? ICON_CHARS[k] : (ICON_ALT[k] || ''); });
+        return ICONS;
+    }
+    const withIcon = (k, text) => { const i = icons()[k]; return i ? i + ' ' + text : text; };
+
     // ───────────── botón (reposo | sonando) ─────────────
     function barHtml() {
-        if (L.state === 'idle') return '<button type="button" class="lq-btn lq-primary ll-main" id="ll-play">▶️ Escuchar todo</button>';
-        const wait = L.waiting ? '⏳ ' : '';
-        return '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-pause">' + wait + (L.state === 'paused' ? '▶ Seguir' : '⏸ Pausar') + '</button>' +
-            '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-stop">⏹ Parar</button>';
+        if (L.state === 'idle') return '<button type="button" class="lq-btn lq-primary ll-main" id="ll-play">' + withIcon('play', 'Escuchar todo') + '</button>';
+        const wait = L.waiting ? (icons().wait ? icons().wait + ' ' : '') : '';
+        const pausa = L.state === 'paused' ? withIcon('resume', 'Seguir') : withIcon('pause', 'Pausar');
+        return '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-pause">' + wait + pausa + '</button>' +
+            '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-stop">' + withIcon('stop', 'Parar') + '</button>';
     }
     function renderBar() {
         const bar = $('ll-bar');
@@ -273,5 +304,6 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
 
-    window.LQ_LISTEN = { stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, config: { AHEAD, RETRY_MS, BACKOFF_MS, MANUAL_SCROLL_MS } };
+    // setIcons: true = todos los iconos; false = solo texto; undefined = detectar la fuente (lo normal). hasGlyph se expone para las pruebas.
+    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, config: { AHEAD, RETRY_MS, BACKOFF_MS, MANUAL_SCROLL_MS } };
 })();

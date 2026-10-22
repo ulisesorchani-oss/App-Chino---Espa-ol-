@@ -73,6 +73,7 @@ const STATS_OUT = [];
       window.speechSynthesis.speak = function (u) { window.__T.speechCalls.push(u.text); setTimeout(() => { try { u.onend && u.onend({}); } catch (e) { /* noop */ } }, 60); };
       window.speechSynthesis.cancel = function () { };
     });
+    await p.evaluate(() => LQ_LISTEN.setIcons(true)); // las pruebas de abajo esperan los iconos; la detección de fuente se prueba aparte
     return { ctx, p, errs };
   }
   // abre la vista Leer de una lección de aprendo chino (salta el glosario si lo hay)
@@ -113,6 +114,33 @@ const STATS_OUT = [];
     await p.click('#ll-stop'); await sleep(p, 200);
     ok((await p.evaluate(() => ({ n: document.querySelectorAll('#ll-bar .lq-btn').length, st: LQ_LISTEN.state, pl: document.querySelectorAll('.lq-line.is-playing').length }))).n === 1, tag + ' «⏹ Parar» vuelve al reposo');
     ok(errs.length === 0, tag + ' sin errores JS: ' + errs.join(' | '));
+    await ctx.close();
+  }
+
+  // ═════════ iconos: solo si hay fuente; si no, solo texto ═════════
+  {
+    const { ctx, p, errs } = await session(320, 'light');
+    const D = await p.evaluate(() => ({ A: LQ_LISTEN.hasGlyph('A'), tofu: LQ_LISTEN.hasGlyph('￿'), vacio: LQ_LISTEN.hasGlyph(''), cjk: LQ_LISTEN.hasGlyph('今') }));
+    ok(D.A === true && D.tofu === false && D.vacio === false, 'iconos: el detector de fuente distingue un glifo real (A) del «tofu» (U+FFFF) y del vacío ' + JSON.stringify(D));
+    await p.evaluate(() => LQ_LISTEN.setIcons(undefined)); // detección real de ESTE navegador
+    const real = await p.evaluate(() => LQ_LISTEN.icons);
+    STATS_OUT.push('detección de iconos en este navegador de pruebas: ' + JSON.stringify(real));
+    ok(Object.keys(real).every(k => typeof real[k] === 'string'), 'iconos: la detección real devuelve, para cada icono, el icono o su reemplazo de texto');
+    await p.evaluate(() => { window.__T.latency = 600; window.__T.audioSec = 1.2; });
+    await openLesson(p, 'h1-primer-dia');
+    await p.evaluate(() => LQ_LISTEN.setIcons(false)); // dispositivo SIN fuente: solo texto
+    const T0 = await p.evaluate(() => ({ t: document.getElementById('ll-play').textContent, h: document.getElementById('ll-play').getBoundingClientRect().height }));
+    ok(T0.t === 'Escuchar todo' && T0.h >= 48, 'iconos ausentes: el reposo muestra solo «Escuchar todo» (' + JSON.stringify(T0.t) + ')');
+    await p.click('#ll-play'); await sleep(p, 200);
+    const T1 = await p.evaluate(() => [...document.querySelectorAll('#ll-bar .lq-btn')].map(b => ({ t: b.textContent, h: b.getBoundingClientRect().height, cut: b.scrollWidth > b.clientWidth + 1 })));
+    ok(T1.length === 2 && /^… Pausar$/.test(T1[0].t) && T1[1].t === 'Parar' && T1.every(x => x.h >= 48 && !x.cut), 'iconos ausentes: sonando = «… Pausar» (esperando) y «Parar», sin cortes ' + JSON.stringify(T1.map(x => x.t)));
+    await p.waitForFunction(() => !document.getElementById('ll-pause').textContent.startsWith('…'), null, { timeout: 8000 });
+    await p.click('#ll-pause'); await sleep(p, 100);
+    ok(await p.evaluate(() => document.getElementById('ll-pause').textContent) === 'Seguir', 'iconos ausentes: en pausa dice «Seguir»');
+    await p.click('#ll-stop');
+    await p.evaluate(() => LQ_LISTEN.setIcons(true));
+    ok((await p.evaluate(() => document.getElementById('ll-play').textContent)) === '▶️ Escuchar todo', 'iconos presentes: «▶️ Escuchar todo»');
+    ok(errs.length === 0, 'iconos sin errores JS: ' + errs.join(' | '));
     await ctx.close();
   }
 
