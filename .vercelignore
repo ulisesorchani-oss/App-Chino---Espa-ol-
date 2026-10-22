@@ -1,0 +1,8 @@
+# Lo que NO se publica con la web (solo afecta al despliegue en Vercel; el repo sigue igual).
+# Hasta ahora no había .vercelignore: todo lo del repo se subía.
+
+# Pruebas automáticas (ver tests/README.md)
+tests/
+tools/test-*.js
+tools/check-*.js
+tools/medir-tts.js

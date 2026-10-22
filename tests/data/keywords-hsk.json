@@ -1,0 +1,1095 @@
+[
+ {
+  "id": "h1-primer-dia",
+  "hsk": 1,
+  "title": "El primer día de clase",
+  "auto": [
+   "老师",
+   "汉语",
+   "学校",
+   "高兴",
+   "第一"
+  ],
+  "kw": [
+   {
+    "zh": "名字",
+    "zhT": "名字",
+    "es": "nombre",
+    "py": "míng zì"
+   },
+   {
+    "zh": "汉语",
+    "zhT": "漢語",
+    "es": "chino (el idioma)",
+    "py": "hàn yǔ"
+   },
+   {
+    "zh": "朋友",
+    "zhT": "朋友",
+    "es": "amigo, amiga",
+    "py": "péng yǒu"
+   },
+   {
+    "zh": "高兴",
+    "zhT": "高興",
+    "es": "contento",
+    "py": "gāo xìng"
+   },
+   {
+    "zh": "老师",
+    "zhT": "老師",
+    "es": "maestro, maestra",
+    "py": "lǎo shī"
+   }
+  ]
+ },
+ {
+  "id": "h1-abuela",
+  "hsk": 1,
+  "title": "Vamos a casa de la abuela",
+  "auto": [
+   "奶奶",
+   "电视",
+   "电影",
+   "不太",
+   "干净"
+  ],
+  "kw": [
+   {
+    "zh": "干净",
+    "zhT": "乾淨",
+    "es": "limpio",
+    "py": "gān jìng"
+   },
+   {
+    "zh": "水果",
+    "zhT": "水果",
+    "es": "fruta",
+    "py": "shuǐ guǒ"
+   },
+   {
+    "zh": "电视",
+    "zhT": "電視",
+    "es": "televisión, tele",
+    "py": "diàn shì"
+   },
+   {
+    "zh": "电影",
+    "zhT": "電影",
+    "es": "película",
+    "py": "diàn yǐng"
+   },
+   {
+    "zh": "好看",
+    "zhT": "好看",
+    "es": "lindo; que se disfruta de ver",
+    "py": "hǎo kàn"
+   }
+  ]
+ },
+ {
+  "id": "h2-cumpleanos",
+  "hsk": 2,
+  "title": "El regalo de cumpleaños",
+  "auto": [
+   "礼物",
+   "十二",
+   "她的",
+   "一个",
+   "一起去"
+  ],
+  "kw": [
+   {
+    "zh": "礼物",
+    "zhT": "禮物",
+    "es": "regalo",
+    "py": "lǐ wù"
+   },
+   {
+    "zh": "快乐",
+    "zhT": "快樂",
+    "es": "feliz",
+    "py": "kuài lè"
+   },
+   {
+    "zh": "生日",
+    "zhT": "生日",
+    "es": "cumpleaños",
+    "py": "shēng rì"
+   },
+   {
+    "zh": "商场",
+    "zhT": "商場",
+    "es": "centro comercial",
+    "py": "shāng chǎng"
+   },
+   {
+    "zh": "看见",
+    "zhT": "看見",
+    "es": "ver",
+    "py": "kàn jiàn"
+   }
+  ]
+ },
+ {
+  "id": "h2-gripe",
+  "hsk": 2,
+  "title": "Xiaoli está enferma",
+  "auto": [
+   "很多",
+   "星期一",
+   "舒服",
+   "不想",
+   "不能"
+  ],
+  "kw": [
+   {
+    "zh": "舒服",
+    "zhT": "舒服",
+    "es": "cómodo; sentirse bien",
+    "py": "shū fú"
+   },
+   {
+    "zh": "应该",
+    "zhT": "應該",
+    "es": "deber",
+    "py": "yīng gāi"
+   },
+   {
+    "zh": "可以",
+    "zhT": "可以",
+    "es": "poder (tener permiso)",
+    "py": "kě yǐ"
+   },
+   {
+    "zh": "以后",
+    "zhT": "以後",
+    "es": "después",
+    "py": "yǐ hòu"
+   },
+   {
+    "zh": "上课",
+    "zhT": "上課",
+    "es": "tener clase",
+    "py": "shàng kè"
+   }
+  ]
+ },
+ {
+  "id": "h3-celular",
+  "hsk": 3,
+  "title": "El celular roto",
+  "auto": [
+   "一个",
+   "住在",
+   "上个",
+   "一下",
+   "突然"
+  ],
+  "kw": [
+   {
+    "zh": "突然",
+    "zhT": "突然",
+    "es": "de repente",
+    "py": "tū rán"
+   },
+   {
+    "zh": "紧张",
+    "zhT": "緊張",
+    "es": "nervioso",
+    "py": "jǐn zhāng"
+   },
+   {
+    "zh": "没关系",
+    "zhT": "沒關係",
+    "es": "no pasa nada; no importa",
+    "py": "méi guān xì"
+   },
+   {
+    "zh": "小心",
+    "zhT": "小心",
+    "es": "cuidado; tener cuidado",
+    "py": "xiǎo xīn"
+   },
+   {
+    "zh": "说话",
+    "zhT": "說話",
+    "es": "hablar",
+    "py": "shuō huà"
+   }
+  ]
+ },
+ {
+  "id": "h3-montana",
+  "hsk": 3,
+  "title": "Plan para el fin de semana",
+  "auto": [
+   "一个",
+   "星期六",
+   "很好",
+   "到了",
+   "这个"
+  ],
+  "kw": [
+   {
+    "zh": "游泳",
+    "zhT": "游泳",
+    "es": "nadar",
+    "py": "yóu yǒng"
+   },
+   {
+    "zh": "决定",
+    "zhT": "決定",
+    "es": "decidir",
+    "py": "jué dìng"
+   },
+   {
+    "zh": "讨论",
+    "zhT": "討論",
+    "es": "discutir",
+    "py": "tǎo lùn"
+   },
+   {
+    "zh": "计划",
+    "zhT": "計劃",
+    "es": "planificar",
+    "py": "jì huà"
+   },
+   {
+    "zh": "机会",
+    "zhT": "機會",
+    "es": "oportunidad",
+    "py": "jī huì"
+   }
+  ]
+ },
+ {
+  "id": "h4-piano",
+  "hsk": 4,
+  "title": "El vecino que canta",
+  "auto": [
+   "这个",
+   "每天",
+   "不着",
+   "轻轻",
+   "一位"
+  ],
+  "kw": [
+   {
+    "zh": "安静",
+    "zhT": "安靜",
+    "es": "tranquilo",
+    "py": "ān jìng"
+   },
+   {
+    "zh": "声音",
+    "zhT": "聲音",
+    "es": "sonido; ruido",
+    "py": "shēng yīn"
+   },
+   {
+    "zh": "应该",
+    "zhT": "應該",
+    "es": "deber",
+    "py": "yīng gāi"
+   },
+   {
+    "zh": "热情",
+    "zhT": "熱情",
+    "es": "amable, cálido",
+    "py": "rè qíng"
+   },
+   {
+    "zh": "小心",
+    "zhT": "小心",
+    "es": "cuidado; tener cuidado",
+    "py": "xiǎo xīn"
+   }
+  ]
+ },
+ {
+  "id": "h4-receta",
+  "hsk": 4,
+  "title": "El sabor de la abuela",
+  "auto": [
+   "这个",
+   "失败",
+   "很多"
+  ],
+  "kw": [
+   {
+    "zh": "失败",
+    "zhT": "失敗",
+    "es": "fracasar",
+    "py": "shī bài"
+   },
+   {
+    "zh": "父母",
+    "zhT": "父母",
+    "es": "padres",
+    "py": "fù mǔ"
+   },
+   {
+    "zh": "去世",
+    "zhT": "去世",
+    "es": "morir, fallecer",
+    "py": "qù shì"
+   },
+   {
+    "zh": "屋子",
+    "zhT": "屋子",
+    "es": "casa, habitación",
+    "py": "wū zi"
+   },
+   {
+    "zh": "味道",
+    "zhT": "味道",
+    "es": "sabor",
+    "py": "wèi dào"
+   }
+  ]
+ },
+ {
+  "id": "h5-carta",
+  "hsk": 5,
+  "title": "La carta que llegó tarde",
+  "auto": [
+   "一天"
+  ],
+  "kw": [
+   {
+    "zh": "城市",
+    "zhT": "城市",
+    "es": "ciudad",
+    "py": "chéng shì"
+   },
+   {
+    "zh": "注意",
+    "zhT": "注意",
+    "es": "prestar atención",
+    "py": "zhù yì"
+   },
+   {
+    "zh": "表达",
+    "zhT": "表達",
+    "es": "expresar",
+    "py": "biǎo dá"
+   },
+   {
+    "zh": "发现",
+    "zhT": "發現",
+    "es": "descubrir",
+    "py": "fā xiàn"
+   },
+   {
+    "zh": "春天",
+    "zhT": "春天",
+    "es": "primavera",
+    "py": "chūn tiān"
+   }
+  ]
+ },
+ {
+  "id": "h6-puente",
+  "hsk": 6,
+  "title": "El puente del abuelo",
+  "auto": [
+   "一位",
+   "我在",
+   "三年",
+   "开通",
+   "站在"
+  ],
+  "kw": [
+   {
+    "zh": "开通",
+    "zhT": "開通",
+    "es": "habilitar, inaugurar",
+    "py": "kāi tōng"
+   },
+   {
+    "zh": "感人",
+    "zhT": "感人",
+    "es": "conmovedor",
+    "py": "gǎn rén"
+   },
+   {
+    "zh": "建成",
+    "zhT": "建成",
+    "es": "terminar de construir",
+    "py": "jiàn chéng"
+   },
+   {
+    "zh": "交通",
+    "zhT": "交通",
+    "es": "transporte",
+    "py": "jiāo tōng"
+   },
+   {
+    "zh": "生活",
+    "zhT": "生活",
+    "es": "vida",
+    "py": "shēng huó"
+   }
+  ]
+ },
+ {
+  "id": "h1-gato",
+  "hsk": 1,
+  "title": "El gato y el pajarito",
+  "auto": [
+   "一只",
+   "很好",
+   "朋友",
+   "他们",
+   "一起"
+  ],
+  "kw": [
+   {
+    "zh": "高兴",
+    "zhT": "高興",
+    "es": "contento",
+    "py": "gāo xìng"
+   },
+   {
+    "zh": "朋友",
+    "zhT": "朋友",
+    "es": "amigo, amiga",
+    "py": "péng yǒu"
+   },
+   {
+    "zh": "什么",
+    "zhT": "什麼",
+    "es": "qué",
+    "py": "shén me"
+   },
+   {
+    "zh": "一起",
+    "zhT": "一起",
+    "es": "juntos",
+    "py": "yì qǐ"
+   },
+   {
+    "zh": "睡觉",
+    "zhT": "睡覺",
+    "es": "dormir",
+    "py": "shuì jiào"
+   }
+  ]
+ },
+ {
+  "id": "h1-shuiguo",
+  "hsk": 1,
+  "title": "Fruta para la clase",
+  "auto": [
+   "水果",
+   "苹果",
+   "香蕉",
+   "商店",
+   "我们"
+  ],
+  "kw": [
+   {
+    "zh": "客气",
+    "zhT": "客氣",
+    "es": "cortés (不客气: de nada)",
+    "py": "kè qi"
+   },
+   {
+    "zh": "香蕉",
+    "zhT": "香蕉",
+    "es": "banana",
+    "py": "xiāng jiāo"
+   },
+   {
+    "zh": "商店",
+    "zhT": "商店",
+    "es": "tienda",
+    "py": "shāng diàn"
+   },
+   {
+    "zh": "水果",
+    "zhT": "水果",
+    "es": "fruta",
+    "py": "shuǐ guǒ"
+   },
+   {
+    "zh": "好吃",
+    "zhT": "好吃",
+    "es": "rico (de comida)",
+    "py": "hǎo chī"
+   }
+  ]
+ },
+ {
+  "id": "h2-zuofan",
+  "hsk": 2,
+  "title": "Ayudo a cocinar",
+  "auto": [
+   "做饭",
+   "已经",
+   "学会",
+   "然后",
+   "有意思"
+  ],
+  "kw": [
+   {
+    "zh": "做饭",
+    "zhT": "做飯",
+    "es": "cocinar",
+    "py": "zuò fàn"
+   },
+   {
+    "zh": "已经",
+    "zhT": "已經",
+    "es": "ya",
+    "py": "yǐ jīng"
+   },
+   {
+    "zh": "然后",
+    "zhT": "然後",
+    "es": "después",
+    "py": "rán hòu"
+   },
+   {
+    "zh": "觉得",
+    "zhT": "覺得",
+    "es": "parecer, opinar",
+    "py": "jué de"
+   },
+   {
+    "zh": "干净",
+    "zhT": "乾淨",
+    "es": "limpio",
+    "py": "gān jìng"
+   }
+  ]
+ },
+ {
+  "id": "h2-zuowei",
+  "hsk": 2,
+  "title": "El día del examen",
+  "auto": [
+   "她的",
+   "可能",
+   "教室",
+   "开始",
+   "大家"
+  ],
+  "kw": [
+   {
+    "zh": "担心",
+    "zhT": "擔心",
+    "es": "preocuparse",
+    "py": "dān xīn"
+   },
+   {
+    "zh": "前面",
+    "zhT": "前面",
+    "es": "anterior; lo de adelante",
+    "py": "qián miàn"
+   },
+   {
+    "zh": "可能",
+    "zhT": "可能",
+    "es": "tal vez, posible",
+    "py": "kě néng"
+   },
+   {
+    "zh": "安静",
+    "zhT": "安靜",
+    "es": "tranquilo, en silencio",
+    "py": "ān jìng"
+   },
+   {
+    "zh": "自己",
+    "zhT": "自己",
+    "es": "uno mismo; solo (por su cuenta)",
+    "py": "zì jǐ"
+   }
+  ]
+ },
+ {
+  "id": "h3-banjia",
+  "hsk": 3,
+  "title": "La mudanza",
+  "auto": [
+   "一个",
+   "邻居",
+   "一家",
+   "附近",
+   "环境"
+  ],
+  "kw": [
+   {
+    "zh": "邻居",
+    "zhT": "鄰居",
+    "es": "vecino",
+    "py": "lín jū"
+   },
+   {
+    "zh": "客气",
+    "zhT": "客氣",
+    "es": "formalidad (不用客气: no hay de qué)",
+    "py": "kè qi"
+   },
+   {
+    "zh": "附近",
+    "zhT": "附近",
+    "es": "cerca, aledaño",
+    "py": "fù jìn"
+   },
+   {
+    "zh": "麻烦",
+    "zhT": "麻煩",
+    "es": "complicado, un lío",
+    "py": "má fán"
+   },
+   {
+    "zh": "终于",
+    "zhT": "終於",
+    "es": "por fin",
+    "py": "zhōng yú"
+   }
+  ]
+ },
+ {
+  "id": "h3-chidao",
+  "hsk": 3,
+  "title": "Después de llegar tarde",
+  "auto": [
+   "迟到",
+   "从来",
+   "十二",
+   "突然",
+   "都在"
+  ],
+  "kw": [
+   {
+    "zh": "迟到",
+    "zhT": "遲到",
+    "es": "llegar tarde",
+    "py": "chí dào"
+   },
+   {
+    "zh": "突然",
+    "zhT": "突然",
+    "es": "de repente",
+    "py": "tū rán"
+   },
+   {
+    "zh": "开始",
+    "zhT": "開始",
+    "es": "empezar",
+    "py": "kāi shǐ"
+   },
+   {
+    "zh": "复习",
+    "zhT": "復習",
+    "es": "repasar",
+    "py": "fù xí"
+   },
+   {
+    "zh": "衣服",
+    "zhT": "衣服",
+    "es": "ropa",
+    "py": "yī fu"
+   }
+  ]
+ },
+ {
+  "id": "h4-mianshi",
+  "hsk": 4,
+  "title": "La entrevista inolvidable",
+  "auto": [
+   "面试",
+   "一份",
+   "他在",
+   "一家",
+   "诚实"
+  ],
+  "kw": [
+   {
+    "zh": "简历",
+    "zhT": "簡歷",
+    "es": "currículum",
+    "py": "jiǎn lì"
+   },
+   {
+    "zh": "面试",
+    "zhT": "面試",
+    "es": "entrevista",
+    "py": "miàn shì"
+   },
+   {
+    "zh": "诚实",
+    "zhT": "誠實",
+    "es": "honesto",
+    "py": "chéng shí"
+   },
+   {
+    "zh": "消息",
+    "zhT": "消息",
+    "es": "noticias; respuesta",
+    "py": "xiāo xī"
+   },
+   {
+    "zh": "紧张",
+    "zhT": "緊張",
+    "es": "nervioso",
+    "py": "jǐn zhāng"
+   }
+  ]
+ },
+ {
+  "id": "h4-jianfei",
+  "hsk": 4,
+  "title": "Crónica de una dieta",
+  "auto": [
+   "一个",
+   "你要",
+   "第一",
+   "蛋糕",
+   "一点"
+  ],
+  "kw": [
+   {
+    "zh": "忍不住",
+    "zhT": "忍不住",
+    "es": "no poder aguantar",
+    "py": "rěn bú zhù"
+   },
+   {
+    "zh": "放弃",
+    "zhT": "放棄",
+    "es": "rendirse, abandonar",
+    "py": "fàng qì"
+   },
+   {
+    "zh": "锻炼",
+    "zhT": "鍛煉",
+    "es": "ejercitarse",
+    "py": "duàn liàn"
+   },
+   {
+    "zh": "减肥",
+    "zhT": "減肥",
+    "es": "hacer dieta, adelgazar",
+    "py": "jiǎn féi"
+   },
+   {
+    "zh": "效果",
+    "zhT": "效果",
+    "es": "efecto, resultado",
+    "py": "xiào guǒ"
+   }
+  ]
+ },
+ {
+  "id": "h5-wanggou",
+  "hsk": 5,
+  "title": "Comprar en línea cambió la vida",
+  "auto": [
+   "这种",
+   "一家",
+   "一种",
+   "购"
+  ],
+  "kw": [
+   {
+    "zh": "冲击",
+    "zhT": "衝擊",
+    "es": "golpe, impacto",
+    "py": "chōng jī"
+   },
+   {
+    "zh": "巨大",
+    "zhT": "巨大",
+    "es": "enorme",
+    "py": "jù dà"
+   },
+   {
+    "zh": "维持",
+    "zhT": "維持",
+    "es": "mantener, sostener",
+    "py": "wéi chí"
+   },
+   {
+    "zh": "趋势",
+    "zhT": "趨勢",
+    "es": "tendencia",
+    "py": "qū shì"
+   },
+   {
+    "zh": "家具",
+    "zhT": "傢具",
+    "es": "muebles",
+    "py": "jiā jù"
+   }
+  ]
+ },
+ {
+  "id": "h5-chaguan",
+  "hsk": 5,
+  "title": "Una tarde de casa de té",
+  "auto": [
+   "喝茶",
+   "一种",
+   "不能",
+   "第一",
+   "这个"
+  ],
+  "kw": [
+   {
+    "zh": "品尝",
+    "zhT": "品嚐",
+    "es": "degustar",
+    "py": "pǐn cháng"
+   },
+   {
+    "zh": "布置",
+    "zhT": "佈置",
+    "es": "ambientación, decoración",
+    "py": "bù zhì"
+   },
+   {
+    "zh": "积累",
+    "zhT": "積累",
+    "es": "acumulación",
+    "py": "jī lěi"
+   },
+   {
+    "zh": "文化",
+    "zhT": "文化",
+    "es": "cultura",
+    "py": "wén huà"
+   },
+   {
+    "zh": "首先",
+    "zhT": "首先",
+    "es": "primero",
+    "py": "shǒu xiān"
+   }
+  ]
+ },
+ {
+  "id": "h6-laozihao",
+  "hsk": 6,
+  "title": "La decisión del local centenario",
+  "auto": [
+   "一家",
+   "不能",
+   "他的",
+   "从不",
+   "看中"
+  ],
+  "kw": [
+   {
+    "zh": "招牌",
+    "zhT": "招牌",
+    "es": "marca; cartel del negocio",
+    "py": "zhāo pái"
+   },
+   {
+    "zh": "苛刻",
+    "zhT": "苛刻",
+    "es": "duro, exigente",
+    "py": "kē kè"
+   },
+   {
+    "zh": "破裂",
+    "zhT": "破裂",
+    "es": "quebrarse, frustrarse",
+    "py": "pò liè"
+   },
+   {
+    "zh": "固执",
+    "zhT": "固執",
+    "es": "terco, obstinado",
+    "py": "gù zhí"
+   },
+   {
+    "zh": "积淀",
+    "zhT": "積澱",
+    "es": "sedimentar, acumularse",
+    "py": "jī diàn"
+   }
+  ]
+ },
+ {
+  "id": "h6-bianlun",
+  "hsk": 6,
+  "title": "La gran final de debate",
+  "auto": [
+   "不是",
+   "辩",
+   "评",
+   "委",
+   "论"
+  ],
+  "kw": [
+   {
+    "zh": "苛刻",
+    "zhT": "苛刻",
+    "es": "exigente, duro",
+    "py": "kē kè"
+   },
+   {
+    "zh": "反驳",
+    "zhT": "反駁",
+    "es": "refutar",
+    "py": "fǎn bó"
+   },
+   {
+    "zh": "衡量",
+    "zhT": "衡量",
+    "es": "medir, sopesar",
+    "py": "héng liáng"
+   },
+   {
+    "zh": "环节",
+    "zhT": "環節",
+    "es": "ronda, etapa (de un debate)",
+    "py": "huán jié"
+   },
+   {
+    "zh": "决赛",
+    "zhT": "決賽",
+    "es": "final (de torneo)",
+    "py": "jué sài"
+   }
+  ]
+ },
+ {
+  "id": "h7-tanpan",
+  "hsk": 7,
+  "title": "La negociación diplomática",
+  "auto": [
+   "这个",
+   "这次",
+   "一个",
+   "三年",
+   "之"
+  ],
+  "kw": [
+   {
+    "zh": "仲裁",
+    "zhT": "仲裁",
+    "es": "arbitraje",
+    "py": "zhòng cái"
+   },
+   {
+    "zh": "造福",
+    "zhT": "造福",
+    "es": "beneficiar (a la gente)",
+    "py": "zào fú"
+   },
+   {
+    "zh": "让步",
+    "zhT": "讓步",
+    "es": "hacer concesión",
+    "py": "ràng bù"
+   },
+   {
+    "zh": "僵局",
+    "zhT": "僵局",
+    "es": "punto muerto, estancamiento",
+    "py": "jiāng jú"
+   },
+   {
+    "zh": "底线",
+    "zhT": "底線",
+    "es": "línea roja, límite mínimo",
+    "py": "dǐ xiàn"
+   }
+  ]
+ },
+ {
+  "id": "h8-jiangzuo",
+  "hsk": 8,
+  "title": "La conferencia de ciencia cognitiva",
+  "auto": [
+   "这个",
+   "一个",
+   "并不",
+   "很好",
+   "新的"
+  ],
+  "kw": [
+   {
+    "zh": "点燃",
+    "zhT": "點燃",
+    "es": "encender, avivar",
+    "py": "diǎn rán"
+   },
+   {
+    "zh": "难题",
+    "zhT": "難題",
+    "es": "problema difícil",
+    "py": "nán tí"
+   },
+   {
+    "zh": "拨冗",
+    "zhT": "撥冗",
+    "es": "sacar tiempo (a pesar de estar ocupado)",
+    "py": "bō rǒng"
+   },
+   {
+    "zh": "假说",
+    "zhT": "假說",
+    "es": "hipótesis",
+    "py": "jiǎ shuō"
+   },
+   {
+    "zh": "实证研究",
+    "zhT": "實證研究",
+    "es": "investigación empírica",
+    "py": "shí zhèng yán jiū"
+   }
+  ]
+ },
+ {
+  "id": "h9-dushuhui",
+  "hsk": 9,
+  "title": "El club de lectura: Sueño en el Pabellón Rojo",
+  "auto": [
+   "今晚",
+   "这个",
+   "一种",
+   "他的",
+   "他在"
+  ],
+  "kw": [
+   {
+    "zh": "寓意",
+    "zhT": "寓意",
+    "es": "significado simbólico, moraleja",
+    "py": "yù yì"
+   },
+   {
+    "zh": "预示",
+    "zhT": "預示",
+    "es": "presagiar, anticipar",
+    "py": "yù shì"
+   },
+   {
+    "zh": "预感",
+    "zhT": "預感",
+    "es": "presentimiento",
+    "py": "yù gǎn"
+   },
+   {
+    "zh": "寄托",
+    "zhT": "寄託",
+    "es": "expresar, depositar (un sentimiento)",
+    "py": "jì tuō"
+   },
+   {
+    "zh": "暗示",
+    "zhT": "暗示",
+    "es": "insinuar, sugerir",
+    "py": "àn shì"
+   }
+  ]
+ }
+]
