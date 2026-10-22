@@ -7048,3 +7048,47 @@ body.dark-mode .lq-gloss-legend { color: #94a3b8; }
 body.paper-mode .rd-approx-label { color: #b45309; }
 body.paper-mode .lq-gloss-star { color: #b91c1c; }
 body.paper-mode .lq-gloss-legend { color: #6b5b40; }
+
+/* R12b: práctica de lecturas v2 — banco (hueco y después ficha), palabras parecidas, resumen por parte */
+.rd-sec { margin: 0 0 8px; font-size: 0.78rem; font-weight: 800; letter-spacing: .02em; color: #4338ca; }
+.rd-hint { margin: 0 0 10px; font-size: 0.84rem; line-height: 1.45; color: #475569; }
+.rd-hint.is-warn { color: #b45309; font-weight: 700; }
+.rd-bank-list { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rd-bank-item { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; font-size: 1.1rem; line-height: 2.2; color: #1e293b; overflow-wrap: anywhere; }
+.rd-blank { display: inline-block; min-width: 3.4em; min-height: 44px; margin: 0 2px; padding: 0 10px; border: 2px dashed #94a3b8; border-radius: 10px; background: #f8fafc; font: inherit; font-weight: 800; color: #1e293b; vertical-align: middle; cursor: pointer; }
+.rd-blank.is-sel { border-style: solid; border-color: #7c5cf0; background: #ede9fe; box-shadow: 0 0 0 3px rgba(124, 92, 240, .25); }
+.rd-blank.is-filled { border-style: solid; border-color: #6366f1; background: #eef2ff; }
+.rd-blank.is-right { border-style: solid; border-color: #16a34a; background: #dcfce7; color: #14532d; }
+.rd-blank.is-wrong { border-style: solid; border-color: #dc2626; background: #fee2e2; color: #7f1d1d; }
+.rd-blank:disabled { cursor: default; }
+.rd-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.rd-chip { min-height: 44px; padding: 0 14px; border: 1.5px solid #cbd5e1; border-radius: 999px; background: #fff; font-size: 1.1rem; font-weight: 800; color: #1e293b; cursor: pointer; }
+.rd-chip.is-used { opacity: .35; text-decoration: line-through; cursor: default; }
+.rd-fix { margin: 0 0 8px; padding-left: 18px; font-size: 1rem; line-height: 1.7; color: #334155; }
+.rd-par-sentence { margin: 4px 0 10px; font-size: 1.3rem; line-height: 1.7; font-weight: 700; color: #1e293b; overflow-wrap: anywhere; }
+.rd-par-blank { display: inline-block; min-width: 2.6em; margin: 0 2px; border-bottom: 3px solid #7c5cf0; text-align: center; color: #7c5cf0; }
+.rd-summary { margin-bottom: 14px; }
+body.dark-mode .rd-sec { color: #c7d2fe; }
+body.dark-mode .rd-hint { color: #cbd5e1; }
+body.dark-mode .rd-hint.is-warn { color: #fcd34d; }
+body.dark-mode .rd-bank-item { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+body.dark-mode .rd-blank { background: #0f172a; border-color: #64748b; color: #f1f5f9; }
+body.dark-mode .rd-blank.is-sel { background: #312e81; border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(165, 180, 252, .3); }
+body.dark-mode .rd-blank.is-filled { background: #1e1b4b; border-color: #818cf8; }
+body.dark-mode .rd-blank.is-right { background: #14532d; border-color: #4ade80; color: #dcfce7; }
+body.dark-mode .rd-blank.is-wrong { background: #7f1d1d; border-color: #f87171; color: #fee2e2; }
+body.dark-mode .rd-chip { background: #1e293b; border-color: #475569; color: #f1f5f9; }
+body.dark-mode .rd-fix, body.dark-mode .rd-par-sentence { color: #e2e8f0; }
+body.dark-mode .rd-par-blank { color: #a5b4fc; border-bottom-color: #a5b4fc; }
+body.paper-mode .rd-sec { color: #b45309; }
+body.paper-mode .rd-hint { color: #6b5b40; }
+body.paper-mode .rd-hint.is-warn { color: #b45309; }
+body.paper-mode .rd-bank-item { background: #fffdf6; border-color: #e6dabf; color: #3d3327; }
+body.paper-mode .rd-blank { background: #faf3df; border-color: #b9a77d; color: #3d3327; }
+body.paper-mode .rd-blank.is-sel { background: #fde8c0; border-color: #b45309; box-shadow: 0 0 0 3px rgba(180, 83, 9, .25); }
+body.paper-mode .rd-blank.is-filled { background: #f3e6c4; border-color: #8a6d3b; }
+body.paper-mode .rd-blank.is-right { background: #e3f0d2; border-color: #4d7c0f; color: #365314; }
+body.paper-mode .rd-blank.is-wrong { background: #f6d9d3; border-color: #b91c1c; color: #7f1d1d; }
+body.paper-mode .rd-chip { background: #fffdf6; border-color: #cdbb8d; color: #3d3327; }
+body.paper-mode .rd-fix, body.paper-mode .rd-par-sentence { color: #3d3327; }
+body.paper-mode .rd-par-blank { color: #b45309; border-bottom-color: #b45309; }
