@@ -220,6 +220,87 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         await ctx.close();
     }
 
+    // ═════════ 7b. el servidor se recupera: el circuito se reinicia en cada pulsación, no a mitad de lección ═════════
+    {
+        // los primeros 4 pedidos fallan (líneas 1 y 2, original + reintento) y DESPUÉS el servidor responde bien
+        let sano = false;
+        const { ctx, p, srv } = await session((req, k) => (k < 4 && !sano ? { status: 502, delay: 40 } : { status: 200, delay: 40 }), { audioSec: 0.3 });
+        await openLesson(p, LESSON);
+        const texts = await lineTexts(p);
+        await p.click('#ll-play');
+        await p.waitForSelector('#ll-note', { timeout: 15000 });
+        await waitIdle(p);
+        const A = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped, note: !!document.getElementById('ll-note'), tr: LQ_LISTEN.tripped }));
+        ok(srv.reqs.length === 4 && A.speech === texts.length, 'recuperación a mitad: el servidor ya responde bien, pero tras el corte el resto de la lección sigue con la voz del sistema y NO se pide nada más (' + srv.reqs.length + ' pedidos, ' + A.speech + ' líneas habladas)');
+        ok(A.tripped === 1 && A.note === false && A.tr === false, 'al terminar: el aviso desaparece y el circuito queda listo para la próxima pulsación');
+        // segunda pulsación sobre la misma lección: se reinicia, vuelve a usar el servidor
+        await p.click('#ll-play');
+        await sleep(p, 500);
+        const mid = await p.evaluate(() => ({ note: !!document.getElementById('ll-note'), tr: LQ_LISTEN.tripped }));
+        await waitIdle(p);
+        const B = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped, marks: window.__S.marks.length }));
+        ok(!mid.note && !mid.tr, 'segunda pulsación: arranca sin aviso ni circuito cortado');
+        ok(srv.reqs.length === 4 + texts.length && srv.reqs.slice(4).every(r => r.method === 'GET') && B.speech === texts.length && B.tripped === 1, 'segunda pulsación: pide las ' + texts.length + ' líneas al servidor (ya sano) y ninguna cae a la voz del sistema (' + (srv.reqs.length - 4) + ' pedidos, habladas ' + B.speech + ')');
+        ok(B.marks === texts.length * 2, 'segunda pulsación: la marca vuelve a recorrer todas las líneas (' + B.marks + ' marcas en total)');
+        // y si falla otra vez, el contador empieza de cero (2 seguidas más para cortar)
+        sano = false;
+        await ctx.close();
+    }
+    {
+        let caido = true;
+        const { ctx, p, srv } = await session(() => (caido ? { status: 502, delay: 30 } : { status: 200, delay: 30 }), { audioSec: 0.3 });
+        await openLesson(p, LESSON);
+        const texts = await lineTexts(p);
+        await p.click('#ll-play'); await waitIdle(p);
+        const n1 = srv.reqs.length;
+        caido = false;
+        await p.click('#ll-play'); await waitIdle(p);
+        const S = await p.evaluate(() => ({ tripped: LQ_LISTEN.stats.tripped, speech: window.__S.speech.length }));
+        ok(n1 === 4 && srv.reqs.length - n1 === texts.length && S.tripped === 1 && S.speech === texts.length, 'reinicio: caído → 4 pedidos y corte; sano en la pulsación siguiente → ' + (srv.reqs.length - n1) + ' pedidos, cero líneas más con la voz del sistema');
+        await ctx.close();
+    }
+
+    // ═════════ 7c. Atrás cierra «Escuchar todo» (audio del servidor y voz del sistema tras el corte) ═════════
+    {
+        const { ctx, p, errs, srv } = await session(() => ({ status: 200, delay: 100 }), { audioSec: 1.2 });
+        await openLesson(p, LESSON);
+        await p.click('#ll-play');
+        await p.waitForFunction(() => window.__S.marks.length >= 1, null, { timeout: 15000 });
+        const antes = srv.reqs.length;
+        await p.evaluate(() => { history.back(); });
+        await sleep(p, 400);
+        const R0 = await p.evaluate(() => ({ st: LQ_LISTEN.state, src: LQ_LISTEN.audio ? LQ_LISTEN.audio.getAttribute('src') : null, paused: !LQ_LISTEN.audio || LQ_LISTEN.audio.paused, pl: document.querySelectorAll('.lq-line.is-playing').length, pop: document.getElementById('lesson-pop').classList.contains('hidden'), stack: Nav.stack.length, marks: window.__S.marks.length }));
+        const despues = srv.reqs.length;
+        await sleep(p, 1800);
+        const R1 = await p.evaluate(() => ({ marks: window.__S.marks.length, speech: window.__S.speech.length }));
+        ok(R0.st === 'idle' && !R0.src && R0.paused && R0.pl === 0 && R0.pop && R0.stack === 0, 'Atrás con audio del servidor: cierra la lección y para «Escuchar todo» (estado idle, audio sin fuente, sin línea marcada, ventana cerrada, pila vacía)');
+        ok(srv.reqs.length === despues && R1.marks === R0.marks && R1.speech === 0, 'Atrás con audio del servidor: después no se pide nada más (' + antes + ' → ' + despues + ' → ' + srv.reqs.length + ') ni avanza la marca');
+        ok(errs.length === 0, 'Atrás con audio sin errores JS: ' + errs.join(' | '));
+        await ctx.close();
+    }
+    {
+        const { ctx, p, errs, srv } = await session(() => ({ status: 502, delay: 30 }));
+        await openLesson(p, LESSON);
+        await p.evaluate(() => {
+            window.__S.cancels = 0;
+            const sp = speechSynthesis.speak; // la voz simulada tarda 250 ms por línea; cancel() la corta
+            speechSynthesis.cancel = function () { if (window.__S.armed) { window.__S.cancels++; window.__S.cut = true; } };
+            speechSynthesis.speak = function (u) { if (window.__S.cut) return; return sp.call(speechSynthesis, u); };
+        });
+        await p.click('#ll-play');
+        await p.waitForSelector('#ll-note', { timeout: 15000 });
+        await p.waitForFunction(() => window.__S.speech.length >= 2, null, { timeout: 15000 });
+        await p.evaluate(() => { window.__S.armed = true; history.back(); });
+        await sleep(p, 400);
+        const R0 = await p.evaluate(() => ({ st: LQ_LISTEN.state, speech: window.__S.speech.length, cancels: window.__S.cancels, pop: document.getElementById('lesson-pop').classList.contains('hidden'), pl: document.querySelectorAll('.lq-line.is-playing').length }));
+        await sleep(p, 1500);
+        const R1 = await p.evaluate(() => ({ speech: window.__S.speech.length }));
+        ok(R0.st === 'idle' && R0.cancels >= 1 && R0.pop && R0.pl === 0, 'Atrás con la voz del sistema (circuito cortado): cierra, cancela la voz (speechSynthesis.cancel ×' + R0.cancels + ') y deja todo en reposo');
+        ok(R1.speech === R0.speech && srv.reqs.length === 4, 'Atrás con la voz del sistema: no se lee ninguna línea más y no se pide nada al servidor (' + R0.speech + ' habladas, ' + srv.reqs.length + ' pedidos)');
+        ok(errs.length === 0, 'Atrás con voz del sistema sin errores JS: ' + errs.join(' | '));
+        await ctx.close();
+    }
+
     // ═════════ 8. fetchTTS directo: GET → POST solo cuando corresponde ═════════
     const body = (text) => ({ text, lang: 'zh-CN', voice: 'f', speed: 1 });
     const probe = async (policy, text) => {
