@@ -10,6 +10,17 @@
 #   responde POST y GET en la ruta que sea (/api/tts, /tts o
 #   /api/index), así no depende del path interno.
 #
+# HOTFIX /api/tts 502 (oct-2026) — reintentos, semáforo y diagnóstico:
+#   · edge-tts >=7.3.1,<8 (requirements.txt): el servicio de Microsoft pasó al token
+#     Sec-MS-GEC «v2» y edge-tts 7.2.x quedó con «No audio was received».
+#   · Hasta 2 intentos (NoAudioReceived, 403, 5xx, WebSocket, timeout) con espera 0,4-0,8 s
+#     al azar; tope por intento ~8 s y total ~12 s (más holgado para textos largos).
+#   · Semáforo: 2 síntesis simultáneas por instancia; si no hay lugar en 4 s → 503 «busy».
+#   · Errores: Cache-Control no-store y {"error":"tts no disponible","codigo":"<corto>"}.
+#   · stderr: una línea por pedido, sin textos (voz, rate, largo, intento, resultado, excepción,
+#     duración, versión de edge-tts). GET sin parámetros → {ok, edge_tts}.
+#   api/index.py y api/tts.py llevan EL MISMO código (tests/api-tts falla si divergen).
+#
 # QUÉ CAMBIÓ EN v9.49 (voces 🇦🇷 argentina y 🇹🇼 taiwanesa):
 #   el mapa VOICES suma es-AR (Elena/Tomás) y zh-TW
 #   (HsiaoChen/YunJhe); el cliente las pide con lang es-AR/zh-TW
@@ -37,9 +48,13 @@
 #   200 { audio(b64), mime: "audio/mpeg", voice, speed, cached }
 #   GET  ?text=…&lang=…&voice=…&speed=… → mismo JSON + Cache-Control
 # ============================================================
+import asyncio
 import base64
 import io
 import json
+import random
+import sys
+import time
 from collections import OrderedDict
 
 import edge_tts
@@ -167,6 +182,169 @@ def _json_payload(payload, via_get):
     return JSONResponse(payload)
 
 
+# ------------------------------------------------------------
+# Hotfix 502 — reintentos, semáforo y registro (ver cabecera).
+# ------------------------------------------------------------
+MAX_ATTEMPTS = 2
+BACKOFF_MIN_S = 0.4
+BACKOFF_MAX_S = 0.8
+ATTEMPT_TIMEOUT_S = 8.0     # tope por intento (textos de ≤ SHORT_TEXT_CHARS)
+TOTAL_BUDGET_S = 12.0       # tope total por pedido (reintento incluido)
+MIN_RETRY_WINDOW_S = 1.0    # si queda menos que esto, no se reintenta
+SHORT_TEXT_CHARS = 160      # más allá (Podcast, Lector) el tope por intento crece con el largo
+MAX_ATTEMPT_TIMEOUT_S = 25.0
+MAX_CONCURRENT = 2          # síntesis simultáneas por instancia
+QUEUE_WAIT_S = 4.0          # espera máxima por un lugar; si se agota → 503 «busy»
+RETRY_AFTER_S = 2
+EDGE_TTS_MIN = (7, 3, 1)
+
+
+def _edge_tts_version():
+    try:
+        from importlib import metadata
+        return metadata.version("edge-tts")
+    except Exception:
+        return str(getattr(edge_tts, "__version__", "") or "desconocida")
+
+
+EDGE_TTS_VERSION = _edge_tts_version()
+
+
+def _version_tuple(v):
+    out = []
+    for part in str(v).split("."):
+        digits = "".join(ch for ch in part if ch.isdigit())
+        out.append(int(digits) if digits else 0)
+    return tuple(out)
+
+
+def _log(line):
+    """Una línea a stderr (Vercel la guarda en los logs). Nunca rompe el pedido."""
+    try:
+        print(line, file=sys.stderr, flush=True)
+    except Exception:
+        pass
+
+
+_log("tts-boot edge_tts=%s%s" % (
+    EDGE_TTS_VERSION,
+    "" if _version_tuple(EDGE_TTS_VERSION) >= EDGE_TTS_MIN else " AVISO=menor_a_7.3.1(token_v2)"))
+
+_SEM = None
+_SEM_LOOP = None
+
+
+def _semaphore():
+    """Un semáforo por event loop (en Vercel hay uno solo; los tests crean varios)."""
+    global _SEM, _SEM_LOOP
+    loop = asyncio.get_running_loop()
+    if _SEM is None or _SEM_LOOP is not loop:
+        _SEM = asyncio.Semaphore(MAX_CONCURRENT)
+        _SEM_LOOP = loop
+    return _SEM
+
+
+async def _acquire_slot():
+    """Devuelve el semáforo ya adquirido, o None si no hubo lugar en QUEUE_WAIT_S."""
+    sem = _semaphore()
+    task = asyncio.ensure_future(sem.acquire())
+    done, _ = await asyncio.wait({task}, timeout=QUEUE_WAIT_S)
+    if task in done:
+        return sem
+    task.cancel()
+    try:
+        await task
+        sem.release()  # se concedió justo antes de cancelar: no perder el lugar
+    except asyncio.CancelledError:
+        pass
+    return None
+
+
+class _EmptyAudio(Exception):
+    """edge-tts terminó sin error pero sin bytes de audio."""
+
+
+def _classify(exc):
+    """(codigo corto, ¿vale la pena reintentar?). Por NOMBRE de clase, sin importar aiohttp."""
+    names = {c.__name__ for c in type(exc).__mro__}
+    status = getattr(exc, "status", None)
+    if isinstance(exc, (asyncio.TimeoutError, TimeoutError)):
+        return "timeout", True
+    if names & {"NoAudioReceived", "_EmptyAudio"}:
+        return "sin_audio", True
+    if "ClientResponseError" in names:  # incluye el rechazo del handshake del WebSocket
+        if status == 403:
+            return "403", True
+        if isinstance(status, int) and status >= 500:
+            return "5xx", True
+        if status == 429:
+            return "limite", False
+        return "http_%s" % status, False
+    if names & {"WebSocketError", "ClientError", "ServerDisconnectedError"} or isinstance(exc, ConnectionError):
+        return "ws", True
+    if "SkewAdjustmentError" in names:
+        return "reloj", True
+    if names & {"UnexpectedResponse", "UnknownResponse"}:
+        return "respuesta", False
+    return "error", False
+
+
+def _budget(n_chars):
+    """(tope por intento, tope total) en segundos; crecen con el largo para no cortar el Podcast."""
+    attempt = ATTEMPT_TIMEOUT_S
+    if n_chars > SHORT_TEXT_CHARS:
+        attempt = min(MAX_ATTEMPT_TIMEOUT_S, attempt + (n_chars - SHORT_TEXT_CHARS) * 0.04)
+    return attempt, max(TOTAL_BUDGET_S, attempt + (TOTAL_BUDGET_S - ATTEMPT_TIMEOUT_S))
+
+
+async def synth_with_retry(text, voice_name, rate, want_boundaries):
+    """Hasta MAX_ATTEMPTS intentos. Devuelve (audio, boundaries, intentos, fallos, codigo|None).
+
+    fallos = nombres de las excepciones vistas. Si no hubo éxito: audio es None y codigo
+    es el de la última falla.
+    """
+    attempt_cap, total_cap = _budget(len(text))
+    t0 = time.monotonic()
+    fallos = []
+    codigo = "error"
+    for intento in range(1, MAX_ATTEMPTS + 1):
+        if intento > 1:
+            await asyncio.sleep(random.uniform(BACKOFF_MIN_S, BACKOFF_MAX_S))
+        restante = total_cap - (time.monotonic() - t0)
+        if intento > 1 and restante < MIN_RETRY_WINDOW_S:
+            return None, None, intento - 1, fallos, codigo
+        try:
+            audio, boundaries = await asyncio.wait_for(
+                synth_edge_bytes(text, voice_name, rate=rate, want_boundaries=want_boundaries),
+                timeout=min(attempt_cap, restante))
+            if not audio:
+                raise _EmptyAudio("sin bytes de audio")
+            return audio, boundaries, intento, fallos, None
+        except Exception as e:  # noqa: BLE001 — se clasifica y se decide si reintentar
+            codigo, reintentable = _classify(e)
+            fallos.append(type(e).__name__)
+            if not reintentable:
+                return None, None, intento, fallos, codigo
+    return None, None, MAX_ATTEMPTS, fallos, codigo
+
+
+def _error(codigo, status=502, retry_after=None):
+    headers = {"Cache-Control": "no-store"}
+    if retry_after:
+        headers["Retry-After"] = str(retry_after)
+    return JSONResponse({"error": "tts no disponible", "codigo": codigo}, status_code=status, headers=headers)
+
+
+def _plain_error(msg, status):
+    return JSONResponse({"error": msg}, status_code=status, headers={"Cache-Control": "no-store"})
+
+
+def _log_request(voice, rate, largo, intento, res, fallos, t0, cola_ms, via):
+    _log("tts voz=%s rate=%s largo=%d via=%s intento=%d res=%s exc=%s dur_ms=%d cola_ms=%d edge_tts=%s" % (
+        voice, rate, largo, via, intento, res, ",".join(fallos) or "-",
+        int((time.monotonic() - t0) * 1000), cola_ms, EDGE_TTS_VERSION))
+
+
 def speed_to_rate(speed):
     """0.85 → '-15%', 1.0 → '+0%', 1.2 → '+20%' (formato edge-tts)."""
     return f"{round((speed - 1) * 100):+d}%"
@@ -230,10 +408,10 @@ def _truthy(v):
 async def tts_endpoint(body, via_get=False):
     text = str(body.get("text") or "").strip()
     if not text:
-        return JSONResponse({"error": "text requerido"}, status_code=400)
+        return _plain_error("text requerido", 400)
     if via_get and len(text) > 400:
         # por GET solo viajan frases; textos largos → el cliente usa POST
-        return JSONResponse({"error": "text demasiado largo para GET"}, status_code=400)
+        return _plain_error("text demasiado largo para GET", 400)
     if len(text) > POST_TEXT_MAX:
         # v9.5x: tope también en POST (antes solo lo tenía GET). El pedido
         # legítimo más largo hoy es la lección completa del Podcast
@@ -249,7 +427,7 @@ async def tts_endpoint(body, via_get=False):
         # — ya no es un caso a cubrir acá. 2000 deja margen real sobre el
         # máximo legítimo de hoy (~700) sin aceptar un texto arbitrariamente
         # grande.
-        return JSONResponse({"error": "text demasiado largo"}, status_code=413)
+        return _plain_error("text demasiado largo", 413)
 
     try:
         speed = float(body.get("speed", 1) or 1)
@@ -267,35 +445,47 @@ async def tts_endpoint(body, via_get=False):
     lang, voice_name = _pick_voice(body)
     key = _cache_key(text, lang, voice_name, speed, want_boundaries)
 
-    # v9.44 — 1.ª capa: LRU en memoria (sirve sin re-sintetizar)
+    t0 = time.monotonic()
+    via = "get" if via_get else "post"
+    rate = speed_to_rate(speed)
+
+    # v9.44 — 1.ª capa: LRU en memoria (sirve sin re-sintetizar ni ocupar un lugar del semáforo)
     hit = _cache_get(key)
     if hit is not None:
         payload = dict(hit)
         payload["cached"] = True
+        _log_request(voice_name, rate, len(text), 0, "cache", [], t0, 0, via)
         return _json_payload(payload, via_get)
 
-    rate = speed_to_rate(speed)
-
+    slot = await _acquire_slot()
+    cola_ms = int((time.monotonic() - t0) * 1000)
+    if slot is None:
+        _log_request(voice_name, rate, len(text), 0, "busy", [], t0, cola_ms, via)
+        return _error("busy", status=503, retry_after=RETRY_AFTER_S)
     try:
         # v9.40: la velocidad se hornea EN la síntesis (sin eco en el cliente)
-        audio, boundaries = await synth_edge_bytes(text, voice_name, rate=rate, want_boundaries=want_boundaries)
-        payload = {
-            "audio": base64.b64encode(audio).decode("ascii"),
-            "mime": "audio/mpeg",
-            "voice": voice_name,
-            "speed": speed,  # ← eco: la app NO aplica playbackRate
-        }
-        if want_boundaries and boundaries:
-            payload["boundaries"] = boundaries  # [{text, offsetMs, durMs}, ...]
-        _cache_put(key, payload)
-        out = dict(payload)
-        out["cached"] = False
-        return _json_payload(out, via_get)
-    except Exception as e_edge:
-        return JSONResponse({
-            "error": "tts no disponible",
-            "detalle": str(e_edge)[:200],
-        }, status_code=502)
+        audio, boundaries, intentos, fallos, codigo = await synth_with_retry(
+            text, voice_name, rate, want_boundaries)
+    finally:
+        slot.release()
+
+    if audio is None:
+        _log_request(voice_name, rate, len(text), intentos, "error_" + codigo, fallos, t0, cola_ms, via)
+        return _error(codigo)
+
+    payload = {
+        "audio": base64.b64encode(audio).decode("ascii"),
+        "mime": "audio/mpeg",
+        "voice": voice_name,
+        "speed": speed,  # ← eco: la app NO aplica playbackRate
+    }
+    if want_boundaries and boundaries:
+        payload["boundaries"] = boundaries  # [{text, offsetMs, durMs}, ...]
+    _cache_put(key, payload)
+    out = dict(payload)
+    out["cached"] = False
+    _log_request(voice_name, rate, len(text), intentos, "ok", fallos, t0, cola_ms, via)
+    return _json_payload(out, via_get)
 
 
 # CATCH-ALL: responde POST en cualquier ruta (/api/tts, /tts, /api/index…)
@@ -320,11 +510,12 @@ async def catch_get(request: Request, full_path: str = ""):
             "karaoke": qp.get("karaoke") or "",
         }
         return await tts_endpoint(body, via_get=True)
-    return {
+    return JSONResponse({
         "ok": True,
+        "edge_tts": EDGE_TTS_VERSION,
         "service": "tts",
         "version": "v9.49",
         "cache": f"LRU memoria {_TTS_CACHE_MAX} audios + CDN (GET immutable)",
         "voices": "zh-CN · zh-TW (nuevo v9.49) · es-ES · es-AR (nuevo v9.49)",
         "hint": "GET ?text=…&lang=…&voice=…&speed=… | POST {text, lang, voice, speed}",
-    }
+    }, headers={"Cache-Control": "no-store"})

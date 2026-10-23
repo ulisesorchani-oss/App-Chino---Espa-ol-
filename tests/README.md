@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 28 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 29 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -66,7 +66,8 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (28) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (28, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-ninos.js` | no | no | no | solo Node |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
@@ -105,6 +106,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `segmentador` | corte de palabras (escritorio, sin `Intl.Segmenter` y Android simulado) |
 | `selector-nivel-botones` | selector de nivel de Aprender: opciones sin corte, colores, 320/360 px |
 | `tocfl-menu-lecciones` | menú TOCFL en la hoja de módulos y en Lecciones |
+| `api-tts` | `api/index.py` y `api/tts.py` con edge-tts simulado: reintentos, semáforo, errores, registro, y que los dos archivos no diverjan |
 | `voz-lecciones` | botones de voz/ciclo en lecciones, podcast y tarjetas de Hoy |
 
 ## Qué suites correr según lo que cambió
@@ -123,6 +125,7 @@ sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si t
 | **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen speak-es navegacion-tanda1 ninos-sonidos` |
 | **Escritura 简/繁** (`text-utils.js`, preferencia de escritura) | `node tests/run-all.js escritura- lecciones-tocfl-contraste segmentador lecturas-tocfl-b1 practica-lecturas check-readings` |
 | **Pinyin** (`pinyin-*.js`, interruptores de pinyin) | `node tests/run-all.js escritura-pinyin lecciones-nombres lecciones-tocfl-contraste lecturas-tocfl-b1 segmentador` |
+| **API de voz** (`api/index.py`, `api/tts.py`, `requirements.txt`) | `node tests/run-all.js api-tts` (también corre solo: `python3 -m unittest discover -s tests/api-tts -v`) |
 | **Niños** (`lessons-ninos.js`, `ninos-*.js`) | `node tests/run-all.js ninos` |
 | **Primer uso / onboarding** | `node tests/run-all.js onboarding` |
 

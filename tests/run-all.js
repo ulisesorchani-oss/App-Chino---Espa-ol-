@@ -47,9 +47,12 @@ const NOTAS = {
     // 'nombre': 'motivo'
 };
 
+// Suites que no usan el navegador (necesitan otra cosa)
+const NEEDS = { 'api-tts.test.js': 'Python 3 + fastapi (sin servidor, navegador ni red; edge-tts va simulado)' };
+
 function suitesDeTests() {
     return fs.readdirSync(__dirname).filter(f => /\.test\.js$/.test(f)).sort().map(f => ({
-        name: f.replace(/\.test\.js$/, ''), file: 'tests/' + f, needs: 'servidor local (lo levanta run-all) + Playwright + Chromium', servidor: true
+        name: f.replace(/\.test\.js$/, ''), file: 'tests/' + f, needs: NEEDS[f] || 'servidor local (lo levanta run-all) + Playwright + Chromium', servidor: !NEEDS[f]
     }));
 }
 
