@@ -158,7 +158,16 @@ function ttsGetUrl(body) {
         return TTS_API_URL + '?' + q.toString();
     } catch (e) { return null; }
 }
-function fetchTTS(body, timeoutMs) {
+// v9.5x (hotfix 502): el POST dejó de ser la "red de contención" de un GET que falló. Con el server caído
+// (502/503/504) un POST con el MISMO texto no arregla nada y duplicaba la carga (cada pedido fallido abría
+// otra síntesis en Microsoft). Ahora, si el texto cabe en GET:
+//   · 200 con la marca X-TTS-Audio → se usa;
+//   · 200 SIN la marca (server viejo que contestó el "tell") o 404/405/501 (server sin GET) → POST, como siempre;
+//   · cualquier otro estado (403, 429, 5xx…) o un error de red → se devuelve tal cual, SIN POST.
+// `opts.silent` evita el aviso rojo global: lo usa «Escuchar todo», que muestra su propio aviso.
+function fetchTTS(body, timeoutMs, opts) {
+    const silent = !!(opts && opts.silent);
+    const notify = () => { if (!silent) notifyTtsFallback(); };
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs || 15000);
     const post = () => fetch(TTS_API_URL, {
@@ -175,19 +184,20 @@ function fetchTTS(body, timeoutMs) {
             // el TTS realmente no responde, no para un límite que funciona como
             // se espera.
             if (res && (res.status === 413 || res.status === 429)) return res;
-            if (!res || !res.ok) notifyTtsFallback();
+            if (!res || !res.ok) notify();
             return res;
         }) // v9.41: 4xx/5xx visible
-        .catch((err) => { notifyTtsFallback(); throw err; }); // v9.41: red/timeout visible
+        .catch((err) => { notify(); throw err; }); // v9.41: red/timeout visible
     const getUrl = ttsGetUrl(body);
     if (!getUrl) return post().finally(() => clearTimeout(timer));
-    // v9.45: GET cacheable → se acepta SOLO si trae la marca de contrato
-    // X-TTS-Audio: 1 (un server viejo respondería el "tell" sin audio con
-    // 200 — sin la marca, la app se quedaría sin voz). Cualquier otra cosa
-    // (404/500/red/tell sin marca) lo salva el POST de siempre.
     return fetch(getUrl, { method: 'GET', signal: ctrl.signal })
-        .then((res) => (res && res.ok && res.headers.get('x-tts-audio') === '1') ? res : post())
-        .catch(() => post())
+        .then((res) => {
+            if (res && res.ok && res.headers.get('x-tts-audio') === '1') return res;
+            if (res && (res.ok || res.status === 404 || res.status === 405 || res.status === 501)) return post(); // server sin contrato GET
+            if (res && (res.status === 413 || res.status === 429)) return res; // límites propios: sin aviso rojo
+            notify(); // 403/5xx…: el POST con el mismo texto no ayuda
+            return res;
+        }, (err) => { notify(); throw err; }) // error de red o timeout: tampoco se duplica por POST
         .finally(() => clearTimeout(timer));
 }
 

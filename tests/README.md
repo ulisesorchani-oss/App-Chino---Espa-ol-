@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 29 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 30 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -66,7 +66,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (28, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (29, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-ninos.js` | no | no | no | solo Node |
@@ -96,6 +96,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `escritura-tradicional` | 6 pantallas de lección × escrituras 简/繁 |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `keywords-hsk`, `keywords-lecciones` | palabras clave de las lecciones (datos en `tests/data/`) |
+| `lecciones-escuchar-fallos` | «Escuchar todo» y `fetchTTS` con un servidor simulado que falla (`page.route`): precarga de 1, un reintento, sin POST tras un GET caído, corte de circuito con aviso, marca de línea y voz del sistema sin karaoke |
 | `lecciones-nombres`, `lecciones-tocfl-contraste` | nombres propios en lecciones (karaoke, audio, pinyin) y contraste en lecciones TOCFL |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
 | `navegacion-tanda1`, `navegacion-tanda2` | botón Atrás: capas apiladas, audio, tips, estadísticas ↔ respaldo |
@@ -122,7 +123,7 @@ sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si t
 | **Aprender** (pantalla, selector de nivel, hoja de módulos, Diaria) | `node tests/run-all.js aprender selector-nivel tocfl-menu hoja- diaria` |
 | **Entrenar / práctica / exámenes** (`exam-practice.js`, `exam-items.js`) | `node tests/run-all.js entrenar practica ordenar-banco` |
 | **Atrás** (`nav.js`, capas, hojas) | `node tests/run-all.js navegacion practica-atras hoja-modulos aprender-simple` |
-| **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen speak-es navegacion-tanda1 ninos-sonidos` |
+| **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen escuchar-fallos speak-es navegacion-tanda1 ninos-sonidos api-tts` |
 | **Escritura 简/繁** (`text-utils.js`, preferencia de escritura) | `node tests/run-all.js escritura- lecciones-tocfl-contraste segmentador lecturas-tocfl-b1 practica-lecturas check-readings` |
 | **Pinyin** (`pinyin-*.js`, interruptores de pinyin) | `node tests/run-all.js escritura-pinyin lecciones-nombres lecciones-tocfl-contraste lecturas-tocfl-b1 segmentador` |
 | **API de voz** (`api/index.py`, `api/tts.py`, `requirements.txt`) | `node tests/run-all.js api-tts` (también corre solo: `python3 -m unittest discover -s tests/api-tts -v`) |
