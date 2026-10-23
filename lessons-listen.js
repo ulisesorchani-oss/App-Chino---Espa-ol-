@@ -4,8 +4,13 @@
 // Un botón a ancho completo ARRIBA del texto (vista Leer de lessons-graduated.js; no en lecturas) que lee la
 // lección entera, línea por línea, con el patrón del Lector (reader.js) aplicado por línea:
 //   · UN solo <audio> reutilizado (src cambiante) y una promesa por línea (nunca se pide dos veces);
-//   · precarga de N+1 y N+2 apenas arranca N (tope 2); si la siguiente no llegó se muestra «⏳» y se espera;
-//   · un reintento silencioso a los 400 ms y, si también falla, voz del sistema SOLO para esa línea;
+//   · precarga de UNA línea (N+1) apenas arranca N; si la siguiente no llegó se muestra «⏳» y se espera;
+//   · UN solo reintento por línea (~0,8-1,2 s después) y, si también falla, voz del sistema para esa línea;
+//   · CORTE DE CIRCUITO: tras 2 líneas seguidas fallidas, el resto de la lección va con la voz del sistema, sin
+//     pedir nada más al servidor, y un aviso en la barra lo explica;
+//   · la línea resaltada avanza SOLO cuando el audio de la anterior terminó de verdad y el de la nueva empezó a sonar
+//     (un error del <audio> o de la voz del sistema no hace correr la marca);
+//   · con la voz del sistema se resalta la LÍNEA, nunca palabra por palabra (sin karaoke: ahí los tiempos no son fiables);
 //   · token de cancelación, blob URLs liberadas, estado idle | playing | paused (+ «⏳» mientras espera);
 //   · tras un 429 la precarga se pausa 5 s (no se insiste); la línea que suena se pide igual, una sola vez.
 // Texto = data-zh del 🔊 de cada línea (sin las etiquetas `who`, en 简/繁 según la lección); voz = voiceZhFor(lección);
@@ -20,17 +25,21 @@
 // ============================================================
 (function lessonsListenInit() {
     'use strict';
-    const AHEAD = 2;            // precarga: N+1 y N+2 (tope)
-    const RETRY_MS = 400;       // un reintento silencioso
+    const AHEAD = 1;            // precarga: solo N+1
+    const RETRY_MS = 800;       // un reintento silencioso, a los RETRY_MS (+ hasta RETRY_JITTER_MS al azar)
+    const RETRY_JITTER_MS = 400;
+    const CIRCUIT_AFTER = 2;    // líneas seguidas fallidas que cortan el circuito
+    const SPEECH_START_MS = 5000; // la voz del sistema que no arranca en este tiempo se da por muda
     const BACKOFF_MS = 5000;    // tras un 429, la precarga espera
     const MANUAL_SCROLL_MS = 3000;
-    const FETCH_TIMEOUT = 12000;
+    const FETCH_TIMEOUT = 14000; // el servidor ya reintenta por su cuenta (hasta ~12 s)
     const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
-    const stats = { body: 0, pop: 0, injected: 0, requests: 0, stops: {} };
+    const stats = { body: 0, pop: 0, injected: 0, requests: 0, tripped: 0, stops: {} };
     const L = {
         state: 'idle', tok: 0, lesson: null, lines: [], idx: -1, cache: new Map(), audio: null,
-        speed: 1, backoffUntil: 0, lastManual: 0, waiting: false, resume: null, tts: null, vz: 'f', lang: 'zh-CN'
+        speed: 1, backoffUntil: 0, lastManual: 0, waiting: false, resume: null, tts: null, vz: 'f', lang: 'zh-CN',
+        fails: 0, tripped: false, reported: 0, settled: new Map()
     };
     const $ = (id) => document.getElementById(id);
     const UI = () => window.LQ_UI;
@@ -71,13 +80,16 @@
     }
     const withIcon = (k, text) => { const i = icons()[k]; return i ? i + ' ' + text : text; };
 
+    const NOTE_TRIPPED = 'No llega la voz del servidor: sigo leyendo con la voz del sistema (suena más robótica).';
+
     // ───────────── botón (reposo | sonando) ─────────────
     function barHtml() {
         if (L.state === 'idle') return '<button type="button" class="lq-btn lq-primary ll-main" id="ll-play">' + withIcon('play', 'Escuchar todo') + '</button>';
         const wait = L.waiting ? (icons().wait ? icons().wait + ' ' : '') : '';
         const pausa = L.state === 'paused' ? withIcon('resume', 'Seguir') : withIcon('pause', 'Pausar');
         return '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-pause">' + wait + pausa + '</button>' +
-            '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-stop">' + withIcon('stop', 'Parar') + '</button>';
+            '<button type="button" class="lq-btn lq-ghost ll-half" id="ll-stop">' + withIcon('stop', 'Parar') + '</button>' +
+            (L.tripped ? '<p class="ll-note" id="ll-note" role="status">' + NOTE_TRIPPED + '</p>' : '');
     }
     function renderBar() {
         const bar = $('ll-bar');
@@ -107,12 +119,29 @@
     }
     async function fetchOnce(text, tok) {
         stats.requests++;
-        const resp = await fetchTTS(ttsBody(text, L.lang, L.vz), FETCH_TIMEOUT); // sin karaoke: GET cacheable, misma caché que el 🔊
+        // silent: el aviso rojo global no sale; «Escuchar todo» tiene el suyo (corte de circuito)
+        const resp = await fetchTTS(ttsBody(text, L.lang, L.vz), FETCH_TIMEOUT, { silent: true }); // sin karaoke: GET cacheable, misma caché que el 🔊
         if (resp && resp.status === 429) { const e = new Error('429'); e.code = 429; throw e; }
         if (!resp || !resp.ok) throw new Error('TTS http ' + (resp && resp.status));
         const data = await resp.json();
         if (!data || !data.audio) throw new Error('TTS sin audio');
         return { url: b64ToUrl(data), data: data, error: null };
+    }
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+    // Cuenta, EN ORDEN de línea, las que fallaron (después de su único reintento). 2 seguidas → se corta el circuito.
+    function settle(i, failed, tok) {
+        if (tok !== L.tok || L.tripped) return;
+        L.settled.set(i, failed);
+        while (L.settled.has(L.reported)) {
+            const f = L.settled.get(L.reported); L.settled.delete(L.reported); L.reported++;
+            L.fails = f ? L.fails + 1 : 0;
+            if (L.fails >= CIRCUIT_AFTER) { trip(); return; }
+        }
+    }
+    function trip() {
+        L.tripped = true; stats.tripped++;
+        Array.from(L.cache.keys()).forEach((k) => { if (k > L.idx) dropEntry(k); }); // lo que venía en camino ya no se usa
+        renderBar();
     }
     function entryFor(i) {
         let e = L.cache.get(i);
@@ -122,8 +151,8 @@
             try { return await fetchOnce(text, tok); }
             catch (err) {
                 if (err && err.code === 429) { L.backoffUntil = Date.now() + BACKOFF_MS; return { url: null, data: null, error: err }; } // no se insiste
-                await new Promise(r => setTimeout(r, RETRY_MS)); // un reintento silencioso
-                if (tok !== L.tok) return { url: null, data: null, error: err };
+                await wait(RETRY_MS + Math.random() * RETRY_JITTER_MS); // UN reintento silencioso
+                if (tok !== L.tok || L.tripped) return { url: null, data: null, error: err };
                 try { return await fetchOnce(text, tok); }
                 catch (err2) {
                     if (err2 && err2.code === 429) L.backoffUntil = Date.now() + BACKOFF_MS;
@@ -131,18 +160,23 @@
                 }
             }
         })();
-        e = { p: p, speed: speed, ready: false, entry: null };
-        p.then((v) => { e.ready = true; e.entry = v; if (tok !== L.tok && v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } } });
+        e = { p: p, speed: speed, ready: false, entry: null, dropped: false };
+        p.then((v) => {
+            e.ready = true; e.entry = v;
+            if (tok !== L.tok && v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } return; }
+            if (!e.dropped) settle(i, !v || !!v.error || !v.url, tok);
+        });
         L.cache.set(i, e);
         return e;
     }
     function dropEntry(i) {
         const e = L.cache.get(i); if (!e) return;
+        e.dropped = true;
         L.cache.delete(i);
         e.p.then((v) => { if (v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } } });
     }
     function preload(cur) {
-        if (Date.now() < L.backoffUntil) return; // tras un 429 la precarga espera 5 s
+        if (L.tripped || Date.now() < L.backoffUntil) return; // tras un 429 la precarga espera 5 s; con el circuito cortado no se pide nada
         for (let k = 1; k <= AHEAD; k++) if (cur + k < L.lines.length) entryFor(cur + k);
     }
     // si cambió la velocidad: lo precargado desde `from` a la velocidad vieja se descarta (rige desde la línea siguiente)
@@ -171,47 +205,79 @@
         if (L.state !== 'paused') return Promise.resolve();
         return new Promise((res) => { L.resume = () => { L.resume = null; res(); }; });
     }
-    function speakSystem(text, tok, el) {
+    // Tiempo estimado de lectura (para no correr la marca cuando no hay audio real que esperar)
+    const dwell = (text) => wait(Math.min(8000, Math.max(1200, text.length * 220 / Math.max(0.5, speedNow()))));
+    // Voz del sistema para UNA línea. Se resalta la línea (markLine), NUNCA palabra por palabra: sin KARA.
+    // Resuelve cuando la voz terminó de verdad; si no pudo hablar, espera lo que habría tardado en leerse.
+    function speakSystem(i, tok) {
+        const text = L.lines[i].text;
         return new Promise((resolve) => {
-            if (!('speechSynthesis' in window)) { resolve(); return; }
+            let started = false, done = false, muda = false, wd = 0;
+            const fin = () => { if (done) return; done = true; clearTimeout(wd); L.tts = null; resolve(); };
+            const mudo = () => { if (muda || done) return; muda = true; markLine(i); dwell(text).then(fin); }; // sin voz: la marca se queda el tiempo de lectura
+            if (!('speechSynthesis' in window)) { mudo(); return; }
             const u = new SpeechSynthesisUtterance(text);
             u.lang = L.lang; u.rate = speedNow();
             try { if (typeof sysVoiceFor === 'function') { const sv = sysVoiceFor(L.lang, L.vz); if (sv) u.voice = sv; } } catch (e) { /* sin voz */ }
-            u.onend = () => resolve(); u.onerror = () => resolve();
+            u.onstart = () => { if (muda) return; started = true; clearTimeout(wd); markLine(i); };
+            u.onend = () => { if (muda) return; if (!started) markLine(i); fin(); };
+            u.onerror = (ev) => {
+                if (muda) return; // ya la dimos por muda (el cancel() de abajo dispara este evento)
+                if (tok !== L.tok || (ev && (ev.error === 'canceled' || ev.error === 'interrupted'))) { fin(); return; } // lo cortamos nosotros
+                if (!started) { mudo(); return; }
+                fin();
+            };
+            wd = setTimeout(() => { if (!started && !done) { try { speechSynthesis.cancel(); } catch (e) { /* noop */ } mudo(); } }, SPEECH_START_MS);
             L.tts = u;
-            try { if (typeof KARA !== 'undefined') KARA.withTts(u, text, u.rate); } catch (e) { /* noop */ }
             speechSynthesis.speak(u);
         });
     }
     async function playEntry(i, ent, tok) {
         const line = L.lines[i];
+        if (!ent || ent.error || !ent.url) { await speakSystem(i, tok); return; }
         try { if (typeof KARA !== 'undefined') KARA.prepare(line.el); } catch (e) { /* noop */ }
-        if (!ent || ent.error || !ent.url) { await speakSystem(line.text, tok, line.el); L.tts = null; return; }
         const a = audioEl();
         a.src = ent.url;
         try { applyTtsSpeed(a, ent.data); } catch (e) { /* noop */ }
-        const ended = new Promise((res) => {
-            const done = () => { a.removeEventListener('ended', done); a.removeEventListener('error', done); res(); };
-            a.addEventListener('ended', done); a.addEventListener('error', done);
+        // «terminó de verdad» = evento 'ended'. Un 'error' del <audio> NO es un fin: la línea se lee con la voz del sistema.
+        const fin = new Promise((res) => {
+            const ok = () => { a.removeEventListener('ended', ok); a.removeEventListener('error', mal); res('ended'); };
+            const mal = () => { a.removeEventListener('ended', ok); a.removeEventListener('error', mal); res('error'); };
+            a.addEventListener('ended', ok); a.addEventListener('error', mal);
         });
-        try { await a.play(); } catch (e) { /* autoplay bloqueado: seguimos */ }
+        let sonando = true, r = 'ended';
+        try {
+            try { await a.play(); } catch (e) { sonando = false; } // autoplay bloqueado o fuente inválida
+            if (tok !== L.tok) return;
+            if (!sonando) r = 'error';
+            else {
+                markLine(i); // recién ahora suena esta línea: la marca avanza
+                try { if (typeof KARA !== 'undefined') KARA.withAudio(a, line.text); } catch (e) { /* noop */ }
+                r = await fin; // pausar no dispara 'ended'
+            }
+        } finally { try { URL.revokeObjectURL(ent.url); } catch (e) { /* ya */ } }
         if (tok !== L.tok) return;
-        try { if (typeof KARA !== 'undefined') KARA.withAudio(a, line.text); } catch (e) { /* noop */ }
-        await ended; // pausar no dispara 'ended'
-        try { URL.revokeObjectURL(ent.url); } catch (e) { /* ya */ }
+        if (r === 'error') { try { a.pause(); } catch (e) { /* noop */ } await speakSystem(i, tok); }
     }
     async function run(tok) {
         for (let i = 0; i < L.lines.length; i++) {
             if (tok !== L.tok) return;
             L.idx = i;
-            markLine(i);
             syncSpeed(i);
-            const mine = entryFor(i);
-            preload(i);
             let ent;
-            if (!mine.ready) { L.waiting = true; renderBar(); ent = await mine.p; L.waiting = false; if (tok !== L.tok) return; renderBar(); }
-            else ent = mine.entry;
-            L.cache.delete(i);
+            if (L.tripped) { ent = { url: null, data: null, error: new Error('circuito') }; } // sin pedir nada más
+            else {
+                const mine = entryFor(i);
+                preload(i);
+                let v;
+                if (!mine.ready) { L.waiting = true; renderBar(); v = await mine.p; L.waiting = false; if (tok !== L.tok) return; renderBar(); }
+                else v = mine.entry;
+                L.cache.delete(i);
+                if (L.tripped) { // el circuito se cortó mientras esperaba: aunque haya llegado, el resto va con la voz del sistema
+                    if (v && v.url) { try { URL.revokeObjectURL(v.url); } catch (e) { /* ya */ } }
+                    ent = { url: null, data: null, error: new Error('circuito') };
+                } else ent = v;
+            }
             if (tok !== L.tok) return;
             await waitWhilePaused(tok);
             if (tok !== L.tok) return;
@@ -232,6 +298,7 @@
         const a = audioEl();
         try { a.src = SILENT_WAV; const pr = a.play(); if (pr && pr.catch) pr.catch(() => { }); } catch (e) { /* desbloqueo del audio dentro del toque */ }
         L.lesson = lesson; L.lines = lines; L.idx = -1; L.cache = new Map(); L.backoffUntil = 0; L.waiting = false; L.resume = null;
+        L.fails = 0; L.tripped = false; L.reported = 0; L.settled = new Map();
         L.vz = (typeof voiceZhFor === 'function') ? voiceZhFor(lesson) : 'f';
         L.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', L.vz) : 'zh-CN';
         L.speed = speedNow();
@@ -245,7 +312,7 @@
         renderBar();
     }
     function reset() {
-        L.state = 'idle'; L.idx = -1; L.waiting = false;
+        L.state = 'idle'; L.idx = -1; L.waiting = false; L.tripped = false; L.fails = 0; L.reported = 0; L.settled = new Map();
         L.cache.forEach((e) => { e.p.then((v) => { if (v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } } }); });
         L.cache.clear();
         document.querySelectorAll('.lq-line.is-playing').forEach(el => el.classList.remove('is-playing'));
@@ -305,5 +372,5 @@
     else boot();
 
     // setIcons: true = todos los iconos; false = solo texto; undefined = detectar la fuente (lo normal). hasGlyph se expone para las pruebas.
-    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, config: { AHEAD, RETRY_MS, BACKOFF_MS, MANUAL_SCROLL_MS } };
+    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, get tripped() { return L.tripped; }, config: { AHEAD, RETRY_MS, RETRY_JITTER_MS, CIRCUIT_AFTER, BACKOFF_MS, MANUAL_SCROLL_MS } };
 })();

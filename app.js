@@ -734,7 +734,7 @@ const UI_STRINGS = {
     srsEmpty: 'Empezá a practicar y armo tu repaso', srsDueN: '{n} para repasar hoy',
     srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
     gradeNoReturn: 'no vuelve', gradeTomorrow: 'mañana', // v9.38: subtítulos diferenciados Bien/Fácil
-    ttsDown: '⚠️ Servidor de voz no disponible — estoy usando la voz del sistema (suena más robótica). Revisá api/tts.py en Vercel.', // v9.41: el fallback deja de ser silencioso
+    ttsDown: '⚠️ Servidor de voz no disponible — estoy usando la voz del sistema (suena más robótica).', // v9.41: el fallback deja de ser silencioso
     hintTone: 'Casi: revisá el tono.', hintHomophone: 'El sonido está bien, el carácter no.',
     hintPinyinOk: 'El pinyin está bien: ahora escribilo en caracteres.',
     hintAccent: 'Casi: revisá los acentos.', hintOneChar: 'Un carácter no coincide:', hintOneLetter: 'Una letra no coincide:',
@@ -816,7 +816,7 @@ const UI_STRINGS = {
     srsEmpty: '开始练习，我来安排复习', srsDueN: '今天要复习 {n} 张',
     srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
     gradeNoReturn: '不再出现', gradeTomorrow: '明天', // v9.38: 中文副标题
-    ttsDown: '⚠️ 语音服务器不可用——暂时使用系统语音（比较机械）。请检查 Vercel 上的 api/tts.py。', // v9.41: 备用语音不再悄无声息
+    ttsDown: '⚠️ 语音服务器不可用——暂时使用系统语音（比较机械）。', // v9.41: 备用语音不再悄无声息
     hintTone: '差一点：注意声调。', hintHomophone: '读音对了，字不对。',
     hintPinyinOk: '拼音对了：请写汉字。',
     hintAccent: '差一点：注意重音符号。', hintOneChar: '有一个字不对：', hintOneLetter: '有一个字母不对：',

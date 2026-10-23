@@ -7097,6 +7097,9 @@ body.paper-mode .rd-par-blank { color: #b45309; border-bottom-color: #b45309; }
 .ll-bar { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0 0 12px; }
 .ll-bar.is-on { grid-template-columns: 1fr 1fr; }
 .ll-bar .lq-btn { min-height: 48px; white-space: nowrap; }
+.ll-note { grid-column: 1 / -1; margin: 0; padding: 8px 12px; border: 1px solid #b45309; border-radius: 10px; background: #fff7ed; color: #7c2d12; font-size: .88rem; line-height: 1.4; }
+body.dark-mode .ll-note { background: #422006; border-color: #f59e0b; color: #fde68a; }
+body.paper-mode .ll-note { background: #fdf0d2; border-color: #b45309; color: #5b3a0a; }
 .lq-line.is-playing { border-color: #7c5cf0; background: #f5f3ff; box-shadow: 0 0 0 3px rgba(124, 92, 240, .22); }
 body.dark-mode .lq-line.is-playing { border-color: #a5b4fc; background: #312e81; box-shadow: 0 0 0 3px rgba(165, 180, 252, .3); }
 body.paper-mode .lq-line.is-playing { border-color: #b45309; background: #fdf0d2; box-shadow: 0 0 0 3px rgba(180, 83, 9, .25); }

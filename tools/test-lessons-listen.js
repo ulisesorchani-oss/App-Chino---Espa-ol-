@@ -8,7 +8,7 @@
 // Qué verifica:
 //   DISPOSICIÓN (320 y 360 px × claro/papel/oscuro): botón a ancho completo arriba del texto, reposo = 1 botón; sonando/pausado = 2 botones
 //     «⏸ Pausar / ▶ Seguir» y «⏹ Parar» de ≥ 48 px lado a lado, sin desborde; ausente en lecturas y en el glosario
-//   REPRODUCCIÓN  latencia 500 ms: un único <audio>; precarga N+1 y N+2 (tope 2) sin pedir nada dos veces; texto = data-zh (sin who); voz/velocidad
+//   REPRODUCCIÓN  latencia 500 ms: un único <audio>; precarga SOLO N+1 (tope 1) sin pedir nada dos veces; texto = data-zh (sin who); voz/velocidad
 //                 actuales; SIN karaoke=1; al terminar vuelve al reposo; 0 disparos de observadores durante la escucha
 //   LATENCIA 2 s  «⏳» y espera
 //   429           la línea cae a voz del sistema sin reintento y la precarga espera 5 s
@@ -101,7 +101,7 @@ const STATS_OUT = [];
         ovf: document.documentElement.scrollWidth > innerWidth + 1, kind: window.LQ_UI.state.lesson.kind || null, top: r.top }; });
     ok(L0.bar && L0.above && L0.n === 1 && L0.txt === '▶️ Escuchar todo' && L0.h >= 48 && Math.abs(L0.full - L0.cw) <= 2 && !L0.ovf && L0.kind === null, tag + ' reposo: un solo botón «▶️ Escuchar todo», ancho completo, ≥ 48 px, arriba del texto ' + JSON.stringify([L0.n, L0.h, Math.round(L0.full), Math.round(L0.cw)]));
     if (SHOTS) await p.screenshot({ path: path.join(SHOTS, 'reposo-' + w + '-' + th + '.png') });
-    await p.click('#ll-play'); await sleep(p, 1500);
+    await p.click('#ll-play'); await p.waitForSelector('.lq-line.is-playing', { timeout: 8000 }); await sleep(p, 300); // la marca sale cuando el audio de verdad empieza a sonar
     const L1 = await p.evaluate(() => { const bt = [...document.querySelectorAll('#ll-bar .lq-btn')].map(b => ({ t: b.textContent, h: b.getBoundingClientRect().height, l: b.getBoundingClientRect().left, r: b.getBoundingClientRect().right, cut: b.scrollWidth > b.clientWidth + 1 }));
       const bar = document.getElementById('ll-bar').getBoundingClientRect();
       return { bt, inside: bt.every(x => x.l >= bar.left - 1 && x.r <= bar.right + 1), side: bt.length === 2 && bt[0].r <= bt[1].l + 1, ovf: document.documentElement.scrollWidth > innerWidth + 1, st: LQ_LISTEN.state, play: document.querySelectorAll('.lq-line.is-playing').length }; });
@@ -172,10 +172,10 @@ const STATS_OUT = [];
     await waitIdle(p);
     const R = await p.evaluate(() => ({ log: window.__T.log, plays: window.__T.plays.size, prepared: window.__T.prepared, withAudio: window.__T.withAudio, bar: document.querySelectorAll('#ll-bar .lq-btn').length, pl: document.querySelectorAll('.lq-line.is-playing').length }));
     const after = await state(p);
-    ok(early.n === 3 && early.texts.join('|') === texts.slice(0, 3).join('|'), 'reproducción: arranca pidiendo la línea 1 y precargando N+1 y N+2 (3 pedidos) ' + JSON.stringify(early.n));
+    ok(early.n === 2 && early.texts.join('|') === texts.slice(0, 2).join('|'), 'reproducción: arranca pidiendo la línea 1 y precargando SOLO la 2 (2 pedidos) ' + JSON.stringify(early.n));
     ok(R.log.length === texts.length && R.log.map(x => x.text).join('|') === texts.join('|'), 'reproducción: un pedido por línea, en orden, sin repetir (' + R.log.length + ' de ' + texts.length + ') y con el texto del 🔊 (data-zh)');
     const look = R.log.map((x, i) => i - Math.max(0, x.idx));
-    ok(Math.max.apply(null, look) <= 2, 'reproducción: la precarga nunca pasa de 2 líneas adelante ' + Math.max.apply(null, look));
+    ok(Math.max.apply(null, look) <= 1, 'reproducción: la precarga nunca pasa de 1 línea adelante ' + Math.max.apply(null, look));
     ok(R.plays === 1, 'reproducción: UN solo <audio> reutilizado (' + R.plays + ')');
     ok(R.log.every(x => x.voice === vz && x.lang === lang && x.speed === 1 && x.karaoke === undefined), 'reproducción: voz por familia (' + vz + '/' + lang + '), velocidad actual y SIN karaoke=1 (ruta GET cacheable)');
     ok(R.prepared === texts.length && R.withAudio === texts.length, 'reproducción con karaoke encendido: usa el KARA existente por línea (' + R.prepared + '/' + R.withAudio + ')');
@@ -247,8 +247,8 @@ const STATS_OUT = [];
     const V = await p.evaluate(() => window.__T.log);
     const at = (i) => V.filter(x => x.text === texts[i]);
     ok(sp !== 1 && at(2).length === 1 && at(2)[0].speed === 1, 'velocidad: la línea que suena (3.ª) sigue a la velocidad vieja (' + at(2).map(x => x.speed) + ') y no se vuelve a pedir');
-    ok(at(3).length === 2 && at(3)[0].speed === 1 && at(3)[1].speed === sp && at(4).length === 2 && at(4)[1].speed === sp, 'velocidad: las precargadas (líneas 4 y 5) se DESCARTAN y se piden a ' + sp + 'x ' + JSON.stringify([at(3).map(x => x.speed), at(4).map(x => x.speed)]));
-    ok(texts.slice(5).every((t, k) => at(5 + k).length === 1 && at(5 + k)[0].speed === sp), 'velocidad: desde la línea siguiente todo sale a la velocidad nueva');
+    ok(at(3).length === 2 && at(3)[0].speed === 1 && at(3)[1].speed === sp && at(4).length === 1 && at(4)[0].speed === sp, 'velocidad: la precargada (línea 4) se DESCARTA y se pide a ' + sp + 'x; la 5.ª ya sale a la velocidad nueva ' + JSON.stringify([at(3).map(x => x.speed), at(4).map(x => x.speed)]));
+    ok(texts.slice(4).every((t, k) => at(4 + k).length === 1 && at(4 + k)[0].speed === sp), 'velocidad: desde la línea siguiente todo sale a la velocidad nueva');
     ok(errs.length === 0, 'velocidad sin errores JS');
     await ctx.close();
   }
