@@ -23,4 +23,4 @@ for(const w of [360,320]) for(const th of ['light','dark','paper']) for(const lv
  ok(!B.errs.length,tag+' sin errores JS');
  if(A&&th==='light'&&lv==='tocfl:Prep')console.log(w+'px: antes «'+A.r.map(x=>x.shown).join('» «')+'» (corte TOCFL: '+A.r[1].opts.filter(o=>o.w>A.r[1].avail).map(o=>o.t).join(', ')+') → ahora «'+B.r.map(x=>(x.tag?x.tag.txt+' / ':'')+x.shown).join('» «')+'», alto '+B.r[0].h+' px');
 }
-await b.close();console.log('comprobaciones '+n+' · FAILS '+fails);})();
+await b.close();console.log('comprobaciones '+n+' · FAILS '+fails);if(!REF)console.log('PARCIAL: comparación de colores/bordes contra otra copia omitida (falta BASE_URL_REF)');})();

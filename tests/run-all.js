@@ -3,13 +3,18 @@
 //
 //   node tests/run-all.js              todas
 //   node tests/run-all.js ninos hsk    solo las que contienen alguno de esos textos en el nombre
-//   node tests/run-all.js --list       lista las suites y qué necesita cada una
+//   node tests/run-all.js --list [filtro]  lista las suites (las que coinciden con el filtro) y qué necesita cada una
+//   node tests/run-all.js --permitir-parciales   no falla (código 3) por suites parciales/omitidas
 //   TIMEOUT_S=300 node tests/run-all.js   tope por suite (por defecto 900 s)
 //
 // Sin falsos verdes: una suite es VERDE solo si terminó con código 0, informó su cantidad de
-// comprobaciones (> 0), no imprimió ningún fallo y mostró su marca de «todo bien». Si falla, da
-// timeout, se cae, no informa comprobaciones o no puede correr (falta una dependencia) es ROJA.
-// El código de salida es 0 solo si TODAS están verdes.
+// comprobaciones (> 0), no imprimió ningún fallo, mostró su marca de «todo bien» y NO declaró que
+// salteó algo. Si falla, da timeout, se cae o no informa comprobaciones es ROJA.
+//   · PARCIAL: la suite corrió bien pero salteó parte (imprime una línea «PARCIAL: motivo»).
+//   · OMITIDA: no se pudo correr por una dependencia que falta (o imprime «OMITIDA: motivo»).
+// Ninguna de las dos se muestra jamás como verde; el motivo queda en la tabla.
+// Código de salida: 0 = todo verde · 1 = hay alguna ROJA · 3 = sin rojas pero con PARCIAL/OMITIDA
+// (con --permitir-parciales, 3 pasa a 0: para uso explícito, p. ej. un CI sin OpenCC).
 //
 // Las suites de tests/*.test.js necesitan la app servida por HTTP: este script levanta un servidor
 // estático local en un puerto libre y se lo pasa por BASE_URL. Las de tools/ levantan el suyo.
@@ -30,7 +35,8 @@ const TOOLS = [
     { name: 'tools/check-readings', file: 'tools/check-readings.js', needs: 'Playwright + Chromium + Python con «pip install opencc»', pre: 'opencc', cuenta: /(\d+) lecturas v2/ },
     { name: 'tools/test-classics-cq', file: 'tools/test-classics-cq.js', needs: 'Playwright + Chromium' },
     { name: 'tools/test-speak-es', file: 'tools/test-speak-es.js', needs: 'Playwright + Chromium' },
-    { name: 'tools/test-dele-layout', file: 'tools/test-dele-layout.js', needs: 'Playwright + Chromium' },
+    { name: 'tools/test-dele-layout', file: 'tools/test-dele-layout.js', needs: 'Playwright + Chromium',
+      parcialSi: env => env.SKIP_CONTRAST ? 'contraste omitido (SKIP_CONTRAST=1)' : '' },
     { name: 'tools/test-lecturas-ui', file: 'tools/test-lecturas-ui.js', needs: 'Playwright + Chromium' },
     { name: 'tools/test-lessons-listen', file: 'tools/test-lessons-listen.js', needs: 'Playwright + Chromium' }
 ];
@@ -92,7 +98,13 @@ function analizar(salida, extra) {
     if (lineasFail.length) malas.push(lineasFail.length + ' línea(s) FAIL');
     if (/\b(?:TimeoutError|Unhandled|UnhandledPromiseRejection|Cannot find module)\b/.test(txt)) malas.push('excepción en la salida');
     if (malas.length) falla = malas.join(' · ');
-    return { n, marca, falla };
+    // Lo que la suite declara que salteó: «PARCIAL: motivo» / «OMITIDA: motivo» (una línea por motivo)
+    const dec = { PARCIAL: [], OMITIDA: [] };
+    for (const l of txt.split('\n')) {
+        const mm = l.match(/^\s*(PARCIAL|OMITIDA)\s*[:—-]\s*(.+?)\s*$/);
+        if (mm && !dec[mm[1]].includes(mm[2])) dec[mm[1]].push(mm[2]);
+    }
+    return { n, marca, falla, parcial: dec.PARCIAL, omitida: dec.OMITIDA };
 }
 
 function correr(s, env) {
@@ -116,12 +128,12 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
 (async () => {
     const args = process.argv.slice(2);
     let todas = suitesDeTests().concat(TOOLS);
+    const filtros = args.filter(a => !a.startsWith('--'));
+    if (filtros.length) todas = todas.filter(s => filtros.some(f => s.name.includes(f)));
     if (args.includes('--list')) {
         todas.forEach(s => console.log(pad(s.name, 30) + ' ' + pad(s.file, 48) + ' ' + s.needs + (NOTAS[s.name] ? '  [' + NOTAS[s.name] + ']' : '')));
         return;
     }
-    const filtros = args.filter(a => !a.startsWith('--'));
-    if (filtros.length) todas = todas.filter(s => filtros.some(f => s.name.includes(f)));
     if (!todas.length) { console.error('Ninguna suite coincide con: ' + filtros.join(' ')); process.exit(2); }
 
     let srv = null;
@@ -138,7 +150,7 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
         process.stdout.write('… ' + s.name + ' ');
         let r;
         if (s.pre && !tieneModuloPython(s.pre)) {
-            r = { estado: 'ROJO', n: null, nota: 'no puede correr: falta «pip install ' + s.pre + '»', seg: 0 };
+            r = { estado: 'OMITIDA', n: null, nota: 'no se corrió: falta «pip install ' + s.pre + '» (sin eso no hay verificación de las lecturas)', seg: 0 };
         } else {
             const x = await correr(s, env);
             const a = analizar(x.salida, s);
@@ -146,8 +158,14 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
             if (x.vencio) { estado = 'ROJO'; nota = 'TIMEOUT (' + TIMEOUT_MS / 1000 + ' s)'; }
             else if (x.codigo !== 0) { estado = 'ROJO'; nota = 'salió con código ' + (x.codigo === null ? x.senal : x.codigo) + (a.falla ? ' · ' + a.falla : ''); }
             else if (a.falla) { estado = 'ROJO'; nota = a.falla; }
+            else if (a.omitida.length) { estado = 'OMITIDA'; nota = a.omitida.join(' · '); }
             else if (!a.n) { estado = 'ROJO'; nota = 'no informó comprobaciones (no se puede dar por verde)'; }
             else if (!a.marca) { estado = 'ROJO'; nota = 'no mostró su marca de «todo bien»'; }
+            else {
+                const motivos = a.parcial.slice();
+                if (s.parcialSi && s.parcialSi(env)) motivos.push(s.parcialSi(env));
+                if (motivos.length) { estado = 'PARCIAL'; nota = motivos.join(' · '); }
+            }
             r = { estado, n: a.n, nota, seg: x.seg, cola: x.salida.trim().split('\n').slice(-12).join('\n') };
         }
         if (NOTAS[s.name]) r.nota = (r.nota ? r.nota + ' · ' : '') + 'NOTA: ' + NOTAS[s.name];
@@ -160,14 +178,18 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
     console.log('\n' + pad('SUITE', w) + '  ' + pad('COMPROBACIONES', 14) + '  RESULTADO');
     console.log('-'.repeat(w + 40));
     for (const f of filas) {
-        const marca = f.estado === 'VERDE' ? '🟢 VERDE' : '🔴 ROJO';
+        const marca = { VERDE: '🟢 VERDE', PARCIAL: '🟡 PARCIAL', OMITIDA: '🟡 OMITIDA', ROJO: '🔴 ROJO' }[f.estado];
         console.log(pad(f.s.name, w) + '  ' + pad(f.n === null || f.n === undefined ? '—' : f.n, 14) + '  ' + marca + (f.nota ? ' — ' + f.nota : ''));
     }
-    const rojas = filas.filter(f => f.estado !== 'VERDE');
+    const cuenta = e => filas.filter(f => f.estado === e).length;
+    const rojas = filas.filter(f => f.estado === 'ROJO');
     const total = filas.reduce((a, f) => a + (f.n || 0), 0);
-    console.log('\n' + filas.length + ' suites · ' + total + ' comprobaciones · ' + (filas.length - rojas.length) + ' verdes · ' + rojas.length + ' rojas');
+    console.log('\n' + filas.length + ' suites · ' + total + ' comprobaciones · ' + cuenta('VERDE') + ' verdes · ' + cuenta('PARCIAL') + ' parciales · '
+        + cuenta('OMITIDA') + ' omitidas · ' + rojas.length + ' rojas');
+    if (!rojas.length && (cuenta('PARCIAL') || cuenta('OMITIDA'))) console.log('Sin rojas, pero NO es todo verde: hay suites parciales/omitidas (ver los motivos arriba).');
     for (const f of rojas) {
         console.log('\n--- ' + f.s.name + ' (' + f.s.file + ') — últimas líneas ---\n' + (f.cola || f.nota));
     }
-    process.exit(rojas.length ? 1 : 0);
+    const incompletas = cuenta('PARCIAL') + cuenta('OMITIDA');
+    process.exit(rojas.length ? 1 : (incompletas && !args.includes('--permitir-parciales') ? 3 : 0));
 })();

@@ -59,7 +59,7 @@ const noErr = (errs) => errs.filter((e) => !/localStorage/.test(e));
         try { await opener(page); } catch (e) { check(name + ': se pudo abrir', false, e.message.split('\n')[0]); await ctx.close(); continue; }
         await page.waitForTimeout(400);
         const st = await stack(page);
-        if (id === 'install-help' && !(await openLayers(page)).includes('install-help')) { console.log('     (' + name + ': el navegador ofreció la instalación nativa; no aplica)'); await ctx.close(); continue; }
+        if (id === 'install-help' && !(await openLayers(page)).includes('install-help')) { console.log('PARCIAL: ' + name + ': el navegador ofreció la instalación nativa; no se probó esa capa'); await ctx.close(); continue; }
         check(name + ': abre y apila', JSON.stringify(st) === JSON.stringify([id]), JSON.stringify(st));
         await back(page);
         check(name + ': Atrás cierra y sigue en la app', (await openLayers(page)).length === 0 && inApp(page) && (await stack(page)).length === 0, JSON.stringify(await openLayers(page)));
@@ -131,7 +131,7 @@ const noErr = (errs) => errs.filter((e) => !/localStorage/.test(e));
         const { ctx, page, errs } = await setup(browser, { firstVisit: true });
         await page.waitForTimeout(800);
         const ol = await openLayers(page);
-        if (!ol.includes('guide-pop')) { console.log('     (la guía no se abrió sola en esta carga)'); }
+        if (!ol.includes('guide-pop')) { console.log('PARCIAL: la guía no se abrió sola en esta carga; no se probó su Atrás'); }
         else {
             check('E guía automática: sin entrada antes de tocarla', (await stack(page)).length === 0, JSON.stringify(await stack(page)));
             await page.locator('#guide-body .ob-title').click(); await page.waitForTimeout(400);

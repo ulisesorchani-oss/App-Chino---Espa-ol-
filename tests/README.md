@@ -20,17 +20,26 @@ ajustes-velocidad     69              🟢 VERDE
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de
-comprobaciones (mayor que 0), no imprimió ningún `FAIL`/`FALLAS`/excepción y mostró su marca de «todo bien».
-Si falla, da *timeout* (900 s por suite; `TIMEOUT_S=300` lo cambia), se cae, no informa comprobaciones o no puede
-correr por una dependencia faltante, queda **ROJA** con el motivo y las últimas líneas de su salida.
-El código de salida es 0 solo si todas son verdes (sirve para CI). Tarda unos 25–30 minutos en total.
+comprobaciones (mayor que 0), no imprimió ningún `FAIL`/`FALLAS`/excepción, mostró su marca de «todo bien»
+y no declaró que salteó algo. Cada resultado es uno de estos:
+
+| Resultado | Cuándo |
+|---|---|
+| 🟢 VERDE | corrió completa y todo pasó |
+| 🟡 PARCIAL | corrió y pasó, pero salteó una parte (la suite imprime `PARCIAL: motivo`; también `SKIP_CONTRAST=1` en `test-dele-layout`). El motivo va en la tabla |
+| 🟡 OMITIDA | no se pudo correr (p. ej. falta `pip install opencc` para `check-readings`) o la suite imprimió `OMITIDA: motivo` |
+| 🔴 ROJO | falló, *timeout* (900 s por suite; `TIMEOUT_S=300` lo cambia), se cayó, o no informó comprobaciones |
+
+Una parcial u omitida **nunca** se muestra como verde. Código de salida: `0` = todo verde, `1` = hay alguna roja,
+`3` = sin rojas pero con parciales u omitidas (`--permitir-parciales` lo convierte en 0, para un CI que sabe que
+no tiene OpenCC, por ejemplo). Tarda unos 25–30 minutos en total.
 En las `check-*` de `tools/`, «comprobaciones» es la cantidad de elementos revisados (scripts, lecciones, lecturas).
 
 Opciones:
 
 ```
 node tests/run-all.js ninos hsk   # solo las suites cuyo nombre contiene «ninos» o «hsk»
-node tests/run-all.js --list      # lista las suites y lo que necesita cada una
+node tests/run-all.js --list [filtro]   # lista las suites (o las que coinciden) y lo que necesita cada una
 ```
 
 Una suite conocida como rota o desactualizada **no se esconde**: se corre igual y se marca en la tabla con el
@@ -71,7 +80,8 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
   Nada se escribe dentro del repo.
 - **Puertos**: ninguna suite fija un puerto; todas usan `BASE_URL`.
 - `selector-nivel-botones` compara además los estilos contra otra copia de la app si le pasás
-  `BASE_URL_REF=http://localhost:8961` (p. ej. `main` en otro puerto); sin eso, esa comparación se omite.
+  `BASE_URL_REF=http://localhost:8961` (p. ej. `main` en otro puerto); sin eso, esa comparación se omite y la
+  suite figura como 🟡 PARCIAL.
 
 ## Qué cubre cada suite de `tests/`
 
@@ -97,6 +107,32 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tocfl-menu-lecciones` | menú TOCFL en la hoja de módulos y en Lecciones |
 | `voz-lecciones` | botones de voz/ciclo en lecciones, podcast y tarjetas de Hoy |
 
+## Qué suites correr según lo que cambió
+
+`run-all` acepta nombres (o partes de nombre) y corre solo las que coinciden; con `--list` mostrás cuáles serían
+sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si tocaste `style.css`, `app.js`,
+`index.html` o algo compartido, o vas a mergear algo grande: corré todo.
+
+| Cambiaste… | Corré |
+|---|---|
+| **Lecciones** (`lessons*.js`, `karaoke.js`, pantalla de lección) | `node tests/run-all.js lecciones keywords segmentador ninos lessons-listen dele-layout classics` |
+| **Lecturas** (`readings-*.js`, `readings-ui.js`, `tools/lecturas-examen/`) | `node tests/run-all.js lecturas entrenar check-readings` |
+| **Aprender** (pantalla, selector de nivel, hoja de módulos, Diaria) | `node tests/run-all.js aprender selector-nivel tocfl-menu hoja- diaria` |
+| **Entrenar / práctica / exámenes** (`exam-practice.js`, `exam-items.js`) | `node tests/run-all.js entrenar practica ordenar-banco` |
+| **Atrás** (`nav.js`, capas, hojas) | `node tests/run-all.js navegacion practica-atras hoja-modulos aprender-simple` |
+| **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen speak-es navegacion-tanda1 ninos-sonidos` |
+| **Escritura 简/繁** (`text-utils.js`, preferencia de escritura) | `node tests/run-all.js escritura- lecciones-tocfl-contraste segmentador lecturas-tocfl-b1 practica-lecturas check-readings` |
+| **Pinyin** (`pinyin-*.js`, interruptores de pinyin) | `node tests/run-all.js escritura-pinyin lecciones-nombres lecciones-tocfl-contraste lecturas-tocfl-b1 segmentador` |
+| **Niños** (`lessons-ninos.js`, `ninos-*.js`) | `node tests/run-all.js ninos` |
+| **Primer uso / onboarding** | `node tests/run-all.js onboarding` |
+
+Notas:
+
+- El filtro es por *contiene*: `lecciones` incluye `lecciones-nombres`, `keywords-lecciones`, `voz-lecciones`…
+- Cualquier cambio de JavaScript: sumá `check-undef` (variables sin definir), p. ej. `node tests/run-all.js check-undef lecturas`.
+- Un cambio en `sw.js` (`VERSION`, precaché) no tiene suite propia: probalo a mano instalando la app y
+  recargando.
+
 ## Cómo se escribe una suite nueva
 
 1. Archivo `tests/<nombre>.test.js` que arranca con
@@ -104,6 +140,8 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
    (`chromium.launch({ ...LAUNCH })`, `page.goto(APP_URL)`, capturas en `shots('<nombre>')`).
 2. Al final imprime **una línea** `comprobaciones N · FAILS M` y sale con código distinto de 0 si `M > 0`.
 3. Si una comprobación falla, imprime una línea que empiece con `FAIL`.
+4. Si saltea algo (una rama que no se dio, una dependencia opcional), imprime `PARCIAL: motivo` —nunca lo
+   dejes pasar en silencio—; si no pudo correr nada, `OMITIDA: motivo`.
 
 `run-all.js` descubre solo los `*.test.js`.
 

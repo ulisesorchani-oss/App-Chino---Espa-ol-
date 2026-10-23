@@ -209,7 +209,7 @@ async function openLesson(page) {
             await ch.click(); await page.waitForTimeout(300);
             await page.keyboard.press('Escape'); await page.waitForTimeout(300);
             check('11. DELE: Escape con la ficha encima cierra solo la ficha', JSON.stringify(await openLayers(page)) === '["dele-pop"]', JSON.stringify(await openLayers(page)));
-        } else console.log('     (DELE sin caracteres tocables en esta vista: Escape+ficha no aplica)');
+        } else console.log('PARCIAL: DELE sin caracteres tocables en esta vista; no se probó Escape+ficha');
         await back(page);
         check('11. DELE: Atrás cierra y sigue en la app', (await openLayers(page)).length === 0 && inApp(page));
         check('11. sin errores JS', errs.length === 0, errs.join(' | '));

@@ -50,7 +50,7 @@ for(const lang of ['es','zh']) for(const w of [320,360]) for(const th of ['light
  await (await p.$('#classics-choice')).screenshot({path:OUT+`clasicos-${lang}-${w}-${th}.png`});
  await p.click('#classics-choice .choice-go');await p.waitForTimeout(600);
  ok(await view()==='view-hoy',tag+' Clásicos ▶ Practicar en Hoy salta');
- } else console.log('  ('+tag+': sin pestaña Clásicos en este modo)');
+ } else console.log('PARCIAL: '+tag+': sin pestaña Clásicos en este modo; no se probó ahí');
  // --- Exámenes siguen saltando
  await p.evaluate(()=>{showView('aprender');document.getElementById('tab-exams').click();});await p.waitForTimeout(300);
  if(await has('select-hsk-level')){await p.selectOption('#select-hsk-level','HSK2');await p.waitForTimeout(600);
