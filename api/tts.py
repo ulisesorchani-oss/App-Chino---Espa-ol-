@@ -33,16 +33,14 @@
 #     con rate="-15%" para speed 0.85: el cliente NO aplica
 #     playbackRate (sin eco). El eco de "speed" en la respuesta
 #     es lo que le avisa a la app.
-#   - Si edge-tts falla → Piper (sin "speed" en la respuesta →
-#     la app compensa con playbackRate, compatible siempre).
-#   - Si Piper tampoco → 502 {"error": ...} → la app usa la voz
+#   - Si edge-tts falla → 502 {"error": ...} → la app usa la voz
 #     del sistema (comportamiento de siempre, sin romper nada).
+#     (Piper se quitó: nunca tuvo modelo en el repo y arrastraba onnxruntime.)
 # ============================================================
 
 import base64
 import io
 import json
-import os
 from collections import OrderedDict
 
 import edge_tts
@@ -206,33 +204,6 @@ async def synth_edge_bytes(text, voice_name, rate=None, want_boundaries=False):
     return buf.getvalue(), boundaries
 
 
-def synth_piper(text, lang):
-    """Fallback local cuando edge-tts falla (voz robótica de reserva).
-
-    SIN cambio de velocidad: la respuesta de Piper NO lleva "speed"
-    → la app compensa con playbackRate como siempre (compatible).
-    Si tenías tu propia implementación Piper, dejala acá dentro.
-    """
-    model = os.environ.get("PIPER_MODEL") or ""
-    if not model:
-        # buscá modelos .onnx junto a este archivo (api/models/xxx.onnx)
-        base = os.path.dirname(os.path.abspath(__file__))
-        mdir = os.path.join(base, "models")
-        pref = "es" if lang and lang.startswith("es") else "zh"
-        if os.path.isdir(mdir):
-            for fn in sorted(os.listdir(mdir)):
-                if fn.endswith(".onnx") and pref in fn:
-                    model = os.path.join(mdir, fn)
-                    break
-    if not model or not os.path.isfile(model):
-        raise RuntimeError("Piper sin modelo configurado (env PIPER_MODEL o api/models/*.onnx)")
-    from piper import PiperVoice  # import tardío: solo si hay modelo
-    voice = PiperVoice.load(model)
-    wav = io.BytesIO()
-    voice.synthesize(text, wav)
-    return wav.getvalue()
-
-
 def _parse_body(raw):
     try:
         return json.loads((raw or b"").decode("utf-8") or "{}")
@@ -322,23 +293,10 @@ async def tts_endpoint(body, via_get=False):
         out["cached"] = False
         return _json_payload(out, via_get)
     except Exception as e_edge:
-        try:
-            audio = synth_piper(text, lang)
-            payload = {
-                "audio": base64.b64encode(audio).decode("ascii"),
-                "mime": "audio/wav",
-                "voice": "piper",
-                # sin "speed": la app compensa (compatible)
-            }
-            _cache_put(key, payload)
-            out = dict(payload)
-            out["cached"] = False
-            return _json_payload(out, via_get)
-        except Exception as e_piper:
-            return JSONResponse({
-                "error": "tts no disponible",
-                "detalle": str(e_edge)[:200] + " | piper: " + str(e_piper)[:200],
-            }, status_code=502)
+        return JSONResponse({
+            "error": "tts no disponible",
+            "detalle": str(e_edge)[:200],
+        }, status_code=502)
 
 
 # CATCH-ALL: responde POST en cualquier ruta (/api/tts, /tts, /api/index…)
