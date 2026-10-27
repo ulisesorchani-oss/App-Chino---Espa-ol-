@@ -1,8 +1,21 @@
 # Lo que NO se publica con la web (solo afecta al despliegue en Vercel; el repo sigue igual).
-# Hasta ahora no había .vercelignore: todo lo del repo se subía.
+# tests/vercelignore.test.js comprueba que NADA de lo que la app o sw.js cargan quede acá
+# (precaché de sw.js, scripts de index.html, cargas perezosas y lo que se pide al recorrer las vistas).
 
 # Pruebas automáticas (ver tests/README.md)
-tests/
-tools/test-*.js
-tools/check-*.js
-tools/medir-tts.js
+/tests/
+
+# Herramientas de desarrollo (generadores, validadores, pruebas, medición): la app no carga nada de tools/
+/tools/
+
+# Documentación e historial de actualizaciones
+/docs/
+
+# Staging histórico: la app NO lee estos archivos (todo viaja embebido en el JS; ver data/README.md)
+/data/
+
+# Documentos de la raíz que no son parte de la app
+/README.md
+/README-Pronunciacion.md
+/AUDITORIA-GAGNE-MAYER.md
+/serve.py
