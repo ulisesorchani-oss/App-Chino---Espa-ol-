@@ -423,6 +423,7 @@ function sysVoiceFor(langCode, v) {
 function warnStaleVoice(key, data) {
     try {
         if (!data || !data.voice) return;               // servidor viejo sin campo voice → nada
+        if (data.fallback) return;                      // voz alternativa del servidor (tw-* → continental tras sin_audio): no es un servidor desactualizado
         const want = VOICE_EXPECT[key] || null;
         if (!want) return;                              // español u otra clave sin mapeo
         if (want.some(w => String(data.voice).indexOf(w) !== -1)) return; // OK

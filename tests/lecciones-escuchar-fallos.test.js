@@ -1,5 +1,6 @@
 // «Escuchar todo» y fetchTTS con un SERVIDOR SIMULADO que falla (page.route sobre /api/tts: sin red real).
-// Verifica: precarga de 1 línea, un solo reintento por línea, nada de POST tras un GET que falló, corte de circuito
+// Verifica: precarga de 1 línea, SIN reintento propio ante un 502 (el servidor ya reintenta), un único reintento solo para el 503 «busy»
+// (respetando Retry-After), nada de POST tras un GET que falló, corte de circuito
 // (2 líneas seguidas fallidas → voz del sistema con aviso sin «api/tts.py»), la marca de línea que avanza solo con el fin
 // real del audio, y la voz del sistema sin karaoke (se resalta la línea, no las palabras).
 const { chromium, LAUNCH, APP_URL } = require('./lib/env');
@@ -16,7 +17,7 @@ function wavB64(sec) {
     buf.write('data', 36); buf.writeUInt32LE(len, 40);
     return buf.toString('base64');
 }
-const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*', 'access-control-expose-headers': 'x-tts-audio' };
+const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*', 'access-control-expose-headers': 'x-tts-audio, x-tts-fallback, retry-after' };
 
 (async () => {
     const b = await chromium.launch({ ...LAUNCH, args: ['--autoplay-policy=no-user-gesture-required'] });
@@ -46,8 +47,8 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
             srv.inflight--;
             if (r.abort) return route.abort('failed');
             const status = r.status || 200;
-            const body = status === 200 ? JSON.stringify(r.body || { audio, mime: 'audio/wav', voice: 'zh-CN-XiaoxiaoNeural', speed: 1, cached: false }) : JSON.stringify({ error: 'tts no disponible', codigo: 'sin_audio' });
-            const headers = Object.assign({ 'content-type': 'application/json' }, CORS, status === 200 && r.mark !== false ? { 'x-tts-audio': '1' } : {}, status !== 200 ? { 'cache-control': 'no-store' } : {});
+            const body = status === 200 ? JSON.stringify(r.body || { audio, mime: 'audio/wav', voice: 'zh-CN-XiaoxiaoNeural', speed: 1, cached: false }) : JSON.stringify({ error: 'tts no disponible', codigo: r.codigo || 'sin_audio' });
+            const headers = Object.assign({ 'content-type': 'application/json' }, CORS, status === 200 && r.mark !== false ? { 'x-tts-audio': '1' } : {}, status !== 200 ? { 'cache-control': 'no-store' } : {}, r.retryAfter !== undefined ? { 'retry-after': String(r.retryAfter) } : {}, r.fallback ? { 'x-tts-fallback': '1' } : {});
             return route.fulfill({ status, headers, body });
         });
         await p.goto(APP_URL, { waitUntil: 'domcontentloaded' }); await sleep(p, 1400);
@@ -118,8 +119,8 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         await waitIdle(p);
         const byText = (t) => srv.reqs.filter(r => r.text === t);
         ok(srv.reqs.every(r => r.method === 'GET'), 'caído: JAMÁS un POST después de un GET 502 (texto corto) — ' + srv.reqs.map(r => r.method).join(','));
-        ok(byText(texts[0]).length === 2 && byText(texts[1]).length === 2, 'caído: cada línea se pide una vez y se reintenta UNA vez (2 pedidos) — ' + [byText(texts[0]).length, byText(texts[1]).length]);
-        ok(srv.reqs.length === 4, 'caído: tras 2 líneas seguidas fallidas no se pide nada más (4 pedidos en total, no ' + srv.reqs.length + ')');
+        ok(byText(texts[0]).length === 1 && byText(texts[1]).length === 1, 'caído: un 502 NO genera reintento propio (el servidor ya reintentó): 1 pedido por línea — ' + [byText(texts[0]).length, byText(texts[1]).length]);
+        ok(srv.reqs.length === 2, 'caído: tras 2 líneas seguidas fallidas no se pide nada más (2 pedidos en total, no ' + srv.reqs.length + ')');
         const S = await p.evaluate(() => ({ speech: window.__S.speech.map(x => x.text), tripped: LQ_LISTEN.stats.tripped, kara: window.__S.kara, banner: document.getElementById('tts-down-notice') ? getComputedStyle(document.getElementById('tts-down-notice')).display : 'none' }));
         ok(S.speech.length === texts.length && S.speech.join('|') === texts.join('|'), 'caído: TODAS las líneas se leen con la voz del sistema, en orden (' + S.speech.length + ' de ' + texts.length + ')');
         ok(S.tripped === 1, 'caído: el circuito se corta una sola vez');
@@ -153,7 +154,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
 
     // ═════════ 4. fallos aislados: no cortan el circuito (no son seguidos) ═════════
     {
-        // las líneas 2, 4 y 6 fallan (original + reintento); el resto responde bien: nunca hay 2 seguidas
+        // las líneas 2, 4 y 6 fallan (sin reintento propio); el resto responde bien: nunca hay 2 seguidas
         const fallan = [];
         const s2 = await session((req) => (fallan.includes(req.text) ? { status: 502, delay: 40 } : { status: 200, delay: 40 }), { audioSec: 0.3 });
         await openLesson(s2.p, LESSON);
@@ -163,24 +164,61 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         const S = await s2.p.evaluate(() => ({ speech: window.__S.speech.map(x => x.text), tripped: LQ_LISTEN.stats.tripped, note: !!document.getElementById('ll-note') }));
         ok(S.tripped === 0, 'aislados: tres líneas fallidas NO seguidas no cortan el circuito');
         ok(S.speech.join('|') === [texts[1], texts[3], texts[5]].join('|'), 'aislados: solo esas tres líneas usan la voz del sistema');
-        ok(s2.srv.reqs.filter(r => fallan.includes(r.text)).length === 6 && s2.srv.reqs.length === texts.length + 3, 'aislados: cada línea fallida se pide 2 veces (original + 1 reintento) y las demás 1 vez (' + s2.srv.reqs.length + ' pedidos)');
+        ok(s2.srv.reqs.filter(r => fallan.includes(r.text)).length === 3 && s2.srv.reqs.length === texts.length, 'aislados: cada línea se pide UNA vez, también las fallidas (' + s2.srv.reqs.length + ' pedidos para ' + texts.length + ' líneas)');
         ok(s2.srv.reqs.every(r => r.method === 'GET'), 'aislados: sin POST');
         ok(s2.errs.length === 0, 'aislados sin errores JS');
         await s2.ctx.close();
     }
 
-    // ═════════ 5. un fallo que se recupera en el reintento ═════════
+    // ═════════ 5. un 502 aislado NO se reintenta: esa línea se lee con la voz del sistema ═════════
     {
         const vistos = new Map();
-        const { ctx, p, srv } = await session((req) => { const c = (vistos.get(req.text) || 0) + 1; vistos.set(req.text, c); return c === 1 && /./.test(req.text) && vistos.size % 3 === 0 ? { status: 502, delay: 30 } : { status: 200, delay: 30 }; }, { audioSec: 0.3 });
+        const { ctx, p, srv } = await session((req) => { const c = (vistos.get(req.text) || 0) + 1; vistos.set(req.text, c); return c === 1 && vistos.size % 4 === 0 ? { status: 502, delay: 30 } : { status: 200, delay: 30 }; }, { audioSec: 0.3 });
         await openLesson(p, LESSON);
         const texts = await lineTexts(p);
         await p.click('#ll-play'); await waitIdle(p);
-        const S = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped }));
-        const dobles = [...vistos.values()].filter(v => v === 2).length;
-        ok(S.speech === 0 && S.tripped === 0 && dobles > 0 && srv.reqs.length === texts.length + dobles && srv.reqs.every(r => r.method === 'GET'), 'reintento: un 502 que se arregla al reintentar suena con el audio del servidor (sin voz del sistema), ' + dobles + ' línea(s) pedidas 2 veces, 0 POST');
+        const S = await p.evaluate(() => ({ speech: window.__S.speech.map(x => x.text), tripped: LQ_LISTEN.stats.tripped }));
+        const falló = texts.filter((_, i) => (i + 1) % 4 === 0);
+        ok(srv.reqs.length === texts.length && srv.reqs.every(r => r.method === 'GET'), 'sin reintento: un pedido por línea aunque alguna dé 502 (' + srv.reqs.length + ' de ' + texts.length + ') y ningún POST');
+        ok(S.speech.join('|') === falló.join('|') && S.tripped === 0, 'sin reintento: solo las líneas que dieron 502 (' + falló.length + ') se leen con la voz del sistema; el resto con el servidor');
         await ctx.close();
     }
+
+    // ═════════ 5b. 503 «busy»: UN reintento, esperando el Retry-After del servidor ═════════
+    const busy = async (nombre, politicaPrimero, esperado) => {
+        const vistos = new Map(); let primero = null; // la política especial solo rige para la PRIMERA línea; el resto responde bien
+        const { ctx, p, srv } = await session((req) => { if (primero === null) primero = req.text; const c = (vistos.get(req.text) || 0) + 1; vistos.set(req.text, c); return req.text === primero ? politicaPrimero(c) : { status: 200, delay: 20 }; }, { audioSec: 0.3 });
+        await openLesson(p, LESSON);
+        await p.click('#ll-play');
+        await p.waitForFunction(() => window.__S.marks.length >= 2, null, { timeout: 30000 });
+        const primera = srv.reqs.filter(r => r.text === srv.reqs[0].text);
+        const gap = primera.length > 1 ? primera[1].t - primera[0].t : null;
+        const S = await p.evaluate(() => ({ speech: window.__S.speech.map(x => x.text), note: !!document.getElementById('ll-note') }));
+        await p.click('#ll-stop');
+        await esperado(primera, gap, S, srv);
+        await ctx.close();
+    };
+    await busy('Retry-After: 1', (c) => (c === 1 ? { status: 503, codigo: 'busy', retryAfter: 1, delay: 20 } : { status: 200, delay: 20 }), (pr, gap, S) => {
+        ok(pr.length === 2 && pr.every(r => r.method === 'GET'), '503 busy: la línea se reintenta UNA vez, por GET (' + pr.length + ' pedidos)');
+        ok(gap >= 950 && gap <= 1900, '503 busy: espera el Retry-After de 1 s antes de reintentar (' + Math.round(gap) + ' ms)');
+        ok(S.speech.length === 0, '503 busy: el reintento llega y suena con el audio del servidor (sin voz del sistema)');
+    });
+    await busy('sin Retry-After', (c) => (c === 1 ? { status: 503, codigo: 'busy', delay: 20 } : { status: 200, delay: 20 }), (pr, gap) => {
+        ok(pr.length === 2 && gap >= 1900 && gap <= 2800, '503 busy sin Retry-After: espera 2 s por defecto (' + Math.round(gap) + ' ms)');
+    });
+    await busy('busy dos veces', () => ({ status: 503, codigo: 'busy', retryAfter: 1, delay: 20 }), (pr, gap, S) => {
+        ok(pr.length === 2, '503 busy dos veces seguidas: NO hay un tercer pedido (' + pr.length + ' pedidos)');
+        ok(S.speech.length >= 1 && S.speech[0] === pr[0].text, '503 busy dos veces: esa línea cae a la voz del sistema');
+    });
+    await busy('Retry-After 30', (c) => (c === 1 ? { status: 503, codigo: 'busy', retryAfter: 30, delay: 20 } : { status: 200, delay: 20 }), (pr, gap) => {
+        ok(pr.length === 2 && gap >= 5900 && gap <= 7000, '503 busy con Retry-After: 30: la espera se limita a 6 s (' + Math.round(gap) + ' ms)');
+    });
+    await busy('503 que no es busy', (c) => (c === 1 ? { status: 503, codigo: 'otro', delay: 20 } : { status: 200, delay: 20 }), (pr, gap, S) => {
+        ok(pr.length === 1 && S.speech[0] === pr[0].text, '503 que NO es «busy» (p. ej. de la plataforma): sin reintento, voz del sistema (' + pr.length + ' pedido)');
+    });
+    await busy('error de red', (c) => (c === 1 ? { abort: true } : { status: 200, delay: 20 }), (pr, gap, S) => {
+        ok(pr.length === 1 && S.speech[0] === pr[0].text, 'error de red: sin reintento propio, esa línea cae a la voz del sistema (' + pr.length + ' pedido)');
+    });
 
     // ═════════ 6. 429 (límite): sin POST, sin reintento, cuenta como fallo de esa línea ═════════
     {
@@ -223,16 +261,16 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
 
     // ═════════ 7b. el servidor se recupera: el circuito se reinicia en cada pulsación, no a mitad de lección ═════════
     {
-        // los primeros 4 pedidos fallan (líneas 1 y 2, original + reintento) y DESPUÉS el servidor responde bien
+        // los primeros 2 pedidos fallan (líneas 1 y 2) y DESPUÉS el servidor responde bien
         let sano = false;
-        const { ctx, p, srv } = await session((req, k) => (k < 4 && !sano ? { status: 502, delay: 40 } : { status: 200, delay: 40 }), { audioSec: 0.3 });
+        const { ctx, p, srv } = await session((req, k) => (k < 2 && !sano ? { status: 502, delay: 40 } : { status: 200, delay: 40 }), { audioSec: 0.3 });
         await openLesson(p, LESSON);
         const texts = await lineTexts(p);
         await p.click('#ll-play');
         await p.waitForSelector('#ll-note', { timeout: 15000 });
         await waitIdle(p);
         const A = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped, note: !!document.getElementById('ll-note'), tr: LQ_LISTEN.tripped }));
-        ok(srv.reqs.length === 4 && A.speech === texts.length, 'recuperación a mitad: el servidor ya responde bien, pero tras el corte el resto de la lección sigue con la voz del sistema y NO se pide nada más (' + srv.reqs.length + ' pedidos, ' + A.speech + ' líneas habladas)');
+        ok(srv.reqs.length === 2 && A.speech === texts.length, 'recuperación a mitad: el servidor ya responde bien, pero tras el corte el resto de la lección sigue con la voz del sistema y NO se pide nada más (' + srv.reqs.length + ' pedidos, ' + A.speech + ' líneas habladas)');
         ok(A.tripped === 1 && A.note === false && A.tr === false, 'al terminar: el aviso desaparece y el circuito queda listo para la próxima pulsación');
         // segunda pulsación sobre la misma lección: se reinicia, vuelve a usar el servidor
         await p.click('#ll-play');
@@ -241,7 +279,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         await waitIdle(p);
         const B = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped, marks: window.__S.marks.length }));
         ok(!mid.note && !mid.tr, 'segunda pulsación: arranca sin aviso ni circuito cortado');
-        ok(srv.reqs.length === 4 + texts.length && srv.reqs.slice(4).every(r => r.method === 'GET') && B.speech === texts.length && B.tripped === 1, 'segunda pulsación: pide las ' + texts.length + ' líneas al servidor (ya sano) y ninguna cae a la voz del sistema (' + (srv.reqs.length - 4) + ' pedidos, habladas ' + B.speech + ')');
+        ok(srv.reqs.length === 2 + texts.length && srv.reqs.slice(2).every(r => r.method === 'GET') && B.speech === texts.length && B.tripped === 1, 'segunda pulsación: pide las ' + texts.length + ' líneas al servidor (ya sano) y ninguna cae a la voz del sistema (' + (srv.reqs.length - 2) + ' pedidos, habladas ' + B.speech + ')');
         ok(B.marks === texts.length * 2, 'segunda pulsación: la marca vuelve a recorrer todas las líneas (' + B.marks + ' marcas en total)');
         // y si falla otra vez, el contador empieza de cero (2 seguidas más para cortar)
         sano = false;
@@ -257,7 +295,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         caido = false;
         await p.click('#ll-play'); await waitIdle(p);
         const S = await p.evaluate(() => ({ tripped: LQ_LISTEN.stats.tripped, speech: window.__S.speech.length }));
-        ok(n1 === 4 && srv.reqs.length - n1 === texts.length && S.tripped === 1 && S.speech === texts.length, 'reinicio: caído → 4 pedidos y corte; sano en la pulsación siguiente → ' + (srv.reqs.length - n1) + ' pedidos, cero líneas más con la voz del sistema');
+        ok(n1 === 2 && srv.reqs.length - n1 === texts.length && S.tripped === 1 && S.speech === texts.length, 'reinicio: caído → 2 pedidos y corte; sano en la pulsación siguiente → ' + (srv.reqs.length - n1) + ' pedidos, cero líneas más con la voz del sistema');
         await ctx.close();
     }
 
@@ -300,7 +338,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         await sleep(p, 1500);
         const R1 = await p.evaluate(() => ({ speech: window.__S.speech.length }));
         ok(R0.st === 'idle' && R0.cancels >= 1 && R0.pop && R0.pl === 0, 'Atrás con la voz del sistema (circuito cortado): cierra, cancela la voz (speechSynthesis.cancel ×' + R0.cancels + ') y deja todo en reposo ' + JSON.stringify(R0));
-        ok(R1.speech === R0.speech && srv.reqs.length === 4, 'Atrás con la voz del sistema: no se lee ninguna línea más y no se pide nada al servidor (' + R0.speech + ' habladas, ' + srv.reqs.length + ' pedidos)');
+        ok(R1.speech === R0.speech && srv.reqs.length === 2, 'Atrás con la voz del sistema: no se lee ninguna línea más y no se pide nada al servidor (' + R0.speech + ' habladas, ' + srv.reqs.length + ' pedidos)');
         ok(errs.length === 0, 'Atrás con voz del sistema sin errores JS: ' + errs.join(' | '));
         await ctx.close();
     }
@@ -344,6 +382,21 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         const src = await p.evaluate(() => fetch('app.js').then(r => r.text()));
         const lineas = src.split('\n').filter(l => /^\s*ttsDown:/.test(l));
         ok(lineas.length === 2 && lineas.every(l => !/api\/tts|\.py|Vercel/.test(l)), 'textos de la interfaz (es y zh): el aviso rojo de voz no menciona api/tts.py ni Vercel (' + lineas.length + ' textos)');
+        await ctx.close();
+    }
+
+    {
+        // warnStaleVoice: avisa de «servidor desactualizado» salvo que la respuesta sea la voz alternativa del servidor
+        const { ctx, p } = await session(() => ({ status: 200 }));
+        const W = await p.evaluate(() => {
+            const out = {}; const avisos = []; const w = console.warn; console.warn = (...a) => avisos.push(a.join(' ')); const ms = window.moduleStatus; window.moduleStatus = (m) => avisos.push('status:' + m);
+            warnStaleVoice('tw-m', { voice: 'zh-CN-YunjianNeural', fallback: true }); out.conFallback = avisos.length;
+            warnStaleVoice('tw-m', { voice: 'zh-CN-YunjianNeural' }); out.sinFallback = avisos.length;
+            warnStaleVoice('tw-m', { voice: 'zh-TW-YunJheNeural' }); out.vozEsperada = avisos.length;
+            console.warn = w; window.moduleStatus = ms; return out;
+        });
+        ok(W.conFallback === 0, 'warnStaleVoice: con fallback:true NO avisa de servidor desactualizado');
+        ok(W.sinFallback >= 1 && W.vozEsperada === W.sinFallback, 'warnStaleVoice: sin fallback y con otra voz sí avisa; con la voz esperada no');
         await ctx.close();
     }
 
