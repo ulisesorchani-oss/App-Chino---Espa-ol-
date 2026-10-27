@@ -60,6 +60,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
             // voz del sistema simulada
             speechSynthesis.cancel = function () { };
             speechSynthesis.speak = function (u) {
+                (T.utts = T.utts || []).push(u);
                 T.speech.push({ text: u.text, t: performance.now() });
                 if (T.speechMode === 'error') { setTimeout(() => { try { u.onerror && u.onerror({ error: 'synthesis-failed' }); } catch (e) { /* noop */ } }, 20); return; }
                 setTimeout(() => { try { u.onstart && u.onstart({}); } catch (e) { /* noop */ } }, 30);
@@ -293,9 +294,12 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         await p.evaluate(() => { window.__S.armed = true; history.back(); });
         await sleep(p, 400);
         const R0 = await p.evaluate(() => ({ st: LQ_LISTEN.state, speech: window.__S.speech.length, cancels: window.__S.cancels, pop: document.getElementById('lesson-pop').classList.contains('hidden'), pl: document.querySelectorAll('.lq-line.is-playing').length }));
+        // eventos TARDÍOS de una voz ya cancelada (algunos motores los entregan igual): no deben volver a marcar una línea ni arrancar nada
+        const T = await p.evaluate(() => { const us = window.__S.utts || []; us.forEach((u) => { try { u.onstart && u.onstart({}); u.onend && u.onend({}); } catch (e) { /* noop */ } }); return { pl: document.querySelectorAll('.lq-line.is-playing').length, st: LQ_LISTEN.state, n: us.length }; });
+        ok(T.n >= 2 && T.pl === 0 && T.st === 'idle', 'Atrás con la voz del sistema: un «start»/«end» tardío de la voz cancelada no vuelve a marcar ninguna línea (marcadas: ' + T.pl + ', ' + T.n + ' voces)');
         await sleep(p, 1500);
         const R1 = await p.evaluate(() => ({ speech: window.__S.speech.length }));
-        ok(R0.st === 'idle' && R0.cancels >= 1 && R0.pop && R0.pl === 0, 'Atrás con la voz del sistema (circuito cortado): cierra, cancela la voz (speechSynthesis.cancel ×' + R0.cancels + ') y deja todo en reposo');
+        ok(R0.st === 'idle' && R0.cancels >= 1 && R0.pop && R0.pl === 0, 'Atrás con la voz del sistema (circuito cortado): cierra, cancela la voz (speechSynthesis.cancel ×' + R0.cancels + ') y deja todo en reposo ' + JSON.stringify(R0));
         ok(R1.speech === R0.speech && srv.reqs.length === 4, 'Atrás con la voz del sistema: no se lee ninguna línea más y no se pide nada al servidor (' + R0.speech + ' habladas, ' + srv.reqs.length + ' pedidos)');
         ok(errs.length === 0, 'Atrás con voz del sistema sin errores JS: ' + errs.join(' | '));
         await ctx.close();

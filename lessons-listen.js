@@ -6,7 +6,7 @@
 //   · UN solo <audio> reutilizado (src cambiante) y una promesa por línea (nunca se pide dos veces);
 //   · precarga de UNA línea (N+1) apenas arranca N; si la siguiente no llegó se muestra «⏳» y se espera;
 //   · UN solo reintento por línea (~0,8-1,2 s después) y, si también falla, voz del sistema para esa línea;
-//   · CORTE DE CIRCUITO: tras 2 líneas seguidas fallidas, el resto de la lección va con la voz del sistema, sin
+//   · si la última línea ya falló no se precarga la siguiente (solo la que toca) y, tras 2 seguidas fallidas, CORTE DE CIRCUITO: el resto de la lección va con la voz del sistema, sin
 //     pedir nada más al servidor, y un aviso en la barra lo explica;
 //   · la línea resaltada avanza SOLO cuando el audio de la anterior terminó de verdad y el de la nueva empezó a sonar
 //     (un error del <audio> o de la voz del sistema no hace correr la marca);
@@ -177,6 +177,7 @@
     }
     function preload(cur) {
         if (L.tripped || Date.now() < L.backoffUntil) return; // tras un 429 la precarga espera 5 s; con el circuito cortado no se pide nada
+        if (L.fails > 0) return; // con la última línea ya fallida no se adelanta nada: se pide solo la que toca (si el servidor sigue caído, no se gastan pedidos de más)
         for (let k = 1; k <= AHEAD; k++) if (cur + k < L.lines.length) entryFor(cur + k);
     }
     // si cambió la velocidad: lo precargado desde `from` a la velocidad vieja se descarta (rige desde la línea siguiente)
@@ -195,6 +196,7 @@
         return L.audio;
     }
     function markLine(i) {
+        if (L.state === 'idle') return; // un evento tardío (p. ej. el «start» de una voz ya cancelada) no vuelve a marcar nada
         document.querySelectorAll('.lq-line.is-playing').forEach(el => el.classList.remove('is-playing'));
         const el = L.lines[i] && L.lines[i].el;
         if (!el) return;
@@ -214,13 +216,13 @@
         return new Promise((resolve) => {
             let started = false, done = false, muda = false, wd = 0;
             const fin = () => { if (done) return; done = true; clearTimeout(wd); L.tts = null; resolve(); };
-            const mudo = () => { if (muda || done) return; muda = true; markLine(i); dwell(text).then(fin); }; // sin voz: la marca se queda el tiempo de lectura
+            const mudo = () => { if (muda || done) return; if (tok !== L.tok) { fin(); return; } muda = true; markLine(i); dwell(text).then(fin); }; // sin voz: la marca se queda el tiempo de lectura
             if (!('speechSynthesis' in window)) { mudo(); return; }
             const u = new SpeechSynthesisUtterance(text);
             u.lang = L.lang; u.rate = speedNow();
             try { if (typeof sysVoiceFor === 'function') { const sv = sysVoiceFor(L.lang, L.vz); if (sv) u.voice = sv; } } catch (e) { /* sin voz */ }
-            u.onstart = () => { if (muda) return; started = true; clearTimeout(wd); markLine(i); };
-            u.onend = () => { if (muda) return; if (!started) markLine(i); fin(); };
+            u.onstart = () => { if (muda || tok !== L.tok) return; started = true; clearTimeout(wd); markLine(i); };
+            u.onend = () => { if (muda) return; if (tok !== L.tok) { fin(); return; } if (!started) markLine(i); fin(); };
             u.onerror = (ev) => {
                 if (muda) return; // ya la dimos por muda (el cancel() de abajo dispara este evento)
                 if (tok !== L.tok || (ev && (ev.error === 'canceled' || ev.error === 'interrupted'))) { fin(); return; } // lo cortamos nosotros
