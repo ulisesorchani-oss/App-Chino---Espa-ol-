@@ -737,7 +737,7 @@
             blurbZh: '魏想去巴勒莫逛逛，卡米拉教他布宜诺斯艾利斯的出行基础：公交车、街角的站台和 SUBE 交通卡。问在哪里、坐几站、怎么付车费。',
             lines: [
                 { who: 'Wei', sp: 'Camila, quiero conocer Palermo. ¿Está lejos?', zh: '卡米拉，我想去巴勒莫看看。远吗？' },
-                { who: 'Camila', sp: 'Un poco. Pero es fácil: puedes tomar el colectivo 152.', zh: '有一点远。不过很简单：你可以坐 152 路公交车。' },
+                { who: 'Camila', sp: 'Un poco. Pero es fácil: podés tomar el colectivo 152.', zh: '有一点远。不过很简单：你可以坐 152 路公交车。' },
                 { who: 'Wei', sp: '¿Colectivo? ¿Qué es un colectivo?', zh: 'colectivo？那是什么？' },
                 { who: 'Camila', sp: 'El autobús. Aquí al autobús le decimos colectivo.', zh: '就是公交车。在这儿我们管公交车叫 colectivo。' },
                 { who: 'Wei', sp: 'Perfecto. ¿Dónde está la parada?', zh: '太好了。车站在哪里？' },
@@ -748,7 +748,7 @@
                 { who: 'Camila', sp: 'Como doce. Te aviso cuando bajemos. ¡Vamos!', zh: '大概十二站。我们下车的时候我提醒你。走吧！' }
             ],
             quiz: [
-                { sp: 'Puedes tomar el ___ 152.', zh: '你可以坐 152 路公交车。',
+                { sp: 'Podés tomar el ___ 152.', zh: '你可以坐 152 路公交车。',
                   opts: [{ w: 'colectivo', e: '公交车（阿根廷说法）' }, { w: 'avión', e: '飞机' }, { w: 'bote', e: '小船' }] },
                 { sp: 'Aquí al autobús le decimos ___.', zh: '在这儿我们管公交车叫 colectivo。',
                   opts: [{ w: 'colectivo', e: 'colectivo（公交车）' }, { w: 'lápiz', e: '铅笔' }, { w: 'ventana', e: '窗户' }] },
