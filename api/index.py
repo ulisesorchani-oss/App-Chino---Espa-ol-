@@ -21,6 +21,12 @@
 #     duración, versión de edge-tts). GET sin parámetros → {ok, edge_tts}.
 #   api/index.py y api/tts.py llevan EL MISMO código (tests/api-tts falla si divergen).
 #
+# VOZ ALTERNATIVA (zh-TW): si una voz de Taiwán (tw-f, tw-m) agota sus reintentos con «sin_audio»,
+#   se prueba UNA vez la continental del mismo género (f → Xiaoxiao, m → Yunjian). Solo para sin_audio
+#   (no para busy ni timeouts). Esa respuesta NUNCA se guarda: Cache-Control: no-store, X-TTS-Fallback: 1,
+#   X-TTS-Audio: 1, campo fallback:true en el JSON, fuera de la caché en memoria; el service worker tampoco
+#   la guarda. Tope ~4,5 s por intento de Taiwán y ~12 s en total.
+#
 # QUÉ CAMBIÓ EN v9.49 (voces 🇦🇷 argentina y 🇹🇼 taiwanesa):
 #   el mapa VOICES suma es-AR (Elena/Tomás) y zh-TW
 #   (HsiaoChen/YunJhe); el cliente las pide con lang es-AR/zh-TW
@@ -95,6 +101,7 @@ app.add_middleware(
     allow_origin_regex=ALLOWED_ORIGINS_REGEX,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-TTS-Audio", "X-TTS-Fallback", "Retry-After"],
 )
 
 # ------------------------------------------------------------
@@ -197,6 +204,10 @@ MAX_CONCURRENT = 2          # síntesis simultáneas por instancia
 QUEUE_WAIT_S = 4.0          # espera máxima por un lugar; si se agota → 503 «busy»
 RETRY_AFTER_S = 2
 EDGE_TTS_MIN = (7, 3, 1)
+# Voz alternativa para zh-TW (ver cabecera)
+TW_ATTEMPT_CAP_S = 4.5      # tope por intento de una voz de Taiwán
+TW_PHASE_BUDGET_S = 7.0     # tope de la fase de Taiwán (reintento incluido): deja >= 5 s para la continental
+FALLBACK_MIN_WINDOW_S = 2.0 # si queda menos que esto del total, no se prueba la continental
 
 
 def _edge_tts_version():
@@ -297,35 +308,39 @@ def _budget(n_chars):
     return attempt, max(TOTAL_BUDGET_S, attempt + (TOTAL_BUDGET_S - ATTEMPT_TIMEOUT_S))
 
 
-async def synth_with_retry(text, voice_name, rate, want_boundaries):
-    """Hasta MAX_ATTEMPTS intentos. Devuelve (audio, boundaries, intentos, fallos, codigo|None).
+async def synth_with_retry(text, voice_name, rate, want_boundaries, attempt_cap=None, total_cap=None):
+    """Hasta MAX_ATTEMPTS intentos. Devuelve (audio, boundaries, intentos, fallos, codigo|None, codigos).
 
-    fallos = nombres de las excepciones vistas. Si no hubo éxito: audio es None y codigo
-    es el de la última falla.
+    fallos = nombres de las excepciones vistas; codigos = su código corto, en orden. Si no hubo éxito:
+    audio es None y codigo es el de la última falla. attempt_cap / total_cap pisan los topes por defecto.
     """
-    attempt_cap, total_cap = _budget(len(text))
+    cap_a, cap_t = _budget(len(text))
+    attempt_cap = cap_a if attempt_cap is None else attempt_cap
+    total_cap = cap_t if total_cap is None else total_cap
     t0 = time.monotonic()
     fallos = []
+    codigos = []
     codigo = "error"
     for intento in range(1, MAX_ATTEMPTS + 1):
         if intento > 1:
             await asyncio.sleep(random.uniform(BACKOFF_MIN_S, BACKOFF_MAX_S))
         restante = total_cap - (time.monotonic() - t0)
         if intento > 1 and restante < MIN_RETRY_WINDOW_S:
-            return None, None, intento - 1, fallos, codigo
+            return None, None, intento - 1, fallos, codigo, codigos
         try:
             audio, boundaries = await asyncio.wait_for(
                 synth_edge_bytes(text, voice_name, rate=rate, want_boundaries=want_boundaries),
                 timeout=min(attempt_cap, restante))
             if not audio:
                 raise _EmptyAudio("sin bytes de audio")
-            return audio, boundaries, intento, fallos, None
+            return audio, boundaries, intento, fallos, None, codigos
         except Exception as e:  # noqa: BLE001 — se clasifica y se decide si reintentar
             codigo, reintentable = _classify(e)
             fallos.append(type(e).__name__)
+            codigos.append(codigo)
             if not reintentable:
-                return None, None, intento, fallos, codigo
-    return None, None, MAX_ATTEMPTS, fallos, codigo
+                return None, None, intento, fallos, codigo, codigos
+    return None, None, MAX_ATTEMPTS, fallos, codigo, codigos
 
 
 def _error(codigo, status=502, retry_after=None):
@@ -339,10 +354,18 @@ def _plain_error(msg, status):
     return JSONResponse({"error": msg}, status_code=status, headers={"Cache-Control": "no-store"})
 
 
-def _log_request(voice, rate, largo, intento, res, fallos, t0, cola_ms, via):
-    _log("tts voz=%s rate=%s largo=%d via=%s intento=%d res=%s exc=%s dur_ms=%d cola_ms=%d edge_tts=%s" % (
-        voice, rate, largo, via, intento, res, ",".join(fallos) or "-",
+def _log_request(voice, rate, largo, intento, res, fallos, t0, cola_ms, via, fallback=0):
+    _log("tts voz=%s rate=%s largo=%d via=%s intento=%d res=%s exc=%s fallback=%d dur_ms=%d cola_ms=%d edge_tts=%s" % (
+        voice, rate, largo, via, intento, res, ",".join(fallos) or "-", fallback,
         int((time.monotonic() - t0) * 1000), cola_ms, EDGE_TTS_VERSION))
+
+
+def _continental_de(voice_name):
+    """zh-TW-HsiaoChenNeural → zh-CN-XiaoxiaoNeural (f); zh-TW-YunJheNeural → zh-CN-YunjianNeural (m)."""
+    for k, v in VOICES["zh-TW"].items():
+        if v == voice_name:
+            return VOICES["zh-CN"].get(k)
+    return None
 
 
 def speed_to_rate(speed):
@@ -462,10 +485,46 @@ async def tts_endpoint(body, via_get=False):
     if slot is None:
         _log_request(voice_name, rate, len(text), 0, "busy", [], t0, cola_ms, via)
         return _error("busy", status=503, retry_after=RETRY_AFTER_S)
+    es_tw = voice_name.startswith("zh-TW-")
+    t_slot = time.monotonic()
     try:
         # v9.40: la velocidad se hornea EN la síntesis (sin eco en el cliente)
-        audio, boundaries, intentos, fallos, codigo = await synth_with_retry(
-            text, voice_name, rate, want_boundaries)
+        if es_tw:
+            audio, boundaries, intentos, fallos, codigo, codigos = await synth_with_retry(
+                text, voice_name, rate, want_boundaries,
+                attempt_cap=TW_ATTEMPT_CAP_S, total_cap=min(TW_PHASE_BUDGET_S, _budget(len(text))[1]))
+        else:
+            audio, boundaries, intentos, fallos, codigo, codigos = await synth_with_retry(
+                text, voice_name, rate, want_boundaries)
+
+        # Voz alternativa: la voz de Taiwán agotó sus reintentos SOLO con «sin_audio» → UNA prueba con la
+        # continental del mismo género. Nunca se guarda (ver cabecera): no entra en la caché en memoria.
+        fb_voice = _continental_de(voice_name) if es_tw else None
+        if audio is None and fb_voice and codigo == "sin_audio" and codigos and all(c == "sin_audio" for c in codigos):
+            restante = _budget(len(text))[1] - (time.monotonic() - t_slot)
+            if restante >= FALLBACK_MIN_WINDOW_S:
+                try:
+                    a2, b2 = await asyncio.wait_for(
+                        synth_edge_bytes(text, fb_voice, rate=rate, want_boundaries=want_boundaries),
+                        timeout=min(_budget(len(text))[0], restante))
+                    intentos += 1
+                    if a2:
+                        out = {
+                            "audio": base64.b64encode(a2).decode("ascii"),
+                            "mime": "audio/mpeg",
+                            "voice": fb_voice,
+                            "speed": speed,
+                            "fallback": True,
+                            "cached": False,
+                        }
+                        if want_boundaries and b2:
+                            out["boundaries"] = b2
+                        _log_request(voice_name, rate, len(text), intentos, "ok", fallos, t0, cola_ms, via, fallback=1)
+                        return JSONResponse(out, headers={"Cache-Control": "no-store", "X-TTS-Fallback": "1", "X-TTS-Audio": "1"})
+                    fallos.append("_EmptyAudio")
+                except Exception as e:  # noqa: BLE001 — la continental también falló: se informa el código original
+                    intentos += 1
+                    fallos.append(type(e).__name__)
     finally:
         slot.release()
 
