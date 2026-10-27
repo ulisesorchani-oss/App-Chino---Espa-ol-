@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 30 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 31 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -66,7 +66,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (29, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (30, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-ninos.js` | no | no | no | solo Node |
@@ -108,6 +108,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `selector-nivel-botones` | selector de nivel de Aprender: opciones sin corte, colores, 320/360 px |
 | `tocfl-menu-lecciones` | menú TOCFL en la hoja de módulos y en Lecciones |
 | `api-tts` | `api/index.py` y `api/tts.py` con edge-tts simulado: reintentos, semáforo, errores, registro, y que los dos archivos no diverjan |
+| `vercelignore` | `.vercelignore` no deja fuera nada que la app o `sw.js` carguen (precaché, referencias del código, cargas perezosas y lo que el navegador pide al recorrer todas las vistas); tests/, tools/, docs/, data/ y los documentos de raíz sí quedan fuera |
 | `voz-lecciones` | botones de voz/ciclo en lecciones, podcast y tarjetas de Hoy |
 
 ## Qué suites correr según lo que cambió
@@ -127,6 +128,7 @@ sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si t
 | **Escritura 简/繁** (`text-utils.js`, preferencia de escritura) | `node tests/run-all.js escritura- lecciones-tocfl-contraste segmentador lecturas-tocfl-b1 practica-lecturas check-readings` |
 | **Pinyin** (`pinyin-*.js`, interruptores de pinyin) | `node tests/run-all.js escritura-pinyin lecciones-nombres lecciones-tocfl-contraste lecturas-tocfl-b1 segmentador` |
 | **API de voz** (`api/index.py`, `api/tts.py`, `requirements.txt`) | `node tests/run-all.js api-tts` (también corre solo: `python3 -m unittest discover -s tests/api-tts -v`) |
+| **`.vercelignore`, `sw.js` (precaché) o archivos nuevos en la raíz** | `node tests/run-all.js vercelignore` |
 | **Niños** (`lessons-ninos.js`, `ninos-*.js`) | `node tests/run-all.js ninos` |
 | **Primer uso / onboarding** | `node tests/run-all.js onboarding` |
 
