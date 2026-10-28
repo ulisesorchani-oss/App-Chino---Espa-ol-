@@ -415,7 +415,7 @@
             keyWords.map(kw =>
                 '<div class="lq-gloss-item">' +
                 '<span class="lq-gloss-zh" lang="zh">' + escHtml(kw.zh) + '</span>' +
-                '<span class="lq-gloss-py">' + escHtml(kw.pyFix || pyLine(kw.zhS || kw.zh) || kw.py) + '</span>' +
+                '<span class="lq-gloss-py">' + escHtml((k === 'trad' ? kw.pyFixT : kw.pyFix) || pyLine(kw.zhS || kw.zh) || kw.py) + '</span>' +
                 '<span class="lq-gloss-es">' + escHtml(kw.es) + '</span>' +
                 '</div>'
             ).join('') +
@@ -488,9 +488,11 @@
         // hskLevelOf/extractKeyWords en dict.js.
         // v9.7x: si la lección trae keywords, el glosario las usa TAL CUAL (sin
         // diccionario ni corte de palabras), en la escritura elegida y con la
-        // glosa escrita para esa lección; py solo para excepciones.
+        // glosa escrita para esa lección; py (simplificado) y pyT (tradicional)
+        // solo para excepciones: si falta el de la escritura elegida, el pinyin
+        // se genera como siempre (ver renderGlossary).
         const keyWords = (Array.isArray(l.keywords) && l.keywords.length)
-            ? l.keywords.map(kw => ({ zh: zhKey() === 'trad' ? (kw.zhT || kw.zh) : kw.zh, zhS: kw.zh, pyFix: kw.py || '', es: kw.es }))
+            ? l.keywords.map(kw => ({ zh: zhKey() === 'trad' ? (kw.zhT || kw.zh) : kw.zh, zhS: kw.zh, pyFix: kw.py || '', pyFixT: kw.pyT || '', es: kw.es }))
             : (typeof extractKeyWords === 'function')
                 ? extractKeyWords(l.lines.map(ln => (zhKey() === 'trad' ? (ln.zhT || ln.zh) : ln.zh)), 5, l.hsk) // v9.7x: en la escritura elegida (el diccionario busca el tradicional por alias)
                 : [];

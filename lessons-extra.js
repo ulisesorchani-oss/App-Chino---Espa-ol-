@@ -115,7 +115,7 @@
         blurb: 'Mercado, números y fruta: Xiaomei compra manzanas y bananas para compartir con sus compañeros.',
         // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
         keywords: [
-            { zh: '客气', zhT: '客氣', es: 'cortés (不客气: de nada)' },
+            { zh: '客气', zhT: '客氣', es: 'cortés; cortesía (como en «de nada»)' },
             { zh: '香蕉', zhT: '香蕉', es: 'banana' },
             { zh: '商店', zhT: '商店', es: 'tienda' },
             { zh: '水果', zhT: '水果', es: 'fruta' },
@@ -382,7 +382,7 @@
         // v9.7x: palabras clave elegidas para el glosario (si no están, el glosario es automático)
         keywords: [
             { zh: '邻居', zhT: '鄰居', es: 'vecino' },
-            { zh: '客气', zhT: '客氣', es: 'formalidad (不用客气: no hay de qué)' },
+            { zh: '客气', zhT: '客氣', es: 'formalidad; cortesía (como en «no hay de qué»)' },
             { zh: '附近', zhT: '附近', es: 'cerca, aledaño' },
             { zh: '麻烦', zhT: '麻煩', es: 'complicado, un lío' },
             { zh: '终于', zhT: '終於', es: 'por fin' }
