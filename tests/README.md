@@ -69,6 +69,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tests/*.test.js` (31, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
+| `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
 | `tools/check-readings.js` | lo levanta | sí | no | Python con `pip install opencc` (opcional `OPENCC_PYTHONPATH`) |
@@ -94,6 +95,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `entrenar`, `entrenar-grilla` | pantalla Entrenar (secciones, Exámenes, Lecturas de estudio) y su grilla a 320/360 px |
 | `escritura-pinyin` | capa de errores y pinyin por familia (HSK/TOCFL), carga de la tabla |
 | `escritura-tradicional` | 6 pantallas de lección × escrituras 简/繁 |
+| `glosario-tocfl` | glosario de las 8 lecciones TOCFL A2–C1 = keywords elegidas (简/繁, escritorio/Android, 320/360 px) y pinyin por escritura (`py`/`pyT`, sin copiar el de la otra escritura; casos 盐酥鸡/鹹酥雞 y 屏幕/螢幕) |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `keywords-hsk`, `keywords-lecciones` | palabras clave de las lecciones (datos en `tests/data/`) |
 | `lecciones-escuchar-fallos` | «Escuchar todo» y `fetchTTS` con un servidor simulado que falla (`page.route`): precarga de 1, un reintento, sin POST tras un GET caído, corte de circuito con aviso (se reinicia en cada pulsación; no se rearma a mitad de lección), marca de línea, resaltado solo de la línea (sin karaoke, ni con el servidor ni con la voz del sistema) y Atrás cerrando «Escuchar todo» |
@@ -121,7 +123,7 @@ sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si t
 
 | Cambiaste… | Corré |
 |---|---|
-| **Lecciones** (`lessons*.js`, `karaoke.js`, pantalla de lección) | `node tests/run-all.js lecciones keywords segmentador ninos lessons-listen dele-layout classics` |
+| **Lecciones** (`lessons*.js`, `karaoke.js`, pantalla de lección) | `node tests/run-all.js lecciones keywords glosario segmentador ninos lessons-listen dele-layout classics` |
 | **Lecturas** (`readings-*.js`, `readings-ui.js`, `tools/lecturas-examen/`) | `node tests/run-all.js lecturas entrenar check-readings` |
 | **Aprender** (pantalla, selector de nivel, hoja de módulos, Diaria) | `node tests/run-all.js aprender selector-nivel tocfl-menu hoja- diaria` |
 | **Entrenar / práctica / exámenes** (`exam-practice.js`, `exam-items.js`) | `node tests/run-all.js entrenar practica ordenar-banco` |

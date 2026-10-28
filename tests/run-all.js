@@ -32,6 +32,7 @@ const TIMEOUT_MS = (Number(process.env.TIMEOUT_S) || 900) * 1000;
 const TOOLS = [
     { name: 'tools/check-undef', file: 'tools/check-undef.js', needs: 'eslint (npx)', cuenta: /(\d+) scripts revisados/ },
     { name: 'tools/check-ninos', file: 'tools/check-ninos.js', needs: 'Node', cuenta: /(\d+) lecciones/ },
+    { name: 'tools/check-keywords', file: 'tools/check-keywords.js', needs: 'Node', cuenta: /(\d+) palabras clave/ },
     { name: 'tools/check-readings', file: 'tools/check-readings.js', needs: 'Playwright + Chromium + Python con «pip install opencc»', pre: 'opencc', cuenta: /(\d+) lecturas v2/ },
     { name: 'tools/test-classics-cq', file: 'tools/test-classics-cq.js', needs: 'Playwright + Chromium' },
     { name: 'tools/test-speak-es', file: 'tools/test-speak-es.js', needs: 'Playwright + Chromium' },

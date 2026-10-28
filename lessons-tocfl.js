@@ -30,6 +30,14 @@
         titleZhT: '夜市小吃',
         titleEs: 'De paseo por el mercado nocturno',
         blurb: 'Martina y su amiga taiwanesa van al 士林夜市: pollo frito, té con perlas y juegos. Comida, precios y gustos — vocabulario básico del TOCFL.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '夜市', zhT: '夜市', es: 'mercado nocturno' },
+            { zh: '逛', zhT: '逛', es: 'pasear mirando; recorrer sin apuro' },
+            { zh: '盐酥鸡', zhT: '鹹酥雞', es: 'pollo frito crocante condimentado (snack típico de Taiwán)', pyT: 'xián sū jī' },
+            { zh: '珍珠奶茶', zhT: '珍珠奶茶', es: 'té con leche y perlas de tapioca (bubble tea)' },
+            { zh: '请客', zhT: '請客', es: 'invitar (pagar la cuenta de los demás)' }
+        ],
         lines: [
             { zh: '今天晚上，玛蒂娜和小林一起去逛夜市。', zhT: '今天晚上，瑪蒂娜和小林一起去逛夜市。', es: 'Esta noche, Martina y Xiaolin van juntas a pasear por el mercado nocturno.' },
             { who: '玛蒂娜', whoT: '瑪蒂娜', zh: '哇，人真多！我闻到好香的鸡排味。', zhT: '哇，人真多！我聞到好香的雞排味。', es: '¡Guau, cuánta gente! Siento un rico olor a pollo frito.' },
@@ -110,6 +118,14 @@
         titleZhT: '第一次坐捷運',
         titleEs: 'Primera vez en el metro (MRT)',
         blurb: 'David viaja solo en el 捷運 de Taipéi por primera vez: pregunta cómo llegar a 淡水, compra una 悠遊卡 y aprende a hacer transbordo.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '捷运', zhT: '捷運', es: 'metro (el subte de Taipéi)' },
+            { zh: '悠游卡', zhT: '悠遊卡', es: 'tarjeta de transporte recargable, como la SUBE' },
+            { zh: '刷卡', zhT: '刷卡', es: 'pagar con tarjeta; pasar la tarjeta' },
+            { zh: '换车', zhT: '換車', es: 'hacer combinación (cambiar de línea)' },
+            { zh: '指示', zhT: '指示', es: 'indicaciones; carteles que orientan' }
+        ],
         lines: [
             { zh: '这个星期六，大卫第一次自己坐台北的捷运。', zhT: '這個星期六，大衛第一次自己坐台北的捷運。', es: 'Este sábado, David toma por primera vez solo el metro de Taipéi.' },
             { who: '大卫', whoT: '大衛', zh: '请问，去淡水是在这边等车吗？', zhT: '請問，去淡水是在這邊等車嗎？', es: 'Disculpe, ¿para ir a Tamsui se espera el tren por acá?' },
@@ -189,6 +205,14 @@
         titleZhT: '開學第一天',
         titleEs: 'El primer día de clases',
         blurb: 'Ana elige sus materias del semestre en la universidad: créditos, horarios que chocan y un curso de expresión oral exigente. Vocabulario académico del TOCFL 進階級.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '选课', zhT: '選課', es: 'elegir las materias; inscribirse a materias' },
+            { zh: '学分', zhT: '學分', es: 'créditos de una materia' },
+            { zh: '主修', zhT: '主修', es: 'especialidad principal; especializarse en' },
+            { zh: '期中报告', zhT: '期中報告', es: 'trabajo o informe de mitad de cuatrimestre' },
+            { zh: '听力', zhT: '聽力', es: 'comprensión auditiva' }
+        ],
         lines: [
             { zh: '九月一号是林安娜开学第一天，她有点紧张。', zhT: '九月一號是林安娜開學第一天，她有點緊張。', es: 'El primero de septiembre es el primer día de clases de Ana; está un poco nerviosa.' },
             { zh: '她是语言系一年级的学生，主修中文。', zhT: '她是語言系一年級的學生，主修中文。', es: 'Es estudiante de primer año de la carrera de lenguas, con especialización en chino.' },
@@ -268,6 +292,14 @@
         titleZhT: '手機壞了',
         titleEs: 'El celular se rompió',
         blurb: 'A Marcos se le cae el celular y la pantalla se rompe: taller, presupuesto, regateo amable, garantía y una buena recomendación. Vocabulario del TOCFL 進階級.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '屏幕', zhT: '螢幕', es: 'pantalla', pyT: 'yíng mù' },
+            { zh: '摔', zhT: '摔', es: 'caerse de golpe; dejar caer' },
+            { zh: '裂', zhT: '裂', es: 'rajarse; agrietarse' },
+            { zh: '保修', zhT: '保修', es: 'garantía de reparación' },
+            { zh: '保护壳', zhT: '保護殼', es: 'funda protectora (del celular)' }
+        ],
         lines: [
             { zh: '星期三早上，马克的手机摔到地上，屏幕裂了。', zhT: '星期三早上，馬克的手機摔到地上，螢幕裂了。', es: 'El miércoles a la mañana, a Marcos se le cae el celular al piso y la pantalla se agrieta.' },
             { who: '马克', whoT: '馬克', zh: '糟糕！屏幕裂了，什么都看不清楚了。', zhT: '糟糕！螢幕裂了，什麼都看不清楚了。', es: '¡Mal! Se agrietó la pantalla, no veo nada con claridad.' },
@@ -654,6 +686,14 @@
         titleZhT: '工作面試',
         titleEs: 'La entrevista de trabajo',
         blurb: 'Una entrevista laboral: experiencia, motivos de cambio y expectativas de desarrollo — vocabulario profesional del TOCFL 高階級.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '面试', zhT: '面試', es: 'entrevista de trabajo' },
+            { zh: '职位', zhT: '職位', es: 'puesto; cargo' },
+            { zh: '客户', zhT: '客戶', es: 'cliente' },
+            { zh: '录取', zhT: '錄取', es: 'aceptar a un candidato; contratar o admitir' },
+            { zh: '技能', zhT: '技能', es: 'habilidad; competencia' }
+        ],
         lines: [
             { zh: '王先生，谢谢你今天来面试。', zhT: '王先生，謝謝你今天來面試。', es: 'Sr. Wang, gracias por venir hoy a la entrevista.' },
             { zh: '不客气，我对这个职位很有兴趣。', zhT: '不客氣，我對這個職位很有興趣。', es: 'De nada, estoy muy interesado en este puesto.' },
@@ -733,6 +773,14 @@
         titleZhT: '環保與生活',
         titleEs: 'El medioambiente y la vida cotidiana',
         blurb: 'Dos amigos debaten cómo reducir la basura y qué responsabilidad le toca a cada parte de la sociedad — vocabulario abstracto del TOCFL 高階級.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '议题', zhT: '議題', es: 'tema de debate' },
+            { zh: '回收', zhT: '回收', es: 'reciclar; recuperar para reutilizar' },
+            { zh: '塑胶', zhT: '塑膠', es: 'plástico' },
+            { zh: '包装', zhT: '包裝', es: 'envase; embalaje' },
+            { zh: '设施', zhT: '設施', es: 'instalaciones; infraestructura' }
+        ],
         lines: [
             { zh: '最近环保的议题越来越受到重视。', zhT: '最近環保的議題越來越受到重視。', es: 'Últimamente el tema del medioambiente recibe cada vez más atención.' },
             { zh: '你觉得我们应该怎么减少垃圾呢？', zhT: '你覺得我們應該怎麼減少垃圾呢？', es: '¿Qué crees que deberíamos hacer para reducir la basura?' },
@@ -813,6 +861,17 @@
         titleZhT: '都市更新聽證會',
         titleEs: 'La audiencia pública sobre renovación urbana',
         blurb: 'Una audiencia pública en Taipéi sobre un proyecto de renovación urbana: derechos de los residentes, compensación y consenso comunitario — vocabulario cívico de nivel C1.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '公听会', zhT: '公聽會', es: 'audiencia pública' },
+            { zh: '都市更新', zhT: '都市更新', es: 'renovación urbana (reconstrucción de barrios antiguos)' },
+            { zh: '容积率', zhT: '容積率', es: 'FOT (factor de ocupación total): superficie construida permitida por m² de terreno' },
+            { zh: '拆迁补偿', zhT: '拆遷補償', es: 'indemnización por demolición y reubicación' },
+            { zh: '权利变换', zhT: '權利變換', es: 'canje de derechos: se cambia el terreno por unidades del edificio nuevo' },
+            { zh: '委托', zhT: '委託', es: 'encargar; encomendar' },
+            { zh: '评估', zhT: '評估', es: 'evaluar; evaluación' },
+            { zh: '公证', zhT: '公證', es: 'certificación notarial; dar fe ante escribano' }
+        ],
         lines: [
             { zh: '今天的听证会主题是信义区老旧社区的都市更新计划。', zhT: '今天的聽證會主題是信義區老舊社區的都市更新計劃。', es: 'La audiencia de hoy trata sobre el plan de renovación urbana de un barrio antiguo en el distrito de Xinyi.' },
             { who: '主持人', whoT: '主持人', zh: '欢迎各位居民与建商代表出席这场公听会。', zhT: '歡迎各位居民與建商代表出席這場公聽會。', es: 'Bienvenidos los residentes y representantes de la constructora a esta audiencia pública.' },
@@ -954,6 +1013,17 @@
         titleZhT: '新創公司路演',
         titleEs: 'El pitch de la startup ante inversores',
         blurb: 'Un fundador presenta su startup a un grupo de inversores en Taipéi: modelo de negocio, proyección de mercado y ronda de preguntas difíciles — vocabulario empresarial de nivel C1.',
+        // palabras clave elegidas para el glosario (revisadas con el docente; el pinyin se genera, salvo pyT cuando la lectura de Taiwán difiere)
+        keywords: [
+            { zh: '路演', zhT: '路演', es: 'presentación ante inversores (pitch, roadshow)' },
+            { zh: '创投', zhT: '創投', es: 'capital de riesgo' },
+            { zh: '渗透率', zhT: '滲透率', es: 'tasa de penetración de mercado' },
+            { zh: '获客', zhT: '獲客', es: 'captación de clientes' },
+            { zh: '估值', zhT: '估值', es: 'valuación de una empresa' },
+            { zh: '募资', zhT: '募資', es: 'recaudar fondos; levantar capital' },
+            { zh: '损益平衡', zhT: '損益平衡', es: 'punto de equilibrio' },
+            { zh: '订阅制', zhT: '訂閱制', es: 'modelo de suscripción' }
+        ],
         lines: [
             { zh: '今天的路演邀请了五位创投合伙人到场评估这个项目。', zhT: '今天的路演邀請了五位創投合夥人到場評估這個項目。', es: 'El pitch de hoy contó con cinco socios de capital de riesgo evaluando el proyecto.' },
             { who: '创办人', whoT: '創辦人', zh: '各位好，我们的产品是一款针对银发族设计的健康管理App。', zhT: '各位好，我們的產品是一款針對銀髮族設計的健康管理App。', es: 'Buenos días a todos; nuestro producto es una app de gestión de salud diseñada para personas mayores.' },
