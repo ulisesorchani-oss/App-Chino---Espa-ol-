@@ -14,7 +14,7 @@
 //   429           la línea cae a voz del sistema sin reintento y la precarga espera 5 s
 //   VELOCIDAD     cambio a mitad: rige desde la línea siguiente y se descartan las precargadas
 //   CORTES        ✕, Atrás (Nav), Esc, abrir Practicar, tocar el 🔊 de una línea, cambiar 简/繁: todo se corta y no se pide más
-//   PAUSA / SCROLL / KARAOKE  pausar y seguir; no pelea con un scroll manual de < 3 s; usa KARA si está encendido
+//   PAUSA / SCROLL / SOLO LÍNEA  pausar y seguir; no pelea con un scroll manual de < 3 s; con el karaoke ENCENDIDO no usa KARA ni descodifica el audio (solo se resalta la línea); el 🔊 por línea sigue con karaoke
 const fs = require('fs'), path = require('path'), http = require('http');
 const ROOT = path.resolve(__dirname, '..');
 let chromium;
@@ -72,6 +72,9 @@ const STATS_OUT = [];
       // voz del sistema simulada: anota y termina a los 60 ms
       window.speechSynthesis.speak = function (u) { window.__T.speechCalls.push(u.text); setTimeout(() => { try { u.onend && u.onend({}); } catch (e) { /* noop */ } }, 60); };
       window.speechSynthesis.cancel = function () { };
+      window.__T.decodes = 0; window.__T.maxKara = 0;
+      { const AC = window.AudioContext || window.webkitAudioContext; if (AC) { const d = AC.prototype.decodeAudioData; AC.prototype.decodeAudioData = function () { window.__T.decodes++; return d.apply(this, arguments); }; } }
+      setInterval(() => { const n = document.querySelectorAll('.k-on, .kara-active').length; if (n > window.__T.maxKara) window.__T.maxKara = n; }, 25);
     });
     await p.evaluate(() => LQ_LISTEN.setIcons(true)); // las pruebas de abajo esperan los iconos; la detección de fuente se prueba aparte
     return { ctx, p, errs };
@@ -178,7 +181,13 @@ const STATS_OUT = [];
     ok(Math.max.apply(null, look) <= 1, 'reproducción: la precarga nunca pasa de 1 línea adelante ' + Math.max.apply(null, look));
     ok(R.plays === 1, 'reproducción: UN solo <audio> reutilizado (' + R.plays + ')');
     ok(R.log.every(x => x.voice === vz && x.lang === lang && x.speed === 1 && x.karaoke === undefined), 'reproducción: voz por familia (' + vz + '/' + lang + '), velocidad actual y SIN karaoke=1 (ruta GET cacheable)');
-    ok(R.prepared === texts.length && R.withAudio === texts.length, 'reproducción con karaoke encendido: usa el KARA existente por línea (' + R.prepared + '/' + R.withAudio + ')');
+    const K = await p.evaluate(() => ({ on: KARA.on(), decodes: window.__T.decodes, maxKara: window.__T.maxKara }));
+    ok(K.on === true && R.prepared === 0 && R.withAudio === 0, 'con el karaoke ENCENDIDO, «Escuchar todo» NO usa KARA: ni prepare ni withAudio (' + R.prepared + '/' + R.withAudio + ')');
+    ok(K.decodes === 0 && K.maxKara === 0, 'con el karaoke encendido no hay detección de silencios (decodeAudioData ×' + K.decodes + ') ni resaltado por palabra (.k-on / .kara-active máx ' + K.maxKara + ')');
+    // el 🔊 por línea NO cambia: sigue usando el karaoke
+    await p.click('.lq-line[data-i="2"] .lq-line-say'); await sleep(p, 900);
+    const K2 = await p.evaluate(() => ({ prepared: window.__T.prepared, withAudio: window.__T.withAudio }));
+    ok(K2.prepared >= 1 && K2.withAudio >= 1, 'el 🔊 por línea sigue con karaoke (prepare ' + K2.prepared + ', withAudio ' + K2.withAudio + ')');
     ok(after.st === 'idle' && R.bar === 1 && R.pl === 0, 'reproducción: al terminar vuelve al reposo, sin línea resaltada');
     ok(after.s.body === before.s.body && after.s.pop === before.s.pop, 'reproducción: 0 disparos de observadores durante la escucha completa (body +' + (after.s.body - before.s.body) + ', pop +' + (after.s.pop - before.s.pop) + ')');
     STATS_OUT.push('escucha completa (15 líneas): observador de #lq-body +' + (after.s.body - before.s.body) + ', de #lesson-pop +' + (after.s.pop - before.s.pop));

@@ -2,7 +2,7 @@
 // Verifica: precarga de 1 línea, SIN reintento propio ante un 502 (el servidor ya reintenta), un único reintento solo para el 503 «busy»
 // (respetando Retry-After), nada de POST tras un GET que falló, corte de circuito
 // (2 líneas seguidas fallidas → voz del sistema con aviso sin «api/tts.py»), la marca de línea que avanza solo con el fin
-// real del audio, y la voz del sistema sin karaoke (se resalta la línea, no las palabras).
+// real del audio, y el resaltado de SOLO la línea (sin karaoke por palabra: ni con la voz del servidor ni con la del sistema).
 const { chromium, LAUNCH, APP_URL } = require('./lib/env');
 
 let n = 0, fails = 0;
@@ -26,9 +26,9 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     async function session(policy, opts) {
         opts = opts || {};
         const ctx = await b.newContext({ viewport: { width: 360, height: 740 }, serviceWorkers: 'block' });
-        await ctx.addInitScript((theme) => {
-            if (!sessionStorage.getItem('_i')) { sessionStorage.setItem('_i', '1'); localStorage.setItem('ac_onboarding_done_v2', '1'); localStorage.setItem('ac_seen_modsheet', '1'); localStorage.setItem('ac_speed', '1'); localStorage.setItem('theme', theme); }
-        }, opts.theme || 'light');
+        await ctx.addInitScript(([theme, kara]) => {
+            if (!sessionStorage.getItem('_i')) { sessionStorage.setItem('_i', '1'); localStorage.setItem('ac_onboarding_done_v2', '1'); localStorage.setItem('ac_seen_modsheet', '1'); localStorage.setItem('ac_speed', '1'); localStorage.setItem('theme', theme); if (kara) localStorage.setItem('ac_karaoke', '1'); }
+        }, [opts.theme || 'light', !!opts.kara]);
         const p = await ctx.newPage(); const errs = [];
         p.on('pageerror', e => errs.push(e.message));
         const srv = { reqs: [], inflight: 0, maxInflight: 0 };
@@ -68,6 +68,8 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
                 setTimeout(() => { try { u.onend && u.onend({}); } catch (e) { /* noop */ } }, 250);
             };
             // registro de la marca de línea (cuándo gana is-playing cada línea)
+            T.maxKara = 0; // máximo de elementos con resaltado por palabra (.k-on) o línea de karaoke activa (.kara-active)
+            setInterval(() => { const n = document.querySelectorAll('.k-on, .kara-active').length; if (n > T.maxKara) T.maxKara = n; }, 25);
             const body = document.getElementById('lq-body');
             new MutationObserver((ms) => {
                 ms.forEach((m) => { const el = m.target; if (el.classList && el.classList.contains('lq-line') && el.classList.contains('is-playing') && !(m.oldValue || '').includes('is-playing')) T.marks.push({ i: Number(el.dataset.i), t: performance.now() }); });
@@ -90,7 +92,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
 
     // ═════════ 1. servidor sano: 1 GET por línea, 0 POST, precarga de 1 ═════════
     {
-        const { ctx, p, errs, srv } = await session(() => ({ status: 200, delay: 120 }), { audioSec: 0.6 });
+        const { ctx, p, errs, srv } = await session(() => ({ status: 200, delay: 120 }), { audioSec: 0.6, kara: true });
         await openLesson(p, LESSON);
         const texts = await lineTexts(p);
         await p.click('#ll-play');
@@ -101,6 +103,8 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         ok(srv.maxInflight <= 2, 'sano: nunca más de 2 pedidos a la vez (la que suena + la precarga) — máx ' + srv.maxInflight);
         const S = await p.evaluate(() => ({ speech: window.__S.speech.length, tripped: LQ_LISTEN.stats.tripped, note: !!document.getElementById('ll-note'), banner: getComputedStyle(document.getElementById('tts-down-notice') || document.body).display }));
         ok(S.speech === 0 && S.tripped === 0 && !S.note, 'sano: ninguna línea con voz del sistema, sin corte de circuito ni aviso');
+        const KS = await p.evaluate(() => ({ on: KARA.on(), kara: window.__S.kara, max: window.__S.maxKara }));
+        ok(KS.on === true && KS.kara.prepare === 0 && KS.kara.withAudio === 0 && KS.kara.withTts === 0 && KS.max === 0, 'sano con el karaoke ENCENDIDO: solo se resalta la línea; no se usa KARA con la voz del servidor (prepare ' + KS.kara.prepare + ', withAudio ' + KS.kara.withAudio + ', palabras resaltadas máx ' + KS.max + ')');
         // la marca avanza en orden, una vez por línea, y cada salto espera el fin del audio (0,6 s)
         const M = await p.evaluate(() => window.__S.marks);
         ok(M.length === texts.length && M.every((m, k) => m.i === k), 'marca: pasa por las ' + texts.length + ' líneas en orden, una vez cada una ' + JSON.stringify(M.map(m => m.i)));
@@ -112,7 +116,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
 
     // ═════════ 2. servidor caído (502 siempre): 2 líneas → corte de circuito ═════════
     {
-        const { ctx, p, errs, srv } = await session(() => ({ status: 502, delay: 60 }));
+        const { ctx, p, errs, srv } = await session(() => ({ status: 502, delay: 60 }), { kara: true });
         await openLesson(p, LESSON);
         const texts = await lineTexts(p);
         await p.click('#ll-play');
@@ -124,7 +128,7 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         const S = await p.evaluate(() => ({ speech: window.__S.speech.map(x => x.text), tripped: LQ_LISTEN.stats.tripped, kara: window.__S.kara, banner: document.getElementById('tts-down-notice') ? getComputedStyle(document.getElementById('tts-down-notice')).display : 'none' }));
         ok(S.speech.length === texts.length && S.speech.join('|') === texts.join('|'), 'caído: TODAS las líneas se leen con la voz del sistema, en orden (' + S.speech.length + ' de ' + texts.length + ')');
         ok(S.tripped === 1, 'caído: el circuito se corta una sola vez');
-        ok(S.kara.withTts === 0 && S.kara.prepare === 0, 'caído: con la voz del sistema NO se usa el karaoke por palabra (prepare ' + S.kara.prepare + ', withTts ' + S.kara.withTts + ')');
+        ok(S.kara.withTts === 0 && S.kara.prepare === 0 && S.kara.withAudio === 0 && (await p.evaluate(() => window.__S.maxKara)) === 0, 'caído con el karaoke encendido: con la voz del sistema NO se usa el karaoke por palabra (prepare ' + S.kara.prepare + ', withTts ' + S.kara.withTts + ')');
         ok(S.banner === 'none', 'caído: no sale el aviso rojo global (lo reemplaza el de la barra)');
         const M = await p.evaluate(() => window.__S.marks);
         ok(M.length === texts.length && M.every((m, k) => m.i === k), 'caído: la marca recorre todas las líneas en orden ' + JSON.stringify(M.map(m => m.i)));

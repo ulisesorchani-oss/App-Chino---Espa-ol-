@@ -11,14 +11,15 @@
 //     pedir nada más al servidor, y un aviso en la barra lo explica;
 //   · la línea resaltada avanza SOLO cuando el audio de la anterior terminó de verdad y el de la nueva empezó a sonar
 //     (un error del <audio> o de la voz del sistema no hace correr la marca);
-//   · con la voz del sistema se resalta la LÍNEA, nunca palabra por palabra (sin karaoke: ahí los tiempos no son fiables);
+//   · SIEMPRE se resalta la LÍNEA, nunca palabra por palabra (sin KARA: ni con la voz del servidor ni con la del sistema);
 //   · token de cancelación, blob URLs liberadas, estado idle | playing | paused (+ «⏳» mientras espera);
 //   · tras un 429 la precarga se pausa 5 s (no se insiste); la línea que suena se pide igual, una sola vez.
 // Texto = data-zh del 🔊 de cada línea (sin las etiquetas `who`, en 简/繁 según la lección); voz = voiceZhFor(lección);
 // velocidad = la actual (si cambia a mitad, rige desde la línea siguiente y se descartan las precargadas).
 // Pedido por GET cacheable (≤160 caracteres, como el 🔊 por línea): SIN karaoke=1 → misma caché que cada 🔊.
 // Resalta la línea que suena (`is-playing`, scroll suave salvo que el usuario haya scrolleado a mano hace < 3 s)
-// y, si el karaoke está encendido, usa el KARA existente.
+// y NADA MÁS: no usa el karaoke (KARA) ni con la voz del servidor ni con la del sistema, con el karaoke encendido o apagado. El 🔊 por línea
+// no cambia. Sin KARA no hay resaltado por palabra, ni bucle de animación por frame, ni detección de silencios del audio.
 // Cortes: cerrar la ventana (#lq-close, Atrás, Esc, fondo), abrir Practicar/quiz, tocar el 🔊 de una línea,
 // cambiar 简/繁 (ac-script-change). Observadores ACOTADOS (sin subtree): uno de atributos en #lesson-pop y uno de
 // hijos directos en #lq-body (para poner el botón cuando se arma la vista Leer); window.LQ_LISTEN.stats cuenta cuántas veces disparan.
@@ -225,7 +226,7 @@
     }
     // Tiempo estimado de lectura (para no correr la marca cuando no hay audio real que esperar)
     const dwell = (text) => wait(Math.min(8000, Math.max(1200, text.length * 220 / Math.max(0.5, speedNow()))));
-    // Voz del sistema para UNA línea. Se resalta la línea (markLine), NUNCA palabra por palabra: sin KARA.
+    // Voz del sistema para UNA línea. Se resalta la línea (markLine), NUNCA palabra por palabra.
     // Resuelve cuando la voz terminó de verdad; si no pudo hablar, espera lo que habría tardado en leerse.
     function speakSystem(i, tok) {
         const text = L.lines[i].text;
@@ -251,9 +252,7 @@
         });
     }
     async function playEntry(i, ent, tok) {
-        const line = L.lines[i];
         if (!ent || ent.error || !ent.url) { await speakSystem(i, tok); return; }
-        try { if (typeof KARA !== 'undefined') KARA.prepare(line.el); } catch (e) { /* noop */ }
         const a = audioEl();
         a.src = ent.url;
         try { applyTtsSpeed(a, ent.data); } catch (e) { /* noop */ }
@@ -270,7 +269,6 @@
             if (!sonando) r = 'error';
             else {
                 markLine(i); // recién ahora suena esta línea: la marca avanza
-                try { if (typeof KARA !== 'undefined') KARA.withAudio(a, line.text); } catch (e) { /* noop */ }
                 r = await fin; // pausar no dispara 'ended'
             }
         } finally { try { URL.revokeObjectURL(ent.url); } catch (e) { /* ya */ } }
@@ -334,7 +332,6 @@
         L.cache.forEach((e) => { e.p.then((v) => { if (v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } } }); });
         L.cache.clear();
         document.querySelectorAll('.lq-line.is-playing').forEach(el => el.classList.remove('is-playing'));
-        try { if (typeof KARA !== 'undefined') KARA.stop(); } catch (e) { /* noop */ }
     }
     function stopAll(why) {
         if (L.state === 'idle') return;
