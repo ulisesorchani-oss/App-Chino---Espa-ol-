@@ -208,6 +208,9 @@ EDGE_TTS_MIN = (7, 3, 1)
 TW_ATTEMPT_CAP_S = 4.5      # tope por intento de una voz de Taiwán
 TW_PHASE_BUDGET_S = 7.0     # tope de la fase de Taiwán (reintento incluido): deja >= 5 s para la continental
 FALLBACK_MIN_WINDOW_S = 2.0 # si queda menos que esto del total, no se prueba la continental
+# TEMPORAL: voces de Taiwán que casi siempre dan «sin_audio» (medido: tw-m en 502 casi siempre; tw-f y las continentales en 200).
+# Con UN solo intento antes del respaldo a la continental (las demás voces siguen con MAX_ATTEMPTS). Vaciar para apagarlo.
+TW_UN_SOLO_INTENTO = {"zh-TW-YunJheNeural"}
 
 
 def _edge_tts_version():
@@ -308,7 +311,7 @@ def _budget(n_chars):
     return attempt, max(TOTAL_BUDGET_S, attempt + (TOTAL_BUDGET_S - ATTEMPT_TIMEOUT_S))
 
 
-async def synth_with_retry(text, voice_name, rate, want_boundaries, attempt_cap=None, total_cap=None):
+async def synth_with_retry(text, voice_name, rate, want_boundaries, attempt_cap=None, total_cap=None, max_attempts=None):
     """Hasta MAX_ATTEMPTS intentos. Devuelve (audio, boundaries, intentos, fallos, codigo|None, codigos).
 
     fallos = nombres de las excepciones vistas; codigos = su código corto, en orden. Si no hubo éxito:
@@ -317,11 +320,12 @@ async def synth_with_retry(text, voice_name, rate, want_boundaries, attempt_cap=
     cap_a, cap_t = _budget(len(text))
     attempt_cap = cap_a if attempt_cap is None else attempt_cap
     total_cap = cap_t if total_cap is None else total_cap
+    max_attempts = MAX_ATTEMPTS if max_attempts is None else max_attempts
     t0 = time.monotonic()
     fallos = []
     codigos = []
     codigo = "error"
-    for intento in range(1, MAX_ATTEMPTS + 1):
+    for intento in range(1, max_attempts + 1):
         if intento > 1:
             await asyncio.sleep(random.uniform(BACKOFF_MIN_S, BACKOFF_MAX_S))
         restante = total_cap - (time.monotonic() - t0)
@@ -340,7 +344,7 @@ async def synth_with_retry(text, voice_name, rate, want_boundaries, attempt_cap=
             codigos.append(codigo)
             if not reintentable:
                 return None, None, intento, fallos, codigo, codigos
-    return None, None, MAX_ATTEMPTS, fallos, codigo, codigos
+    return None, None, max_attempts, fallos, codigo, codigos
 
 
 def _error(codigo, status=502, retry_after=None):
@@ -492,7 +496,8 @@ async def tts_endpoint(body, via_get=False):
         if es_tw:
             audio, boundaries, intentos, fallos, codigo, codigos = await synth_with_retry(
                 text, voice_name, rate, want_boundaries,
-                attempt_cap=TW_ATTEMPT_CAP_S, total_cap=min(TW_PHASE_BUDGET_S, _budget(len(text))[1]))
+                attempt_cap=TW_ATTEMPT_CAP_S, total_cap=min(TW_PHASE_BUDGET_S, _budget(len(text))[1]),
+                max_attempts=1 if voice_name in TW_UN_SOLO_INTENTO else None)
         else:
             audio, boundaries, intentos, fallos, codigo, codigos = await synth_with_retry(
                 text, voice_name, rate, want_boundaries)

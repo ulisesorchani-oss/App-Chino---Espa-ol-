@@ -394,13 +394,15 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         const { ctx, p } = await session(() => ({ status: 200 }));
         const W = await p.evaluate(() => {
             const out = {}; const avisos = []; const w = console.warn; console.warn = (...a) => avisos.push(a.join(' ')); const ms = window.moduleStatus; window.moduleStatus = (m) => avisos.push('status:' + m);
-            warnStaleVoice('tw-m', { voice: 'zh-CN-YunjianNeural', fallback: true }); out.conFallback = avisos.length;
-            warnStaleVoice('tw-m', { voice: 'zh-CN-YunjianNeural' }); out.sinFallback = avisos.length;
-            warnStaleVoice('tw-m', { voice: 'zh-TW-YunJheNeural' }); out.vozEsperada = avisos.length;
+            warnStaleVoice('tw-f', { voice: 'zh-CN-XiaoxiaoNeural', fallback: true }); out.conFallback = avisos.length;
+            warnStaleVoice('tw-f', { voice: 'zh-CN-XiaoxiaoNeural' }); out.sinFallback = avisos.length;
+            warnStaleVoice('tw-f', { voice: 'zh-TW-HsiaoChenNeural' }); out.vozEsperada = avisos.length;
+            warnStaleVoice('tw-m', { voice: 'zh-CN-YunjianNeural' }); out.sustituida = avisos.length; // tw-m en VOCES_NO_DISPONIBLES: sustitución a propósito
             console.warn = w; window.moduleStatus = ms; return out;
         });
         ok(W.conFallback === 0, 'warnStaleVoice: con fallback:true NO avisa de servidor desactualizado');
         ok(W.sinFallback >= 1 && W.vozEsperada === W.sinFallback, 'warnStaleVoice: sin fallback y con otra voz sí avisa; con la voz esperada no');
+        ok(W.sustituida === W.vozEsperada, 'warnStaleVoice: una voz sustituida a propósito (tw-m en VOCES_NO_DISPONIBLES) tampoco avisa de servidor desactualizado');
         await ctx.close();
     }
 

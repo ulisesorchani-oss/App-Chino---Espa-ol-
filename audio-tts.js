@@ -218,13 +218,52 @@ let ttsServerSpeed = false; // alguna respuesta ya vino sintetizada a pedido
 // El api v9.49 mapea esos lang a Elena/Tomás y HsiaoChen/YunJhe; con un api
 // viejo la clave cae a la voz default (Xiaoxiao) y el aviso de server
 // desactualizado (warnStaleVoice) lo hace visible en la muestra de voz.
-function ttsLangFor(lang, v) {
+// ── TEMPORAL: voces que el servidor casi nunca entrega ──
+// tw-m (zh-TW-YunJheNeural) da «sin_audio» casi siempre (tw-f y las cuatro continentales, 200). Mientras esté en esta lista NO se
+// hace ningún pedido a esa voz: se pide la continental del mismo género. La elección del alumno NO se toca (ac_voice_zh sigue
+// guardada y el botón de voz sigue mostrándola); solo cambia la voz con la que se pide el audio. PARA APAGARLO: vaciar el arreglo
+// (`const VOCES_NO_DISPONIBLES = [];`). Es un arreglo (no se reasigna) para poder apagarlo también desde las pruebas.
+const VOCES_NO_DISPONIBLES = ['tw-m'];
+const VOZ_CONTINENTAL_DE = { 'tw-f': 'f', 'tw-m': 'm' };
+function voiceEfectiva(v) {
     const k = String(v || '');
+    return VOCES_NO_DISPONIBLES.indexOf(k) !== -1 ? (VOZ_CONTINENTAL_DE[k] || k) : k;
+}
+// Aviso breve, UNA vez por sesión (sessionStorage: una recarga de la misma pestaña no lo repite), la primera vez que se pide un
+// audio con la voz sustituida.
+let avisoVozNoDispMostrado = false;
+function avisarVozNoDisponible() {
+    if (avisoVozNoDispMostrado) return;
+    avisoVozNoDispMostrado = true;
+    try { if (sessionStorage.getItem('ac_aviso_voz_nodisp') === '1') return; sessionStorage.setItem('ac_aviso_voz_nodisp', '1'); } catch (e) { /* sin sessionStorage: queda el aviso en memoria */ }
+    try {
+        let el = document.getElementById('tts-voice-notice');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'tts-voice-notice';
+            el.setAttribute('role', 'status');
+            el.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);' +
+                'z-index:99998;max-width:92vw;background:#92400e;color:#fff;padding:10px 14px;' +
+                'border-radius:10px;font-size:13px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.35);' +
+                'cursor:pointer;display:none;text-align:center;';
+            el.addEventListener('click', () => { try { el.style.display = 'none'; } catch (e) { } });
+            (document.body || document.documentElement).appendChild(el);
+        }
+        el.textContent = uiT('ttsVozNoDisp');
+        el.style.display = 'block';
+        clearTimeout(avisarVozNoDisponible._t);
+        avisarVozNoDisponible._t = setTimeout(() => { try { el.style.display = 'none'; } catch (e) { } }, 7000);
+    } catch (e) { /* el aviso nunca rompe la app */ }
+}
+function ttsLangFor(lang, v) {
+    const k = voiceEfectiva(v);
     if (lang === 'es') return k.indexOf('ar-') === 0 ? 'es-AR' : 'es-ES';
     return k.indexOf('tw-') === 0 ? 'zh-TW' : 'zh-CN';
 }
 function ttsBody(text, lang, voice, wantBoundaries) {
-    const b = { text: text, lang: lang, voice: voice,
+    const efectiva = voiceEfectiva(voice);
+    if (efectiva !== voice) avisarVozNoDisponible();
+    const b = { text: text, lang: lang, voice: efectiva,
                 speed: (typeof playbackSpeed === 'number') ? playbackSpeed : 1 };
     // v9.7x: karaoke con timestamps reales — opt-in, solo lo piden los
     // llamadores que van a sincronizar resaltado (ver karaoke.js). El
@@ -423,6 +462,7 @@ function sysVoiceFor(langCode, v) {
 function warnStaleVoice(key, data) {
     try {
         if (!data || !data.voice) return;               // servidor viejo sin campo voice → nada
+        if (voiceEfectiva(key) !== key) return;         // voz sustituida a propósito (VOCES_NO_DISPONIBLES): no es un servidor desactualizado
         if (data.fallback) return;                      // voz alternativa del servidor (tw-* → continental tras sin_audio): no es un servidor desactualizado
         const want = VOICE_EXPECT[key] || null;
         if (!want) return;                              // español u otra clave sin mapeo

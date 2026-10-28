@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 31 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 32 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -66,7 +66,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (30, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (31, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-ninos.js` | no | no | no | solo Node |
@@ -110,6 +110,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `api-tts` | `api/index.py` y `api/tts.py` con edge-tts simulado: reintentos, semáforo, errores, registro, y que los dos archivos no diverjan |
 | `vercelignore` | `.vercelignore` no deja fuera nada que la app o `sw.js` carguen (precaché, referencias del código, cargas perezosas y lo que el navegador pide al recorrer todas las vistas); tests/, tools/, docs/, data/ y los documentos de raíz sí quedan fuera |
 | `tts-service-worker` | `sw.js` REAL frente a un `/api/tts` simulado en otro puerto: una respuesta con `X-TTS-Fallback` o `no-store` (voz alternativa) nunca entra en `chino-es-tts-v2` y una normal sí |
+| `voz-no-disponible` | `VOCES_NO_DISPONIBLES = ['tw-m']` (temporal, `audio-tts.js`): con la constante activa no sale ningún pedido a tw-m (se pide la continental m), la elección del alumno y el botón no se tocan y el aviso sale una vez por sesión; apagada vuelve el comportamiento anterior; tw-f y las continentales no cambian |
 | `voz-lecciones` | botones de voz/ciclo en lecciones, podcast y tarjetas de Hoy |
 
 ## Qué suites correr según lo que cambió
@@ -125,7 +126,7 @@ sin correr nada. Los comandos de abajo están pensados para copiar y pegar. Si t
 | **Aprender** (pantalla, selector de nivel, hoja de módulos, Diaria) | `node tests/run-all.js aprender selector-nivel tocfl-menu hoja- diaria` |
 | **Entrenar / práctica / exámenes** (`exam-practice.js`, `exam-items.js`) | `node tests/run-all.js entrenar practica ordenar-banco` |
 | **Atrás** (`nav.js`, capas, hojas) | `node tests/run-all.js navegacion practica-atras hoja-modulos aprender-simple` |
-| **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen escuchar-fallos tts-service-worker speak-es navegacion-tanda1 ninos-sonidos api-tts` |
+| **Audio** (`audio-tts.js`, velocidad, «Escuchar todo», caché de TTS en `sw.js`) | `node tests/run-all.js ajustes-velocidad voz-lecciones lessons-listen escuchar-fallos tts-service-worker voz-no-disponible speak-es navegacion-tanda1 ninos-sonidos api-tts` |
 | **Escritura 简/繁** (`text-utils.js`, preferencia de escritura) | `node tests/run-all.js escritura- lecciones-tocfl-contraste segmentador lecturas-tocfl-b1 practica-lecturas check-readings` |
 | **Pinyin** (`pinyin-*.js`, interruptores de pinyin) | `node tests/run-all.js escritura-pinyin lecciones-nombres lecciones-tocfl-contraste lecturas-tocfl-b1 segmentador` |
 | **API de voz** (`api/index.py`, `api/tts.py`, `requirements.txt`) | `node tests/run-all.js api-tts` (también corre solo: `python3 -m unittest discover -s tests/api-tts -v`) |
