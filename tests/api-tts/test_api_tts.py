@@ -102,7 +102,7 @@ class Base(unittest.IsolatedAsyncioTestCase):
         GUION.clear(); LLAMADAS.clear(); ENVUELO.update(ahora=0, max=0)
         m._TTS_CACHE.clear(); m._SEM = None; m._SEM_LOOP = None
         self._orig = {k: getattr(m, k) for k in ("BACKOFF_MIN_S", "BACKOFF_MAX_S", "ATTEMPT_TIMEOUT_S",
-                                                  "TOTAL_BUDGET_S", "QUEUE_WAIT_S", "MAX_CONCURRENT")}
+                                                  "TOTAL_BUDGET_S", "QUEUE_WAIT_S", "MAX_CONCURRENT", "TW_ATTEMPT_CAP_S", "TW_PHASE_BUDGET_S", "FALLBACK_MIN_WINDOW_S")}
         m.BACKOFF_MIN_S, m.BACKOFF_MAX_S = 0.01, 0.02   # los tests no esperan 0,4-0,8 s de verdad
         self._log_real = m._log
         self.logs = []
@@ -113,7 +113,7 @@ class Base(unittest.IsolatedAsyncioTestCase):
         self.M._log = self._log_real
 
     async def pedir(self, texto="你好", via_get=False, **extra):
-        body = dict(text=texto, lang="zh-TW", voice="tw-m", speed=0.85); body.update(extra)
+        body = dict(text=texto, lang="zh-CN", voice="m", speed=0.85); body.update(extra)
         antes = len(self.logs)
         r = await self.M.tts_endpoint(body, via_get=via_get)
         return r, self.logs[antes:]
@@ -151,14 +151,14 @@ class VelocidadTest(Base):
 
     async def test_el_rate_llega_a_edge_tts(self):
         r, _ = await self.pedir(speed=0.7)
-        self.assertEqual(r.status_code, 200); self.assertEqual(LLAMADAS[-1], ("zh-TW-YunJheNeural", "-30%"))
+        self.assertEqual(r.status_code, 200); self.assertEqual(LLAMADAS[-1], ("zh-CN-YunjianNeural", "-30%"))
 
 
 class ExitoTest(Base):
     async def test_exito_a_la_primera_y_cabeceras_de_get(self):
         r, log = await self.pedir(via_get=True)
         self.assertEqual(r.status_code, 200)
-        d = cuerpo(r); self.assertEqual((d["mime"], d["voice"], d["speed"], d["cached"]), ("audio/mpeg", "zh-TW-YunJheNeural", 0.85, False))
+        d = cuerpo(r); self.assertEqual((d["mime"], d["voice"], d["speed"], d["cached"]), ("audio/mpeg", "zh-CN-YunjianNeural", 0.85, False))
         self.assertIn("immutable", r.headers["cache-control"]); self.assertEqual(r.headers["x-tts-audio"], "1")
         self.assertEqual(len(log), 1); self.assertIn("intento=1 res=ok", log[0])
 
@@ -304,7 +304,7 @@ class RegistroTest(Base):
         GUION[:] = [NoAudioReceived("x"), "ok"]
         r, log = await self.pedir(texto=secreto)
         self.assertEqual(len(log), 1)
-        for campo in ("voz=zh-TW-YunJheNeural", "rate=-15%", "largo=%d" % len(secreto), "intento=2", "res=ok", "exc=NoAudioReceived",
+        for campo in ("voz=zh-CN-YunjianNeural", "rate=-15%", "largo=%d" % len(secreto), "intento=2", "res=ok", "exc=NoAudioReceived",
                       "dur_ms=", "edge_tts=7.3.1"):
             self.assertIn(campo, log[0])
         self.assertNotIn(secreto, log[0]); self.assertNotIn("你", log[0])
@@ -362,6 +362,113 @@ class ClasificacionTest(unittest.TestCase):
         self.assertEqual(INDEX._classify(aiohttp.ClientResponseError(info, (), status=403)), ("403", True))
         self.assertEqual(INDEX._classify(aiohttp.ClientConnectionError()), ("ws", True))
         self.assertEqual(INDEX._classify(aiohttp.ServerDisconnectedError()), ("ws", True))
+
+
+class VozAlternativaTest(Base):
+    """zh-TW que agota sus reintentos SOLO con sin_audio → UNA prueba con la continental; esa respuesta no se guarda."""
+
+    async def tw(self, voz="tw-m", via_get=False, texto="你好", **extra):
+        return await self.pedir(texto=texto, via_get=via_get, lang="zh-TW", voice=voz, **extra)
+
+    async def test_tw_m_cae_a_yunjian_con_todas_las_marcas_de_no_guardar(self):
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), "ok"]
+        r, log = await self.tw("tw-m", via_get=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual([v for v, _ in LLAMADAS], ["zh-TW-YunJheNeural", "zh-TW-YunJheNeural", "zh-CN-YunjianNeural"])
+        d = cuerpo(r)
+        self.assertEqual((d["voice"], d["fallback"], d["cached"], d["mime"], d["speed"]), ("zh-CN-YunjianNeural", True, False, "audio/mpeg", 0.85))
+        self.assertEqual(r.headers["cache-control"], "no-store")
+        self.assertEqual(r.headers["x-tts-fallback"], "1")
+        self.assertEqual(r.headers["x-tts-audio"], "1")     # el cliente acepta un GET solo con esta marca
+        self.assertNotIn("immutable", r.headers["cache-control"]); self.assertNotIn("public", r.headers["cache-control"])
+        self.assertEqual(len(self.M._TTS_CACHE), 0, "el fallback entró en la caché en memoria")
+        self.assertEqual(len(log), 1); self.assertIn("fallback=1", log[0]); self.assertIn("res=ok", log[0]); self.assertIn("intento=3", log[0])
+
+    async def test_tw_f_cae_a_xiaoxiao_tambien_por_post(self):
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), "ok"]
+        r, log = await self.tw("tw-f", via_get=False)
+        self.assertEqual((r.status_code, cuerpo(r)["voice"], cuerpo(r)["fallback"]), (200, "zh-CN-XiaoxiaoNeural", True))
+        self.assertEqual((r.headers["cache-control"], r.headers["x-tts-fallback"]), ("no-store", "1"))
+        self.assertEqual(len(self.M._TTS_CACHE), 0)
+
+    async def test_el_fallback_nunca_se_sirve_de_la_cache_ni_pisa_la_voz_de_taiwan(self):
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), "ok"]
+        await self.tw("tw-m")
+        n = len(LLAMADAS)
+        r, _ = await self.tw("tw-m")      # taiwán responde bien esta vez: sale de Taiwán, no del fallback anterior
+        self.assertEqual(r.status_code, 200); self.assertGreater(len(LLAMADAS), n)
+        d = cuerpo(r); self.assertEqual(d["voice"], "zh-TW-YunJheNeural"); self.assertNotIn("fallback", d); self.assertFalse(d["cached"])
+        self.assertIn("immutable", self.M._json_payload(dict(d), True).headers["cache-control"])
+        self.assertEqual(len(self.M._TTS_CACHE), 1)   # esa SÍ se guardó, con su clave de Taiwán
+        r3, _ = await self.tw("tw-m"); self.assertTrue(cuerpo(r3)["cached"]); self.assertEqual(cuerpo(r3)["voice"], "zh-TW-YunJheNeural")
+
+    async def test_la_continental_tambien_falla_502_sin_marcas_de_fallback(self):
+        GUION[:] = [NoAudioReceived("x")] * 3
+        r, log = await self.tw("tw-m")
+        self.assertEqual((r.status_code, cuerpo(r)), (502, {"error": "tts no disponible", "codigo": "sin_audio"}))
+        self.assertEqual(r.headers["cache-control"], "no-store"); self.assertNotIn("x-tts-fallback", r.headers)
+        self.assertEqual(len(LLAMADAS), 3); self.assertEqual(len(self.M._TTS_CACHE), 0)
+        self.assertIn("res=error_sin_audio", log[0]); self.assertIn("fallback=0", log[0])
+
+    async def test_un_solo_intento_de_continental(self):
+        GUION[:] = [NoAudioReceived("x")] * 10
+        await self.tw("tw-f"); self.assertEqual(len(LLAMADAS), 3)
+
+    async def test_no_hay_fallback_para_timeouts_ni_403_ni_5xx_ni_mezclas(self):
+        self.M.TW_ATTEMPT_CAP_S = 0.1; self.M.TW_PHASE_BUDGET_S = 2.0
+        casos = {"timeout": [("cuelga", 5), ("cuelga", 5)], "403": [ClientResponseError(403)] * 2, "5xx": [ClientResponseError(503)] * 2,
+                 "sin_audio y luego timeout": [NoAudioReceived("x"), ("cuelga", 5)], "timeout y luego sin_audio": [("cuelga", 5), NoAudioReceived("x")],
+                 "ws": [WebSocketError("w")] * 2}
+        for nombre, guion in casos.items():
+            GUION[:] = guion + ["ok"]; LLAMADAS.clear(); self.M._TTS_CACHE.clear()
+            r, log = await self.tw("tw-m")
+            self.assertEqual(r.status_code, 502, nombre); self.assertEqual(len(LLAMADAS), 2, nombre)
+            self.assertTrue(all(v == "zh-TW-YunJheNeural" for v, _ in LLAMADAS), nombre)
+            self.assertNotIn("x-tts-fallback", r.headers, nombre); self.assertIn("fallback=0", log[0], nombre)
+
+    async def test_las_voces_continentales_no_tienen_fallback(self):
+        GUION[:] = [NoAudioReceived("x")] * 3 + ["ok"]
+        r, _ = await self.pedir(lang="zh-CN", voice="m")
+        self.assertEqual((r.status_code, len(LLAMADAS)), (502, 2))
+        GUION[:] = [NoAudioReceived("x")] * 3 + ["ok"]; LLAMADAS.clear()
+        r, _ = await self.pedir(lang="es-AR", voice="ar-f", texto="Hola")
+        self.assertEqual((r.status_code, len(LLAMADAS)), (502, 2))
+
+    async def test_busy_no_dispara_fallback(self):
+        self.M.QUEUE_WAIT_S = 0.05
+        sem = self.M._semaphore(); await sem.acquire(); await sem.acquire()
+        try:
+            GUION[:] = ["ok"]
+            r, _ = await self.tw("tw-m")
+            self.assertEqual((r.status_code, cuerpo(r)["codigo"]), (503, "busy")); self.assertEqual(len(LLAMADAS), 0)
+            self.assertNotIn("x-tts-fallback", r.headers)
+        finally: sem.release(); sem.release()
+
+    async def test_tiempos_el_intento_de_taiwan_tiene_tope_y_el_total_no_pasa_de_12_s(self):
+        m = self.M
+        self.assertLessEqual(m.TW_ATTEMPT_CAP_S, 5.0); self.assertGreaterEqual(m.TW_ATTEMPT_CAP_S, 4.0)
+        self.assertLessEqual(m.TW_PHASE_BUDGET_S + m.ATTEMPT_TIMEOUT_S, m.TOTAL_BUDGET_S + 3.0)
+        # escala reducida: fase de Taiwán ≤ 0.4 s, total 0.9 s; la continental cuelga → corta por el tope total
+        m.TW_ATTEMPT_CAP_S = 0.2; m.TW_PHASE_BUDGET_S = 0.4; m.ATTEMPT_TIMEOUT_S = 0.5; m.TOTAL_BUDGET_S = 0.9
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), ("cuelga", 5)]
+        t0 = asyncio.get_running_loop().time(); r, log = await self.tw("tw-m"); dt = asyncio.get_running_loop().time() - t0
+        self.assertEqual(r.status_code, 502); self.assertLess(dt, 0.9 + 0.3, "se pasó del total (%.2f s)" % dt)
+
+    async def test_si_no_queda_ventana_no_se_prueba_la_continental(self):
+        m = self.M
+        m.TW_ATTEMPT_CAP_S = 0.2; m.TW_PHASE_BUDGET_S = 1.5; m.TOTAL_BUDGET_S = 3.0; m.FALLBACK_MIN_WINDOW_S = 5.0
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), "ok"]
+        r, _ = await self.tw("tw-m"); self.assertEqual((r.status_code, len(LLAMADAS)), (502, 2))
+
+    async def test_con_karaoke_el_fallback_trae_los_tiempos_de_la_voz_que_sono(self):
+        GUION[:] = [NoAudioReceived("x"), NoAudioReceived("x"), "ok"]
+        r, _ = await self.tw("tw-f", karaoke="1")
+        self.assertEqual((r.status_code, cuerpo(r)["fallback"]), (200, True)); self.assertEqual(len(self.M._TTS_CACHE), 0)
+
+    async def test_cors_expone_los_encabezados_que_lee_el_cliente(self):
+        cfg = next(mw for mw in self.M.app.user_middleware if mw.cls.__name__ == "CORSMiddleware")
+        expuestos = [h.lower() for h in cfg.kwargs.get("expose_headers", [])]
+        for h in ("x-tts-audio", "x-tts-fallback", "retry-after"): self.assertIn(h, expuestos)
 
 
 class MismoComportamientoTest(Base):

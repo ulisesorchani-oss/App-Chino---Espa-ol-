@@ -5,7 +5,8 @@
 // lección entera, línea por línea, con el patrón del Lector (reader.js) aplicado por línea:
 //   · UN solo <audio> reutilizado (src cambiante) y una promesa por línea (nunca se pide dos veces);
 //   · precarga de UNA línea (N+1) apenas arranca N; si la siguiente no llegó se muestra «⏳» y se espera;
-//   · UN solo reintento por línea (~0,8-1,2 s después) y, si también falla, voz del sistema para esa línea;
+//   · SIN reintento propio ante un fallo (502, red…): el servidor ya reintentó y tiene voz alternativa; solo un 503 «busy»
+//     (el servidor está ocupado) se reintenta UNA vez, esperando su Retry-After; si falla, voz del sistema para esa línea;
 //   · si la última línea ya falló no se precarga la siguiente (solo la que toca) y, tras 2 seguidas fallidas, CORTE DE CIRCUITO: el resto de la lección va con la voz del sistema, sin
 //     pedir nada más al servidor, y un aviso en la barra lo explica;
 //   · la línea resaltada avanza SOLO cuando el audio de la anterior terminó de verdad y el de la nueva empezó a sonar
@@ -26,8 +27,9 @@
 (function lessonsListenInit() {
     'use strict';
     const AHEAD = 1;            // precarga: solo N+1
-    const RETRY_MS = 800;       // un reintento silencioso, a los RETRY_MS (+ hasta RETRY_JITTER_MS al azar)
-    const RETRY_JITTER_MS = 400;
+    const BUSY_DEFAULT_MS = 2000; // 503 «busy» sin Retry-After legible: espera por defecto antes del único reintento
+    const BUSY_MAX_WAIT_MS = 6000; // tope de lo que se espera por un Retry-After
+    const BUSY_JITTER_MS = 300;   // azar para que dos líneas no vuelvan a chocar juntas
     const CIRCUIT_AFTER = 2;    // líneas seguidas fallidas que cortan el circuito
     const SPEECH_START_MS = 5000; // la voz del sistema que no arranca en este tiempo se da por muda
     const BACKOFF_MS = 5000;    // tras un 429, la precarga espera
@@ -122,13 +124,26 @@
         // silent: el aviso rojo global no sale; «Escuchar todo» tiene el suyo (corte de circuito)
         const resp = await fetchTTS(ttsBody(text, L.lang, L.vz), FETCH_TIMEOUT, { silent: true }); // sin karaoke: GET cacheable, misma caché que el 🔊
         if (resp && resp.status === 429) { const e = new Error('429'); e.code = 429; throw e; }
-        if (!resp || !resp.ok) throw new Error('TTS http ' + (resp && resp.status));
+        if (!resp || !resp.ok) {
+            const e = new Error('TTS http ' + (resp && resp.status));
+            e.status = resp && resp.status;
+            if (resp && resp.status === 503) { // solo el 503 «busy» (semáforo del servidor) se reintenta
+                let codigo = null;
+                try { codigo = (await resp.clone().json()).codigo; } catch (x) { /* cuerpo no JSON */ }
+                if (codigo === 'busy') {
+                    const ra = parseFloat(resp.headers.get('retry-after'));
+                    e.busy = true;
+                    e.retryAfterMs = (isFinite(ra) && ra >= 0) ? ra * 1000 : BUSY_DEFAULT_MS;
+                }
+            }
+            throw e;
+        }
         const data = await resp.json();
         if (!data || !data.audio) throw new Error('TTS sin audio');
         return { url: b64ToUrl(data), data: data, error: null };
     }
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
-    // Cuenta, EN ORDEN de línea, las que fallaron (después de su único reintento). 2 seguidas → se corta el circuito.
+    // Cuenta, EN ORDEN de línea, las que fallaron (tras el 'busy' reintentado una vez, si lo hubo). 2 seguidas → se corta el circuito.
     function settle(i, failed, tok) {
         if (tok !== L.tok || L.tripped) return;
         L.settled.set(i, failed);
@@ -151,7 +166,8 @@
             try { return await fetchOnce(text, tok); }
             catch (err) {
                 if (err && err.code === 429) { L.backoffUntil = Date.now() + BACKOFF_MS; return { url: null, data: null, error: err }; } // no se insiste
-                await wait(RETRY_MS + Math.random() * RETRY_JITTER_MS); // UN reintento silencioso
+                if (!(err && err.busy)) return { url: null, data: null, error: err }; // 502, red, timeout…: el servidor ya reintentó; no se insiste
+                await wait(Math.min(BUSY_MAX_WAIT_MS, err.retryAfterMs) + Math.random() * BUSY_JITTER_MS); // «busy»: UN reintento, respetando Retry-After
                 if (tok !== L.tok || L.tripped) return { url: null, data: null, error: err };
                 try { return await fetchOnce(text, tok); }
                 catch (err2) {
@@ -374,5 +390,5 @@
     else boot();
 
     // setIcons: true = todos los iconos; false = solo texto; undefined = detectar la fuente (lo normal). hasGlyph se expone para las pruebas.
-    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, get tripped() { return L.tripped; }, config: { AHEAD, RETRY_MS, RETRY_JITTER_MS, CIRCUIT_AFTER, BACKOFF_MS, MANUAL_SCROLL_MS } };
+    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, get tripped() { return L.tripped; }, config: { AHEAD, BUSY_DEFAULT_MS, BUSY_MAX_WAIT_MS, CIRCUIT_AFTER, BACKOFF_MS, MANUAL_SCROLL_MS } };
 })();
