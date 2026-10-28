@@ -735,6 +735,7 @@ const UI_STRINGS = {
     srsRelearn: '{n} para repetir en esta sesión', srsOkNew: 'Repaso al día · volvé mañana',
     gradeNoReturn: 'no vuelve', gradeTomorrow: 'mañana', // v9.38: subtítulos diferenciados Bien/Fácil
     ttsDown: '⚠️ Servidor de voz no disponible — estoy usando la voz del sistema (suena más robótica).', // v9.41: el fallback deja de ser silencioso
+    ttsVozNoDisp: 'La voz masculina de Taiwán no está disponible por ahora: uso la masculina continental.', // temporal (VOCES_NO_DISPONIBLES en audio-tts.js)
     hintTone: 'Casi: revisá el tono.', hintHomophone: 'El sonido está bien, el carácter no.',
     hintPinyinOk: 'El pinyin está bien: ahora escribilo en caracteres.',
     hintAccent: 'Casi: revisá los acentos.', hintOneChar: 'Un carácter no coincide:', hintOneLetter: 'Una letra no coincide:',
@@ -817,6 +818,7 @@ const UI_STRINGS = {
     srsRelearn: '本次还要重练 {n} 张', srsOkNew: '复习完成 · 明天再来',
     gradeNoReturn: '不再出现', gradeTomorrow: '明天', // v9.38: 中文副标题
     ttsDown: '⚠️ 语音服务器不可用——暂时使用系统语音（比较机械）。', // v9.41: 备用语音不再悄无声息
+    ttsVozNoDisp: '台湾男声暂时不可用：改用大陆男声。', // 临时（audio-tts.js 的 VOCES_NO_DISPONIBLES）
     hintTone: '差一点：注意声调。', hintHomophone: '读音对了，字不对。',
     hintPinyinOk: '拼音对了：请写汉字。',
     hintAccent: '差一点：注意重音符号。', hintOneChar: '有一个字不对：', hintOneLetter: '有一个字母不对：',
