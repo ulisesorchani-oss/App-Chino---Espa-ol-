@@ -586,7 +586,8 @@ function scriptFor(ref) {
 }
 // Contexto de ck(): una lección o el Podcast abiertos (window.acScriptRef,
 // lo ponen lessons-graduated.js/podcast.js) → esa lección; el Repaso (SRS)
-// abierto → "HSK y el resto", como siempre; si no, el módulo activo de Hoy.
+// abierto → "HSK y el resto" (las tarjetas de TOCFL eligen aparte, ver
+// scriptForCard); si no, el módulo activo de Hoy.
 function scriptContextRef() {
     if (window.acScriptRef) return window.acScriptRef;
     const srs = document.getElementById('srs-pop');
@@ -595,6 +596,28 @@ function scriptContextRef() {
 }
 function ck() {
     return scriptFor(scriptContextRef());
+}
+// Repaso (SRS): familia de una tarjeta, derivada AL DIBUJARLA de la etiqueta del
+// módulo que guardó al crearse (card.m); no hay campo nuevo en las tarjetas.
+// Reconoce 'TOCFL-A1'… (Hoy), 'Práctica TOCFL B1…' (práctica de examen) y
+// 'Lección <título>' cuando ese título es de una lección TOCFL. Todo lo demás
+// (HSK, Clásicos, Pares mínimos, sin módulo) devuelve null: sigue como siempre.
+function cardFamily(m) {
+    const t = String(m || '').trim();
+    if (!t) return null;
+    if (/^(Práctica )?TOCFL/.test(t)) return 'tocfl';
+    const mm = /^Lección (.+)$/.exec(t);
+    if (mm && Array.isArray(window.GRADED_LESSONS)) {
+        const hit = window.GRADED_LESSONS.filter(l => l.titleEs === mm[1]);
+        if (hit.length && hit.every(l => l.exam === 'TOCFL')) return 'tocfl';
+    }
+    return null;
+}
+// Escritura con la que el Repaso dibuja una tarjeta: las de TOCFL, la de su familia
+// (la elección explícita del alumno gana; sin elección, tradicional); el resto, ck()
+// igual que antes. Solo cambia lo que se VE y se oye; no convierte textos.
+function scriptForCard(card) {
+    return cardFamily(card && card.m) === 'tocfl' ? scriptFor('tocfl') : ck();
 }
 // Migración única: un 'trad' guardado con el 简/繁 de antes (global) cuenta
 // como elección explícita para las dos familias; un 'simp' guardado NO

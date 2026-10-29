@@ -33,6 +33,9 @@
     'use strict';
 
     const SRS_KEY = 'ac_srs';
+    // Escritura con la que se DIBUJA cada tarjeta (hanzi, ejemplo, pista, voz, a mano): las de TOCFL, la de su familia;
+    // el resto, ck() como siempre (scriptForCard está en app.js). No interviene en validar lo tecleado ni en la calificación.
+    const ckFor = (card) => (typeof scriptForCard === 'function' ? scriptForCard(card) : ck());
     const DAY = 86400000;
     const MIN = 60000;
     const AGAIN_MS = 10 * MIN;          // caja 1: relearning dentro de la sesión
@@ -332,7 +335,7 @@
     }
     function prodPlan(item) {
         const card = item.card || {};
-        const trad = ck() === 'trad';
+        const trad = ckFor(card) === 'trad';
         const wordSimp = item.zh;
         const wordTrad = card.zt || dictSimpToTrad(wordSimp) || '';
         const es = srsGloss(item.zh, card);
@@ -480,13 +483,13 @@
         const nextGood = Math.min(card.b + 1, 6);
         const nextEasy = Math.min(card.b + 2, 6);
         const hintB = (n) => (n === 1 ? '10 min' : (BOX_DAYS[n] === 1 ? '1 día' : BOX_DAYS[n] + ' días'));
-        const zhAns = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
+        const zhAns = ckFor(card) === 'trad' ? (card.zt || item.zh) : item.zh;
         return (withHanzi ? '<div class="srs-ans-zh" lang="zh">' + escHtml(zhAns) + '</div>' : '') +
             (card.py ? '<div class="srs-py">📖 ' + escHtml(card.py) + '</div>' : '') +
             '<div class="srs-es">🇪🇸 ' + (srsGloss(item.zh, card)
                 ? escHtml(srsGloss(item.zh, card)) : '<span class="srs-es-missing">—</span>') + '</div>' +
             ((card.ctxZh || card.ctxEs) ? '<div class="srs-ctx"><div class="srs-ctx-title">📌 Tu ejemplo</div>' +
-                (card.ctxZh ? '<div class="srs-ctx-zh" lang="zh">' + escHtml(ck() === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' : '') +
+                (card.ctxZh ? '<div class="srs-ctx-zh" lang="zh">' + escHtml(ckFor(card) === 'trad' ? (card.ctxZt || card.ctxZh) : card.ctxZh) + '</div>' : '') +
                 (card.ctxEs ? '<div class="srs-ctx-es">“' + escHtml(card.ctxEs) + '”</div>' : '') + '</div>' : '') +
             '<div class="srs-grades">' +
                 '<button type="button" class="srs-grade srs-g-again" data-k="again">😵 Otra vez<small>' + hintB(1) + '</small></button>' +
@@ -503,7 +506,7 @@
         SR.cur = item; SR.revealed = false;
         SR.curTries = 0; SR.curRes = ''; SR.attDone = false; // v9.48: pase fresco
         const card = item.card;
-        const zh = ck() === 'trad' ? (card.zt || item.zh) : item.zh;
+        const zh = ckFor(card) === 'trad' ? (card.zt || item.zh) : item.zh;
         const box = card.b;
 
         // v9.17: plan de producción para esta tarjeta (null → clásica)
@@ -600,7 +603,7 @@
         if (fb) fb.innerHTML = ok
             ? '<span class="srs-prod-ok">✅ ¡Correcto!</span>'
             : '<span class="srs-prod-bad">❌ Era: <b lang="zh">' +
-              escHtml(ck() === 'trad' ? (item.card.zt || item.zh) : item.zh) + '</b></span>';
+              escHtml(ckFor(item.card) === 'trad' ? (item.card.zt || item.zh) : item.zh) + '</b></span>';
         inp.disabled = true;
         const chk = document.querySelector('#srs-body .srs-prod-check');
         if (chk) chk.disabled = true;
@@ -856,11 +859,11 @@
             else if (b.classList.contains('srs-stats-btn')) renderStats();
             else if (b.classList.contains('srs-close-btn')) srsClose();
             else if (b.classList.contains('srs-speak')) {
-                if (SR.cur) srsSpeak(ck() === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh);
+                if (SR.cur) srsSpeak(ckFor(SR.cur.card) === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh);
             }
             else if (b.classList.contains('srs-prod-hw')) { // v9.34: ✍️ a mano
                 if (SR.cur) {
-                    const zh = ck() === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh;
+                    const zh = ckFor(SR.cur.card) === 'trad' ? (SR.cur.card.zt || SR.cur.zh) : SR.cur.zh;
                     openHandwriteAnswer(zh, (word) => {
                         const pin = document.querySelector('#srs-body .srs-prod-input');
                         if (pin && !pin.disabled) {

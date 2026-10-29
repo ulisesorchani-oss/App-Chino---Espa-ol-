@@ -95,6 +95,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `entrenar`, `entrenar-grilla` | pantalla Entrenar (secciones, Exámenes, Lecturas de estudio) y su grilla a 320/360 px |
 | `escritura-pinyin` | capa de errores y pinyin por familia (HSK/TOCFL), carga de la tabla |
 | `escritura-tradicional` | 6 pantallas de lección × escrituras 简/繁 |
+| `repaso-escritura` | escritura del Repaso por tarjeta: prueba de oro (cajas y fechas iguales a las de main, grabadas en `tests/data/repaso-oro.json` con `GOLDEN_RECORD=1` sobre el código viejo), respuesta tecleada en 简 o 繁, TOCFL en tradicional y HSK en simplificado con la elección explícita ganando, tarjetas sin módulo sin convertir |
 | `glosario-tocfl` | glosario de las 8 lecciones TOCFL A2–C1 = keywords elegidas (简/繁, escritorio/Android, 320/360 px) y pinyin por escritura (`py`/`pyT`, sin copiar el de la otra escritura; casos 盐酥鸡/鹹酥雞 y 屏幕/螢幕) |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `keywords-hsk`, `keywords-lecciones` | palabras clave de las lecciones (datos en `tests/data/`) |
