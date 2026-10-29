@@ -81,7 +81,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  ({ctx,p,errs}=await page(w,th,'entrenar'));
  await p.click('#btn-exam-practice');await p.waitForTimeout(300);
  const e=await p.evaluate(()=>{const r=[...document.querySelectorAll('.ex-lv')].find(x=>x.dataset.k==='TOCFL-B3');return {n:document.querySelectorAll('.ex-lv').length,t:r&&r.querySelector('.t').textContent,d:r&&r.querySelector('.d').textContent};});
- ok(e.n===6&&/^TOCFL B1/.test(e.t)&&e.t.includes('進階')&&/lecturas/.test(e.d)&&/lecciones/.test(e.d),tag+' práctica: entrada «TOCFL B1 進階» con lecturas '+JSON.stringify(e));
+ ok(e.n===7&&/^TOCFL B1/.test(e.t)&&e.t.includes('進階')&&/lecturas/.test(e.d)&&/lecciones/.test(e.d),tag+' práctica: entrada «TOCFL B1 進階» con lecturas '+JSON.stringify(e));
  await p.click('.ex-lv[data-k="TOCFL-B3"]');await p.waitForTimeout(700);
  const adv=async()=>{for(let g=0;g<30;g++){const t=await p.evaluate(()=>{const S=ExamDebug.state();return S.items[S.idx].type;});if(t==='rtext')return true;const r=await p.evaluate(()=>{const S=ExamDebug.state();return S.items[S.idx].opts.findIndex(o=>o.ok);});await p.click(`#ex-opts .lq-opt[data-i="${r}"]`);await p.click('#ex-next');await p.waitForTimeout(40);}return false;};
  ok(await adv(),tag+' práctica B1: llega al texto');

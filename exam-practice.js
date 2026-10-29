@@ -1,5 +1,5 @@
 // ============================================================
-// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, A1 y B1, HSK 1, HSK 3 y HSK 5)
+// exam-practice.js — Práctica tipo examen (piloto: TOCFL Prep, A1 y B1, HSK 1, HSK 3, HSK 4 y HSK 5)
 // ============================================================
 // Sesión de 20 ítems sin tiempo límite. Se arma con las lecciones de cada nivel
 // (window.GRADED_LESSONS) y, si existe, con el banco escrito de exam-items.js
@@ -15,12 +15,15 @@
 //     confirmación (st: 'pend') no salen. Baraja guardada entre tandas ('ac_order_deck_v1'): no se
 //     repite ninguna hasta usar todas las del nivel. Si faltan, se compensa con Escuchar y Completar.
 //   Sin banco para un nivel: 6 Escuchar + 8 Completar + 6 Ordenar (como antes).
-//   R9 — Niveles con LECTURAS (window.READINGS, readings-*.js: HSK 3, HSK 5 y TOCFL B1): la tanda lleva
+//   R9 — Niveles con LECTURAS (window.READINGS v1: HSK 3, HSK 5 y TOCFL B1; y las de tipo «examen» del esquema v2
+//   en window.LECTURAS, readings-unify.js: HSK 4): la tanda lleva
 //   un texto con 3 o 4 preguntas («📖 Texto», cuentan en la parte «Leer») + Escuchar y Completar
 //   hasta los 20; sin «Ordenar» (no hay banco revisado para esos niveles). El texto va PLANO
 //   mientras se responde (es un examen) y al responder se vuelve tocable, con pinyin y
 //   traducción (window.LQ_TEXT de lessons-graduated.js). El historial suma rd: [{ id, s, n }].
 //   Rota los textos: sale primero el que hace más tiempo que no aparece.
+//   HSK 4: sin banco escrito ni «Ordenar»/«Diálogo» (no hay material revisado); los textos v2 traen
+//   sus preguntas ya normalizadas (opción correcta = índice `ok`; V/F con opciones fijas Verdadero/Falso).
 // Es PRÁCTICA, no un examen oficial: no copia ítems de exámenes reales ni
 // predice un puntaje. Misma piel que las lecciones (.lq-pop) y los mismos
 // criterios de escritura/voz por familia (scriptFor / voiceZhFor).
@@ -46,6 +49,7 @@
         { k: 'TOCFL-A1', name: 'TOCFL A1', pick: l => l.exam === 'TOCFL' && l.examLvl === 'A1' },
         { k: 'HSK1', name: 'HSK 1', pick: l => !l.exam && l.hsk === 1 },
         { k: 'HSK3', name: 'HSK 3', pick: l => !l.exam && l.hsk === 3, reads: 3 },
+        { k: 'HSK4', name: 'HSK 4', pick: l => !l.exam && l.hsk === 4, reads: 4 },
         { k: 'HSK5', name: 'HSK 5', pick: l => !l.exam && l.hsk === 5, reads: 5 },
         // TOCFL B1 (módulo 'TOCFL-B3' en la app): lecturas de readings-tocfl.js
         { k: 'TOCFL-B3', name: 'TOCFL B1', pick: l => l.exam === 'TOCFL' && l.examLvl === 'B1', reads: { exam: 'TOCFL', lvl: 'B1' } }
@@ -238,7 +242,11 @@
         const h = (levelOf(k) || {}).reads;
         if (!h) return [];
         const same = (typeof h === 'object') ? (r => r.exam === h.exam && r.examLvl === h.lvl) : (r => !r.exam && r.hsk === h);
-        return (window.READINGS || []).filter(r => r && r.kind === 'reading' && same(r) && Array.isArray(r.questions) && r.questions.length && Array.isArray(r.lines));
+        const v1 = (window.READINGS || []).filter(r => r && r.kind === 'reading' && same(r) && Array.isArray(r.questions) && r.questions.length && Array.isArray(r.lines));
+        // esquema v2 (readings-examen.js, ya normalizado en LECTURAS): solo los de tipo «examen» y visibles; los de estudio no entran
+        const vis = (window.LECTURAS_API && window.LECTURAS_API.visible) || (() => true);
+        const v2 = (window.LECTURAS || []).filter(r => r && r.origen === 'v2' && r.tipo === 'examen' && vis(r) && same(r) && Array.isArray(r.preguntas) && r.preguntas.length && Array.isArray(r.lines));
+        return v1.concat(v2);
     };
     // rota: sale el texto que hace más tiempo que no aparece (los que nunca salieron, primero)
     function pickReading(k) {
@@ -252,6 +260,15 @@
     }
     function genRText(r, trad) {
         const pk = (a, aT) => (trad && aT) ? aT : a;
+        if (r.origen === 'v2') { // preguntas normalizadas: opción correcta = `ok`; V/F con opciones fijas (sin barajar)
+            return r.preguntas.map((q, qi) => {
+                const opts = q.opts.map((t, i) => ({
+                    es: t, zh: '', ok: i === q.ok ? 1 : 0,
+                    whyNot: (q.type === 'vf' || i === q.ok) ? '' : ((q.whyNot || [])[i - (i > q.ok ? 1 : 0)] || '')
+                }));
+                return { type: 'rtext', rid: r.id, qi: qi, rd: r, trad: trad, q: q.es, qzh: '', why: q.why, opts: q.fixed ? opts : shuf(opts) };
+            });
+        }
         return r.questions.map((q, qi) => {
             const zhQ = !!q.qZh; // desde HSK 5 la pregunta va en chino
             return {
@@ -556,7 +573,7 @@
             const eb = $('ex-rd-es'); if (eb) eb.classList.add('hidden');
             const chosen = it.opts[i];
             finishAnswer(ok, verdict(ok) + '<div class="ex-fb' + (ok ? ' ok' : ' bad') + '">' +
-                (ok ? '' : '<span class="es"><b>Tu respuesta:</b> ' + esc(chosen.whyNot) + '</span>') +
+                (ok || !chosen.whyNot ? '' : '<span class="es"><b>Tu respuesta:</b> ' + esc(chosen.whyNot) + '</span>') +
                 '<span class="es">' + (ok ? '' : '<b>La correcta (' + 'ABCD'[right] + '):</b> ') + esc(it.why) + '</span></div>');
             const box = $('ex-rtext');
             if (box && window.LQ_TEXT) {

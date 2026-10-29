@@ -106,6 +106,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `onboarding` | primer uso: pantallas, «Desde cero», «Ya sé algo», saltar |
 | `ordenar-banco` | ejercicio de ordenar (usa `tests/lib/vocabcheck-lib.js`) |
 | `practica-atras`, `practica-generadores`, `practica-lecturas` | práctica: Atrás en sesión, generadores y práctica de lecturas |
+| `practica-hsk4` | práctica tipo examen HSK 4 (textos v2 de tipo examen): generador (sin Ordenar/Diálogo, sin el texto de estudio, correcta y `whyNot` bien ubicadas, V/F fijo, rotación) y pantalla a 320/360 px en claro/oscuro, 简/繁 |
 | `segmentador` | corte de palabras (escritorio, sin `Intl.Segmenter` y Android simulado) |
 | `selector-nivel-botones` | selector de nivel de Aprender: opciones sin corte, colores, 320/360 px |
 | `tocfl-menu-lecciones` | menú TOCFL en la hoja de módulos y en Lecciones |
