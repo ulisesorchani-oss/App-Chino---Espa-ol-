@@ -53,7 +53,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  // ===== entrada: 5 niveles, los de lecturas lo dicen
  await p.click('#btn-exam-practice');await p.waitForTimeout(300);
  const e=await p.evaluate(()=>({lv:[...document.querySelectorAll('.ex-lv')].map(x=>x.dataset.k+'|'+x.querySelector('.d').textContent),notes:[...document.querySelectorAll('.ex-note')].map(x=>x.textContent),ovf:document.getElementById('ex-body').scrollWidth>document.getElementById('ex-body').clientWidth+1}));
- ok(e.lv.map(x=>x.split('|')[0]).join()==='TOCFL-Prep,TOCFL-A1,HSK1,HSK3,HSK5,TOCFL-B3'&&/lecturas/.test(e.lv[3])&&/lecturas/.test(e.lv[4])&&/lecturas/.test(e.lv[5])&&!/lecturas/.test(e.lv[2]),tag+' entrada: 6 niveles (R11: +TOCFL B1) y los de HSK 3, HSK 5 y B1 anuncian «lecturas» '+JSON.stringify(e.lv));
+ ok(e.lv.map(x=>x.split('|')[0]).join()==='TOCFL-Prep,TOCFL-A1,HSK1,HSK3,HSK4,HSK5,TOCFL-B3'&&/lecturas/.test(e.lv[3])&&/lecturas/.test(e.lv[4])&&/lecturas/.test(e.lv[5])&&/lecturas/.test(e.lv[6])&&!/lecturas/.test(e.lv[2]),tag+' entrada: 7 niveles (R11: +TOCFL B1; HSK 4) y los de HSK 3, HSK 4, HSK 5 y B1 anuncian «lecturas» '+JSON.stringify(e.lv));
  ok(e.notes.some(x=>/texto con varias preguntas/.test(x)&&/no trae «Ordenar»/.test(x))&&!e.ovf,tag+' la entrada aclara que esos niveles traen un texto y no «Ordenar»');
  await p.screenshot({path:OUT+`entrada-${w}-${th}.png`});
  await p.click('#ex-close');await p.waitForTimeout(200);

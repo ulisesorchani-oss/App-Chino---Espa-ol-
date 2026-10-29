@@ -52,7 +52,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  await p.click('#btn-exam-practice');await p.waitForTimeout(300);
  ok(await popOpen(p),tag+' abre el overlay');
  const en=await p.evaluate(()=>({lv:[...document.querySelectorAll('.ex-lv')].map(e=>e.innerText.replace(/\s+/g,' ')),stack:Nav.stack,lock:document.body.style.overflow,pill:!!document.querySelector('.ex-pill'),txt:document.getElementById('ex-body').innerText}));
- ok(en.lv.length===6&&/TOCFL Prep 準備 392 palabras · 4 lecciones/.test(en.lv[0])&&/TOCFL A1 入門 344/.test(en.lv[1])&&/HSK 1 497/.test(en.lv[2])&&/HSK 3 949 palabras · 4 lecciones · lecturas/.test(en.lv[3])&&/HSK 5 1057 palabras · 3 lecciones · lecturas/.test(en.lv[4]),tag+' entrada con 6 niveles (R9: +HSK 3 y HSK 5; R11: +TOCFL B1) '+en.lv.join(' | '));
+ ok(en.lv.length===7&&/TOCFL Prep 準備 392 palabras · 4 lecciones/.test(en.lv[0])&&/TOCFL A1 入門 344/.test(en.lv[1])&&/HSK 1 497/.test(en.lv[2])&&/HSK 3 949 palabras · 4 lecciones · lecturas/.test(en.lv[3])&&/^HSK 4 \d+ palabras · 4 lecciones · lecturas/.test(en.lv[4])&&/HSK 5 1057 palabras · 3 lecciones · lecturas/.test(en.lv[5]),tag+' entrada con 7 niveles (R9: +HSK 3 y HSK 5; R11: +TOCFL B1; HSK 4) '+en.lv.join(' | '));
  ok(JSON.stringify(en.stack)==='["exam-pop"]'&&en.lock==='hidden'&&en.pill&&/no es un examen oficial/i.test(en.txt),tag+' pila Atrás, scroll bloqueado y aviso «no oficial»');
  ok((await cuts(p)).length===0,tag+' entrada sin cortes');
  await p.screenshot({path:OUT+`entry-${w}-${th}.png`});

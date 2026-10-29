@@ -10,7 +10,7 @@ await start();let s=await st();ok(s.open&&s.sess&&s.ref&&JSON.stringify(s.stack)
 await p.goBack().catch(()=>{});await p.waitForTimeout(400);s=await st();
 ok(!s.open&&!s.sess&&!s.ref&&s.stack.length===0&&s.lock===''&&s.hist===null,'Atrás en medio de la sesión cierra y descarta: '+JSON.stringify(s));
 ok(p.url().includes('index.html')&&s.view==='view-entrenar','Atrás no sale de la app y deja Entrenar: '+s.view);
-await p.click('#btn-exam-practice');await p.waitForTimeout(300);ok(await p.evaluate(()=>document.querySelectorAll('.ex-lv').length)===6,'al reabrir vuelve a la entrada (sin sesión vieja; R11: 6 niveles)');
+await p.click('#btn-exam-practice');await p.waitForTimeout(300);ok(await p.evaluate(()=>document.querySelectorAll('.ex-lv').length)===7,'al reabrir vuelve a la entrada (sin sesión vieja; R11: +TOCFL B1; HSK 4: 7 niveles)');
 await p.keyboard.press('Escape');await p.waitForTimeout(200);
 await start();await p.keyboard.press('Escape');await p.waitForTimeout(200);s=await st();ok(!s.open&&!s.sess,'Escape en medio de la sesión cierra');
 await start();await p.click('#ex-close');await p.waitForTimeout(200);s=await st();ok(!s.open&&!s.sess&&s.hist===null,'✕ en medio de la sesión cierra sin guardar');
