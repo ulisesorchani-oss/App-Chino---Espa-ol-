@@ -22,8 +22,8 @@ const start=async(p,k)=>{await p.click('#btn-exam-practice');await p.waitForTime
    const idxs=S.items.map((it,j)=>it.type==='rtext'?j:-1).filter(j=>j>=0);if(idxs.some((j,q)=>j!==20-want.nq+q))o.consec=false; // al final y contiguas, en orden
    const R=S.rd;o.reads[R.id]=(o.reads[R.id]||0)+1;
    if(rt.some(it=>it.rid!==R.id||it.rd!==R))o.bad.push('texto mezclado');
-   rt.forEach((it,q)=>{const d=R.questions[q];if(it.qi!==q)o.bad.push('orden de preguntas');if(it.opts.length!==want.opts||it.opts.filter(x=>x.ok).length!==1||new Set(it.opts.map(x=>x.es)).size!==want.opts)o.bad.push('opts '+R.id+q);
-    if(it.opts.find(x=>x.ok).es!==d.opts[0])o.bad.push('correcta '+R.id+q);if(!!it.qzh!==want.zhq)o.bad.push('qzh '+R.id+q);if(want.zhq&&(it.qzh!==(S.trad?d.qZhT:d.qZh)||it.opts.some(x=>!x.zh)))o.bad.push('chino '+R.id+q);
+   rt.forEach((it,q)=>{const d=R.questions?R.questions[q]:R.preguntas[q],dok=R.questions?0:d.ok;if(it.qi!==q)o.bad.push('orden de preguntas');if(it.opts.length!==want.opts||it.opts.filter(x=>x.ok).length!==1||new Set(it.opts.map(x=>x.es)).size!==want.opts)o.bad.push('opts '+R.id+q);
+    if(it.opts.find(x=>x.ok).es!==d.opts[dok])o.bad.push('correcta '+R.id+q);if(!!it.qzh!==want.zhq)o.bad.push('qzh '+R.id+q);if(want.zhq&&(it.qzh!==(S.trad?d.qZhT:d.qZh)||it.opts.some(x=>!x.zh)))o.bad.push('chino '+R.id+q);
     const wrong=it.opts.filter(x=>!x.ok);if(wrong.some(x=>!x.whyNot))o.bad.push('whyNot '+R.id+q);if(!it.why)o.bad.push('why '+R.id+q);});
    const es=new Set();let dup=false;S.items.forEach(it=>{if(it.type==='listen'){if(es.has(it.es))dup=true;es.add(it.es);}});if(dup)o.dupEs++;
    if(S.items.some(it=>it.type==='order'||it.type==='dialogue'||it.type==='reading'))o.bad.push('tipo inesperado');
@@ -31,7 +31,7 @@ const start=async(p,k)=>{await p.click('#btn-exam-practice');await p.waitForTime
   out[k]=o;}return out;});
  for(const k of ['HSK3','HSK5']){const o=g[k];ok(o.min===20&&o.bad.length===0,'generador '+k+': 20 ítems válidos, un texto con sus preguntas '+JSON.stringify([o.min,o.bad.slice(0,4)]));
   ok(o.consec&&o.dupEs===0,'generador '+k+': las preguntas del texto van juntas al final y en orden; sin escuchar repetidas '+JSON.stringify([o.consec,o.dupEs]));
-  ok(Object.keys(o.sig).join()==='cloze+listen+rtext'&&Object.keys(o.reads).length===4,'generador '+k+': mezcla escuchar+completar+texto (sin ordenar) y salen los 4 textos '+JSON.stringify([o.sig,o.reads]));}
+  ok(Object.keys(o.sig).join()==='cloze+listen+rtext'&&Object.keys(o.reads).length===(k==='HSK5'?5:4),'generador '+k+': mezcla escuchar+completar+texto (sin ordenar) y salen los 4 textos '+JSON.stringify([o.sig,o.reads]));}
  // los niveles con banco no cambian y no llevan texto
  const same=await p.evaluate(()=>['TOCFL-Prep','TOCFL-A1','HSK1'].map(k=>{let bad=0;for(let i=0;i<50;i++){const S=ExamDebug.build(k);if(S.items.length!==20||S.items.some(it=>it.type==='rtext'))bad++;const t={};S.items.forEach(it=>t[it.type]=(t[it.type]||0)+1);if(['listen','dialogue','cloze','reading','order'].map(x=>t[x]||0).join('/')!=='5/3/6/3/3')bad++;}return bad;}));
  ok(same.every(x=>x===0),'Prep, A1 y HSK 1 siguen con la mezcla (fix/ordenar-banco: 5/3/6/3/3) y sin texto '+JSON.stringify(same));
@@ -118,7 +118,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  ok(errs.length===0,tag+' HSK 3 sin errores JS '+errs);
 
  // ===== HSK 5: pregunta en chino + «ver en español»
- await start(p,'HSK5');ok(await toType(p,'rtext','right'),tag+' HSK 5: llega al texto');
+ await p.evaluate(()=>{const i=LECTURAS.findIndex(r=>r.id==='rx-h5-ruido');if(i>=0)LECTURAS.splice(i,1);});await start(p,'HSK5');ok(await toType(p,'rtext','right'),tag+' HSK 5: llega al texto');
  const R5=await p.evaluate(()=>ExamDebug.state().rd);
  const h5=await p.evaluate(()=>({sec:document.querySelector('.ex-sec').textContent,zhq:document.querySelector('.rd-q-zh').innerText,esHid:document.getElementById('rd-q-es').classList.contains('hidden'),opts:[...document.querySelectorAll('#ex-opts .lq-opt')].map(o=>o.querySelector('.rd-opt-zh').innerText),optEsHid:[...document.querySelectorAll('.rd-opt-es')].every(e=>e.classList.contains('hidden')),btn:document.getElementById('ex-rd-es').textContent,ovf:document.getElementById('ex-body').scrollWidth>document.getElementById('ex-body').clientWidth+1}));
  ok(/1 de 4/.test(h5.sec)&&h5.zhq===R5.questions[0].qZh&&h5.opts.length===4&&h5.esHid&&h5.optEsHid&&h5.btn==='🇪🇸 Ver en español'&&!h5.ovf,tag+' HSK 5: pregunta y 4 opciones en chino, español oculto '+JSON.stringify([h5.sec.trim(),h5.zhq]));
@@ -139,7 +139,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  ok(errs.length===0,tag+' HSK 5 sin errores JS '+errs);await ctx.close();
 
  // ===== escritura tradicional (familia HSK en 繁)
- if(th==='light'){({ctx,p,errs}=await page(w,th,{ac_script_hsk:'trad'}));await start(p,'HSK5');await toType(p,'rtext','right');
+ if(th==='light'){({ctx,p,errs}=await page(w,th,{ac_script_hsk:'trad'}));await p.evaluate(()=>{const i=LECTURAS.findIndex(r=>r.id==='rx-h5-ruido');if(i>=0)LECTURAS.splice(i,1);});await start(p,'HSK5');await toType(p,'rtext','right');
   const t=await p.evaluate(()=>{const S=ExamDebug.state();const it=S.items[S.idx];const d=S.rd.questions[it.qi];return {q:document.querySelector('.rd-q-zh').innerText,eq:d.qZhT,l1:document.querySelector('#ex-rtext p').innerText,el:S.rd.lines[0].zhT,opts:[...document.querySelectorAll('.rd-opt-zh')].map(x=>x.innerText).sort(),eo:d.optsZhT.slice().sort()};});
   ok(t.q===t.eq&&t.l1===t.el&&JSON.stringify(t.opts)===JSON.stringify(t.eo),tag+' con 繁: texto, pregunta y opciones en tradicional '+t.q);
   await answer(p,'right');const w2=await p.evaluate(()=>({fb:document.getElementById('ex-fb').innerText,want:(()=>{const S=ExamDebug.state();const d=S.rd.questions[S.items[S.idx].qi];return d.whyT||d.why;})(),l1:document.querySelector('#ex-rtext .lq-line-zh').innerText,el:ExamDebug.state().rd.lines[0].zhT}));

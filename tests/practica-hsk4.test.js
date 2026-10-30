@@ -103,8 +103,8 @@ const OUT = shots('practica-hsk4'); require('fs').mkdirSync(OUT, { recursive: tr
         const nor = await p.evaluate(() => { const keep = LECTURAS.slice(); LECTURAS.length = 0; const S = ExamDebug.build('HSK4'); const t = {}; S.items.forEach(it => t[it.type] = (t[it.type] || 0) + 1); keep.forEach(x => LECTURAS.push(x)); return { n: S.items.length, t }; });
         ok(nor.n === 20 && !nor.t.rtext && nor.t.listen && nor.t.cloze, 'sin textos el nivel vuelve al reparto genérico ' + JSON.stringify(nor));
         // los demás niveles no cambian
-        const same = await p.evaluate(() => ['HSK3', 'HSK5', 'TOCFL-B3'].map(k => { let bad = 0; for (let i = 0; i < 40; i++) { const S = ExamDebug.build(k); if (S.items.length !== 20 || !S.items.some(it => it.type === 'rtext') || S.rd.origen === 'v2') bad++; } return bad; }));
-        ok(same.every(x => x === 0), 'HSK 3, HSK 5 y TOCFL B1 siguen con sus textos v1 ' + JSON.stringify(same));
+        const same = await p.evaluate(() => ['HSK3', 'HSK5', 'TOCFL-B3'].map(k => { let bad = 0; const v2 = new Set(); for (let i = 0; i < 80; i++) { const S = ExamDebug.build(k); if (S.items.length !== 20 || !S.items.some(it => it.type === 'rtext')) bad++; if (S.rd.origen === 'v2') v2.add(S.rd.id); if (S.rd.origen === 'v2' && k !== 'HSK5') bad++; } return [bad, [...v2]]; }));
+        ok(same.every(x => x[0] === 0) && JSON.stringify(same[1][1]) === '["rx-h5-ruido"]' && same[0][1].length === 0 && same[2][1].length === 0, 'HSK 3 y TOCFL B1 siguen solo con textos v1; HSK 5 suma el v2 «rx-h5-ruido» ' + JSON.stringify(same));
         ok(errs.length === 0, 'generador sin errores JS ' + errs);
         await ctx.close();
     }
