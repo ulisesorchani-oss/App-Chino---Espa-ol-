@@ -15,7 +15,8 @@
 //     emoji, genre, titleZh, titleZhT, titleEs, blurb,
 //     lines: [{ zh, zhT, es }],            // v1: las líneas; v2: los párrafos
 //     glosario: [{ zh, zhT, es, categoria, nivelLista, fueraDeNivel }],   // fueraDeNivel: true | false | null (v1: no se calcula)
-//     preguntas: [{ type, es, opts[], ok, fixed, vf?, why, whyNot[] }],  // ok = índice de la correcta; fixed = no se baraja (V/F)
+//     preguntas: [{ type, es, opts[], ok, fixed, vf?, why, whyNot[], qZh?, qZhT?, optsZh?[], optsZhT?[] }],  // ok = índice de la correcta; fixed = no se baraja (V/F); qZh…: solo v2 que las traiga (HSK 5)
+//     nota ('' si no hay): aviso visible junto a «Nivel aproximado» (v2; p. ej. «Texto original; los datos son ilustrativos»)
 //     banco, parecidas, capa2 (v2) }
 // V/F existe SOLO en v2 (se muestra como Verdadero/Falso con opciones fijas); v1 no cambia.
 // Filtro por `revision`: constante REVISION_FILTRO (sin parámetro de URL ni franja).
@@ -45,15 +46,19 @@
     function normV2(r) {
         const hsk = r.nivel, n = nivelOf({ hsk: hsk });
         return {
-            id: r.id, kind: 'reading', origen: 'v2', tipo: r.tipo, revision: r.revision,
+            id: r.id, kind: 'reading', origen: 'v2', tipo: r.tipo, revision: r.revision, nota: r.nota || '',
             hsk: hsk, nivelKey: n.key, nivelLabel: n.label, nivelRank: n.rank,
             emoji: r.emoji, genre: r.genero, largo: r.largo,
             titleZh: r.titulo.zh, titleZhT: r.titulo.zhT, titleEs: r.titulo.es, blurb: '',
             lines: r.parrafos.map(p => ({ zh: p.zh, zhT: p.zhT, es: p.es })),
             glosario: r.glosario.map(g => ({ zh: g.zh, zhT: g.zhT, es: g.es, categoria: g.categoria, nivelLista: g.nivelLista, fueraDeNivel: g.fueraDeNivel })),
             preguntas: r.comprension.map(q => q.tipo === 'vf'
-                ? { type: 'vf', es: q.es, opts: ['Verdadero', 'Falso'], ok: q.vf ? 0 : 1, fixed: true, vf: q.vf, why: q.why, whyNot: [] }
-                : { type: q.tipo, es: q.es, opts: q.opts, ok: 0, fixed: false, why: q.why, whyNot: q.whyNot || [] }),
+                ? Object.assign({ type: 'vf', es: q.es, opts: ['Verdadero', 'Falso'], ok: q.vf ? 0 : 1, fixed: true, vf: q.vf, why: q.why, whyNot: [] },
+                    // V/F en chino (HSK 5): la afirmación y las opciones fijas 对/错 (簡/繁)
+                    q.qZh ? { qZh: q.qZh, qZhT: q.qZhT, optsZh: ['对', '错'], optsZhT: ['對', '錯'] } : {})
+                : Object.assign({ type: q.tipo, es: q.es, opts: q.opts, ok: 0, fixed: false, why: q.why, whyNot: q.whyNot || [] },
+                    // HSK 5 v2: pregunta y opciones en chino (con «ver en español»); solo si el texto las trae. Los v1 no pasan por acá.
+                    q.qZh ? { qZh: q.qZh, qZhT: q.qZhT, optsZh: q.optsZh, optsZhT: q.optsZhT } : {})),
             banco: r.banco || null, parecidas: r.parecidas || [], capa2: r.capa2 || null,
             nombres: r.nombres || [], fueraDeNivelDeclarado: r.fueraDeNivelDeclarado || []
         };
@@ -74,6 +79,6 @@
         examen: () => ALL.filter(r => visible(r) && r.tipo === 'examen').sort(byLevel),
         estudio: () => ALL.filter(r => visible(r) && r.tipo === 'estudio').sort(byLevel),
         // «Nivel aproximado: HSK 4 · no oficial»: la etiqueta de TODOS los textos (HSK y TOCFL)
-        etiqueta: (r) => 'Nivel aproximado: ' + r.nivelLabel + ' · no oficial'
+        etiqueta: (r) => 'Nivel aproximado: ' + r.nivelLabel + ' · no oficial' + (r.nota ? ' · ' + r.nota : '')
     };
 })();

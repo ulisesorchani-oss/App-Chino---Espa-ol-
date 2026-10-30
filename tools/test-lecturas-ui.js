@@ -6,7 +6,7 @@
 // Qué verifica (servidor estático local + Chromium con Playwright, sin red real):
 //   FUENTE ÚNICA  · window.LECTURAS junta los 12 v1 y los 5 v2 (ids únicos); etiqueta «Nivel aproximado: … · no oficial» en HSK y TOCFL;
 //                   revision de v1 (HSK 3 revisado; HSK 5 y TOCFL pendiente); visible() con la constante 'todas'; V/F solo en v2 (Verdadero/Falso fijas)
-//   LISTA         · «Lecturas tipo examen»: 16 tarjetas en HSK 3, HSK 4, HSK 5 y TOCFL B1; «Lecturas de estudio»: solo el texto de tipo 'estudio';
+//   LISTA         · «Lecturas tipo examen»: 17 tarjetas en HSK 3, HSK 4, HSK 5 y TOCFL B1; «Lecturas de estudio»: solo el texto de tipo 'estudio';
 //                   botones APILADOS (Practicar principal arriba, Leer secundario abajo), sin desborde ni texto cortado
 //   LEER          · glosario con * en lo fuera de nivel (v2) y leyenda; v1 sin asteriscos; 简/繁; pinyin; texto con los párrafos
 //   PRACTICAR v2  · comprensión de 4 opciones y Verdadero/Falso (2 opciones fijas, letras V/F); explicaciones; progreso en ac_reading_v1
@@ -84,10 +84,10 @@ const SHOTS = process.env.SHOTS_DIR || '';
         v1vf: window.READINGS.some(r => r.questions.some(q => q.type === 'vf')) || L.filter(r => r.origen === 'v1').some(r => r.preguntas.some(q => q.type === 'vf')),
         v1ok: L.filter(r => r.origen === 'v1').every(r => r.preguntas.every(q => q.ok === 0 && !q.fixed)) };
     });
-    ok(U.n === 17 && U.v1 === 12 && U.v2 === 5 && U.uniq && U.raw1 === 12 && U.raw2 === 5, tag + ' LECTURAS = 12 v1 + 5 v2, ids únicos y los datos crudos intactos ' + JSON.stringify([U.n, U.v1, U.v2]));
+    ok(U.n === 18 && U.v1 === 12 && U.v2 === 6 && U.uniq && U.raw1 === 12 && U.raw2 === 6, tag + ' LECTURAS = 12 v1 + 6 v2, ids únicos y los datos crudos intactos ' + JSON.stringify([U.n, U.v1, U.v2]));
     ok(U.etq.h3 === 'Nivel aproximado: HSK 3 · no oficial' && U.etq.h4 === 'Nivel aproximado: HSK 4 · no oficial' && U.etq.h5 === 'Nivel aproximado: HSK 5 · no oficial' && U.etq.b1 === 'Nivel aproximado: TOCFL B1 · no oficial', tag + ' etiqueta «Nivel aproximado: … · no oficial» también en TOCFL ' + JSON.stringify(U.etq));
     ok(U.rev.h3 === 'revisado' && U.rev.h5 === 'pendiente' && U.rev.b1 === 'pendiente' && U.rev.v2 === 'revisado' && U.vis, tag + ' revision de v1 por nivel; visible() deja pasar todo con la constante «todas» ' + JSON.stringify(U.rev));
-    ok(U.ex === 16 && U.es === 1 && U.esId === 'rx-h4-chunlian' && U.order === 'HSK3,HSK4,HSK5,TOCFL-B1', tag + ' examen = 16 (HSK 3, 4, 5, TOCFL B1) y estudio = solo «貼春聯» ' + JSON.stringify([U.ex, U.es, U.esId, U.order]));
+    ok(U.ex === 17 && U.es === 1 && U.esId === 'rx-h4-chunlian' && U.order === 'HSK3,HSK4,HSK5,TOCFL-B1', tag + ' examen = 17 (HSK 3, 4, 5, TOCFL B1) y estudio = solo «貼春聯» ' + JSON.stringify([U.ex, U.es, U.esId, U.order]));
     ok(U.vfShape && U.vfShape.opts.join() === 'Verdadero,Falso' && U.vfShape.ok === 1 && U.vfShape.fixed === true && !U.v1vf && U.v1ok, tag + ' V/F solo en v2 (Verdadero/Falso fijas); los v1 conservan «correcta = índice 0» ' + JSON.stringify(U.vfShape));
 
     // ── lista en Exámenes ──
@@ -105,8 +105,8 @@ const SHOTS = process.env.SHOTS_DIR || '';
         ovf: document.documentElement.scrollWidth > innerWidth + 1, cut: cards.concat(st).some(c => c.scrollWidth > c.clientWidth + 1),
         studyInExamen: !!wrap.querySelector('[data-id="rx-h4-chunlian"]'), tradTitle: cards[0].querySelector('.lc-zh').textContent };
     });
-    ok(Li.title === '📖 Lecturas tipo examen' && Li.groups.join() === 'HSK 3,HSK 4,HSK 5,TOCFL B1' && Li.cards === 16 && !Li.studyInExamen, tag + ' lista: 16 tarjetas en HSK 3, HSK 4, HSK 5 y TOCFL B1; el texto de estudio NO está ahí ' + JSON.stringify([Li.groups, Li.cards]));
-    ok(Li.labels.slice(0, 4).every(t => t === 'Nivel aproximado: HSK 3 · no oficial') && Li.labels.slice(12).every(t => t === 'Nivel aproximado: TOCFL B1 · no oficial'), tag + ' cada tarjeta lleva la etiqueta común (HSK y TOCFL)');
+    ok(Li.title === '📖 Lecturas tipo examen' && Li.groups.join() === 'HSK 3,HSK 4,HSK 5,TOCFL B1' && Li.cards === 17 && !Li.studyInExamen, tag + ' lista: 17 tarjetas en HSK 3, HSK 4, HSK 5 y TOCFL B1; el texto de estudio NO está ahí ' + JSON.stringify([Li.groups, Li.cards]));
+    ok(Li.labels.slice(0, 4).every(t => t === 'Nivel aproximado: HSK 3 · no oficial') && Li.labels[12] === 'Nivel aproximado: HSK 5 · no oficial · Texto original; los datos son ilustrativos' && Li.labels.slice(13).every(t => t === 'Nivel aproximado: TOCFL B1 · no oficial'), tag + ' cada tarjeta lleva la etiqueta común (HSK y TOCFL)');
     ok(Li.btns.every(x => x === '🎯 Practicar|📖 Leer') && Li.primary && Li.stackedAll, tag + ' botones apilados: Practicar (principal) arriba y Leer (secundario) abajo, mismo ancho, ≥ 44 px');
     ok(!Li.studyHidden && Li.studyTitle === '📚 Lecturas de estudio' && Li.studyCards === 1 && Li.studyLabel === 'Nivel aproximado: HSK 4 · no oficial', tag + ' sección aparte «📚 Lecturas de estudio» con 1 texto ' + JSON.stringify([Li.studyHidden, Li.studyCards, Li.studyLabel]));
     ok(!Li.ovf && !Li.cut, tag + ' lista sin desborde horizontal ni tarjetas cortadas');

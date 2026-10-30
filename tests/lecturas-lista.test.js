@@ -22,8 +22,8 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
    btns:cards.map(c=>[...c.querySelectorAll('.lq-btn')].map(x=>x.textContent.trim()).join('|')),ovf:document.documentElement.scrollWidth>innerWidth+1,cut:cards.some(c=>c.scrollWidth>c.clientWidth+1),placement:document.getElementById('btn-placement').offsetParent!==null,
    order:[...document.getElementById('panel-exams').children].map(e=>e.id||e.className.split(' ')[0])};});
  ok(L.has&&L.title==='📖 Lecturas tipo examen'&&/no es oficial/.test(L.intro)&&/aproximado/.test(L.intro),tag+' sección Exámenes con título y aviso «aproximado / no es oficial»');
- ok(L.lv.length===4&&/^HSK 3 nivel aproximado · 0\/4 hechas$/.test(L.lv[0].t)&&/^HSK 4 nivel aproximado · 0\/4 hechas$/.test(L.lv[1].t)&&/^HSK 5 nivel aproximado · 0\/4 hechas$/.test(L.lv[2].t)&&/^TOCFL B1 nivel aproximado · 0\/4 hechas$/.test(L.lv[3].t)&&L.lv.every(x=>x.open&&x.cards===4),tag+' lista por nivel: HSK 3, HSK 4, HSK 5 y TOCFL B1, 4 textos cada uno '+JSON.stringify(L.lv));
- ok(L.cards===16&&L.tags.slice(0,4).every(t=>t==='Nivel aproximado: HSK 3 · no oficial')&&L.tags.slice(4,8).every(t=>t==='Nivel aproximado: HSK 4 · no oficial')&&L.tags.slice(8,12).every(t=>t==='Nivel aproximado: HSK 5 · no oficial')&&L.tags.slice(12).every(t=>t==='Nivel aproximado: TOCFL B1 · no oficial')&&L.best.every(x=>x==='🎯 —'),tag+' 16 tarjetas con la etiqueta «Nivel aproximado: … · no oficial» (también TOCFL) y sin progreso');
+ ok(L.lv.length===4&&/^HSK 3 nivel aproximado · 0\/4 hechas$/.test(L.lv[0].t)&&/^HSK 4 nivel aproximado · 0\/4 hechas$/.test(L.lv[1].t)&&/^HSK 5 nivel aproximado · 0\/5 hechas$/.test(L.lv[2].t)&&/^TOCFL B1 nivel aproximado · 0\/4 hechas$/.test(L.lv[3].t)&&L.lv.every((x,i)=>x.open&&x.cards===(i===2?5:4)),tag+' lista por nivel: HSK 3, HSK 4, HSK 5 y TOCFL B1, 4 textos cada uno salvo HSK 5 (5: los 4 v1 y «¿Los sonidos afectan la atención?») '+JSON.stringify(L.lv));
+ ok(L.cards===17&&L.tags.slice(0,4).every(t=>t==='Nivel aproximado: HSK 3 · no oficial')&&L.tags.slice(4,8).every(t=>t==='Nivel aproximado: HSK 4 · no oficial')&&L.tags.slice(8,12).every(t=>t==='Nivel aproximado: HSK 5 · no oficial')&&L.tags[12]==='Nivel aproximado: HSK 5 · no oficial · Texto original; los datos son ilustrativos'&&L.tags.slice(13).every(t=>t==='Nivel aproximado: TOCFL B1 · no oficial')&&L.best.every(x=>x==='🎯 —'),tag+' 17 tarjetas con la etiqueta «Nivel aproximado: … · no oficial» (también TOCFL; la del texto con nota la lleva al final) y sin progreso');
  ok(L.btns.every(x=>x==='🎯 Practicar|📖 Leer')&&!L.ovf&&!L.cut&&L.placement,tag+' botones Practicar (principal) y Leer (secundario), sin desborde y el test de colocación sigue ahí');
  ok(L.order.indexOf('btn-placement')<L.order.indexOf('rd-section')||L.order.indexOf('btn-placement')<L.order.length-1,tag+' orden del panel '+L.order.join(','));
  const sec=await p.$('.rd-section');
@@ -149,7 +149,7 @@ for(const w of [320,360]) for(const th of ['light','dark','paper']){
  // persistencia tras recargar
  await p.reload();await p.waitForTimeout(1300);await p.evaluate(()=>{showView('aprender');document.getElementById('tab-exams').click();});await p.waitForTimeout(300);
  const pr=await p.evaluate(()=>({best:[...document.querySelectorAll('#reading-list .rd-card')].map(c=>c.querySelector('.lc-best').textContent.trim()),lv:[...document.querySelectorAll('#reading-list .rd-level summary')].map(s=>s.innerText.replace(/\s+/g,' '))}));
- ok(pr.best[0]==='🎯 3/3 ✓'&&pr.best[8]==='🎯 3/4 ✓'&&/1\/4 hechas/.test(pr.lv[0])&&/1\/4 hechas/.test(pr.lv[2]),tag+' el progreso sobrevive a la recarga '+JSON.stringify(pr));
+ ok(pr.best[0]==='🎯 3/3 ✓'&&pr.best[8]==='🎯 3/4 ✓'&&/1\/4 hechas/.test(pr.lv[0])&&/1\/5 hechas/.test(pr.lv[2]),tag+' el progreso sobrevive a la recarga '+JSON.stringify(pr));
  ok(errs.length===0,tag+' sin errores JS '+errs);await ctx.close();
 
  // ===== escritura tradicional (familia HSK elegida 繁)

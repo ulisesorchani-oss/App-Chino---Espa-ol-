@@ -100,6 +100,7 @@ const srv = http.createServer((q, s) => {
             if (!cfg.generos.includes(r.genero)) E('genero «' + r.genero + '» fuera de la lista'); if (!r.emoji) E('falta emoji');
             if (!['pendiente', 'revisado', 'nativo'].includes(r.revision)) E('revision: pendiente | revisado | nativo'); if (r.revision === 'nativo' && !String(r.revisor || '').trim()) E('revision «nativo» exige revisor (quién lo confirmó: profesora o hablante)'); else if (r.revisor && r.revision !== 'nativo') E('revisor solo va con revision «nativo»');
             const T = r.titulo || {}; if (!T.zh || !T.zhT || !T.es) E('titulo incompleto');
+            if ('nota' in r && !String(r.nota || '').trim()) E('nota vacía (si no hay aviso, no lleva el campo)');
             const ps = r.parrafos || []; if (!ps.length) E('sin párrafos');
             ps.forEach((p, i) => { if (!p.zh || !p.zhT || !p.es) E('párrafo ' + (i + 1) + ' incompleto'); });
             const scr = (s, w) => { if (SIMP.test(s.zhT || '')) E(w + ': zhT con rasgos simplificados'); if (TRAD.test(s.zh || '')) E(w + ': zh con rasgos tradicionales'); };
@@ -130,17 +131,33 @@ const srv = http.createServer((q, s) => {
             const qs = r.comprension || [], nOpt = cfg.opcionesComprension[nv], rgQ = cfg.comprension[nv]; let longest = 0, nOptQ = 0;
             if (rgQ && !rng(qs.length, rgQ)) E('comprensión: ' + rgQ.join(' a ') + ' preguntas (hay ' + qs.length + ')');
             qs.forEach((q, i) => { const n = 'P' + (i + 1);
-                if (!['idea', 'detalle', 'vf', 'vocabulario'].includes(q.tipo)) E(n + ' tipo'); if (!q.es || !q.why) E(n + ' sin es/why');
+                if (!['idea', 'detalle', 'inferencia', 'vf', 'vocabulario'].includes(q.tipo)) E(n + ' tipo'); if (!q.es || !q.why) E(n + ' sin es/why');
                 // la respuesta tiene que estar respaldada por el texto: el why cita en «» el pasaje chino (partes separadas por …)
                 const quotes = (String(q.why || '').match(/«[^»]*»/g) || []).map(x => x.slice(1, -1)).flatMap(x => x.split('…')).map(hz).filter(x => x.length >= 2);
                 if (!quotes.length) E(n + ' el why debe citar en «» el pasaje chino que respalda la respuesta'); else quotes.forEach(x => { if (!H.includes(x)) E(n + ' el pasaje citado «' + x + '» no está en el texto'); });
-                if (q.tipo === 'vf') { if (typeof q.vf !== 'boolean') E(n + ' vf debe ser true/false'); if (q.opts) E(n + ' vf no lleva opts'); return; }
+                if (q.tipo === 'vf') { if (typeof q.vf !== 'boolean') E(n + ' vf debe ser true/false'); if (q.opts) E(n + ' vf no lleva opts');
+                    if (q.qZh || q.qZhT) { // V/F en chino: solo la afirmación (las opciones fijas 对/错 las pone readings-unify.js)
+                        if (nv !== 5) E(n + ' qZh solo desde HSK 5'); else if (!q.qZh || !q.qZhT || q.optsZh || q.optsZhT) E(n + ' V/F en chino lleva qZh y qZhT (y no optsZh)');
+                        else { scr({ zh: q.qZh, zhT: q.qZhT }, n + ' afirmación'); lvl([q.qZh], n + ' (en chino)'); pairs.push({ id: r.id, w: 'P' + (i + 1) + ' chino', zh: q.qZh, zhT: q.qZhT }); } }
+                    return; }
                 nOptQ++;
                 if (!Array.isArray(q.opts) || q.opts.length !== nOpt) { E(n + ' debe tener ' + nOpt + ' opciones'); return; }
                 if (new Set(q.opts).size !== q.opts.length) E(n + ' opciones repetidas');
                 if (!Array.isArray(q.whyNot) || q.whyNot.length !== q.opts.length - 1 || q.whyNot.some(x => !x)) E(n + ' whyNot debe explicar cada distractor (' + (q.opts.length - 1) + ')');
-                if (nv === 5) { if (!q.qZh || !q.qZhT || !Array.isArray(q.optsZh) || q.optsZh.length !== nOpt) E(n + ' HSK 5 lleva qZh/qZhT/optsZh/optsZhT'); } else if (q.qZh) E(n + ' qZh solo desde HSK 5');
+                if (nv === 5) {
+                    // HSK 5: pregunta y opciones en chino (con su tradicional); «ver en español» muestra es/opts. Los textos que no las traigan siguen en español.
+                    if (q.qZh || q.qZhT || q.optsZh || q.optsZhT) {
+                        if (!q.qZh || !q.qZhT || !Array.isArray(q.optsZh) || q.optsZh.length !== nOpt || !Array.isArray(q.optsZhT) || q.optsZhT.length !== nOpt) E(n + ' HSK 5 lleva qZh/qZhT/optsZh/optsZhT (' + nOpt + ' opciones cada uno)');
+                        else {
+                            if (new Set(q.optsZh).size !== nOpt) E(n + ' optsZh repetidas');
+                            scr({ zh: q.qZh, zhT: q.qZhT }, n + ' pregunta'); q.optsZh.forEach((o, k) => scr({ zh: o, zhT: q.optsZhT[k] }, n + ' opción ' + (k + 1)));
+                            lvl([q.qZh].concat(q.optsZh), n + ' (en chino)');
+                            [[q.qZh, q.qZhT]].concat(q.optsZh.map((o, k) => [o, q.optsZhT[k]])).forEach(([zh, zhT]) => pairs.push({ id: r.id, w: 'P' + (i + 1) + ' chino', zh, zhT }));
+                        }
+                    }
+                } else if (q.qZh || q.optsZh) E(n + ' qZh solo desde HSK 5');
                 if (q.opts.slice(1).every(o => o.length < q.opts[0].length)) longest++; });
+            const nZhQ = qs.filter(q => q.qZh).length; if (nZhQ && nZhQ !== qs.length) E('preguntas en chino: todas o ninguna del texto (hay ' + nZhQ + ' de ' + qs.length + ')');
             if (nOptQ && longest > nOptQ / 2) W('la correcta es la opción más larga en ' + longest + ' de ' + nOptQ);
             // banco de palabras
             const bk = r.banco || {}, hu = bk.huecos || [], pal = bk.palabras || [];
@@ -198,6 +215,8 @@ const srv = http.createServer((q, s) => {
                 if (q.type === 'vf' && (r.origen !== 'v2' || q.opts.length !== 2 || !q.fixed)) err.push(w + 'P' + (i + 1) + ' V/F solo en v2, con 2 opciones fijas');
                 if (r.origen === 'v1' && (q.ok !== 0 || q.fixed)) err.push(w + 'P' + (i + 1) + ' v1 conserva «correcta = índice 0»');
                 if (q.type !== 'vf' && q.opts.length > 1 && (q.whyNot || []).length !== q.opts.length - 1) err.push(w + 'P' + (i + 1) + ' whyNot incompleto');
+                if (r.origen === 'v1' && ('qZh' in q || 'optsZh' in q)) err.push(w + 'P' + (i + 1) + ' los v1 no pasan qZh/optsZh a las preguntas normalizadas (los HSK 5 v1 no se tocan)');
+                if (q.qZh && (!q.qZhT || !Array.isArray(q.optsZh) || q.optsZh.length !== q.opts.length || !Array.isArray(q.optsZhT) || q.optsZhT.length !== q.opts.length)) err.push(w + 'P' + (i + 1) + ' pregunta en chino incompleta (qZhT, optsZh, optsZhT: una por opción)');
             });
         });
         return { n: L.length, err };

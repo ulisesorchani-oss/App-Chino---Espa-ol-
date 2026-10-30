@@ -183,9 +183,13 @@
         u.els.progNum.textContent = (S.idx + 1) + '/' + n;
         u.renderSegments();
         const letter = (pos) => q.type === 'vf' ? 'VF'[pos] : 'ABCD'[pos];
+        // HSK 5 (solo los textos que traen qZh/optsZh): pregunta y opciones en chino; «Ver en español» (o responder) muestra es/opts
+        const zhQ = !!q.qZh;
         const optHtml = ord.map((di, pos) =>
             '<button type="button" class="lq-opt rd-opt' + (q.type === 'vf' ? ' rd-opt-vf' : '') + '" data-pos="' + pos + '"><span class="lq-opt-letter">' + letter(pos) + '</span>' +
-            '<span class="rd-opt-body"><span class="rd-opt-es">' + esc(q.opts[di]) + '</span></span></button>').join('');
+            '<span class="rd-opt-body">' + (zhQ
+                ? '<span class="rd-opt-zh" lang="zh">' + esc(k === 'trad' ? ((q.optsZhT || [])[di] || q.optsZh[di]) : q.optsZh[di]) + '</span><span class="rd-opt-es hidden">' + esc(q.opts[di]) + '</span>'
+                : '<span class="rd-opt-es">' + esc(q.opts[di]) + '</span>') + '</span></button>').join('');
         body.innerHTML =
             '<div class="lq-tag-row"><div class="lq-lesson-tag">' + esc(r.emoji) + ' ' + esc(r.titleEs) + '</div>' +
             '<span class="rd-approx">' + esc(API().etiqueta(r)) + '</span></div>' + secRow() +
@@ -194,7 +198,10 @@
             '<div class="lq-lines rd-lines">' + u.linesHtml(r, false) + '</div>' +
             '<div class="rd-text-tools"><button type="button" class="lq-btn lq-ghost lq-mini" id="rd-py">🔤 Pinyin: ' + (S.pinyin ? 'ON' : 'OFF') + '</button></div></details>' +
             '<div class="rd-q"><div class="rd-q-meta">Pregunta ' + (S.idx + 1) + ' de ' + n + ' · ' + esc(RD_TYPE[q.type] || q.type) + '</div>' +
-            '<div class="rd-q-es" id="rd-q-es">' + esc(q.es) + '</div>' +
+            (zhQ
+                ? '<div class="rd-q-zh" lang="zh">' + u.zhCharsHtml(k === 'trad' ? (q.qZhT || q.qZh) : q.qZh) + '</div><div class="rd-q-es hidden" id="rd-q-es">' + esc(q.es) + '</div>' +
+                  '<button type="button" class="lq-btn lq-ghost lq-mini" id="rd-es">🇪🇸 Ver en español</button>'
+                : '<div class="rd-q-es" id="rd-q-es">' + esc(q.es) + '</div>') +
             '<div class="lq-opts rd-opts" id="lq-opts">' + optHtml + '</div>' +
             '<div class="lq-feedback hidden" id="lq-feedback"></div>' +
             '<div class="lq-foot"><button type="button" class="lq-btn lq-primary hidden" id="lq-next">' +
@@ -215,11 +222,26 @@
             const b = e.target.closest('.lq-opt');
             if (b && !S.answered) answer(+b.dataset.pos);
         });
+        // preguntas en chino: el mismo botón y el mismo comportamiento que en los textos v1 (lessons-graduated.js)
+        const esBtn = body.querySelector('#rd-es');
+        if (esBtn) esBtn.addEventListener('click', () => {
+            const on = body.querySelector('#rd-q-es').classList.contains('hidden');
+            body.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.toggle('hidden', !on));
+            esBtn.textContent = on ? '🇨🇳 Ocultar el español' : '🇪🇸 Ver en español';
+        });
+        const qz = body.querySelector('.rd-q-zh');
+        if (qz) qz.addEventListener('click', (e) => {
+            const chEl = e.target.closest('.lq-ch');
+            if (chEl && typeof showVocabPop === 'function') showVocabPop(chEl.dataset.ch);
+        });
         body.querySelector('#lq-next').addEventListener('click', next);
     }
     function answer(pos) {
         const u = U(), S = u.state, body = u.els.body, r = S.lesson, q = r.preguntas[S.idx], ord = S.order[S.idx];
         S.answered = true;
+        // pregunta en chino: al responder todo se ve en español y el botón se va (no-op en las de siempre)
+        body.querySelectorAll('#rd-q-es, .rd-opt-es').forEach(el => el.classList.remove('hidden'));
+        const esB = body.querySelector('#rd-es'); if (esB) esB.classList.add('hidden');
         const di = ord[pos], ok = di === q.ok, rightPos = ord.indexOf(q.ok);
         S.results[S.idx] = ok; S.picks[S.idx] = di;
         u.renderSegments();

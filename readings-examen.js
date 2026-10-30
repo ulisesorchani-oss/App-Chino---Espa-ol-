@@ -17,7 +17,10 @@
 //     fueraDeNivelDeclarado?: [zh],                    // el cálculo las da como dentro (se arman con palabras de la lista) pero el autor las declara fuera (大年三十); el validador falla si sobran
 //     largo,                                           // hanzi del texto — CALCULADO
 //     glosario: [{ zh, zhT, categoria, es, nivelLista, fueraDeNivel }],  // 8–12; nivelLista = HSK 1–9 de la entrada exacta o null; ambos CALCULADOS
-//     comprension: [ { tipo: idea|detalle|vocabulario, es, opts[], why, whyNot[] }   // opts[0] = CORRECTA (se baraja al mostrar)
+//     nota?: 'texto',                                // aviso visible en las pantallas junto a «Nivel aproximado» (p. ej. «Texto original; los datos son ilustrativos»)
+//     comprension: [ { tipo: idea|detalle|inferencia|vocabulario, es, opts[], why, whyNot[],   // opts[0] = CORRECTA (se baraja al mostrar)
+//                     qZh?, qZhT?, optsZh?[], optsZhT?[] }          // HSK 5: la pregunta y las opciones van en chino y «ver en español» muestra es/opts; solo si el texto las trae (todas o ninguna)
+//                  | { tipo: 'vf', es, vf, why, qZh?, qZhT? }   // V/F: con qZh la afirmación va en chino y las opciones fijas son 对/错 (Verdadero/Falso en español)
 //                  | { tipo: 'vf', es, vf: true|false, why } ],                    // verdadero/falso: la pantalla lo resuelve la rama de interfaz
 //     banco: { huecos: [{ zh (con ＿＿), zhT, resp, respT }], palabras[], palabrasT[] },  // palabras = respuestas + 1–2 sobrantes
 //     parecidas: [{ zh (con ＿＿), zhT, opts[], optsT[], ok: [índices válidos], why, delTexto?: false }],   // desde HSK 4; delTexto:false = oración nueva
@@ -1339,5 +1342,393 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     }
    ]
   }
+ },
+ {
+  "id": "rx-h5-ruido",
+  "schema": 2,
+  "tipo": "examen",
+  "nivel": 5,
+  "genero": "expositivo",
+  "emoji": "🎧",
+  "revision": "pendiente",
+  "nota": "Texto original; los datos son ilustrativos",
+  "titulo": {
+   "zh": "声音会影响注意力吗？",
+   "zhT": "聲音會影響注意力嗎？",
+   "es": "¿Los sonidos afectan la atención?"
+  },
+  "parrafos": [
+   {
+    "zh": "很多人习惯在有声音的地方学习。有人说，有一点声音反而能让人更专心；也有人觉得太吵了，根本没办法集中注意力。声音到底会不会影响注意力呢？研究人员做了一个实验。",
+    "zhT": "很多人習慣在有聲音的地方學習。有人說，有一點聲音反而能讓人更專心；也有人覺得太吵了，根本沒辦法集中注意力。聲音到底會不會影響注意力呢？研究人員做了一個實驗。",
+    "es": "Mucha gente suele estudiar en lugares con sonido. Hay quienes dicen que un poco de sonido, al contrario, ayuda a concentrarse mejor; otros piensan que hay demasiado ruido y que así no hay manera de mantener la atención. ¿Los sonidos afectan realmente la atención? Unos investigadores hicieron un experimento."
+   },
+   {
+    "zh": "实验有六十名志愿者。研究人员请他们在三种环境里读文章、回答题目。三种环境里的题目都一样，有简单的，也有复杂的。第一种环境非常安静，第二种有普通的说话声，第三种有很大的噪音，像在马路旁边一样。",
+    "zhT": "實驗有六十名志願者。研究人員請他們在三種環境裡讀文章、回答題目。三種環境裡的題目都一樣，有簡單的，也有複雜的。第一種環境非常安靜，第二種有普通的說話聲，第三種有很大的噪音，像在馬路旁邊一樣。",
+    "es": "El experimento contó con sesenta voluntarios. Los investigadores les pidieron que leyeran textos y respondieran preguntas en tres ambientes. Las preguntas eran las mismas en los tres ambientes, y había tanto simples como complejas. El primer ambiente era muy silencioso; el segundo tenía voces normales; el tercero tenía mucho ruido, como junto a una calle."
+   },
+   {
+    "zh": "结果显示，在安静的环境里，参加的人平均答对了百分之八十五的题；有普通说话声时，大约是百分之八十；而在噪音很大的环境里，只有百分之六十左右。可见，噪音很大时，答对的题目会明显减少。研究人员还发现，声音对简单的题目影响不大，但题目越复杂，干扰就越大。",
+    "zhT": "結果顯示，在安靜的環境裡，參加的人平均答對了百分之八十五的題；有普通說話聲時，大約是百分之八十；而在噪音很大的環境裡，只有百分之六十左右。可見，噪音很大時，答對的題目會明顯減少。研究人員還發現，聲音對簡單的題目影響不大，但題目越複雜，干擾就越大。",
+    "es": "Los resultados muestran que, en el ambiente silencioso, los participantes respondieron bien, en promedio, el 85 % de las preguntas; con voces normales fue de alrededor del 80 %; y en el ambiente con mucho ruido fue de solo alrededor del 60 %. Se ve, entonces, que cuando hay mucho ruido se responden bien claramente menos preguntas. Los investigadores también encontraron que el sonido casi no afecta las preguntas simples, pero cuanto más compleja es la pregunta, mayor es la interferencia."
+   },
+   {
+    "zh": "研究人员认为，每个人的习惯并不相同，结果不一定适合所有人。不过，他们提出了几点建议：复杂的工作，最好选择安静的地方；做简单的事情时，有一点声音也没关系；如果只能在吵的地方，可以戴上耳机。",
+    "zhT": "研究人員認為，每個人的習慣並不相同，結果不一定適合所有人。不過，他們提出了幾點建議：複雜的工作，最好選擇安靜的地方；做簡單的事情時，有一點聲音也沒關係；如果只能在吵的地方，可以戴上耳機。",
+    "es": "Los investigadores creen que los hábitos de cada persona no son iguales y que el resultado no sirve necesariamente para todos. Aun así, hicieron algunas sugerencias: para un trabajo complejo, lo mejor es elegir un lugar silencioso; para hacer cosas simples, no importa que haya un poco de sonido; y si solo se puede estar en un lugar ruidoso, se pueden usar auriculares."
+   }
+  ],
+  "largo": 347,
+  "glosario": [
+   {
+    "zh": "噪音",
+    "zhT": "噪音",
+    "categoria": "sustantivo",
+    "es": "ruido (sonido fuerte y molesto)",
+    "nivelLista": 9,
+    "fueraDeNivel": true
+   },
+   {
+    "zh": "干扰",
+    "zhT": "干擾",
+    "categoria": "verbo",
+    "es": "interferir, perturbar, estorbar",
+    "nivelLista": 5,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "集中",
+    "zhT": "集中",
+    "categoria": "verbo",
+    "es": "concentrar, centrar (la atención)",
+    "nivelLista": 3,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "安静",
+    "zhT": "安靜",
+    "categoria": "adjetivo",
+    "es": "silencioso, tranquilo",
+    "nivelLista": 2,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "研究",
+    "zhT": "研究",
+    "categoria": "sustantivo",
+    "es": "investigación (研究人员: investigadores)",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "志愿者",
+    "zhT": "志願者",
+    "categoria": "sustantivo",
+    "es": "voluntario",
+    "nivelLista": 3,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "实验",
+    "zhT": "實驗",
+    "categoria": "sustantivo",
+    "es": "experimento",
+    "nivelLista": 3,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "平均",
+    "zhT": "平均",
+    "categoria": "adverbio",
+    "es": "en promedio, en término medio",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "减少",
+    "zhT": "減少",
+    "categoria": "verbo",
+    "es": "disminuir, hacerse menos",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "反而",
+    "zhT": "反而",
+    "categoria": "adverbio",
+    "es": "al contrario, en cambio (contra lo que se esperaba)",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "耳机",
+    "zhT": "耳機",
+    "categoria": "sustantivo",
+    "es": "auriculares",
+    "nivelLista": 4,
+    "fueraDeNivel": false
+   },
+   {
+    "zh": "建议",
+    "zhT": "建議",
+    "categoria": "sustantivo",
+    "es": "sugerencia, recomendación",
+    "nivelLista": 3,
+    "fueraDeNivel": false
+   }
+  ],
+  "comprension": [
+   {
+    "tipo": "idea",
+    "qZh": "这篇文章主要介绍了什么？",
+    "qZhT": "這篇文章主要介紹了什麼？",
+    "es": "¿Qué presenta principalmente el artículo?",
+    "opts": [
+     "Un experimento sobre cómo el sonido afecta la atención y algunas recomendaciones",
+     "Varios tipos de música adecuados para escuchar al estudiar",
+     "Por qué los sonidos de la ciudad son cada vez más fuertes",
+     "La experiencia personal de universitarios que participaron en el experimento"
+    ],
+    "optsZh": [
+     "一次关于声音如何影响注意力的实验和一些建议",
+     "几种适合学习时听的音乐",
+     "为什么城市里的声音越来越大",
+     "大学生参加实验的个人经历"
+    ],
+    "optsZhT": [
+     "一次關於聲音如何影響注意力的實驗和一些建議",
+     "幾種適合學習時聽的音樂",
+     "為什麼城市裡的聲音越來越大",
+     "大學生參加實驗的個人經歷"
+    ],
+    "why": "El texto plantea la pregunta «声音到底会不会影响注意力», describe el experimento con sus resultados y termina con recomendaciones.",
+    "whyNot": [
+     "El texto no habla de música: trata de los sonidos en general (voces, ruido) y de su efecto en la atención.",
+     "El texto no explica por qué hay más ruido en las ciudades: estudia qué efecto tiene el sonido.",
+     "Los voluntarios son los participantes del experimento, pero el texto no cuenta sus vivencias: da promedios y porcentajes."
+    ]
+   },
+   {
+    "tipo": "detalle",
+    "qZh": "在哪种环境里，答对的题最少？",
+    "qZhT": "在哪種環境裡，答對的題最少？",
+    "es": "¿En qué ambiente se respondieron bien menos preguntas?",
+    "opts": [
+     "En el ambiente con mucho ruido",
+     "En el ambiente muy silencioso",
+     "En el ambiente con voces normales",
+     "Los tres ambientes fueron parecidos"
+    ],
+    "optsZh": [
+     "声音非常大的环境",
+     "非常安静的环境",
+     "有普通说话声的环境",
+     "三种环境都差不多"
+    ],
+    "optsZhT": [
+     "聲音非常大的環境",
+     "非常安靜的環境",
+     "有普通說話聲的環境",
+     "三種環境都差不多"
+    ],
+    "why": "El texto dice que «在噪音很大的环境里，只有百分之六十左右»: es el porcentaje más bajo de los tres.",
+    "whyNot": [
+     "En silencio fue donde más acertaron: alrededor del 85 %.",
+     "Con voces normales acertaron alrededor del 80 %, casi lo mismo que en silencio.",
+     "Sí hubo una diferencia clara: del 85 % al 60 %."
+    ]
+   },
+   {
+    "tipo": "inferencia",
+    "qZh": "有两个人：一个要准备一场很难的考试，一个要整理自己的房间。根据文章，下面哪种做法最合适？",
+    "qZhT": "有兩個人：一個要準備一場很難的考試，一個要整理自己的房間。根據文章，下面哪種做法最合適？",
+    "es": "Una persona tiene que preparar un examen muy difícil y otra, ordenar su cuarto. Según el artículo, ¿qué conducta es la más adecuada?",
+    "opts": [
+     "Quien prepara el examen debería buscar un lugar silencioso; quien ordena el cuarto no necesariamente",
+     "Los dos deberían buscar el lugar más silencioso, porque el sonido siempre es malo",
+     "Los dos pueden hacerlo en un lugar ruidoso, porque el sonido no influye",
+     "Quien prepara el examen puede estar en un lugar ruidoso; quien ordena el cuarto debería buscar silencio"
+    ],
+    "optsZh": [
+     "准备考试的人最好找安静的地方，整理房间的人不一定需要",
+     "两个人都应该找最安静的地方，因为声音总是不好",
+     "两个人都可以在吵的地方做，因为声音没有影响",
+     "准备考试的人可以在吵的地方，整理房间的人应该找安静的地方"
+    ],
+    "optsZhT": [
+     "準備考試的人最好找安靜的地方，整理房間的人不一定需要",
+     "兩個人都應該找最安靜的地方，因為聲音總是不好",
+     "兩個人都可以在吵的地方做，因為聲音沒有影響",
+     "準備考試的人可以在吵的地方，整理房間的人應該找安靜的地方"
+    ],
+    "why": "La regla del texto es «复杂的工作，最好选择安静的地方» y «做简单的事情时，有一点声音也没关系». El texto no menciona exámenes ni cuartos: hay que aplicar la regla a dos casos nuevos (un examen difícil es un trabajo complejo; ordenar el cuarto es algo simple).",
+    "whyNot": [
+     "El texto no dice que cualquier sonido sea malo: para lo simple, un poco de sonido no importa.",
+     "Para lo complejo el texto recomienda un lugar silencioso: el sonido interfiere más cuanto más complejo es lo que se hace.",
+     "Está al revés: lo complejo (el examen difícil) pide silencio y lo simple (ordenar el cuarto) tolera algo de sonido."
+    ]
+   },
+   {
+    "tipo": "vocabulario",
+    "qZh": "文章说“题目越复杂，干扰就越大”，其中的“干扰”是什么意思？",
+    "qZhT": "文章說“題目越複雜，干擾就越大”，其中的“干擾”是什麼意思？",
+    "es": "El artículo dice «cuanto más compleja la pregunta, mayor la interferencia»; ¿qué significa «干扰» ahí?",
+    "opts": [
+     "Hace que las cosas no puedan salir bien",
+     "Ayuda a terminar más rápido",
+     "Hace que a uno le resulte muy interesante",
+     "Baja el volumen del sonido"
+    ],
+    "optsZh": [
+     "让事情不能顺利进行",
+     "帮助人更快完成",
+     "让人觉得很有意思",
+     "把声音变小"
+    ],
+    "optsZhT": [
+     "讓事情不能順利進行",
+     "幫助人更快完成",
+     "讓人覺得很有意思",
+     "把聲音變小"
+    ],
+    "why": "En «题目越复杂，干扰就越大» el sonido estorba más cuanto más compleja es la pregunta: 干扰 es «interferir, perturbar».",
+    "whyNot": [
+     "Es lo contrario: el sonido perjudica, no ayuda.",
+     "El texto no habla de interés ni de diversión.",
+     "El sonido es la causa de la interferencia; 干扰 no significa bajar el volumen."
+    ]
+   },
+   {
+    "tipo": "vf",
+    "qZh": "有普通说话声时，结果比安静时更好。",
+    "qZhT": "有普通說話聲時，結果比安靜時更好。",
+    "es": "Con voces normales el resultado fue mejor que en silencio.",
+    "vf": false,
+    "why": "Con voces normales el resultado fue de alrededor del 80 % («有普通说话声时，大约是百分之八十»), algo menos que el 85 % del ambiente silencioso."
+   }
+  ],
+  "banco": {
+   "huecos": [
+    {
+     "zh": "第一种环境非常＿＿",
+     "zhT": "第一種環境非常＿＿",
+     "resp": "安静",
+     "respT": "安靜"
+    },
+    {
+     "zh": "根本没办法＿＿注意力",
+     "zhT": "根本沒辦法＿＿注意力",
+     "resp": "集中",
+     "respT": "集中"
+    },
+    {
+     "zh": "参加的人＿＿答对了百分之八十五的题",
+     "zhT": "參加的人＿＿答對了百分之八十五的題",
+     "resp": "平均",
+     "respT": "平均"
+    },
+    {
+     "zh": "答对的题目会明显＿＿",
+     "zhT": "答對的題目會明顯＿＿",
+     "resp": "减少",
+     "respT": "減少"
+    },
+    {
+     "zh": "他们提出了几点＿＿",
+     "zhT": "他們提出了幾點＿＿",
+     "resp": "建议",
+     "respT": "建議"
+    },
+    {
+     "zh": "可以戴上＿＿",
+     "zhT": "可以戴上＿＿",
+     "resp": "耳机",
+     "respT": "耳機"
+    }
+   ],
+   "palabras": [
+    "安静",
+    "集中",
+    "平均",
+    "减少",
+    "建议",
+    "耳机",
+    "提高",
+    "价格"
+   ],
+   "palabrasT": [
+    "安靜",
+    "集中",
+    "平均",
+    "減少",
+    "建議",
+    "耳機",
+    "提高",
+    "價格"
+   ]
+  },
+  "parecidas": [
+   {
+    "zh": "声音太大，会＿＿我们的学习。",
+    "zhT": "聲音太大，會＿＿我們的學習。",
+    "opts": [
+     "影响",
+     "打扰",
+     "帮助"
+    ],
+    "optsT": [
+     "影響",
+     "打擾",
+     "幫助"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "影响 («afectar») y 打扰 («perturbar, molestar») sirven: un sonido demasiado fuerte perjudica el estudio. 帮助 («ayudar») dice lo contrario.",
+    "delTexto": false
+   },
+   {
+    "zh": "做复杂的工作时，最好＿＿一个安静的地方。",
+    "zhT": "做複雜的工作時，最好＿＿一個安靜的地方。",
+    "opts": [
+     "选择",
+     "寻找",
+     "忘记"
+    ],
+    "optsT": [
+     "選擇",
+     "尋找",
+     "忘記"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "选择 («elegir») y 寻找 («buscar») encajan con «un lugar silencioso». 忘记 («olvidar») es gramatical pero no tiene sentido aquí: nadie recomienda olvidar un lugar tranquilo para hacer un trabajo complejo.",
+    "delTexto": false
+   },
+   {
+    "zh": "在安静的环境里，事情往往做得更＿＿。",
+    "zhT": "在安靜的環境裡，事情往往做得更＿＿。",
+    "opts": [
+     "顺利",
+     "轻松",
+     "热闹"
+    ],
+    "optsT": [
+     "順利",
+     "輕鬆",
+     "熱鬧"
+    ],
+    "ok": [
+     0,
+     1
+    ],
+    "why": "顺利 («sin contratiempos») y 轻松 («con facilidad») describen cómo sale una tarea en silencio. 热闹 («animado, bullicioso») describe un lugar con gente y sonido, no cómo se hace algo.",
+    "delTexto": false
+   }
+  ]
  }
 ]);
