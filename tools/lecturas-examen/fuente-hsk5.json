@@ -16,12 +16,12 @@
     "es": "Mucha gente suele estudiar en lugares con sonido. Hay quienes dicen que un poco de sonido, al contrario, ayuda a concentrarse mejor; otros piensan que hay demasiado ruido y que así no hay manera de mantener la atención. ¿Los sonidos afectan realmente la atención? Unos investigadores hicieron un experimento."
    },
    {
-    "zh": "实验有六十名志愿者。研究人员请他们在三种环境里读文章、回答题目，题目的难度都一样。第一种环境非常安静，第二种有普通的说话声，第三种有很大的噪音，像在马路旁边一样。",
-    "es": "El experimento contó con sesenta voluntarios. Los investigadores les pidieron que leyeran textos y respondieran preguntas en tres ambientes, con preguntas de la misma dificultad. El primer ambiente era muy silencioso; el segundo tenía voces normales; el tercero tenía mucho ruido, como junto a una calle."
+    "zh": "实验有六十名志愿者。研究人员请他们在三种环境里读文章、回答题目。三种环境里的题目都一样，有简单的，也有复杂的。第一种环境非常安静，第二种有普通的说话声，第三种有很大的噪音，像在马路旁边一样。",
+    "es": "El experimento contó con sesenta voluntarios. Los investigadores les pidieron que leyeran textos y respondieran preguntas en tres ambientes. Las preguntas eran las mismas en los tres ambientes, y había tanto simples como complejas. El primer ambiente era muy silencioso; el segundo tenía voces normales; el tercero tenía mucho ruido, como junto a una calle."
    },
    {
-    "zh": "结果显示，在安静的环境里，参加的人平均答对了百分之八十五的题；有普通说话声时，大约是百分之八十；而在噪音很大的环境里，只有百分之六十左右。可见，很大的声音会降低完成任务的效率。研究人员还发现，声音对简单的任务影响不大，但任务越复杂，干扰就越大。",
-    "es": "Los resultados muestran que, en el ambiente silencioso, los participantes respondieron bien, en promedio, el 85 % de las preguntas; con voces normales fue de alrededor del 80 %; y en el ambiente con mucho ruido fue de solo alrededor del 60 %. Se ve, entonces, que los sonidos muy fuertes reducen la eficiencia con que se completan las tareas. Los investigadores también encontraron que el sonido casi no afecta las tareas simples, pero cuanto más compleja es la tarea, mayor es la interferencia."
+    "zh": "结果显示，在安静的环境里，参加的人平均答对了百分之八十五的题；有普通说话声时，大约是百分之八十；而在噪音很大的环境里，只有百分之六十左右。可见，噪音很大时，答对的题目会明显减少。研究人员还发现，声音对简单的题目影响不大，但题目越复杂，干扰就越大。",
+    "es": "Los resultados muestran que, en el ambiente silencioso, los participantes respondieron bien, en promedio, el 85 % de las preguntas; con voces normales fue de alrededor del 80 %; y en el ambiente con mucho ruido fue de solo alrededor del 60 %. Se ve, entonces, que cuando hay mucho ruido se responden bien claramente menos preguntas. Los investigadores también encontraron que el sonido casi no afecta las preguntas simples, pero cuanto más compleja es la pregunta, mayor es la interferencia."
    },
    {
     "zh": "研究人员认为，每个人的习惯并不相同，结果不一定适合所有人。不过，他们提出了几点建议：复杂的工作，最好选择安静的地方；做简单的事情时，有一点声音也没关系；如果只能在吵的地方，可以戴上耳机。",
@@ -70,14 +70,14 @@
     "es": "en promedio, en término medio"
    },
    {
-    "zh": "降低",
+    "zh": "减少",
     "categoria": "verbo",
-    "es": "reducir, hacer bajar"
+    "es": "disminuir, hacerse menos"
    },
    {
-    "zh": "效率",
-    "categoria": "sustantivo",
-    "es": "eficiencia, rendimiento"
+    "zh": "反而",
+    "categoria": "adverbio",
+    "es": "al contrario, en cambio (contra lo que se esperaba)"
    },
    {
     "zh": "耳机",
@@ -139,49 +139,56 @@
    },
    {
     "tipo": "inferencia",
-    "qZh": "有个人今天要整理一些旧文件，这是一件很简单的事。根据文章，他最可能怎么做？",
-    "es": "Hoy una persona tiene que ordenar unos papeles viejos, algo muy simple. Según el artículo, ¿qué es lo más probable que haga?",
-    "opts": [
-     "No necesariamente tiene que buscar un lugar muy silencioso",
-     "Tiene que ir a un lugar muy silencioso, porque solo con silencio se puede hacer bien",
-     "Lo mejor es buscar un lugar con mucho ruido, para rendir más",
-     "Tiene que lograr antes que a su alrededor no haya ningún sonido"
-    ],
+    "qZh": "有两个人：一个要准备一场很难的考试，一个要整理自己的房间。根据文章，下面哪种做法最合适？",
+    "es": "Una persona tiene que preparar un examen muy difícil y otra, ordenar su cuarto. Según el artículo, ¿qué conducta es la más adecuada?",
     "optsZh": [
-     "不一定要找很安静的地方",
-     "一定要去很安静的地方，因为只有安静才能做好",
-     "最好找一个声音很大的地方，这样效率更高",
-     "必须先让周围一点声音都没有"
+     "准备考试的人最好找安静的地方，整理房间的人不一定需要",
+     "两个人都应该找最安静的地方，因为声音总是不好",
+     "两个人都可以在吵的地方做，因为声音没有影响",
+     "准备考试的人可以在吵的地方，整理房间的人应该找安静的地方"
     ],
-    "why": "La regla del texto es que, para lo simple, «有一点声音也没关系»; aplicada a ordenar papeles (una tarea simple), no hace falta un lugar muy silencioso. El texto no menciona este caso: hay que deducirlo.",
+    "opts": [
+     "Quien prepara el examen debería buscar un lugar silencioso; quien ordena el cuarto no necesariamente",
+     "Los dos deberían buscar el lugar más silencioso, porque el sonido siempre es malo",
+     "Los dos pueden hacerlo en un lugar ruidoso, porque el sonido no influye",
+     "Quien prepara el examen puede estar en un lugar ruidoso; quien ordena el cuarto debería buscar silencio"
+    ],
+    "why": "La regla del texto es «复杂的工作，最好选择安静的地方» y «做简单的事情时，有一点声音也没关系». El texto no menciona exámenes ni cuartos: hay que aplicar la regla a dos casos nuevos (un examen difícil es un trabajo complejo; ordenar el cuarto es algo simple).",
     "whyNot": [
-     "Eso vale para el trabajo complejo (el texto recomienda un lugar silencioso para ese caso), no para una tarea simple.",
-     "El texto muestra que el mucho ruido baja la eficiencia; en ningún momento recomienda buscarlo.",
-     "El texto dice que un poco de sonido no molesta en las tareas simples; no pide silencio total."
+     "El texto no dice que cualquier sonido sea malo: para lo simple, un poco de sonido no importa.",
+     "Para lo complejo el texto recomienda un lugar silencioso: el sonido interfiere más cuanto más complejo es lo que se hace.",
+     "Está al revés: lo complejo (el examen difícil) pide silencio y lo simple (ordenar el cuarto) tolera algo de sonido."
     ]
    },
    {
     "tipo": "vocabulario",
-    "qZh": "文章说“任务越复杂，干扰就越大”，其中的“干扰”是什么意思？",
-    "es": "El artículo dice «cuanto más compleja la tarea, mayor la interferencia»; ¿qué significa «干扰» ahí?",
-    "opts": [
-     "Hace que las cosas no puedan salir bien",
-     "Ayuda a terminar más rápido",
-     "Hace que a uno le resulte muy interesante",
-     "Baja el volumen del sonido"
-    ],
+    "qZh": "文章说“题目越复杂，干扰就越大”，其中的“干扰”是什么意思？",
+    "es": "El artículo dice «cuanto más compleja la pregunta, mayor la interferencia»; ¿qué significa «干扰» ahí?",
     "optsZh": [
      "让事情不能顺利进行",
      "帮助人更快完成",
      "让人觉得很有意思",
      "把声音变小"
     ],
-    "why": "En «任务越复杂，干扰就越大» el sonido estorba más cuanto más compleja es la tarea: 干扰 es «interferir, perturbar».",
+    "opts": [
+     "Hace que las cosas no puedan salir bien",
+     "Ayuda a terminar más rápido",
+     "Hace que a uno le resulte muy interesante",
+     "Baja el volumen del sonido"
+    ],
+    "why": "En «题目越复杂，干扰就越大» el sonido estorba más cuanto más compleja es la pregunta: 干扰 es «interferir, perturbar».",
     "whyNot": [
      "Es lo contrario: el sonido perjudica, no ayuda.",
      "El texto no habla de interés ni de diversión.",
      "El sonido es la causa de la interferencia; 干扰 no significa bajar el volumen."
     ]
+   },
+   {
+    "tipo": "vf",
+    "qZh": "有普通说话声时，结果比安静时更好。",
+    "es": "Con voces normales el resultado fue mejor que en silencio.",
+    "vf": false,
+    "why": "Con voces normales el resultado fue de alrededor del 80 % («有普通说话声时，大约是百分之八十»), algo menos que el 85 % del ambiente silencioso."
    }
   ],
   "banco": {
@@ -199,8 +206,8 @@
      "resp": "平均"
     },
     {
-     "frase": "很大的声音会降低完成任务的效率",
-     "resp": "降低"
+     "frase": "答对的题目会明显减少",
+     "resp": "减少"
     },
     {
      "frase": "他们提出了几点建议",
@@ -220,7 +227,7 @@
      "Hueco 1 (第一种环境非常＿＿): ahí va un adjetivo después de 非常 (la descripción del ambiente); 提高 es un verbo («elevar, mejorar»).",
      "Hueco 2 (根本没办法＿＿注意力): gramaticalmente entra («mejorar la atención»), pero el sentido es el contrario del texto: con ruido nadie puede mantener la atención, no la «sube»; el hueco pide 集中 («concentrar»).",
      "Hueco 3 (参加的人＿＿答对了百分之八十五的题): ahí va un adverbio («en promedio»); 提高 es un verbo.",
-     "Hueco 4 (很大的声音会＿＿完成任务的效率): entra en la gramática, pero dice lo contrario de los resultados: el ruido fuerte baja la eficiencia (de 85 % a 60 %), no la sube.",
+     "Hueco 4 (答对的题目会明显＿＿): entra en la gramática («aumentar de forma notable»), pero dice lo contrario de los resultados: con mucho ruido se acierta menos (del 85 % al 60 %), no más.",
      "Hueco 5 (他们提出了几点＿＿): ahí va un sustantivo («sugerencias»); 提高 es un verbo.",
      "Hueco 6 (可以戴上＿＿): ahí va un objeto que se puede poner (戴上…); 提高 no es una cosa que uno se ponga."
     ],
@@ -228,7 +235,7 @@
      "Hueco 1 (第一种环境非常＿＿): después de 非常 va un adjetivo; 价格 («precio») es un sustantivo y el ambiente no tiene que ver con precios.",
      "Hueco 2 (根本没办法＿＿注意力): ahí va un verbo que se pueda aplicar a la atención; 价格 («precio») no es un verbo y nada en el texto habla de dinero.",
      "Hueco 3 (参加的人＿＿答对了百分之八十五的题): ahí va un adverbio («en promedio»); 价格 es un sustantivo.",
-     "Hueco 4 (很大的声音会＿＿完成任务的效率): ahí va un verbo con 效率 como objeto; 价格 es un sustantivo y sería absurdo («el ruido ‘precio’ la eficiencia»).",
+     "Hueco 4 (答对的题目会明显＿＿): ahí va un verbo («disminuir»); 价格 es un sustantivo y no tiene sentido («los aciertos ‘precio’ notablemente»).",
      "Hueco 5 (他们提出了几点＿＿): 价格 sí es un sustantivo, pero «sugerencias» es lo que se «propone»; nadie ‘propone precios’ en este texto y el sentido no encaja.",
      "Hueco 6 (可以戴上＿＿): no se puede «ponerse un precio» (戴上价格); ahí va un objeto físico como los auriculares."
     ]
@@ -254,14 +261,14 @@
     "opts": [
      "选择",
      "寻找",
-     "减少"
+     "忘记"
     ],
     "ok": [
      0,
      1
     ],
     "delTexto": false,
-    "why": "选择 («elegir») y 寻找 («buscar») encajan con «un lugar silencioso». 减少 («reducir») se usa con cantidades, no con un lugar."
+    "why": "选择 («elegir») y 寻找 («buscar») encajan con «un lugar silencioso». 忘记 («olvidar») es gramatical pero no tiene sentido aquí: nadie recomienda olvidar un lugar tranquilo para hacer un trabajo complejo."
    },
    {
     "frase": "在安静的环境里，事情往往做得更＿＿。",
@@ -282,14 +289,18 @@
    "frases": [
     {
      "zh": "第二种有普通的说话声，第三种有很大的噪音",
-     "resultado": "sin coincidencia exacta (resultados sin relación: una ficha de un modelo de clasificación de sonidos y páginas generales sobre ruido)"
+     "resultado": "sin coincidencia exacta (resultados sin relación: una ficha de un modelo de clasificación de sonidos y páginas generales sobre ruido) · buscada el 2026-10-29; la frase no cambió"
     },
     {
-     "zh": "声音对简单的任务影响不大，但任务越复杂，干扰就越大",
-     "resultado": "sin coincidencia exacta (solo artículos científicos en inglés sobre distracción auditiva, que no contienen la frase). Aviso: esos artículos matizan que «más complejo = más interferencia» no vale en general (depende del tipo de sonido y de tarea); por eso el texto lleva la nota «los datos son ilustrativos» y redacción cautelosa"
+     "zh": "三种环境里的题目都一样，有简单的，也有复杂的",
+     "resultado": "sin coincidencia exacta (resultados sin relación sobre «ambientes» y «problemas») · buscada el 2026-10-30"
+    },
+    {
+     "zh": "声音对简单的题目影响不大，但题目越复杂，干扰就越大",
+     "resultado": "sin coincidencia exacta (solo artículos científicos en inglés sobre distracción auditiva, que no contienen la frase) · buscada el 2026-10-30. Aviso: esos artículos matizan que «más complejo = más interferencia» no es una regla general (depende del tipo de sonido y de tarea); por eso el texto lleva la nota «los datos son ilustrativos» y redacción cautelosa"
     }
    ],
-   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-29"
+   "busqueda": "WebSearch (modo estándar), frase entre comillas, 2026-10-29 y 2026-10-30"
   }
  }
 ]

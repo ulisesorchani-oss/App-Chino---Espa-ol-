@@ -18,13 +18,13 @@ const start=async(p,k)=>{await p.click('#btn-exam-practice');await p.waitForTime
  const g=await p.evaluate(()=>{const out={};for(const k of ['HSK3','HSK5']){const o={min:99,bad:[],sig:{},reads:{},consec:true,dupEs:0,scriptBad:0};const want=k==='HSK3'?{nq:3,opts:3,zhq:false}:{nq:4,opts:4,zhq:true};
   for(let i=0;i<200;i++){const S=ExamDebug.build(k);o.min=Math.min(o.min,S.items.length);if(S.items.length!==20)o.bad.push('largo '+S.items.length);
    const t={};S.items.forEach(it=>t[it.type]=(t[it.type]||0)+1);o.sig[Object.keys(t).sort().join('+')]=(o.sig[Object.keys(t).sort().join('+')]||0)+1;
-   const rt=S.items.filter(it=>it.type==='rtext');if(rt.length!==want.nq)o.bad.push('rtext '+rt.length);
-   const idxs=S.items.map((it,j)=>it.type==='rtext'?j:-1).filter(j=>j>=0);if(idxs.some((j,q)=>j!==20-want.nq+q))o.consec=false; // al final y contiguas, en orden
+   const rt=S.items.filter(it=>it.type==='rtext');const nq=(S.rd.origen==='v2')?S.rd.preguntas.length:want.nq;if(rt.length!==nq)o.bad.push('rtext '+rt.length);
+   const idxs=S.items.map((it,j)=>it.type==='rtext'?j:-1).filter(j=>j>=0);if(idxs.some((j,q)=>j!==20-nq+q))o.consec=false; // al final y contiguas, en orden
    const R=S.rd;o.reads[R.id]=(o.reads[R.id]||0)+1;
    if(rt.some(it=>it.rid!==R.id||it.rd!==R))o.bad.push('texto mezclado');
-   rt.forEach((it,q)=>{const d=R.questions?R.questions[q]:R.preguntas[q],dok=R.questions?0:d.ok;if(it.qi!==q)o.bad.push('orden de preguntas');if(it.opts.length!==want.opts||it.opts.filter(x=>x.ok).length!==1||new Set(it.opts.map(x=>x.es)).size!==want.opts)o.bad.push('opts '+R.id+q);
-    if(it.opts.find(x=>x.ok).es!==d.opts[dok])o.bad.push('correcta '+R.id+q);if(!!it.qzh!==want.zhq)o.bad.push('qzh '+R.id+q);if(want.zhq&&(it.qzh!==(S.trad?d.qZhT:d.qZh)||it.opts.some(x=>!x.zh)))o.bad.push('chino '+R.id+q);
-    const wrong=it.opts.filter(x=>!x.ok);if(wrong.some(x=>!x.whyNot))o.bad.push('whyNot '+R.id+q);if(!it.why)o.bad.push('why '+R.id+q);});
+   rt.forEach((it,q)=>{const d=R.questions?R.questions[q]:R.preguntas[q],dok=R.questions?0:d.ok;if(it.qi!==q)o.bad.push('orden de preguntas');const nopt=(d.type==='vf')?2:want.opts;if(it.opts.length!==nopt||it.opts.filter(x=>x.ok).length!==1||new Set(it.opts.map(x=>x.es)).size!==nopt)o.bad.push('opts '+R.id+q);
+    if(it.opts.find(x=>x.ok).es!==d.opts[dok])o.bad.push('correcta '+R.id+q);if(!!it.qzh!==want.zhq)o.bad.push('qzh '+R.id+q);if(want.zhq&&(it.qzh!==(S.trad?d.qZhT:d.qZh)||it.opts.some(x=>!x.zh)))o.bad.push('chino '+R.id+q);if(d.type==='vf'&&it.opts.map(x=>x.es).join()!=='Verdadero,Falso')o.bad.push('V/F fijo '+R.id+q);
+    const wrong=it.opts.filter(x=>!x.ok);if(d.type!=='vf'&&wrong.some(x=>!x.whyNot))o.bad.push('whyNot '+R.id+q);if(!it.why)o.bad.push('why '+R.id+q);});
    const es=new Set();let dup=false;S.items.forEach(it=>{if(it.type==='listen'){if(es.has(it.es))dup=true;es.add(it.es);}});if(dup)o.dupEs++;
    if(S.items.some(it=>it.type==='order'||it.type==='dialogue'||it.type==='reading'))o.bad.push('tipo inesperado');
    if(S.items.filter(it=>it.type==='listen').length<7)o.bad.push('pocas de escuchar');}
