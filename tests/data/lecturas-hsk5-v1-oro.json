@@ -1,0 +1,863 @@
+{
+ "nota": "GRABADO con el código de main, ANTES del soporte de qZh (GOLDEN_RECORD=1)",
+ "snap": {
+  "lista": {
+   "rd-h5-celular": {
+    "origen": "v1",
+    "tipo": "examen",
+    "revision": "pendiente",
+    "nivelKey": "HSK5",
+    "etiqueta": "Nivel aproximado: HSK 5 · no oficial",
+    "preguntas": [
+     {
+      "type": "idea",
+      "es": "¿Qué quiere explicar principalmente el artículo?",
+      "opts": [
+       "Que dedicar mucho tiempo a leer en el celular no es lo mismo que leer bien",
+       "Que el celular hace que se lean cada vez menos libros en el mundo",
+       "Que los libros de papel son bastante más baratos que los del celular",
+       "Que los maestros no deberían dejar entrar celulares al aula"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "El texto contrasta el mucho tiempo de «lectura» con lo poco que se retiene, y propone cómo concentrarse.",
+      "whyNot": [
+       "El texto no dice que se lean menos libros; dice que se lee con interrupciones.",
+       "No compara precios.",
+       "La maestra no prohíbe el celular: propone dejarlo en silencio y lejos durante media hora."
+      ]
+     },
+     {
+      "type": "detalle",
+      "es": "¿Qué descubrieron los investigadores?",
+      "opts": [
+       "Que se lee bastante tiempo, pero se recuerda poco",
+       "Que a la gente ya no le gusta leer y prefiere mirar videos",
+       "Que los libros del celular son más difíciles de entender y más caros",
+       "Que a nadie le gusta leer en el subte ni haciendo cola"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«花在阅读上的时间不少，真正读进去、记在心里的内容却很有限».",
+      "whyNot": [
+       "El texto no dice que no les guste: dice que se distraen.",
+       "No habla de dificultad de comprensión.",
+       "Hacer cola es solo un ejemplo de dónde se lee."
+      ]
+     },
+     {
+      "type": "detalle",
+      "es": "¿Qué les propone la maestra a sus alumnos?",
+      "opts": [
+       "Media hora fija por día, con el celular en silencio y un solo libro de papel",
+       "Leer libros electrónicos dos horas por día, siempre a la misma hora",
+       "Entregarle el celular a la maestra antes de cada clase de lectura",
+       "Leer únicamente durante el viaje en subte, de ida y de vuelta"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "Es casi una cita del texto: «每天固定留出半个小时，把手机调成静音…只读一本纸质书».",
+      "whyNot": [
+       "Son 30 minutos, no dos horas, y de papel.",
+       "El texto no menciona entregar el celular.",
+       "El subte aparece como ejemplo de dónde se lee con el celular, no como consejo."
+      ]
+     },
+     {
+      "type": "inferencia",
+      "es": "¿Qué significa más probablemente «能不能安静下来» (si uno logra aquietarse)?",
+      "opts": [
+       "Si uno puede concentrarse sin que lo interrumpan",
+       "Si uno puede pasar una hora entera sin decir una palabra",
+       "Si uno puede apagar todas las luces de la habitación para leer",
+       "Si uno puede dormirse en muy poco tiempo"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "El problema del texto son las interrupciones; «安静下来» es calmarse y concentrarse.",
+      "whyNot": [
+       "No se trata de hablar o no hablar.",
+       "No hay nada sobre la luz.",
+       "No se trata de dormir."
+      ]
+     }
+    ]
+   },
+   "rd-h5-carta": {
+    "origen": "v1",
+    "tipo": "examen",
+    "revision": "pendiente",
+    "nivelKey": "HSK5",
+    "etiqueta": "Nivel aproximado: HSK 5 · no oficial",
+    "preguntas": [
+     {
+      "type": "detalle",
+      "es": "¿Por qué Aming dejó su empresa anterior?",
+      "opts": [
+       "Porque repetía lo mismo todos los días y sentía que no progresaba",
+       "Porque el sueldo era demasiado bajo y el trabajo no valía la pena",
+       "Porque se llevaba mal con sus compañeros y ya no quería ir",
+       "Porque la empresa le pidió mudarse a otra ciudad para trabajar"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«每天都在重复同样的事情，我渐渐发现自己不再进步了».",
+      "whyNot": [
+       "Dice lo contrario: «收入不错» (el sueldo era bueno).",
+       "No menciona problemas con los compañeros.",
+       "No se habla de ninguna mudanza."
+      ]
+     },
+     {
+      "type": "detalle",
+      "es": "Comparado con antes, ¿cómo es el trabajo nuevo?",
+      "opts": [
+       "Paga menos, pero con más presión",
+       "Paga más y con menos presión",
+       "Paga lo mismo, pero hay más trabajo",
+       "Paga menos y con menos presión"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«工资比以前少了三分之一，压力却大了不少».",
+      "whyNot": [
+       "El sueldo bajó un tercio.",
+       "El sueldo no es el mismo.",
+       "La presión aumentó, no bajó."
+      ]
+     },
+     {
+      "type": "inferencia",
+      "es": "¿Qué actitud tiene Aming hacia su decisión?",
+      "opts": [
+       "No está seguro de que sea acertada, pero quiere intentarlo",
+       "Está muy arrepentido y quiere volver a la empresa anterior",
+       "Está totalmente seguro y confía por completo en el resultado",
+       "Se siente cansado y no quiere volver a hablar del tema"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«我也不知道这个选择是对是错… 与其一直后悔没有试过，不如先试一试».",
+      "whyNot": [
+       "Dice que se siente más aliviado, no arrepentido.",
+       "Admite que no sabe si acertó.",
+       "Le cuenta todo a su amigo con detalle."
+      ]
+     },
+     {
+      "type": "vocabulario",
+      "es": "¿Qué expresa «惭愧» en la carta?",
+      "opts": [
+       "Siente vergüenza por haber tardado tanto en contestar",
+       "Está enojado por las preguntas de la carta de Xiaolin",
+       "Está muy conforme con su nuevo trabajo",
+       "Le parece aburrido escribir y por eso respondió tarde"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "Lo dice justo después: «这么长时间才给你回信».",
+      "whyNot": [
+       "Dice que se alegró de recibirla.",
+       "Cuenta que el trabajo nuevo paga menos y presiona más; no habla de estar conforme con eso.",
+       "No hay ninguna queja sobre escribir."
+      ]
+     }
+    ]
+   },
+   "rd-h5-sueno": {
+    "origen": "v1",
+    "tipo": "examen",
+    "revision": "pendiente",
+    "nivelKey": "HSK5",
+    "etiqueta": "Nivel aproximado: HSK 5 · no oficial",
+    "preguntas": [
+     {
+      "type": "detalle",
+      "es": "Según el artículo, ¿cuánto le conviene dormir a un adulto por día?",
+      "opts": [
+       "De siete a ocho horas",
+       "De cinco a seis horas",
+       "De nueve a diez horas",
+       "Cuanto más, mejor"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«成年人每天睡七到八个小时比较合适».",
+      "whyNot": [
+       "Dormir muy poco afecta la atención y la memoria.",
+       "Dormir demasiado deja desganado.",
+       "El texto abre justamente diciendo que esa idea es falsa («其实不然»)."
+      ]
+     },
+     {
+      "type": "detalle",
+      "es": "¿Cuál de las siguientes NO es una recomendación de los especialistas?",
+      "opts": [
+       "Tomar un té fuerte antes de dormir para relajarse",
+       "Mantener una hora fija de dormir también los fines de semana",
+       "Mirar menos el celular en la hora previa a dormir",
+       "Darse una ducha caliente antes de dormir"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "Es la única que contradice el texto: «咖啡、浓茶更是要避免» (el té fuerte hay que evitarlo).",
+      "whyNot": [
+       "Sí la recomiendan: «周末也不要改变太多».",
+       "Sí la recomiendan: «最好不要看手机或电视».",
+       "Sí la recomiendan: «洗个热水澡… 有助于入睡»."
+      ]
+     },
+     {
+      "type": "inferencia",
+      "es": "¿Por qué conviene no mirar el celular antes de dormir?",
+      "opts": [
+       "Porque la luz de la pantalla mantiene el cerebro activado",
+       "Porque el sonido del celular despierta a otros",
+       "Porque mirar el celular achica los ojos",
+       "Porque el celular calienta la habitación"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«屏幕发出的光会让大脑一直保持兴奋».",
+      "whyNot": [
+       "El texto habla de la luz, no del sonido.",
+       "Eso no aparece en el texto.",
+       "Eso no aparece en el texto."
+      ]
+     },
+     {
+      "type": "vocabulario",
+      "es": "¿Qué significa más o menos «无精打采»?",
+      "opts": [
+       "Estar sin energía, sin ganas de nada",
+       "Estar muy enojado",
+       "Estar especialmente contento",
+       "Tener mucha hambre"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "Se dice de quien duerme de más: queda desganado «整天».",
+      "whyNot": [
+       "No hay enojo en el texto.",
+       "Lo opuesto: es un efecto negativo de dormir demasiado.",
+       "El hambre no se menciona."
+      ]
+     }
+    ]
+   },
+   "rd-h5-libros": {
+    "origen": "v1",
+    "tipo": "examen",
+    "revision": "pendiente",
+    "nivelKey": "HSK5",
+    "etiqueta": "Nivel aproximado: HSK 5 · no oficial",
+    "preguntas": [
+     {
+      "type": "detalle",
+      "es": "¿Cómo surgió el rincón de libros?",
+      "opts": [
+       "La señora Wang llevó sus libros viejos al jardín",
+       "El barrio compró muchos libros nuevos con dinero de todos",
+       "Una escuela le regaló una colección de libros al barrio",
+       "Los vecinos lo decidieron en una reunión de edificio"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«这个主意最早来自…王阿姨… 把它们搬到了花园里».",
+      "whyNot": [
+       "Eran libros viejos de la señora Wang, no nuevos.",
+       "No interviene ninguna escuela.",
+       "Fue iniciativa de una persona, no una votación."
+      ]
+     },
+     {
+      "type": "detalle",
+      "es": "Seis meses después, ¿cómo estaban los libros del estante?",
+      "opts": [
+       "Había más que antes",
+       "Se habían perdido enseguida",
+       "No había cambiado ni uno",
+       "Solo quedaban libros viejos"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«书架上的书不但没有减少，反而越来越多».",
+      "whyNot": [
+       "Eso era lo que temían al principio, pero no pasó.",
+       "El texto cuenta que la gente fue sumando libros.",
+       "Se sumaron libros ilustrados, cuadernos de viaje y notitas, no solo viejos."
+      ]
+     },
+     {
+      "type": "inferencia",
+      "es": "¿Qué no imaginaba la señora Wang?",
+      "opts": [
+       "Que el estante iba a hacer que los vecinos se conocieran",
+       "Que los libros se perdieran enseguida, como temían todos",
+       "Que algún vecino fuera a leer sentado en el jardín",
+       "Que ella tuviera tantos libros guardados en su casa"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "La frase final: «她从来没有想到…竟然让邻居们熟悉了起来».",
+      "whyNot": [
+       "Esa era la preocupación de «大家» al principio, no lo que sorprendió a la señora Wang.",
+       "Que haya gente leyendo es parte de lo que ocurrió, no su sorpresa.",
+       "Los libros eran suyos; sabía cuántos tenía."
+      ]
+     },
+     {
+      "type": "vocabulario",
+      "es": "¿Qué indica «特意写了纸条» sobre esa persona?",
+      "opts": [
+       "Escribió la nota a propósito, para recomendar el libro",
+       "Puso la nota sin querer dentro del libro, por descuido",
+       "Quería llevarse el libro a su casa para releerlo",
+       "No le gustó el libro y quiso avisar a los demás"
+      ],
+      "ok": 0,
+      "fixed": false,
+      "why": "«特意» = a propósito; la nota era «推荐给下一个读者».",
+      "whyNot": [
+       "«特意» es lo contrario de sin querer.",
+       "La nota está para el próximo lector, no para él.",
+       "Recomienda el libro, así que le gustó."
+      ]
+     }
+    ]
+   }
+  },
+  "exam": {
+   "rd-h5-celular": [
+    {
+     "qEs": "¿Qué quiere explicar principalmente el artículo?",
+     "qEsOculta": true,
+     "qZh": "这篇文章主要想说明什么？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Que dedicar mucho tiempo a leer en el celular no es lo mismo que leer bien",
+      "Que el celular hace que se lean cada vez menos libros en el mundo",
+      "Que los libros de papel son bastante más baratos que los del celular",
+      "Que los maestros no deberían dejar entrar celulares al aula"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "手机让人们读的书一年比一年少，越来越少",
+      "纸质书比手机上的书便宜很多，所以更好",
+      "老师不应该让学生把手机带进教室里来",
+      "花很多时间在手机上阅读，不等于读得好"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué descubrieron los investigadores?",
+     "qEsOculta": true,
+     "qZh": "研究者发现了什么？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Que a la gente ya no le gusta leer y prefiere mirar videos",
+      "Que a nadie le gusta leer en el subte ni haciendo cola",
+      "Que los libros del celular son más difíciles de entender y más caros",
+      "Que se lee bastante tiempo, pero se recuerda poco"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "人们已经不再喜欢读书，只想看视频了",
+      "大家都不愿意在地铁上和排队时看书",
+      "手机上的书比纸质书更难读懂，也更贵",
+      "读的时间不少，但记住的内容很有限"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué les propone la maestra a sus alumnos?",
+     "qEsOculta": true,
+     "qZh": "那位老师建议学生怎么做？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Entregarle el celular a la maestra antes de cada clase de lectura",
+      "Leer libros electrónicos dos horas por día, siempre a la misma hora",
+      "Leer únicamente durante el viaje en subte, de ida y de vuelta",
+      "Media hora fija por día, con el celular en silencio y un solo libro de papel"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "只在上班和下班坐地铁的路上读书",
+      "每天固定半小时，把手机调成静音，只读一本纸质书",
+      "每天在固定的时间读两个小时电子书",
+      "每次上阅读课以前，把手机交给老师保管，下课再还给学生"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué significa más probablemente «能不能安静下来» (si uno logra aquietarse)?",
+     "qEsOculta": true,
+     "qZh": "“能不能安静下来”最可能是什么意思？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Si uno puede apagar todas las luces de la habitación para leer",
+      "Si uno puede concentrarse sin que lo interrumpan",
+      "Si uno puede dormirse en muy poco tiempo",
+      "Si uno puede pasar una hora entera sin decir una palabra"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "能不能关掉房间里所有的灯再看书",
+      "能不能在很短的时间里很快睡着",
+      "能不能整整一个小时一句话也不说",
+      "能不能集中注意力，不被打扰"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    }
+   ],
+   "rd-h5-carta": [
+    {
+     "qEs": "¿Por qué Aming dejó su empresa anterior?",
+     "qEsOculta": true,
+     "qZh": "阿明为什么离开了原来的公司？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Porque el sueldo era demasiado bajo y el trabajo no valía la pena",
+      "Porque la empresa le pidió mudarse a otra ciudad para trabajar",
+      "Porque repetía lo mismo todos los días y sentía que no progresaba",
+      "Porque se llevaba mal con sus compañeros y ya no quería ir"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "因为公司要他搬到别的城市去工作，他不愿意",
+      "因为和同事的关系越来越不好，他不想再去上班了",
+      "因为收入一直太低，他觉得工作很不值得做",
+      "因为每天重复同样的事情，他觉得自己没有进步"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "Comparado con antes, ¿cómo es el trabajo nuevo?",
+     "qEsOculta": true,
+     "qZh": "和以前相比，新工作怎么样？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Paga lo mismo, pero hay más trabajo",
+      "Paga menos y con menos presión",
+      "Paga menos, pero con más presión",
+      "Paga más y con menos presión"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "工资一样，但是更忙",
+      "工资多了，压力也小了",
+      "工资少了，压力也小了",
+      "工资少了，压力却更大"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué actitud tiene Aming hacia su decisión?",
+     "qEsOculta": true,
+     "qZh": "阿明对自己的选择是什么态度？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Está muy arrepentido y quiere volver a la empresa anterior",
+      "Está totalmente seguro y confía por completo en el resultado",
+      "No está seguro de que sea acertada, pero quiere intentarlo",
+      "Se siente cansado y no quiere volver a hablar del tema"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "不能肯定对不对，但是愿意试一试",
+      "对结果完全有信心，觉得自己不会出错",
+      "觉得很累，不想再谈起这件事了",
+      "非常后悔，已经想回原来的那家公司了"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué expresa «惭愧» en la carta?",
+     "qEsOculta": true,
+     "qZh": "“惭愧”在信里表示什么？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Está enojado por las preguntas de la carta de Xiaolin",
+      "Está muy conforme con su nuevo trabajo",
+      "Le parece aburrido escribir y por eso respondió tarde",
+      "Siente vergüenza por haber tardado tanto en contestar"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "他对小林来信里问的问题很生气",
+      "他对自己的新工作非常满意，很得意",
+      "他觉得不好意思，因为回信回得太晚",
+      "他觉得写信很无聊，所以回得很晚"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    }
+   ],
+   "rd-h5-sueno": [
+    {
+     "qEs": "Según el artículo, ¿cuánto le conviene dormir a un adulto por día?",
+     "qEsOculta": true,
+     "qZh": "根据文章，成年人每天睡多长时间比较合适？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Cuanto más, mejor",
+      "De cinco a seis horas",
+      "De nueve a diez horas",
+      "De siete a ocho horas"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "七到八个小时",
+      "九到十个小时",
+      "五到六个小时",
+      "越多越好"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Cuál de las siguientes NO es una recomendación de los especialistas?",
+     "qEsOculta": true,
+     "qZh": "下面哪一项不是专家的建议？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Darse una ducha caliente antes de dormir",
+      "Mantener una hora fija de dormir también los fines de semana",
+      "Mirar menos el celular en la hora previa a dormir",
+      "Tomar un té fuerte antes de dormir para relajarse"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "周末也尽量在固定的时间睡觉",
+      "睡前一个小时少看手机",
+      "睡前喝一杯浓茶，让自己放松",
+      "睡前洗个热水澡"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Por qué conviene no mirar el celular antes de dormir?",
+     "qEsOculta": true,
+     "qZh": "为什么睡前最好不要看手机？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Porque el celular calienta la habitación",
+      "Porque el sonido del celular despierta a otros",
+      "Porque la luz de la pantalla mantiene el cerebro activado",
+      "Porque mirar el celular achica los ojos"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "屏幕的光会让大脑一直保持兴奋",
+      "手机会让房间变热",
+      "手机的声音会吵醒别人",
+      "看手机会让眼睛变小"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué significa más o menos «无精打采»?",
+     "qEsOculta": true,
+     "qZh": "“无精打采”最接近什么意思？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Estar especialmente contento",
+      "Estar muy enojado",
+      "Estar sin energía, sin ganas de nada",
+      "Tener mucha hambre"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "没有精神，什么都不想做",
+      "特别高兴",
+      "肚子很饿",
+      "非常生气"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    }
+   ],
+   "rd-h5-libros": [
+    {
+     "qEs": "¿Cómo surgió el rincón de libros?",
+     "qEsOculta": true,
+     "qZh": "图书角是怎么来的？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "El barrio compró muchos libros nuevos con dinero de todos",
+      "La señora Wang llevó sus libros viejos al jardín",
+      "Los vecinos lo decidieron en una reunión de edificio",
+      "Una escuela le regaló una colección de libros al barrio"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "学校把很多书送给了这个小区",
+      "小区用大家的钱买了很多新书",
+      "王阿姨把自己的旧书搬到了花园里",
+      "邻居们一起开会以后决定的"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "Seis meses después, ¿cómo estaban los libros del estante?",
+     "qEsOculta": true,
+     "qZh": "半年以后，书架上的书怎么样了？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Había más que antes",
+      "No había cambiado ni uno",
+      "Se habían perdido enseguida",
+      "Solo quedaban libros viejos"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "一本也没有变",
+      "只剩下旧书了",
+      "很快就丢光了",
+      "比以前更多了"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué no imaginaba la señora Wang?",
+     "qEsOculta": true,
+     "qZh": "王阿姨没有想到什么？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Que algún vecino fuera a leer sentado en el jardín",
+      "Que el estante iba a hacer que los vecinos se conocieran",
+      "Que ella tuviera tantos libros guardados en su casa",
+      "Que los libros se perdieran enseguida, como temían todos"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "书会像大家担心的那样很快丢光",
+      "书架会让邻居们互相熟悉起来",
+      "会有邻居坐在花园里看书",
+      "自己家里竟然有这么多书"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    },
+    {
+     "qEs": "¿Qué indica «特意写了纸条» sobre esa persona?",
+     "qEsOculta": true,
+     "qZh": "“特意写了纸条”说明那个人怎么样？",
+     "ver": true,
+     "verTxt": "🇪🇸 Ver en español",
+     "optsEs": [
+      "Escribió la nota a propósito, para recomendar el libro",
+      "No le gustó el libro y quiso avisar a los demás",
+      "Puso la nota sin querer dentro del libro, por descuido",
+      "Quería llevarse el libro a su casa para releerlo"
+     ],
+     "optsEsOcultas": true,
+     "optsZh": [
+      "他不喜欢这本书，想告诉别人",
+      "他不小心把纸条放进了书里，自己也没发现",
+      "他想把这本书带回家再读一遍",
+      "他是专门为了推荐书才写的"
+     ],
+     "sombra": false,
+     "tras": {
+      "fb": true,
+      "esVisible": true
+     }
+    }
+   ]
+  },
+  "entrenar": {
+   "rd-h5-carta": {
+    "0": {
+     "qzh": "阿明为什么离开了原来的公司？",
+     "q": "¿Por qué Aming dejó su empresa anterior?",
+     "opts": [
+      "因为公司要他搬到别的城市去工作，他不愿意|Porque la empresa le pidió mudarse a otra ciudad para trabajar|0 ; 因为和同事的关系越来越不好，他不想再去上班了|Porque se llevaba mal con sus compañeros y ya no quería ir|0 ; 因为收入一直太低，他觉得工作很不值得做|Porque el sueldo era demasiado bajo y el trabajo no valía la pena|0 ; 因为每天重复同样的事情，他觉得自己没有进步|Porque repetía lo mismo todos los días y sentía que no progresaba|1"
+     ]
+    },
+    "1": {
+     "qzh": "和以前相比，新工作怎么样？",
+     "q": "Comparado con antes, ¿cómo es el trabajo nuevo?",
+     "opts": [
+      "工资一样，但是更忙|Paga lo mismo, pero hay más trabajo|0 ; 工资多了，压力也小了|Paga más y con menos presión|0 ; 工资少了，压力也小了|Paga menos y con menos presión|0 ; 工资少了，压力却更大|Paga menos, pero con más presión|1"
+     ]
+    },
+    "2": {
+     "qzh": "阿明对自己的选择是什么态度？",
+     "q": "¿Qué actitud tiene Aming hacia su decisión?",
+     "opts": [
+      "不能肯定对不对，但是愿意试一试|No está seguro de que sea acertada, pero quiere intentarlo|1 ; 对结果完全有信心，觉得自己不会出错|Está totalmente seguro y confía por completo en el resultado|0 ; 觉得很累，不想再谈起这件事了|Se siente cansado y no quiere volver a hablar del tema|0 ; 非常后悔，已经想回原来的那家公司了|Está muy arrepentido y quiere volver a la empresa anterior|0"
+     ]
+    },
+    "3": {
+     "qzh": "“惭愧”在信里表示什么？",
+     "q": "¿Qué expresa «惭愧» en la carta?",
+     "opts": [
+      "他对小林来信里问的问题很生气|Está enojado por las preguntas de la carta de Xiaolin|0 ; 他对自己的新工作非常满意，很得意|Está muy conforme con su nuevo trabajo|0 ; 他觉得不好意思，因为回信回得太晚|Siente vergüenza por haber tardado tanto en contestar|1 ; 他觉得写信很无聊，所以回得很晚|Le parece aburrido escribir y por eso respondió tarde|0"
+     ]
+    }
+   },
+   "rd-h5-libros": {
+    "0": {
+     "qzh": "图书角是怎么来的？",
+     "q": "¿Cómo surgió el rincón de libros?",
+     "opts": [
+      "学校把很多书送给了这个小区|Una escuela le regaló una colección de libros al barrio|0 ; 小区用大家的钱买了很多新书|El barrio compró muchos libros nuevos con dinero de todos|0 ; 王阿姨把自己的旧书搬到了花园里|La señora Wang llevó sus libros viejos al jardín|1 ; 邻居们一起开会以后决定的|Los vecinos lo decidieron en una reunión de edificio|0"
+     ]
+    },
+    "1": {
+     "qzh": "半年以后，书架上的书怎么样了？",
+     "q": "Seis meses después, ¿cómo estaban los libros del estante?",
+     "opts": [
+      "一本也没有变|No había cambiado ni uno|0 ; 只剩下旧书了|Solo quedaban libros viejos|0 ; 很快就丢光了|Se habían perdido enseguida|0 ; 比以前更多了|Había más que antes|1"
+     ]
+    },
+    "2": {
+     "qzh": "王阿姨没有想到什么？",
+     "q": "¿Qué no imaginaba la señora Wang?",
+     "opts": [
+      "书会像大家担心的那样很快丢光|Que los libros se perdieran enseguida, como temían todos|0 ; 书架会让邻居们互相熟悉起来|Que el estante iba a hacer que los vecinos se conocieran|1 ; 会有邻居坐在花园里看书|Que algún vecino fuera a leer sentado en el jardín|0 ; 自己家里竟然有这么多书|Que ella tuviera tantos libros guardados en su casa|0"
+     ]
+    },
+    "3": {
+     "qzh": "“特意写了纸条”说明那个人怎么样？",
+     "q": "¿Qué indica «特意写了纸条» sobre esa persona?",
+     "opts": [
+      "他不喜欢这本书，想告诉别人|No le gustó el libro y quiso avisar a los demás|0 ; 他不小心把纸条放进了书里，自己也没发现|Puso la nota sin querer dentro del libro, por descuido|0 ; 他想把这本书带回家再读一遍|Quería llevarse el libro a su casa para releerlo|0 ; 他是专门为了推荐书才写的|Escribió la nota a propósito, para recomendar el libro|1"
+     ]
+    }
+   },
+   "rd-h5-sueno": {
+    "0": {
+     "qzh": "根据文章，成年人每天睡多长时间比较合适？",
+     "q": "Según el artículo, ¿cuánto le conviene dormir a un adulto por día?",
+     "opts": [
+      "七到八个小时|De siete a ocho horas|1 ; 九到十个小时|De nueve a diez horas|0 ; 五到六个小时|De cinco a seis horas|0 ; 越多越好|Cuanto más, mejor|0"
+     ]
+    },
+    "1": {
+     "qzh": "下面哪一项不是专家的建议？",
+     "q": "¿Cuál de las siguientes NO es una recomendación de los especialistas?",
+     "opts": [
+      "周末也尽量在固定的时间睡觉|Mantener una hora fija de dormir también los fines de semana|0 ; 睡前一个小时少看手机|Mirar menos el celular en la hora previa a dormir|0 ; 睡前喝一杯浓茶，让自己放松|Tomar un té fuerte antes de dormir para relajarse|1 ; 睡前洗个热水澡|Darse una ducha caliente antes de dormir|0"
+     ]
+    },
+    "2": {
+     "qzh": "为什么睡前最好不要看手机？",
+     "q": "¿Por qué conviene no mirar el celular antes de dormir?",
+     "opts": [
+      "屏幕的光会让大脑一直保持兴奋|Porque la luz de la pantalla mantiene el cerebro activado|1 ; 手机会让房间变热|Porque el celular calienta la habitación|0 ; 手机的声音会吵醒别人|Porque el sonido del celular despierta a otros|0 ; 看手机会让眼睛变小|Porque mirar el celular achica los ojos|0"
+     ]
+    },
+    "3": {
+     "qzh": "“无精打采”最接近什么意思？",
+     "q": "¿Qué significa más o menos «无精打采»?",
+     "opts": [
+      "没有精神，什么都不想做|Estar sin energía, sin ganas de nada|1 ; 特别高兴|Estar especialmente contento|0 ; 肚子很饿|Tener mucha hambre|0 ; 非常生气|Estar muy enojado|0"
+     ]
+    }
+   },
+   "rd-h5-celular": {
+    "0": {
+     "qzh": "这篇文章主要想说明什么？",
+     "q": "¿Qué quiere explicar principalmente el artículo?",
+     "opts": [
+      "手机让人们读的书一年比一年少，越来越少|Que el celular hace que se lean cada vez menos libros en el mundo|0 ; 纸质书比手机上的书便宜很多，所以更好|Que los libros de papel son bastante más baratos que los del celular|0 ; 老师不应该让学生把手机带进教室里来|Que los maestros no deberían dejar entrar celulares al aula|0 ; 花很多时间在手机上阅读，不等于读得好|Que dedicar mucho tiempo a leer en el celular no es lo mismo que leer bien|1"
+     ]
+    },
+    "1": {
+     "qzh": "研究者发现了什么？",
+     "q": "¿Qué descubrieron los investigadores?",
+     "opts": [
+      "人们已经不再喜欢读书，只想看视频了|Que a la gente ya no le gusta leer y prefiere mirar videos|0 ; 大家都不愿意在地铁上和排队时看书|Que a nadie le gusta leer en el subte ni haciendo cola|0 ; 手机上的书比纸质书更难读懂，也更贵|Que los libros del celular son más difíciles de entender y más caros|0 ; 读的时间不少，但记住的内容很有限|Que se lee bastante tiempo, pero se recuerda poco|1"
+     ]
+    },
+    "2": {
+     "qzh": "那位老师建议学生怎么做？",
+     "q": "¿Qué les propone la maestra a sus alumnos?",
+     "opts": [
+      "只在上班和下班坐地铁的路上读书|Leer únicamente durante el viaje en subte, de ida y de vuelta|0 ; 每天固定半小时，把手机调成静音，只读一本纸质书|Media hora fija por día, con el celular en silencio y un solo libro de papel|1 ; 每天在固定的时间读两个小时电子书|Leer libros electrónicos dos horas por día, siempre a la misma hora|0 ; 每次上阅读课以前，把手机交给老师保管，下课再还给学生|Entregarle el celular a la maestra antes de cada clase de lectura|0"
+     ]
+    },
+    "3": {
+     "qzh": "“能不能安静下来”最可能是什么意思？",
+     "q": "¿Qué significa más probablemente «能不能安静下来» (si uno logra aquietarse)?",
+     "opts": [
+      "能不能关掉房间里所有的灯再看书|Si uno puede apagar todas las luces de la habitación para leer|0 ; 能不能在很短的时间里很快睡着|Si uno puede dormirse en muy poco tiempo|0 ; 能不能整整一个小时一句话也不说|Si uno puede pasar una hora entera sin decir una palabra|0 ; 能不能集中注意力，不被打扰|Si uno puede concentrarse sin que lo interrumpan|1"
+     ]
+    }
+   }
+  }
+ }
+}

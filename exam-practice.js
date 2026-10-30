@@ -262,11 +262,12 @@
         const pk = (a, aT) => (trad && aT) ? aT : a;
         if (r.origen === 'v2') { // preguntas normalizadas: opción correcta = `ok`; V/F con opciones fijas (sin barajar)
             return r.preguntas.map((q, qi) => {
+                const zhQ = !!q.qZh; // HSK 5 v2 con preguntas en chino
                 const opts = q.opts.map((t, i) => ({
-                    es: t, zh: '', ok: i === q.ok ? 1 : 0,
+                    es: t, zh: zhQ ? pk(q.optsZh[i], (q.optsZhT || [])[i]) : '', ok: i === q.ok ? 1 : 0,
                     whyNot: (q.type === 'vf' || i === q.ok) ? '' : ((q.whyNot || [])[i - (i > q.ok ? 1 : 0)] || '')
                 }));
-                return { type: 'rtext', rid: r.id, qi: qi, rd: r, trad: trad, q: q.es, qzh: '', why: q.why, opts: q.fixed ? opts : shuf(opts) };
+                return { type: 'rtext', rid: r.id, qi: qi, rd: r, trad: trad, q: q.es, qzh: zhQ ? pk(q.qZh, q.qZhT) : '', why: q.why, opts: q.fixed ? opts : shuf(opts) };
             });
         }
         return r.questions.map((q, qi) => {
@@ -498,6 +499,7 @@
             const zhQ = !!it.qzh;
             shell(num, S.res, head +
                 '<details class="rd-text"' + (S.rTextOpen === false ? '' : ' open') + '><summary>📄 Texto</summary>' +
+                (it.rd.nota ? '<p class="rd-nota">' + esc(it.rd.nota) + '</p>' : '') +
                 '<div class="lq-lines rd-lines rd-plain" id="ex-rtext" lang="zh">' + it.rd.lines.map(l => '<p>' + esc(it.trad ? (l.zhT || l.zh) : l.zh) + '</p>').join('') + '</div></details>' +
                 '<div class="rd-q">' + (zhQ
                     ? '<div class="rd-q-zh" lang="zh">' + esc(it.qzh) + '</div><div class="rd-q-es hidden" id="rd-q-es">' + esc(it.q) + '</div>' +
