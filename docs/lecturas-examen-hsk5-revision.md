@@ -21,8 +21,7 @@ GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproxima
 | 實驗 | 实验 | HSK 3 | Experimentar | sí |
 | 研究 | 研究 | HSK 4 | Investigar | sí |
 | 平均 | 平均 | HSK 4 | Promediar/igual | sí |
-| 降低 | 降低 | HSK 4 | Bajar | sí |
-| 效率 | 效率 | HSK 4 | Eficiencia | sí |
+| 反而 | 反而 | HSK 4 | Por el contrario | sí |
 | 耳機 | 耳机 | HSK 4 | Audífono | sí |
 | 建議 | 建议 | HSK 3 | Sugerir | sí |
 | 集中 | 集中 | HSK 3 | Concentrar | sí |
@@ -34,6 +33,8 @@ GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproxima
 | 選擇 | 选择 | HSK 4 | Elegir | sí |
 | 尋找 | 寻找 | HSK 4 | Buscar | sí |
 | 減少 | 减少 | HSK 4 | Disminuir | sí |
+| 明顯 | 明显 | HSK 3 | Obvio | sí |
+| 忘記 | 忘记 | HSK 1 | Olvidar | sí |
 | 順利 | 顺利 | HSK 2 | Exitoso | sí |
 | 輕鬆 | 轻松 | HSK 4 | Relajado | sí |
 | 熱鬧 | 热闹 | HSK 4 | Animado | sí |

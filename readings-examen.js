@@ -19,7 +19,8 @@
 //     glosario: [{ zh, zhT, categoria, es, nivelLista, fueraDeNivel }],  // 8–12; nivelLista = HSK 1–9 de la entrada exacta o null; ambos CALCULADOS
 //     nota?: 'texto',                                // aviso visible en las pantallas junto a «Nivel aproximado» (p. ej. «Texto original; los datos son ilustrativos»)
 //     comprension: [ { tipo: idea|detalle|inferencia|vocabulario, es, opts[], why, whyNot[],   // opts[0] = CORRECTA (se baraja al mostrar)
-//                     qZh?, qZhT?, optsZh?[], optsZhT?[] }          // HSK 5: la pregunta y las opciones van en chino y «ver en español» muestra es/opts; solo si el texto las trae
+//                     qZh?, qZhT?, optsZh?[], optsZhT?[] }          // HSK 5: la pregunta y las opciones van en chino y «ver en español» muestra es/opts; solo si el texto las trae (todas o ninguna)
+//                  | { tipo: 'vf', es, vf, why, qZh?, qZhT? }   // V/F: con qZh la afirmación va en chino y las opciones fijas son 对/错 (Verdadero/Falso en español)
 //                  | { tipo: 'vf', es, vf: true|false, why } ],                    // verdadero/falso: la pantalla lo resuelve la rama de interfaz
 //     banco: { huecos: [{ zh (con ＿＿), zhT, resp, respT }], palabras[], palabrasT[] },  // palabras = respuestas + 1–2 sobrantes
 //     parecidas: [{ zh (con ＿＿), zhT, opts[], optsT[], ok: [índices válidos], why, delTexto?: false }],   // desde HSK 4; delTexto:false = oración nueva

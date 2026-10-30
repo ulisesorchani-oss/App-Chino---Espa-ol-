@@ -135,7 +135,11 @@ const srv = http.createServer((q, s) => {
                 // la respuesta tiene que estar respaldada por el texto: el why cita en «» el pasaje chino (partes separadas por …)
                 const quotes = (String(q.why || '').match(/«[^»]*»/g) || []).map(x => x.slice(1, -1)).flatMap(x => x.split('…')).map(hz).filter(x => x.length >= 2);
                 if (!quotes.length) E(n + ' el why debe citar en «» el pasaje chino que respalda la respuesta'); else quotes.forEach(x => { if (!H.includes(x)) E(n + ' el pasaje citado «' + x + '» no está en el texto'); });
-                if (q.tipo === 'vf') { if (typeof q.vf !== 'boolean') E(n + ' vf debe ser true/false'); if (q.opts) E(n + ' vf no lleva opts'); return; }
+                if (q.tipo === 'vf') { if (typeof q.vf !== 'boolean') E(n + ' vf debe ser true/false'); if (q.opts) E(n + ' vf no lleva opts');
+                    if (q.qZh || q.qZhT) { // V/F en chino: solo la afirmación (las opciones fijas 对/错 las pone readings-unify.js)
+                        if (nv !== 5) E(n + ' qZh solo desde HSK 5'); else if (!q.qZh || !q.qZhT || q.optsZh || q.optsZhT) E(n + ' V/F en chino lleva qZh y qZhT (y no optsZh)');
+                        else { scr({ zh: q.qZh, zhT: q.qZhT }, n + ' afirmación'); lvl([q.qZh], n + ' (en chino)'); pairs.push({ id: r.id, w: 'P' + (i + 1) + ' chino', zh: q.qZh, zhT: q.qZhT }); } }
+                    return; }
                 nOptQ++;
                 if (!Array.isArray(q.opts) || q.opts.length !== nOpt) { E(n + ' debe tener ' + nOpt + ' opciones'); return; }
                 if (new Set(q.opts).size !== q.opts.length) E(n + ' opciones repetidas');
@@ -153,6 +157,7 @@ const srv = http.createServer((q, s) => {
                     }
                 } else if (q.qZh || q.optsZh) E(n + ' qZh solo desde HSK 5');
                 if (q.opts.slice(1).every(o => o.length < q.opts[0].length)) longest++; });
+            const nZhQ = qs.filter(q => q.qZh).length; if (nZhQ && nZhQ !== qs.length) E('preguntas en chino: todas o ninguna del texto (hay ' + nZhQ + ' de ' + qs.length + ')');
             if (nOptQ && longest > nOptQ / 2) W('la correcta es la opción más larga en ' + longest + ' de ' + nOptQ);
             // banco de palabras
             const bk = r.banco || {}, hu = bk.huecos || [], pal = bk.palabras || [];

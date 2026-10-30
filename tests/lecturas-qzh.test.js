@@ -64,7 +64,8 @@ const V1 = ['rd-h5-celular', 'rd-h5-carta', 'rd-h5-sueno', 'rd-h5-libros'];
         mc('detalle', '¿Dónde ocurre?', ['En la estación', 'En la escuela', 'En el parque', 'En casa'], 'Dice la estación.', ['a', 'b', 'c'],
           { qZh: '故事发生在哪里？', qZhT: '故事發生在哪裡？', optsZh: ['在车站', '在学校', '在公园', '在家里'], optsZhT: ['在車站', '在學校', '在公園', '在家裡'] }),
         mc('inferencia', '¿Qué tema tiene?', ['Un viaje', 'Una cena', 'Un examen', 'Un regalo'], 'Un viaje.', ['a', 'b', 'c'],
-          { qZh: '这个故事说的是什么？', qZhT: '這個故事說的是什麼？', optsZh: ['一次旅行', '一顿晚饭', '一场考试', '一个礼物'], optsZhT: ['一次旅行', '一頓晚飯', '一場考試', '一個禮物'] })] }),
+          { qZh: '这个故事说的是什么？', qZhT: '這個故事說的是什麼？', optsZh: ['一次旅行', '一顿晚饭', '一场考试', '一个礼物'], optsZhT: ['一次旅行', '一頓晚飯', '一場考試', '一個禮物'] }),
+        { tipo: 'vf', qZh: '这个故事发生在车站。', qZhT: '這個故事發生在車站。', es: 'La historia ocurre en la estación.', vf: true, why: 'Sí, en la estación.' }] }),
       base('syn-sin', 'Sin chino', { comprension: [mc('detalle', '¿Qué dice?', ['Una cosa', 'Otra', 'Otra más', 'La última'], 'Esa.', ['a', 'b', 'c'])] })];
   }
   for (const w of [320, 360]) for (const sc of ['simp', 'trad']) {
@@ -90,6 +91,15 @@ const V1 = ['rd-h5-celular', 'rd-h5-carta', 'rd-h5-sueno', 'rd-h5-libros'];
     await responder(p, false);   // responder sin pulsar el botón también muestra el español
     const q2b = await pantalla(p);
     ok(!q2b.qEsOculta && !q2b.optsEsOcultas && !q2b.ver && await p.evaluate(() => /Tu respuesta/.test(document.getElementById('lq-feedback').textContent)), 'b. ' + tag + ' al responder todo pasa a español y el feedback sale ' + JSON.stringify(q2b));
+    // V/F con la afirmación en chino: opciones fijas 对/错 (簡/繁), «Verdadero/Falso» ocultos hasta «Ver en español» o responder
+    await p.click('#lq-next'); await p.waitForTimeout(100);
+    const vf = await p.evaluate(() => ({ qZh: document.querySelector('.rd-q-zh').textContent, optsZh: [...document.querySelectorAll('#lq-opts .rd-opt-zh')].map(e => e.textContent), optsEs: [...document.querySelectorAll('#lq-opts .rd-opt-es')].map(e => e.textContent),
+      esOculto: [...document.querySelectorAll('#lq-opts .rd-opt-es')].every(e => e.classList.contains('hidden')), vfCls: document.querySelectorAll('#lq-opts .rd-opt-vf').length, letras: [...document.querySelectorAll('#lq-opts .lq-opt-letter')].map(e => e.textContent).join(''),
+      qEsOculta: document.getElementById('rd-q-es').classList.contains('hidden'), ver: !!document.getElementById('rd-es') }));
+    ok(vf.qZh === (sc === 'trad' ? '這個故事發生在車站。' : '这个故事发生在车站。') && JSON.stringify(vf.optsZh) === (sc === 'trad' ? '["對","錯"]' : '["对","错"]') && JSON.stringify(vf.optsEs) === '["Verdadero","Falso"]' && vf.esOculto && vf.qEsOculta && vf.ver && vf.vfCls === 2 && vf.letras === 'VF',
+      'b. ' + tag + ' V/F en chino: afirmación y opciones 对/错 en la escritura elegida, español oculto, opciones fijas ' + JSON.stringify(vf));
+    await responder(p, true);
+    ok(await p.evaluate(() => /Correcto/.test(document.getElementById('lq-feedback').textContent) && [...document.querySelectorAll('#lq-opts .rd-opt-es')].every(e => !e.classList.contains('hidden'))), 'b. ' + tag + ' V/F en chino: al responder se ve «Verdadero/Falso» y el feedback');
     await p.evaluate(() => { const c = document.getElementById('lq-close'); if (c) c.click(); }); await p.waitForTimeout(150);
     await aExamenes(p); await abrirPractica(p, 'syn-sin');
     const q3 = await pantalla(p);

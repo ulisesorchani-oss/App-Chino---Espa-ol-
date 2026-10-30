@@ -26,7 +26,7 @@ src.forEach(r => {
     r.banco.huecos.forEach(h => { S(h.frase); S(h.resp); }); r.banco.sobrantes.forEach(S);
     r.parecidas.forEach(p => p.opts.forEach(o => S(p.frase.replace(BLANK, o))));
     ((r.capa2 || {}).notas || []).forEach(n => S(n.zh)); ((r.capa2 || {}).colocaciones || []).forEach(n => S(n.zh));
-    r.comprension.forEach(q => { if (q.qZh) { S(q.qZh); q.optsZh.forEach(S); } }); // HSK 5: pregunta y opciones en chino
+    r.comprension.forEach(q => { if (q.qZh) { S(q.qZh); (q.optsZh || []).forEach(S); } }); // HSK 5: pregunta (o afirmación V/F) y opciones en chino
 });
 const oc = JSON.parse(cp.execFileSync('python3', [path.join(SRC, 'opencc-s2tw.py')], { input: JSON.stringify(strings), encoding: 'utf8', env: Object.assign({}, process.env, process.env.OPENCC_PYTHONPATH ? { PYTHONPATH: process.env.OPENCC_PYTHONPATH } : {}) }));
 const T = zh => oc.t[idx.get(zh)];
@@ -49,7 +49,7 @@ const built = src.map(r => {
         largo: 0,
         glosario: r.glosario.map(g => ({ zh: g.zh, zhT: T(g.zh), categoria: g.categoria, es: g.es, nivelLista: null, fueraDeNivel: false })),
         comprension: r.comprension.map(q => {
-            if (q.tipo === 'vf') return { tipo: 'vf', es: q.es, vf: q.vf, why: q.why };
+            if (q.tipo === 'vf') return q.qZh ? { tipo: 'vf', qZh: q.qZh, qZhT: T(q.qZh), es: q.es, vf: q.vf, why: q.why } : { tipo: 'vf', es: q.es, vf: q.vf, why: q.why }; // V/F en chino: opciones fijas 对/错 (las pone readings-unify.js)
             if (q.qZh) return { tipo: q.tipo, qZh: q.qZh, qZhT: T(q.qZh), es: q.es, opts: q.opts, optsZh: q.optsZh, optsZhT: q.optsZh.map(T), why: q.why, whyNot: q.whyNot }; // pregunta en chino (HSK 5)
             return { tipo: q.tipo, es: q.es, opts: q.opts, why: q.why, whyNot: q.whyNot };
         }),
@@ -75,8 +75,8 @@ const built = src.map(r => {
 // ── hoja de revisión (docs/lecturas-examen-hsk4-revision.md): una por texto, para revisar sin abrir código ──
 const esc = x => String(x).replace(/\|/g, '\\|');
 const VERIF = [['悄悄', '悄悄'], ['擦', '擦'], ['郊區', '郊区'], ['視頻', '视频'], ['春聯', '春联'], ['毛筆', '毛笔'], ['氣氛', '气氛'], ['現成', '现成'], ['橫批', '横批'], ['婚禮', '婚礼'], ['晚點', '晚点'], ['堵車', '堵车'], ['座位', '座位'], ['省', '省']]; // pedidas en la revisión: [tradicional, simplificado] ¿en qué nivel están?
-const VERIF5 = [['噪音', '噪音'], ['干擾', '干扰'], ['志願者', '志愿者'], ['實驗', '实验'], ['研究', '研究'], ['平均', '平均'], ['降低', '降低'], ['效率', '效率'], ['耳機', '耳机'], ['建議', '建议'], ['集中', '集中'], ['安靜', '安静'],
-    ['提高', '提高'], ['價格', '价格'], ['打擾', '打扰'], ['影響', '影响'], ['選擇', '选择'], ['尋找', '寻找'], ['減少', '减少'], ['順利', '顺利'], ['輕鬆', '轻松'], ['熱鬧', '热闹']]; // HSK 5: palabras del glosario, del banco (con sobrantes) y de las parecidas
+const VERIF5 = [['噪音', '噪音'], ['干擾', '干扰'], ['志願者', '志愿者'], ['實驗', '实验'], ['研究', '研究'], ['平均', '平均'], ['反而', '反而'], ['耳機', '耳机'], ['建議', '建议'], ['集中', '集中'], ['安靜', '安静'],
+    ['提高', '提高'], ['價格', '价格'], ['打擾', '打扰'], ['影響', '影响'], ['選擇', '选择'], ['尋找', '寻找'], ['減少', '减少'], ['明顯', '明显'], ['忘記', '忘记'], ['順利', '顺利'], ['輕鬆', '轻松'], ['熱鬧', '热闹']]; // HSK 5: palabras del glosario, del banco (con sobrantes) y de las parecidas
 const VERIF_BY = { 4: VERIF, 5: VERIF5 }; // por nivel: [tradicional, simplificado] a verificar contra la lista
 function hoja(rs, ctl, meta, srcs, nv) {
     const L = ['# Lecturas tipo examen · HSK ' + nv + ' · hoja de revisión', '',
@@ -174,7 +174,8 @@ const srv = http.createServer((q, s) => {
         '//     glosario: [{ zh, zhT, categoria, es, nivelLista, fueraDeNivel }],  // 8–12; nivelLista = HSK 1–9 de la entrada exacta o null; ambos CALCULADOS',
         '//     nota?: \'texto\',                                // aviso visible en las pantallas junto a «Nivel aproximado» (p. ej. «Texto original; los datos son ilustrativos»)',
         '//     comprension: [ { tipo: idea|detalle|inferencia|vocabulario, es, opts[], why, whyNot[],   // opts[0] = CORRECTA (se baraja al mostrar)',
-        '//                     qZh?, qZhT?, optsZh?[], optsZhT?[] }          // HSK 5: la pregunta y las opciones van en chino y «ver en español» muestra es/opts; solo si el texto las trae',
+        '//                     qZh?, qZhT?, optsZh?[], optsZhT?[] }          // HSK 5: la pregunta y las opciones van en chino y «ver en español» muestra es/opts; solo si el texto las trae (todas o ninguna)',
+        '//                  | { tipo: \'vf\', es, vf, why, qZh?, qZhT? }   // V/F: con qZh la afirmación va en chino y las opciones fijas son 对/错 (Verdadero/Falso en español)',
         '//                  | { tipo: \'vf\', es, vf: true|false, why } ],                    // verdadero/falso: la pantalla lo resuelve la rama de interfaz',
         '//     banco: { huecos: [{ zh (con ＿＿), zhT, resp, respT }], palabras[], palabrasT[] },  // palabras = respuestas + 1–2 sobrantes',
         '//     parecidas: [{ zh (con ＿＿), zhT, opts[], optsT[], ok: [índices válidos], why, delTexto?: false }],   // desde HSK 4; delTexto:false = oración nueva',

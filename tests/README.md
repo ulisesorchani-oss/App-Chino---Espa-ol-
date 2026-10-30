@@ -107,7 +107,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `onboarding` | primer uso: pantallas, «Desde cero», «Ya sé algo», saltar |
 | `ordenar-banco` | ejercicio de ordenar (usa `tests/lib/vocabcheck-lib.js`) |
 | `practica-atras`, `practica-generadores`, `practica-lecturas` | práctica: Atrás en sesión, generadores y práctica de lecturas |
-| `lecturas-qzh` | preguntas EN CHINO con «ver en español» para textos v2 que las traigan (texto crudo sintético cargado antes de `readings-unify.js`), nota visible del texto, y prueba de oro de los 4 HSK 5 v1 (`tests/data/lecturas-hsk5-v1-oro.json`, grabada con `GOLDEN_RECORD=1` sobre el código de `main`): no cambian |
+| `lecturas-qzh` | preguntas EN CHINO (y V/F con afirmación en chino y opciones 对/错) con «ver en español» para textos v2 que las traigan (texto crudo sintético cargado antes de `readings-unify.js`), nota visible del texto, y prueba de oro de los 4 HSK 5 v1 (`tests/data/lecturas-hsk5-v1-oro.json`, grabada con `GOLDEN_RECORD=1` sobre el código de `main`): no cambian |
 | `lectura-hsk5-ruido` | texto HSK 5 expositivo `rx-h5-ruido`: datos (largo, 4 preguntas en chino, banco con 2 sobrantes, 3 parecidas, 干扰 en un solo ejercicio, sin 正确率, inferencia que no está escrita en el texto), Exámenes 320/360 px 简/繁 con la cadena completa y Entrenar (HSK 5 = 5 textos) |
 | `practica-hsk4` | práctica tipo examen HSK 4 (textos v2 de tipo examen): generador (sin Ordenar/Diálogo, sin el texto de estudio, correcta y `whyNot` bien ubicadas, V/F fijo, rotación) y pantalla a 320/360 px en claro/oscuro, 简/繁 |
 | `segmentador` | corte de palabras (escritorio, sin `Intl.Segmenter` y Android simulado) |

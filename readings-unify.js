@@ -53,7 +53,9 @@
             lines: r.parrafos.map(p => ({ zh: p.zh, zhT: p.zhT, es: p.es })),
             glosario: r.glosario.map(g => ({ zh: g.zh, zhT: g.zhT, es: g.es, categoria: g.categoria, nivelLista: g.nivelLista, fueraDeNivel: g.fueraDeNivel })),
             preguntas: r.comprension.map(q => q.tipo === 'vf'
-                ? { type: 'vf', es: q.es, opts: ['Verdadero', 'Falso'], ok: q.vf ? 0 : 1, fixed: true, vf: q.vf, why: q.why, whyNot: [] }
+                ? Object.assign({ type: 'vf', es: q.es, opts: ['Verdadero', 'Falso'], ok: q.vf ? 0 : 1, fixed: true, vf: q.vf, why: q.why, whyNot: [] },
+                    // V/F en chino (HSK 5): la afirmación y las opciones fijas 对/错 (簡/繁)
+                    q.qZh ? { qZh: q.qZh, qZhT: q.qZhT, optsZh: ['对', '错'], optsZhT: ['對', '錯'] } : {})
                 : Object.assign({ type: q.tipo, es: q.es, opts: q.opts, ok: 0, fixed: false, why: q.why, whyNot: q.whyNot || [] },
                     // HSK 5 v2: pregunta y opciones en chino (con «ver en español»); solo si el texto las trae. Los v1 no pasan por acá.
                     q.qZh ? { qZh: q.qZh, qZhT: q.qZhT, optsZh: q.optsZh, optsZhT: q.optsZhT } : {})),
