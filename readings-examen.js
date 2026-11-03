@@ -1366,12 +1366,12 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
    {
     "zh": "实验有六十名志愿者。研究人员请他们在三种环境里读文章、回答题目。三种环境里的题目都一样，有简单的，也有复杂的。第一种环境非常安静，第二种有普通的说话声，第三种有很大的噪音，像在马路旁边一样。",
     "zhT": "實驗有六十名志願者。研究人員請他們在三種環境裡讀文章、回答題目。三種環境裡的題目都一樣，有簡單的，也有複雜的。第一種環境非常安靜，第二種有普通的說話聲，第三種有很大的噪音，像在馬路旁邊一樣。",
-    "es": "El experimento contó con sesenta voluntarios. Los investigadores les pidieron que leyeran textos y respondieran preguntas en tres ambientes. Las preguntas eran las mismas en los tres ambientes, y había tanto simples como complejas. El primer ambiente era muy silencioso; el segundo tenía voces normales; el tercero tenía mucho ruido, como junto a una calle."
+    "es": "En el experimento participaron sesenta voluntarios. Los investigadores les pidieron que leyeran textos y respondieran preguntas en tres ambientes. Las preguntas eran las mismas en los tres ambientes, y había tanto simples como complejas. El primer ambiente era muy silencioso; el segundo tenía voces normales; el tercero tenía mucho ruido, como junto a una calle."
    },
    {
     "zh": "结果显示，在安静的环境里，参加的人平均答对了百分之八十五的题；有普通说话声时，大约是百分之八十；而在噪音很大的环境里，只有百分之六十左右。可见，噪音很大时，答对的题目会明显减少。研究人员还发现，声音对简单的题目影响不大，但题目越复杂，干扰就越大。",
     "zhT": "結果顯示，在安靜的環境裡，參加的人平均答對了百分之八十五的題；有普通說話聲時，大約是百分之八十；而在噪音很大的環境裡，只有百分之六十左右。可見，噪音很大時，答對的題目會明顯減少。研究人員還發現，聲音對簡單的題目影響不大，但題目越複雜，干擾就越大。",
-    "es": "Los resultados muestran que, en el ambiente silencioso, los participantes respondieron bien, en promedio, el 85 % de las preguntas; con voces normales fue de alrededor del 80 %; y en el ambiente con mucho ruido fue de solo alrededor del 60 %. Se ve, entonces, que cuando hay mucho ruido se responden bien claramente menos preguntas. Los investigadores también encontraron que el sonido casi no afecta las preguntas simples, pero cuanto más compleja es la pregunta, mayor es la interferencia."
+    "es": "Los resultados muestran que, en el ambiente silencioso, los participantes acertaron, en promedio, el 85 % de las preguntas; con voces normales fue de alrededor del 80 %; y en el ambiente con mucho ruido fue de solo alrededor del 60 %. Se ve, entonces, que con mucho ruido baja claramente la cantidad de respuestas correctas. Los investigadores también encontraron que el sonido casi no afecta las preguntas simples, pero cuanto más compleja es la pregunta, mayor es la interferencia."
    },
    {
     "zh": "研究人员认为，每个人的习惯并不相同，结果不一定适合所有人。不过，他们提出了几点建议：复杂的工作，最好选择安静的地方；做简单的事情时，有一点声音也没关系；如果只能在吵的地方，可以戴上耳机。",
@@ -1485,22 +1485,22 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "qZhT": "這篇文章主要介紹了什麼？",
     "es": "¿Qué presenta principalmente el artículo?",
     "opts": [
-     "Un experimento sobre cómo el sonido afecta la atención y algunas recomendaciones",
-     "Varios tipos de música adecuados para escuchar al estudiar",
-     "Por qué los sonidos de la ciudad son cada vez más fuertes",
-     "La experiencia personal de universitarios que participaron en el experimento"
+     "Un experimento sobre el efecto del sonido en la atención y recomendaciones",
+     "Varios tipos de música tranquila que conviene escuchar mientras se estudia",
+     "Por qué en la actualidad los sonidos de la ciudad son cada vez más fuertes",
+     "La experiencia personal de los universitarios durante todo este experimento"
     ],
     "optsZh": [
-     "一次关于声音如何影响注意力的实验和一些建议",
-     "几种适合学习时听的音乐",
-     "为什么城市里的声音越来越大",
-     "大学生参加实验的个人经历"
+     "声音如何影响注意力的实验和建议",
+     "几种适合在学习的时候听的轻松音乐",
+     "为什么现在城市里的声音越来越大",
+     "大学生参加这次实验时的个人经历"
     ],
     "optsZhT": [
-     "一次關於聲音如何影響注意力的實驗和一些建議",
-     "幾種適合學習時聽的音樂",
-     "為什麼城市裡的聲音越來越大",
-     "大學生參加實驗的個人經歷"
+     "聲音如何影響注意力的實驗和建議",
+     "幾種適合在學習的時候聽的輕鬆音樂",
+     "為什麼現在城市裡的聲音越來越大",
+     "大學生參加這次實驗時的個人經歷"
     ],
     "why": "El texto plantea la pregunta «声音到底会不会影响注意力», describe el experimento con sus resultados y termina con recomendaciones.",
     "whyNot": [
@@ -1546,21 +1546,21 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "es": "Una persona tiene que preparar un examen muy difícil y otra, ordenar su cuarto. Según el artículo, ¿qué conducta es la más adecuada?",
     "opts": [
      "Quien prepara el examen debería buscar un lugar silencioso; quien ordena el cuarto no necesariamente",
-     "Los dos deberían buscar el lugar más silencioso, porque el sonido siempre es malo",
-     "Los dos pueden hacerlo en un lugar ruidoso, porque el sonido no influye",
-     "Quien prepara el examen puede estar en un lugar ruidoso; quien ordena el cuarto debería buscar silencio"
+     "Los dos deberían ir a buscar el lugar más silencioso, porque cualquier sonido les hace mal para trabajar",
+     "Los dos pueden hacerlo en un lugar bastante ruidoso, porque el sonido casi no tiene ninguna influencia",
+     "Quien prepara el examen puede estar en un lugar ruidoso; quien ordena el cuarto debe buscar silencio"
     ],
     "optsZh": [
      "准备考试的人最好找安静的地方，整理房间的人不一定需要",
-     "两个人都应该找最安静的地方，因为声音总是不好",
-     "两个人都可以在吵的地方做，因为声音没有影响",
-     "准备考试的人可以在吵的地方，整理房间的人应该找安静的地方"
+     "两个人都应该去找最安静的地方，因为任何声音都对做事不好",
+     "两个人都可以在很吵的地方做事，因为声音没有什么影响",
+     "准备考试的人可以在吵的地方，整理房间的人要找安静的地方"
     ],
     "optsZhT": [
      "準備考試的人最好找安靜的地方，整理房間的人不一定需要",
-     "兩個人都應該找最安靜的地方，因為聲音總是不好",
-     "兩個人都可以在吵的地方做，因為聲音沒有影響",
-     "準備考試的人可以在吵的地方，整理房間的人應該找安靜的地方"
+     "兩個人都應該去找最安靜的地方，因為任何聲音都對做事不好",
+     "兩個人都可以在很吵的地方做事，因為聲音沒有什麼影響",
+     "準備考試的人可以在吵的地方，整理房間的人要找安靜的地方"
     ],
     "why": "La regla del texto es «复杂的工作，最好选择安静的地方» y «做简单的事情时，有一点声音也没关系». El texto no menciona exámenes ni cuartos: hay que aplicar la regla a dos casos nuevos (un examen difícil es un trabajo complejo; ordenar el cuarto es algo simple).",
     "whyNot": [
@@ -1654,8 +1654,8 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "减少",
     "建议",
     "耳机",
-    "提高",
-    "价格"
+    "分散",
+    "上升"
    ],
    "palabrasT": [
     "安靜",
@@ -1664,8 +1664,8 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "減少",
     "建議",
     "耳機",
-    "提高",
-    "價格"
+    "分散",
+    "上升"
    ]
   },
   "parecidas": [
@@ -1690,8 +1690,8 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
     "delTexto": false
    },
    {
-    "zh": "做复杂的工作时，最好＿＿一个安静的地方。",
-    "zhT": "做複雜的工作時，最好＿＿一個安靜的地方。",
+    "zh": "写报告的时候，最好＿＿一个安静的地方。",
+    "zhT": "寫報告的時候，最好＿＿一個安靜的地方。",
     "opts": [
      "选择",
      "寻找",
@@ -1706,7 +1706,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
      0,
      1
     ],
-    "why": "选择 («elegir») y 寻找 («buscar») encajan con «un lugar silencioso». 忘记 («olvidar») es gramatical pero no tiene sentido aquí: nadie recomienda olvidar un lugar tranquilo para hacer un trabajo complejo.",
+    "why": "选择 («elegir») y 寻找 («buscar») encajan con «un lugar silencioso». 忘记 («olvidar») es gramatical pero no tiene sentido aquí: nadie recomienda olvidar un lugar tranquilo para escribir un informe.",
     "delTexto": false
    },
    {

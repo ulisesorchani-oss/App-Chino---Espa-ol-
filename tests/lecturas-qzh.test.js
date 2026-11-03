@@ -1,7 +1,8 @@
 // tests/lecturas-qzh.test.js — preguntas EN CHINO con «ver en español» (HSK 5 v2) y nota visible del texto
-//   a. Los 4 HSK 5 v1 NO cambian (ya se preguntan en chino con «Ver en español» vía lessons-graduated.js): tests/data/lecturas-hsk5-v1-oro.json se GRABÓ con el código de main (antes del cambio):
+//   a. Los 4 HSK 5 v1 NO cambian (ya se preguntan en chino con «Ver en español» vía lessons-graduated.js): tests/data/lecturas-hsk5-v1-oro.json se GRABÓ con el código de main ANTES del cambio (ef6d69d, sin el soporte de qZh):
 //        GOLDEN_RECORD=1 BASE_URL=<app de main> node tests/lecturas-qzh.test.js
-//      y se compara la lista normalizada, la pantalla de preguntas de Exámenes (en chino con su botón) y las
+//      y se compara la lista normalizada, la pantalla de preguntas de Exámenes (en chino con su botón), el progreso guardado (ac_reading_v1) y la pantalla final
+//      acertando todo y fallando todo, y las
 //      preguntas de Entrenar (en chino, como siempre).
 //   b. Un texto v2 que trae qZh/optsZh (sintético: no depende de ningún texto real): en Exámenes la pregunta y las opciones van en
 //      chino (簡/繁 según la escritura), el español queda oculto hasta «Ver en español» o hasta responder; Entrenar lo mismo con su botón.
@@ -32,7 +33,7 @@ const V1 = ['rd-h5-celular', 'rd-h5-carta', 'rd-h5-sueno', 'rd-h5-libros'];
   const responder = async (p, bien) => { const rp = await p.evaluate(() => { const S = LQ_UI.state; return S.order[S.idx].indexOf(S.view === 'rquiz2' ? S.lesson.preguntas[S.idx].ok : 0); }); const nOpt = await p.evaluate(() => document.querySelectorAll('#lq-opts .lq-opt').length);
     const pos = bien ? rp : [...Array(nOpt).keys()].find(x => x !== rp); await p.click('#lq-opts .lq-opt[data-pos="' + pos + '"]'); await p.waitForTimeout(80); };
   // ---------- a. los 4 HSK 5 v1: instantánea ----------
-  const snap = { lista: {}, exam: {}, entrenar: {} };
+  const snap = { lista: {}, exam: {}, entrenar: {}, progreso: {} };
   { const { ctx, p, errs } = await page(360);
     snap.lista = await p.evaluate((ids) => Object.fromEntries(ids.map(id => { const r = LECTURAS.find(x => x.id === id); return [id, { origen: r.origen, tipo: r.tipo, revision: r.revision, nivelKey: r.nivelKey, etiqueta: LECTURAS_API.etiqueta(r), preguntas: r.preguntas }]; })), V1);
     await aExamenes(p);
@@ -45,11 +46,36 @@ const V1 = ['rd-h5-celular', 'rd-h5-carta', 'rd-h5-sueno', 'rd-h5-libros'];
       const x = o[S.rd.id] = o[S.rd.id] || {}; S.items.filter(it => it.type === 'rtext').forEach(it => { const k = it.qi; x[k] = x[k] || { qzh: it.qzh, q: it.q, opts: [] };
         const s = it.opts.map(a => a.zh + '|' + a.es + '|' + a.ok).sort().join(' ; '); if (!x[k].opts.includes(s)) x[k].opts.push(s); }); } return o; }, V1);
     ok(errs.length === 0, 'instantánea sin errores JS ' + errs); await ctx.close(); }
+  // ---------- progreso guardado (ac_reading_v1) y pantalla final de los 4 HSK 5 v1: acertando todo y fallando todo ----------
+  // «bien»: siempre la correcta (v1: opts[0]). «mal»: siempre la 1.ª incorrecta, elegida por CONTENIDO (no por posición: las opciones se barajan), así el feedback es determinista.
+  // Cada variante en un contexto nuevo (sin progreso previo). La fecha del registro (`last`) se enmascara: solo se exige su formato.
+  async function jugar(id, variante) {
+    const { ctx, p, errs } = await page(360);
+    await aExamenes(p); await abrirPractica(p, id);
+    const total = await p.evaluate(() => LQ_DEBUG.state.results.length), fbs = [], di = variante === 'bien' ? 0 : 1;
+    for (let i = 0; i < total; i++) {
+      const pos = await p.evaluate((di) => LQ_UI.state.order[LQ_UI.state.idx].indexOf(di), di);
+      await p.click('#lq-opts .lq-opt[data-pos="' + pos + '"]'); await p.waitForTimeout(80);
+      // la letra de «La correcta (X)» depende del barajado (cambia en cada sesión): se enmascara; el resto del feedback se compara tal cual
+      fbs.push(await p.evaluate(() => document.getElementById('lq-feedback').textContent.replace(/\s+/g, ' ').trim().replace(/La correcta \([A-D]\)/, 'La correcta (?)')));
+      await p.click('#lq-next'); await p.waitForTimeout(80);
+    }
+    const fin = await p.evaluate(() => ({ score: (document.querySelector('.lq-final-score') || {}).textContent || '', msg: (document.querySelector('.lq-final-msg') || {}).textContent || '', bd: [...document.querySelectorAll('.rd-breakdown li')].map(x => x.innerText.replace(/\s+/g, ' ')) }));
+    const todo = await p.evaluate(() => JSON.parse(localStorage.getItem('ac_reading_v1') || '{}'));
+    const rec = todo[id] ? Object.assign({}, todo[id]) : null; let fechaOk = false;
+    if (rec && rec.last) { fechaOk = /^\d{4}-\d\d-\d\d$/.test(rec.last); rec.last = fechaOk ? 'AAAA-MM-DD' : rec.last; }
+    const r = { fbs, fin, rec, fechaOk, claves: Object.keys(todo), errs }; await ctx.close(); return r;
+  }
+  for (const id of V1) { snap.progreso[id] = { bien: await jugar(id, 'bien'), mal: await jugar(id, 'mal') }; }
   if (REC) { fs.writeFileSync(GOLD, JSON.stringify({ nota: 'GRABADO con el código de main, ANTES del soporte de qZh (GOLDEN_RECORD=1)', snap }, null, 1)); console.log('oro grabado en ' + GOLD); await b.close(); process.exit(0); }
   const G = JSON.parse(fs.readFileSync(GOLD, 'utf8')).snap;
-  for (const k of ['lista', 'exam', 'entrenar']) for (const id of V1) ok(JSON.stringify(snap[k][id]) === JSON.stringify(G[k][id]), 'a. ' + id + ' (' + k + ') igual que con el código de main\n   sale:  ' + JSON.stringify(snap[k][id]).slice(0, 400) + '\n   debía: ' + JSON.stringify(G[k][id]).slice(0, 400));
+  for (const k of ['lista', 'exam', 'entrenar', 'progreso']) for (const id of V1) ok(JSON.stringify(snap[k][id]) === JSON.stringify(G[k][id]), 'a. ' + id + ' (' + k + ') igual que con el código de main\n   sale:  ' + JSON.stringify(snap[k][id]).slice(0, 400) + '\n   debía: ' + JSON.stringify(G[k][id]).slice(0, 400));
   ok(V1.every(id => G.exam[id].every(q => q.qZh && q.ver && q.qEsOculta && q.optsZh.length === 4)), 'a. en Exámenes los HSK 5 v1 ya se preguntan en chino con «Ver en español» (lessons-graduated.js): es la referencia para los v2');
   ok(V1.every(id => Object.values(G.entrenar[id]).every(q => q.qzh)), 'a. en Entrenar los HSK 5 v1 se preguntan en chino, como siempre');
+  // el oro tiene sentido: acertando todo el registro queda perfecto; fallando todo, en cero; el feedback de los errores trae «Tu respuesta»; y no se escribe nada de otro texto
+  ok(V1.every(id => { const b = G.progreso[id].bien, m = G.progreso[id].mal; return b.rec && b.rec.done === true && b.rec.best === b.rec.of && b.rec.qs.every(x => x === true) && b.rec.tries === 1 && b.fechaOk && JSON.stringify(b.claves) === JSON.stringify([id])
+    && m.rec && m.rec.done === true && m.rec.best === 0 && m.rec.qs.every(x => x === false) && m.rec.tries === 1 && m.fechaOk && JSON.stringify(m.claves) === JSON.stringify([id])
+    && m.fbs.every(f => /Tu respuesta/.test(f)) && b.fbs.every(f => !/Tu respuesta/.test(f)); }), 'a. oro de progreso: acertar todo = perfecto y fallar todo = 0 (una sola clave, fecha con formato, «Tu respuesta» solo al fallar)');
   // ---------- b y c. texto v2 sintético con preguntas en chino ----------
   // textos v2 CRUDOS (esquema de readings-examen.js) que se cargan antes que readings-unify.js
   function RAW() {
