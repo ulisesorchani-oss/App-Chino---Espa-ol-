@@ -76,7 +76,7 @@ const built = src.map(r => {
 const esc = x => String(x).replace(/\|/g, '\\|');
 const VERIF = [['悄悄', '悄悄'], ['擦', '擦'], ['郊區', '郊区'], ['視頻', '视频'], ['春聯', '春联'], ['毛筆', '毛笔'], ['氣氛', '气氛'], ['現成', '现成'], ['橫批', '横批'], ['婚禮', '婚礼'], ['晚點', '晚点'], ['堵車', '堵车'], ['座位', '座位'], ['省', '省']]; // pedidas en la revisión: [tradicional, simplificado] ¿en qué nivel están?
 const VERIF5 = [['噪音', '噪音'], ['干擾', '干扰'], ['志願者', '志愿者'], ['實驗', '实验'], ['研究', '研究'], ['平均', '平均'], ['反而', '反而'], ['耳機', '耳机'], ['建議', '建议'], ['集中', '集中'], ['安靜', '安静'],
-    ['提高', '提高'], ['價格', '价格'], ['打擾', '打扰'], ['影響', '影响'], ['選擇', '选择'], ['尋找', '寻找'], ['減少', '减少'], ['明顯', '明显'], ['忘記', '忘记'], ['順利', '顺利'], ['輕鬆', '轻松'], ['熱鬧', '热闹']]; // HSK 5: palabras del glosario, del banco (con sobrantes) y de las parecidas
+    ['分散', '分散'], ['上升', '上升'], ['至少', '至少'], ['打擾', '打扰'], ['報告', '报告'], ['影響', '影响'], ['選擇', '选择'], ['尋找', '寻找'], ['減少', '减少'], ['明顯', '明显'], ['忘記', '忘记'], ['順利', '顺利'], ['輕鬆', '轻松'], ['熱鬧', '热闹']]; // HSK 5: palabras del glosario, del banco (con sobrantes) y de las parecidas
 const VERIF_BY = { 4: VERIF, 5: VERIF5 }; // por nivel: [tradicional, simplificado] a verificar contra la lista
 function hoja(rs, ctl, meta, srcs, nv) {
     const L = ['# Lecturas tipo examen · HSK ' + nv + ' · hoja de revisión', '',
@@ -115,6 +115,10 @@ function hoja(rs, ctl, meta, srcs, nv) {
         L.push('', 'Palabras del banco: ' + r.banco.palabras.join(' · ') + ' (sobrantes: ' + r.banco.palabras.slice(r.banco.huecos.length).join(' · ') + ')');
         const pq = srcs[i].banco.porQue;
         if (pq) { L.push('', '**Por qué ningún sobrante encaja en un hueco:**', ''); r.banco.palabras.slice(r.banco.huecos.length).forEach(sb => { L.push('- **' + sb + '**'); (pq[sb] || []).forEach(x => L.push('  - ' + x)); }); }
+        const mt = srcs[i].banco.matriz, rv = srcs[i].banco.reserva;
+        if (mt) { L.push('', '**Matriz de huecos** (¿entra la palabra en cada hueco? ✔ es la respuesta · ⚠ entra en la gramática y tienta, pero el texto lo contradice · ✗ no entra o no tiene sentido; ninguna palabra encaja en dos huecos):', '', '| Palabra | H1 | H2 | H3 | H4 | H5 | H6 |', '|---|---|---|---|---|---|---|');
+            Object.keys(mt).forEach(w => L.push('| ' + w + ' | ' + mt[w].join(' | ') + ' |')); }
+        if (rv) L.push('', '**' + rv.texto.split(':')[0] + ':**' + rv.texto.slice(rv.texto.indexOf(':') + 1));
         L.push('', '### Palabras parecidas', '');
         r.parecidas.forEach((p, k) => { L.push((k + 1) + '. ' + (p.delTexto === false ? '_(oración nueva, no está en el texto)_ ' : '') + p.zh + '  →  ' + p.opts.map((o, j) => (p.ok.includes(j) ? '✅ ' : '❌ ') + o).join(' · '), '   - ' + p.why); }); L.push('');
         L.push('### Glosario (* = fuera de nivel)', '', '| 简体 | 繁體 | Categoría | Español | Nivel en la lista |', '|---|---|---|---|---|');
