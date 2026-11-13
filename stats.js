@@ -491,6 +491,7 @@
             aria: 'Rachas y estadísticas',
             title: '🔥 Tu racha',
             heroUnit: 'días seguidos',
+            heroUnit1: 'día seguido',     // singular cuando la racha es 1
             heroZero: '¡Empezá hoy tu racha! 10 minutos alcanzan.',
             risk: '⚠ Practicá hoy para no perderla',
             okToday: 'Hoy ya practicaste ✓',
@@ -709,7 +710,7 @@
         // --- hero racha ---
         h += '<div class="st-hero">' +
             '<div class="st-hero-n"><span class="st-fire">🔥</span> ' + streak.n + '</div>' +
-            '<div class="st-hero-l">' + escH(P.heroUnit) + '</div>';
+            '<div class="st-hero-l">' + escH(streak.n === 1 && P.heroUnit1 ? P.heroUnit1 : P.heroUnit) + '</div>';
         if (streak.n === 0) {
             h += '<div class="st-hero-sub">' + escH(P.heroZero) + '</div>';
         } else if (streak.risk) {
