@@ -25,7 +25,7 @@ module.exports = {
     LECCION,
     RESPUESTA: 'amar',                  // primera tarjeta de HSK 1: 爱 → "Amar / Gustar"
     escenas: [
-        { id: 'titulo', nombre: 'Título', locucion: 'Huayu Diario, en noventa segundos.', tarjeta: { t1: 'Huayu Diario en 90 segundos', icono: 'icons/logo-192.png' }, secs: 3 },
+        { id: 'titulo', nombre: 'Título', locucion: 'Huayu Diario, en noventa segundos.', tarjeta: { t1: 'Huayu Diario\nen 90 segundos', icono: 'icons/logo-192.png' }, secs: 3 },
         { id: 'bienvenida', nombre: 'Bienvenida', locucion: 'Al abrir, ves tres pantallas de bienvenida. Tocá Empezar, elegí «Desde cero» y seguí con Siguiente hasta Empezar.', subs: [
             { barra: true, arriba: true, muestra: 'bienvenida-barra', txt: 'Al abrir, verás tres pantallas.', secs: 3.5, pasos: [{ espera: 1.2 }] },
             { muestra: 'bienvenida', txt: 'Elegí «Desde cero».', secs: 5.5, globo: ['Tocá Empezar', 'Elegí «Desde cero»'],
@@ -66,6 +66,6 @@ module.exports = {
             { muestra: 'yo-racha', txt: 'Mirá tu racha.', secs: 3.5, globo: 'Mirá tu racha', pasos: [{ tap: '#nav-yo', hold: 0.5 }, { tap: '#btn-stats', hold: 0.6 }] },
             { muestra: 'yo-ajustes', txt: 'Ajustá voz y velocidad.', secs: 3.5, globo: 'Ajustá voz y velocidad', pasos: [{ click: '#btn-stats-close' }, { mira: '#btn-voice-zh', hold: 1 }, { mira: '#btn-speed', hold: 1 }] }
         ] },
-        { id: 'cierre', nombre: 'Cierre', locucion: 'Un poquito cada día.', tarjeta: { t1: 'Un poquito cada día', icono: 'icons/logo-192.png' }, secs: 4 }
+        { id: 'cierre', nombre: 'Cierre', locucion: 'Una frase al día.', tarjeta: { t1: 'Una frase al día', icono: 'icons/logo-192.png' }, secs: 4 }
     ]
 };
