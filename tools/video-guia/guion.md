@@ -17,11 +17,11 @@ Una frase por escena; cada una entra en los segundos de su escena (unas 2,5 pala
 | Exámenes | 0:55,5 – 1:02,5 | 7,0 | También podés prepararte para exámenes: hay un test de nivel y lecturas de práctica. (14 palabras) |
 | Entrenar | 1:02,5 – 1:16,5 | 14,0 | En Entrenar practicás el oído, la voz y la mano: distinguí los tonos, escribí a mano y practicá como en el examen. (22 palabras) |
 | Yo | 1:16,5 – 1:23,5 | 7,0 | En Yo mirás tu racha, y ajustás la voz y la velocidad. (12 palabras) |
-| Cierre | 1:23,5 – 1:27,5 | 4,0 | Un poquito cada día. (4 palabras) |
+| Cierre | 1:23,5 – 1:27,5 | 4,0 | Una frase al día. (4 palabras) |
 
 **Texto seguido (87,5 s):**
 
-Huayu Diario, en noventa segundos. Al abrir, ves tres pantallas de bienvenida. Tocá Empezar, elegí «Desde cero» y seguí con Siguiente hasta Empezar. Esta es tu tarjeta de hoy. Tocá el parlante para escuchar la palabra, escribí qué significa y tocá Verificar. Y con este botón elegís qué practicar. En Aprender tenés lecciones cortas. Elegí tu nivel, HSK o TOCFL. Tocá Leer para ver la historia; si tocás una palabra, te dice qué significa. Con Escuchar todo la oís completa, y con Practicar la ejercitás. También podés prepararte para exámenes: hay un test de nivel y lecturas de práctica. En Entrenar practicás el oído, la voz y la mano: distinguí los tonos, escribí a mano y practicá como en el examen. En Yo mirás tu racha, y ajustás la voz y la velocidad. Un poquito cada día.
+Huayu Diario, en noventa segundos. Al abrir, ves tres pantallas de bienvenida. Tocá Empezar, elegí «Desde cero» y seguí con Siguiente hasta Empezar. Esta es tu tarjeta de hoy. Tocá el parlante para escuchar la palabra, escribí qué significa y tocá Verificar. Y con este botón elegís qué practicar. En Aprender tenés lecciones cortas. Elegí tu nivel, HSK o TOCFL. Tocá Leer para ver la historia; si tocás una palabra, te dice qué significa. Con Escuchar todo la oís completa, y con Practicar la ejercitás. También podés prepararte para exámenes: hay un test de nivel y lecturas de práctica. En Entrenar practicás el oído, la voz y la mano: distinguí los tonos, escribí a mano y practicá como en el examen. En Yo mirás tu racha, y ajustás la voz y la velocidad. Una frase al día.
 
 ## Detalle por escena: lo que aparece y cuánto dura
 
@@ -88,7 +88,7 @@ Huayu Diario, en noventa segundos. Al abrir, ves tres pantallas de bienvenida. T
 
 | Tipo | Texto en pantalla | Frase del guion | Desde – hasta | Seg. |
 |---|---|---|---|---|
-| Tarjeta | «Un poquito cada día» | — | 1:23,5 – 1:27,5 | 4,0 |
+| Tarjeta | «Una frase al día» | — | 1:23,5 – 1:27,5 | 4,0 |
 
 ## Qué no se muestra
 

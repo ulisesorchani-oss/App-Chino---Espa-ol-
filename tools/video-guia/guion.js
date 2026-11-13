@@ -31,7 +31,7 @@ for (const e of D.escenas) {
     L.push('| Tipo | Texto en pantalla | Frase del guion | Desde – hasta | Seg. |', '|---|---|---|---|---|');
     for (const it of e.items) {
         const tipo = it.tipo === 'globo' ? 'Globo' : it.tipo === 'barra' ? 'Barra' : 'Tarjeta';
-        L.push('| ' + tipo + ' | «' + it.texto + '» | ' + (it.frase ? it.frase : '—') + ' | ' + t(it.desde) + ' – ' + t(it.hasta) + ' | ' + n(it.seg) + ' |');
+        L.push('| ' + tipo + ' | «' + it.texto.replace(/\n/g, ' ') + '» | ' + (it.frase ? it.frase : '—') + ' | ' + t(it.desde) + ' – ' + t(it.hasta) + ' | ' + n(it.seg) + ' |');
     }
     L.push('');
 }

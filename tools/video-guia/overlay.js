@@ -25,7 +25,7 @@ const CSS = `
 #vg-card { inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; color: #fff;
   background: linear-gradient(160deg, #667eea 0%, #764ba2 100%); font-family: Inter, "Noto Sans", "DejaVu Sans", Arial, "Noto Color Emoji", sans-serif; }
 #vg-card img { width: 112px; height: 112px; border-radius: 24px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
-#vg-card .t1 { font-size: 46px; font-weight: 800; line-height: 1.1; padding: 0 20px; }
+#vg-card .t1 { font-size: 42px; font-weight: 800; line-height: 1.1; padding: 0 6px; text-wrap: balance; white-space: pre-line; }  /* reparte las líneas parejas: nada de una palabra suelta */
 #vg-card .t2 { font-size: 32px; font-weight: 700; line-height: 1.15; padding: 0 24px; opacity: .97; }
 `;
 
