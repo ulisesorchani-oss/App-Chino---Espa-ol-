@@ -209,7 +209,7 @@
         '.og-i{display:block;font-weight:700;color:var(--primary);font-size:.78rem;margin-top:3px;}',
         '.ob-script-row{display:flex;justify-content:flex-end;margin:0 0 8px;}',
         '.ob-script-btn{border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);border-radius:999px;padding:3px 11px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.5;transition:border-color .15s,color .15s;}',
-        '.ob-script-btn:hover{border-color:var(--primary);color:var(--primary);}',
+        '@media (hover:hover){.ob-script-btn:hover{border-color:var(--primary);color:var(--primary);}}',
         '.ob-tip{font-size:.84rem;color:var(--text-secondary);background:var(--bg-light);border-radius:10px;padding:9px 11px;line-height:1.5;margin-top:10px;}',
         '.ob-boxes{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 8px;}',
         '.ob-box{border:2px solid var(--border);background:var(--bg-card);color:var(--text-primary);border-radius:10px;padding:7px 9px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;}',
@@ -224,7 +224,7 @@
         '.ob-next{min-width:112px;min-height:44px;}',
         '.ob-back{min-height:44px;}',
         '.ob-skip{background:transparent;border:0;color:var(--text-secondary);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;font-size:.85rem;min-height:44px;padding:6px 10px;border-radius:8px;}',
-        '.ob-skip:hover{color:var(--primary);}',
+        '@media (hover:hover){.ob-skip:hover{color:var(--primary);}}',
         '.ob-nav{flex-wrap:wrap;}',
         '#btn-guide-close{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;}',
         // v9.7x — guía simple en español (3 pantallas) + pista/racha de la 1.ª tarjeta

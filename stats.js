@@ -477,7 +477,7 @@
         // v9.47: chips de hanzi difíciles
         '.st-hz-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;}',
         '.st-hz{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:52px;padding:7px 8px 5px;background:var(--bg-light);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;}',
-        '.st-hz:hover{border-color:var(--primary);}',
+        '@media (hover:hover){.st-hz:hover{border-color:var(--primary);}}',
         '.st-hz-ch{font-size:1.5rem;line-height:1.15;font-weight:700;color:var(--text-primary);}',
         '.st-hz-m{font-size:.66rem;font-weight:800;color:#b91c1c;line-height:1.2;}',
         '.st-hz-q{font-size:.6rem;color:var(--text-secondary);line-height:1.2;}'
