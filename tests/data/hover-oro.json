@@ -1,0 +1,455 @@
+{
+ "light|.mtab:not(.active):hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.22)"
+ },
+ "light|.btn-primary:hover|transform": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)"
+ },
+ "light|.speed-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.92)",
+  "color": "rgb(255, 255, 255)",
+  "transform": "matrix(1, 0, 0, 1, 0, -2)"
+ },
+ "light|.blank-slot:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(37, 99, 235, 0.1)"
+ },
+ "light|.srs-bar-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color": {
+  "border-top-color": "rgb(37, 99, 235)",
+  "border-right-color": "rgb(37, 99, 235)",
+  "border-bottom-color": "rgb(37, 99, 235)",
+  "border-left-color": "rgb(37, 99, 235)",
+  "color": "rgb(255, 255, 255)"
+ },
+ "light|.tools-gear:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,box-shadow,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(248, 250, 252)",
+  "box-shadow": "rgba(15, 23, 42, 0.15) 0px 2px 8px 0px",
+  "transform": "matrix(1.06, 0, 0, 1.06, 0, 0)"
+ },
+ "light|.srs-bar-btn:hover|color": {
+  "color": "rgb(255, 255, 255)"
+ },
+ "light|.btn-link:hover|color": {
+  "color": "rgb(37, 99, 235)"
+ },
+ "light|.btn-primary:hover|transform,box-shadow": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)",
+  "box-shadow": "rgba(255, 255, 255, 0.22) 0px 1px 0px 0px inset, rgba(37, 99, 235, 0.7) 0px 12px 26px -10px"
+ },
+ "light|.mod-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color": {
+  "border-top-color": "rgb(37, 99, 235)",
+  "border-right-color": "rgb(37, 99, 235)",
+  "border-bottom-color": "rgb(37, 99, 235)",
+  "border-left-color": "rgb(37, 99, 235)"
+ },
+ "light|.train-card:hover|transform": {
+  "transform": "none"
+ },
+ "light|.btn-reset:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color,background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "border-top-color": "rgb(255, 255, 255)",
+  "border-right-color": "rgb(255, 255, 255)",
+  "border-bottom-color": "rgb(255, 255, 255)",
+  "border-left-color": "rgb(255, 255, 255)",
+  "color": "rgb(255, 255, 255)",
+  "background-image": "linear-gradient(rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%)",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "light|.theme-toggle:hover|transform": {
+  "transform": "none"
+ },
+ "light|.voice-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "light|.install-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(67, 56, 202)",
+  "color": "rgb(255, 255, 255)"
+ },
+ "light|.danger-zone .btn-reset:hover|opacity": {
+  "opacity": "1"
+ },
+ "light|.lang-switch-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(255, 255, 255)",
+  "transform": "none"
+ },
+ "dark|.mtab:not(.active):hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.22)"
+ },
+ "dark|.btn-primary:hover|transform": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)"
+ },
+ "dark|.speed-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(37, 46, 60)",
+  "color": "rgb(237, 241, 247)",
+  "transform": "matrix(1, 0, 0, 1, 0, -2)"
+ },
+ "dark|.blank-slot:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(37, 99, 235, 0.1)"
+ },
+ "dark|.srs-bar-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color": {
+  "border-top-color": "rgb(147, 180, 255)",
+  "border-right-color": "rgb(147, 180, 255)",
+  "border-bottom-color": "rgb(147, 180, 255)",
+  "border-left-color": "rgb(147, 180, 255)",
+  "color": "rgb(237, 241, 247)"
+ },
+ "dark|body.dark-mode .srs-bar-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color": {
+  "border-top-color": "rgb(147, 180, 255)",
+  "border-right-color": "rgb(147, 180, 255)",
+  "border-bottom-color": "rgb(147, 180, 255)",
+  "border-left-color": "rgb(147, 180, 255)",
+  "color": "rgb(237, 241, 247)"
+ },
+ "dark|.tools-gear:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,box-shadow,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.12)",
+  "box-shadow": "rgba(15, 23, 42, 0.15) 0px 2px 8px 0px",
+  "transform": "matrix(1.06, 0, 0, 1.06, 0, 0)"
+ },
+ "dark|body.dark-mode .tools-gear:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.12)"
+ },
+ "dark|.srs-bar-btn:hover|color": {
+  "color": "rgb(237, 241, 247)"
+ },
+ "dark|.btn-link:hover|color": {
+  "color": "rgb(37, 99, 235)"
+ },
+ "dark|.btn-primary:hover|transform,box-shadow": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)",
+  "box-shadow": "rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(37, 99, 235, 0.65) 0px 10px 24px -10px"
+ },
+ "dark|.mod-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color": {
+  "border-top-color": "rgb(37, 99, 235)",
+  "border-right-color": "rgb(37, 99, 235)",
+  "border-bottom-color": "rgb(37, 99, 235)",
+  "border-left-color": "rgb(37, 99, 235)"
+ },
+ "dark|.train-card:hover|transform": {
+  "transform": "none"
+ },
+ "dark|.btn-reset:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color,background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "border-top-color": "rgb(255, 255, 255)",
+  "border-right-color": "rgb(255, 255, 255)",
+  "border-bottom-color": "rgb(255, 255, 255)",
+  "border-left-color": "rgb(255, 255, 255)",
+  "color": "rgb(255, 255, 255)",
+  "background-image": "linear-gradient(rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%)",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "dark|.theme-toggle:hover|transform": {
+  "transform": "none"
+ },
+ "dark|.voice-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "dark|.install-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(55, 48, 163)",
+  "color": "rgb(163, 175, 194)"
+ },
+ "dark|.danger-zone .btn-reset:hover|opacity": {
+  "opacity": "1"
+ },
+ "dark|.lang-switch-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.06)",
+  "transform": "none"
+ },
+ "dark|body.dark-mode .lang-switch-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.06)"
+ },
+ "paper|.mtab:not(.active):hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.22)"
+ },
+ "paper|.btn-primary:hover|transform": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)"
+ },
+ "paper|.speed-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(255, 255, 255, 0.92)",
+  "color": "rgb(47, 107, 79)",
+  "transform": "matrix(1, 0, 0, 1, 0, -2)"
+ },
+ "paper|.blank-slot:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(37, 99, 235, 0.1)"
+ },
+ "paper|.srs-bar-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color": {
+  "border-top-color": "rgb(37, 99, 235)",
+  "border-right-color": "rgb(37, 99, 235)",
+  "border-bottom-color": "rgb(37, 99, 235)",
+  "border-left-color": "rgb(37, 99, 235)",
+  "color": "rgb(255, 255, 255)"
+ },
+ "paper|.tools-gear:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,box-shadow,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(247, 239, 220)",
+  "box-shadow": "rgba(15, 23, 42, 0.15) 0px 2px 8px 0px",
+  "transform": "matrix(1.06, 0, 0, 1.06, 0, 0)"
+ },
+ "paper|body.paper-mode .tools-gear:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(247, 239, 220)"
+ },
+ "paper|.srs-bar-btn:hover|color": {
+  "color": "rgb(255, 255, 255)"
+ },
+ "paper|.btn-link:hover|color": {
+  "color": "rgb(37, 99, 235)"
+ },
+ "paper|.btn-primary:hover|transform,box-shadow": {
+  "transform": "matrix(1, 0, 0, 1, 0, -1)",
+  "box-shadow": "rgba(255, 255, 255, 0.22) 0px 1px 0px 0px inset, rgba(37, 99, 235, 0.7) 0px 12px 26px -10px"
+ },
+ "paper|.mod-btn:hover|border-top-color,border-right-color,border-bottom-color,border-left-color": {
+  "border-top-color": "rgb(37, 99, 235)",
+  "border-right-color": "rgb(37, 99, 235)",
+  "border-bottom-color": "rgb(37, 99, 235)",
+  "border-left-color": "rgb(37, 99, 235)"
+ },
+ "paper|.train-card:hover|transform": {
+  "transform": "none"
+ },
+ "paper|.btn-reset:hover|border-top-color,border-right-color,border-bottom-color,border-left-color,color,background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "border-top-color": "rgb(255, 255, 255)",
+  "border-right-color": "rgb(255, 255, 255)",
+  "border-bottom-color": "rgb(255, 255, 255)",
+  "border-left-color": "rgb(255, 255, 255)",
+  "color": "rgb(255, 255, 255)",
+  "background-image": "linear-gradient(rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%)",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "paper|.theme-toggle:hover|transform": {
+  "transform": "none"
+ },
+ "paper|.voice-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgba(0, 0, 0, 0)"
+ },
+ "paper|.install-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(67, 56, 202)",
+  "color": "rgb(255, 255, 255)"
+ },
+ "paper|.danger-zone .btn-reset:hover|opacity": {
+  "opacity": "1"
+ },
+ "paper|.lang-switch-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color,transform": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(255, 253, 246)",
+  "transform": "none"
+ },
+ "paper|body.paper-mode .lang-switch-btn:hover|background-image,background-position-x,background-position-y,background-size,background-repeat,background-attachment,background-origin,background-clip,background-color": {
+  "background-image": "none",
+  "background-position-x": "0%",
+  "background-position-y": "0%",
+  "background-size": "auto",
+  "background-repeat": "repeat",
+  "background-attachment": "scroll",
+  "background-origin": "padding-box",
+  "background-clip": "border-box",
+  "background-color": "rgb(255, 253, 246)"
+ }
+}
