@@ -37,7 +37,7 @@ function instrumentar(cfg) {
     // acciones disparables por eventos (se ejecutan en la página, no desde Node)
     const click = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
     const ACC = {
-        pausa: () => click('#ll-pause'), seguir: () => click('#ll-pause'), parar: () => click('#ll-stop'), cerrar: () => click('#lq-close'),
+        pausa: () => click('#ll-pause'), pausaYSeguir: () => { click('#ll-pause'); click('#ll-pause'); }, seguir: () => click('#ll-pause'), parar: () => click('#ll-stop'), cerrar: () => click('#lq-close'),
         linea: () => click('#lq-body .lq-line-say'), practicar: () => click('#lq-story-practice'), velocidad: () => click('#lq-story-speed'),
         escritura: () => document.dispatchEvent(new CustomEvent('ac-script-change')), ventana: () => document.getElementById('lesson-pop').classList.add('hidden'),
         api: () => window.LQ_LISTEN.stop(), vista: () => { const b = document.getElementById('ll-bar'); if (b) b.remove(); document.getElementById('lq-body').appendChild(document.createElement('div')); }, fin: () => { window.__fin = true; }
@@ -162,7 +162,8 @@ function instrumentar(cfg) {
         { id: 'corte-api', opts: {}, triggers: [{ when: 'marca 2', do: 'api' }, FIN_IDLE] },
         { id: 'velocidad', opts: {}, triggers: [{ when: 'marca 1', do: 'velocidad' }, { when: 'marca 4', do: 'parar' }, FIN_IDLE] },
         { id: 'pausa-voz-muda-ultima', opts: { policy: () => ({ status: 502 }), vozMudaDesde: 14 }, triggers: [{ when: 'speak L14', do: 'pausa', delay: 50 }, FIN_IDLE] },
-        { id: 'R5-pausa-al-arrancar', opts: { alPlay: 'pausa' }, triggers: [{ when: 'voz.start L0', do: 'seguir', delay: 150 }, { when: 'marca 2', do: 'parar' }, FIN_IDLE] }
+        { id: 'R5-pausa-al-arrancar', opts: { alPlay: 'pausa' }, triggers: [{ re: '^barra .*▶ Seguir', do: 'seguir', delay: 150 }, { when: 'marca 2', do: 'parar' }, FIN_IDLE] },
+        { id: 'R5-pausa-y-seguir-juntos', opts: { alPlay: 'pausaYSeguir' }, triggers: [{ when: 'marca 2', do: 'parar' }, FIN_IDLE] }
     ];
     async function correr(esc, opts) {
         const { ctx, p, errs, srv } = await sesion(Object.assign({}, esc.opts, { triggers: esc.triggers, sinMaquina: opts && opts.sinMaquina }));
@@ -200,6 +201,11 @@ function instrumentar(cfg) {
             const g = oro[esc.id];
             ok(!!g && JSON.stringify(g) === JSON.stringify(r.traza), '[' + esc.id + '] la traza por orden de eventos es IDÉNTICA al oro (' + r.traza.length + ' eventos)' + ((!g || JSON.stringify(g) !== JSON.stringify(r.traza)) ? ' → primera diferencia: ' + JSON.stringify(difer(g || [], r.traza)) : ''));
             ok(['escuchar.reproduccion', 'escuchar.espera', 'escuchar.circuito'].every((k) => r.sm.maquinas.includes(k)), '[' + esc.id + '] las 3 máquinas están registradas (state-machine.js cargó)');
+            if (/^R5-/.test(esc.id)) { // el defecto R5 NO se tolera: con la barra en «Seguir» no puede sonar ni marcarse nada
+                const mal = sonidoEnPausa(r.traza);
+                ok(mal.length === 0, '[' + esc.id + '] en pausa (barra «Seguir») no suena nada: sin voz del sistema, sin marca nueva, sin audio' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
+                ok(!r.traza.some((e) => /^speak /.test(e)), '[' + esc.id + '] con el servidor sano la voz del sistema NUNCA habla (la pausa no manda la línea a la voz del sistema)');
+            }
             ok(r.sm.log.length === 0, '[' + esc.id + '] modo estricto: ninguna transición sin declarar (AC_SM_LOG vacío)' + (r.sm.log.length ? ' → ' + JSON.stringify(r.sm.log.slice(0, 3)) : ''));
             ok(r.errs.filter((x) => !/localStorage/.test(x)).length === 0, '[' + esc.id + '] sin errores JS ' + r.errs.join('|'));
         }
@@ -212,6 +218,16 @@ function instrumentar(cfg) {
             ok(JSON.stringify(oro[id]) === JSON.stringify(r.traza), '[sin-maquina · ' + id + '] con state-machine.js bloqueado la traza es IDÉNTICA al oro' + (JSON.stringify(oro[id]) !== JSON.stringify(r.traza) ? ' → ' + JSON.stringify(difer(oro[id] || [], r.traza)) : ''));
             ok(r.sm.maquinas.length === 0, '[sin-maquina · ' + id + '] no hay máquinas registradas (el archivo no cargó)');
         }
+    }
+    // eventos que suenan o marcan DESPUÉS de que la barra pasó a «Seguir» y ANTES de que alguien siga (> seguir)
+    function sonidoEnPausa(traza) {
+        const mal = []; let pausada = false;
+        traza.forEach((e, i) => {
+            if (/^barra .*▶ Seguir/.test(e)) pausada = true;
+            else if (e === '> seguir') pausada = false;
+            else if (pausada && /^(speak |voz\.start|marca |audio\.playing)/.test(e)) mal.push({ en: i, evento: e });
+        });
+        return mal;
     }
     function difer(a, c) { for (let i = 0; i < Math.max(a.length, c.length); i++) if (a[i] !== c[i]) return { en: i, oro: a[i], ahora: c[i] }; return null; }
 

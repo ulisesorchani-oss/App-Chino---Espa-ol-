@@ -59,9 +59,6 @@
             { from: 'playing', to: 'idle', ev: 'fin', nota: 'se leyó la última línea' },
             { from: ['playing', 'paused'], to: 'idle', ev: 'corte', nota: 'un corte (ver la tabla de cortes)' },
             { from: 'paused', to: 'idle', ev: 'fin', known: 'pausa-muda', nota: 'si la última línea se lee sin voz (la voz del sistema no arranca), el tiempo de lectura sigue corriendo en pausa y la lección termina estando en pausa' }
-        ],
-        defectos: [
-            { id: 'R5', escenario: 'R5-pausa-al-arrancar', nota: 'la pausa llega en el mismo instante en que arranca un audio: play() se rechaza con AbortError, la línea cae a la voz del sistema y SUENA estando en pausa (no es una transición: es un efecto dentro de «paused»)' }
         ]
     });
     // Espera: ⏳ mientras la línea que toca no tiene su audio (o su error) todavía.
@@ -91,7 +88,7 @@
         { id: 'vista', nota: 'la vista cambió (quiz, glosario, otra lección)' }, { id: 'api', nota: 'LQ_LISTEN.stop()' }
     ];
     const L = {
-        tok: 0, lesson: null, lines: [], idx: -1, cache: new Map(), audio: null,
+        tok: 0, pausas: 0, lesson: null, lines: [], idx: -1, cache: new Map(), audio: null,
         speed: 1, backoffUntil: 0, lastManual: 0, resume: null, tts: null, vz: 'f', lang: 'zh-CN',
         fails: 0, reported: 0, settled: new Map(),
         get state() { return REPRO.state; }, get waiting() { return ESPERA.state === 'esperando'; }, get tripped() { return CIRCUITO.state === 'abierto'; }
@@ -316,7 +313,15 @@
         });
         let sonando = true, r = 'ended';
         try {
-            try { await a.play(); } catch (e) { sonando = false; } // autoplay bloqueado o fuente inválida
+            for (;;) {
+                const p0 = L.pausas;
+                try { await a.play(); break; } catch (e) {
+                    // R5: si lo que abortó el play() fue NUESTRA pausa (justo al arrancar el audio), no es un error del audio: se espera el «Seguir» y se arranca de nuevo ESTE audio
+                    if (!(e && e.name === 'AbortError' && tok === L.tok && L.pausas !== p0)) { sonando = false; break; } // autoplay bloqueado, fuente inválida o corte
+                    await waitWhilePaused(tok);
+                    if (tok !== L.tok) return;
+                }
+            }
             if (tok !== L.tok) return;
             if (!sonando) r = 'error';
             else {
@@ -402,7 +407,7 @@
     }
     function togglePause() {
         if (L.state === 'playing') {
-            REPRO.go('paused', 'pausa');
+            REPRO.go('paused', 'pausa'); L.pausas++; // L.pausas no es estado: marca «hubo una pausa nuestra» (playEntry distingue así un play() abortado por NUESTRA pausa)
             if (L.tts) { try { speechSynthesis.pause(); } catch (e) { /* noop */ } } else if (L.audio && !L.audio.paused) { try { L.audio.pause(); } catch (e) { /* noop */ } }
         } else if (L.state === 'paused') {
             REPRO.go('playing', 'seguir');

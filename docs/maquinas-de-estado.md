@@ -38,10 +38,6 @@ stateDiagram-v2
 | `playing`, `paused` | `idle` | `corte` | declarada | un corte (ver la tabla de cortes) |
 | `paused` | `idle` | `fin` | ⚠️ **conocida** (pausa-muda) | si la última línea se lee sin voz (la voz del sistema no arranca), el tiempo de lectura sigue corriendo en pausa y la lección termina estando en pausa |
 
-Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual):
-
-- ⚠️ **R5** — la pausa llega en el mismo instante en que arranca un audio: play() se rechaza con AbortError, la línea cae a la voz del sistema y SUENA estando en pausa (no es una transición: es un efecto dentro de «paused») Escenario del oro: `R5-pausa-al-arrancar`.
-
 ### «Escuchar todo»: espera del audio (`escuchar.espera`)
 
 Estados: `libre`, `esperando` · inicial: `libre`
