@@ -1,9 +1,10 @@
 // Corte tardío del audio global (R1): stopGlobalAudio() tiene que invalidar un playAudio EN VUELO. Antes solo pausaba si ya había un
 // src, así que la respuesta que llegaba después arrancaba el audio igual («audio sonando tras cerrar»).
 // SERVIDOR SIMULADO con compuerta (page.route sobre /api/tts: la respuesta se libera cuando la prueba lo decide, sin esperas fijas).
-//   a1) pedido en vuelo + corte + respuesta  → CERO «playing» del reproductor global
+//   a1) pedido en vuelo + corte + respuesta  → CERO «playing» del reproductor global y el botón 🔊 vuelve a su texto
 //   a2) pedido en vuelo + corte + respuesta 503 → CERO voz del sistema (el pedido invalidado tampoco cae al respaldo)
-//   b)  corte y luego un 🔊 nuevo (playAudio) → suena
+//   a3) corte con el audio SONANDO → pausa y el botón 🔊 se restaura (antes quedaba «…» y deshabilitado para siempre)
+//   b)  corte y luego un 🔊 nuevo → suena
 //   c)  dos toques rápidos al mismo 🔊 → un solo pedido y un solo «playing»; dos botones distintos → suena solo el último
 //   d)  cada llamador sigue sonando tras un corte anterior: Hoy, Lector, Podcast, práctica tipo examen, lecciones (🔊 por línea y «Escuchar todo»)
 const { chromium, LAUNCH, APP_URL } = require('./lib/env');
@@ -89,11 +90,12 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     {
         const { ctx, p, errs, srv } = await session(hold1);
         await cortarEnVuelo(p, srv);
-        const t = await T(p);
+        const t = await T(p), bt = await boton(p, 'btn-play-cn');
         const est = await p.evaluate(() => ({ src: !!globalAudioPlayer.getAttribute('src'), pausado: globalAudioPlayer.paused, isPlaying }));
         ok(srv.reqs.length === 1, 'a1: hubo 1 pedido (el que se cortó) (' + srv.reqs.length + ')');
         ok(cuenta(t, 'global') === 0, 'a1: CERO «playing» del reproductor global tras el corte (' + cuenta(t, 'global') + ')');
         ok(est.pausado && est.isPlaying === false, 'a1: el reproductor global queda quieto (pausado ' + est.pausado + ', isPlaying ' + est.isPlaying + ')');
+        ok(bt.texto === '🔊 CN' && bt.disabled === false, 'a1: el botón 🔊 vuelve a su texto y se habilita (' + JSON.stringify(bt) + ')');
         ok(noErr(errs).length === 0, 'a1: sin errores JS ' + noErr(errs).join('|'));
         await ctx.close();
     }
@@ -101,18 +103,32 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     {
         const { ctx, p, srv } = await session((r, k) => ({ status: 503, hold: k === 0 }));
         await cortarEnVuelo(p, srv);
-        const t = await T(p);
+        const t = await T(p), bt = await boton(p, 'btn-play-cn');
         ok(t.speak === 0 && cuenta(t, 'global') === 0, 'a2: con 503 tras el corte NO habla la voz del sistema ni suena nada (speak ' + t.speak + ')');
+        ok(bt.texto === '🔊 CN' && bt.disabled === false, 'a2: el botón 🔊 vuelve a su texto (' + JSON.stringify(bt) + ')');
+        await ctx.close();
+    }
+    // ═════════ a3. corte con el audio SONANDO ═════════
+    {
+        const { ctx, p, srv } = await session(() => ({ status: 200 }), { audioSec: 4 });
+        await p.evaluate(() => { const b = document.getElementById('btn-play-cn'); b.focus(); b.click(); });
+        await p.waitForFunction(() => window.__T.playing.length >= 1, null, { timeout: 8000 });
+        await p.evaluate(() => stopGlobalAudio()); await sleep(p, 300);
+        const est = await p.evaluate(() => ({ pausado: globalAudioPlayer.paused, isPlaying })), bt = await boton(p, 'btn-play-cn');
+        ok(est.pausado && est.isPlaying === false, 'a3: el corte pausa el audio que sonaba');
+        ok(bt.texto === '🔊 CN' && bt.disabled === false, 'a3: el botón 🔊 se restaura (antes quedaba «…» y deshabilitado) (' + JSON.stringify(bt) + ')');
         await ctx.close();
     }
     // ═════════ b. corte y luego un 🔊 nuevo: suena ═════════
     {
         const { ctx, p, srv } = await session(hold1);
         await cortarEnVuelo(p, srv);
-        await p.evaluate(() => { playAudio('cn'); }); // por playAudio: sin la restauración del botón en el corte (otro commit), el 🔊 queda deshabilitado
+        await p.evaluate(() => { const b = document.getElementById('btn-play-cn'); b.focus(); b.click(); });
         await p.waitForFunction(() => window.__T.playing.length >= 1, null, { timeout: 8000 });
         const t = await T(p);
-        ok(cuenta(t, 'global') === 1 && srv.reqs.length === 2, 'b: tras el corte, un 🔊 nuevo (playAudio) SUENA (1 «playing», 2 pedidos en total) (' + cuenta(t, 'global') + ', ' + srv.reqs.length + ')');
+        ok(cuenta(t, 'global') === 1 && srv.reqs.length === 2, 'b: tras el corte, un 🔊 nuevo SUENA (1 «playing», 2 pedidos en total) (' + cuenta(t, 'global') + ', ' + srv.reqs.length + ')');
+        await p.waitForFunction(() => { const e = document.getElementById('btn-play-cn'); return !e.disabled && e.innerText.trim() === '🔊 CN'; }, null, { timeout: 8000 });
+        ok(true, 'b: al terminar, el botón vuelve a su texto');
         await ctx.close();
     }
     // ═════════ c. dos toques rápidos ═════════

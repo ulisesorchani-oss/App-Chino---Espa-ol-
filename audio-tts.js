@@ -394,6 +394,9 @@ function stopGlobalAudio() {
         globalAudioPlayer.pause();
         isPlaying = false;
     }
+    // El 🔊 que esperaba ('...') o sonaba vuelve a su texto: el pedido invalidado sale sin restaurarlo y un audio pausado no dispara
+    // 'ended', así que sin esto el botón quedaba deshabilitado. restoreButton() no hace nada si no hay botón activo.
+    restoreButton();
 }
 
 // v9.7x: los botones de velocidad de Yo → Ajustes y de la hoja 👁 Ver de Hoy
