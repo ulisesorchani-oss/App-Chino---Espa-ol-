@@ -101,6 +101,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `keywords-hsk`, `keywords-lecciones` | palabras clave de las lecciones (datos en `tests/data/`) |
 | `lecciones-escuchar-fallos` | «Escuchar todo» y `fetchTTS` con un servidor simulado que falla (`page.route`): precarga de 1, un reintento, sin POST tras un GET caído, corte de circuito con aviso (se reinicia en cada pulsación; no se rearma a mitad de lección), marca de línea, resaltado solo de la línea (sin karaoke, ni con el servidor ni con la voz del sistema) y Atrás cerrando «Escuchar todo» |
+| `audio-corte-tardio` | `stopGlobalAudio()` invalida un `playAudio` en vuelo (servidor simulado con compuerta): tras el corte, cero «playing» del reproductor global, el 🔊 vuelve a su texto (también con el audio sonando) y un 🔊 nuevo suena; dos toques rápidos (mismo 🔊 y dos botones) suenan una sola vez; el Lector, el Podcast, la práctica tipo examen y las lecciones (🔊 por línea y «Escuchar todo») suenan tras un corte anterior |
 | `lecciones-nombres`, `lecciones-tocfl-contraste` | nombres propios en lecciones (karaoke, audio, pinyin) y contraste en lecciones TOCFL |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
 | `navegacion-tanda1`, `navegacion-tanda2` | botón Atrás: capas apiladas, audio, tips, estadísticas ↔ respaldo |
