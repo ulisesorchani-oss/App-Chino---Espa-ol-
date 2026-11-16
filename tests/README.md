@@ -71,6 +71,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
+| `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + tablas de `lessons-listen.js`): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped`, cada `go()` y cada `stopAll()` con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
 | `tools/check-readings.js` | lo levanta | sí | no | Python con `pip install opencc` (opcional `OPENCC_PYTHONPATH`) |
 | `tools/medir-tts.js` | — | — | **sí** (llama al API real) | no es una suite: mide, no verifica; `run-all` no la corre |
@@ -93,6 +94,8 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `ajustes-velocidad` | chip de velocidad del audio en Hoy, Ajustes y lecciones (es/zh × 3 temas) |
 | `aprender-simple` | pantalla Aprender simplificada: nivel, abrir/cerrar con ✕ y con Atrás |
 | `diaria-practicar` | Diaria → «Practicar frases», botón de escena y contraste |
+| `escuchar-todo-oro` | «Escuchar todo»: **prueba de oro por ORDEN de eventos** (no por tiempos; `tests/data/escuchar-todo-oro.json`, grabado con el código anterior a las máquinas de estado y regrabable con `GOLDEN_RECORD=1`): 15 escenarios (sano, pausa en la espera, circuito, cada corte, velocidad, R5…); en modo estricto ninguna transición sin declarar; con `state-machine.js` bloqueado (`page.route` abort) suena igual y la traza es la misma |
+| `escuchar-todo-mutaciones` | rompe `lessons-listen.js` a propósito (sacar una fila de la tabla, asignación directa `L.state = …`, saltear el corte «ventana») y exige que fallen el chequeo estático y el oro; sin modo estricto (producción) la fila sacada se aplica igual y queda en `AC_SM_LOG` |
 | `entrenar`, `entrenar-grilla` | pantalla Entrenar (secciones, Exámenes, Lecturas de estudio) y su grilla a 320/360 px |
 | `escritura-pinyin` | capa de errores y pinyin por familia (HSK/TOCFL), carga de la tabla |
 | `escritura-tradicional` | 6 pantallas de lección × escrituras 简/繁 |
