@@ -89,6 +89,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Suite | Cubre |
 |---|---|
+| `aviso-voz-falso` | aviso rojo de voz del Lector con un servidor simulado: servidor sano → sin aviso y suena la voz del servidor; 503 (o sin conexión) y luego 200 → sin aviso y suena la voz del servidor; dos fallos (o sin conexión dos veces) → aviso y voz del sistema; 429 y 429 y «200 sin audio» → voz del sistema sin aviso (como siempre); 502 y luego 429 → aviso; con dos trozos, el aviso espera a que el 2.º caiga a la voz del sistema; guardia: `playAudio` de Hoy con 503 sigue avisando |
 | `ajustes-velocidad` | chip de velocidad del audio en Hoy, Ajustes y lecciones (es/zh × 3 temas) |
 | `aprender-simple` | pantalla Aprender simplificada: nivel, abrir/cerrar con ✕ y con Atrás |
 | `diaria-practicar` | Diaria → «Practicar frases», botón de escena y contraste |
@@ -101,6 +102,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `hover-tactil` | :hover pegado en el celular: todas las reglas :hover (style.css y los CSS inyectados de stats.js y onboarding.js) van dentro de `@media (hover: hover)` y ningún `:focus` queda dentro (CSSOM + fuente); contexto TÁCTIL de Playwright en los 3 temas: tras un toque el estilo calculado vuelve al base; con mouse el estilo al pasar el mouse es idéntico al del código anterior (oro grabado en `tests/data/hover-oro.json`, `GOLDEN_RECORD=1` lo regraba) |
 | `keywords-hsk`, `keywords-lecciones` | palabras clave de las lecciones (datos en `tests/data/`) |
 | `lecciones-escuchar-fallos` | «Escuchar todo» y `fetchTTS` con un servidor simulado que falla (`page.route`): precarga de 1, un reintento, sin POST tras un GET caído, corte de circuito con aviso (se reinicia en cada pulsación; no se rearma a mitad de lección), marca de línea, resaltado solo de la línea (sin karaoke, ni con el servidor ni con la voz del sistema) y Atrás cerrando «Escuchar todo» |
+| `audio-corte-tardio` | `stopGlobalAudio()` invalida un `playAudio` en vuelo (servidor simulado con compuerta): tras el corte, cero «playing» del reproductor global, el 🔊 vuelve a su texto (también con el audio sonando) y un 🔊 nuevo suena; dos toques rápidos (mismo 🔊 y dos botones) suenan una sola vez; el Lector, el Podcast, la práctica tipo examen y las lecciones (🔊 por línea y «Escuchar todo») suenan tras un corte anterior |
 | `lecciones-nombres`, `lecciones-tocfl-contraste` | nombres propios en lecciones (karaoke, audio, pinyin) y contraste en lecciones TOCFL |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
 | `navegacion-tanda1`, `navegacion-tanda2` | botón Atrás: capas apiladas, audio, tips, estadísticas ↔ respaldo |

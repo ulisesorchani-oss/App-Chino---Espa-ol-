@@ -387,10 +387,16 @@ function restoreButton() {
 // Detiene el reproductor global desde otros módulos (lección-quiz, lector de
 // clásicos) sin que cada uno repita el mismo bloque pause()+isPlaying=false.
 function stopGlobalAudio() {
+    // Un playAudio EN VUELO (la respuesta del TTS todavía no llegó, así que no hay src) queda invalidado: su respuesta ya no arranca el
+    // audio ni cae a la voz del sistema. Antes solo se pausaba si ya había un src y la respuesta tardía sonaba igual (R1).
+    audioReqTok++;
     if (globalAudioPlayer.src) {
         globalAudioPlayer.pause();
         isPlaying = false;
     }
+    // El 🔊 que esperaba ('...') o sonaba vuelve a su texto: el pedido invalidado sale sin restaurarlo y un audio pausado no dispara
+    // 'ended', así que sin esto el botón quedaba deshabilitado. restoreButton() no hace nada si no hay botón activo.
+    restoreButton();
 }
 
 // v9.7x: los botones de velocidad de Yo → Ajustes y de la hoja 👁 Ver de Hoy
