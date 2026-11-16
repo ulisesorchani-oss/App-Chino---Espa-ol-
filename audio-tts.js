@@ -387,6 +387,9 @@ function restoreButton() {
 // Detiene el reproductor global desde otros módulos (lección-quiz, lector de
 // clásicos) sin que cada uno repita el mismo bloque pause()+isPlaying=false.
 function stopGlobalAudio() {
+    // Un playAudio EN VUELO (la respuesta del TTS todavía no llegó, así que no hay src) queda invalidado: su respuesta ya no arranca el
+    // audio ni cae a la voz del sistema. Antes solo se pausaba si ya había un src y la respuesta tardía sonaba igual (R1).
+    audioReqTok++;
     if (globalAudioPlayer.src) {
         globalAudioPlayer.pause();
         isPlaying = false;
