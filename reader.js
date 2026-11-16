@@ -151,11 +151,19 @@ function readerGroupChunks(sentences) {
 // Un intento de pedir el audio de un trozo (usado por readerFetchChunk,
 // hasta 2 veces: el intento normal + 1 reintento silencioso).
 async function readerFetchOnce(text) {
+    // `silent`: el aviso rojo NO sale por un pedido que el reintento puede resolver. Se avisa solo si de verdad se cae a la voz del
+    // sistema (readerNotifyFallback, en playReaderChunk). `pedidoCaido` marca los fallos que antes avisaban desde fetchTTS: un error
+    // de red o timeout, o una respuesta !ok que NO sea 413/429 (límites propios del servidor: sin aviso, como siempre).
     const response = await fetchTTS(
         ttsBody(text, readerSessionLangCode, readerSessionGender, readerWantKaraoke),
-        Math.max(15000, text.length * 50)
-    );
-    if (!response.ok) throw new Error('Error en servidor');
+        Math.max(15000, text.length * 50),
+        { silent: true }
+    ).catch((e) => { if (e && typeof e === 'object') e.pedidoCaido = true; throw e; });
+    if (!response.ok) {
+        const e = new Error('Error en servidor');
+        e.pedidoCaido = response.status !== 413 && response.status !== 429;
+        throw e;
+    }
     const data = await response.json();
     if (!data.audio) throw new Error('Sin audio');
     const bin = atob(data.audio);
@@ -185,7 +193,8 @@ function readerFetchChunk(idx) {
             try {
                 return await readerFetchOnce(text);
             } catch (e2) {
-                return { url: null, data: null, error: e2 };
+                // pedidoCaido: cuenta si CUALQUIERA de los dos intentos fue una caída (red/timeout o !ok que no sea 413/429)
+                return { url: null, data: null, error: e2, pedidoCaido: !!((e && e.pedidoCaido) || (e2 && e2.pedidoCaido)) };
             }
         }
     })();
@@ -259,6 +268,8 @@ async function playReaderChunk(idx, myToken) {
     if (lineEl) KARA.prepare(lineEl);
 
     if (!entry || entry.error || !entry.url) {
+        // El aviso rojo sale AQUÍ, cuando de verdad se lee con la voz del sistema (y solo si el trozo falló por una caída del servidor).
+        if (entry && entry.pedidoCaido && typeof notifyTtsFallback === 'function') notifyTtsFallback();
         await readerSpeakFallback(readerChunks[idx], readerSessionLangCode);
         if (myToken !== readerStopToken) return;
         readerAdvanceAfterChunk(idx, myToken);
