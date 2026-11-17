@@ -158,6 +158,21 @@ function instrumentar(cfg) {
         await ctx.close();
         return { traza, sm, errs, pedidos: srv.reqs };
     }
+    // R10b: un toque en ▶️ MIENTRAS carga no lanza un segundo pedido: tras «> toque» no hay ningún `fetch` más y el total es UN pedido
+    function pedidosTrasElToque(traza) { const i = traza.indexOf('> toque'); return i === -1 ? -1 : traza.slice(i).filter((e) => /^fetch /.test(e)).length; }
+    // coherencia durante la carga: mientras el estado dice «⏳ Preparando…» el botón dice «⏳» y está inerte (aria-disabled=true); fuera de la carga, no
+    function botonCoherente(traza) {
+        const mal = []; let est = '', btn = '', dis = 'false';
+        traza.forEach((e, i) => {
+            if (/^estado /.test(e)) {
+                if (est.startsWith('⏳') && !e.startsWith('estado ⏳') && (btn !== '⏳' || dis !== 'true')) mal.push({ en: i, evento: 'salió de la carga con el botón «' + btn + '» aria-disabled=' + dis });
+                est = e.slice(7);
+            } else if (/^boton aria-disabled=/.test(e)) dis = e.split('=')[1];
+            else if (/^boton aria-label=/.test(e)) { /* se mira con el texto */ }
+            else if (/^boton /.test(e)) btn = e.slice(6);
+        });
+        return mal;
+    }
     function difer(a, c) { for (let i = 0; i < Math.max(a.length, c.length); i++) if (a[i] !== c[i]) return { en: i, oro: a[i], ahora: c[i] }; return null; }
 
     const oro = RECORD ? {} : JSON.parse(fs.readFileSync(GOLD, 'utf8'));
@@ -178,6 +193,11 @@ function instrumentar(cfg) {
             ok(MAQ.every((k) => r.sm.maquinas.includes(k)), '[' + esc.id + '] la máquina del Podcast está registrada (state-machine.js cargó antes que podcast.js)');
             ok(r.sm.log.length === 0, '[' + esc.id + '] modo estricto: ninguna transición sin declarar (AC_SM_LOG vacío)' + (r.sm.log.length ? ' → ' + JSON.stringify(r.sm.log.slice(0, 3)) : ''));
             ok(r.errs.filter((x) => !/localStorage/.test(x)).length === 0, '[' + esc.id + '] sin errores JS ' + r.errs.join('|'));
+            if (esc.id === 'R10b-toque-en-carga') { // R10b: el toque durante la carga NO reinicia el pedido
+                ok(r.pedidos === 1 && pedidosTrasElToque(r.traza) === 0, '[R10b] un toque en ▶️ mientras carga NO lanza un segundo pedido (pedidos al servidor: ' + r.pedidos + '; «fetch» tras el toque: ' + pedidosTrasElToque(r.traza) + ')');
+            }
+            { const mal = botonCoherente(r.traza); // en TODOS los escenarios
+              ok(mal.length === 0, '[' + esc.id + '] durante la carga el botón dice «⏳» y está inerte (aria-disabled=true)' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 2)) : '')); }
         }
     }
     // el Podcast sigue sonando y pausando con state-machine.js BLOQUEADO (la máquina de respaldo no valida)

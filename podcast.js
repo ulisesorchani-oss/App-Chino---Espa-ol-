@@ -92,7 +92,6 @@
             { from: 'paused', to: 'done', ev: 'fin', known: 'R10c-emulado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL (play() rechazado a la fuerza, como un autoplay bloqueado). La voz del sistema habla mientras la pantalla dice «En pausa» y termina estando en pausa (ver «pausa al motor equivocado»). Escenario R10c-autoplay-bloqueado' }
         ],
         defectos: [
-            { id: 'R10b', escenario: 'R10b-toque-en-carga', nota: 'CLASE real. Un toque en ▶️ MIENTRAS carga reinicia el pedido (loading → loading no es un cambio de estado): sale un SEGUNDO pedido de la lección entera al servidor y el primero se descarta. El botón dice ▶️ aunque el estado dice «Preparando…», y openLesson arranca solo, así que cualquiera lo alcanza.' },
             { id: 'R10c-emulado (pausa al motor equivocado)', escenario: 'R10c-autoplay-bloqueado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado.' }
         ]
     });
@@ -238,6 +237,8 @@
             } else if (pTtsU) {
                 try { speechSynthesis.resume(); PD.go('playing', 'seguir'); updatePlayerUI(); } catch (e) { }
             }
+        } else if (PD.is('loading')) {
+            // R10b: mientras carga NO se hace nada (antes un toque en ▶️ reiniciaba el pedido: un SEGUNDO pedido de la lección entera al servidor). El botón ya lo dice: «⏳», inerte.
         } else { // idle | done → (re)empezar
             playLesson();
         }
@@ -373,8 +374,10 @@
         }
         const ppBtn = $('pd-playpause');
         if (ppBtn) {
-            ppBtn.textContent = PD.state === 'playing' ? '⏸' : '▶️';
-            ppBtn.setAttribute('aria-label', PD.state === 'playing' ? 'Pausar' : 'Reproducir');
+            const cargando = PD.state === 'loading'; // R10b: durante la carga el botón es «⏳» e inerte (antes decía ▶️ y reiniciaba el pedido)
+            ppBtn.textContent = PD.state === 'playing' ? '⏸' : (cargando ? '⏳' : '▶️');
+            ppBtn.setAttribute('aria-label', PD.state === 'playing' ? 'Pausar' : (cargando ? 'Preparando el audio' : 'Reproducir'));
+            ppBtn.setAttribute('aria-disabled', cargando ? 'true' : 'false');
         }
         // v9.72: ⏮/⏭ ahora navegan GRADED_LESSONS — se apagan en los bordes
         // de la lista, no según haya o no audio del API en curso.

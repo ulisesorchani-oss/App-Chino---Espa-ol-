@@ -138,7 +138,6 @@ stateDiagram-v2
 
 Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual hasta que se arreglen):
 
-- ⚠️ **R10b** — CLASE real. Un toque en ▶️ MIENTRAS carga reinicia el pedido (loading → loading no es un cambio de estado): sale un SEGUNDO pedido de la lección entera al servidor y el primero se descarta. El botón dice ▶️ aunque el estado dice «Preparando…», y openLesson arranca solo, así que cualquiera lo alcanza. Escenario del oro: `R10b-toque-en-carga`.
 - ⚠️ **R10c-emulado (pausa al motor equivocado)** — CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado. Escenario del oro: `R10c-autoplay-bloqueado`.
 
 ## Lector de texto libre
