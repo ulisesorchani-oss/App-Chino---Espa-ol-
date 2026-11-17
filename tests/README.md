@@ -10,13 +10,13 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 32 suites de `tests/` y las 8 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 46 suites de `tests/` y las 10 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
 ajustes-velocidad     69              🟢 VERDE
 …
-36 suites · 5274 comprobaciones · 36 verdes · 0 rojas
+56 suites · 6499 comprobaciones · 54 verdes · 2 parciales · 0 omitidas · 0 rojas
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de
@@ -66,12 +66,12 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (31, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (45, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
-| `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + tablas de `lessons-listen.js`): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped`, cada `go()` y cada `stopAll()` con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
+| `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + las tablas de `lessons-listen.js` —«Escuchar todo»— y de `reader.js` —el Lector—): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped` ni a `readerPlayState`/`readerActiveEngine`, cada `go()` (y cada `stopAll()` en «Escuchar todo») con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
 | `tools/check-readings.js` | lo levanta | sí | no | Python con `pip install opencc` (opcional `OPENCC_PYTHONPATH`) |
 | `tools/medir-tts.js` | — | — | **sí** (llama al API real) | no es una suite: mide, no verifica; `run-all` no la corre |
