@@ -1350,7 +1350,7 @@ window.READINGS_V2 = (window.READINGS_V2 || []).concat([
   "nivel": 5,
   "genero": "expositivo",
   "emoji": "🎧",
-  "revision": "pendiente",
+  "revision": "revisado",
   "nota": "Texto original; los datos son ilustrativos",
   "titulo": {
    "zh": "声音会影响注意力吗？",
