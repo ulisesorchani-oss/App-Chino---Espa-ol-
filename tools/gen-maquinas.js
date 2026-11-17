@@ -8,7 +8,8 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
 const DOC = path.join(ROOT, 'docs', 'maquinas-de-estado.md');
 const MODULOS = [
-    { archivo: 'lessons-listen.js', titulo: '«Escuchar todo» (lecciones de aprendo chino)', cortes: (w) => (w.LQ_LISTEN && w.LQ_LISTEN.cortes) || [] }
+    { archivo: 'lessons-listen.js', titulo: '«Escuchar todo» (lecciones de aprendo chino)', oro: 'escuchar-todo-oro', cortes: (w) => (w.LQ_LISTEN && w.LQ_LISTEN.cortes) || [] },
+    { archivo: 'reader.js', titulo: 'Lector de texto libre', oro: 'lector-oro', cortes: () => [] } // el único corte es stopReader() (8 llamadores en otros archivos: su firma no cambia)
 ];
 
 function cargar(archivo, texto) { // → { maquinas, cortes } con el texto dado (las mutaciones de las pruebas lo usan)
@@ -38,7 +39,7 @@ function seccion(maq) {
     maq.rows.forEach((r) => out.push('| ' + r.from.map((f) => '`' + f + '`').join(', ') + ' | `' + r.to + '` | `' + r.ev + '` | ' + (r.known ? '⚠️ **conocida** (' + esc(r.known) + ')' : 'declarada') + ' | ' + esc(r.nota) + ' |'));
     out.push('');
     if (maq.defectos && maq.defectos.length) {
-        out.push('Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual):', '');
+        out.push('Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual hasta que se arreglen):', '');
         maq.defectos.forEach((d) => out.push('- ⚠️ **' + d.id + '** — ' + esc(d.nota) + ' Escenario del oro: `' + d.escenario + '`.'));
         out.push('');
     }
@@ -55,7 +56,7 @@ function generar(textos) { // textos: { 'lessons-listen.js': '…' } opcional (p
         '- Los tokens de cancelación (`L.tok`, `audioReqTok`, …) NO son estado: identifican «una corrida».', '');
     MODULOS.forEach((m) => {
         const c = cargar(m.archivo, textos && textos[m.archivo]);
-        L.push('## ' + m.titulo, '', 'Archivo: `' + m.archivo + '` · prueba de oro: `tests/escuchar-todo-oro.test.js` (`tests/data/escuchar-todo-oro.json`).', '');
+        L.push('## ' + m.titulo, '', 'Archivo: `' + m.archivo + '` · prueba de oro: `tests/' + m.oro + '.test.js` (`tests/data/' + m.oro + '.json`).', '');
         c.maquinas.forEach((maq) => L.push.apply(L, seccion(maq)));
         if (c.cortes.length) {
             L.push('### Cortes (`stopAll(motivo)`)', '', 'Todo lo que para la escucha pasa por `stopAll(motivo)` con uno de estos motivos; cada uno lleva a `idle` / `libre` / `cerrado` con el evento `corte`.', '', '| Motivo | Qué lo dispara |', '|---|---|');

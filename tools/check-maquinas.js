@@ -13,7 +13,9 @@ const { cargar, generar, DOC, MODULOS } = require('./gen-maquinas');
 const ROOT = path.resolve(__dirname, '..');
 // Por módulo: la variable de cada máquina (en el código) y los campos de estado que NO se asignan a mano.
 const CONFIG = {
-    'lessons-listen.js': { maquinas: { REPRO: 'escuchar.reproduccion', ESPERA: 'escuchar.espera', CIRCUITO: 'escuchar.circuito' }, objeto: 'L', campos: ['state', 'waiting', 'tripped'], stop: 'stopAll' }
+    'lessons-listen.js': { maquinas: { REPRO: 'escuchar.reproduccion', ESPERA: 'escuchar.espera', CIRCUITO: 'escuchar.circuito' }, objeto: 'L', campos: ['state', 'waiting', 'tripped'], stop: 'stopAll' },
+    // reader.js: variables globales sueltas (no un objeto). stopReader() no recibe motivo: no hay tabla de cortes; sus filas 'corte' se verifican como cualquier fila emitida
+    'reader.js': { maquinas: { READER_REPRO: 'lector.reproduccion', READER_ESPERA: 'lector.espera', READER_MOTOR: 'lector.motor' }, variables: ['readerPlayState', 'readerActiveEngine'] }
 };
 // Quita comentarios (// y /* */) conservando el largo de las líneas; respeta los literales de cadena.
 function sinComentarios(t) {
@@ -35,9 +37,10 @@ function revisar(archivo, texto, docs) { // → { errores: [], resumen: {…} }
     let c;
     try { c = cargar(archivo, texto); } catch (e) { return { errores: ['el módulo no carga en el sandbox: ' + e.message], resumen: {} }; }
     // 1) asignaciones directas
-    const ra = new RegExp('\\b' + cfg.objeto + '\\.(' + cfg.campos.join('|') + ')\\s*(=(?!=)|\\+=|-=|\\|\\|=|&&=)', 'g');
+    const campos = (cfg.campos || []).map((c) => cfg.objeto + '\\.' + c).concat(cfg.variables || []);
+    const ra = new RegExp('\\b(' + campos.join('|') + ')\\s*(=(?!=)|\\+=|-=|\\|\\|=|&&=)', 'g');
     let m, directas = 0;
-    while ((m = ra.exec(codigo))) { directas++; E.push('asignación directa «' + cfg.objeto + '.' + m[1] + ' = …» (línea ' + (codigo.slice(0, m.index).split('\n').length) + '): usá MAQUINA.go(estado, evento)'); }
+    while ((m = ra.exec(codigo))) { directas++; E.push('asignación directa «' + m[1].replace(/\\/g, '') + ' = …» (línea ' + (codigo.slice(0, m.index).split('\n').length) + '): usá MAQUINA.go(estado, evento)'); }
     // 2) go() literales ↔ filas
     const filas = {}; c.maquinas.forEach((mq) => { filas[mq.name] = mq.rows; });
     const usados = {}; let literales = 0;
@@ -62,9 +65,9 @@ function revisar(archivo, texto, docs) { // → { errores: [], resumen: {…} }
         });
     });
     // 4) cortes
-    const re4 = new RegExp('\\b' + cfg.stop + '\\(\\s*\'([^\']+)\'\\s*\\)', 'g');
+    const re4 = new RegExp('\\b' + (cfg.stop || 'nuncaHayCorte') + '\\(\\s*\'([^\']+)\'\\s*\\)', 'g');
     const deCodigo = new Set(); let s;
-    while ((s = re4.exec(codigo))) deCodigo.add(s[1]);
+    while (cfg.stop && (s = re4.exec(codigo))) deCodigo.add(s[1]);
     const tabla = new Set(c.cortes.map((x) => x.id));
     deCodigo.forEach((id) => { if (!tabla.has(id)) E.push('stopAll(\'' + id + '\') no está en la tabla de cortes'); });
     tabla.forEach((id) => { if (!deCodigo.has(id)) E.push('el corte «' + id + '» está en la tabla pero ningún stopAll(\'' + id + '\') lo dispara (¿se saltearon el corte?)'); });
