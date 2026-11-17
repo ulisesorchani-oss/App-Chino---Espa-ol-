@@ -45,7 +45,7 @@ GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproxima
 
 ## 1. 🎧 声音会影响注意力吗？ / 聲音會影響注意力嗎？ — ¿Los sonidos afectan la atención?
 
-`rx-h5-ruido` · expositivo · HSK 5 · tipo: `examen` · revision: pendiente
+`rx-h5-ruido` · expositivo · HSK 5 · tipo: `examen` · revision: revisado
 
 ### Tabla de control
 
@@ -54,7 +54,7 @@ GENERADA por `tools/build-readings-examen.js` (no editar a mano). Nivel aproxima
 | Largo | 347 hanzi (rango HSK 5: 220–380) |
 | Nivel por palabras (HSK 3.0 (GF0025-2021), HSK 1–5) | 98.7 % (mínimo 90 %) · 237 palabras |
 | Palabras fuera de nivel en el texto | 噪音* (HSK 9) — 1 de 5 permitidas |
-| Chino | pendiente de revisión |
+| Chino | revisado por el docente; sin confirmación de hablante nativo |
 | Nombres propios (no cuentan) | — |
 | Coincidencias con palabra de nivel más alto, revisadas (cuentan como dentro) | — |
 | Declaradas fuera de nivel a mano (el cálculo las da como dentro; cuentan como fuera) | — |

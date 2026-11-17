@@ -1,5 +1,5 @@
 // tests/lectura-hsk5-ruido.test.js — texto HSK 5 expositivo «¿Los sonidos afectan la atención?» (rx-h5-ruido)
-//   a. datos: tipo examen, nivel 5, expositivo, revisión pendiente, largo 220–380, 5 preguntas EN CHINO (idea, detalle, inferencia con casos nuevos, vocabulario y un V/F),
+//   a. datos: tipo examen, nivel 5, expositivo, revisión «revisado» (por el docente; sin confirmación de hablante nativo), largo 220–380, 5 preguntas EN CHINO (idea, detalle, inferencia con casos nuevos, vocabulario y un V/F),
 //      banco de 6 huecos con 2 sobrantes (提高, 价格), 3 parecidas, sin capa 2, nota visible; 干扰 es objetivo en UN solo ejercicio;
 //      ninguna pregunta usa 正确率 ni habla de «eficiencia»; la respuesta de la inferencia NO está escrita en el texto (aplica la regla a un examen difícil y a ordenar el cuarto);
 //      redacción cautelosa y sin institución ni año
@@ -29,10 +29,10 @@ const NOTA = 'Texto original; los datos son ilustrativos';
         q3enTexto: hz(texto).includes(hz(q3.optsZh[0])), q3why: q3.why, q3zh: q3.qZh, q5: { tipo: q5.tipo, vf: q5.vf, zh: q5.qZh, es: q5.es, why: q5.why }, todo: JSON.stringify(r) };
     });
     const r = d.r;
-    ok(r.tipo === 'examen' && r.nivel === 5 && r.genero === 'expositivo' && r.revision === 'pendiente' && !('capa2' in r) && r.nota === NOTA, 'a. ficha: examen, nivel 5, expositivo, pendiente, sin capa 2, nota ' + JSON.stringify([r.tipo, r.nivel, r.genero, r.revision, r.nota]));
+    ok(r.tipo === 'examen' && r.nivel === 5 && r.genero === 'expositivo' && r.revision === 'revisado' && !('revisor' in r) && !('capa2' in r) && r.nota === NOTA, 'a. ficha: examen, nivel 5, expositivo, revisado (no nativo: sin revisor), sin capa 2, nota ' + JSON.stringify([r.tipo, r.nivel, r.genero, r.revision, r.nota]));
     ok(d.largo >= 220 && d.largo <= 380 && r.parrafos.length === 4, 'a. largo ' + d.largo + ' hanzi en 4 párrafos (220–380)');
     ok(JSON.stringify(d.qTipos) === '["idea","detalle","inferencia","vocabulario","vf"]' && d.L.zh && d.L.nq === 5, 'a. 5 preguntas en chino: idea, detalle, inferencia, vocabulario y V/F ' + JSON.stringify(d.qTipos));
-    ok(d.L.origen === 'v2' && d.L.tipo === 'examen' && d.L.nivelKey === 'HSK5' && d.L.revision === 'pendiente' && d.L.nota === NOTA && d.L.etiqueta === 'Nivel aproximado: HSK 5 · no oficial · ' + NOTA, 'a. LECTURAS: nivel HSK 5, pendiente y la nota junto a «Nivel aproximado» ' + JSON.stringify(d.L));
+    ok(d.L.origen === 'v2' && d.L.tipo === 'examen' && d.L.nivelKey === 'HSK5' && d.L.revision === 'revisado' && d.L.nota === NOTA && d.L.etiqueta === 'Nivel aproximado: HSK 5 · no oficial · ' + NOTA, 'a. LECTURAS: nivel HSK 5, revisado y la nota junto a «Nivel aproximado» (la etiqueta que ve el alumno no depende de la revisión) ' + JSON.stringify(d.L));
     ok(r.glosario.length >= 8 && r.glosario.length <= 12 && r.glosario.filter(g => g.fueraDeNivel).map(g => g.zh).join() === '噪音', 'a. glosario de 8–12 con solo 噪音* fuera de nivel ' + r.glosario.length);
     ok(r.banco.huecos.length === 6 && JSON.stringify(r.banco.palabras) === '["安静","集中","平均","减少","建议","耳机","分散","上升"]', 'a. banco: 6 huecos (安静 集中 平均 减少 建议 耳机) y los sobrantes 分散 (tienta en H2) y 上升 (tienta en H4) ' + JSON.stringify(r.banco.palabras));
     // los sobrantes y la reserva (至少, para H3) no aparecen en el texto, el glosario, las preguntas ni las parecidas; ninguna palabra del banco reproduce el texto en dos huecos
