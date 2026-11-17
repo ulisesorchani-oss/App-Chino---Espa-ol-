@@ -245,7 +245,8 @@ function instrumentar(cfg) {
     }
     // el Lector sigue sonando con state-machine.js BLOQUEADO (la máquina de respaldo no valida)
     if (!RECORD && !SOLO) {
-        for (const id of ['sano', 'pausa-seguir-parar', 'fallo-voz']) {
+        // sin la máquina el Lector suena y pausa igual, también en los dos escenarios de R2 (la espera y el «Continuar» usan la máquina de respaldo, que no valida pero sí guarda el estado)
+        for (const id of ['sano', 'pausa-seguir-parar', 'fallo-voz', 'R2-pausa-en-carga', 'R2-continuar-antes-de-llegar']) {
             const r = await correr(ESC.find((e) => e.id === id), { sinMaquina: true });
             ok(JSON.stringify(oro[id]) === JSON.stringify(r.traza), '[sin-maquina · ' + id + '] con state-machine.js bloqueado la traza es IDÉNTICA al oro' + (JSON.stringify(oro[id]) !== JSON.stringify(r.traza) ? ' → ' + JSON.stringify(difer(oro[id] || [], r.traza)) : ''));
             ok(r.sm.maquinas.length === 0, '[sin-maquina · ' + id + '] no hay máquinas registradas (el archivo no cargó)');
