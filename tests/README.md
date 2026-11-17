@@ -16,7 +16,7 @@ Corre las 49 suites de `tests/` y las 10 de `tools/`, una por una, y al final mu
 SUITE                 COMPROBACIONES  RESULTADO
 ajustes-velocidad     69              🟢 VERDE
 …
-57 suites · 6543 comprobaciones · 55 verdes · 2 parciales · 0 omitidas · 0 rojas
+58 suites · 6617 comprobaciones · 56 verdes · 2 parciales · 0 omitidas · 0 rojas
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de

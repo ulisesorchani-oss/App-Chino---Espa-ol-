@@ -70,6 +70,7 @@ repartidas en archivos más chicos.
 | `README-Pronunciacion.md` | Documentación viva del módulo de pronunciación |
 | `docs/historial-actualizaciones/` | Notas de actualización de versiones anteriores (histórico, ya aplicadas) |
 | `docs/revision-lecturas-v1.md` | Constancia (escrita a mano) de quién y cuándo revisó el chino de las lecturas v1 |
+| `docs/matriz-de-audio.md` | Semilla (borrador, a mano) de la matriz «un solo audio a la vez»: sitios anotados; la matriz completa y su validador van en una rama aparte |
 
 ## Documentación
 
