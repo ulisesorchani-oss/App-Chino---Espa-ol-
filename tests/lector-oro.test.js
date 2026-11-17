@@ -96,7 +96,7 @@ function instrumentar(cfg) {
             setTimeout(terminar, 90); u.__terminar = terminar;
         };
         speechSynthesis.cancel = function () { log('cancel'); const u = hablando; if (u) setTimeout(() => { if (hablando === u) { log('voz.canceled'); fin(u, 'canceled'); } }, 0); };
-        speechSynthesis.pause = function () { log('voz.pause'); pausada = true; };
+        speechSynthesis.pause = function () { log('voz.pause'); if (!cfg.vozIgnoraPausa) pausada = true; }; // vozIgnoraPausa: un motor cuyo pause() no pausa (la voz sigue y termina sola)
         speechSynthesis.resume = function () { log('voz.resume'); pausada = false; const u = hablando; if (u && u.__pend) { u.__pend = false; setTimeout(u.__terminar, 5); } };
     }
     // texto del botón del Lector (con el estado entre corchetes)
@@ -132,7 +132,7 @@ function instrumentar(cfg) {
             const body = status === 200 ? JSON.stringify({ audio, mime: 'audio/wav', voice: 'zh-CN-XiaoxiaoNeural', speed: 1, cached: false }) : JSON.stringify({ error: 'tts no disponible', codigo: 'sin_audio' });
             return route.fulfill({ status, headers: Object.assign({ 'content-type': 'application/json' }, CORS, status === 200 ? { 'x-tts-audio': '1' } : { 'cache-control': 'no-store' }), body });
         });
-        await ctx.addInitScript('(' + instrumentar.toString() + ')(' + JSON.stringify({ triggers: esc.triggers || [], sinVoz: !!esc.sinVoz }) + ')');
+        await ctx.addInitScript('(' + instrumentar.toString() + ')(' + JSON.stringify({ triggers: esc.triggers || [], sinVoz: !!esc.sinVoz, vozIgnoraPausa: !!esc.vozIgnoraPausa }) + ')');
         await p.goto(APP_URL, { waitUntil: 'domcontentloaded' }); await sleep(p, 1300);
         await p.evaluate(() => {
             window.__estado = () => readerPlayState; // se lee igual con la variable de antes y con el getter de las máquinas
@@ -156,6 +156,7 @@ function instrumentar(cfg) {
         { id: 'mixto-un-trozo-falla', policy: ({ idx }) => (idx === 1 ? { status: 503 } : {}), triggers: [FIN_IDLE] },
         { id: 'corte-en-carga-y-nueva-lectura', policy: ({ idx }, intento) => (idx === 0 && intento === 0 ? { hold: true } : {}), liberar: { tras: '> leer', idx: 0, espera: 400 }, triggers: [{ when: 'fetch GET L0', n: 1, do: 'parar', delay: 30 }, { when: '> parar', do: 'leer', delay: 50 }, { re: '^btn 🔊 Leer', n: 4, do: 'fin', delay: 200 }] }, // el 4.º «🔊 Leer»: arranque, corte, arranque de la nueva y fin de la nueva
         { id: 'R2-pausa-en-carga-con-voz', policy: () => ({ status: 503 }), triggers: [{ re: '^btn ⏳', n: 2, do: 'pausa', delay: 20 }, { when: '> pausa', do: 'seguir', delay: 700, cond: 'pausado' }, FIN_IDLE] },
+        { id: 'pausa-voz-ignora-pausa', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L3', do: 'pausa', delay: 30 }, FIN_IDLE] },
         { id: 'corte-limpiar', triggers: [{ when: 'audio.playing', n: 2, do: 'limpiar' }, FIN_IDLE] },
         { id: 'corte-stopReader', triggers: [{ when: 'audio.playing', n: 2, do: 'parar' }, FIN_IDLE] },
         { id: 'corte-global', triggers: [{ when: 'audio.playing', n: 2, do: 'global' }, FIN_IDLE] }
@@ -177,6 +178,26 @@ function instrumentar(cfg) {
         await ctx.close();
         return { traza, sm, errs };
     }
+    // trozos que suenan o hablan DESPUÉS de que el botón pasó a «Continuar» y ANTES de que alguien siga (> seguir): lo que R2 no permite
+    function sonidoEnPausa(traza) {
+        const mal = []; let pausada = false;
+        traza.forEach((e, i) => {
+            if (/^btn ▶ Continuar/.test(e)) pausada = true;
+            else if (e === '> seguir') pausada = false;
+            else if (pausada && /^(audio\.play |audio\.playing|speak |voz\.start|aviso-rojo|btn ⏸ Pausar)/.test(e)) mal.push({ en: i, evento: e });
+        });
+        return mal;
+    }
+    // cada voz.pause se cierra con voz.resume o cancel ANTES de la próxima voz (el simulador no puede mostrar una voz «trabada»: solo se exige el par)
+    function vozPareada(traza) {
+        const mal = []; let abierta = false;
+        traza.forEach((e, i) => {
+            if (e === 'voz.pause') abierta = true;
+            else if (e === 'voz.resume' || e === 'cancel') abierta = false;
+            else if (abierta && /^speak /.test(e)) mal.push({ en: i, evento: e });
+        });
+        return mal;
+    }
     function difer(a, c) { for (let i = 0; i < Math.max(a.length, c.length); i++) if (a[i] !== c[i]) return { en: i, oro: a[i], ahora: c[i] }; return null; }
 
     const oro = RECORD ? {} : JSON.parse(fs.readFileSync(GOLD, 'utf8'));
@@ -197,6 +218,14 @@ function instrumentar(cfg) {
             ok(MAQ.every((k) => r.sm.maquinas.includes(k)), '[' + esc.id + '] las 3 máquinas del Lector están registradas (state-machine.js cargó antes que reader.js)');
             ok(r.sm.log.length === 0, '[' + esc.id + '] modo estricto: ninguna transición sin declarar (AC_SM_LOG vacío)' + (r.sm.log.length ? ' → ' + JSON.stringify(r.sm.log.slice(0, 3)) : ''));
             ok(r.errs.filter((x) => !/localStorage/.test(x)).length === 0, '[' + esc.id + '] sin errores JS ' + r.errs.join('|'));
+            if (esc.id === 'R2-pausa-en-carga-con-voz') {
+                const mal = vozPareada(r.traza);
+                ok(mal.length === 0, '[' + esc.id + '] cada voz.pause se cierra con voz.resume o cancel antes de la próxima voz' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
+            }
+            if (['R2-pausa-en-carga', 'R2-pausa-en-hueco', 'R2-pausa-sin-voz', 'R2-pausa-en-carga-con-voz'].includes(esc.id)) { // el defecto R2 NO se tolera: en pausa no suena, no habla, no avisa
+                const mal = sonidoEnPausa(r.traza);
+                ok(mal.length === 0, '[' + esc.id + '] en pausa (botón «Continuar») no suena ni habla nada ni cambia el botón' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
+            }
         }
     }
     // el Lector sigue sonando con state-machine.js BLOQUEADO (la máquina de respaldo no valida)
