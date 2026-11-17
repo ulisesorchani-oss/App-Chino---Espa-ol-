@@ -92,3 +92,74 @@ Todo lo que para la escucha pasa por `stopAll(motivo)` con uno de estos motivos;
 | `ventana` | Esc o clic en el fondo (lesson-pop se oculta) |
 | `vista` | la vista cambió (quiz, glosario, otra lección) |
 | `api` | LQ_LISTEN.stop() |
+
+## Lector de texto libre
+
+Archivo: `reader.js` · prueba de oro: `tests/lector-oro.test.js` (`tests/data/lector-oro.json`).
+
+### Lector: reproducción (`lector.reproduccion`)
+
+Estados: `idle`, `playing`, `paused` · inicial: `idle`
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle --> playing : leer
+    playing --> paused : pausa
+    paused --> playing : seguir
+    playing --> idle : fin
+    playing --> idle : corte
+    paused --> idle : corte
+    paused --> idle : fin (conocida)
+```
+
+| De | A | Evento | Estado de la fila | Qué es |
+|---|---|---|---|---|
+| `idle` | `playing` | `leer` | declarada | 🔊 Leer: arranca una lectura nueva |
+| `playing` | `paused` | `pausa` | declarada | ⏸ Pausar (también mientras carga un trozo) |
+| `paused` | `playing` | `seguir` | declarada | ▶ Continuar |
+| `playing` | `idle` | `fin` | declarada | se leyó el último trozo |
+| `playing`, `paused` | `idle` | `corte` | declarada | stopReader(): lo llaman Limpiar, otra lectura/audio de la app (un solo audio a la vez) y toggleReaderPlay() al arrancar |
+| `paused` | `idle` | `fin` | ⚠️ **conocida** (pausa-ignorada) | si el motor de voz del sistema ignora pause() (la voz sigue y termina sola), el último trozo termina estando en pausa y la lectura vuelve al reposo sin que nadie siga (escenario pausa-voz-ignora-pausa) |
+
+### Lector: espera del trozo (`lector.espera`)
+
+Estados: `libre`, `esperando` · inicial: `libre`
+
+```mermaid
+stateDiagram-v2
+    [*] --> libre
+    libre --> esperando : sin-trozo-listo
+    esperando --> libre : llego
+    esperando --> libre : corte
+```
+
+| De | A | Evento | Estado de la fila | Qué es |
+|---|---|---|---|---|
+| `libre` | `esperando` | `sin-trozo-listo` | declarada | al trozo que toca todavía no le llegó el audio |
+| `esperando` | `libre` | `llego` | declarada | llegó el audio (o el error): se sigue |
+| `esperando` | `libre` | `corte` | declarada | stopReader() mientras esperaba |
+
+### Lector: motor de voz (`lector.motor`)
+
+Estados: `ninguno`, `speech`, `audio` · inicial: `ninguno`
+
+```mermaid
+stateDiagram-v2
+    [*] --> ninguno
+    ninguno --> audio : trozo-con-audio
+    speech --> audio : trozo-con-audio
+    ninguno --> speech : trozo-sin-audio
+    audio --> speech : trozo-sin-audio
+    audio --> ninguno : fin
+    speech --> ninguno : fin
+    audio --> ninguno : corte
+    speech --> ninguno : corte
+```
+
+| De | A | Evento | Estado de la fila | Qué es |
+|---|---|---|---|---|
+| `ninguno`, `speech` | `audio` | `trozo-con-audio` | declarada | el trozo suena con el audio del servidor |
+| `ninguno`, `audio` | `speech` | `trozo-sin-audio` | declarada | el trozo falló: se lee con la voz del sistema |
+| `audio`, `speech` | `ninguno` | `fin` | declarada | se leyó el último trozo |
+| `audio`, `speech` | `ninguno` | `corte` | declarada | stopReader() |
