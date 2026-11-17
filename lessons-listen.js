@@ -39,10 +39,59 @@
     const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
     const stats = { body: 0, pop: 0, injected: 0, requests: 0, tripped: 0, stops: {} };
+
+    // ───────────── máquinas de estado (tablas) ─────────────
+    // El ESTADO vive en tres máquinas con su tabla de transiciones (state-machine.js, compartido). L.state / L.waiting / L.tripped se LEEN igual que
+    // siempre (son getters); para CAMBIARLOS hay que pasar por .go(estado, evento): una asignación directa (L.state = 'x') la frena
+    // tools/check-maquinas.js. Los tokens de cancelación (L.tok) no son estado: identifican «una corrida». Si state-machine.js no carga,
+    // el respaldo asigna sin validar y «Escuchar todo» suena igual. Doc generada: docs/maquinas-de-estado.md (tools/gen-maquinas.js).
+    const SM = (typeof window.acMachine === 'function') ? window.acMachine : function (name, def) {
+        let cur = def.initial; // respaldo: no valida, no registra
+        return { name: name, get state() { return cur; }, is: (x) => cur === x, declared: () => true, go(to) { cur = to; return true; } };
+    };
+    // Reproducción: lo que ve el usuario en la barra (▶ Escuchar todo | ⏸ Pausar / ▶ Seguir + ⏹ Parar).
+    const REPRO = SM('escuchar.reproduccion', {
+        initial: 'idle', titulo: '«Escuchar todo»: reproducción',
+        rows: [
+            { from: 'idle', to: 'playing', ev: 'start', nota: '▶ Escuchar todo' },
+            { from: 'playing', to: 'paused', ev: 'pausa', nota: '⏸ Pausar (también durante la espera de un audio)' },
+            { from: 'paused', to: 'playing', ev: 'seguir', nota: '▶ Seguir' },
+            { from: 'playing', to: 'idle', ev: 'fin', nota: 'se leyó la última línea' },
+            { from: ['playing', 'paused'], to: 'idle', ev: 'corte', nota: 'un corte (ver la tabla de cortes)' },
+            { from: 'paused', to: 'idle', ev: 'fin', known: 'pausa-muda', nota: 'si la última línea se lee sin voz (la voz del sistema no arranca), el tiempo de lectura sigue corriendo en pausa y la lección termina estando en pausa' }
+        ]
+    });
+    // Espera: ⏳ mientras la línea que toca no tiene su audio (o su error) todavía.
+    const ESPERA = SM('escuchar.espera', {
+        initial: 'libre', titulo: '«Escuchar todo»: espera del audio',
+        rows: [
+            { from: 'libre', to: 'esperando', ev: 'sin-audio-listo', nota: 'a la línea que toca todavía no le llegó el audio' },
+            { from: 'esperando', to: 'libre', ev: 'llego', nota: 'llegó el audio (o el error): se sigue' },
+            { from: 'esperando', to: 'libre', ev: 'corte', nota: 'un corte mientras esperaba' },
+            { from: 'esperando', to: 'libre', ev: 'arranque', nota: 'defensa: start() deja la espera limpia (no debería haber nada en espera con la reproducción en reposo)' }
+        ]
+    });
+    // Circuito: 2 líneas SEGUIDAS fallidas lo cortan; el resto de la lección va con la voz del sistema y el aviso.
+    const CIRCUITO = SM('escuchar.circuito', {
+        initial: 'cerrado', titulo: '«Escuchar todo»: circuito del servidor de voz',
+        rows: [
+            { from: 'cerrado', to: 'abierto', ev: 'dos-fallos', nota: 'CIRCUIT_AFTER líneas seguidas fallidas: no se pide nada más' },
+            { from: 'abierto', to: 'cerrado', ev: 'fin', nota: 'termina la lección: el próximo «Escuchar todo» empieza con el circuito cerrado' },
+            { from: 'abierto', to: 'cerrado', ev: 'corte', nota: 'un corte' },
+            { from: 'abierto', to: 'cerrado', ev: 'arranque', nota: 'defensa: start() deja el circuito cerrado (cada lección empieza de cero)' }
+        ]
+    });
+    // Cortes: todo lo que para la escucha pasa por stopAll(motivo) con uno de estos motivos (los estadísticos en LQ_LISTEN.stats.stops).
+    const CORTES = [
+        { id: 'boton', nota: '⏹ Parar' }, { id: 'cerrar', nota: '✕ y Atrás (#lq-close)' }, { id: 'escritura', nota: 'cambio 简/繁 (ac-script-change)' },
+        { id: 'linea', nota: '🔊 de una línea' }, { id: 'practicar', nota: 'Practicar → quiz' }, { id: 'ventana', nota: 'Esc o clic en el fondo (lesson-pop se oculta)' },
+        { id: 'vista', nota: 'la vista cambió (quiz, glosario, otra lección)' }, { id: 'api', nota: 'LQ_LISTEN.stop()' }
+    ];
     const L = {
-        state: 'idle', tok: 0, lesson: null, lines: [], idx: -1, cache: new Map(), audio: null,
-        speed: 1, backoffUntil: 0, lastManual: 0, waiting: false, resume: null, tts: null, vz: 'f', lang: 'zh-CN',
-        fails: 0, tripped: false, reported: 0, settled: new Map()
+        tok: 0, pausas: 0, lesson: null, lines: [], idx: -1, cache: new Map(), audio: null,
+        speed: 1, backoffUntil: 0, lastManual: 0, resume: null, tts: null, vz: 'f', lang: 'zh-CN',
+        fails: 0, reported: 0, settled: new Map(),
+        get state() { return REPRO.state; }, get waiting() { return ESPERA.state === 'esperando'; }, get tripped() { return CIRCUITO.state === 'abierto'; }
     };
     const $ = (id) => document.getElementById(id);
     const UI = () => window.LQ_UI;
@@ -155,7 +204,7 @@
         }
     }
     function trip() {
-        L.tripped = true; stats.tripped++;
+        CIRCUITO.go('abierto', 'dos-fallos'); stats.tripped++;
         Array.from(L.cache.keys()).forEach((k) => { if (k > L.idx) dropEntry(k); }); // lo que venía en camino ya no se usa
         renderBar();
     }
@@ -264,7 +313,15 @@
         });
         let sonando = true, r = 'ended';
         try {
-            try { await a.play(); } catch (e) { sonando = false; } // autoplay bloqueado o fuente inválida
+            for (;;) {
+                const p0 = L.pausas;
+                try { await a.play(); break; } catch (e) {
+                    // R5: si lo que abortó el play() fue NUESTRA pausa (justo al arrancar el audio), no es un error del audio: se espera el «Seguir» y se arranca de nuevo ESTE audio
+                    if (!(e && e.name === 'AbortError' && tok === L.tok && L.pausas !== p0)) { sonando = false; break; } // autoplay bloqueado, fuente inválida o corte
+                    await waitWhilePaused(tok);
+                    if (tok !== L.tok) return;
+                }
+            }
             if (tok !== L.tok) return;
             if (!sonando) r = 'error';
             else {
@@ -286,7 +343,7 @@
                 const mine = entryFor(i);
                 preload(i);
                 let v;
-                if (!mine.ready) { L.waiting = true; renderBar(); v = await mine.p; L.waiting = false; if (tok !== L.tok) return; renderBar(); }
+                if (!mine.ready) { ESPERA.go('esperando', 'sin-audio-listo'); renderBar(); v = await mine.p; ESPERA.go('libre', 'llego'); if (tok !== L.tok) return; renderBar(); }
                 else v = mine.entry;
                 L.cache.delete(i);
                 if (L.tripped) { // el circuito se cortó mientras esperaba: aunque haya llegado, el resto va con la voz del sistema
@@ -313,28 +370,31 @@
         try { if (typeof stopReader === 'function') stopReader(); } catch (e) { /* noop */ }
         const a = audioEl();
         try { a.src = SILENT_WAV; const pr = a.play(); if (pr && pr.catch) pr.catch(() => { }); } catch (e) { /* desbloqueo del audio dentro del toque */ }
-        L.lesson = lesson; L.lines = lines; L.idx = -1; L.cache = new Map(); L.backoffUntil = 0; L.waiting = false; L.resume = null;
-        L.fails = 0; L.tripped = false; L.reported = 0; L.settled = new Map();
+        L.lesson = lesson; L.lines = lines; L.idx = -1; L.cache = new Map(); L.backoffUntil = 0; L.resume = null;
+        ESPERA.go('libre', 'arranque'); CIRCUITO.go('cerrado', 'arranque'); // defensa: cada lección empieza con la espera y el circuito limpios
+        L.fails = 0; L.reported = 0; L.settled = new Map();
         L.vz = (typeof voiceZhFor === 'function') ? voiceZhFor(lesson) : 'f';
         L.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', L.vz) : 'zh-CN';
         L.speed = speedNow();
-        L.state = 'playing';
+        REPRO.go('playing', 'start');
         const tok = ++L.tok;
         renderBar();
         run(tok);
     }
     function finish() {
-        reset();
+        reset('fin');
         renderBar();
     }
-    function reset() {
-        L.state = 'idle'; L.idx = -1; L.waiting = false; L.tripped = false; L.fails = 0; L.reported = 0; L.settled = new Map();
+    function reset(ev) { // ev: 'fin' (terminó la lección) o 'corte' (stopAll)
+        REPRO.go('idle', ev); ESPERA.go('libre', ev); CIRCUITO.go('cerrado', ev);
+        L.idx = -1; L.fails = 0; L.reported = 0; L.settled = new Map();
         L.cache.forEach((e) => { e.p.then((v) => { if (v && v.url) { try { URL.revokeObjectURL(v.url); } catch (x) { /* ya */ } } }); });
         L.cache.clear();
         document.querySelectorAll('.lq-line.is-playing').forEach(el => el.classList.remove('is-playing'));
     }
     function stopAll(why) {
         if (L.state === 'idle') return;
+        if (!CORTES.some((c) => c.id === why)) { try { console.warn('[escuchar-todo] corte sin declarar:', why); } catch (e) { /* noop */ } if (window.AC_SM_STRICT === true) throw new Error('[escuchar-todo] corte sin declarar: ' + why); }
         stats.stops[why] = (stats.stops[why] || 0) + 1;
         L.tok++; // cancela lo que esté en vuelo
         const a = L.audio;
@@ -342,15 +402,15 @@
         if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) { /* noop */ } }
         L.tts = null;
         const r = L.resume; L.resume = null; if (r) r();
-        reset();
+        reset('corte');
         renderBar();
     }
     function togglePause() {
         if (L.state === 'playing') {
-            L.state = 'paused';
+            REPRO.go('paused', 'pausa'); L.pausas++; // L.pausas no es estado: marca «hubo una pausa nuestra» (playEntry distingue así un play() abortado por NUESTRA pausa)
             if (L.tts) { try { speechSynthesis.pause(); } catch (e) { /* noop */ } } else if (L.audio && !L.audio.paused) { try { L.audio.pause(); } catch (e) { /* noop */ } }
         } else if (L.state === 'paused') {
-            L.state = 'playing';
+            REPRO.go('playing', 'seguir');
             if (L.resume) L.resume();
             else if (L.tts) { try { speechSynthesis.resume(); } catch (e) { /* noop */ } } else if (L.audio && L.audio.src && L.audio.paused) { L.audio.play().catch(() => { }); }
         }
@@ -387,5 +447,5 @@
     else boot();
 
     // setIcons: true = todos los iconos; false = solo texto; undefined = detectar la fuente (lo normal). hasGlyph se expone para las pruebas.
-    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, get tripped() { return L.tripped; }, config: { AHEAD, BUSY_DEFAULT_MS, BUSY_MAX_WAIT_MS, CIRCUIT_AFTER, BACKOFF_MS, MANUAL_SCROLL_MS } };
+    window.LQ_LISTEN = { setIcons(v) { ICONS = (v === undefined) ? null : (v ? Object.assign({}, ICON_CHARS) : { play: '', pause: '', resume: '', stop: '', wait: '…' }); renderBar(); }, get icons() { return Object.assign({}, icons()); }, hasGlyph: hasGlyph, stats: stats, get state() { return L.state; }, get idx() { return L.idx; }, stop: () => stopAll('api'), get audio() { return L.audio; }, get tripped() { return L.tripped; }, cortes: CORTES.map((c) => ({ id: c.id, nota: c.nota })), config: { AHEAD, BUSY_DEFAULT_MS, BUSY_MAX_WAIT_MS, CIRCUIT_AFTER, BACKOFF_MS, MANUAL_SCROLL_MS } };
 })();
