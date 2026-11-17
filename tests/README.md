@@ -10,13 +10,13 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 46 suites de `tests/` y las 10 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 47 suites de `tests/` y las 10 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
 ajustes-velocidad     69              🟢 VERDE
 …
-56 suites · 6499 comprobaciones · 54 verdes · 2 parciales · 0 omitidas · 0 rojas
+57 suites · 6543 comprobaciones · 55 verdes · 2 parciales · 0 omitidas · 0 rojas
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de
@@ -66,7 +66,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (45, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (46, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
@@ -110,6 +110,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `lector-oro` | Lector de texto libre (`reader.js`): **prueba de oro por ORDEN de eventos** (`tests/data/lector-oro.json`, grabado con el código anterior a las máquinas de estado; regrabable con `GOLDEN_RECORD=1`): 17 escenarios (sano, pausa/continuar/parar, pausa mientras carga un trozo —R2—, pausa en el hueco entre trozos, continuar antes de que llegue, bache y caída a la voz del sistema, trozos mixtos, corte en plena carga y lectura nueva, cada corte); estricto sin transiciones sin declarar; con `state-machine.js` bloqueado suena igual |
 | `lector-mutaciones` | rompe `reader.js` a propósito (sacar una fila, asignación directa `readerPlayState = …`, saltear el reinicio de `stopReader()`) y exige que fallen el chequeo estático y el oro; sin modo estricto la fila sacada se aplica igual y queda en `AC_SM_LOG` |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
+| `muestra-de-voz` | muestra de voz (botones 🇨🇳👩/🇦🇷👩, `playVoiceSample`) con un servidor simulado: sano → suena la voz del servidor; 503/502/red caída → cae a la voz del sistema (texto, idioma y voz acordes) y el aviso rojo sale una vez; 429/413/200 sin audio → voz del sistema SIN aviso; español; sin voces del sistema; toques rápidos (solo el último habla); el botón no queda trabado; guardia: `playAudio` de Hoy con 503 sigue avisando |
 | `navegacion-tanda1`, `navegacion-tanda2` | botón Atrás: capas apiladas, audio, tips, estadísticas ↔ respaldo |
 | `ninos-pantalla`, `ninos-sonidos` | pantalla Niños y tarjetas de sonidos |
 | `onboarding` | primer uso: pantallas, «Desde cero», «Ya sé algo», saltar |

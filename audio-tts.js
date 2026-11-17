@@ -480,28 +480,53 @@ function warnStaleVoice(key, data) {
     } catch (e) { /* silencioso */ }
 }
 
-function playVoiceSample(lang) {
+// La muestra de voz CAE A LA VOZ DEL SISTEMA si el servidor falla (antes: solo el aviso rojo y ningún sonido). Misma regla que el Lector (#131): el aviso rojo
+// (notifyTtsFallback) sale SOLO si de verdad se cae a la voz del sistema por una caída del servidor (error de red o timeout, o una respuesta !ok que no sea 413/429).
+// 413/429 (límites propios) y un 200 sin audio (o con cuerpo ilegible) caen a la voz del sistema SIN aviso. Sin reintento: un pedido fallido va directo a la voz del sistema.
+// fetchTTS no cambia: se usa su opción `silent` (el aviso lo decide esta función). Un fallo al decodificar o al reproducir una respuesta buena sigue siendo silencioso.
+let voiceSampleTok = 0; // solo el ÚLTIMO toque puede caer a la voz del sistema (tres toques rápidos → una sola voz, la de la última elección)
+function speakVoiceSampleSystem(text, langCode, gender) {
+    try {
+        if (!('speechSynthesis' in window)) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = langCode; u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+        try { const sv = sysVoiceFor(langCode, gender); if (sv) u.voice = sv; } catch (e) { /* sin voz acorde: la del sistema por defecto */ } // v9.4: voz del sistema acorde a la elegida
+        speechSynthesis.speak(u);
+    } catch (e) { /* silencioso */ }
+}
+async function playVoiceSample(lang) {
     try {
         const text = VOICE_SAMPLES[lang];
         const gender = lang === 'es' ? voiceEs : voiceZh;
         const langCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
-        fetchTTS(ttsBody(text, langCode, gender)) // v9.41: pasa por el choke point único (timeout + aviso si el server cae)
-            .then(r => r.ok ? r.json() : null)
-            .then(d => {
-                // v9.49: chequeo de server viejo SOLO para claves regionales
-                // (las f/m de España no tienen expectativa en VOICE_EXPECT).
-                if (lang === 'es') { if (gender.indexOf('ar-') === 0) warnStaleVoice(gender, d); }
-                else if (gender.indexOf('tw-') === 0) warnStaleVoice(gender, d);
-                if (!d || !d.audio) return;
-                const bin = atob(d.audio);
-                const bytes = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-                const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
-                const a = new Audio(url);
-                applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
-                a.onended = () => URL.revokeObjectURL(url);
-                a.play().catch(() => { /* autoplay bloqueado */ });
-            })
-            .catch(() => { /* sin muestra de audio */ });
+        const myTok = ++voiceSampleTok;
+        let res = null, caida = false;
+        try {
+            res = await fetchTTS(ttsBody(text, langCode, gender), undefined, { silent: true }); // v9.41: choke point único (timeout); `silent`: el aviso se decide abajo
+            if (!res || !res.ok) caida = !res || (res.status !== 413 && res.status !== 429);
+        } catch (e) { caida = true; } // error de red o timeout
+        let d = null;
+        if (res && res.ok) { try { d = await res.json(); } catch (e) { d = null; } }
+        // v9.49: chequeo de server viejo SOLO para claves regionales
+        // (las f/m de España no tienen expectativa en VOICE_EXPECT).
+        if (lang === 'es') { if (gender.indexOf('ar-') === 0) warnStaleVoice(gender, d); }
+        else if (gender.indexOf('tw-') === 0) warnStaleVoice(gender, d);
+        if (!d || !d.audio) {
+            if (myTok !== voiceSampleTok) return; // hubo otro toque después: ese es el que manda
+            if (caida) notifyTtsFallback();
+            speakVoiceSampleSystem(text, langCode, gender);
+            return;
+        }
+        try {
+            const bin = atob(d.audio);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
+            const a = new Audio(url);
+            applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
+            a.onended = () => URL.revokeObjectURL(url);
+            a.play().catch(() => { /* autoplay bloqueado */ });
+        } catch (e) { /* sin muestra de audio */ }
     } catch (e) { /* silencioso */ }
 }
