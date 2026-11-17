@@ -9,6 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DOC = path.join(ROOT, 'docs', 'maquinas-de-estado.md');
 const MODULOS = [
     { archivo: 'lessons-listen.js', titulo: '«Escuchar todo» (lecciones de aprendo chino)', oro: 'escuchar-todo-oro', cortes: (w) => (w.LQ_LISTEN && w.LQ_LISTEN.cortes) || [] },
+    { archivo: 'podcast.js', titulo: 'Podcast (lecciones de corrido)', oro: 'podcast-oro', cortes: () => [] }, // el único corte es stopAll() (✕, Esc, clic afuera, ☰, ⏮/⏭, elegir otra)
     { archivo: 'reader.js', titulo: 'Lector de texto libre', oro: 'lector-oro', cortes: () => [] } // el único corte es stopReader() (8 llamadores en otros archivos: su firma no cambia)
 ];
 

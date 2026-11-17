@@ -93,6 +93,54 @@ Todo lo que para la escucha pasa por `stopAll(motivo)` con uno de estos motivos;
 | `vista` | la vista cambió (quiz, glosario, otra lección) |
 | `api` | LQ_LISTEN.stop() |
 
+## Podcast (lecciones de corrido)
+
+Archivo: `podcast.js` · prueba de oro: `tests/podcast-oro.test.js` (`tests/data/podcast-oro.json`).
+
+### Podcast: reproducción (`podcast.reproduccion`)
+
+Estados: `idle`, `done`, `loading`, `playing`, `paused` · inicial: `idle`
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle --> loading : leer
+    done --> loading : leer
+    loading --> playing : audio
+    loading --> playing : voz-del-sistema
+    loading --> idle : sin-voz
+    playing --> paused : pausa
+    paused --> playing : seguir
+    playing --> done : fin
+    loading --> idle : corte
+    playing --> idle : corte
+    paused --> idle : corte
+    done --> idle : corte
+    idle --> playing : seguir (conocida)
+    loading --> playing : seguir (conocida)
+    paused --> playing : voz-del-sistema (conocida)
+    paused --> done : fin (conocida)
+```
+
+| De | A | Evento | Estado de la fila | Qué es |
+|---|---|---|---|---|
+| `idle`, `done` | `loading` | `leer` | declarada | se elige una lección (arranca sola) o se toca ▶️ tras «Listo» |
+| `loading` | `playing` | `audio` | declarada | llegó el audio del servidor y arranca |
+| `loading` | `playing` | `voz-del-sistema` | declarada | el pedido o el play() falló: se lee la lección entera con la voz del sistema |
+| `loading` | `idle` | `sin-voz` | declarada | el pedido falló y el dispositivo no tiene voz del sistema |
+| `playing` | `paused` | `pausa` | declarada | ⏸ |
+| `paused` | `playing` | `seguir` | declarada | ▶️ tras una pausa |
+| `playing` | `done` | `fin` | declarada | terminó el audio (o la voz del sistema) |
+| `loading`, `playing`, `paused`, `done` | `idle` | `corte` | declarada | stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección |
+| `idle`, `loading` | `playing` | `seguir` | ⚠️ **conocida** (R10a) | CLASE sintética (dos toques en la MISMA tarea; una persona no puede). El .then de play() al reanudar no tiene guarda de token: tras cerrar / ☰ / ⏭ en el mismo turno vuelve a poner «playing» (en idle, sin efecto visible) o lo pone con la lección nueva todavía cargando (loading: la pantalla dice «Reproduciendo» sin que suene nada). Escenarios R10a-* |
+| `paused` | `playing` | `voz-del-sistema` | ⚠️ **conocida** (R10c-real) | CLASE real (AbortError real; ventana de un solo turno). ⏸ en el mismo turno que el primer play(): play() se rechaza, el catch manda toda la lección a la voz del sistema y el estado vuelve a «playing» pese a que se pausó. Escenario R10c-pausa-en-el-play |
+| `paused` | `done` | `fin` | ⚠️ **conocida** (R10c-emulado) | CLASE emulada: PROBAR EN UN DISPOSITIVO REAL (play() rechazado a la fuerza, como un autoplay bloqueado). La voz del sistema habla mientras la pantalla dice «En pausa» y termina estando en pausa (ver «pausa al motor equivocado»). Escenario R10c-autoplay-bloqueado |
+
+Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual hasta que se arreglen):
+
+- ⚠️ **R10b** — CLASE real. Un toque en ▶️ MIENTRAS carga reinicia el pedido (loading → loading no es un cambio de estado): sale un SEGUNDO pedido de la lección entera al servidor y el primero se descarta. El botón dice ▶️ aunque el estado dice «Preparando…», y openLesson arranca solo, así que cualquiera lo alcanza. Escenario del oro: `R10b-toque-en-carga`.
+- ⚠️ **R10c-emulado (pausa al motor equivocado)** — CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado. Escenario del oro: `R10c-autoplay-bloqueado`.
+
 ## Lector de texto libre
 
 Archivo: `reader.js` · prueba de oro: `tests/lector-oro.test.js` (`tests/data/lector-oro.json`).

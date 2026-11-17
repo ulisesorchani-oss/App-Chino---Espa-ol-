@@ -67,6 +67,35 @@
 // ============================================================
 (function podcastInit() {
     'use strict';
+    // ── Estado de la reproducción: UNA máquina con tabla de transiciones (state-machine.js, compartido; docs/maquinas-de-estado.md) ──
+    // Se declara ANTES de los `return` de más abajo (sin lecciones o sin el overlay) para que el generador de la doc la vea. Para CAMBIAR el estado hay que pasar por
+    // PD.go(estado, evento): una asignación directa (pState = 'x') la frena tools/check-maquinas.js. pTok NO es estado: identifica «una reproducción» (invalida callbacks viejos).
+    // Si state-machine.js no carga, el respaldo asigna sin validar y el Podcast suena igual.
+    const SM = (typeof window.acMachine === 'function') ? window.acMachine : function (name, def) {
+        let cur = def.initial; // respaldo: no valida, no registra
+        return { name: name, get state() { return cur; }, is: (x) => cur === x, declared: () => true, go(to) { cur = to; return true; } };
+    };
+    const PD = SM('podcast.reproduccion', {
+        initial: 'idle', titulo: 'Podcast: reproducción',
+        rows: [
+            { from: ['idle', 'done'], to: 'loading', ev: 'leer', nota: 'se elige una lección (arranca sola) o se toca ▶️ tras «Listo»' },
+            { from: 'loading', to: 'playing', ev: 'audio', nota: 'llegó el audio del servidor y arranca' },
+            { from: 'loading', to: 'playing', ev: 'voz-del-sistema', nota: 'el pedido o el play() falló: se lee la lección entera con la voz del sistema' },
+            { from: 'loading', to: 'idle', ev: 'sin-voz', nota: 'el pedido falló y el dispositivo no tiene voz del sistema' },
+            { from: 'playing', to: 'paused', ev: 'pausa', nota: '⏸' },
+            { from: 'paused', to: 'playing', ev: 'seguir', nota: '▶️ tras una pausa' },
+            { from: 'playing', to: 'done', ev: 'fin', nota: 'terminó el audio (o la voz del sistema)' },
+            { from: ['loading', 'playing', 'paused', 'done'], to: 'idle', ev: 'corte', nota: 'stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección' },
+            // ── defectos de hoy (R10 del informe de máquinas de estado), declarados «conocida»: describen lo que el código hace AHORA; el oro por orden de eventos los fija ──
+            { from: ['idle', 'loading'], to: 'playing', ev: 'seguir', known: 'R10a', nota: 'CLASE sintética (dos toques en la MISMA tarea; una persona no puede). El .then de play() al reanudar no tiene guarda de token: tras cerrar / ☰ / ⏭ en el mismo turno vuelve a poner «playing» (en idle, sin efecto visible) o lo pone con la lección nueva todavía cargando (loading: la pantalla dice «Reproduciendo» sin que suene nada). Escenarios R10a-*' },
+            { from: 'paused', to: 'playing', ev: 'voz-del-sistema', known: 'R10c-real', nota: 'CLASE real (AbortError real; ventana de un solo turno). ⏸ en el mismo turno que el primer play(): play() se rechaza, el catch manda toda la lección a la voz del sistema y el estado vuelve a «playing» pese a que se pausó. Escenario R10c-pausa-en-el-play' },
+            { from: 'paused', to: 'done', ev: 'fin', known: 'R10c-emulado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL (play() rechazado a la fuerza, como un autoplay bloqueado). La voz del sistema habla mientras la pantalla dice «En pausa» y termina estando en pausa (ver «pausa al motor equivocado»). Escenario R10c-autoplay-bloqueado' }
+        ],
+        defectos: [
+            { id: 'R10b', escenario: 'R10b-toque-en-carga', nota: 'CLASE real. Un toque en ▶️ MIENTRAS carga reinicia el pedido (loading → loading no es un cambio de estado): sale un SEGUNDO pedido de la lección entera al servidor y el primero se descarta. El botón dice ▶️ aunque el estado dice «Preparando…», y openLesson arranca solo, así que cualquiera lo alcanza.' },
+            { id: 'R10c-emulado (pausa al motor equivocado)', escenario: 'R10c-autoplay-bloqueado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado.' }
+        ]
+    });
     const LESSONS = (typeof window.GRADED_LESSONS !== 'undefined') ? window.GRADED_LESSONS : [];
     if (!LESSONS.length) return;
 
@@ -84,7 +113,7 @@
     let pAudio = null;       // Audio() del API en curso (toda la lección)
     let pTtsU = null;        // utterance del fallback (voz del sistema, sin progreso real)
     let pTok = 0;            // invalida callbacks de una reproducción vieja
-    let pState = 'idle';     // 'idle' | 'loading' | 'playing' | 'paused' | 'done'
+    // (el estado — idle | loading | playing | paused | done — vive en la máquina PD de arriba)
     let showText = false;    // "👁️ Ver texto" — NUNCA activado por defecto
 
     function getLastLessonId() {
@@ -127,7 +156,7 @@
         pTok++;
         if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; }
         if (pTtsU) { try { speechSynthesis.cancel(); } catch (e) { } pTtsU = null; }
-        pState = 'idle';
+        PD.go('idle', 'corte');
     }
 
     // ── v9.71/v9.72: UN pedido de TTS con la lección ENTERA (no una cola
@@ -137,7 +166,7 @@
     async function playLesson() {
         if (!S.lesson) return;
         const myTok = ++pTok;
-        pState = 'loading';
+        PD.go('loading', 'leer');
         updatePlayerUI();
         if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
         if (typeof stopReader === 'function') stopReader();
@@ -162,13 +191,13 @@
             try { audio.preservesPitch = true; audio.webkitPreservesPitch = true; } catch (e2) { }
             if (typeof applyTtsSpeed === 'function') applyTtsSpeed(audio, data);
             pAudio = audio;
-            pState = 'playing';
+            PD.go('playing', 'audio');
             audio.addEventListener('timeupdate', updateAudioProgress);
             updatePlayerUI();
             const gone = () => {
                 URL.revokeObjectURL(url);
                 if (myTok !== pTok) return;
-                pState = 'done';
+                PD.go('done', 'fin');
                 updatePlayerUI();
             };
             audio.addEventListener('ended', gone, { once: true });
@@ -181,33 +210,33 @@
                 u.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN'; // v9.7x: 🇹🇼 → zh-TW también sin red
                 u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
                 pTtsU = u;
-                pState = 'playing';
+                PD.go('playing', 'voz-del-sistema');
                 updatePlayerUI();
                 const gone = () => {
                     if (myTok !== pTok) return;
-                    pTtsU = null; pState = 'done';
+                    pTtsU = null; PD.go('done', 'fin');
                     updatePlayerUI();
                 };
                 u.onend = gone;
                 u.onerror = gone;
                 speechSynthesis.speak(u);
             } else {
-                pState = 'idle';
+                PD.go('idle', 'sin-voz');
                 updatePlayerUI();
             }
         }
     }
     function togglePlayPause() {
-        if (pState === 'playing') {
+        if (PD.is('playing')) {
             if (pAudio) { try { pAudio.pause(); } catch (e) { } }
             else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } }
-            pState = 'paused';
+            PD.go('paused', 'pausa');
             updatePlayerUI();
-        } else if (pState === 'paused') {
+        } else if (PD.is('paused')) {
             if (pAudio) {
-                pAudio.play().then(() => { pState = 'playing'; updatePlayerUI(); }).catch(() => { });
+                pAudio.play().then(() => { PD.go('playing', 'seguir'); updatePlayerUI(); }).catch(() => { });
             } else if (pTtsU) {
-                try { speechSynthesis.resume(); pState = 'playing'; updatePlayerUI(); } catch (e) { }
+                try { speechSynthesis.resume(); PD.go('playing', 'seguir'); updatePlayerUI(); } catch (e) { }
             }
         } else { // idle | done → (re)empezar
             playLesson();
@@ -336,16 +365,16 @@
         const statusEl = $('pd-status');
         if (statusEl) {
             statusEl.textContent =
-                pState === 'loading' ? '⏳ Preparando el audio de toda la lección…' :
-                pState === 'playing' ? '▶ Reproduciendo…' :
-                pState === 'paused' ? '⏸ En pausa' :
-                pState === 'done' ? '🏁 Listo — tocá ▶️ para volver a escuchar' :
+                PD.state === 'loading' ? '⏳ Preparando el audio de toda la lección…' :
+                PD.state === 'playing' ? '▶ Reproduciendo…' :
+                PD.state === 'paused' ? '⏸ En pausa' :
+                PD.state === 'done' ? '🏁 Listo — tocá ▶️ para volver a escuchar' :
                 'Tocá ▶️ para empezar';
         }
         const ppBtn = $('pd-playpause');
         if (ppBtn) {
-            ppBtn.textContent = pState === 'playing' ? '⏸' : '▶️';
-            ppBtn.setAttribute('aria-label', pState === 'playing' ? 'Pausar' : 'Reproducir');
+            ppBtn.textContent = PD.state === 'playing' ? '⏸' : '▶️';
+            ppBtn.setAttribute('aria-label', PD.state === 'playing' ? 'Pausar' : 'Reproducir');
         }
         // v9.72: ⏮/⏭ ahora navegan GRADED_LESSONS — se apagan en los bordes
         // de la lista, no según haya o no audio del API en curso.
