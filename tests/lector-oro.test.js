@@ -157,6 +157,7 @@ function instrumentar(cfg) {
         { id: 'corte-en-carga-y-nueva-lectura', policy: ({ idx }, intento) => (idx === 0 && intento === 0 ? { hold: true } : {}), liberar: { tras: '> leer', idx: 0, espera: 400 }, triggers: [{ when: 'fetch GET L0', n: 1, do: 'parar', delay: 30 }, { when: '> parar', do: 'leer', delay: 50 }, { re: '^btn 🔊 Leer', n: 4, do: 'fin', delay: 200 }] }, // el 4.º «🔊 Leer»: arranque, corte, arranque de la nueva y fin de la nueva
         { id: 'R2-pausa-en-carga-con-voz', policy: () => ({ status: 503 }), triggers: [{ re: '^btn ⏳', n: 2, do: 'pausa', delay: 20 }, { when: '> pausa', do: 'seguir', delay: 700, cond: 'pausado' }, FIN_IDLE] },
         { id: 'pausa-voz-ignora-pausa', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L3', do: 'pausa', delay: 30 }, FIN_IDLE] },
+        { id: 'R2-pausa-voz-ignora-pausa-y-sigue', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L1', do: 'pausa', delay: 30 }, { when: 'voz.end L1', do: 'seguir', delay: 100 }, FIN_IDLE] },
         { id: 'corte-limpiar', triggers: [{ when: 'audio.playing', n: 2, do: 'limpiar' }, FIN_IDLE] },
         { id: 'corte-stopReader', triggers: [{ when: 'audio.playing', n: 2, do: 'parar' }, FIN_IDLE] },
         { id: 'corte-global', triggers: [{ when: 'audio.playing', n: 2, do: 'global' }, FIN_IDLE] }
@@ -185,6 +186,16 @@ function instrumentar(cfg) {
             if (/^btn ▶ Continuar/.test(e)) pausada = true;
             else if (e === '> seguir') pausada = false;
             else if (pausada && /^(audio\.play |audio\.playing|speak |voz\.start|aviso-rojo|btn ⏸ Pausar)/.test(e)) mal.push({ en: i, evento: e });
+        });
+        return mal;
+    }
+    // R2b: entre el «Continuar» y la llegada del trozo (resp L1) no suena ni se pide nada al motor
+    function sonidoAntesDeLlegar(traza) {
+        const mal = []; let esperando = false;
+        traza.forEach((e, i) => {
+            if (e === '> seguir') esperando = true;
+            else if (/^resp L1 /.test(e)) esperando = false;
+            else if (esperando && /^(audio\.play |audio\.playing|voz\.resume)/.test(e)) mal.push({ en: i, evento: e });
         });
         return mal;
     }
@@ -218,11 +229,15 @@ function instrumentar(cfg) {
             ok(MAQ.every((k) => r.sm.maquinas.includes(k)), '[' + esc.id + '] las 3 máquinas del Lector están registradas (state-machine.js cargó antes que reader.js)');
             ok(r.sm.log.length === 0, '[' + esc.id + '] modo estricto: ninguna transición sin declarar (AC_SM_LOG vacío)' + (r.sm.log.length ? ' → ' + JSON.stringify(r.sm.log.slice(0, 3)) : ''));
             ok(r.errs.filter((x) => !/localStorage/.test(x)).length === 0, '[' + esc.id + '] sin errores JS ' + r.errs.join('|'));
-            if (esc.id === 'R2-pausa-en-carga-con-voz') {
+            if (esc.id === 'R2-continuar-antes-de-llegar') { // R2b: «Continuar» antes de que llegue el trozo no repite el anterior
+                const mal = sonidoAntesDeLlegar(r.traza);
+                ok(mal.length === 0, '[' + esc.id + '] entre el «Continuar» y la llegada del trozo no suena nada (sin play() sobre el audio viejo)' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
+            }
+            { // en TODOS los escenarios: cada voz.pause se cierra con voz.resume o cancel antes de la próxima voz
                 const mal = vozPareada(r.traza);
                 ok(mal.length === 0, '[' + esc.id + '] cada voz.pause se cierra con voz.resume o cancel antes de la próxima voz' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
             }
-            if (['R2-pausa-en-carga', 'R2-pausa-en-hueco', 'R2-pausa-sin-voz', 'R2-pausa-en-carga-con-voz'].includes(esc.id)) { // el defecto R2 NO se tolera: en pausa no suena, no habla, no avisa
+            if (['R2-pausa-en-carga', 'R2-pausa-en-hueco', 'R2-pausa-sin-voz', 'R2-pausa-en-carga-con-voz', 'R2-pausa-voz-ignora-pausa-y-sigue'].includes(esc.id)) { // el defecto R2 NO se tolera: en pausa no suena, no habla, no avisa
                 const mal = sonidoEnPausa(r.traza);
                 ok(mal.length === 0, '[' + esc.id + '] en pausa (botón «Continuar») no suena ni habla nada ni cambia el botón' + (mal.length ? ' → ' + JSON.stringify(mal.slice(0, 4)) : ''));
             }

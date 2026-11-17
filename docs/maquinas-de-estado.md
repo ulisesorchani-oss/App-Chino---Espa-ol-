@@ -122,10 +122,6 @@ stateDiagram-v2
 | `playing`, `paused` | `idle` | `corte` | declarada | stopReader(): lo llaman Limpiar, otra lectura/audio de la app (un solo audio a la vez) y toggleReaderPlay() al arrancar |
 | `paused` | `idle` | `fin` | ⚠️ **conocida** (pausa-ignorada) | si el motor de voz del sistema ignora pause() (la voz sigue y termina sola), el último trozo termina estando en pausa y la lectura vuelve al reposo sin que nadie siga (escenario pausa-voz-ignora-pausa) |
 
-Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual hasta que se arreglen):
-
-- ⚠️ **R2b** — pausar y «Continuar» mientras carga el trozo siguiente llama a play() sobre el audio VIEJO (ya terminado): repite el trozo anterior hasta que llega el nuevo Escenario del oro: `R2-continuar-antes-de-llegar`.
-
 ### Lector: espera del trozo (`lector.espera`)
 
 Estados: `libre`, `esperando` · inicial: `libre`

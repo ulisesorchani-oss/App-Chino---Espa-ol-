@@ -55,9 +55,7 @@ const READER_REPRO = readerSM('lector.reproduccion', {
         { from: ['playing', 'paused'], to: 'idle', ev: 'corte', nota: 'stopReader(): lo llaman Limpiar, otra lectura/audio de la app (un solo audio a la vez) y toggleReaderPlay() al arrancar' },
         { from: 'paused', to: 'idle', ev: 'fin', known: 'pausa-ignorada', nota: 'si el motor de voz del sistema ignora pause() (la voz sigue y termina sola), el último trozo termina estando en pausa y la lectura vuelve al reposo sin que nadie siga (escenario pausa-voz-ignora-pausa)' }
     ],
-    defectos: [
-        { id: 'R2b', escenario: 'R2-continuar-antes-de-llegar', nota: 'pausar y «Continuar» mientras carga el trozo siguiente llama a play() sobre el audio VIEJO (ya terminado): repite el trozo anterior hasta que llega el nuevo' }
-    ]
+    defectos: []
 });
 // Espera: «⏳ ...» mientras al trozo que toca todavía no le llegó el audio (o su error).
 const READER_ESPERA = readerSM('lector.espera', {
@@ -85,6 +83,7 @@ let readerChunkIdx = -1;           // trozo que está sonando (o el último que 
 let readerChunkCache = new Map();  // idx -> Promise<{url,data,error}> (fetch en curso o resuelto)
 let readerChunkReady = new Map();  // idx -> {url,data,error} YA resuelto (para saber si hay que mostrar "cargando")
 let readerStopToken = 0;           // se incrementa en cada stop/nueva lectura: invalida callbacks viejos
+let readerMotorPausado = false;    // el pausar le hizo pause() al motor: el «Continuar» (o stopReader) le debe cerrar el par
 let readerResume = null;           // resolvedor de «esperando el Continuar»: playReaderChunk lo deja si el trozo llegó con la lectura en pausa (stopReader también lo suelta)
 let readerSessionLangCode = null;  // idioma/voz fijados al arrancar esta lectura (igual para todos los trozos)
 let readerSessionGender = null;
@@ -297,7 +296,7 @@ function readerAdvanceAfterChunk(idx, myToken) {
     const btn = document.getElementById('btn-reader-play');
     // Solo se muestra "cargando" si de verdad el siguiente trozo no está
     // listo — con trozos de ~150 caracteres, lo normal es que ya lo esté.
-    if (btn && !readerChunkReady.has(nextIdx)) btn.textContent = '⏳ ...';
+    if (btn && !readerChunkReady.has(nextIdx) && !READER_REPRO.is('paused')) btn.textContent = '⏳ ...'; // en pausa el botón sigue diciendo «Continuar»
     playReaderChunk(nextIdx, myToken);
 }
 
@@ -352,6 +351,7 @@ async function playReaderChunk(idx, myToken) {
 
 function stopReader() {
     readerStopToken++;
+    readerMotorPausado = false;
     if (readerResume) readerResume(); // suelta a un playReaderChunk que esperaba el «Continuar»: al ver el token nuevo, se va
     KARA.stop(); // v9.7x: apaga el resaltado si estaba activo (no-op si ya estaba parado)
     if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -378,20 +378,29 @@ async function toggleReaderPlay() {
     if (!btn) return;
 
     if (READER_REPRO.is('playing')) {
-        if (READER_MOTOR.is('speech')) { if ('speechSynthesis' in window) speechSynthesis.pause(); }
-        else { readerAudio.pause(); }
+        // R2b: mientras carga un trozo NO suena nada (el motor que quedó marcado es el del trozo anterior): no se le pide pausa a ningún motor
+        if (!READER_ESPERA.is('esperando')) {
+            if (READER_MOTOR.is('speech')) { if ('speechSynthesis' in window) speechSynthesis.pause(); }
+            else { readerAudio.pause(); }
+            readerMotorPausado = true; // el «Continuar» le debe el resume() (se cierra el par pause/resume)
+        }
         READER_REPRO.go('paused', 'pausa');
         btn.textContent = '▶ Continuar';
         return;
     }
     if (READER_REPRO.is('paused')) {
         READER_REPRO.go('playing', 'seguir');
-        btn.textContent = '⏸ Pausar';
+        const motorPausado = readerMotorPausado; readerMotorPausado = false;
+        // R2b: si el trozo sigue cargando no hay nada que reanudar: el botón vuelve a «⏳ ...» y el trozo arranca solo al llegar (antes se repetía el anterior)
+        btn.textContent = (READER_ESPERA.is('esperando') && !readerResume) ? '⏳ ...' : '⏸ Pausar';
+        // si el pausar le hizo pause() a la voz del sistema, el «Continuar» le debe SIEMPRE el resume() (se cierra el par), también cuando no hay nada que reanudar
+        const cerrarParDeVoz = () => { if (motorPausado && READER_MOTOR.is('speech') && 'speechSynthesis' in window) speechSynthesis.resume(); };
         if (readerResume) { // el trozo ya había llegado y esperaba: arranca él (no se le pide play() al audio viejo)
-            if (READER_MOTOR.is('speech') && 'speechSynthesis' in window) speechSynthesis.resume(); // el pausar le hizo pause() a la voz: se cierra el par
+            cerrarParDeVoz();
             readerResume();
             return;
         }
+        if (READER_ESPERA.is('esperando')) { cerrarParDeVoz(); return; }
         if (READER_MOTOR.is('speech')) { if ('speechSynthesis' in window) speechSynthesis.resume(); }
         else { try { await readerAudio.play(); } catch (e) { /* nada que reanudar */ } }
         return;
