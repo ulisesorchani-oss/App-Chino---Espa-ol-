@@ -29,7 +29,7 @@
     const nivelOf = (r) => r.exam === 'TOCFL'
         ? { key: 'TOCFL-' + r.examLvl, label: 'TOCFL ' + TOCFL_LABEL(r.examLvl), rank: 100 + ['Prep', 'A1', 'A2', 'B1', 'B2', 'C1'].indexOf(r.examLvl) }
         : { key: 'HSK' + r.hsk, label: 'HSK ' + r.hsk, rank: Number(r.hsk) };
-    // revision de los v1 (hoy no tienen el campo): HSK 3 lo revisó el autor; HSK 5 y TOCFL siguen pendientes
+    // revision de los v1 (hoy no tienen el campo): HSK 3: revisado por el docente (sin hablante nativo; constancia en docs/revision-lecturas-v1.md); HSK 5 y TOCFL siguen pendientes
     const REVISION_V1 = { HSK3: 'revisado', HSK5: 'pendiente', 'TOCFL-B1': 'pendiente' };
 
     function normV1(r) {

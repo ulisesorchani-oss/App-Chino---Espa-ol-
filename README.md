@@ -69,6 +69,7 @@ repartidas en archivos más chicos.
 | `manifest.json`, `icons/` | PWA instalable |
 | `README-Pronunciacion.md` | Documentación viva del módulo de pronunciación |
 | `docs/historial-actualizaciones/` | Notas de actualización de versiones anteriores (histórico, ya aplicadas) |
+| `docs/revision-lecturas-v1.md` | Constancia (escrita a mano) de quién y cuándo revisó el chino de las lecturas v1 |
 
 ## Documentación
 
@@ -182,6 +183,7 @@ nuevo con la traducción en `es`.
    mismo archivo.
 3. Probá en el navegador con refresco forzado (Ctrl+Shift+R) antes de dar
    por terminado el cambio.
+4. Una etiqueta de revisión o de calidad en los datos (`revisado`, `nativo`, `verificado`…) solo se escribe si el mismo commit registra quién la puso y cuándo; si no, la etiqueta es `pendiente`.
 
 ## Despliegue
 
