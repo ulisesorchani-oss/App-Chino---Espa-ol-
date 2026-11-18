@@ -15,6 +15,8 @@ const ROOT = path.resolve(__dirname, '..');
 const CONFIG = {
     'lessons-listen.js': { maquinas: { REPRO: 'escuchar.reproduccion', ESPERA: 'escuchar.espera', CIRCUITO: 'escuchar.circuito' }, objeto: 'L', campos: ['state', 'waiting', 'tripped'], stop: 'stopAll' },
     // reader.js: variables globales sueltas (no un objeto). stopReader() no recibe motivo: no hay tabla de cortes; sus filas 'corte' se verifican como cualquier fila emitida
+    // podcast.js: variable local de un IIFE (pState); stopAll() no recibe motivo: sus filas 'corte' se verifican como cualquier fila emitida
+    'podcast.js': { maquinas: { PD: 'podcast.reproduccion' }, variables: ['pState'] },
     'reader.js': { maquinas: { READER_REPRO: 'lector.reproduccion', READER_ESPERA: 'lector.espera', READER_MOTOR: 'lector.motor' }, variables: ['readerPlayState', 'readerActiveEngine'] }
 };
 // Quita comentarios (// y /* */) conservando el largo de las líneas; respeta los literales de cadena.
