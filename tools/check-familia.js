@@ -109,7 +109,10 @@ ok(!paises.length, 'sin nombres de países ni banderas en los textos que se mues
 ok(L.every(l => l.fuente === 'material del Instituto Guó Fēng'), 'cada lección lleva fuente «material del Instituto Guó Fēng»');
 ok(/Fuente: ' \+ esc\(l\.fuente\)/.test(uiFam), 'el visor muestra «Fuente: …» al pie de cada lección');
 ok(/Fuente: ' \+ escHtml\(l\.fuente\)/.test(fs.readFileSync(path.join(ROOT, 'lessons-graduated.js'), 'utf8')), 'la tarjeta de la lista muestra «Fuente: …»');
-ok(mdGuardado.includes('**Fuente: material del Instituto Guó Fēng**') && /Permiso de uso: a confirmar con el maestro/.test(mdGuardado), 'la hoja de revisión lleva la atribución y el permiso pendiente');
+ok(mdGuardado.includes('**Fuente: material del Instituto Guó Fēng**') && mdGuardado.includes(B.textoPermiso(A)), 'la hoja de revisión lleva la atribución y el estado del permiso («' + B.textoPermiso(A) + '»)');
+const P = A.permiso || {};
+ok(P.estado !== 'confirmado' || (/^\d{4}-\d{2}-\d{2}$/.test(P.fecha || '') && P.quien && filas.some(c => c[0] === P.fecha && /permiso/i.test(c.join(' ')) && /confirmad/i.test(c.join(' ')))),
+    'un permiso «confirmado» lleva fecha y quién, y su fila en la constancia de la hoja');
 
 // ── 8) simplificado ──
 // 8a) contra los pares [simplificado, tradicional] del vocabulario embebido de la app (NO es la prueba de OpenCC)

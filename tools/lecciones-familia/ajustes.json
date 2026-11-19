@@ -1,6 +1,12 @@
 {
   "_nota": "Ajustes sobre fuente-guofeng.json (que NO se edita): simplificado, español de los pares, lectura de 叔, asignación de formas cotidianas desparejas y armado de las lecciones. Lo lee tools/lecciones-familia/derivar.js (generador y validador). Cada ajuste se lista en docs/revision-familia.md.",
   "fuente": "material del Instituto Guó Fēng",
+  "permiso": {
+    "_nota": "Permiso de uso del material. Solo se marca «confirmado» con fecha y quién; la misma fila va en la constancia de docs/revision-familia.md. La fecha es la del aviso de Ulises (la fecha en que el maestro confirmó no está registrada).",
+    "estado": "confirmado",
+    "fecha": "2026-11-19",
+    "quien": "el maestro del Instituto Guó Fēng"
+  },
   "simplificado": {
     "_nota": "Simplificado escrito a mano, carácter por carácter (los demás caracteres de la fuente son iguales en las dos escrituras). 姊 queda 姊 en las dos (decisión de Ulises, 2026-11-19). Se verifica con la ida y vuelta s2tw de OpenCC (tools/lecturas-examen/opencc-s2tw.py) y contra los pares de la app.",
     "爺": "爷", "媽": "妈", "親": "亲", "兒": "儿", "孫": "孙", "婦": "妇", "嬸": "婶", "姪": "侄"

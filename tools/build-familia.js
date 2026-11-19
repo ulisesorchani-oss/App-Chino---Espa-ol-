@@ -16,6 +16,13 @@ const CONSTANCIA_VACIA = [
     '| — | — | — | — |'
 ].join('\n');
 
+// «Permiso de uso: …» a partir de ajustes.permiso (sin permiso registrado: a confirmar)
+function textoPermiso(A) {
+    const p = A.permiso || {};
+    return p.estado === 'confirmado' && p.fecha && p.quien
+        ? 'Permiso de uso: confirmado por ' + p.quien + ' (lo informó Ulises el ' + p.fecha + ')'
+        : 'Permiso de uso: a confirmar con el maestro';
+}
 function constanciaDe(md) {
     if (!md) return CONSTANCIA_VACIA;
     const a = md.indexOf(C0), b = md.indexOf(C1);
@@ -38,7 +45,7 @@ function textoDatos(d) {
         '// lessons-familia.js — LECCIONES DE FAMILIA (fichas) · TOCFL, nivel aproximado',
         '// GENERADO por tools/build-familia.js desde tools/lecciones-familia/fuente-guofeng.json + ajustes.json. NO editar a mano:',
         '// tools/check-familia.js lo vuelve a calcular y falla si no coincide.',
-        '// Fuente: ' + d.A.fuente + ' («Mapa de la familia», transcrito de una captura). Permiso de uso: a confirmar con el maestro.',
+        '// Fuente: ' + d.A.fuente + ' («Mapa de la familia», transcrito de una captura). Permiso de uso: ' + ((d.A.permiso || {}).estado === 'confirmado' ? 'confirmado (quién y cuándo: docs/revision-familia.md)' : 'a confirmar con el maestro') + '.',
         '// revision: todos «pendiente» (el chino lo revisa Ulises; constancia en docs/revision-familia.md). Zhuyin derivado del pinyin',
         '// de la fuente (tono neutro adelante: ˙ㄇㄚ), pendiente de revisión. No entra en GRADED_LESSONS ni en el SRS.',
         '// Esquema: { id, kind:"familia", hsk, exam:"TOCFL", examLvl, nivelAprox, emoji, titleZh, titleZhT, titleEs, blurb, fuente,',
@@ -59,7 +66,7 @@ function textoHoja(d, constancia) {
     L.push('# Lecciones de familia · hoja de revisión', '');
     L.push('GENERADA por `tools/build-familia.js` (no editar a mano, salvo el bloque «Constancia de revisión», que se conserva al regenerar).');
     L.push('', '**Fuente: ' + d.A.fuente + '** («Mapa de la familia», `tools/lecciones-familia/fuente-guofeng.json`, transcrito de una captura). ' +
-        '**Permiso de uso: a confirmar con el maestro** (el PR queda sin mergear hasta confirmarlo). Nivel aproximado, no oficial.');
+        '**' + textoPermiso(d.A) + '**. Nivel aproximado, no oficial.');
     L.push('', '`revision`: los ' + d.items.length + ' ítems están en `pendiente`. Ninguno es `revisado` ni `nativo`. Una etiqueta distinta de `pendiente` solo se escribe si ' +
         'la constancia de abajo registra quién la puso y cuándo (regla 4 de «Después de editar» en el `README.md`).');
     L.push('', '## Constancia de revisión', '', C0, constancia, C1, '');
@@ -114,7 +121,7 @@ function generar() {
     return { d, errores: [], js: textoDatos(d), md: textoHoja(d, constanciaDe(prev)) };
 }
 
-module.exports = { generar, OUT_JS, OUT_MD };
+module.exports = { generar, textoPermiso, OUT_JS, OUT_MD };
 
 if (require.main === module) {
     const g = generar();

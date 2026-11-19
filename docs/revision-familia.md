@@ -2,7 +2,7 @@
 
 GENERADA por `tools/build-familia.js` (no editar a mano, salvo el bloque «Constancia de revisión», que se conserva al regenerar).
 
-**Fuente: material del Instituto Guó Fēng** («Mapa de la familia», `tools/lecciones-familia/fuente-guofeng.json`, transcrito de una captura). **Permiso de uso: a confirmar con el maestro** (el PR queda sin mergear hasta confirmarlo). Nivel aproximado, no oficial.
+**Fuente: material del Instituto Guó Fēng** («Mapa de la familia», `tools/lecciones-familia/fuente-guofeng.json`, transcrito de una captura). **Permiso de uso: confirmado por el maestro del Instituto Guó Fēng (lo informó Ulises el 2026-11-19)**. Nivel aproximado, no oficial.
 
 `revision`: los 59 ítems están en `pendiente`. Ninguno es `revisado` ni `nativo`. Una etiqueta distinta de `pendiente` solo se escribe si la constancia de abajo registra quién la puso y cuándo (regla 4 de «Después de editar» en el `README.md`).
 
@@ -11,7 +11,7 @@ GENERADA por `tools/build-familia.js` (no editar a mano, salvo el bloque «Const
 <!-- constancia: se completa a mano; build-familia.js lo conserva tal cual -->
 | Fecha | Quién | Qué se revisó | Resultado |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-11-19 | Ulises (informa que el maestro del Instituto Guó Fēng lo confirmó; fecha de la confirmación no registrada) | Permiso de uso del material | confirmado |
 <!-- /constancia -->
 
 ## A confirmar con el maestro

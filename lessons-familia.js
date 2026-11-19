@@ -2,7 +2,7 @@
 // lessons-familia.js — LECCIONES DE FAMILIA (fichas) · TOCFL, nivel aproximado
 // GENERADO por tools/build-familia.js desde tools/lecciones-familia/fuente-guofeng.json + ajustes.json. NO editar a mano:
 // tools/check-familia.js lo vuelve a calcular y falla si no coincide.
-// Fuente: material del Instituto Guó Fēng («Mapa de la familia», transcrito de una captura). Permiso de uso: a confirmar con el maestro.
+// Fuente: material del Instituto Guó Fēng («Mapa de la familia», transcrito de una captura). Permiso de uso: confirmado (quién y cuándo: docs/revision-familia.md).
 // revision: todos «pendiente» (el chino lo revisa Ulises; constancia en docs/revision-familia.md). Zhuyin derivado del pinyin
 // de la fuente (tono neutro adelante: ˙ㄇㄚ), pendiente de revisión. No entra en GRADED_LESSONS ni en el SRS.
 // Esquema: { id, kind:"familia", hsk, exam:"TOCFL", examLvl, nivelAprox, emoji, titleZh, titleZhT, titleEs, blurb, fuente,
