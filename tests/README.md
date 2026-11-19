@@ -32,7 +32,8 @@ y no declaró que salteó algo. Cada resultado es uno de estos:
 
 Una parcial u omitida **nunca** se muestra como verde. Código de salida: `0` = todo verde, `1` = hay alguna roja,
 `3` = sin rojas pero con parciales u omitidas (`--permitir-parciales` lo convierte en 0, para un CI que sabe que
-no tiene OpenCC, por ejemplo). Tarda unos 25–30 minutos en total.
+no tiene OpenCC, por ejemplo). Tarda bastante: la suma de los tiempos por suite de una corrida completa dio 62,7 minutos
+(contenedor de desarrollo, 4 núcleos); en GitHub se reparte en 4 partes (ver abajo).
 En las `check-*` de `tools/`, «comprobaciones» es la cantidad de elementos revisados (scripts, lecciones, lecturas).
 
 Opciones:
@@ -44,6 +45,37 @@ node tests/run-all.js --list [filtro]   # lista las suites (o las que coinciden)
 
 Una suite conocida como rota o desactualizada **no se esconde**: se corre igual y se marca en la tabla con el
 motivo (`NOTAS` al principio de `run-all.js`).
+
+## En GitHub (cada PR)
+
+`.github/workflows/bateria.yml` corre la batería en cada pull request, en 4 partes en paralelo (`--shard=i/4`: reparto por turnos,
+cada suite cae en una sola parte) y con `--permitir-parciales`. Es **informativa**: no es un chequeo obligatorio para mergear.
+La tabla de cada parte queda en el resumen del trabajo; si algo falla, las capturas se suben como artefacto.
+
+En la máquina de GitHub el navegador tendría internet, así que el workflow activa la **guarda de red**
+(`tests/lib/red-local.js`, con `AC_RED_LOCAL=1` y `NODE_OPTIONS="--require …/tests/lib/red-local.js"`): todo pedido del
+navegador que no vaya a localhost se aborta (las rutas simuladas de cada suite siguen ganando) y cada suite que abre un
+navegador deja una línea `red-local:` con los hosts cortados (las dos de mutaciones no: corren sus escenarios en procesos
+hijos, que heredan la guarda pero no muestran la línea). Hueco conocido: ninguna suite prueba que los pedidos que hace el
+*service worker* hacia afuera pasen por la guarda (`tts-service-worker` usa un servidor simulado en localhost). La cabecera
+de `run-all` dice si la guarda está activa. A mano:
+
+```
+AC_RED_LOCAL=1 NODE_OPTIONS="--require $PWD/tests/lib/red-local.js" node tests/run-all.js --shard=1/4
+```
+
+Con el reparto por turnos, las 4 partes quedaron (con los tiempos del contenedor) entre 10 y 19 minutos cada una.
+
+## Las 4 partes a la vez, en local
+
+```
+node tests/run-paralelo.js            # PARTES=2 para 2 partes; las opciones de run-all pasan tal cual
+```
+
+Corre `run-all.js --shard=i/4` cuatro veces a la vez, cada una con su `SHOTS_DIR/parte-i`, y une las tablas. No chocan:
+servidores en puertos libres, contextos de navegador nuevos (almacenamiento vacío) y temporales con el pid. Medido el
+2026-11-19 en el contenedor (4 núcleos, con la guarda): **18,9 min reales contra ~60 en serie**, con el mismo resultado
+en las 60 suites (estado y comprobaciones). La batería espera más de lo que calcula, por eso se solapa bien.
 
 ## Correr una sola suite
 

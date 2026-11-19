@@ -1,0 +1,99 @@
+# Batería de pruebas (node tests/run-all.js) en cada PR. INFORMATIVA: no es un chequeo obligatorio para mergear
+# (eso se configura en GitHub, no acá) hasta verla verde un par de veces. Un rojo la deja en rojo: sin continue-on-error.
+#   · 4 partes en paralelo (--shard=i/4): cada suite cae en una sola parte
+#   · --permitir-parciales: PARCIAL/OMITIDA no la ponen en rojo (siguen visibles en la tabla del resumen)
+#   · el navegador no sale de localhost (tests/lib/red-local.js): ninguna suite pega al servidor real de voz ni a los CDN
+#   · versiones fijadas a las del contenedor donde la batería dio verde (Node 22, Playwright 1.63.0, ESLint 10.1.0,
+#     Python 3.13, OpenCC 1.4.2), zona horaria UTC y las mismas fuentes (WenQuanYi Zen Hei, Unifont, Noto Color Emoji, Inter)
+name: Batería de pruebas
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bateria-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  bateria:
+    name: Batería (parte ${{ matrix.parte }} de 4)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [1, 2, 3, 4]
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Fuentes (chino, Unifont, emoji e Inter)
+        run: |
+          sudo apt-get update
+          echo "antes: Segoe UI → $(fc-match 'Segoe UI' family) · system-ui → $(fc-match system-ui family) · sans-serif → $(fc-match sans-serif family)"
+          sudo apt-get install -y --no-install-recommends fonts-wqy-zenhei unifont fonts-noto-color-emoji fonts-inter
+          # En el contenedor de desarrollo una regla local (no un paquete) manda «Segoe UI», system-ui y sans-serif a Inter.
+          # Sin ella Ubuntu usa DejaVu Sans (más ancha) y practica-hsk4 desborda a 320 px (docs/pendientes-app.md).
+          sudo install -m 644 tests/lib/fontconfig/56-prefer-inter.conf /etc/fonts/conf.d/56-prefer-inter.conf
+          sudo fc-cache -f
+          fc-list :lang=zh family | sort -u
+          for f in 'Segoe UI' system-ui sans-serif; do
+            got="$(fc-match "$f" family)"; echo "después: $f → $got"
+            [ "$got" = Inter ] || { echo "::error::$f resuelve a «$got», no a Inter: la CI no usaría la fuente de la corrida local"; exit 1; }
+          done
+
+      - name: Playwright, Chromium y ESLint (sin package.json en el repo)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0 eslint@10.1.0
+          npx playwright install --with-deps chromium
+
+      - name: Python (api/ y OpenCC)
+        run: pip install -r requirements.txt opencc==1.4.2
+
+      - name: Batería, parte ${{ matrix.parte }} de 4
+        shell: bash
+        env:
+          AC_RED_LOCAL: '1'
+          NODE_OPTIONS: --require ${{ github.workspace }}/tests/lib/red-local.js
+          SHOTS_DIR: ${{ runner.temp }}/ac-tests
+        run: |
+          node tests/run-all.js --permitir-parciales --shard=${{ matrix.parte }}/4 2>&1 | tee "$RUNNER_TEMP/bateria.txt"
+
+      - name: Resumen
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### Batería · parte ${{ matrix.parte }} de 4"
+            echo '```'
+            grep -E '^Red del navegador' "$RUNNER_TEMP/bateria.txt" || true
+            sed -n '/^SUITE/,$p' "$RUNNER_TEMP/bateria.txt" || true
+            echo '```'
+            echo '<details><summary>Pedidos externos cortados por la guarda</summary>'
+            echo
+            echo '```'
+            grep -E '^(… |    red-local:)' "$RUNNER_TEMP/bateria.txt" || true
+            echo '```'
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Capturas (si algo falló)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-parte-${{ matrix.parte }}
+          path: ${{ runner.temp }}/ac-tests
+          retention-days: 7
+          if-no-files-found: ignore
