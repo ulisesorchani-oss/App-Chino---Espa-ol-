@@ -324,6 +324,7 @@
             '<div class="lq-story-head"><span class="lq-story-emoji">' + info.emoji + '</span>' +
             '<div><div class="lq-story-zh">' + escHtml(titleZh) + '</div>' +
             '<div class="lq-story-es">' + escHtml(info.es) + ' · ' + badgeTxt + '</div>' +
+            (info.subtitulo ? '<div class="cr-sub">' + escHtml(info.subtitulo) + '</div>' : '') +
             (info.nivel ? '<div class="cr-nivel">Nivel: ' + escHtml(info.nivel) + '</div>' : '') + '</div></div>' +
             '<p class="cr-intro">' + escHtml(info.intro) + '</p>' +
             '<div class="cr-chips" id="cr-chips">' + chips + '</div>' +
@@ -657,6 +658,7 @@
                 '<span class="cr-badge' + (info.badge === 'completo' ? ' full' : '') + '">' +
                 (info.badge === 'completo' ? '✓ completo' : 'selección') + '</span></div>' +
                 '<div class="cr-es">' + escHtml(info.es) + '</div>' +
+                (info.subtitulo ? '<div class="cr-sub">' + escHtml(info.subtitulo) + '</div>' : '') +
                 '<div class="cr-meta">' + info.blocks.length + ' bloques · ' + nLines + ' líneas</div>' +
                 '<div class="cr-cta">📖 Leer el original</div>';
             wrap.appendChild(card);
