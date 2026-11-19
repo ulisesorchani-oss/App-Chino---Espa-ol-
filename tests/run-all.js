@@ -36,6 +36,7 @@ const TOOLS = [
     { name: 'tools/check-ninos', file: 'tools/check-ninos.js', needs: 'Node', cuenta: /(\d+) lecciones/ },
     { name: 'tools/check-maquinas', file: 'tools/check-maquinas.js', needs: 'Node', cuenta: /(\d+) máquinas/ },
     { name: 'tools/check-keywords', file: 'tools/check-keywords.js', needs: 'Node', cuenta: /(\d+) palabras clave/ },
+    { name: 'tools/check-familia', file: 'tools/check-familia.js', needs: 'Node (la ida y vuelta s2tw necesita Python con «pip install opencc»; sin OpenCC queda PARCIAL)' },
     { name: 'tools/check-readings', file: 'tools/check-readings.js', needs: 'Playwright + Chromium + Python con «pip install opencc»', pre: 'opencc', cuenta: /(\d+) lecturas v2/ },
     { name: 'tools/test-classics-cq', file: 'tools/test-classics-cq.js', needs: 'Playwright + Chromium' },
     { name: 'tools/test-speak-es', file: 'tools/test-speak-es.js', needs: 'Playwright + Chromium' },
