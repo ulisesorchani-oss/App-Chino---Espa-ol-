@@ -1,6 +1,6 @@
 // Podcast: si la carga FALLA (503 o error de red), el botón no queda en «⏳» ni inerte. Tras el fallo:
-//   · con voz del sistema → cae a ella: estado «Reproduciendo», el botón dice «⏸» y está habilitado (suena algo); al terminar la voz queda «Listo» y el botón vuelve a «▶️», habilitado
-//   · sin voz del sistema → vuelve al reposo: el botón dice «▶️» y está habilitado
+//   · con voz del sistema → cae a ella (por frases): estado «Reproduciendo», el botón dice «⏸» y está habilitado (suena algo); al terminar la voz queda «Listo» y el botón vuelve a «▶️», habilitado
+//   · sin voz del sistema → estado «No pude reproducir el audio» (antes: reposo mudo, «Tocá ▶️ para empezar»): el botón dice «▶️» y está habilitado
 // y en ambos casos un toque en ▶️ vuelve a pedir la lección (no queda trabado). SERVIDOR Y VOZ DEL SISTEMA SIMULADOS (page.route; speechSynthesis). Un contexto nuevo por caso.
 // Esta prueba tiene que ponerse ROJA contra un botón que no se rehabilita tras el fallo (con PC_MUTADO=<archivo> se sirve otro podcast.js: ver el informe de la rama).
 //   PC_MUTADO=<archivo> sirve ese podcast.js en lugar del del repo (para las mutaciones)
@@ -33,7 +33,7 @@ function wavB64(sec) {
             speechSynthesis.getVoices = () => [];
             speechSynthesis.cancel = () => { };
             speechSynthesis.pause = () => { }; speechSynthesis.resume = () => { };
-            speechSynthesis.speak = (u) => { window.__voz.speak++; setTimeout(() => { try { u.onend && u.onend({}); } catch (e) { /* noop */ } }, 900); }; // la voz simulada dura 0,9 s
+            speechSynthesis.speak = (u) => { window.__voz.speak++; setTimeout(() => { try { u.onstart && u.onstart({}); } catch (e) { /* noop */ } }, 0); setTimeout(() => { try { u.onend && u.onend({}); } catch (e) { /* noop */ } }, 900); }; // como Chrome: onstart y, 0,9 s después, onend (por frase)
         }, !!sinVoz);
         const p = await ctx.newPage(); const errs = [];
         p.on('pageerror', (e) => errs.push(e.message));
@@ -74,13 +74,13 @@ function wavB64(sec) {
             ok(errs.filter((x) => !/localStorage/.test(x)).length === 0, nombre + ' + voz: sin errores JS ' + errs.join('|'));
             await ctx.close();
         }
-        // ═════════ sin voz del sistema: vuelve al reposo; el botón dice ▶️ y está habilitado; un toque vuelve a pedir ═════════
+        // ═════════ sin voz del sistema: «No pude reproducir el audio»; el botón dice ▶️ y está habilitado; un toque vuelve a pedir ═════════
         {
             const { ctx, p, errs, srv } = await sesion(() => falla(), true);
             await abrir(p); const sale2 = await salioDeLaCarga(p); await sleep(p, 100);
             const u = await ui(p);
             ok(sale2, nombre + ' sin voz: la carga TERMINA (el estado deja de decir «⏳» en 4 s; si queda trabado: «' + u.estado + '», botón «' + u.boton + '»)');
-            ok(/Tocá ▶️/.test(u.estado) && u.boton === '▶️' && u.label === 'Reproducir' && tocable(u), nombre + ' sin voz: vuelve al reposo; el botón dice «▶️» y se puede tocar (estado «' + u.estado + '», botón «' + u.boton + '», aria-label «' + u.label + '», aria-disabled=' + u.dis + ')');
+            ok(/No pude reproducir el audio/.test(u.estado) && u.boton === '▶️' && u.label === 'Reproducir' && tocable(u), nombre + ' sin voz: «No pude reproducir el audio»; el botón dice «▶️» y se puede tocar (estado «' + u.estado + '», botón «' + u.boton + '», aria-label «' + u.label + '», aria-disabled=' + u.dis + ')');
             const antes = srv.reqs; await p.evaluate(() => document.getElementById('pd-playpause').click()); await sleep(p, 400);
             ok(srv.reqs === antes + 1, nombre + ' sin voz: un toque en ▶️ vuelve a pedir la lección (pedidos ' + antes + ' → ' + srv.reqs + ')');
             const sale3 = await salioDeLaCarga(p); await sleep(p, 100);

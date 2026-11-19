@@ -99,16 +99,19 @@ Archivo: `podcast.js` · prueba de oro: `tests/podcast-oro.test.js` (`tests/data
 
 ### Podcast: reproducción (`podcast.reproduccion`)
 
-Estados: `idle`, `done`, `loading`, `playing`, `paused` · inicial: `idle`
+Estados: `idle`, `done`, `error`, `loading`, `playing`, `paused` · inicial: `idle`
 
 ```mermaid
 stateDiagram-v2
     [*] --> idle
     idle --> loading : leer
     done --> loading : leer
+    error --> loading : leer
     loading --> playing : audio
     loading --> playing : voz-del-sistema
-    loading --> idle : sin-voz
+    loading --> error : sin-sonido
+    playing --> error : sin-sonido
+    paused --> error : sin-sonido
     playing --> paused : pausa
     paused --> playing : seguir
     playing --> done : fin
@@ -116,29 +119,22 @@ stateDiagram-v2
     playing --> idle : corte
     paused --> idle : corte
     done --> idle : corte
+    error --> idle : corte
     idle --> playing : seguir (conocida)
     loading --> playing : seguir (conocida)
-    paused --> playing : voz-del-sistema (conocida)
-    paused --> done : fin (conocida)
 ```
 
 | De | A | Evento | Estado de la fila | Qué es |
 |---|---|---|---|---|
-| `idle`, `done` | `loading` | `leer` | declarada | se elige una lección (arranca sola) o se toca ▶️ tras «Listo» |
+| `idle`, `done`, `error` | `loading` | `leer` | declarada | se elige una lección (arranca sola) o se toca ▶️ tras «Listo» o tras «No pude reproducir el audio» |
 | `loading` | `playing` | `audio` | declarada | llegó el audio del servidor y arranca |
-| `loading` | `playing` | `voz-del-sistema` | declarada | el pedido o el play() falló: se lee la lección entera con la voz del sistema |
-| `loading` | `idle` | `sin-voz` | declarada | el pedido falló y el dispositivo no tiene voz del sistema |
-| `playing` | `paused` | `pausa` | declarada | ⏸ |
+| `loading` | `playing` | `voz-del-sistema` | declarada | el pedido o el play() falló: la lección se lee por FRASES con la voz del sistema; se pasa a «playing» cuando la primera frase EMPIEZA a sonar (onstart) o, en un motor que no lo dispara, cuando termina (onend) tras ≥300 ms |
+| `loading`, `playing`, `paused` | `error` | `sin-sonido` | declarada | no suena nada: el dispositivo no tiene voz, la voz del sistema dio un error (distinto de canceled/interrupted), no arrancó en ~5 s, terminó al instante sin hablar, o el audio del servidor falló ya sin sonar. NUNCA pasa a «Listo» |
+| `playing` | `paused` | `pausa` | declarada | ⏸ (con la voz del sistema: se corta la frase en curso y «Seguir» la retoma desde su INICIO) |
 | `paused` | `playing` | `seguir` | declarada | ▶️ tras una pausa |
-| `playing` | `done` | `fin` | declarada | terminó el audio (o la voz del sistema) |
-| `loading`, `playing`, `paused`, `done` | `idle` | `corte` | declarada | stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección |
+| `playing` | `done` | `fin` | declarada | terminó el audio (o la última frase de la voz del sistema, habiendo sonado) |
+| `loading`, `playing`, `paused`, `done`, `error` | `idle` | `corte` | declarada | stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección |
 | `idle`, `loading` | `playing` | `seguir` | ⚠️ **conocida** (R10a) | CLASE sintética (dos toques en la MISMA tarea; una persona no puede). El .then de play() al reanudar no tiene guarda de token: tras cerrar / ☰ / ⏭ en el mismo turno vuelve a poner «playing» (en idle, sin efecto visible) o lo pone con la lección nueva todavía cargando (loading: la pantalla dice «Reproduciendo» sin que suene nada). Escenarios R10a-* |
-| `paused` | `playing` | `voz-del-sistema` | ⚠️ **conocida** (R10c-real) | CLASE real (AbortError real; ventana de un solo turno). ⏸ en el mismo turno que el primer play(): play() se rechaza, el catch manda toda la lección a la voz del sistema y el estado vuelve a «playing» pese a que se pausó. Escenario R10c-pausa-en-el-play |
-| `paused` | `done` | `fin` | ⚠️ **conocida** (R10c-emulado) | CLASE emulada: PROBAR EN UN DISPOSITIVO REAL (play() rechazado a la fuerza, como un autoplay bloqueado). La voz del sistema habla mientras la pantalla dice «En pausa» y termina estando en pausa (ver «pausa al motor equivocado»). Escenario R10c-autoplay-bloqueado |
-
-Defectos conocidos de esta máquina (no son transiciones; el oro los fija tal cual hasta que se arreglen):
-
-- ⚠️ **R10c-emulado (pausa al motor equivocado)** — CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado. Escenario del oro: `R10c-autoplay-bloqueado`.
 
 ## Lector de texto libre
 

@@ -78,23 +78,51 @@
     const PD = SM('podcast.reproduccion', {
         initial: 'idle', titulo: 'Podcast: reproducción',
         rows: [
-            { from: ['idle', 'done'], to: 'loading', ev: 'leer', nota: 'se elige una lección (arranca sola) o se toca ▶️ tras «Listo»' },
+            { from: ['idle', 'done', 'error'], to: 'loading', ev: 'leer', nota: 'se elige una lección (arranca sola) o se toca ▶️ tras «Listo» o tras «No pude reproducir el audio»' },
             { from: 'loading', to: 'playing', ev: 'audio', nota: 'llegó el audio del servidor y arranca' },
-            { from: 'loading', to: 'playing', ev: 'voz-del-sistema', nota: 'el pedido o el play() falló: se lee la lección entera con la voz del sistema' },
-            { from: 'loading', to: 'idle', ev: 'sin-voz', nota: 'el pedido falló y el dispositivo no tiene voz del sistema' },
-            { from: 'playing', to: 'paused', ev: 'pausa', nota: '⏸' },
+            { from: 'loading', to: 'playing', ev: 'voz-del-sistema', nota: 'el pedido o el play() falló: la lección se lee por FRASES con la voz del sistema; se pasa a «playing» cuando la primera frase EMPIEZA a sonar (onstart) o, en un motor que no lo dispara, cuando termina (onend) tras ≥300 ms' },
+            { from: ['loading', 'playing', 'paused'], to: 'error', ev: 'sin-sonido', nota: 'no suena nada: el dispositivo no tiene voz, la voz del sistema dio un error (distinto de canceled/interrupted), no arrancó en ~5 s, terminó al instante sin hablar, o el audio del servidor falló ya sin sonar. NUNCA pasa a «Listo»' },
+            { from: 'playing', to: 'paused', ev: 'pausa', nota: '⏸ (con la voz del sistema: se corta la frase en curso y «Seguir» la retoma desde su INICIO)' },
             { from: 'paused', to: 'playing', ev: 'seguir', nota: '▶️ tras una pausa' },
-            { from: 'playing', to: 'done', ev: 'fin', nota: 'terminó el audio (o la voz del sistema)' },
-            { from: ['loading', 'playing', 'paused', 'done'], to: 'idle', ev: 'corte', nota: 'stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección' },
+            { from: 'playing', to: 'done', ev: 'fin', nota: 'terminó el audio (o la última frase de la voz del sistema, habiendo sonado)' },
+            { from: ['loading', 'playing', 'paused', 'done', 'error'], to: 'idle', ev: 'corte', nota: 'stopAll(): ✕, Esc, clic afuera, ☰ Elegir otra, ⏮/⏭ y elegir otra lección' },
             // ── defectos de hoy (R10 del informe de máquinas de estado), declarados «conocida»: describen lo que el código hace AHORA; el oro por orden de eventos los fija ──
-            { from: ['idle', 'loading'], to: 'playing', ev: 'seguir', known: 'R10a', nota: 'CLASE sintética (dos toques en la MISMA tarea; una persona no puede). El .then de play() al reanudar no tiene guarda de token: tras cerrar / ☰ / ⏭ en el mismo turno vuelve a poner «playing» (en idle, sin efecto visible) o lo pone con la lección nueva todavía cargando (loading: la pantalla dice «Reproduciendo» sin que suene nada). Escenarios R10a-*' },
-            { from: 'paused', to: 'playing', ev: 'voz-del-sistema', known: 'R10c-real', nota: 'CLASE real (AbortError real; ventana de un solo turno). ⏸ en el mismo turno que el primer play(): play() se rechaza, el catch manda toda la lección a la voz del sistema y el estado vuelve a «playing» pese a que se pausó. Escenario R10c-pausa-en-el-play' },
-            { from: 'paused', to: 'done', ev: 'fin', known: 'R10c-emulado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL (play() rechazado a la fuerza, como un autoplay bloqueado). La voz del sistema habla mientras la pantalla dice «En pausa» y termina estando en pausa (ver «pausa al motor equivocado»). Escenario R10c-autoplay-bloqueado' }
+            { from: ['idle', 'loading'], to: 'playing', ev: 'seguir', known: 'R10a', nota: 'CLASE sintética (dos toques en la MISMA tarea; una persona no puede). El .then de play() al reanudar no tiene guarda de token: tras cerrar / ☰ / ⏭ en el mismo turno vuelve a poner «playing» (en idle, sin efecto visible) o lo pone con la lección nueva todavía cargando (loading: la pantalla dice «Reproduciendo» sin que suene nada). Escenarios R10a-*' }
         ],
-        defectos: [
-            { id: 'R10c-emulado (pausa al motor equivocado)', escenario: 'R10c-autoplay-bloqueado', nota: 'CLASE emulada: PROBAR EN UN DISPOSITIVO REAL. Si play() se rechaza y cae a la voz del sistema, pAudio sigue apuntando al audio fallido: ⏸ le hace pause() a ESE audio y no a la voz, que sigue hablando mientras la pantalla dice «En pausa». No es una transición: es un efecto dentro del estado.' }
-        ]
+        defectos: []
     });
+    // ── voz del sistema: la lección se lee por FRASES de <= PD_FRASE_MAX caracteres (como el Lector; una frase larga se corta en el navegador y no deja avanzar ni pausar) ──
+    const PD_FRASE_MAX = 150;      // caracteres por frase
+    const PD_ARRANQUE_MS = 5000;   // una frase que no EMPIEZA (onstart) en este tiempo se da por muda (mismo criterio que «Escuchar todo»)
+    const PD_ONEND_MIN_MS = 300;   // un onend sin onstart antes de esto: no habló (una frase no se lee en 300 ms). PROBAR EN UN DISPOSITIVO REAL (docs/prueba-celular.md)
+    // Parte `texto` (líneas separadas por '\n') en frases: oraciones agrupadas hasta PD_FRASE_MAX; una oración más larga se corta en comas y, si aún pasa, en seco.
+    function podcastFrases(texto) {
+        const MAX = PD_FRASE_MAX, out = [];
+        const cortar = (t) => { // una oración → trozos <= MAX
+            if (Array.from(t).length <= MAX) return [t];
+            const res = []; let cur = '';
+            (t.match(/[^，、,]+[，、,]*/g) || [t]).forEach((c) => {
+                if (cur && Array.from(cur + c).length > MAX) { res.push(cur); cur = ''; }
+                if (Array.from(c).length > MAX) { const a = Array.from(c); for (let i = 0; i < a.length; i += MAX) res.push(a.slice(i, i + MAX).join('')); }
+                else cur += c;
+            });
+            if (cur) res.push(cur);
+            return res;
+        };
+        let grupo = '';
+        String(texto == null ? '' : texto).split('\n').forEach((linea) => {
+            (linea.match(/[^。！？；!?;…]+[。！？；!?;…]*|[。！？；!?;…]+/g) || []).forEach((o) => {
+                o = o.trim(); if (!o) return;
+                cortar(o).forEach((t) => {
+                    if (grupo && Array.from(grupo + '\n' + t).length > MAX) { out.push(grupo); grupo = t; }
+                    else grupo = grupo ? grupo + '\n' + t : t;
+                });
+            });
+        });
+        if (grupo) out.push(grupo);
+        return out;
+    }
+    window.podcastFrases = podcastFrases;
     const LESSONS = (typeof window.GRADED_LESSONS !== 'undefined') ? window.GRADED_LESSONS : [];
     if (!LESSONS.length) return;
 
@@ -110,7 +138,7 @@
     const S = { view: null, lesson: null };
     // ── reproducción: UN SOLO audio para la lección completa (v9.71) ──
     let pAudio = null;       // Audio() del API en curso (toda la lección)
-    let pTtsU = null;        // utterance del fallback (voz del sistema, sin progreso real)
+    let pSys = null;         // voz del sistema, por frases: { tok, frases, i, u, wd, sono, lang, gender } (ver aVozDelSistema)
     let pTok = 0;            // invalida callbacks de una reproducción vieja
     // (el estado — idle | loading | playing | paused | done — vive en la máquina PD de arriba)
     let showText = false;    // "👁️ Ver texto" — NUNCA activado por defecto
@@ -154,7 +182,7 @@
     function stopAll() {
         pTok++;
         if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; }
-        if (pTtsU) { try { speechSynthesis.cancel(); } catch (e) { } pTtsU = null; }
+        if (pSys) { cortarVoz(); pSys = null; }
         PD.go('idle', 'corte');
     }
 
@@ -193,53 +221,104 @@
             PD.go('playing', 'audio');
             audio.addEventListener('timeupdate', updateAudioProgress);
             updatePlayerUI();
-            const gone = () => {
+            let sono = false;
+            audio.addEventListener('playing', () => { sono = true; }, { once: true });
+            audio.addEventListener('ended', () => {
                 URL.revokeObjectURL(url);
-                if (myTok !== pTok) return;
+                if (myTok !== pTok || pAudio !== audio) return;
                 PD.go('done', 'fin');
                 updatePlayerUI();
-            };
-            audio.addEventListener('ended', gone, { once: true });
-            audio.addEventListener('error', gone, { once: true });
+            }, { once: true });
+            // un <audio> que falla: antes → «Listo» SIN sonido. Ahora: si nunca sonó, cae a la voz del sistema (como cuando falla el pedido); si ya sonaba, «No pude reproducir el audio»
+            audio.addEventListener('error', () => {
+                URL.revokeObjectURL(url);
+                if (myTok !== pTok || pAudio !== audio) return;
+                if (sono) sinSonido(); else aVozDelSistema(myTok, fullText, gender);
+            }, { once: true });
             await audio.play();
         } catch (e) {
             if (myTok !== pTok) return;
-            if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(fullText);
-                u.lang = (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN'; // v9.7x: 🇹🇼 → zh-TW también sin red
-                u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
-                pTtsU = u;
-                PD.go('playing', 'voz-del-sistema');
-                updatePlayerUI();
-                const gone = () => {
-                    if (myTok !== pTok) return;
-                    pTtsU = null; PD.go('done', 'fin');
-                    updatePlayerUI();
-                };
-                u.onend = gone;
-                u.onerror = gone;
-                speechSynthesis.speak(u);
-            } else {
-                PD.go('idle', 'sin-voz');
-                updatePlayerUI();
-            }
+            aVozDelSistema(myTok, fullText, gender);
         }
+    }
+
+    // ── voz del sistema POR FRASES (respaldo cuando el servidor o el <audio> fallan) ──
+    // Mismo criterio que «Escuchar todo» (lessons-listen.js, speakSystem): voz elegida con sysVoiceFor, vigilancia de arranque (~5 s: si la frase no EMPIEZA se da por muda),
+    // y onerror NO se trata como onend. Las frases que corta la propia app (pausa, cerrar, ⏮/⏭) se desactivan antes de cancel(): sus eventos canceled/interrupted no cuentan.
+    // Si no suena NADA no se pasa a «Listo»: estado 'error' («No pude reproducir el audio») y ▶️ habilitado para reintentar.
+    function cortarVoz() {
+        const s = pSys; if (!s) return;
+        clearTimeout(s.wd); s.wd = 0;
+        if (s.u) { s.u = null; try { speechSynthesis.cancel(); } catch (e) { } } // s.u = null ANTES de cancel(): el onerror(canceled/interrupted) que dispara es nuestro y se ignora
+    }
+    function sinSonido() {
+        if (pSys) { cortarVoz(); pSys = null; }
+        if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; }
+        PD.go('error', 'sin-sonido');
+        updatePlayerUI();
+    }
+    function aVozDelSistema(myTok, fullText, gender) {
+        if (myTok !== pTok) return;
+        if (pSys && pSys.tok === myTok) return; // ya cayó (play() rechazado + evento error del <audio>)
+        if (pAudio) { try { pAudio.pause(); } catch (e) { } pAudio = null; } // el audio fallido ya no es el motor: ⏸ no puede ir a él
+        const frases = podcastFrases(fullText);
+        if (!('speechSynthesis' in window) || !frases.length) { sinSonido(); return; }
+        pSys = { tok: myTok, frases: frases, i: 0, u: null, wd: 0, sono: false,
+            lang: (typeof ttsLangFor === 'function') ? ttsLangFor('zh', gender) : 'zh-CN', gender: gender }; // v9.7x: 🇹🇼 → zh-TW también sin red
+        if (PD.is('paused')) { updatePlayerUI(); return; } // el usuario pausó justo antes de que cayera: la 1.ª frase espera el «Seguir»
+        hablarFrase();
+    }
+    function hablarFrase() {
+        const s = pSys; if (!s || s.tok !== pTok) return;
+        if (s.i >= s.frases.length) { // se leyeron todas
+            if (!s.sono) { sinSonido(); return; }
+            pSys = null; PD.go('done', 'fin'); updatePlayerUI(); return;
+        }
+        const u = new SpeechSynthesisUtterance(s.frases[s.i]);
+        u.lang = s.lang; u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
+        try { if (typeof sysVoiceFor === 'function') { const v = sysVoiceFor(s.lang, s.gender); if (v) u.voice = v; } } catch (e) { /* sin voz elegida: queda la del idioma */ }
+        const t0 = Date.now();
+        let empezo = false;
+        const mia = () => s.u === u && s.tok === pTok && pSys === s; // false si la frase ya la cortamos nosotros o cambió la reproducción
+        u.onstart = () => {
+            if (!mia()) return;
+            empezo = true; s.sono = true; clearTimeout(s.wd); s.wd = 0;
+            if (PD.is('loading')) PD.go('playing', 'voz-del-sistema');
+            updatePlayerUI();
+        };
+        u.onend = () => {
+            if (!mia()) return;
+            clearTimeout(s.wd); s.wd = 0; s.u = null;
+            if (!empezo && Date.now() - t0 < PD_ONEND_MIN_MS) { sinSonido(); return; } // terminó al instante sin hablar: eso NO es «terminó»
+            s.sono = true; s.i++;
+            if (PD.is('loading')) PD.go('playing', 'voz-del-sistema'); // un motor que no dispara onstart pero habló (onend tras >=300 ms): sale de «loading» igual
+            updatePlayerUI();
+            hablarFrase();
+        };
+        u.onerror = () => { // canceled/interrupted provocados por nosotros ya no llegan acá (mia() es false); cualquier otro error (language-unavailable, synthesis-failed…) = no suena
+            if (!mia()) return;
+            sinSonido();
+        };
+        s.u = u;
+        s.wd = setTimeout(() => { if (!mia() || empezo) return; sinSonido(); }, PD_ARRANQUE_MS);
+        try { speechSynthesis.speak(u); } catch (e) { sinSonido(); }
     }
     function togglePlayPause() {
         if (PD.is('playing')) {
             if (pAudio) { try { pAudio.pause(); } catch (e) { } }
-            else if (pTtsU) { try { speechSynthesis.pause(); } catch (e) { } }
+            else if (pSys) cortarVoz(); // por frase: se corta la que suena; «Seguir» la retoma desde su INICIO (speechSynthesis.pause() no es fiable en Android)
             PD.go('paused', 'pausa');
             updatePlayerUI();
         } else if (PD.is('paused')) {
             if (pAudio) {
                 pAudio.play().then(() => { PD.go('playing', 'seguir'); updatePlayerUI(); }).catch(() => { });
-            } else if (pTtsU) {
-                try { speechSynthesis.resume(); PD.go('playing', 'seguir'); updatePlayerUI(); } catch (e) { }
+            } else if (pSys) {
+                PD.go('playing', 'seguir'); updatePlayerUI();
+                hablarFrase(); // la frase en curso, desde el principio
             }
         } else if (PD.is('loading')) {
             // R10b: mientras carga NO se hace nada (antes un toque en ▶️ reiniciaba el pedido: un SEGUNDO pedido de la lección entera al servidor). El botón ya lo dice: «⏳», inerte.
-        } else { // idle | done → (re)empezar
+        } else { // idle | done | error → (re)empezar
             playLesson();
         }
     }
@@ -333,13 +412,21 @@
         });
         updatePlayerUI();
     }
-    // v9.72: progreso REAL del <audio> (currentTime/duration) — no hay
-    // nada análogo para el fallback de voz del sistema (sin elemento
-    // <audio>, sin duration), así que la barra se oculta en ese caso.
+    // v9.72: progreso REAL del <audio> (currentTime/duration). Con la voz
+    // del sistema (sin elemento <audio>, sin duration) el avance es por
+    // FRASE: barra = frases leídas / total y «Frase i / n».
     function updateAudioProgress() {
         const track = $('pd-audio-track'), fill = $('pd-audio-fill'), timeEl = $('pd-time');
         if (!track || !timeEl) return;
-        if (!pAudio) { track.classList.add('hidden'); timeEl.textContent = ''; return; }
+        if (!pAudio) {
+            if (pSys && pSys.frases.length) { // voz del sistema: no hay duración real; el avance es por FRASE
+                track.classList.remove('hidden');
+                if (fill) fill.style.width = Math.min(100, Math.round(pSys.i / pSys.frases.length * 100)) + '%';
+                timeEl.textContent = 'Frase ' + Math.min(pSys.i + 1, pSys.frases.length) + ' / ' + pSys.frases.length;
+                return;
+            }
+            track.classList.add('hidden'); timeEl.textContent = ''; return;
+        }
         track.classList.remove('hidden');
         const cur = pAudio.currentTime || 0;
         const dur = pAudio.duration;
@@ -370,6 +457,7 @@
                 PD.state === 'playing' ? '▶ Reproduciendo…' :
                 PD.state === 'paused' ? '⏸ En pausa' :
                 PD.state === 'done' ? '🏁 Listo — tocá ▶️ para volver a escuchar' :
+                PD.state === 'error' ? '⚠️ No pude reproducir el audio — tocá ▶️ para reintentar' :
                 'Tocá ▶️ para empezar';
         }
         const ppBtn = $('pd-playpause');

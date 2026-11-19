@@ -10,13 +10,13 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 49 suites de `tests/` y las 10 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 50 suites de `tests/` y las 10 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
 ajustes-velocidad     69              🟢 VERDE
 …
-58 suites · 6617 comprobaciones · 56 verdes · 2 parciales · 0 omitidas · 0 rojas
+60 suites · 6723 comprobaciones · 58 verdes · 2 parciales · 0 omitidas · 0 rojas
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de
@@ -66,7 +66,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 
 | Grupo | Servidor local | Playwright + Chromium | Red | Otros |
 |---|---|---|---|---|
-| `tests/*.test.js` (48, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
+| `tests/*.test.js` (49, de navegador) | sí (`BASE_URL`; `run-all` lo levanta) | sí | **no** (el audio y las llamadas a `/api/tts` se simulan) | — |
 | `tests/api-tts.test.js` | no | no | **no** (edge-tts va simulado) | Python 3 + `fastapi`; sin eso figura 🟡 OMITIDA |
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
@@ -111,8 +111,9 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `lector-mutaciones` | rompe `reader.js` a propósito (sacar una fila, asignación directa `readerPlayState = …`, saltear el reinicio de `stopReader()`) y exige que fallen el chequeo estático y el oro; sin modo estricto la fila sacada se aplica igual y queda en `AC_SM_LOG` |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
 | `muestra-de-voz` | muestra de voz (botones 🇨🇳👩/🇦🇷👩, `playVoiceSample`) con un servidor simulado: sano → suena la voz del servidor; 503/502/red caída → cae a la voz del sistema (texto, idioma y voz acordes) y el aviso rojo sale una vez; 429/413/200 sin audio → voz del sistema SIN aviso; español; sin voces del sistema; toques rápidos (solo el último habla); el botón no queda trabado; guardia: `playAudio` de Hoy con 503 sigue avisando |
-| `podcast-oro` | Podcast (`podcast.js`): **prueba de oro por ORDEN de eventos** (`tests/data/podcast-oro.json`, grabado con el código anterior a la máquina de estados; regrabable con `GOLDEN_RECORD=1`): 13 escenarios, cada uno con su CLASE (**real**, **sintético** —dos toques en la misma tarea— o **emulado** —play() rechazado a la fuerza: probar en un dispositivo real—): sano, pausa/seguir, R10a, R10b (un toque en ▶️ mientras carga), R10c real y emulado, voz del sistema, sin voz, siguiente lección, replay tras «Listo»; en modo estricto ninguna transición sin declarar; con `state-machine.js` bloqueado suena igual |
-| `podcast-carga-fallida` | Podcast: si la carga falla (503 o error de red) el botón no queda en «⏳» ni inerte: con voz del sistema cae a ella (botón «⏸», y «▶️» al terminar la voz); sin voz vuelve al reposo con «▶️» habilitado; en ambos casos un toque vuelve a pedir la lección y, con el servidor sano, suena. Servidor y voz del sistema simulados. Con `PC_MUTADO=<archivo>` se sirve otro `podcast.js` (las mutaciones que no repintan o dejan inerte el botón la ponen en rojo) |
+| `podcast-oro` | Podcast (`podcast.js`): **prueba de oro por ORDEN de eventos** (`tests/data/podcast-oro.json`; los 9 escenarios que no pasan por la voz del sistema se grabaron con el código anterior a la máquina de estados y siguen idénticos; los de la voz del sistema se regrabaron en `fix/podcast-voz-sistema`; regrabable con `GOLDEN_RECORD=1`): 22 escenarios, cada uno con su CLASE (**real**, **sintético** —dos toques en la misma tarea— o **emulado** —play() rechazado a la fuerza: probar en un dispositivo real—): sano, pausa/seguir, R10a, R10b (un toque en ▶️ mientras carga), R10c, voz del sistema, sin voz, siguiente lección, replay tras «Listo», y la voz del sistema por frases (onend inmediato, onerror `language-unavailable` y `synthesis-failed`, una voz que nunca arranca, una voz que habla pero no dispara `onstart` (`voz-sin-onstart`), pausa y seguir la misma frase, pausa >5 s antes de arrancar, audio corrupto, error y reintento) con aserciones con nombre («Listo» nunca; «No pude reproducir el audio»; ▶️ habilitado). La voz simulada se porta como Chrome (`onstart`, `onerror`, `cancel()` → `interrupted`). En modo estricto ninguna transición sin declarar; con `state-machine.js` bloqueado suena igual |
+| `podcast-carga-fallida` | Podcast: si la carga falla (503 o error de red) el botón no queda en «⏳» ni inerte: con voz del sistema cae a ella (botón «⏸», y «▶️» al terminar la voz); sin voz pasa a «No pude reproducir el audio» con «▶️» habilitado; en ambos casos un toque vuelve a pedir la lección y, con el servidor sano, suena. Servidor y voz del sistema simulados. Con `PC_MUTADO=<archivo>` se sirve otro `podcast.js` (las mutaciones que no repintan o dejan inerte el botón la ponen en rojo) |
+| `podcast-frases` | Podcast, voz del sistema: el divisor en frases (`podcastFrases`): en las 41 lecciones (simplificado y tradicional) toda frase tiene ≤150 caracteres, ninguna queda vacía y no se pierde ni se inventa texto; casos límite (sin puntuación, solo comas, solo signos, vacío/undefined, caracteres fuera del plano básico, una línea de 5000 caracteres) |
 | `navegacion-tanda1`, `navegacion-tanda2` | botón Atrás: capas apiladas, audio, tips, estadísticas ↔ respaldo |
 | `ninos-pantalla`, `ninos-sonidos` | pantalla Niños y tarjetas de sonidos |
 | `onboarding` | primer uso: pantallas, «Desde cero», «Ya sé algo», saltar |
