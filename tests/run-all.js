@@ -5,6 +5,8 @@
 //   node tests/run-all.js ninos hsk    solo las que contienen alguno de esos textos en el nombre
 //   node tests/run-all.js --list [filtro]  lista las suites (las que coinciden con el filtro) y qué necesita cada una
 //   node tests/run-all.js --permitir-parciales   no falla (código 3) por suites parciales/omitidas
+//   node tests/run-all.js --shard=2/4  solo la 2.ª de 4 partes (reparto por turnos sobre la lista ordenada: cada suite cae en UNA parte)
+//   AC_RED_LOCAL=1 NODE_OPTIONS="--require $PWD/tests/lib/red-local.js"  el navegador no sale de localhost (ver tests/lib/red-local.js)
 //   TIMEOUT_S=300 node tests/run-all.js   tope por suite (por defecto 900 s)
 //
 // Sin falsos verdes: una suite es VERDE solo si terminó con código 0, informó su cantidad de
@@ -135,11 +137,24 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
     let todas = suitesDeTests().concat(TOOLS);
     const filtros = args.filter(a => !a.startsWith('--'));
     if (filtros.length) todas = todas.filter(s => filtros.some(f => s.name.includes(f)));
+    // --shard=i/n: reparto por turnos (0-based k % n === i-1) sobre la lista completa y ordenada → las n partes no se pisan
+    const shardArg = args.find(a => a.startsWith('--shard='));
+    let shard = null;
+    if (shardArg) {
+        const m = shardArg.slice(8).match(/^(\d+)\/(\d+)$/);
+        if (!m || +m[1] < 1 || +m[1] > +m[2]) { console.error('--shard=i/n con 1 ≤ i ≤ n (ej. --shard=2/4)'); process.exit(2); }
+        shard = { i: +m[1], n: +m[2] };
+        todas = todas.filter((s, k) => k % shard.n === shard.i - 1);
+    }
     if (args.includes('--list')) {
         todas.forEach(s => console.log(pad(s.name, 30) + ' ' + pad(s.file, 48) + ' ' + s.needs + (NOTAS[s.name] ? '  [' + NOTAS[s.name] + ']' : '')));
         return;
     }
     if (!todas.length) { console.error('Ninguna suite coincide con: ' + filtros.join(' ')); process.exit(2); }
+    if (shard) console.log('Parte ' + shard.i + ' de ' + shard.n + ': ' + todas.length + ' suites (' + todas.map(s => s.name).join(', ') + ')');
+    // la guarda de red (tests/lib/red-local.js) se anuncia acá para que quede en el registro de la corrida
+    const guarda = process.env.AC_RED_LOCAL === '1' && /red-local\.js/.test(process.env.NODE_OPTIONS || '');
+    console.log('Red del navegador: ' + (guarda ? 'solo localhost (tests/lib/red-local.js activa)' : 'sin guarda (AC_RED_LOCAL no está activo)'));
 
     let srv = null;
     const env = Object.assign({}, process.env, { SHOTS_DIR: process.env.SHOTS_DIR || path.join(os.tmpdir(), 'ac-tests') });
@@ -172,10 +187,12 @@ function pad(t, n) { t = String(t); return t.length >= n ? t : t + ' '.repeat(n 
                 if (motivos.length) { estado = 'PARCIAL'; nota = motivos.join(' · '); }
             }
             r = { estado, n: a.n, nota, seg: x.seg, cola: x.salida.trim().split('\n').slice(-12).join('\n') };
+            r.red = x.salida.split('\n').filter(l => /^red-local:/.test(l)); // constancia de la guarda de red (tests/lib/red-local.js)
         }
         if (NOTAS[s.name]) r.nota = (r.nota ? r.nota + ' · ' : '') + 'NOTA: ' + NOTAS[s.name];
         filas.push(Object.assign({ s }, r));
         console.log(r.estado + ' (' + r.seg.toFixed(0) + ' s)');
+        (r.red || []).forEach(l => console.log('    ' + l));
     }
     if (srv) srv.close();
 
