@@ -1,0 +1,71 @@
+{
+  "fuente": "Mapa de la familia, Instituto Guó Fēng (artefacto de Claude hecho por el maestro). Transcrito de una captura a pantalla completa el 2026-11-19.",
+  "estado": "revision: pendiente (el chino lo revisa Ulises). No se transcribió el zhuyin; derivarlo del pinyin y revisar. Los campos con verificar=true tenían letra muy chica en la captura.",
+  "categorias": {
+    "directo": "直系血親 zhíxì xuèqīn: línea directa",
+    "colateral": "旁系血親 pángxì xuèqīn: línea colateral",
+    "afinidad": "姻親 yīnqīn: parientes políticos"
+  },
+  "reglas": [
+    "外 wài ('de afuera'): la familia de mamá (外公) y los hijos de las mujeres de la familia (外甥, 外孫).",
+    "堂 táng = primos con el mismo apellido; 表 biǎo = primos de otro apellido.",
+    "兄 姊 = mayores que yo; 弟 妹 = menores; 伯 = mayor que papá; 叔 = menor que papá.",
+    "曾 zēng = una generación más lejos, hacia arriba (曾祖父) y hacia abajo (曾孫)."
+  ],
+  "terminos": [
+    {"gen":3,"linea":"materna","cat":"directo","hanzi":"外曾祖父","pinyin":"wàizēngzǔfù","es":"Bisabuelo materno","cotidiano":[{"hanzi":"太外公","pinyin":"tài wàigōng"}]},
+    {"gen":3,"linea":"materna","cat":"directo","hanzi":"外曾祖母","pinyin":"wàizēngzǔmǔ","es":"Bisabuela materna","cotidiano":[{"hanzi":"太外婆","pinyin":"tài wàipó"}]},
+    {"gen":3,"linea":"paterna","cat":"directo","hanzi":"曾祖父","pinyin":"zēngzǔfù","es":"Bisabuelo paterno","cotidiano":[{"hanzi":"太爺爺","pinyin":"tài yéye"}]},
+    {"gen":3,"linea":"paterna","cat":"directo","hanzi":"曾祖母","pinyin":"zēngzǔmǔ","es":"Bisabuela paterna","cotidiano":[{"hanzi":"太奶奶","pinyin":"tài nǎinai"}]},
+
+    {"gen":2,"linea":"materna","cat":"directo","hanzi":"外祖父","pinyin":"wàizǔfù","es":"Abuelo materno","cotidiano":[{"hanzi":"外公","pinyin":"wàigōng"}]},
+    {"gen":2,"linea":"materna","cat":"directo","hanzi":"外祖母","pinyin":"wàizǔmǔ","es":"Abuela materna","cotidiano":[{"hanzi":"外婆","pinyin":"wàipó"}]},
+    {"gen":2,"linea":"paterna","cat":"directo","hanzi":"祖父","pinyin":"zǔfù","es":"Abuelo paterno","cotidiano":[{"hanzi":"爺爺","pinyin":"yéye"}]},
+    {"gen":2,"linea":"paterna","cat":"directo","hanzi":"祖母","pinyin":"zǔmǔ","es":"Abuela paterna","cotidiano":[{"hanzi":"奶奶","pinyin":"nǎinai"}]},
+
+    {"gen":1,"linea":"materna","cat":"afinidad","hanzi":"姨父","pinyin":"yífù","es":"Esposo de la tía (hermana de mamá)","cotidiano":[{"hanzi":"姨丈","pinyin":"yízhàng"}]},
+    {"gen":1,"linea":"materna","cat":"colateral","hanzi":"姨母","pinyin":"yímǔ","es":"Tía (hermana de mamá)","cotidiano":[{"hanzi":"阿姨","pinyin":"āyí"}]},
+    {"gen":1,"linea":"materna","cat":"colateral","hanzi":"舅父","pinyin":"jiùfù","es":"Tío (hermano de mamá)","cotidiano":[{"hanzi":"舅舅","pinyin":"jiùjiu"}]},
+    {"gen":1,"linea":"materna","cat":"afinidad","hanzi":"舅母","pinyin":"jiùmǔ","es":"Esposa del tío (hermano de mamá)","cotidiano":[{"hanzi":"舅媽","pinyin":"jiùmā"}]},
+    {"gen":1,"linea":"centro","cat":"directo","hanzi":"母親","pinyin":"mǔqīn","es":"Mamá","cotidiano":[{"hanzi":"媽媽","pinyin":"māma"}]},
+    {"gen":1,"linea":"centro","cat":"directo","hanzi":"父親","pinyin":"fùqīn","es":"Papá","cotidiano":[{"hanzi":"爸爸","pinyin":"bàba"}]},
+    {"gen":1,"linea":"paterna","cat":"colateral","hanzi":"伯父·叔父","pinyin":"bófù · shūfù","es":"Tío (hermano mayor · menor de papá)","cotidiano":[{"hanzi":"伯伯·叔叔","pinyin":"bóbo · shūshu"}]},
+    {"gen":1,"linea":"paterna","cat":"afinidad","hanzi":"伯母·叔母","pinyin":"bómǔ · shūmǔ","es":"Esposa del tío (de papá)","cotidiano":[{"hanzi":"伯母·嬸嬸","pinyin":"bómǔ · shěnshen"}],"verificar":true},
+    {"gen":1,"linea":"paterna","cat":"colateral","hanzi":"姑母","pinyin":"gūmǔ","es":"Tía (hermana de papá)","cotidiano":[{"hanzi":"姑姑·大姑·小姑","pinyin":"gūgu · dàgū · xiǎogū"}],"verificar":true},
+    {"gen":1,"linea":"paterna","cat":"afinidad","hanzi":"姑父","pinyin":"gūfù","es":"Esposo de la tía (hermana de papá)","cotidiano":[{"hanzi":"姑丈","pinyin":"gūzhàng"}]},
+
+    {"gen":0,"linea":"materna","cat":"colateral","hanzi":"表兄·表弟","pinyin":"biǎoxiōng · biǎodì","es":"Primo (mayor · menor), hijo de 姨母, 舅父 o 姑母","cotidiano":[{"hanzi":"表哥","pinyin":"biǎogē"}]},
+    {"gen":0,"linea":"materna","cat":"colateral","hanzi":"表姊·表妹","pinyin":"biǎojiě · biǎomèi","es":"Prima (mayor · menor), hija de 姨母, 舅父 o 姑母","cotidiano":[{"hanzi":"表姐","pinyin":"biǎojiě"}],"verificar":true},
+    {"gen":0,"linea":"paterna","cat":"colateral","hanzi":"堂兄·堂弟","pinyin":"tángxiōng · tángdì","es":"Primo (mayor · menor), hijo del tío paterno","cotidiano":[{"hanzi":"堂哥","pinyin":"tánggē"}]},
+    {"gen":0,"linea":"paterna","cat":"colateral","hanzi":"堂姊·堂妹","pinyin":"tángjiě · tángmèi","es":"Prima (mayor · menor), hija del tío paterno","cotidiano":[],"verificar":true},
+    {"gen":0,"linea":"centro","cat":"afinidad","hanzi":"姊夫·妹夫","pinyin":"jiěfū · mèifū","es":"Cuñado (esposo de la hermana)","cotidiano":[]},
+    {"gen":0,"linea":"centro","cat":"colateral","hanzi":"姊·妹","pinyin":"jiě · mèi","es":"Hermana (mayor · menor)","cotidiano":[{"hanzi":"姊姊·妹妹","pinyin":"jiějie · mèimei"}]},
+    {"gen":0,"linea":"centro","cat":"directo","hanzi":"自己","pinyin":"zìjǐ","es":"Yo","cotidiano":[{"hanzi":"我","pinyin":"wǒ"}]},
+    {"gen":0,"linea":"centro","cat":"afinidad","hanzi":"夫·妻","pinyin":"fū · qī","es":"Esposo · esposa","cotidiano":[{"hanzi":"老公·老婆","pinyin":"lǎogōng · lǎopó"}]},
+    {"gen":0,"linea":"centro","cat":"colateral","hanzi":"兄·弟","pinyin":"xiōng · dì","es":"Hermano (mayor · menor)","cotidiano":[{"hanzi":"哥哥·弟弟","pinyin":"gēge · dìdi"}]},
+    {"gen":0,"linea":"centro","cat":"afinidad","hanzi":"嫂·弟婦","pinyin":"sǎo · dìfù","es":"Cuñada (esposa del hermano mayor · menor)","cotidiano":[{"hanzi":"大嫂·弟妹","pinyin":"dàsǎo · dìmèi"}],"verificar":true},
+
+    {"gen":-1,"linea":"descendientes","cat":"colateral","hanzi":"外甥","pinyin":"wàishēng","es":"Sobrino (hijo de la hermana)","cotidiano":[]},
+    {"gen":-1,"linea":"descendientes","cat":"colateral","hanzi":"外甥女","pinyin":"wàishēngnǚ","es":"Sobrina (hija de la hermana)","cotidiano":[]},
+    {"gen":-1,"linea":"descendientes","cat":"afinidad","hanzi":"女婿","pinyin":"nǚxù","es":"Yerno","cotidiano":[]},
+    {"gen":-1,"linea":"descendientes","cat":"directo","hanzi":"女","pinyin":"nǚ","es":"Hija","cotidiano":[{"hanzi":"女兒","pinyin":"nǚ'ér"}]},
+    {"gen":-1,"linea":"descendientes","cat":"directo","hanzi":"子","pinyin":"zǐ","es":"Hijo","cotidiano":[{"hanzi":"兒子","pinyin":"érzi"}]},
+    {"gen":-1,"linea":"descendientes","cat":"afinidad","hanzi":"媳","pinyin":"xí","es":"Nuera","cotidiano":[{"hanzi":"媳婦","pinyin":"xífù"}]},
+    {"gen":-1,"linea":"descendientes","cat":"colateral","hanzi":"姪","pinyin":"zhí","es":"Sobrino (hijo del hermano)","cotidiano":[{"hanzi":"姪子","pinyin":"zhízi"}]},
+    {"gen":-1,"linea":"descendientes","cat":"colateral","hanzi":"姪女","pinyin":"zhínǚ","es":"Sobrina (hija del hermano)","cotidiano":[]},
+
+    {"gen":-2,"linea":"descendientes","cat":"afinidad","hanzi":"外孫女婿","pinyin":"wàisūnnǚxù","es":"Esposo de la nieta (hija de mi hija)","cotidiano":[]},
+    {"gen":-2,"linea":"descendientes","cat":"directo","hanzi":"外孫女","pinyin":"wàisūnnǚ","es":"Nieta (hija de mi hija)","cotidiano":[]},
+    {"gen":-2,"linea":"descendientes","cat":"afinidad","hanzi":"外孫婦","pinyin":"wàisūnfù","es":"Esposa del nieto (hijo de mi hija)","cotidiano":[]},
+    {"gen":-2,"linea":"descendientes","cat":"directo","hanzi":"外孫","pinyin":"wàisūn","es":"Nieto (hijo de mi hija)","cotidiano":[]},
+    {"gen":-2,"linea":"descendientes","cat":"directo","hanzi":"孫","pinyin":"sūn","es":"Nieto (hijo de mi hijo)","cotidiano":[{"hanzi":"孫子","pinyin":"sūnzi"}]},
+    {"gen":-2,"linea":"descendientes","cat":"afinidad","hanzi":"孫婦","pinyin":"sūnfù","es":"Esposa del nieto (hijo de mi hijo)","cotidiano":[{"hanzi":"孫媳婦","pinyin":"sūnxífù"}],"verificar":true},
+    {"gen":-2,"linea":"descendientes","cat":"directo","hanzi":"孫女","pinyin":"sūnnǚ","es":"Nieta (hija de mi hijo)","cotidiano":[]},
+    {"gen":-2,"linea":"descendientes","cat":"afinidad","hanzi":"孫女婿","pinyin":"sūnnǚxù","es":"Esposo de la nieta (hija de mi hijo)","cotidiano":[]},
+
+    {"gen":-3,"linea":"descendientes","cat":"directo","hanzi":"外曾孫女","pinyin":"wàizēngsūnnǚ","es":"Bisnieta (por mi hija)","cotidiano":[]},
+    {"gen":-3,"linea":"descendientes","cat":"directo","hanzi":"外曾孫","pinyin":"wàizēngsūn","es":"Bisnieto (por mi hija)","cotidiano":[]},
+    {"gen":-3,"linea":"descendientes","cat":"directo","hanzi":"曾孫","pinyin":"zēngsūn","es":"Bisnieto (por mi hijo)","cotidiano":[]},
+    {"gen":-3,"linea":"descendientes","cat":"directo","hanzi":"曾孫女","pinyin":"zēngsūnnǚ","es":"Bisnieta (por mi hijo)","cotidiano":[]}
+  ]
+}
