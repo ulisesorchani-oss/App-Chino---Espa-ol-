@@ -50,6 +50,7 @@ repartidas en archivos más chicos.
 |---|---|
 | `lessons.js`, `lessons-tocfl.js`, `lessons-extra.js`, `lessons-dele.js` | Lecciones graduadas y textos largos |
 | `classics.js` | Los 9 clásicos chinos (texto original) |
+| `lessons-familia.js`, `familia-ui.js` | Fichas de familia (TOCFL, nivel aproximado; material del Instituto Guó Fēng, permiso a confirmar). Datos GENERADOS por `tools/build-familia.js` desde `tools/lecciones-familia/`; revisión en `docs/revision-familia.md` |
 | `dict-mini.js` | Diccionario offline zh↔es |
 | `data-embedded.js` | Oraciones de práctica + vocabulario HSK/TOCFL |
 | `data/` | Datos de exámenes en JSON (respaldo, poco usado — casi todo está embebido) |
