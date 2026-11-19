@@ -8,6 +8,9 @@
 # Herramientas de desarrollo (generadores, validadores, pruebas, medición): la app no carga nada de tools/
 /tools/
 
+# Workflows de GitHub Actions (la batería en cada PR): no son parte de la app
+/.github/
+
 # Documentación e historial de actualizaciones
 /docs/
 

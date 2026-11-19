@@ -66,6 +66,17 @@ AC_RED_LOCAL=1 NODE_OPTIONS="--require $PWD/tests/lib/red-local.js" node tests/r
 
 Con el reparto por turnos, las 4 partes quedaron (con los tiempos del contenedor) entre 10 y 19 minutos cada una.
 
+## Las 4 partes a la vez, en local
+
+```
+node tests/run-paralelo.js            # PARTES=2 para 2 partes; las opciones de run-all pasan tal cual
+```
+
+Corre `run-all.js --shard=i/4` cuatro veces a la vez, cada una con su `SHOTS_DIR/parte-i`, y une las tablas. No chocan:
+servidores en puertos libres, contextos de navegador nuevos (almacenamiento vacío) y temporales con el pid. Medido el
+2026-11-19 en el contenedor (4 núcleos, con la guarda): **18,9 min reales contra ~60 en serie**, con el mismo resultado
+en las 60 suites (estado y comprobaciones). La batería espera más de lo que calcula, por eso se solapa bien.
+
 ## Correr una sola suite
 
 Las de `tools/` levantan su propio servidor y se corren directo:
