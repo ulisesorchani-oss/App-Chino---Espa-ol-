@@ -1,0 +1,29 @@
+{
+  "_nota": "Ajustes sobre fuente.json (que no se edita): cómo se muestra el clásico en la app. Cada decisión figura en docs/revision-datong.md.",
+  "clave": "Clasicos-Datong",
+  "es": "Capítulo de la Gran Armonía",
+  "py": "Lǐyùn Dàtóng piān",
+  "emoji": "🌏",
+  "badge": "completo",
+  "nivel": "avanzado (nivel aproximado)",
+  "intro": "El texto completo, frase por frase, con el zhuyin y la traducción del PDF «Presentación con traducción». Tocá ㄅ para mostrar u ocultar el zhuyin.",
+  "bloque": "全文 · Texto completo",
+  "escritura": "trad",
+  "decisiones": {
+    "_nota": "Decisiones tomadas el 2026-11-19 (Ulises y la sesión); quedan en la hoja de revisión.",
+    "titulo": "En la interfaz, «Capítulo de la Gran Armonía». El PDF dice «SUTRA DE LA MANCOMUNIDAD»: «sutra» corresponde a 經 en contexto budista y 篇 es «capítulo». La elección final (Gran Armonía o Mancomunidad) es de Ulises y el maestro.",
+    "pdf": "El PDF no se sube al repo (público): solo esta transcripción.",
+    "pinyin": "El pinyin que se muestra sale del zhuyin del PDF (tools/clasico-datong/zhuyin-pinyin.js), nunca de pinyin-pro. Sin fichas al tocar un carácter.",
+    "escritura": "Arranca en tradicional (como el PDF) si no se eligió una escritura para «HSK y el resto»; con 简 elegido, el texto sale en simplificado (OpenCC tw2s) y cada carácter conserva el mismo zhuyin del PDF (la misma sílaba, sobre su forma simplificada); el pinyin derivado tampoco cambia.",
+    "practica": "Sin práctica por ahora: el clásico no entra en el menú de Hoy (CLASSICS_MODULES) ni en la Biblioteca; solo en la lista de Clásicos.",
+    "puntuacion": "Se usa la puntuación de la versión frase por frase (p.2–9), tal cual (latina: , . ;). Las otras versiones puntúan distinto. Pasarla a la puntuación china completa (，。；「」) es decisión de Ulises.",
+    "终終": "p.4 escribe 终 (simplificado) en 使老有所終; p.11 y p.14 escriben 終. Se usa 終 en el tradicional.",
+    "鰥矜": "Se usa 鰥 (PDF, ㄍㄨㄢ). El texto base de Ulises decía 矜: queda anotado como variante.",
+    "於于": "Se usa 於 (p.6, p.7, p.12). La versión «solo tonos» (p.15) escribe 于.",
+    "comillas": "Sin 「」 en 大同: el PDF no las tiene."
+  },
+  "pinyinExcepciones": {
+    "_nota": "Caracteres donde el pinyin derivado del zhuyin del PDF difiere de pinyin-pro (el resto coincide carácter por carácter). El PDF manda; 謀 = ㄇㄡˇ figura igual en p.8 y p.13 y puede ser un error del PDF: a revisar.",
+    "lista": [[9, "長", "zhǎng", "cháng"], [12, "分", "fèn", "fēn"], [13, "惡", "wù", "è"], [15, "惡", "wù", "è"], [17, "謀", "mǒu", "móu"]]
+  }
+}

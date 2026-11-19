@@ -50,6 +50,7 @@ repartidas en archivos más chicos.
 |---|---|
 | `lessons.js`, `lessons-tocfl.js`, `lessons-extra.js`, `lessons-dele.js` | Lecciones graduadas y textos largos |
 | `classics.js` | Los 9 clásicos chinos (texto original) |
+| `classics-datong.js` | 禮運大同篇 («Capítulo de la Gran Armonía»): zhuyin y traducción del PDF «Presentación con traducción», solo en la lista de Clásicos. GENERADO por `tools/build-datong.js` desde `tools/clasico-datong/`; revisión en `docs/revision-datong.md` |
 | `lessons-familia.js`, `familia-ui.js` | Fichas de familia (TOCFL, nivel aproximado; material del Instituto Guó Fēng, permiso de uso confirmado; ver docs/revision-familia.md). Datos GENERADOS por `tools/build-familia.js` desde `tools/lecciones-familia/`; revisión en `docs/revision-familia.md` |
 | `dict-mini.js` | Diccionario offline zh↔es |
 | `data-embedded.js` | Oraciones de práctica + vocabulario HSK/TOCFL |

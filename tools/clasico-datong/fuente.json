@@ -1,0 +1,317 @@
+{
+ "_nota": "Transcripción a mano del PDF «Presentación con traducción» (15 páginas de imágenes), leída a 200 ppp y en recortes ampliados el 2026-11-19. NO se edita para corregir el chino ni la traducción: el PDF manda. Todo pendiente de revisión de Ulises. zhT/zy/es/nota: versión frase por frase (p.2–9); testigo2: la versión de texto corrido (p.10–13), leída aparte sobre sus propios recortes; el zhuyin tiene que coincidir (la puntuación no: cada versión puntúa distinto). zh: simplificado con OpenCC tw2s (lo verifica tools/check-datong.js).",
+ "fuente": "PDF «Presentación con traducción» (autoría a confirmar)",
+ "permiso": {
+  "estado": "confirmado",
+  "informadoPor": "Ulises",
+  "fechaInforme": "2026-11-19",
+  "nota": "Fecha de la confirmación y autoría del PDF: no registradas."
+ },
+ "titulo": {
+  "zhT": "禮運大同篇",
+  "zh": "礼运大同篇",
+  "zy": "ㄌㄧˇ ㄩㄣˋ ㄉㄚˋ ㄊㄨㄥˊ ㄆㄧㄢ",
+  "esPdf": "SUTRA DE LA MANCOMUNIDAD",
+  "glosaPdf": "(Cortesía - Transitar - Mundo Pacífico - Texto) “La Mancomunidad”"
+ },
+ "frases": [
+  {
+   "n": 1,
+   "p": 2,
+   "zhT": "大道之行也",
+   "zh": "大道之行也",
+   "zy": "ㄉㄚˋ ㄉㄠˋ ㄓ ㄒㄧㄥˊ ㄧㄝˇ",
+   "es": "Cuando el Gran Tao esté actuando,",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄉㄚˋ ㄉㄠˋ ㄓ ㄒㄧㄥˊ ㄧㄝˇ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 2,
+   "p": 2,
+   "zhT": "天下為公",
+   "zh": "天下为公",
+   "zy": "ㄊㄧㄢ ㄒㄧㄚˋ ㄨㄟˊ ㄍㄨㄥ",
+   "es": "el mundo entero (bajo el cielo) será una mancomunidad, tendrá el propósito de ser para el bien común.",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄊㄧㄢ ㄒㄧㄚˋ ㄨㄟˊ ㄍㄨㄥ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 3,
+   "p": 2,
+   "zhT": "選賢與能",
+   "zh": "选贤与能",
+   "zy": "ㄒㄩㄢˇ ㄒㄧㄢˊ ㄩˇ ㄋㄥˊ",
+   "es": "Las personas elegidas, virtuosas y capaces, ofrecerán ayuda, serán encomendadas por sus capacidades.",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄒㄩㄢˇ ㄒㄧㄢˊ ㄩˇ ㄋㄥˊ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 4,
+   "p": 2,
+   "zhT": "講信修睦.",
+   "zh": "讲信修睦.",
+   "zy": "ㄐㄧㄤˇ ㄒㄧㄣˋ ㄒㄧㄡ ㄇㄨˋ",
+   "es": "En la comunicación habrá fe y confianza, cultivando la amistad entre vecinos, el buen trato y la armonía.",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄐㄧㄤˇ ㄒㄧㄣˋ ㄒㄧㄡ ㄇㄨˋ",
+    "puntFinal": "."
+   }
+  },
+  {
+   "n": 5,
+   "p": 3,
+   "zhT": "故人不獨親其親,",
+   "zh": "故人不独亲其亲,",
+   "zy": "ㄍㄨˋ ㄖㄣˊ ㄅㄨˋ ㄉㄨˊ ㄑㄧㄣ ㄑㄧˊ ㄑㄧㄣ",
+   "es": "El respeto a los mayores no será sólo hacia nuestros padres, se tratará a todos los mayores como nuestros propios padres.",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄍㄨˋ ㄖㄣˊ ㄅㄨˋ ㄉㄨˊ ㄑㄧㄣ ㄑㄧˊ ㄑㄧㄣ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 6,
+   "p": 3,
+   "zhT": "不獨子其子.",
+   "zh": "不独子其子.",
+   "zy": "ㄅㄨˋ ㄉㄨˊ ㄗˇ ㄑㄧˊ ㄗˇ",
+   "es": "El cuidado de los niños no será solamente hacia nuestros hijos, se tratará a todos los niños como nuestros propios hijos.",
+   "testigo2": {
+    "p": 10,
+    "zy": "ㄅㄨˋ ㄉㄨˊ ㄗˇ ㄑㄧˊ ㄗˇ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 7,
+   "p": 4,
+   "zhT": "使老有所終",
+   "zh": "使老有所终",
+   "zy": "ㄕˇ ㄌㄠˇ ㄧㄡˇ ㄙㄨㄛˇ ㄓㄨㄥ",
+   "es": "Los ancianos serán cuidados hasta el final (vivirán acorde a ello, pues en cada etapa de la vida todos cumplirán bien su función).",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄕˇ ㄌㄠˇ ㄧㄡˇ ㄙㄨㄛˇ ㄓㄨㄥ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 8,
+   "p": 4,
+   "zhT": "壯有所用",
+   "zh": "壮有所用",
+   "zy": "ㄓㄨㄤˋ ㄧㄡˇ ㄙㄨㄛˇ ㄩㄥˋ",
+   "es": "Los capaces (los jóvenes y adultos) harán uso de sus facultades en los trabajos.",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄓㄨㄤˋ ㄧㄡˇ ㄙㄨㄛˇ ㄩㄥˋ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 9,
+   "p": 4,
+   "zhT": "幼有所長",
+   "zh": "幼有所长",
+   "zy": "ㄧㄡˋ ㄧㄡˇ ㄙㄨㄛˇ ㄓㄤˇ",
+   "es": "Los niños crecerán bien (serán cuidados, alimentados y educados).",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄧㄡˋ ㄧㄡˇ ㄙㄨㄛˇ ㄓㄤˇ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 10,
+   "p": 5,
+   "zhT": "鰥寡孤獨",
+   "zh": "鳏寡孤独",
+   "zy": "ㄍㄨㄢ ㄍㄨㄚˇ ㄍㄨ ㄉㄨˊ",
+   "es": "Los viudos y viudas, los huérfanos, los ancianos sin hijos",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄍㄨㄢ ㄍㄨㄚˇ ㄍㄨ ㄉㄨˊ",
+    "puntFinal": ""
+   }
+  },
+  {
+   "n": 11,
+   "p": 5,
+   "zhT": "廢疾者皆有所養;",
+   "zh": "废疾者皆有所养;",
+   "zy": "ㄈㄟˋ ㄐㄧˊ ㄓㄜˇ ㄐㄧㄝ ㄧㄡˇ ㄙㄨㄛˇ ㄧㄤˇ",
+   "es": "y las personas con discapacidad, todos y cada uno de ellos, tendrán cuidados y serán atendidos.",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄈㄟˋ ㄐㄧˊ ㄓㄜˇ ㄐㄧㄝ ㄧㄡˇ ㄙㄨㄛˇ ㄧㄤˇ",
+    "puntFinal": ";"
+   }
+  },
+  {
+   "n": 12,
+   "p": 6,
+   "zhT": "男有分,女有歸,",
+   "zh": "男有分,女有归,",
+   "zy": "ㄋㄢˊ ㄧㄡˇ ㄈㄣˋ ㄋㄩˇ ㄧㄡˇ ㄍㄨㄟ",
+   "es": "Cada hombre tendrá su puesto (ocupación, deber) y cada mujer, un lugar donde retornar (hogar).",
+   "testigo2": {
+    "p": 11,
+    "zy": "ㄋㄢˊ ㄧㄡˇ ㄈㄣˋ ㄋㄩˇ ㄧㄡˇ ㄍㄨㄟ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 13,
+   "p": 6,
+   "zhT": "貨惡其棄於地也",
+   "zh": "货恶其弃于地也",
+   "zy": "ㄏㄨㄛˋ ㄨˋ ㄑㄧˊ ㄑㄧˋ ㄩˊ ㄉㄧˋ ㄧㄝˇ",
+   "es": "Los recursos naturales no sé desperdiciarán, ni echarán a perder.",
+   "testigo2": {
+    "p": 12,
+    "zy": "ㄏㄨㄛˋ ㄨˋ ㄑㄧˊ ㄑㄧˋ ㄩˊ ㄉㄧˋ ㄧㄝˇ",
+    "puntFinal": ""
+   }
+  },
+  {
+   "n": 14,
+   "p": 6,
+   "zhT": "不必藏於己,",
+   "zh": "不必藏于己,",
+   "zy": "ㄅㄨˊ ㄅㄧˋ ㄘㄤˊ ㄩˊ ㄐㄧˇ",
+   "es": "Se compartirán y no guardarán para uno mismo.",
+   "nota": "(Las capacidades, la fuerza física y los recursos no permanecen ociosos, ya que son ofrecidos en pos del bien común)",
+   "testigo2": {
+    "p": 12,
+    "zy": "ㄅㄨˊ ㄅㄧˋ ㄘㄤˊ ㄩˊ ㄐㄧˇ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 15,
+   "p": 7,
+   "zhT": "力惡其不出於身也",
+   "zh": "力恶其不出于身也",
+   "zy": "ㄌㄧˋ ㄨˋ ㄑㄧˊ ㄅㄨˋ ㄔㄨ ㄩˊ ㄕㄣ ㄧㄝˇ",
+   "es": "Se repudiará la vagancia. La fuerza del cuerpo, las capacidades personales",
+   "testigo2": {
+    "p": 12,
+    "zy": "ㄌㄧˋ ㄨˋ ㄑㄧˊ ㄅㄨˋ ㄔㄨ ㄩˊ ㄕㄣ ㄧㄝˇ",
+    "puntFinal": ""
+   }
+  },
+  {
+   "n": 16,
+   "p": 7,
+   "zhT": "不必為己,",
+   "zh": "不必为己,",
+   "zy": "ㄅㄨˊ ㄅㄧˋ ㄨㄟˋ ㄐㄧˇ",
+   "es": "no serán sólo para abastecerse a uno mismo.",
+   "nota": "(Cada persona no teme por su propia enfermedad, sino teme por no ser útil a los demás. Cada uno quiere cumplir con su justicia)",
+   "testigo2": {
+    "p": 12,
+    "zy": "ㄅㄨˊ ㄅㄧˋ ㄨㄟˋ ㄐㄧˇ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 17,
+   "p": 8,
+   "zhT": "是故謀閉而不興,",
+   "zh": "是故谋闭而不兴,",
+   "zy": "ㄕˋ ㄍㄨˋ ㄇㄡˇ ㄅㄧˋ ㄦˊ ㄅㄨˋ ㄒㄧㄥ",
+   "es": "Por lo tanto, las estratagemas, la intriga y la conspiración no tendrán vía y caerán en desuso.",
+   "testigo2": {
+    "p": 13,
+    "zy": "ㄕˋ ㄍㄨˋ ㄇㄡˇ ㄅㄧˋ ㄦˊ ㄅㄨˋ ㄒㄧㄥ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 18,
+   "p": 8,
+   "zhT": "盜竊亂賊而不作,",
+   "zh": "盗窃乱贼而不作,",
+   "zy": "ㄉㄠˋ ㄑㄧㄝˋ ㄌㄨㄢˋ ㄗㄟˊ ㄦˊ ㄅㄨˊ ㄗㄨㄛˋ",
+   "es": "Robos, disturbios, conspiradores, traidores y malvados, por eso, no podrán prosperar.",
+   "testigo2": {
+    "p": 13,
+    "zy": "ㄉㄠˋ ㄑㄧㄝˋ ㄌㄨㄢˋ ㄗㄟˊ ㄦˊ ㄅㄨˊ ㄗㄨㄛˋ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 19,
+   "p": 9,
+   "zhT": "故外戶而不閉,",
+   "zh": "故外户而不闭,",
+   "zy": "ㄍㄨˋ ㄨㄞˋ ㄏㄨˋ ㄦˊ ㄅㄨˊ ㄅㄧˋ",
+   "es": "Por lo tanto, las puertas de las casas no necesitarán cerrarse.",
+   "testigo2": {
+    "p": 13,
+    "zy": "ㄍㄨˋ ㄨㄞˋ ㄏㄨˋ ㄦˊ ㄅㄨˊ ㄅㄧˋ",
+    "puntFinal": ","
+   }
+  },
+  {
+   "n": 20,
+   "p": 9,
+   "zhT": "是謂大同.",
+   "zh": "是谓大同.",
+   "zy": "ㄕˋ ㄨㄟˋ ㄉㄚˋ ㄊㄨㄥˊ",
+   "es": "Esto es lo que se denomina la gran armonía.",
+   "testigo2": {
+    "p": 13,
+    "zy": "ㄕˋ ㄨㄟˋ ㄉㄚˋ ㄊㄨㄥˊ",
+    "puntFinal": ""
+   }
+  }
+ ],
+ "marcasTono": {
+  "_nota": "Marcas naranjas de cambio de tono (3.º → 2.º) de p.11 y p.14–15: frase y posición del carácter (desde 0, solo hanzi). La de 幼有所長 cae dentro de la caja de 所 en p.11 (x 458–523; 所 420–524) y en p.14 (x 300–366; 所 299–375).",
+  "lista": [
+   [
+    7,
+    1,
+    "老"
+   ],
+   [
+    7,
+    2,
+    "有"
+   ],
+   [
+    8,
+    1,
+    "有"
+   ],
+   [
+    9,
+    2,
+    "所"
+   ],
+   [
+    11,
+    4,
+    "有"
+   ],
+   [
+    12,
+    3,
+    "女"
+   ]
+  ]
+ },
+ "textoBaseUlises": "大道之行也，天下為公。選賢與能，講信修睦。故人不獨親其親，不獨子其子；使老有所終，壯有所用，幼有所長，矜、寡、孤、獨、廢疾者，皆有所養；男有分，女有歸。貨，惡其棄於地也，不必藏於己；力，惡其不出於身也，不必為己。是故謀閉而不興，盜竊亂賊而不作，故外戶而不閉，是謂「大同」。"
+}
