@@ -260,6 +260,7 @@
         // todavía) — agrupa los tres niveles bajo un solo acceso.
         const tocflLvl = filt.indexOf('tocfl:') === 0 ? filt.slice(6) : null;
         const hskAdvanced = filt === '7-9';
+        renderFamList(tocflLvl); // fichas de familia (window.FAMILY_LESSONS) del nivel TOCFL elegido, en #fam-list
         wrap.innerHTML = '';
         const filtered = LESSONS.filter(l => {
             if (tocflLvl) return l.exam === 'TOCFL' && String(l.examLvl || '') === tocflLvl;
@@ -292,6 +293,31 @@
         });
     }
 
+    // Fichas de familia (lessons-familia.js → window.FAMILY_LESSONS; visor en familia-ui.js). NO están en
+    // GRADED_LESSONS: van en un contenedor propio (#fam-list, debajo de #lesson-list) y solo con un nivel TOCFL.
+    // El visor (fichas, 🔊 por forma, pinyin/zhuyin) vive en familia-ui.js (LQ_FAMILIA.open); acá solo la lista.
+    const FAMS = () => (Array.isArray(window.FAMILY_LESSONS) ? window.FAMILY_LESSONS : []);
+    const isFam = (l) => !!l && l.kind === 'familia';
+    const famCount = (l) => l.grupos ? l.grupos.reduce((a, g) => a + g.items.filter(it => !it.ancla).length, 0) : 0;
+    function renderFamList(tocflLvl) {
+        const fw = $('fam-list');
+        if (!fw) return;
+        const list = tocflLvl ? FAMS().filter(l => String(l.examLvl || '') === tocflLvl) : [];
+        fw.innerHTML = '';
+        fw.classList.toggle('hidden', !list.length);
+        if (!list.length) return;
+        fw.innerHTML = '<h4 class="fam-list-title">🗂 Fichas: la familia</h4>' + list.map(l =>
+            '<div class="lesson-card fam-card">' +
+            '<div class="lc-top"><span class="lc-emoji" aria-hidden="true">' + l.emoji + '</span>' +
+            '<span class="lc-hsk">' + escHtml(lessonTag(l)) + '</span></div>' +
+            '<div class="lc-titles"><span class="lc-zh" lang="zh">' + escHtml(lessonScript(l) === 'trad' ? (l.titleZhT || l.titleZh) : l.titleZh) + '</span>' +
+            '<span class="lc-es">' + escHtml(l.titleEs) + '</span></div>' +
+            '<p class="lc-blurb">' + escHtml(l.blurb) + '</p>' +
+            '<div class="lc-meta">' + (l.grupos ? famCount(l) + ' fichas' : l.reglas.length + ' reglas') + ' · Fuente: ' + escHtml(l.fuente) + '</div>' +
+            '<div class="lc-actions fam-actions"><button type="button" class="lq-btn lc-read" data-act="fichas" data-id="' + escHtml(l.id) + '">🗂 Ver fichas</button></div>' +
+            '</div>').join('');
+    }
+
     // v9.6b: accesos TOCFL junto a los de HSK.
     // v9.7x: ya NO depende de qué niveles tengan lecciones — se ofrecen
     // los 6 siempre (準備→流利), igual que HSK ofrece 7-9 aunque todavía no
@@ -303,7 +329,7 @@
     // el valor guardado ('tocfl:C1') y el examLvl de los datos no cambian.
     const TOCFL_LABEL = { C1: 'C' };
     const tocflLvlLabel = (v) => TOCFL_LABEL[v] || v;
-    const lessonTag = (l) => isRd(l) ? 'Lectura · ' + (l.exam === 'TOCFL' ? 'TOCFL ' + tocflLvlLabel(l.examLvl || '') : 'HSK ' + l.hsk) + ' (aprox.)' : l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
+    const lessonTag = (l) => isFam(l) ? 'Fichas · TOCFL ' + tocflLvlLabel(l.examLvl || '') + ' · nivel aproximado' : isRd(l) ? 'Lectura · ' + (l.exam === 'TOCFL' ? 'TOCFL ' + tocflLvlLabel(l.examLvl || '') : 'HSK ' + l.hsk) + ' (aprox.)' : l.exam ? (l.exam + ' ' + (l.exam === 'TOCFL' ? tocflLvlLabel(l.examLvl || '') : (l.examLvl || l.hsk))) : 'HSK ' + l.hsk;
     function buildTocflOptions() {
         const sel = $('sel-lv-tocfl');
         if (!sel) return;
@@ -357,6 +383,11 @@
             if (!l) return;
             if (btn.dataset.act === 'read') openStory(l);
             else openQuiz(l);
+        });
+        const fw = $('fam-list');
+        if (fw) fw.addEventListener('click', (e) => {
+            const btn = e.target.closest('.lq-btn[data-act="fichas"]');
+            if (btn && window.LQ_FAMILIA) window.LQ_FAMILIA.open(btn.dataset.id);
         });
         // v9.7x: elegir en cualquiera de los dos <select> cambia data-level
         // (igual que antes el chip) y re-arma la lista, sin cambiar de pestaña.
@@ -904,7 +935,7 @@
     window.LQ_UI = {
         state: S, els: { pop, body, segs, progNum },
         openPop, closePop, renderSegments, linesHtml, bindLines, zhCharsHtml, zhKey, escHtml,
-        pyLine, pyReady, bindSpeedChip, stopSpeak,
+        pyLine, pyReady, bindSpeedChip, stopSpeak, lessonTag,
         getVerEs: () => verEs, setVerEs
     };
     window.LQ_DEBUG = {

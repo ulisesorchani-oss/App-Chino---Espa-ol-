@@ -1,0 +1,153 @@
+{
+  "_nota": "Ajustes sobre fuente-guofeng.json (que NO se edita): simplificado, español de los pares, lectura de 叔, asignación de formas cotidianas desparejas y armado de las lecciones. Lo lee tools/lecciones-familia/derivar.js (generador y validador). Cada ajuste se lista en docs/revision-familia.md.",
+  "fuente": "material del Instituto Guó Fēng",
+  "permiso": {
+    "_nota": "Permiso de uso del material. Solo se marca «confirmado» con fecha y quién; la misma fila va en la constancia de docs/revision-familia.md. La fecha es la del aviso de Ulises (la fecha en que el maestro confirmó no está registrada).",
+    "estado": "confirmado",
+    "fecha": "2026-11-19",
+    "quien": "el maestro del Instituto Guó Fēng"
+  },
+  "simplificado": {
+    "_nota": "Simplificado escrito a mano, carácter por carácter (los demás caracteres de la fuente son iguales en las dos escrituras). 姊 queda 姊 en las dos (decisión de Ulises, 2026-11-19). Se verifica con la ida y vuelta s2tw de OpenCC (tools/lecturas-examen/opencc-s2tw.py) y contra los pares de la app.",
+    "爺": "爷", "媽": "妈", "親": "亲", "兒": "儿", "孫": "孙", "婦": "妇", "嬸": "婶", "姪": "侄"
+  },
+  "excepcionesOpencc": {
+    "_nota": "Pares simplificado/tradicional que la ida y vuelta de OpenCC no reproduce y que se mantienen a propósito. 姪 → 侄 es decisión de Ulises (2026-11-19): OpenCC 1.4.2 no convierte 姪 en 侄 ni 侄 en 姪. tools/check-familia.js falla ante cualquier diferencia que no sea de estos pares.",
+    "姪": "侄"
+  },
+  "resultadoOpencc": "Ida y vuelta s2tw/tw2s con OpenCC 1.4.2, corrida el 2026-11-19 sobre los 111 pares simplificado/tradicional distintos de lessons-familia.js (ítems, formas cotidianas, marcas y ejemplos de las reglas, y títulos): 107 coinciden en las dos direcciones. Las 4 diferencias son todas 姪/侄, que OpenCC deja sin convertir: 姪, 姪子, 姪女 y el título 兒女、媳婦和姪甥. Se mantiene 姪 → 侄 por decisión de Ulises (excepción declarada en ajustes.json); tools/check-familia.js lo vuelve a comprobar en cada corrida.",
+  "pinyin": {
+    "_nota": "Lecturas que se apartan de la fuente. 叔 = shú: convención TOCFL de la app (pinyin-tocfl.js, módulo TOCFL-A2); la fuente dice shū. A confirmar con el maestro.",
+    "叔父": "shúfù", "叔母": "shúmǔ", "叔叔": "shúshu"
+  },
+  "alineadoManual": {
+    "_nota": "Lecturas que pinyin-pro no conoce y que hacen falta para alinear el pinyin de la fuente sílaba por sílaba (pinyin-pro solo da zǐ para 姊).",
+    "姊": ["jie"]
+  },
+  "espanol": {
+    "_nota": "Español de cada pieza de los pares con «·» (la fuente trae una sola glosa para el par) y de las dos glosas que llevaban caracteres chinos. En 姊夫/妹夫 el «mayor/menor» lo agregamos nosotros.",
+    "伯父": "Tío, hermano mayor de papá",
+    "叔父": "Tío, hermano menor de papá",
+    "伯母": "Esposa del hermano mayor de papá",
+    "叔母": "Esposa del hermano menor de papá",
+    "表兄": "Primo mayor, de otro apellido",
+    "表弟": "Primo menor, de otro apellido",
+    "表姊": "Prima mayor, de otro apellido",
+    "表妹": "Prima menor, de otro apellido",
+    "堂兄": "Primo mayor, hijo de un hermano de papá",
+    "堂弟": "Primo menor, hijo de un hermano de papá",
+    "堂姊": "Prima mayor, hija de un hermano de papá",
+    "堂妹": "Prima menor, hija de un hermano de papá",
+    "姊夫": "Cuñado, esposo de la hermana mayor",
+    "妹夫": "Cuñado, esposo de la hermana menor",
+    "姊": "Hermana mayor",
+    "妹": "Hermana menor",
+    "夫": "Esposo",
+    "妻": "Esposa",
+    "兄": "Hermano mayor",
+    "弟": "Hermano menor",
+    "嫂": "Cuñada, esposa del hermano mayor",
+    "弟婦": "Cuñada, esposa del hermano menor"
+  },
+  "asignarCotidiano": {
+    "_nota": "Pares con una sola forma cotidiana para dos formales: se asigna por significado, no por posición.",
+    "表哥": "表兄", "表姐": "表姊", "堂哥": "堂兄"
+  },
+  "pantalla": {
+    "_nota": "Cómo se muestra cada ítem (los datos no cambian).",
+    "ancla": ["自己"],
+    "destacarCotidiano": ["子", "女", "媳"],
+    "cotidianoIgual": ["伯母"]
+  },
+  "notasRevision": {
+    "_nota": "Solo para la hoja de revisión; no se muestran en pantalla.",
+    "小姑": "También significa «hermana menor del esposo» (小姑子). En pantalla solo figura como forma cotidiana de 姑母.",
+    "弟妹": "También significa «hermanos menores». En pantalla solo figura como forma cotidiana de 弟婦.",
+    "表姐": "La fuente escribe 表姐 (con 姐) como forma cotidiana de 表姊 (con 姊). Se deja como en la fuente; la app TOCFL usa 姊.",
+    "伯母": "La fuente da 伯母 como formal y como cotidiano. En pantalla se muestra una sola vez, con la nota «La forma cotidiana es la misma».",
+    "姊夫": "«mayor» lo agregamos nosotros: la fuente dice «Cuñado (esposo de la hermana)».",
+    "妹夫": "«menor» lo agregamos nosotros: la fuente dice «Cuñado (esposo de la hermana)».",
+    "自己": "Se muestra como punto de partida («Yo»), no como término de parentesco.",
+    "子": "Se muestra con la forma cotidiana a la vista y la nota «la forma formal casi no se usa sola».",
+    "女": "Se muestra con la forma cotidiana a la vista y la nota «la forma formal casi no se usa sola». La lista TOCFL de la app trae 女 como «femenino».",
+    "媳": "Se muestra con la forma cotidiana a la vista y la nota «la forma formal casi no se usa sola»."
+  },
+  "lecciones": [
+    {
+      "id": "tocfl-fam-abuelos", "examLvl": "A2", "hsk": 2, "emoji": "👵",
+      "titleZhT": "祖父母和曾祖父母", "titleZh": "祖父母和曾祖父母",
+      "titleEs": "Abuelos y bisabuelos",
+      "blurb": "Los abuelos y bisabuelos por el lado de mamá y por el lado de papá, con la forma formal y la que se usa en casa. Tocá 🔊 para escuchar cada una.",
+      "grupos": [
+        { "titulo": "Lado de mamá", "items": ["外曾祖父", "外曾祖母", "外祖父", "外祖母"] },
+        { "titulo": "Lado de papá", "items": ["曾祖父", "曾祖母", "祖父", "祖母"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-tios", "examLvl": "A2", "hsk": 2, "emoji": "👨‍👩‍👧",
+      "titleZhT": "父母和他們的兄弟姊妹", "titleZh": "父母和他们的兄弟姊妹",
+      "titleEs": "Papá, mamá y tíos",
+      "blurb": "Papá, mamá y sus hermanos, separados por lado: por papá cambia si el tío es mayor o menor que él. Tocá 🔊 para escuchar cada forma.",
+      "grupos": [
+        { "titulo": "Papá y mamá", "items": ["父親", "母親"] },
+        { "titulo": "Lado de papá", "items": ["伯父", "叔父", "伯母", "叔母", "姑母", "姑父"] },
+        { "titulo": "Lado de mamá", "items": ["舅父", "舅母", "姨母", "姨父"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-hermanos", "examLvl": "Prep", "hsk": 1, "emoji": "👫",
+      "titleZhT": "兄弟姊妹和夫妻", "titleZh": "兄弟姊妹和夫妻",
+      "titleEs": "Hermanos y pareja",
+      "blurb": "Desde vos: tus hermanos, mayores y menores, y tu pareja. Tocá 🔊 para escuchar cada forma.",
+      "grupos": [
+        { "titulo": "Punto de partida", "items": ["自己"] },
+        { "titulo": "Hermanos", "items": ["兄", "弟", "姊", "妹"] },
+        { "titulo": "Pareja", "items": ["夫", "妻"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-primos", "examLvl": "B1", "hsk": 4, "emoji": "🧑‍🤝‍🧑",
+      "titleZhT": "嫂、姊夫和堂表兄弟姊妹", "titleZh": "嫂、姊夫和堂表兄弟姊妹",
+      "titleEs": "Cuñados y primos",
+      "blurb": "Las parejas de tus hermanos y tus primos: el nombre cambia según el apellido y según si son mayores o menores que vos.",
+      "grupos": [
+        { "titulo": "Cuñados", "items": ["嫂", "弟婦", "姊夫", "妹夫"] },
+        { "titulo": "Primos 堂: hijos de los hermanos de papá (mismo apellido)", "items": ["堂兄", "堂弟", "堂姊", "堂妹"] },
+        { "titulo": "Primos 表: hijos de las hermanas de papá y de los hermanos y hermanas de mamá (otro apellido)", "items": ["表兄", "表弟", "表姊", "表妹"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-hijos", "examLvl": "A2", "hsk": 2, "emoji": "👶",
+      "titleZhT": "兒女、媳婦和姪甥", "titleZh": "儿女、媳妇和侄甥",
+      "titleEs": "Hijos, nueras y sobrinos",
+      "blurb": "Hijos, sus parejas y sobrinos: el sobrino cambia de nombre si es hijo de tu hermano o de tu hermana.",
+      "grupos": [
+        { "titulo": "Hijos y sus parejas", "items": ["子", "女", "媳", "女婿"] },
+        { "titulo": "Sobrinos", "items": ["姪", "姪女", "外甥", "外甥女"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-nietos", "examLvl": "B1", "hsk": 4, "emoji": "🍼",
+      "titleZhT": "孫子和曾孫", "titleZh": "孙子和曾孙",
+      "titleEs": "Nietos y bisnietos",
+      "blurb": "Nietos y bisnietos, con sus parejas: los hijos de tu hija llevan 外 adelante.",
+      "grupos": [
+        { "titulo": "Nietos por mi hijo", "items": ["孫", "孫女", "孫婦", "孫女婿"] },
+        { "titulo": "Nietos por mi hija", "items": ["外孫", "外孫女", "外孫婦", "外孫女婿"] },
+        { "titulo": "Bisnietos", "items": ["曾孫", "曾孫女", "外曾孫", "外曾孫女"] }
+      ]
+    },
+    {
+      "id": "tocfl-fam-reglas", "examLvl": "B1", "hsk": 4, "emoji": "🧩",
+      "titleZhT": "稱謂怎麼組成", "titleZh": "称谓怎么组成",
+      "titleEs": "Cómo se arman los términos",
+      "blurb": "Cuatro piezas que se repiten en todo el mapa de la familia. Con ellas podés adivinar muchos términos nuevos.",
+      "reglas": [
+        { "marcas": ["外"], "es": "«De afuera»: la familia de mamá y los hijos de las mujeres de la familia.", "ejemplos": ["外公", "外甥", "外孫"] },
+        { "marcas": ["堂", "表"], "es": "堂: primos con el mismo apellido. 表: primos de otro apellido.", "ejemplos": ["堂哥", "表哥"] },
+        { "marcas": ["兄", "姊", "弟", "妹", "伯", "叔"], "es": "兄 y 姊: mayores que yo; 弟 y 妹: menores. 伯: mayor que papá; 叔: menor que papá.", "ejemplos": ["兄", "姊", "弟", "妹", "伯父", "叔父"] },
+        { "marcas": ["曾"], "es": "Una generación más lejos, hacia arriba y hacia abajo.", "ejemplos": ["曾祖父", "曾孫"] }
+      ]
+    }
+  ]
+}

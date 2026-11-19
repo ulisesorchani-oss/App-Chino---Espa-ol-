@@ -11,6 +11,12 @@ Regla que busca la matriz: al arrancar, cada módulo corta lo que ya suena. Hoy 
 | **Podcast** | `hablarFrase` (`podcast.js`), desde `aVozDelSistema`, cuando falla el pedido o el `<audio>` | `stopGlobalAudio()` y `stopReader()` (este último cancela la voz del sistema), al arrancar la carga | **Un solo sitio de `speak` en el Podcast**, ahora **por frases de ≤150 caracteres** (una a la vez; `fix/podcast-voz-sistema`): voz elegida con `sysVoiceFor`, vigilancia de arranque de ~5 s, `onerror` distinto de `onend`. ⏸ hace `speechSynthesis.cancel()` de la frase en curso (la de `u.onerror` `canceled`/`interrupted` provocada por la app se ignora) y ▶️ la retoma desde su inicio. Su audio del servidor es un `new Audio` propio (`pAudio`) que solo corta su `stopAll()`. No hay `cancel()` justo antes de hablar. A verificar en el celular: `docs/prueba-celular.md` |
 | **Muestra de voz** (#138) | `speakVoiceSampleSystem` (`audio-tts.js`) | `speechSynthesis.cancel()` — **global** | Corta cualquier frase de la voz del sistema en curso (por ejemplo la del Lector con el servidor caído); antes la muestra fallida no hacía nada. **No** llama a `stopGlobalAudio()` ni a `stopReader()`. La muestra con audio del servidor (`playVoiceSample`) crea un `new Audio` propio que nadie corta |
 
+## Llamadores nuevos de un sitio existente
+
+| Sitio | Función (archivo) | Qué corta antes de hablar | Observaciones |
+|---|---|---|---|
+| **Fichas de familia** (`feat/lecciones-familia`) | el 🔊 de cada forma (`familia-ui.js`) llama a `speakZh` de `lessons-graduated.js` vía `LQ_UI.bindLines` | lo mismo que el 🔊 por línea de las lecciones: `stopGlobalAudio()`, su propio `lqAudio` y `KARA.stop()`; si el servidor falla, `speechSynthesis.cancel()` antes de su `speak` | **No agrega** `new Audio` ni `speechSynthesis.speak`: reusa el sitio de `lessons-graduated.js`. Voz según la familia de la lección (TOCFL). Sin `.lq-lines`: «Escuchar todo» no se engancha. `closePop` corta con `stopSpeak()` |
+
 ## Sitios que toman el reproductor global sin pasar por `stopGlobalAudio` (de #133)
 
 | Sitio | Función (archivo) | Qué hace con `globalAudioPlayer` |
