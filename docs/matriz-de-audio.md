@@ -16,6 +16,7 @@ Regla que busca la matriz: al arrancar, cada módulo corta lo que ya suena. Hoy 
 | Sitio | Función (archivo) | Qué corta antes de hablar | Observaciones |
 |---|---|---|---|
 | **Fichas de familia** (`feat/lecciones-familia`) | el 🔊 de cada forma (`familia-ui.js`) llama a `speakZh` de `lessons-graduated.js` vía `LQ_UI.bindLines` | lo mismo que el 🔊 por línea de las lecciones: `stopGlobalAudio()`, su propio `lqAudio` y `KARA.stop()`; si el servidor falla, `speechSynthesis.cancel()` antes de su `speak` | **No agrega** `new Audio` ni `speechSynthesis.speak`: reusa el sitio de `lessons-graduated.js`. Voz según la familia de la lección (TOCFL). Sin `.lq-lines`: «Escuchar todo» no se engancha. `closePop` corta con `stopSpeak()` |
+| **禮運大同篇** (`feat/clasico-datong`) | el 🔊 de cada frase (`classics-reader.js`, `speakCr`) | lo mismo que en los demás clásicos | **No agrega** `new Audio` ni `speechSynthesis.speak`: es el mismo `speakCr`. Sin karaoke (no hay `.lq-ch`) |
 
 ## Sitios que toman el reproductor global sin pasar por `stopGlobalAudio` (de #133)
 

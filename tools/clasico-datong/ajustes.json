@@ -1,0 +1,105 @@
+{
+  "_nota": "Ajustes sobre fuente.json (que no se edita): cómo se muestra el clásico en la app. Cada decisión figura en docs/revision-datong.md.",
+  "clave": "Clasicos-Datong",
+  "es": "Texto de la Gran Armonía",
+  "py": "Lǐyùn Dàtóng piān",
+  "emoji": "🌏",
+  "badge": "completo",
+  "nivel": "avanzado (nivel aproximado)",
+  "intro": "El texto completo, frase por frase, con el zhuyin y la traducción del PDF «Presentación con traducción» (con las correcciones declaradas en la hoja de revisión). Tocá ㄅ para mostrar u ocultar el zhuyin.",
+  "bloque": "全文 · Texto completo",
+  "escritura": "trad",
+  "decisiones": {
+    "_nota": "Decisiones tomadas el 2026-11-19 (Ulises y la sesión); quedan en la hoja de revisión.",
+    "titulo": "En la interfaz, «Texto de la Gran Armonía», con la línea «Del capítulo Liyun (禮運) del Libro de los Ritos (禮記)» (consulta a la docente del instituto, 2026-11-19). Motivo: 篇 es un texto con introducción, desarrollo y cierre, que puede leerse por separado; el capítulo es 禮運 y el libro, 禮記; «sutra» corresponde a 佛經. El PDF dice «SUTRA DE LA MANCOMUNIDAD». La elección final es de Ulises y el maestro.",
+    "pdf": "El PDF no se sube al repo (público): solo esta transcripción.",
+    "pinyin": "El pinyin que se muestra sale del zhuyin del PDF (tools/clasico-datong/zhuyin-pinyin.js), nunca de pinyin-pro. Sin fichas al tocar un carácter.",
+    "escritura": "Arranca en tradicional (como el PDF) si no se eligió una escritura para «HSK y el resto»; con 简 elegido, el texto sale en simplificado (OpenCC tw2s, salvo 於, que se mantiene) y cada carácter conserva el mismo zhuyin (la misma sílaba, sobre su forma simplificada); el pinyin derivado tampoco cambia.",
+    "practica": "Sin práctica por ahora: el clásico no entra en el menú de Hoy (CLASSICS_MODULES) ni en la Biblioteca; solo en la lista de Clásicos.",
+    "puntuacion": "Se usa la puntuación de la versión frase por frase (p.2–9), latina (, . ;), con las dos comas agregadas después de 也 (correcciones). Las otras versiones puntúan distinto. Pasarla a la puntuación china completa (，。；「」) es decisión de Ulises.",
+    "终終": "p.4 escribe 终 (simplificado) en 使老有所終; p.11 y p.14 escriben 終. Se usa 終 en el tradicional.",
+    "鰥矜": "Se usa 鰥 (PDF, ㄍㄨㄢ). El texto base de Ulises decía 矜: queda anotado como variante.",
+    "於于": "Se usa 於 (p.6, p.7, p.12) en las dos escrituras: en simplificado se mantiene 於 y no se convierte en 于 (excepción declarada; corrección). La versión «solo tonos» (p.15) escribe 于.",
+    "comillas": "Sin 「」 en 大同: el PDF no las tiene."
+  },
+  "pinyinExcepciones": {
+    "_nota": "Caracteres donde el pinyin derivado del zhuyin difiere de pinyin-pro (el resto coincide carácter por carácter). La comparación se hace sobre el simplificado de OpenCC (con 于), porque pinyin-pro lee 於 como wū.",
+    "lista": [
+      [
+        9,
+        "長",
+        "zhǎng",
+        "cháng"
+      ],
+      [
+        12,
+        "分",
+        "fèn",
+        "fēn"
+      ],
+      [
+        13,
+        "惡",
+        "wù",
+        "è"
+      ],
+      [
+        15,
+        "惡",
+        "wù",
+        "è"
+      ]
+    ]
+  },
+  "subtitulo": "Del capítulo Liyun (禮運) del Libro de los Ritos (禮記)",
+  "correcciones": {
+    "_nota": "Correcciones sobre la transcripción del PDF (fuente.json no se edita). Cada una dice qué trae el PDF y qué se muestra. tools/check-datong.js exige que los datos difieran de la transcripción en esto y en nada más.",
+    "origen": "consulta a la docente del instituto, 2026-11-19",
+    "zhuyin": [
+      [
+        17,
+        "謀",
+        "ㄇㄡˇ",
+        "ㄇㄡˊ"
+      ]
+    ],
+    "marcasQuitar": [
+      [
+        7,
+        1,
+        "老"
+      ]
+    ],
+    "marcasAgregar": [
+      [
+        7,
+        0,
+        "使"
+      ]
+    ],
+    "comas": [
+      [
+        13,
+        "貨惡其棄於地也",
+        "貨惡其棄於地也,"
+      ],
+      [
+        15,
+        "力惡其不出於身也",
+        "力惡其不出於身也,"
+      ]
+    ],
+    "simplificadoMantener": [
+      "於"
+    ]
+  },
+  "fusionesOpencc": {
+    "_nota": "Caracteres del texto cuyo simplificado (OpenCC tw2s) junta más de un carácter tradicional. Solo se anotan; el único que se mantiene sin convertir es 於.",
+    "lista": [
+      "為/爲 → 为",
+      "噁/惡 → 恶",
+      "於/于 → 于"
+    ]
+  },
+  "notaMarcas": "Las marcas siguen la fuente (PDF). Regla de referencia: ante dos terceros tonos seguidos, el primero pasa a 2.º. La única corrección de la docente fue 使老有所終 (marcas en 使 y 有). Que 有所長 y 有所養 lleven marca solo en un carácter es decisión de Ulises; uniformar la regla es cambio opcional futuro."
+}

@@ -46,9 +46,24 @@
     const body = $('cr-body'), progNum = $('cr-progress-num');
 
     const CR = { mod: null, block: 0, pinyin: false };
+    // Clásicos con zhuyin guardado (classics-datong.js → window.CLASSIC_ZY): zhuyin del PDF sobre cada carácter, pinyin
+    // DERIVADO de ese zhuyin (nunca pinyin-pro), sin fichas al tocar ni karaoke, sin práctica. Los demás clásicos no cambian.
+    const ZY = (typeof window.CLASSIC_ZY !== 'undefined') ? window.CLASSIC_ZY : {};
+    const zyOf = (mod) => ZY[mod] || null;
+    const ZY_KEY = 'ac_cr_zy';
+    let zyOn = true;
+    try { zyOn = localStorage.getItem(ZY_KEY) !== '0'; } catch (e) { /* sin storage: zhuyin a la vista */ }
 
     // ── utilidades compartidas con lessonsInit ──
     const zhKey = () => (typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp'; // v9.7x: Clásicos = "HSK y el resto"
+    const zhKeyFor = (mod) => {
+        const info = DATA[mod];
+        if (info && info.escritura === 'trad') {
+            const ex = (typeof explicitScript === 'function') ? explicitScript('hsk') : null;
+            return ex || 'trad';
+        }
+        return zhKey();
+    };
     const pyLine = (zh) => {
         try { return (typeof pinyinPro !== 'undefined') ? pinyinPro.pinyin(zh) : ''; }
         catch (e) { return ''; }
@@ -62,6 +77,24 @@
                 ? '<span class="lq-ch" data-ch="' + escHtml(ch) + '">' + escHtml(ch) + '</span>'
                 : escHtml(ch)
         ).join('');
+    }
+    // zhuyin apilado como en el PDF: los símbolos en columna (el neutro ˙ arriba) y la marca de tono a la derecha.
+    // El textContent sigue siendo la sílaba guardada tal cual (p. ej. «ㄍㄨㄟ», «˙ㄗ», «ㄓㄤˇ»).
+    function zyStackHtml(zy) {
+        const s = Array.from(String(zy || ''));
+        const tone = /[ˊˇˋ]/.test(s[s.length - 1] || '') ? s.pop() : '';
+        return s.map(c => '<span class="cr-zys">' + escHtml(c) + '</span>').join('') + (tone ? '<span class="cr-zyt">' + escHtml(tone) + '</span>' : '');
+    }
+    // carácter + su zhuyin guardado (cz[k] = { zy, py, t32? }); la puntuación pasa tal cual
+    function zyCharsHtml(zh, cz) {
+        let k = 0;
+        return Array.from(String(zh == null ? '' : zh)).map(ch => {
+            if (!CR_RE_HANZI.test(ch)) return '<span class="cr-punt">' + escHtml(ch) + '</span>';
+            const c = cz[k++] || { zy: '', py: '' };
+            return '<span class="cr-zych' + (c.t32 ? ' cr-t32' : '') + '"' + (c.t32 ? ' title="Cambio de tono: 3.º → 2.º"' : '') + '>' +
+                '<span class="cr-h" lang="zh">' + escHtml(ch) + '</span>' +
+                '<span class="cr-zy' + (zyOn ? '' : ' hidden') + '" lang="zh-Bopo">' + zyStackHtml(c.zy) + '</span></span>';
+        }).join('');
     }
     function speedLabel() {
         return '⚡ ' + ((typeof playbackSpeed === 'number') ? playbackSpeed : 1) + 'x';
@@ -247,10 +280,11 @@
     // ── vista: un bloque del texto original ──
     function renderBlock(hitLine) {
         const mod = CR.mod, info = DATA[mod];
-        const k = zhKey(), trad = (k === 'trad');
+        const k = zhKeyFor(mod), trad = (k === 'trad');
+        const zd = zyOf(mod);
         const blocks = info.blocks, b = CR.block, blk = blocks[b];
         const cinfo = (typeof CLASSICS_INFO !== 'undefined') ? CLASSICS_INFO[mod] : null;
-        const titleZh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : (trad ? (T.label[mod] || '') : '');
+        const titleZh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : info.zhT ? (trad ? info.zhT : info.zh) : (trad ? (T.label[mod] || '') : '');
         const flatBase = blocks.slice(0, b).reduce((a, x) => a + x.l.length, 0);
         const tlines = T.line[mod] || [];
         const tlabels = T.label[mod] || [];
@@ -261,6 +295,18 @@
             // v9.2 fix: si el pinyin está ON, las líneas de un bloque nuevo nacen
             // CON pinyin (antes quedaban vacías/ocultas hasta re-tocar el botón)
             const pyCls = CR.pinyin ? 'lq-line-py' : 'lq-line-py hidden';
+            if (zd) {
+                // zhuyin y pinyin GUARDADOS (data-py): el botón Pinyin y el re-dibujado por 简/繁 nunca llaman a pinyin-pro
+                const cz = zd.lineas[flatBase + i] || [];
+                const py = cz.map(c => c.py).join(' ');
+                const nota = zd.notas[flatBase + i];
+                return '<div class="lq-line cr-zyline' + (i === hitLine ? ' cr-flash' : '') + '" data-i="' + i + '"' + (i === hitLine ? ' id="cr-hit"' : '') + '>' +
+                    '<div class="lq-line-zh cr-zyrow">' + zyCharsHtml(zh, cz) + '</div>' +
+                    '<button type="button" class="lq-line-say" data-zh="' + escHtml(zh) + '" aria-label="Escuchar la línea">🔊</button>' +
+                    '<div class="' + pyCls + '" data-zh="' + escHtml(zh) + '" data-py="' + escHtml(py) + '">' + (CR.pinyin ? escHtml(py) : '') + '</div>' +
+                    '<div class="lq-line-es' + (esPref() ? '' : ' hidden') + '">' + escHtml(pair[1]) + '</div>' +
+                    (nota ? '<div class="lq-line-es cr-nota' + (esPref() ? '' : ' hidden') + '">' + escHtml(nota) + '</div>' : '') + '</div>';
+            }
             return '<div class="lq-line' + (i === hitLine ? ' cr-flash' : '') + '" data-i="' + i + '"' +
                 (i === hitLine ? ' id="cr-hit"' : '') + ' role="button" tabindex="0" title="Tocá un carácter para verlo · 🔊 para escuchar la línea">' +
                 '<div class="lq-line-zh">' + zhCharsHtml(zh) + '</div>' +
@@ -277,17 +323,21 @@
         body.innerHTML =
             '<div class="lq-story-head"><span class="lq-story-emoji">' + info.emoji + '</span>' +
             '<div><div class="lq-story-zh">' + escHtml(titleZh) + '</div>' +
-            '<div class="lq-story-es">' + escHtml(info.es) + ' · ' + badgeTxt + '</div></div></div>' +
+            '<div class="lq-story-es">' + escHtml(info.es) + ' · ' + badgeTxt + '</div>' +
+            (info.subtitulo ? '<div class="cr-sub">' + escHtml(info.subtitulo) + '</div>' : '') +
+            (info.nivel ? '<div class="cr-nivel">Nivel: ' + escHtml(info.nivel) + '</div>' : '') + '</div></div>' +
             '<p class="cr-intro">' + escHtml(info.intro) + '</p>' +
             '<div class="cr-chips" id="cr-chips">' + chips + '</div>' +
             '<div class="lq-lines" id="cr-lines">' + lines + '</div>' +
             '<div class="lq-story-foot">' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-es">🇪🇸 Español: ' + (esPref() ? 'ON' : 'OFF') + '</button>' +
+            (zd ? '<button type="button" class="lq-btn lq-ghost" id="cr-zy">ㄅ Zhuyin: ' + (zyOn ? 'ON' : 'OFF') + '</button>' : '') +
             '<button type="button" class="lq-btn lq-ghost" id="cr-py">🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF') + '</button>' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-speed">⚡ …</button>' +
-            '<button type="button" class="lq-btn lq-ghost" id="cr-kara">✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF') + '</button>' +
-            '<button type="button" class="lq-btn lq-primary" id="cr-practice">🎯 Practicar este clásico</button>' +
+            (zd ? '' : '<button type="button" class="lq-btn lq-ghost" id="cr-kara">✨ Karaoke: ' + (KARA.on() ? 'ON' : 'OFF') + '</button>') +
+            (info.practica === false ? '' : '<button type="button" class="lq-btn lq-primary" id="cr-practice">🎯 Practicar este clásico</button>') +
             '</div>' +
+            (info.fuente ? '<p class="cr-fuente">Fuente: ' + escHtml(info.fuente) + '. El zhuyin, el pinyin derivado y la traducción están pendientes de revisión.</p>' : '') +
             '<div class="cr-nav">' +
             '<button type="button" class="lq-btn lq-ghost" id="cr-prev"' + (b === 0 ? ' disabled' : '') + '>‹ Anterior</button>' +
             '<span class="cr-nav-num">' + escHtml(trad ? (tlabels[b] || blk.n) : blk.n) + '</span>' +
@@ -304,19 +354,28 @@
             CR.pinyin = !CR.pinyin;
             e.target.textContent = '🔤 Pinyin: ' + (CR.pinyin ? 'ON' : 'OFF');
             body.querySelectorAll('.lq-line-py').forEach(el => {
-                if (CR.pinyin && !el.textContent) el.textContent = pyLine(el.dataset.zh);
+                if (CR.pinyin && !el.textContent) el.textContent = (el.dataset.py != null) ? el.dataset.py : pyLine(el.dataset.zh);
                 el.classList.toggle('hidden', !CR.pinyin);
             });
         });
+        const zyBtn = body.querySelector('#cr-zy');
+        if (zyBtn) zyBtn.addEventListener('click', (e) => {
+            zyOn = !zyOn;
+            try { localStorage.setItem(ZY_KEY, zyOn ? '1' : '0'); } catch (e2) { /* sin storage: no se recuerda */ }
+            e.target.textContent = 'ㄅ Zhuyin: ' + (zyOn ? 'ON' : 'OFF');
+            body.querySelectorAll('.cr-zy').forEach(el => el.classList.toggle('hidden', !zyOn));
+        });
         bindSpeedChip(body.querySelector('#cr-speed'));
-        body.querySelector('#cr-kara').addEventListener('click', (e) => {
+        const karaBtn = body.querySelector('#cr-kara');
+        if (karaBtn) karaBtn.addEventListener('click', (e) => {
             // v9.4: karaoke de lectura en clásicos — misma preferencia compartida
             const v = !KARA.on();
             try { localStorage.setItem('ac_karaoke', v ? '1' : '0'); } catch (e2) { }
             if (!v) KARA.stop();
             e.target.textContent = '✨ Karaoke: ' + (v ? 'ON' : 'OFF');
         });
-        body.querySelector('#cr-practice').addEventListener('click', () => {
+        const practiceBtn = body.querySelector('#cr-practice');
+        if (practiceBtn) practiceBtn.addEventListener('click', () => {
             // v9.3: la práctica de clásicos es un multiple choice DENTRO del
             // lector (misma piel que las lecciones HSK) — no cambia de ventana
             // ni interrumpe la lectura. Sin datos embebidos queda el salto viejo.
@@ -581,12 +640,12 @@
     function renderCrList() {
         const wrap = $('cread-list');
         if (!wrap) return;
-        const k = zhKey(), trad = (k === 'trad');
         wrap.innerHTML = '';
         Object.keys(DATA).forEach(mod => {
             const info = DATA[mod];
+            const trad = zhKeyFor(mod) === 'trad';
             const cinfo = (typeof CLASSICS_INFO !== 'undefined') ? CLASSICS_INFO[mod] : null;
-            const zh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : '';
+            const zh = cinfo ? (trad ? cinfo.zhT : cinfo.zh) : info.zhT ? (trad ? info.zhT : info.zh) : '';
             const nLines = info.blocks.reduce((a, x) => a + x.l.length, 0);
             const card = document.createElement('div');
             card.className = 'cr-card';
@@ -599,6 +658,7 @@
                 '<span class="cr-badge' + (info.badge === 'completo' ? ' full' : '') + '">' +
                 (info.badge === 'completo' ? '✓ completo' : 'selección') + '</span></div>' +
                 '<div class="cr-es">' + escHtml(info.es) + '</div>' +
+                (info.subtitulo ? '<div class="cr-sub">' + escHtml(info.subtitulo) + '</div>' : '') +
                 '<div class="cr-meta">' + info.blocks.length + ' bloques · ' + nLines + ' líneas</div>' +
                 '<div class="cr-cta">📖 Leer el original</div>';
             wrap.appendChild(card);

@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 51 suites de `tests/` y las 11 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 52 suites de `tests/` y las 12 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -103,6 +103,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tools/test-*.js` (5) | lo levantan ellas | sí | no | — |
 | `tools/check-keywords.js` | no | no | no | solo Node (lee `lessons.js`, `lessons-tocfl.js` y `lessons-extra.js`; falla si una lección no tiene keywords) |
 | `tools/check-familia.js` | no | no | no | solo Node (regenera `lessons-familia.js` y `docs/revision-familia.md` y exige que coincidan; la ida y vuelta s2tw necesita `pip install opencc`, sin eso queda PARCIAL) |
+| `tools/check-datong.js` | no | no | no | solo Node (regenera `classics-datong.js` y `docs/revision-datong.md`; compara el zhuyin y la traducción con la transcripción del PDF; el simplificado se verifica con `pip install opencc`, sin eso queda PARCIAL) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
 | `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + las tablas de `lessons-listen.js` —«Escuchar todo»—, `reader.js` —el Lector— y `podcast.js` —el Podcast—): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped` ni a `readerPlayState`/`readerActiveEngine`/`pState`, cada `go()` (y cada `stopAll()` en «Escuchar todo») con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
@@ -141,6 +142,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `audio-corte-tardio` | `stopGlobalAudio()` invalida un `playAudio` en vuelo (servidor simulado con compuerta): tras el corte, cero «playing» del reproductor global, el 🔊 vuelve a su texto (también con el audio sonando) y un 🔊 nuevo suena; dos toques rápidos (mismo 🔊 y dos botones) suenan una sola vez; el Lector, el Podcast, la práctica tipo examen y las lecciones (🔊 por línea y «Escuchar todo») suenan tras un corte anterior |
 | `lecciones-nombres`, `lecciones-tocfl-contraste` | nombres propios en lecciones (karaoke, audio, pinyin) y contraste en lecciones TOCFL |
 | `lecciones-familia` | fichas de familia (`familia-ui.js`, `#fam-list`): tarjetas por nivel TOCFL y ocultas con HSK y en «aprendo español», `#lesson-list` igual a `GRADED_LESSONS`, pinyin y zhuyin guardados (姊 = jiě, 叔 = shú, neutro adelante), 伯母 una sola vez, ancla «Yo», 🔊 por forma, atribución, sin países ni tuteo, 320/360 px en los tres temas |
+| `clasico-datong` | clásico 禮運大同篇 (`classics-datong.js`, `classics-reader.js`): lista de Clásicos (10) sin entrar en Hoy (9), tradicional por defecto y simplificado con 简, zhuyin y pinyin GUARDADOS (長 zhǎng, 惡 wù, 分 fèn; nunca el generado, también con el pinyin ON al abrir y tras 简/繁), sin fichas, karaoke ni práctica, marcas de cambio de tono, traducción y notas del PDF, 🔊 por línea, 320/360 px en los tres temas; regresión de 大學 |
 | `lector-oro` | Lector de texto libre (`reader.js`): **prueba de oro por ORDEN de eventos** (`tests/data/lector-oro.json`, grabado con el código anterior a las máquinas de estado; regrabable con `GOLDEN_RECORD=1`): 17 escenarios (sano, pausa/continuar/parar, pausa mientras carga un trozo —R2—, pausa en el hueco entre trozos, continuar antes de que llegue, bache y caída a la voz del sistema, trozos mixtos, corte en plena carga y lectura nueva, cada corte); estricto sin transiciones sin declarar; con `state-machine.js` bloqueado suena igual |
 | `lector-mutaciones` | rompe `reader.js` a propósito (sacar una fila, asignación directa `readerPlayState = …`, saltear el reinicio de `stopReader()`) y exige que fallen el chequeo estático y el oro; sin modo estricto la fila sacada se aplica igual y queda en `AC_SM_LOG` |
 | `lecturas-lista`, `lecturas-tocfl-b1` | lista de Lecturas (grupos, tarjetas, etiquetas) y lecturas TOCFL B1 |
