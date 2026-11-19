@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Diagnóstico de voz</title>
+<!--
+  Página de DIAGNÓSTICO de la voz del sistema (speechSynthesis). NO es parte de la app: no la carga index.html, no está en el precaché de sw.js,
+  no registra service worker, no pide nada a la red después de cargar (salvo un fetch a una ruta inexistente en las variantes «demora con fetch»),
+  no guarda datos y no manda nada a ningún lado: el informe queda en esta pantalla y se copia a mano.
+  Rama chore/diag-voz: se abre desde el preview de Vercel; no se mergea.
+-->
+<style>
+:root{--bg:#fafafa;--fg:#1b1b1f;--mut:#5b5b66;--card:#fff;--line:#d9d9e0;--acc:#4a56d6;--ok:#12794a;--bad:#b3261e;--warn:#9a6700}
+@media (prefers-color-scheme:dark){:root{--bg:#121216;--fg:#ececf1;--mut:#a0a0ad;--card:#1c1c22;--line:#33333d;--acc:#8e99ff;--ok:#5fd39b;--bad:#ff8a80;--warn:#e3b341}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:12px 16px 60px;max-width:820px;margin-inline:auto}
+h1{font-size:1.35rem;margin:.4em 0}
+h2{font-size:1.05rem;margin:1.4em 0 .4em;border-bottom:1px solid var(--line);padding-bottom:.25em}
+section{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+ol.instr{margin:.3em 0;padding-left:1.3em}
+ol.instr li{margin:.2em 0}
+button{font:inherit;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;margin:3px 3px 3px 0}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.sel{outline:2px solid var(--acc)}
+label{display:block;font-size:.9rem;color:var(--mut);margin:.5em 0 .1em}
+select,input[type=text]{font:inherit;width:100%;min-height:42px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{border-bottom:1px solid var(--line);padding:4px 5px;text-align:left;vertical-align:top;word-break:break-word}
+th{color:var(--mut);font-weight:600;white-space:nowrap;word-break:normal}
+.scroll{overflow-x:auto}
+pre,textarea{font:12px/1.35 ui-monospace,Menlo,Consolas,monospace}
+textarea{width:100%;min-height:260px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.mut{color:var(--mut)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.warn{color:var(--warn);font-weight:600}
+.k{display:inline-block;min-width:9.5em;color:var(--mut)}
+.env div{padding:1px 0;word-break:break-word}
+#aviso{position:sticky;top:0;z-index:5;background:var(--acc);color:#fff;padding:6px 10px;border-radius:8px;margin:6px 0;display:none}
+.errbox{border-color:var(--bad)}
+</style>
+</head>
+<body>
+<h1>🔊 Diagnóstico de la voz del sistema</h1>
+<div id="aviso" role="status"></div>
+
+<section class="card" id="instrucciones">
+  <b>Cómo usarla (5 pasos)</b>
+  <ol class="instr">
+    <li>Abrí esta página <b>CON conexión</b> (Wi-Fi o datos) y <b>dejala abierta</b>: no la recargues ni la cierres.</li>
+    <li>Con conexión, tocá los controles de abajo en orden (español, inglés, chino) y marcá «¿Lo oíste?» en cada resultado: así sabemos si la voz del sistema suena <i>por sí sola</i>, incluso online.</li>
+    <li><b>Recién ahora</b> activá el <b>modo avión</b> (sin salir de la página) y repetí los mismos controles.</li>
+    <li>Repetí todo (con conexión y en modo avión) en <b>Brave</b> y en <b>Chrome</b>, abriendo esta misma dirección en cada uno.</li>
+    <li>Completá los dos campos de abajo («Navegador» y «Motor de voz»), tocá <b>Copiar informe</b> y pegámelo (el cuadro de texto del final también se puede copiar a mano).</li>
+  </ol>
+</section>
+
+<h2>1 · Entorno</h2>
+<section class="card env" id="env"></section>
+
+<h2>2 · Voces instaladas</h2>
+<section class="card">
+  <div id="voces-resumen"></div>
+  <div class="scroll"><table id="voces-tabla"><thead><tr><th>#</th><th>name</th><th>lang</th><th>localService</th><th>default</th><th>voiceURI</th></tr></thead><tbody></tbody></table></div>
+  <button id="b-voces">Releer la lista</button>
+  <span class="mut" id="voces-nota"></span>
+</section>
+
+<h2>3 · Controles (lo más simple posible)</h2>
+<section class="card">
+  <div class="mut">Solo <code>lang</code>: sin <code>cancel()</code>, sin voz asignada, con handlers. Primero español e inglés (separan «motor mudo» de «sin voz china»), después chino.</div>
+  <div>
+    <button class="run pri" data-ctl="es">🇪🇸 Control español</button>
+    <button class="run pri" data-ctl="en">🇬🇧 Control inglés</button>
+  </div>
+  <div>
+    <button class="run" data-ctl="zhcn">🇨🇳 Chino corto (zh-CN)</button>
+    <button class="run" data-ctl="zhtw">🇹🇼 Chino corto (zh-TW)</button>
+  </div>
+</section>
+
+<h2>4 · Variantes</h2>
+<section class="card">
+  <div class="row">
+    <div><label for="f-texto">Frase</label>
+      <select id="f-texto">
+        <option value="zhcorta">chino corto (4 caracteres)</option>
+        <option value="muestra">chino: la muestra de voz de la app</option>
+        <option value="zh150">chino ≈144 caracteres</option>
+        <option value="zh600">chino ≈592 caracteres (como el Podcast)</option>
+        <option value="es">español</option>
+        <option value="en">inglés</option>
+      </select></div>
+    <div><label for="f-lang">Idioma (<code>u.lang</code>)</label>
+      <select id="f-lang"><option>zh-CN</option><option>zh-TW</option><option>es-ES</option><option>en-US</option><option value="">(sin lang)</option></select></div>
+  </div>
+  <div class="row">
+    <div><label for="f-voz">Voz asignada (<code>u.voice</code>)</label>
+      <select id="f-voz"><option value="none">sin asignar (solo lang)</option><option value="app">como la app (sysVoiceFor: la 1.ª del idioma)</option></select></div>
+    <div><label for="f-rate">Velocidad (<code>u.rate</code>)</label>
+      <select id="f-rate"><option>1</option><option>0.85</option><option>0.7</option></select></div>
+  </div>
+  <div class="row">
+    <div><label for="f-cancel"><code>cancel()</code> previo</label>
+      <select id="f-cancel"><option value="no">ninguno</option><option value="inmediato">inmediato (justo antes del speak)</option><option value="400">hace 400 ms</option><option value="3000">hace 3 s</option></select></div>
+    <div><label for="f-demora">Demora desde el toque hasta el speak</label>
+      <select id="f-demora"><option value="0">ninguna</option><option value="400">400 ms</option><option value="3000">3 s</option><option value="fetch">tras un fetch (falla o 404)</option><option value="fetch+400">tras un fetch + 400 ms (como el Lector)</option></select></div>
+  </div>
+  <label><input type="checkbox" id="f-handlers" checked> con handlers (onstart / onend / onerror …). Sin ellos solo se mira <code>speaking</code>.</label>
+  <label><input type="checkbox" id="f-desbloqueo"> reproducir un <code>&lt;audio&gt;</code> silencioso justo antes (como «Escuchar todo»)</label>
+  <div><button class="run pri" id="b-var">▶ Ejecutar esta variante</button></div>
+  <div class="mut">Atajos que imitan cada camino de la app:</div>
+  <div>
+    <button class="run" data-pre="muestra">Muestra de voz</button>
+    <button class="run" data-pre="hoy">Hoy 🔊</button>
+    <button class="run" data-pre="lector">Lector</button>
+    <button class="run" data-pre="escuchar">«Escuchar todo»</button>
+    <button class="run" data-pre="podcast">Podcast (frase larga)</button>
+  </div>
+</section>
+
+<h2>5 · Resultados</h2>
+<section class="card">
+  <div class="scroll"><table id="runs-tabla"><thead><tr><th>#</th><th>prueba</th><th>online</th><th>voces</th><th>veredicto</th><th>¿Lo oíste?</th></tr></thead><tbody></tbody></table></div>
+  <div class="mut" id="runs-vacio">Todavía no corriste ninguna prueba.</div>
+</section>
+
+<h2>6 · Pruebas que alteran el motor (hacelas al final)</h2>
+<section class="card">
+  <div class="mut">Dejan el motor en un estado raro a propósito. Antes de cada una se registra <code>paused / speaking / pending</code>, así que si el motor quedó trabado de una prueba anterior se ve en el informe.</div>
+  <div><button class="danger" id="b-reset">♻ Reset motor (cancel + resume)</button></div>
+  <label for="f-pausa">Pausa previa (se prepara y recién después corre la frase de la sección 4)</label>
+  <select id="f-pausa">
+    <option value="sin-resume">pause() y cancel() SIN resume() (el patrón del código de la app)</option>
+    <option value="cancel-resume">pause(), cancel() y resume()</option>
+    <option value="pause-resume">pause(), resume() y cancel()</option>
+  </select>
+  <div><button class="run" id="b-pausa">▶ Ejecutar la variante con pausa previa</button></div>
+  <div class="mut" style="margin-top:.6em">Matriz rápida: corre unas 11 pruebas seguidas (con un reset entre cada una). Sonarán una tras otra: anotá cuáles oíste en la tabla de resultados.</div>
+  <div><button class="run danger" id="b-matriz">▶ Matriz rápida</button> <button id="b-parar" disabled>■ Parar la matriz</button></div>
+</section>
+
+<h2>7 · Informe</h2>
+<section class="card">
+  <div class="row">
+    <div><label for="m-nav">Navegador (a mano: el <code>userAgent</code> de Brave puede decir «Chrome»)</label>
+      <select id="m-nav"><option value="">(elegí)</option><option>Brave</option><option>Chrome</option><option>APK instalado (TWA)</option><option>Samsung Internet</option><option>Otro</option></select></div>
+    <div><label for="m-motor">Motor de voz predeterminado (Ajustes de Android → Salida de texto a voz)</label>
+      <select id="m-motor"><option value="">(elegí)</option><option>Samsung TTS</option><option>Google TTS</option><option>Otro</option></select></div>
+  </div>
+  <div class="row">
+    <div><label for="m-conex">Conexión al hacer estas pruebas</label>
+      <select id="m-conex"><option value="">(elegí)</option><option>con conexión</option><option>modo avión</option></select></div>
+    <div><label for="m-nota">Nota (opcional)</label><input type="text" id="m-nota" placeholder="p. ej. «la primera vez sonó, la segunda no»"></div>
+  </div>
+  <div style="margin-top:8px"><button class="pri" id="b-copiar">📋 Copiar informe</button> <button id="b-limpiar">Borrar resultados</button></div>
+  <label for="informe">Informe (texto plano)</label>
+  <textarea id="informe" readonly spellcheck="false"></textarea>
+</section>
+
+<section class="card errbox" id="errores-card" style="display:none"><b>Errores de la página</b><pre id="errores"></pre></section>
+
+<script>
+(function () {
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+var SS = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+var T00 = performance.now(), T_ABIERTA = new Date().toISOString();
+var GLOG = [];          // eventos de la página fuera de las pruebas
+var RUNS = [];          // una entrada por prueba
+var KEEP = [];          // referencias a las utterances (evita que el navegador las recolecte a mitad de frase)
+var ocupado = false, parar = false, esBrave = '';
+var SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+
+var ZH = {
+  zhcorta: '你好吗？',
+  muestra: '你好！我们一起练习吧。',
+  zh150: '今天天气很好，我们一起去公园玩。'.repeat(9),
+  zh600: '今天天气很好，我们一起去公园玩。'.repeat(37),
+  es: 'Hola, esta es una prueba de la voz del sistema.',
+  en: 'Hello, this is a test of the system voice.'
+};
+var TEXTO_ETQ = { zhcorta: 'zh 4 car.', muestra: 'zh muestra', zh150: 'zh ≈144', zh600: 'zh ≈592', es: 'es', en: 'en' };
+
+function glog(m) { GLOG.push(((performance.now() - T00) / 1000).toFixed(1) + ' s  ' + m); renderInforme(); }
+function aviso(m) { var a = $('aviso'); a.textContent = m; a.style.display = 'block'; clearTimeout(aviso._t); aviso._t = setTimeout(function () { a.style.display = 'none'; }, 3500); }
+function snap() { try { return SS ? ('paused=' + SS.paused + ' speaking=' + SS.speaking + ' pending=' + SS.pending) : 'sin speechSynthesis'; } catch (e) { return 'snap falló: ' + e.message; } }
+function voces() { try { return SS ? SS.getVoices() : []; } catch (e) { return []; } }
+function esZh(v) { return !!v.lang && /^zh/i.test(String(v.lang).replace('_', '-')); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+// misma regla que sysVoiceFor() de audio-tts.js (la 1.ª voz del idioma; con idioma regional, la del país exacto si existe)
+function sysVoiceFor(langCode) {
+  var full = String(langCode || '').toLowerCase().replace('_', '-'), pref = full.slice(0, 2);
+  var norm = function (x) { return String(x.lang).toLowerCase().replace('_', '-'); };
+  var vs = voces().filter(function (x) { return x.lang && norm(x).indexOf(pref) === 0; });
+  if (!vs.length) return null;
+  var exact = full.length > 2 ? vs.filter(function (x) { return norm(x).indexOf(full) === 0; }) : [];
+  return (exact.length ? exact : vs)[0];
+}
+
+// ───────── entorno ─────────
+function envLines() {
+  var ua = navigator.userActivation;
+  var dm = ['standalone', 'fullscreen', 'minimal-ui', 'browser'].filter(function (m) { try { return matchMedia('(display-mode: ' + m + ')').matches; } catch (e) { return false; } });
+  return [
+    ['dirección', location.href],
+    ['userAgent', navigator.userAgent],
+    ['Brave (navigator.brave)', esBrave || '…'],
+    ['navigator.onLine', String(navigator.onLine)],
+    ['visibilityState', document.visibilityState],
+    ['userActivation', ua ? ('hasBeenActive=' + ua.hasBeenActive + ' isActive=' + ua.isActive) : 'n/d'],
+    ['display-mode', dm.join(', ') || 'n/d'],
+    ['document.referrer', document.referrer || '(vacío)'],
+    ['speechSynthesis en window', SS ? 'sí' : 'NO'],
+    ['SpeechSynthesisUtterance', ('SpeechSynthesisUtterance' in window) ? 'sí' : 'NO'],
+    ['estado del motor ahora', snap()]
+  ];
+}
+function renderEnv() {
+  $('env').innerHTML = envLines().map(function (l) { return '<div><span class="k">' + esc(l[0]) + '</span>' + esc(l[1]) + '</div>'; }).join('');
+}
+
+// ───────── voces ─────────
+var vocesUlt = '';
+function resumenVoces() {
+  var vs = voces(), zh = vs.filter(esZh), por = {};
+  zh.forEach(function (v) { por[v.lang] = (por[v.lang] || 0) + 1; });
+  var cuenta = function (re) { return vs.filter(function (v) { return v.lang && re.test(String(v.lang).replace('_', '-')); }).length; };
+  return { total: vs.length, zh: zh.length, zhPor: por, es: cuenta(/^es/i), en: cuenta(/^en/i) };
+}
+function refrescarVoces(origen) {
+  var vs = voces(), r = resumenVoces();
+  var firma = vs.map(function (v) { return v.voiceURI + '|' + v.lang; }).join(';');
+  var porTxt = Object.keys(r.zhPor).map(function (k) { return k + ' ×' + r.zhPor[k]; }).join(', ');
+  var clase = !SS ? 'bad' : (r.zh === 0 ? 'bad' : 'ok');
+  $('voces-resumen').innerHTML = '<div>Total: <b>' + r.total + '</b> · español: <b>' + r.es + '</b> · inglés: <b>' + r.en + '</b> · con <code>lang</code> chino (zh*): <b class="' + clase + '">' + r.zh + '</b>' + (porTxt ? ' (' + esc(porTxt) + ')' : '') + '</div>'
+    + (r.total === 0 ? '<div class="warn">La lista está vacía (puede ser normal al abrir: se vuelve a leer cuando el navegador avisa). Si sigue vacía, es un dato del informe.</div>' : '');
+  var tb = $('voces-tabla').tBodies[0];
+  tb.innerHTML = vs.map(function (v, i) { return '<tr><td>' + i + '</td><td>' + esc(v.name) + '</td><td>' + esc(v.lang) + '</td><td>' + v.localService + '</td><td>' + v.default + '</td><td>' + esc(v.voiceURI) + '</td></tr>'; }).join('');
+  // selector de voz de la sección 4 (conserva la elección)
+  var sel = $('f-voz'), cur = sel.value;
+  while (sel.options.length > 2) sel.remove(2);
+  vs.forEach(function (v, i) { var o = document.createElement('option'); o.value = 'i:' + i; o.textContent = '#' + i + ' ' + v.name + ' (' + v.lang + (v.localService ? ', local' : ', red') + ')'; sel.appendChild(o); });
+  if ([].some.call(sel.options, function (o) { return o.value === cur; })) sel.value = cur;
+  if (firma !== vocesUlt) { glog('voces (' + (origen || 'lectura') + '): total=' + r.total + ' zh=' + r.zh + (porTxt ? ' [' + porTxt + ']' : '')); vocesUlt = firma; }
+  return r;
+}
+
+// ───────── una prueba ─────────
+function def(p) { return Object.assign({ texto: 'zhcorta', lang: '', rate: 1, voz: 'none', cancelPrev: 'no', pausaPrev: 'no', demora: '0', handlers: true, desbloqueo: false }, p); }
+
+async function prepararPausa(modo, ev) {
+  ev('preparación: hablo un texto en español para poder pausarlo');
+  var h = new SpeechSynthesisUtterance('Texto de preparación para probar la pausa, lo bastante largo como para alcanzar a sonar.');
+  h.lang = 'es-ES'; KEEP.push(h);
+  var started = false; h.onstart = function () { started = true; }; h.onerror = function () { };
+  SS.speak(h);
+  for (var i = 0; i < 30 && !started; i++) await sleep(100);
+  ev('preparación: onstart=' + started + ' · ' + snap());
+  SS.pause(); ev('pause() → ' + snap()); await sleep(400);
+  if (modo === 'sin-resume') { SS.cancel(); ev('cancel() SIN resume() → ' + snap()); }
+  else if (modo === 'cancel-resume') { SS.cancel(); SS.resume(); ev('cancel() + resume() → ' + snap()); }
+  else if (modo === 'pause-resume') { SS.resume(); ev('resume() → ' + snap()); await sleep(200); SS.cancel(); ev('cancel() → ' + snap()); }
+  await sleep(400); ev('motor listo para la prueba → ' + snap());
+}
+
+function etiquetaParams(p) {
+  var v = p.voz === 'none' ? 'sin voz' : (p.voz === 'app' ? 'voz app' : 'voz ' + p.voz.replace('i:', '#'));
+  return [TEXTO_ETQ[p.texto] || p.texto, p.lang || 'sin lang', v, 'rate ' + p.rate, 'cancel ' + p.cancelPrev, p.pausaPrev !== 'no' ? 'pausa previa ' + p.pausaPrev : null,
+    'demora ' + p.demora, p.handlers ? 'handlers' : 'SIN handlers', p.desbloqueo ? 'audio silencioso' : null].filter(Boolean).join(' · ');
+}
+
+async function ejecutar(etq, p0) {
+  if (ocupado) { aviso('Hay una prueba en curso: esperá a que termine.'); return null; }
+  var p = def(p0);
+  ocupado = true; botones();
+  var run = { n: RUNS.length + 1, etq: etq, p: p, ev: [], oi: '', ver: '…', onLine: navigator.onLine, nVoces: 0, antes: '' };
+  RUNS.push(run); renderRuns();
+  var t0 = performance.now(), done = false;
+  var ev = function (m) { run.ev.push(Math.round(performance.now() - t0) + ' ms  ' + m); renderInforme(); };
+  try {
+    refrescarVoces('inicio de la prueba'); run.nVoces = voces().length; run.antes = snap();
+    ev('inicio · online=' + navigator.onLine + ' · voces=' + run.nVoces + ' · estado previo: ' + run.antes);
+    if (!SS) { run.ver = 'NO EXISTE speechSynthesis'; return run; }
+    var texto = ZH[p.texto] || p.texto;
+    if (p.pausaPrev !== 'no') await prepararPausa(p.pausaPrev, ev);
+    if (p.desbloqueo) { try { var a = new Audio(SILENT_WAV); var pr = a.play(); if (pr && pr.catch) pr.catch(function (e) { ev('<audio> silencioso rechazado: ' + e.name); }); ev('<audio> silencioso: play()'); } catch (e) { ev('<audio> silencioso falló: ' + e.name); } }
+    if (String(p.demora).indexOf('fetch') === 0) {
+      ev('await fetch a una ruta inexistente…');
+      try { var r = await fetch('./__diag_no_existe__?' + Date.now(), { cache: 'no-store' }); ev('fetch respondió ' + r.status); } catch (e) { ev('fetch falló (' + e.name + ')'); }
+      if (String(p.demora).indexOf('+400') !== -1) await sleep(400);
+    } else if (+p.demora > 0) { ev('espero ' + p.demora + ' ms'); await sleep(+p.demora); }
+    if (p.cancelPrev === 'inmediato') { SS.cancel(); ev('cancel() inmediato → ' + snap()); }
+    else if (p.cancelPrev === '400' || p.cancelPrev === '3000') { SS.cancel(); ev('cancel() y espero ' + p.cancelPrev + ' ms'); await sleep(+p.cancelPrev); }
+
+    var u = new SpeechSynthesisUtterance(texto); KEEP.push(u);
+    if (p.lang) u.lang = p.lang;
+    u.rate = +p.rate || 1;
+    var vInfo = 'sin voz asignada';
+    if (p.voz === 'app') {
+      var v = sysVoiceFor(p.lang || 'zh-CN');
+      if (v) { try { u.voice = v; vInfo = 'sysVoiceFor → ' + v.name + ' (' + v.lang + ')'; } catch (e) { vInfo = 'ERROR al asignar la voz: ' + e.message; } }
+      else vInfo = 'sysVoiceFor → ninguna voz de ese idioma (queda sin voz asignada)';
+    } else if (/^i:\d+$/.test(p.voz)) {
+      var v2 = voces()[+p.voz.slice(2)];
+      if (v2) { try { u.voice = v2; vInfo = 'voz elegida → ' + v2.name + ' (' + v2.lang + ')'; } catch (e) { vInfo = 'ERROR al asignar la voz: ' + e.message; } } else vInfo = 'la voz elegida ya no está en la lista';
+    }
+    var st = { start: null, end: null, err: null, speaking: false, bnd: 0 };
+    var ms = function () { return Math.round(performance.now() - t0); };
+    if (p.handlers) {
+      u.onstart = function () { st.start = ms(); ev('onstart'); };
+      u.onend = function () { st.end = ms(); ev('onend'); };
+      u.onerror = function (e) { st.err = (e && e.error) || '(sin código)'; ev('onerror → ' + st.err); };
+      u.onpause = function () { ev('onpause'); }; u.onresume = function () { ev('onresume'); };
+      u.onboundary = function () { st.bnd++; if (st.bnd === 1) ev('onboundary (primera)'); };
+    }
+    ev('speak() · ' + vInfo + ' · lang=' + (u.lang || '(vacío)') + ' · rate=' + u.rate + ' · ' + Array.from(texto).length + ' caracteres');
+    var tSpeak = performance.now();
+    SS.speak(u);
+    ev('justo después de speak(): ' + snap());
+    [100, 1000, 5000].forEach(function (d) { setTimeout(function () { if (!done) ev('+' + d + ' ms: ' + snap()); }, d); });
+
+    var mudo = false;
+    await new Promise(function (res) {
+      var iv = setInterval(function () {
+        var el = performance.now() - tSpeak;
+        if (SS.speaking && !st.speaking) { st.speaking = true; ev('speaking pasó a true'); }
+        var fin = function () { clearInterval(iv); res(); };
+        if (st.end !== null || st.err !== null) return fin();
+        if (!p.handlers && st.speaking && !SS.speaking) { ev('speaking volvió a false'); return fin(); }
+        if (st.start === null && !st.speaking && el > 8000) { mudo = true; return fin(); }
+        if (el > 120000) { ev('tope de 120 s sin onend'); return fin(); }
+      }, 100);
+    });
+    done = true;
+    if (mudo) { ev('MUDO: ni onstart ni onend ni speaking en 8 s → cancel() de limpieza'); try { SS.cancel(); } catch (e) { } await sleep(500); }
+    // veredicto
+    if (st.err !== null) run.ver = 'ERROR ' + st.err + (st.start !== null ? ' (después de onstart)' : ' (sin onstart)');
+    else if (mudo) run.ver = 'MUDO (8 s sin señales)';
+    else if (st.start !== null && st.end !== null) run.ver = 'habló: onstart ' + st.start + ' ms, onend ' + st.end + ' ms';
+    else if (st.start === null && st.end !== null) run.ver = (st.end - Math.round(tSpeak - t0) < 300 ? 'onend INMEDIATO sin onstart (' + (st.end - Math.round(tSpeak - t0)) + ' ms)' : 'onend sin onstart (' + (st.end - Math.round(tSpeak - t0)) + ' ms)');
+    else if (!p.handlers) run.ver = st.speaking ? 'speaking=true y volvió a false (sin handlers)' : 'sin señales';
+    else run.ver = 'sin onend';
+  } catch (e) {
+    run.ver = 'EXCEPCIÓN ' + (e && e.name) + ': ' + (e && e.message); ev(run.ver);
+  } finally {
+    done = true; run.cierre = snap(); ev('fin · ' + run.ver + ' · estado: ' + run.cierre);
+    ocupado = false; botones(); renderRuns();
+  }
+  return run;
+}
+
+// ───────── interfaz ─────────
+function botones() {
+  [].forEach.call(document.querySelectorAll('button.run'), function (b) { b.disabled = ocupado; });
+  $('b-parar').disabled = !ocupado || !$('b-matriz').dataset.corriendo;
+}
+function renderRuns() {
+  var tb = $('runs-tabla').tBodies[0];
+  $('runs-vacio').style.display = RUNS.length ? 'none' : 'block';
+  tb.innerHTML = RUNS.map(function (r) {
+    var c = /^habló/.test(r.ver) ? 'ok' : (/MUDO|ERROR|NO EXISTE|EXCEPCI|INMEDIATO/.test(r.ver) ? 'bad' : 'warn');
+    var b = function (val, txt) { return '<button data-oi="' + r.n + ':' + val + '"' + (r.oi === val ? ' class="sel"' : '') + ' style="min-height:34px;padding:2px 10px">' + txt + '</button>'; };
+    return '<tr><td>' + r.n + '</td><td><b>' + esc(r.etq) + '</b><br><span class="mut">' + esc(etiquetaParams(r.p)) + '</span></td><td>' + r.onLine + '</td><td>' + r.nVoces + '</td><td class="' + c + '">' + esc(r.ver) + '</td><td>' + b('sí', 'Sí') + b('no', 'No') + '</td></tr>';
+  }).join('');
+  renderInforme();
+}
+function textoInforme() {
+  var L = [], nl = function (s) { L.push(s == null ? '' : s); };
+  nl('DIAGNÓSTICO DE VOZ — página abierta el ' + T_ABIERTA);
+  nl('Navegador (a mano): ' + ($('m-nav').value || '(sin completar)'));
+  nl('Motor de voz predeterminado (a mano): ' + ($('m-motor').value || '(sin completar)'));
+  nl('Conexión al probar (a mano): ' + ($('m-conex').value || '(sin completar)'));
+  if ($('m-nota').value) nl('Nota: ' + $('m-nota').value);
+  nl(''); nl('== ENTORNO'); envLines().forEach(function (l) { nl(l[0] + ': ' + l[1]); });
+  var r = resumenVoces();
+  nl(''); nl('== VOCES: total=' + r.total + ' · es=' + r.es + ' · en=' + r.en + ' · zh*=' + r.zh + ' ' + JSON.stringify(r.zhPor));
+  voces().forEach(function (v, i) { nl('#' + i + ' | ' + v.name + ' | ' + v.lang + ' | localService=' + v.localService + ' | default=' + v.default + ' | ' + v.voiceURI); });
+  if (GLOG.length) { nl(''); nl('== EVENTOS DE LA PÁGINA'); GLOG.forEach(nl); }
+  nl(''); nl('== PRUEBAS (' + RUNS.length + ')');
+  RUNS.forEach(function (x) {
+    nl(''); nl('#' + x.n + ' ' + x.etq + '  →  ' + x.ver + '  |  ¿lo oíste?: ' + (x.oi || '(sin marcar)'));
+    nl('   parámetros: ' + etiquetaParams(x.p) + ' · online=' + x.onLine + ' · voces=' + x.nVoces);
+    x.ev.forEach(function (e) { nl('   ' + e); });
+  });
+  return L.join('\n');
+}
+var pend = false;
+function renderInforme() { if (pend) return; pend = true; setTimeout(function () { pend = false; $('informe').value = textoInforme(); }, 60); }
+
+async function copiar() {
+  var t = textoInforme(); $('informe').value = t;
+  try { await navigator.clipboard.writeText(t); aviso('Informe copiado (' + t.length + ' caracteres).'); }
+  catch (e) {
+    try { $('informe').removeAttribute('readonly'); $('informe').select(); $('informe').setSelectionRange(0, t.length); var ok = document.execCommand('copy'); $('informe').setAttribute('readonly', ''); aviso(ok ? 'Informe copiado (método alternativo).' : 'No pude copiar: tocá el cuadro y copiá a mano.'); }
+    catch (e2) { aviso('No pude copiar: tocá el cuadro y copiá a mano.'); }
+  }
+}
+function leerForm() {
+  return { texto: $('f-texto').value, lang: $('f-lang').value, rate: $('f-rate').value, voz: $('f-voz').value, cancelPrev: $('f-cancel').value, demora: $('f-demora').value, handlers: $('f-handlers').checked, desbloqueo: $('f-desbloqueo').checked };
+}
+function resetMotor() {
+  if (!SS) return; var antes = snap();
+  try { SS.cancel(); SS.resume(); } catch (e) { glog('reset falló: ' + e.message); }
+  glog('Reset motor (cancel + resume): antes ' + antes + ' → ' + snap());
+  return sleep(400).then(function () { glog('tras el reset: ' + snap()); });
+}
+
+var CONTROLES = {
+  es: ['Control español', { texto: 'es', lang: 'es-ES' }],
+  en: ['Control inglés', { texto: 'en', lang: 'en-US' }],
+  zhcn: ['Control chino zh-CN', { texto: 'zhcorta', lang: 'zh-CN' }],
+  zhtw: ['Control chino zh-TW', { texto: 'zhcorta', lang: 'zh-TW' }]
+};
+var ATAJOS = {
+  muestra: ['Camino muestra de voz', { texto: 'muestra', lang: 'zh-CN', voz: 'app', cancelPrev: 'inmediato', handlers: false }],
+  hoy: ['Camino Hoy 🔊', { texto: 'muestra', lang: 'zh-CN', voz: 'app', cancelPrev: 'inmediato', demora: 'fetch' }],
+  lector: ['Camino Lector', { texto: 'zhcorta', lang: 'zh-CN', voz: 'none', demora: 'fetch+400' }],
+  escuchar: ['Camino «Escuchar todo»', { texto: 'muestra', lang: 'zh-CN', voz: 'app', desbloqueo: true, demora: 'fetch' }],
+  podcast: ['Camino Podcast (frase larga)', { texto: 'zh600', lang: 'zh-CN', voz: 'none', demora: 'fetch' }]
+};
+var MATRIZ = [
+  ['M1 español, solo lang', { texto: 'es', lang: 'es-ES' }],
+  ['M2 inglés, solo lang', { texto: 'en', lang: 'en-US' }],
+  ['M3 zh-CN corto, solo lang', { texto: 'zhcorta', lang: 'zh-CN' }],
+  ['M4 zh-CN corto, voz de la app', { texto: 'zhcorta', lang: 'zh-CN', voz: 'app' }],
+  ['M5 zh-CN corto, cancel inmediato, sin voz', { texto: 'zhcorta', lang: 'zh-CN', cancelPrev: 'inmediato' }],
+  ['M6 zh-CN corto, cancel inmediato + voz de la app', { texto: 'zhcorta', lang: 'zh-CN', cancelPrev: 'inmediato', voz: 'app' }],
+  ['M7 zh-CN ≈144, solo lang', { texto: 'zh150', lang: 'zh-CN' }],
+  ['M8 zh-CN ≈144, voz de la app', { texto: 'zh150', lang: 'zh-CN', voz: 'app' }],
+  ['M9 zh-TW corto, solo lang', { texto: 'zhcorta', lang: 'zh-TW' }],
+  ['M10 zh-CN corto tras pausa previa SIN resume', { texto: 'zhcorta', lang: 'zh-CN', pausaPrev: 'sin-resume' }],
+  ['M11 zh-CN corto tras pausa + cancel + resume', { texto: 'zhcorta', lang: 'zh-CN', pausaPrev: 'cancel-resume' }]
+];
+
+async function correrMatriz() {
+  if (ocupado) { aviso('Hay una prueba en curso.'); return; }
+  parar = false; $('b-matriz').dataset.corriendo = '1';
+  glog('matriz rápida: inicio'); botones();
+  for (var i = 0; i < MATRIZ.length && !parar; i++) {
+    await resetMotor(); await sleep(300);
+    await ejecutar(MATRIZ[i][0], MATRIZ[i][1]);
+    $('b-matriz').dataset.corriendo = '1'; botones();
+    await sleep(600);
+  }
+  await resetMotor();
+  glog('matriz rápida: ' + (parar ? 'detenida' : 'terminó'));
+  delete $('b-matriz').dataset.corriendo; botones();
+  aviso(parar ? 'Matriz detenida.' : 'Matriz terminada: marcá cuáles oíste.');
+}
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('button') : null; if (!b) return;
+  if (b.dataset.ctl) { var c = CONTROLES[b.dataset.ctl]; ejecutar(c[0], c[1]); }
+  else if (b.dataset.pre) { var a = ATAJOS[b.dataset.pre]; ejecutar(a[0], a[1]); }
+  else if (b.dataset.oi) { var pr = b.dataset.oi.split(':'); var r = RUNS[+pr[0] - 1]; if (r) { r.oi = (r.oi === pr[1]) ? '' : pr[1]; renderRuns(); } }
+  else if (b.id === 'b-var') ejecutar('Variante a mano', leerForm());
+  else if (b.id === 'b-pausa') { var f = leerForm(); f.pausaPrev = $('f-pausa').value; ejecutar('Variante con pausa previa', f); }
+  else if (b.id === 'b-reset') resetMotor();
+  else if (b.id === 'b-matriz') correrMatriz();
+  else if (b.id === 'b-parar') { parar = true; aviso('Se detiene al terminar la prueba en curso.'); }
+  else if (b.id === 'b-copiar') copiar();
+  else if (b.id === 'b-limpiar') { RUNS.length = 0; GLOG.length = 0; renderRuns(); aviso('Resultados borrados.'); }
+  else if (b.id === 'b-voces') { refrescarVoces('botón'); renderEnv(); }
+});
+['m-nav', 'm-motor', 'm-conex', 'm-nota'].forEach(function (id) { $(id).addEventListener('input', renderInforme); });
+
+// errores de la página, a la vista (no hay herramientas de desarrollo en el teléfono)
+var ERRS = [];
+function mostrarError(m) { ERRS.push(m); $('errores').textContent = ERRS.join('\n'); $('errores-card').style.display = 'block'; glog('ERROR DE LA PÁGINA: ' + m); }
+window.addEventListener('error', function (e) { mostrarError((e.message || 'error') + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')'); });
+window.addEventListener('unhandledrejection', function (e) { mostrarError('promesa rechazada: ' + ((e.reason && e.reason.message) || e.reason)); });
+window.addEventListener('online', function () { glog('evento online · navigator.onLine=' + navigator.onLine); renderEnv(); });
+window.addEventListener('offline', function () { glog('evento offline · navigator.onLine=' + navigator.onLine); renderEnv(); });
+document.addEventListener('visibilitychange', function () { glog('visibilityState=' + document.visibilityState); });
+
+// arranque
+renderEnv(); refrescarVoces('arranque'); botones(); renderRuns();
+if (SS) {
+  var vcCambio = function () { refrescarVoces('voiceschanged'); renderEnv(); };
+  if ('onvoiceschanged' in SS) SS.onvoiceschanged = vcCambio; else if (SS.addEventListener) SS.addEventListener('voiceschanged', vcCambio);
+  var reintentos = 0, ti = setInterval(function () { reintentos++; if (voces().length || reintentos > 20) { clearInterval(ti); refrescarVoces('reintento'); renderEnv(); } }, 500);
+} else { glog('ESTE NAVEGADOR NO TIENE speechSynthesis'); }
+try { if (navigator.brave && navigator.brave.isBrave) navigator.brave.isBrave().then(function (v) { esBrave = v ? 'sí' : 'no'; renderEnv(); }, function () { esBrave = 'error'; renderEnv(); }); else { esBrave = 'no (sin navigator.brave)'; renderEnv(); } } catch (e) { esBrave = 'n/d'; }
+renderInforme();
+})();
+</script>
+</body>
+</html>
