@@ -4968,6 +4968,7 @@ function pzCounterUpdate() {
         pzRadical = !pzRadical;
         localStorage.setItem('ac_pz_radical', pzRadical ? '1' : '0');
         pzUpdateControls();
+        pzCounterUpdate(); // la línea de radical agrega alto a cada carácter: cambia cuántos entran
     });
     safe('btn-pz-significado', 'click', () => {
         pzSignificado = !pzSignificado;
@@ -4979,6 +4980,7 @@ function pzCounterUpdate() {
         const v = e.target.value;
         pzPron = (v === 'none' || v === 'zhuyin') ? v : 'pinyin';
         localStorage.setItem('ac_pz_pron', pzPron);
+        pzCounterUpdate(); // pinyin/zhuyin agregan la línea de info: cambia cuántos entran (ninguna la quita)
     });
     safe('pz-input', 'input', pzCounterUpdate); // v9.2: contador en vivo
     window.addEventListener('resize', () => {
