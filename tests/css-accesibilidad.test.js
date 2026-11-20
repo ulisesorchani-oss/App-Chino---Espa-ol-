@@ -78,6 +78,13 @@ async function abrir(b, theme, w, h) {
         }
         await p.evaluate(() => showView('aprender')); await p.waitForTimeout(350);
 
+        // campos de texto (foco por clic = :focus-visible): anillo oscuro (en claro) y SIN el halo, para conservar su borde y brillo propios
+        await p.evaluate(() => showView('hoy')); await p.waitForTimeout(300);
+        const campo = await p.evaluate(() => { const e = document.getElementById('answer-input'); e.focus(); const cs = getComputedStyle(e); return { fv: e.matches(':focus-visible'), color: cs.outlineColor, sombra: cs.boxShadow }; });
+        ok(campo.fv && (th !== 'light' || campo.color === 'rgb(27, 34, 48)'), th + ' · #answer-input con foco: anillo ' + campo.color);
+        ok(!/rgb\(255, 255, 255\) 0px 0px 0px 2px/.test(campo.sombra), th + ' · #answer-input no recibe el halo blanco (box-shadow: ' + campo.sombra + ')');
+        await p.evaluate(() => showView('aprender')); await p.waitForTimeout(300);
+
         // --- 7: pestaña activa de Aprender ---
         const m = await p.evaluate(() => { const e = document.querySelector('.mtab.active'); const cs = getComputedStyle(e); return { color: cs.color, bg: cs.backgroundColor, img: cs.backgroundImage }; });
         const mc = parse(m.color), mb = parse(m.bg);

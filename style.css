@@ -5921,7 +5921,9 @@ body {
 /* a11y: en CLARO el anillo blanco era invisible sobre las tarjetas blancas (1,00:1). Anillo de DOS tonos: trazo azul
    noche (≥ 15:1 sobre blanco) + halo blanco en el hueco del offset (≥ 3,4:1 sobre el violeta de la página). Oscuro y
    papel tienen su propio color (más abajo) y quedan fuera de esta regla. */
-body:not(.dark-mode):not(.paper-mode) :focus-visible { outline-color: #1b2230; box-shadow: 0 0 0 2px #fff; }
+body:not(.dark-mode):not(.paper-mode) :focus-visible { outline-color: #1b2230; }
+/* el halo (box-shadow) no va en los campos de texto: ya tienen borde azul + su propio brillo de foco (p. ej. .srs-prod-input) */
+body:not(.dark-mode):not(.paper-mode) :focus-visible:not(input):not(textarea):not(select) { box-shadow: 0 0 0 2px #fff; }
 
 button, .card, .vocabulary-panel, .module-status, .reader-banner,
 .train-card, .vocab-pop, .app-nav, .control-panel, #answer-input, .reader-input {
