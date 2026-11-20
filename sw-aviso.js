@@ -14,7 +14,10 @@
 // no se pudieron bajar al instalar. Esta página lo lee y lo muestra en Yo → Ajustes («Modo sin conexión: Completo / Incompleto ·
 // archivos sin descargar: N», con la lista y «Reintentar»). Como AVISO visible sale solo si el alumno está SIN conexión y falta algo
 // (no en cada visita), una vez por sesión, y sin invitar a recargar. Al abrir la app con conexión se reintenta, una sola vez por
-// sesión y en silencio, bajar lo que falta. La página NUNCA escribe en el caché de estado: la lista se recalcula contra el caché
+// sesión y en silencio, bajar lo que falta. Al volver la conexión (evento «online») también se reintenta, pero con tope: 3 veces por
+// sesión (sessionStorage), para que una señal que oscila no pida los archivos sin límite; ni el reintento al abrir ni el botón
+// «Reintentar» (manual) cuentan para ese tope. Cada pedido tiene un tiempo máximo (un pedido colgado no deja «reintentando»
+// activo hasta recargar). La página NUNCA escribe en el caché de estado: la lista se recalcula contra el caché
 // real (un archivo que el SW guardó después al pedirlo ya no falta).
 // Textos: UI_STRINGS de app.js (sw*, español y chino). El chino de cn-es está PENDIENTE DE REVISIÓN (docs/revision-aviso-sw.md).
 // ============================================================
@@ -44,6 +47,13 @@
     const ssGet = (k) => { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } };
     const ssSet = (k) => { try { sessionStorage.setItem(k, '1'); } catch (e) { /* sin sessionStorage */ } };
     let reintentando = false;
+    // tope del reintento por el evento «online»: sessionStorage (sobrevive a recargar, no viaja en el respaldo) + una copia en memoria
+    // por si sessionStorage está bloqueado (ahí el tope vale mientras la pestaña no se recargue)
+    const TOPE_ONLINE = 3, CLAVE_ONLINE = 'sw_reintentos_online', ESPERA_MAX_MS = 15000;
+    let onlineMem = 0;
+    const intentosOnline = () => { let n = 0; try { n = parseInt(sessionStorage.getItem(CLAVE_ONLINE), 10) || 0; } catch (e) { /* sin sessionStorage */ } return Math.max(n, onlineMem); };
+    const contarOnline = () => { onlineMem = intentosOnline() + 1; try { sessionStorage.setItem(CLAVE_ONLINE, String(onlineMem)); } catch (e) { /* queda la copia en memoria */ } };
+    const puedeReintentar = () => !reintentando && !!faltan && faltan.length > 0 && navigator.onLine;
 
     function cartel() {
         let el = document.getElementById('sw-aviso');
@@ -131,16 +141,19 @@
         decidirAviso();
     }
     async function reintentar() {
-        if (reintentando || !faltan || !faltan.length || !navigator.onLine) return;
+        if (!puedeReintentar()) return;
         reintentando = true; pintarFila();
         const lista = faltan.slice();
         for (const f of lista) {
+            // tiempo máximo por archivo (pedido + guardado): vencido, se corta y el archivo sigue en la lista
+            const ac = new AbortController(), t = setTimeout(() => ac.abort(), ESPERA_MAX_MS);
             try {
                 const url = new URL(f, document.baseURI).href;
-                const res = await fetch(url, { cache: 'reload' });
+                const res = await fetch(url, { cache: 'reload', signal: ac.signal });
                 // se guarda en el caché del shell SOLO si existe (si la versión cambió y se borró, open() lo recrearía vacío)
                 if (res.ok && estadoShell && await caches.has(estadoShell)) await (await caches.open(estadoShell)).put(url, res.clone());
-            } catch (e) { /* sigue sin red o el archivo sigue sin estar: queda en la lista */ }
+            } catch (e) { /* sigue sin red, el archivo sigue sin estar o se agotó el tiempo: queda en la lista */ }
+            finally { clearTimeout(t); }
         }
         reintentando = false;
         await refrescarEstado();
@@ -157,7 +170,12 @@
         if (sw && sw.state !== 'activated') sw.addEventListener('statechange', function h() { if (sw.state === 'activated') { sw.removeEventListener('statechange', h); refrescarEstado(); } });
     });
     window.addEventListener('offline', decidirAviso);
-    window.addEventListener('online', () => { decidirAviso(); reintentar(); });
+    window.addEventListener('online', () => {
+        decidirAviso();
+        // el tope gasta solo los intentos que de verdad empiezan (no hay nada que bajar, o ya hay uno en curso, no cuenta)
+        if (!puedeReintentar() || intentosOnline() >= TOPE_ONLINE) return;
+        contarOnline(); reintentar();
+    });
 
     function iniciar() {
         const b = document.getElementById('btn-sw-reintentar');
@@ -171,5 +189,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 
     window.swAvisoRefrescar = () => { pintar(); pintarFila(); }; // updateUILanguage (app.js) lo llama al cambiar de idioma
-    window.swAvisoEstado = () => ({ hayNueva, faltan: faltan && faltan.slice(), modo, shell: estadoShell }); // solo lectura (pruebas)
+    window.swAvisoEstado = () => ({ hayNueva, faltan: faltan && faltan.slice(), modo, shell: estadoShell, reintentando, online: intentosOnline() }); // solo lectura (pruebas)
 })();
