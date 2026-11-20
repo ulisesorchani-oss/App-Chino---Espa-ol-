@@ -1010,6 +1010,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function applySavedUI() {
+    pzSyncModuleName(); // planilla: el módulo guardado (loadProgress corre después de armar la planilla)
     const btnEsCn = document.getElementById('btn-es-cn');
     if (btnEsCn) btnEsCn.classList.toggle('active', state.mode === 'es-cn');
 
@@ -1865,6 +1866,7 @@ function setModule(mod, opts) {
     updateClassicsBtnLabel();
     updateClassicsScript();
     paintScriptButtons(ck()); // v9.7x: otra familia puede tener otra escritura
+    pzSyncModuleName();       // planilla: «📋 Usar módulo: <nombre>»
     
     saveProgress();
     loadSentences().then(() => {
@@ -4705,8 +4707,10 @@ function pzPrint() {
 function pzUseModule() {
     const seen = new Set();
     let out = '';
+    // Escritura por familia: TOCFL (o 繁體 elegido) carga caracteres tradicionales; el resto, simplificados (como siempre).
+    const k = ck();
     for (const s of getFiltered()) {
-        for (const ch of String(s.chinese_simp_answer || '')) {
+        for (const ch of String(s['chinese_' + k + '_answer'] || s.chinese_simp_answer || '')) {
             if (!pzIsHan(ch) || seen.has(ch)) continue;
             seen.add(ch);
             out += ch;
@@ -4724,6 +4728,13 @@ function pzUseModule() {
     }
 }
 
+// La etiqueta del botón «Usar módulo» sigue al módulo activo. Función aparte (y no pzUpdateControls) porque
+// setModule/applySavedUI la llaman antes de que existan los `let` de la planilla (pzTrazos, pzCells…).
+function pzSyncModuleName() {
+    const nm = document.getElementById('pz-module-name');
+    if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+}
+
 function pzUpdateControls() {
     const bt = document.getElementById('btn-pz-trazos');
     if (bt) {
@@ -4734,8 +4745,7 @@ function pzUpdateControls() {
     if (sel) sel.value = String(pzCells);
     const stl = document.getElementById('select-pz-style');
     if (stl) stl.value = pzStyle;
-    const nm = document.getElementById('pz-module-name');
-    if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+    pzSyncModuleName();
     // v9.7x: los ajustes del encabezado (mismo patrón de arriba) — v9.11x:
     // Composición se unificó con Trazos (ver pzUpdateControls/btn-pz-trazos).
     const br = document.getElementById('btn-pz-radical');
