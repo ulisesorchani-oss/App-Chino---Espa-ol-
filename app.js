@@ -2155,11 +2155,11 @@ function renderSentenceText(s) {
                             if (charPos === zone.start) html += fill ? fillSpan(fillTxt) : '___';
                         } else {
                             const toneNum = it.num || 5;
-                            html += `<span class="tone-${toneNum}">${it.origin}</span>`;
+                            html += `<span class="tone-${toneNum}">${escHtml(it.origin)}</span>`;
                         }
                         charPos++;
                     } else {
-                        html += it.origin;
+                        html += escHtml(it.origin);
                     }
                 }
                 sentenceTextEl.innerHTML = html;
