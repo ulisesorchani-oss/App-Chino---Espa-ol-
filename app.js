@@ -3500,6 +3500,20 @@ function resetProgress() {
     localStorage.removeItem(ATTEMPTS_KEY);   // v9.47: el contador de intentos también se borra
     localStorage.removeItem(HANZI_STATS_KEY); // v9.47: la estadística de trazos también se borra
     if (typeof window.acSrsReset === 'function') window.acSrsReset(); // v7.21: el mazo de repaso también se borra
+    // La sesión del día (anillo) y la racha también son progreso: se borran en disco y en memoria, sin recargar.
+    // La meta vuelve a la de fábrica (10), que es lo que daría una recarga sin ac_session_v1.
+    localStorage.removeItem(SESSION_KEY);
+    if (window.HuayuStats && typeof HuayuStats.reset === 'function') HuayuStats.reset();
+    state.sessionDone = 0;
+    state.sessionGoal = 10;
+    state.sessionTarget = 10;
+    state.sessionDate = sessionToday();
+    const sesionCompleta = document.getElementById('session-done');   // si el panel «sesión completa» estaba abierto,
+    const tarjeta = document.getElementById('sentence-card');          // vuelve la tarjeta (sin pasar por saveSession)
+    if (sesionCompleta && !sesionCompleta.classList.contains('hidden')) {
+        sesionCompleta.classList.add('hidden');
+        if (tarjeta) tarjeta.classList.remove('hidden'); // solo showSessionDone() oculta la tarjeta: se restaura solo en ese caso
+    }
     state.knownWords = new Set();
     state.newWords = new Set();
     state.wordContexts = {}; // v7.13
@@ -3508,6 +3522,9 @@ function resetProgress() {
     showToneColors = false;
     updateStats();
     updateVocabularyPanel();
+    updateSessionUI();    // anillo en 0/10 y meta de fábrica
+    updateHeaderStreak(); // chip 🔥 de la cabecera
+    if (typeof renderLastSessionNote === 'function') renderLastSessionNote();
     renderCurrentSentence();
     applySavedUI();
 }

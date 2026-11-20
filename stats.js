@@ -283,6 +283,7 @@
     var _lastScore = null;   // baseline leída al init (antes de app.js)
     var _lastSrs = null;
     var _origSet = null;
+    var _pend = 0;           // segundos acumulados en memoria, aún sin volcar a disco (ver installTracker)
 
     function flush() {
         // v9.28: escribe con _origSet (el setItem SIN envolver). Antes pasaba
@@ -291,9 +292,24 @@
         // recién importado con el LOG en memoria (orden de claves no
         // determinista: a veces ganaba el import, a veces no).
         try {
+            // Un registro sin ningún día no se escribe: tras «Borrar progreso» la clave ac_stats_v1 queda AUSENTE
+            // (pagehide/visibilitychange llaman a flush() aunque no haya pasado nada).
+            if (!LOG || !LOG.days || !Object.keys(LOG.days).length) return;
             if (_origSet) _origSet(LS_KEY, JSON.stringify(LOG));
             else localStorage.setItem(LS_KEY, JSON.stringify(LOG));
         } catch (e) { /* lleno/privado */ }
+    }
+    // «🗑️ Borrar progreso» (app.js resetProgress): vacía la racha y el historial, en disco Y en memoria. Hay que limpiar
+    // el LOG y los segundos pendientes: si no, el próximo flush() (pagehide, cada ~60 s) volvería a escribir los días viejos.
+    // Las líneas base se re-basan a 0 (el puntaje y el mazo SRS también quedaron en 0), así el 1.er acierto nuevo cuenta.
+    function reset() {
+        try {
+            LOG = { v: 1, days: {} };
+            _pend = 0;
+            _lastScore = 0;
+            _lastSrs = 0;
+            try { localStorage.removeItem(LS_KEY); } catch (e) { /* privado */ }
+        } catch (e) { /* nunca romper la app */ }
     }
     // Acepta deltas chicos (respuesta a respuesta). Saltos grandes o
     // negativos = importación de respaldo / reset → re-base sin contar.
@@ -392,7 +408,6 @@
             // durante toda la práctica. Mismo corte de "día activo":
             // hsIsActive ya usa granularidad de 60 s. visibilitychange y
             // pagehide siguen vaciando lo pendiente al ocultar/salir.
-            var _pend = 0;
             setInterval(function () {
                 try {
                     if (!document.hidden && Date.now() - _lastAct <= ACT_WIN_MS) {
@@ -928,6 +943,7 @@
         close: close,
         getSummary: getSummary,   // v9.25: resumen de solo lectura (racha en vivo de la guía)
         getLastSession: getLastSession, // v9.62: última sesión anterior, solo lectura
+        reset: reset,             // «Borrar progreso»: vacía la racha (disco + memoria)
         _pure: {
             dayKey: hsDayKey,
             shiftKey: hsShiftKey,
