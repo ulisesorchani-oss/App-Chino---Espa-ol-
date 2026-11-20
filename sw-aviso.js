@@ -14,7 +14,8 @@
 // no se pudieron bajar al instalar. Esta página lo lee y lo muestra en Yo → Ajustes («Modo sin conexión: Completo / Incompleto ·
 // archivos sin descargar: N», con la lista y «Reintentar»). Como AVISO visible sale solo si el alumno está SIN conexión y falta algo
 // (no en cada visita), una vez por sesión, y sin invitar a recargar. Al abrir la app con conexión se reintenta, una sola vez por
-// sesión y en silencio, bajar lo que falta. La página NUNCA escribe en el caché de estado: la lista se recalcula contra el caché
+// sesión y en silencio, bajar lo que falta; el evento «online» reintenta como mucho 3 veces por sesión (sin contar el botón ni el reintento
+// al abrir), y cada pedido tiene un tiempo máximo (15 s) para que uno colgado no deje trabado el botón. La página NUNCA escribe en el caché de estado: la lista se recalcula contra el caché
 // real (un archivo que el SW guardó después al pedirlo ya no falta).
 // Textos: UI_STRINGS de app.js (sw*, español y chino). El chino de cn-es está PENDIENTE DE REVISIÓN (docs/revision-aviso-sw.md).
 // ============================================================
@@ -43,7 +44,12 @@
     // sessionStorage (no una variable): el aviso sin conexión sale UNA vez por sesión, también tras recargar; sessionStorage no viaja en el respaldo
     const ssGet = (k) => { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } };
     const ssSet = (k) => { try { sessionStorage.setItem(k, '1'); } catch (e) { /* sin sessionStorage */ } };
+    // contador de reintentos por «online» en esta sesión (sessionStorage: sobrevive a recargas y no viaja en el respaldo)
+    const nOnline = () => { try { return parseInt(sessionStorage.getItem('sw_reintentos_online'), 10) || 0; } catch (e) { return 0; } };
+    const sumaOnline = () => { try { sessionStorage.setItem('sw_reintentos_online', String(nOnline() + 1)); } catch (e) { /* sin sessionStorage */ } };
     let reintentando = false;
+    const MAX_ONLINE = 3;                                     // tope de reintentos AUTOMÁTICOS por sesión disparados por el evento «online»
+    const TIMEOUT_MS = (window.SW_AVISO_TIMEOUT_MS | 0) || 15000; // tiempo máximo de cada pedido de reintento (SW_AVISO_TIMEOUT_MS: solo pruebas)
 
     function cartel() {
         let el = document.getElementById('sw-aviso');
@@ -130,19 +136,27 @@
         pintarFila();
         decidirAviso();
     }
-    async function reintentar() {
-        if (reintentando || !faltan || !faltan.length || !navigator.onLine) return;
+    // origen: 'manual' (botón) | 'abrir' (al abrir con conexión) | 'online' (evento). Solo 'online' cuenta para el tope (MAX_ONLINE).
+    async function reintentar(origen) {
+        if (reintentando || !faltan || !faltan.length || !navigator.onLine) return; // guarda: nunca dos intentos a la vez
+        if (origen === 'online') sumaOnline(); // se cuenta solo cuando el intento arranca de verdad
         reintentando = true; pintarFila();
-        const lista = faltan.slice();
-        for (const f of lista) {
-            try {
-                const url = new URL(f, document.baseURI).href;
-                const res = await fetch(url, { cache: 'reload' });
-                // se guarda en el caché del shell SOLO si existe (si la versión cambió y se borró, open() lo recrearía vacío)
-                if (res.ok && estadoShell && await caches.has(estadoShell)) await (await caches.open(estadoShell)).put(url, res.clone());
-            } catch (e) { /* sigue sin red o el archivo sigue sin estar: queda en la lista */ }
+        try {
+            const lista = faltan.slice();
+            for (const f of lista) {
+                // cada pedido tiene un tiempo máximo: uno colgado no deja la guarda puesta (ni el botón en «Descargando…»)
+                const ac = new AbortController(); const t = setTimeout(() => ac.abort(), TIMEOUT_MS);
+                try {
+                    const url = new URL(f, document.baseURI).href;
+                    const res = await fetch(url, { cache: 'reload', signal: ac.signal });
+                    // se guarda en el caché del shell SOLO si existe (si la versión cambió y se borró, open() lo recrearía vacío)
+                    if (res.ok && estadoShell && await caches.has(estadoShell)) await (await caches.open(estadoShell)).put(url, res.clone());
+                } catch (e) { /* sigue sin red, se cortó por tiempo o el archivo sigue sin estar: queda en la lista */ }
+                finally { clearTimeout(t); }
+            }
+        } finally {
+            reintentando = false; // pase lo que pase, la guarda se suelta
         }
-        reintentando = false;
         await refrescarEstado();
     }
 
@@ -157,19 +171,19 @@
         if (sw && sw.state !== 'activated') sw.addEventListener('statechange', function h() { if (sw.state === 'activated') { sw.removeEventListener('statechange', h); refrescarEstado(); } });
     });
     window.addEventListener('offline', decidirAviso);
-    window.addEventListener('online', () => { decidirAviso(); reintentar(); });
+    window.addEventListener('online', () => { decidirAviso(); if (nOnline() < MAX_ONLINE) reintentar('online'); });
 
     function iniciar() {
         const b = document.getElementById('btn-sw-reintentar');
-        if (b) b.addEventListener('click', reintentar);
+        if (b) b.addEventListener('click', () => reintentar('manual'));
         refrescarEstado().then(() => {
             // al abrir con conexión y con algo faltante: UN reintento silencioso por sesión. La marca se gasta solo si se intenta de verdad
             // (la visita que instala no tiene estado todavía: el 1.er intento es en la siguiente carga)
-            if (faltan && faltan.length && navigator.onLine && !ssGet('sw_reintento')) { ssSet('sw_reintento'); reintentar(); }
+            if (faltan && faltan.length && navigator.onLine && !ssGet('sw_reintento')) { ssSet('sw_reintento'); reintentar('abrir'); }
         });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 
     window.swAvisoRefrescar = () => { pintar(); pintarFila(); }; // updateUILanguage (app.js) lo llama al cambiar de idioma
-    window.swAvisoEstado = () => ({ hayNueva, faltan: faltan && faltan.slice(), modo, shell: estadoShell }); // solo lectura (pruebas)
+    window.swAvisoEstado = () => ({ hayNueva, faltan: faltan && faltan.slice(), modo, shell: estadoShell, reintentando, reintentosOnline: nOnline() }); // solo lectura (pruebas)
 })();
