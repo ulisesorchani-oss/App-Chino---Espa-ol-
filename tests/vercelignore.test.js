@@ -155,10 +155,10 @@ for (const f of appFiles) {
 
     // ── lo que SÍ debe quedar fuera ──
     const debeIgnorar = ['tests/run-all.js', 'tests/README.md', 'tools/check-ninos.js', 'tools/build-readings-examen.js', 'tools/lecturas-examen/nivel.js', 'docs/ninos-imagenes.md',
-        'docs/historial-actualizaciones/LEEME-VOCES.txt', 'data/hsk1.json', 'data/exams/hsk1.json', 'data/README.md', 'README.md', 'README-Pronunciacion.md', 'AUDITORIA-GAGNE-MAYER.md', 'serve.py'];
+        'docs/historial-actualizaciones/LEEME-VOCES.txt', 'data/hsk1.json', 'data/exams/hsk1.json', 'data/README.md', 'GEMINI.md', '.github/workflows/bateria.yml', 'README.md', 'README-Pronunciacion.md', 'AUDITORIA-GAGNE-MAYER.md', 'serve.py'];
     const noIgn = debeIgnorar.filter(p => trackedSet.has(p) && !ignorados([p]).has(p));
     ok(debeIgnorar.every(p => trackedSet.has(p)), '.vercelignore: los archivos de ejemplo existen en el repo');
-    ok(noIgn.length === 0, '.vercelignore: tests/, tools/, docs/, data/ y los 4 archivos de raíz SÍ quedan fuera ' + JSON.stringify(noIgn));
+    ok(noIgn.length === 0, '.vercelignore: tests/, tools/, docs/, data/, .github/ y los 5 archivos de raíz (GEMINI.md incluido) SÍ quedan fuera ' + JSON.stringify(noIgn));
     // y lo que debe publicarse
     const debePublicar = ['index.html', 'sw.js', 'manifest.json', 'vercel.json', 'requirements.txt', 'api/index.py', 'api/tts.py', '.well-known/assetlinks.json', 'icons/logo-192.png'];
     const malIgn = debePublicar.filter(p => ignorados([p]).has(p));
