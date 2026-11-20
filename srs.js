@@ -172,7 +172,8 @@
     window.acSrsDueWords = function () {
         load();
         return dueList().map(function (e) {
-            return { zh: e.zh, zt: e.card.zt || '', es: e.card.es || '', py: e.card.py || '' };
+            // m: etiqueta del módulo; trazos.js (wrWordFor) deriva de ella la escritura de la familia, como el Repaso (cardFamily).
+            return { zh: e.zh, zt: e.card.zt || '', es: e.card.es || '', py: e.card.py || '', m: e.card.m || '' };
         });
     };
     function relearnCount() {
