@@ -4,7 +4,9 @@
 // o incompleta) sigue funcionando. (2) La página avisa de una versión nueva SIN recargarse sola (solo al tocar «Actualizar»),
 // en español y en chino (cn-es); la primera instalación no avisa. (3) Yo → Ajustes → «Modo sin conexión» muestra el estado
 // del precache (completo / archivos que faltan, con «Reintentar»); sin conexión e incompleto sale UN aviso (una vez por sesión,
-// sin invitar a recargar); con conexión se reintenta una vez en silencio; la lista se recalcula contra el caché real.
+// sin invitar a recargar); con conexión se reintenta una vez en silencio; la lista se recalcula contra el caché real. (4) El evento
+// «online» reintenta como mucho 3 veces por sesión (sin contar el botón ni el reintento al abrir), nunca dos intentos a la vez, y
+// un pedido colgado se corta por tiempo y suelta la guarda.
 // Un «404 a propósito» se simula con el servidor (bloquear = rutas que devuelven 404), sin tocar sw.js.
 const http = require('http');
 const fs = require('fs');
@@ -21,12 +23,14 @@ const rgb = (s) => (String(s).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
 // ---- servidor del laboratorio ----
-const cfg = { bloquear: new Set(), version: null };       // version: reemplaza «const VERSION = '…'» de sw.js (simula una versión nueva)
+const cfg = { bloquear: new Set(), colgar: new Set(), vistos: {}, version: null }; // colgar: rutas a las que el servidor NO responde (pedido colgado)       // version: reemplaza «const VERSION = '…'» de sw.js (simula una versión nueva)
 const SW_ORIG = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const PRECACHE = (() => { const a = SW_ORIG.indexOf('const PRECACHE = ['), b = SW_ORIG.indexOf('\n];', a); return (SW_ORIG.slice(a, b).match(/'\.\/[^']*'/g) || []).map((x) => x.slice(1, -1)); })();
 const server = http.createServer((req, res) => {
     const u = decodeURIComponent(req.url.split('?')[0]);
+    cfg.vistos[u] = (cfg.vistos[u] || 0) + 1;                // pedidos que LLEGAN al servidor (cuenta también los colgados)
     if (cfg.bloquear.has(u)) { res.writeHead(404); return res.end('no'); }
+    if (cfg.colgar.has(u)) return; // sin respuesta: el pedido queda colgado hasta que el cliente lo corta
     const f = path.join(ROOT, u === '/' ? 'index.html' : u);
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end('no'); }
     let body = fs.readFileSync(f);
@@ -38,9 +42,10 @@ const server = http.createServer((req, res) => {
 });
 
 async function abrir(b, opciones) {
-    const o = Object.assign({ modo: 'es-cn', tema: 'light', sw: 'allow' }, opciones);
+    const o = Object.assign({ modo: 'es-cn', tema: 'light', sw: 'allow', timeoutMs: 0 }, opciones);
     const ctx = await b.newContext({ viewport: { width: 360, height: 740 }, serviceWorkers: o.sw });
     await ctx.route(/^(?!http:\/\/(127\.0\.0\.1|localhost)).*/, (r) => r.abort());
+    if (o.timeoutMs) await ctx.addInitScript((ms) => { window.SW_AVISO_TIMEOUT_MS = ms; }, o.timeoutMs); // tiempo máximo del pedido de reintento (solo pruebas)
     await ctx.addInitScript(([modo, tema]) => {
         if (sessionStorage.getItem('i')) return; sessionStorage.setItem('i', '1');
         localStorage.setItem('ac_onboarding_done_v2', '1'); localStorage.setItem('theme', tema);
@@ -469,7 +474,71 @@ const estadoSW = (p) => p.evaluate(async () => {
         cfg.version = null; cfg.bloquear = new Set();
     }
 
-    await b.close(); server.close();
+    // ---- S. el evento «online» reintenta como mucho 3 veces por sesión; nunca dos a la vez; el botón y el reintento al abrir no cuentan ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500);
+        let pedidos = 0; p.on('request', (r) => { if (/pinyin-tocfl\.js/.test(r.url())) pedidos++; });
+        const online = async () => { await p.evaluate(() => window.dispatchEvent(new Event('online'))); await p.waitForFunction(() => !window.swAvisoEstado().reintentando, null, { timeout: 10000 }); await p.waitForTimeout(150); };
+        await p.reload(); await p.waitForTimeout(2500);                 // reintento al abrir (no cuenta para el tope)
+        const alAbrir = pedidos; pedidos = 0;
+        ok(alAbrir >= 1 && (await p.evaluate(() => window.swAvisoEstado().reintentosOnline)) === 0, 'S · al abrir: ' + alAbrir + ' pedido(s) del reintento al abrir y el contador de «online» sigue en 0');
+        // ráfaga: 5 eventos «online» en el MISMO instante (una señal que oscila): un solo intento y cuenta 1
+        await p.evaluate(() => { for (let i = 0; i < 5; i++) window.dispatchEvent(new Event('online')); });
+        await p.waitForFunction(() => !window.swAvisoEstado().reintentando, null, { timeout: 10000 }); await p.waitForTimeout(150);
+        const rafaga = await p.evaluate(() => window.swAvisoEstado().reintentosOnline);
+        ok(pedidos === 1 && rafaga === 1, 'S · 5 «online» en el mismo instante: UN solo intento (' + pedidos + ' pedido) y cuenta 1 (' + rafaga + '): nunca dos a la vez');
+        // 5 eventos seguidos, esperando a que termine cada intento: en total solo 3 intentos por «online»
+        pedidos = 0;
+        for (let i = 0; i < 5; i++) await online();
+        const cont = await p.evaluate(() => window.swAvisoEstado().reintentosOnline);
+        ok(cont === 3 && pedidos === 2, 'S · tras 5 «online» seguidos el contador queda en 3 (' + cont + ') y se hicieron solo ' + pedidos + ' intentos más (1 de la ráfaga + 2 = 3 en total)');
+        // el botón manual sigue andando y no cuenta
+        pedidos = 0;
+        await irAjustes(p); await p.click('#btn-sw-reintentar'); await p.waitForFunction(() => !window.swAvisoEstado().reintentando, null, { timeout: 10000 });
+        ok(pedidos === 1 && (await p.evaluate(() => window.swAvisoEstado().reintentosOnline)) === 3, 'S · el botón «Reintentar» sigue reintentando tras el tope (' + pedidos + ' pedido) y no cuenta para el tope');
+        // el tope es por SESIÓN, no por carga: recargar la pestaña no lo reinicia
+        await p.reload(); await p.waitForTimeout(2000); pedidos = 0;
+        await online(); await online();
+        ok(pedidos === 0, 'S · recargando la pestaña el tope sigue (' + pedidos + ' pedidos por «online»)');
+        // una pestaña NUEVA = sesión nueva: vuelve a reintentar
+        const pn = await ctx.newPage(); let pn2 = 0; pn.on('request', (r) => { if (/pinyin-tocfl\.js/.test(r.url())) pn2++; });
+        await pn.goto(URL); await pn.waitForTimeout(2500); pn2 = 0;
+        await pn.evaluate(() => window.dispatchEvent(new Event('online'))); await pn.waitForFunction(() => !window.swAvisoEstado().reintentando, null, { timeout: 10000 });
+        ok(pn2 === 1, 'S · en una pestaña nueva (sesión nueva) «online» vuelve a reintentar (' + pn2 + ' pedido)');
+        ok(p._errs.length === 0, 'S · sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+        cfg.bloquear = new Set();
+    }
+
+    // ---- T. un pedido COLGADO se corta por tiempo y suelta la guarda (el botón y «online» no quedan trabados) ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL, timeoutMs: 1500 });
+        await p.waitForTimeout(1500);
+        cfg.bloquear = new Set(); cfg.colgar = new Set(['/pinyin-tocfl.js']);
+        const llegan = () => cfg.vistos['/pinyin-tocfl.js'] || 0; const base = llegan();
+        await irAjustes(p);
+        await p.click('#btn-sw-reintentar');
+        const durante = await fila(p);
+        ok(durante.txt === 'Descargando…' && durante.btnDis, 'T · con el pedido colgado la fila dice «' + durante.txt + '» y el botón está deshabilitado');
+        await p.evaluate(() => window.dispatchEvent(new Event('online'))); await p.waitForTimeout(500);
+        ok(llegan() - base === 1, 'T · un «online» durante el intento colgado NO lanza otro pedido (llegó ' + (llegan() - base) + ' al servidor)');
+        await p.waitForFunction(() => !window.swAvisoEstado().reintentando, null, { timeout: 8000 }).catch(() => { });
+        const despues = await fila(p);
+        ok(!despues.btnDis && /Incompleto/.test(despues.txt), 'T · a los ~1,5 s el pedido se corta por tiempo y la guarda se suelta: «' + despues.txt + '», botón habilitado');
+        ok(!(await hayCacheado(p, './pinyin-tocfl.js')), 'T · y el archivo sigue sin estar en el caché');
+        cfg.colgar = new Set();                                    // vuelve el servidor: el botón no quedó trabado
+        await p.click('#btn-sw-reintentar');
+        await p.waitForFunction(() => document.getElementById('sw-estado-txt').textContent === 'Completo', null, { timeout: 15000 }).catch(() => { });
+        ok((await fila(p)).txt === 'Completo' && await hayCacheado(p, './pinyin-tocfl.js'), 'T · con el servidor de vuelta, «Reintentar» completa (la guarda no quedó puesta)');
+        ok(p._errs.length === 0, 'T · sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+        cfg.colgar = new Set(); cfg.bloquear = new Set();
+    }
+
+    await b.close(); try { server.closeAllConnections(); } catch (e) { /* Node viejo */ } server.close();
     console.log('comprobaciones ' + n + ' · FAILS ' + fails + (fails ? '' : ' · TODO OK'));
     process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
