@@ -74,6 +74,13 @@ const REF = { '爺爺': 'ㄧㄝˊ ˙ㄧㄝ', '奶奶': 'ㄋㄞˇ ˙ㄋㄞ', '舅
     '曾祖父': 'ㄗㄥ ㄗㄨˇ ㄈㄨˋ', '姪女': 'ㄓˊ ㄋㄩˇ', '表姊': 'ㄅㄧㄠˇ ㄐㄧㄝˇ', '叔叔': 'ㄕㄨˊ ˙ㄕㄨ', '叔父': 'ㄕㄨˊ ㄈㄨˋ', '姊姊': 'ㄐㄧㄝˇ ˙ㄐㄧㄝ', '外甥': 'ㄨㄞˋ ㄕㄥ', '阿姨': 'ㄚ ㄧˊ' };
 const malRef = Object.keys(REF).filter(h => { const p = piezas.find(x => x.zhT === h); return !p || p.zy !== REF[h]; }).map(h => h + ' «' + ((piezas.find(x => x.zhT === h) || {}).zy) + '» (debía «' + REF[h] + '»)');
 ok(!malRef.length, 'zhuyin de referencia (' + Object.keys(REF).length + ' piezas, con tono neutro y 叔 = ㄕㄨˊ)' + (malRef.length ? ': ' + malRef.join(' | ') : ''));
+// Ida y vuelta INDEPENDIENTE del zhuyin: cada zhuyin se convierte de vuelta a pinyin con la tabla de tools/clasico-datong/zhuyin-pinyin.js
+// (zhuyin → pinyin, escrita aparte y sin leer app.js) y se compara con el pinyin de la fuente. derivar.js usa la tabla de app.js (pinyin → zhuyin):
+// con una sola tabla compartida un error de ella se cancelaría a sí mismo; con dos, ㄧ (you mal convertido) volvería como «yi» y no como «you».
+const { zhuyinAPinyin } = require('./clasico-datong/zhuyin-pinyin.js');
+const normPy = (s) => s.normalize('NFC').toLowerCase().replace(/['\s]/g, '');
+const noVuelta = piezas.map(p => { try { const v = p.zy.split(' ').map(zhuyinAPinyin).join(''); return normPy(v) === normPy(p.py) ? null : p.zhT + ' «' + p.zy + '» → ' + v + ' (la fuente: ' + p.py + ')'; } catch (e) { return p.zhT + ' «' + p.zy + '»: ' + e.message; } }).filter(Boolean);
+ok(!noVuelta.length, 'ida y vuelta del zhuyin con una tabla independiente: las ' + piezas.length + ' piezas vuelven a su pinyin' + (noVuelta.length ? ': ' + noVuelta.join(' | ') : ''));
 const pyRef = { '叔父': 'shúfù', '叔母': 'shúmǔ', '叔叔': 'shúshu', '姊': 'jiě', '表姊': 'biǎojiě', '姊夫': 'jiěfū', '女兒': "nǚ'ér" };
 const malPy = Object.keys(pyRef).filter(h => (piezas.find(x => x.zhT === h) || {}).py !== pyRef[h]);
 ok(!malPy.length, 'pinyin de referencia: 叔 = shú, 姊 = jiě, apóstrofe de nǚ\'ér' + (malPy.length ? ': ' + malPy.join(',') : ''));
