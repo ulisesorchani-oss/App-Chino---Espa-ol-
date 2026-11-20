@@ -18,6 +18,7 @@
 /data/
 
 # Documentos de la raíz que no son parte de la app
+/GEMINI.md
 /README.md
 /README-Pronunciacion.md
 /AUDITORIA-GAGNE-MAYER.md
