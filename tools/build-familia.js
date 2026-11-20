@@ -80,7 +80,7 @@ function textoHoja(d, constancia) {
     L.push('', '## Decisiones de armado (`tools/lecciones-familia/ajustes.json`)', '');
     L.push('- **Simplificado** escrito a mano, carácter por carácter: ' + Object.keys(d.A.simplificado).filter(k => k[0] !== '_').map(k => k + '→' + d.A.simplificado[k]).join(', ') +
         '. 姊 queda 姊 en las dos escrituras. **Resultado de OpenCC:** ' + d.A.resultadoOpencc);
-    L.push('- **Zhuyin** derivado del pinyin de la fuente con la tabla de `app.js` (`pzPinyinToZhuyin`, sin modificarla), alineado sílaba por sílaba; ' +
+    L.push('- **Zhuyin** derivado del pinyin de la fuente con la tabla de `app.js` (`pzPinyinToZhuyin`; verificado de vuelta con una tabla independiente en `tools/check-familia.js`), alineado sílaba por sílaba; ' +
         'la marca del tono neutro va **adelante** (˙ㄇㄚ). Alineado a mano (pinyin-pro no conoce la lectura): ' +
         Object.keys(d.A.alineadoManual).filter(k => k[0] !== '_').map(k => k + ' = ' + d.A.alineadoManual[k].join('/')).join(', ') + '. **Todo el zhuyin está pendiente de revisión.**');
     L.push('- **Pares con «·»**: se separan por posición. Forma cotidiana única para dos formales, asignada por significado: ' +

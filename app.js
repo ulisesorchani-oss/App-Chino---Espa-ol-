@@ -4026,7 +4026,7 @@ const PZ_ZY_FINALS = [
     ['ang', 'ㄤ'], ['eng', 'ㄥ'], ['ong', 'ㄨㄥ'],
     ['ai', 'ㄞ'], ['ei', 'ㄟ'], ['ao', 'ㄠ'], ['ou', 'ㄡ'],
     ['an', 'ㄢ'], ['en', 'ㄣ'], ['er', 'ㄦ'],
-    ['ia', 'ㄧㄚ'], ['ie', 'ㄧㄝ'], ['iu', 'ㄧㄡ'], ['in', 'ㄧㄣ'],
+    ['ia', 'ㄧㄚ'], ['ie', 'ㄧㄝ'], ['io', 'ㄧㄛ'], ['iu', 'ㄧㄡ'], ['in', 'ㄧㄣ'],
     ['ua', 'ㄨㄚ'], ['uo', 'ㄨㄛ'], ['ui', 'ㄨㄟ'], ['un', 'ㄨㄣ'],
     ['üe', 'ㄩㄝ'], ['ve', 'ㄩㄝ'], ['ün', 'ㄩㄣ'], ['vn', 'ㄩㄣ'],
     ['a', 'ㄚ'], ['o', 'ㄛ'], ['e', 'ㄜ'], ['ê', 'ㄝ'],
@@ -4049,6 +4049,8 @@ function pzPinyinToZhuyin(syllNum) {
     if (base[0] === 'y') {
         const rest = base.slice(1);
         if (rest === '' || rest === 'i') base = 'i';
+        else if (rest === 'ou') base = 'iu';                         // you = ㄧㄡ (antes 'iou': sin fila en la tabla, quedaba solo ㄧ)
+        else if (rest === 'o') base = 'io';                          // yo = ㄧㄛ (antes 'io': quedaba solo ㄧ)
         else if (rest[0] === 'u') base = 'ü' + rest.slice(1);       // yu/yue/yuan/yun
         else if (rest[0] === 'i') base = rest;                       // yin/ying (ya empiezan con i)
         else base = 'i' + rest;                                      // ya/yan/yang/yao/yong…

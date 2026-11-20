@@ -159,7 +159,7 @@ function textoHoja(d, constancia) {
     L.push('## Fuera de esta versión', '');
     L.push('- La vista «solo tonos» (p.14–15) y la práctica quedan para después.');
     L.push('- Audio: el 🔊 de cada frase usa el mismo camino de voz que los demás clásicos (`speakCr` → servidor de voz, o la voz del sistema si falla). **No se verificó** cómo lee los polifónicos (惡, 為, 行, 長, 興, 鰥): el contenedor de desarrollo no llega al servidor de voz.');
-    L.push('- Aparte (no es de esta rama): la tabla pinyin→zhuyin de `app.js` (`pzPinyinToZhuyin`) convierte «you» en «ㄧ» en lugar de «ㄧㄡ» (有, 又, 右…).', '');
+    L.push('- La tabla pinyin→zhuyin de `app.js` (`pzPinyinToZhuyin`) convertía «you» en «ㄧ» en lugar de «ㄧㄡ» (有, 又, 右…); corregido en v240. Este clásico no la usa: su zhuyin sale del PDF.', '');
     return L.join('\n');
 }
 
