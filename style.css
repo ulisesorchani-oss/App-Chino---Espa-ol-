@@ -1014,7 +1014,7 @@ body.dark-mode .reader-word:active {
 
 .offline-pill {
     position: fixed;
-    bottom: 18px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)); /* a11y: por encima de #app-nav (57 px + zona segura); antes (18px) la tapaba */
     left: 50%;
     transform: translateX(-50%);
     background: #1e293b;
@@ -5918,6 +5918,12 @@ body {
 
 ::selection { background: rgba(102, 126, 234, 0.30); }
 :focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; border-radius: 4px; }
+/* a11y: en CLARO el anillo blanco era invisible sobre las tarjetas blancas (1,00:1). Anillo de DOS tonos: trazo azul
+   noche (≥ 15:1 sobre blanco) + halo blanco en el hueco del offset (≥ 3,4:1 sobre el violeta de la página). Oscuro y
+   papel tienen su propio color (más abajo) y quedan fuera de esta regla. */
+body:not(.dark-mode):not(.paper-mode) :focus-visible { outline-color: #1b2230; }
+/* el halo (box-shadow) no va en los campos de texto: ya tienen borde azul + su propio brillo de foco (p. ej. .srs-prod-input) */
+body:not(.dark-mode):not(.paper-mode) :focus-visible:not(input):not(textarea):not(select) { box-shadow: 0 0 0 2px #fff; }
 
 button, .card, .vocabulary-panel, .module-status, .reader-banner,
 .train-card, .vocab-pop, .app-nav, .control-panel, #answer-input, .reader-input {
@@ -6169,7 +6175,7 @@ body.paper-mode {
 }
 
 body.paper-mode ::selection { background: rgba(192, 138, 62, 0.30); }
-body.paper-mode :focus-visible { outline-color: rgba(139, 94, 52, 0.85); }
+body.paper-mode :focus-visible { outline-color: #8b5e34; } /* a11y: opaco (con alfa .85 daba 2,74:1 sobre el crema) */
 body.paper-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
 body.paper-mode ::-webkit-scrollbar-thumb {
     background: #cbb58a;
@@ -6451,7 +6457,7 @@ body.dark-mode .cr-card:hover { background: #2b3546; } }
 body.dark-mode .btn-secondary { background: #2b3546; }
 @media (hover: hover) { body.dark-mode .btn-secondary:hover { background: #343f53; } }
 body.dark-mode .mtab { background: #232b38; border-color: #364052; }
-body.dark-mode .mtab.active { background: #2f3a4e; }
+body.dark-mode .mtab.active { background: #2f3a4e; color: #93c5fd; } /* a11y: el azul de marca daba 2,21:1 sobre #2f3a4e */
 body.dark-mode .control-panel { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
 body.dark-mode #answer-input,
 body.dark-mode .reader-input { background-color: #141a23; border-color: #3a4558; }
