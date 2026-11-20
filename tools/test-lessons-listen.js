@@ -250,7 +250,7 @@ const STATS_OUT = [];
     const texts = await lineTexts(p);
     await p.click('#ll-play');
     await p.waitForFunction(() => LQ_LISTEN.idx === 2);
-    await p.click('#lq-story-speed'); await sleep(p, 100); // ⚡: 1 → 0.7
+    await p.click('#lq-story-speed'); await sleep(p, 100); // ⚡: 1 → 0.85
     const sp = await p.evaluate(() => playbackSpeed);
     await waitIdle(p);
     const V = await p.evaluate(() => window.__T.log);
@@ -259,6 +259,29 @@ const STATS_OUT = [];
     ok(at(3).length === 2 && at(3)[0].speed === 1 && at(3)[1].speed === sp && at(4).length === 1 && at(4)[0].speed === sp, 'velocidad: la precargada (línea 4) se DESCARTA y se pide a ' + sp + 'x; la 5.ª ya sale a la velocidad nueva ' + JSON.stringify([at(3).map(x => x.speed), at(4).map(x => x.speed)]));
     ok(texts.slice(4).every((t, k) => at(4 + k).length === 1 && at(4 + k)[0].speed === sp), 'velocidad: desde la línea siguiente todo sale a la velocidad nueva');
     ok(errs.length === 0, 'velocidad sin errores JS');
+    await ctx.close();
+  }
+
+  // ═════════ velocidad 0.5: se pide literalmente a 0.5 y la vuelta 0.5 → 1 rige desde la línea siguiente ═════════
+  {
+    const { ctx, p, errs } = await session(360, 'light');
+    await p.evaluate(() => { window.__T.latency = 150; window.__T.audioSec = 1.2; playbackSpeed = 0.5; });
+    await openLesson(p, 'h1-primer-dia');
+    const texts = await lineTexts(p);
+    await p.click('#ll-play');
+    await p.waitForFunction(() => LQ_LISTEN.idx === 2);
+    const antes = await p.evaluate(() => window.__T.log.map(x => [x.text, x.speed]));
+    ok(antes.length >= 3 && antes.every(x => x[1] === 0.5), 'velocidad 0.5: todo lo pedido hasta la 3.ª línea lleva speed 0.5 literal (' + antes.map(x => x[1]) + ')');
+    await p.click('#lq-story-speed'); await sleep(p, 100); // ⚡: 0.5 → 1 (vuelta del ciclo)
+    const sp = await p.evaluate(() => playbackSpeed);
+    ok(sp === 1, 'velocidad 0.5: un toque en ⚡ vuelve a 1 (playbackSpeed = ' + sp + ')');
+    await waitIdle(p);
+    const V = await p.evaluate(() => window.__T.log);
+    const at = (i) => V.filter(x => x.text === texts[i]);
+    ok(at(2).length === 1 && at(2)[0].speed === 0.5, 'velocidad 0.5: la línea que suena (3.ª) sigue a 0.5 y no se vuelve a pedir (' + at(2).map(x => x.speed) + ')');
+    ok(at(3).length === 2 && at(3)[0].speed === 0.5 && at(3)[1].speed === 1 && at(4).length === 1 && at(4)[0].speed === 1, 'velocidad 0.5: la precargada (línea 4) a 0.5 se DESCARTA y se pide a 1 (' + at(3).map(x => x.speed) + ')');
+    ok(texts.slice(4).every((t, k) => at(4 + k).length === 1 && at(4 + k)[0].speed === 1), 'velocidad 0.5: desde la línea siguiente todo sale a 1');
+    ok(errs.length === 0, 'velocidad 0.5 sin errores JS');
     await ctx.close();
   }
 

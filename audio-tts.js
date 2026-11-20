@@ -20,8 +20,9 @@ function lsGet(key) {
 }
 
 // ===== Velocidad de audio (persistente, default 0.85) =====
-const SPEED_STEPS = [0.85, 1, 0.7];
-const SPEED_LABELS = { '0.85': '🐢 0.85x', '1': '⚡ 1.0x', '0.7': '🐌 0.7x' };
+// v10.x: ciclo 1 → 0.85 → 0.7 → 0.5 → 1 (0.5 pedido por alumnos); el default sigue en 0.85.
+const SPEED_STEPS = [1, 0.85, 0.7, 0.5];
+const SPEED_LABELS = { '0.85': '🐢 0.85x', '1': '⚡ 1.0x', '0.7': '🐌 0.7x', '0.5': '🐌 0.5x' };
 let playbackSpeed = parseFloat(lsGet('ac_speed'));
 if (SPEED_STEPS.indexOf(playbackSpeed) === -1) playbackSpeed = 0.85;
 
@@ -411,7 +412,7 @@ function paintSpeedButtons() {
     });
 }
 
-// ===== Botón de velocidad: 0.85x -> 1.0x -> 0.7x =====
+// ===== Botón de velocidad: 1.0x -> 0.85x -> 0.7x -> 0.5x -> 1.0x =====
 function cycleSpeed() {
     const idx = SPEED_STEPS.indexOf(playbackSpeed);
     playbackSpeed = SPEED_STEPS[(idx + 1) % SPEED_STEPS.length];
