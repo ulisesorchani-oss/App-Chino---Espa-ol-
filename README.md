@@ -73,7 +73,7 @@ repartidas en archivos más chicos.
 | `docs/historial-actualizaciones/` | Notas de actualización de versiones anteriores (histórico, ya aplicadas) |
 | `docs/revision-lecturas-v1.md` | Constancia (escrita a mano) de quién y cuándo revisó el chino de las lecturas v1 |
 | `docs/prueba-celular.md` | Lista a mano, en modo avión, para verificar en un celular real lo que la batería no prueba (la voz del sistema: Hoy 🔊, Lector, Podcast, «Escuchar todo», muestra de voz y práctica tipo examen) y las tres cosas del Podcast sin verificar en un dispositivo |
-| `docs/matriz-de-audio.md` | Semilla (borrador, a mano) de la matriz «un solo audio a la vez»: sitios anotados; la matriz completa y su validador van en una rama aparte |
+| `docs/matriz-de-audio.md` | Matriz (a mano) de «un solo audio a la vez»: las 26 fuentes de audio (14 `new Audio` + 12 `speechSynthesis.speak`), qué corta cada una y quién puede cortarla; la valida `tools/check-audio-matriz.js`. Los arreglos por módulo van en el paso 2 de `fix/un-solo-audio` |
 | `docs/prueba-gemini-revision.md` | Plan de prueba (a mano) de la revisión informativa de PR con Gemini (`.github/workflows/gemini-revision.yml`, reglas en `GEMINI.md`): antes del merge, en el PR, y después, en un PR descartable (prueba de inyección y `@gemini-cli /review`) |
 
 ## Documentación

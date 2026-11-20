@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 63 suites de `tests/` y las 12 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 63 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -106,6 +106,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tools/check-datong.js` | no | no | no | solo Node (regenera `classics-datong.js` y `docs/revision-datong.md`; compara el zhuyin y la traducción con la transcripción del PDF; el simplificado se verifica con `pip install opencc`, sin eso queda PARCIAL) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
 | `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + las tablas de `lessons-listen.js` —«Escuchar todo»—, `reader.js` —el Lector— y `podcast.js` —el Podcast—): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped` ni a `readerPlayState`/`readerActiveEngine`/`pState`, cada `go()` (y cada `stopAll()` en «Escuchar todo») con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
+| `tools/check-audio-matriz.js` | no | no | no | solo Node: `docs/matriz-de-audio.md` al día con el código (26 fuentes `new Audio` / `speechSynthesis.speak`, sus cortes `stopGlobalAudio` / `stopReader`) + autoprueba con 4 mutaciones que tienen que dar rojo |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
 | `tools/check-readings.js` | lo levanta | sí | no | Python con `pip install opencc` (opcional `OPENCC_PYTHONPATH`) |
 | `tools/medir-tts.js` | — | — | **sí** (llama al API real) | no es una suite: mide, no verifica; `run-all` no la corre |

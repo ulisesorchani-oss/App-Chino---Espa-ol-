@@ -35,6 +35,7 @@ const TOOLS = [
     { name: 'tools/check-undef', file: 'tools/check-undef.js', needs: 'eslint (npx)', cuenta: /(\d+) scripts revisados/ },
     { name: 'tools/check-ninos', file: 'tools/check-ninos.js', needs: 'Node', cuenta: /(\d+) lecciones/ },
     { name: 'tools/check-maquinas', file: 'tools/check-maquinas.js', needs: 'Node', cuenta: /(\d+) máquinas/ },
+    { name: 'tools/check-audio-matriz', file: 'tools/check-audio-matriz.js', needs: 'Node', cuenta: /(\d+) fuentes/ },
     { name: 'tools/check-keywords', file: 'tools/check-keywords.js', needs: 'Node', cuenta: /(\d+) palabras clave/ },
     { name: 'tools/check-familia', file: 'tools/check-familia.js', needs: 'Node (la ida y vuelta s2tw necesita Python con «pip install opencc»; sin OpenCC queda PARCIAL)' },
     { name: 'tools/check-datong', file: 'tools/check-datong.js', needs: 'Node (el simplificado se verifica con Python y «pip install opencc»; sin OpenCC queda PARCIAL)' },
