@@ -2,7 +2,9 @@
 // Cubre: (1) el SW guarda en un caché PROPIO (huayu-diario-estado-v1) qué archivos del precache faltaron, sin abortar la
 // instalación y sin que activate lo borre; el modo sin conexión (primera carga tras instalar, con la instalación completa
 // o incompleta) sigue funcionando. (2) La página avisa de una versión nueva SIN recargarse sola (solo al tocar «Actualizar»),
-// en español y en chino (cn-es); la primera instalación no avisa. Yo → Ajustes se suma en su commit.
+// en español y en chino (cn-es); la primera instalación no avisa. (3) Yo → Ajustes → «Modo sin conexión» muestra el estado
+// del precache (completo / archivos que faltan, con «Reintentar»); sin conexión e incompleto sale UN aviso (una vez por sesión,
+// sin invitar a recargar); con conexión se reintenta una vez en silencio; la lista se recalcula contra el caché real.
 // Un «404 a propósito» se simula con el servidor (bloquear = rutas que devuelven 404), sin tocar sw.js.
 const http = require('http');
 const fs = require('fs');
@@ -36,17 +38,17 @@ const server = http.createServer((req, res) => {
 });
 
 async function abrir(b, opciones) {
-    const o = Object.assign({ modo: 'es-cn' }, opciones);
-    const ctx = await b.newContext({ viewport: { width: 360, height: 740 }, serviceWorkers: 'allow' });
+    const o = Object.assign({ modo: 'es-cn', tema: 'light', sw: 'allow' }, opciones);
+    const ctx = await b.newContext({ viewport: { width: 360, height: 740 }, serviceWorkers: o.sw });
     await ctx.route(/^(?!http:\/\/(127\.0\.0\.1|localhost)).*/, (r) => r.abort());
-    await ctx.addInitScript((modo) => {
+    await ctx.addInitScript(([modo, tema]) => {
         if (sessionStorage.getItem('i')) return; sessionStorage.setItem('i', '1');
-        localStorage.setItem('ac_onboarding_done_v2', '1');
+        localStorage.setItem('ac_onboarding_done_v2', '1'); localStorage.setItem('theme', tema);
         localStorage.setItem('chino-espanol-app-v2', JSON.stringify({ mode: modo }));
-    }, o.modo);
+    }, [o.modo, o.tema]);
     const p = await ctx.newPage(); p._errs = []; p.on('pageerror', (e) => p._errs.push(e.message));
     await p.goto(o.url);
-    await esperarControl(p);
+    if (o.sw === 'allow') await esperarControl(p);
     return { ctx, p };
 }
 // espera a que el SW esté activo Y controle la página (clients.claim)
@@ -245,6 +247,226 @@ const estadoSW = (p) => p.evaluate(async () => {
         ok(t[0] === 'Hay una versión nueva de la app.' && t[1] === '应用有新版本。' && t[2] === '更新', 'G · al pasar a cn-es con el cartel visible se traduce («' + t.join('» · «') + '»)');
         await ctx.close();
         cfg.version = null;
+    }
+
+    // ---- Yo → Ajustes: lectura de la fila «Modo sin conexión» ----
+    const fila = (p) => p.evaluate(() => {
+        const vis = (id) => { const e = document.getElementById(id); return !!e && getComputedStyle(e).display !== 'none' && !e.classList.contains('hidden'); };
+        return { fila: vis('row-sw-estado'), etiqueta: (document.querySelector('#row-sw-estado .set-label') || {}).textContent, txt: document.getElementById('sw-estado-txt').textContent, falta: document.getElementById('sw-estado-txt').classList.contains('falta'),
+                 lista: [...document.querySelectorAll('#sw-estado-lista li')].map((x) => x.textContent), listaVis: vis('sw-estado-lista'), btn: vis('btn-sw-reintentar'), btnDis: document.getElementById('btn-sw-reintentar').disabled, btnTxt: document.getElementById('btn-sw-reintentar').textContent,
+                 cartel: (() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; })() };
+    });
+    const hayCacheado = (p, f) => p.evaluate(async (f) => !!(await caches.match(new URL(f, document.baseURI).href, { ignoreVary: true })), f);
+    const irAjustes = (p) => p.evaluate(async () => { showView('yo'); await new Promise((r) => setTimeout(r, 300)); });
+
+    // ---- I. instalación completa: «Completo», sin lista, sin botón, sin aviso ----
+    {
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500); await irAjustes(p);
+        const f = await fila(p);
+        ok(f.fila && f.etiqueta === 'Modo sin conexión' && f.txt === 'Completo' && !f.falta && !f.listaVis && !f.btn && !f.cartel, 'I · instalación completa: Ajustes dice «Completo», sin lista ni botón y sin aviso (' + JSON.stringify(f) + ')');
+        await ctx.close();
+    }
+
+    // ---- J. incompleta, con conexión: la fila muestra el archivo; NO hay aviso; «Reintentar» lo baja ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(2000); await irAjustes(p);
+        const f = await fila(p);
+        ok(f.fila && f.falta && f.txt === 'Incompleto · archivos sin descargar: 1' && JSON.stringify(f.lista) === '["./pinyin-tocfl.js"]' && f.listaVis && f.btn && f.btnTxt === 'Reintentar', 'J · incompleta: Ajustes lista «./pinyin-tocfl.js» con «Reintentar» (' + JSON.stringify(f) + ')');
+        ok(!f.cartel, 'J · con conexión NO hay aviso visible (solo la fila de Ajustes)');
+        await p.evaluate(() => document.getElementById('row-sw-estado').scrollIntoView({ block: 'center' })); await p.waitForTimeout(200);
+        await p.screenshot({ path: shots('sw-aviso') + 'ajustes-incompleto.png' });
+        // reintento con el archivo todavía bloqueado: sigue faltando
+        await p.click('#btn-sw-reintentar'); await p.waitForTimeout(1200);
+        const f2 = await fila(p);
+        ok(f2.falta && f2.lista.length === 1, 'J · «Reintentar» con el archivo todavía caído: sigue en la lista (' + f2.txt + ')');
+        ok(!(await hayCacheado(p, './pinyin-tocfl.js')), 'J · y el archivo sigue sin estar en el caché');
+        // vuelve el servidor: «Reintentar» lo baja y la fila pasa a «Completo»
+        cfg.bloquear = new Set();
+        await p.click('#btn-sw-reintentar');
+        await p.waitForFunction(() => document.getElementById('sw-estado-txt').textContent === 'Completo', null, { timeout: 15000 }).catch(() => { });
+        const f3 = await fila(p);
+        ok(f3.txt === 'Completo' && !f3.falta && !f3.btn && !f3.listaVis, 'J · con el servidor de vuelta, «Reintentar» completa: «' + f3.txt + '»');
+        ok(await hayCacheado(p, './pinyin-tocfl.js'), 'J · y el archivo quedó en el caché (sirve sin conexión)');
+        const e = await estadoSW(p);
+        ok(e.estado && e.estado.faltan.length === 1, 'J · la página NO reescribió el caché de estado (sigue la lista de la instalación: ' + JSON.stringify(e.estado && e.estado.faltan) + ')');
+        ok(p._errs.length === 0, 'J · sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+    }
+
+    // ---- K. reintento automático al abrir con conexión: una sola vez por sesión, en silencio ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500);
+        cfg.bloquear = new Set();                                  // el servidor vuelve
+        const p2 = await ctx.newPage(); p2._errs = [];            // pestaña nueva = sesión nueva (sessionStorage vacío)
+        await p2.goto(URL); await esperarControl(p2);
+        await p2.waitForFunction(async () => { const r = await caches.match(new URL('./pinyin-tocfl.js', document.baseURI).href); return !!r; }, null, { timeout: 15000 }).catch(() => { });
+        await irAjustes(p2);
+        const f = await fila(p2);
+        ok(f.txt === 'Completo' && await hayCacheado(p2, './pinyin-tocfl.js'), 'K · al abrir con conexión se reintentó solo (sin tocar nada): «' + f.txt + '»');
+        ok(!f.cartel, 'K · y sin ningún aviso');
+        await ctx.close();
+        // una sola vez por sesión, y solo si se intenta de verdad: la visita que instala no tiene estado todavía (no hay intento);
+        // la 1.ª recarga con algo faltante SÍ reintenta; la siguiente no
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx: c3, p: p3 } = await abrir(b, { url: URL });
+        await p3.waitForTimeout(1500);
+        let pedidos = 0; p3.on('request', (r) => { if (/pinyin-tocfl\.js/.test(r.url())) pedidos++; });
+        await p3.reload(); await p3.waitForTimeout(2500);
+        const primera = pedidos; pedidos = 0;
+        ok(primera >= 1, 'K · la 1.ª carga con algo faltante SÍ reintenta solo (' + primera + ' pedidos de pinyin-tocfl.js)');
+        await p3.reload(); await p3.waitForTimeout(2500);
+        ok(pedidos === 0, 'K · la carga siguiente de la misma pestaña NO lo repite (' + pedidos + ' pedidos)');
+        await c3.close();
+        cfg.bloquear = new Set();
+    }
+
+    // ---- L. sin conexión e incompleta: UN aviso por sesión, sin invitar a recargar; completa: nada ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500);
+        const on = await fila(p);
+        ok(!on.cartel, 'L · con conexión no hay aviso');
+        await ctx.setOffline(true);
+        await p.reload(); await p.waitForTimeout(2000);
+        const cartel = await p.evaluate(() => { const e = document.getElementById('sw-aviso'); return { vis: !!e && getComputedStyle(e).display !== 'none', txt: document.getElementById('sw-aviso-txt') && document.getElementById('sw-aviso-txt').textContent, act: getComputedStyle(document.getElementById('sw-aviso-act')).display, no: document.getElementById('sw-aviso-no').textContent, top: Math.round(e.getBoundingClientRect().top) }; });
+        ok(cartel.vis && cartel.txt === 'Modo sin conexión incompleto · archivos sin descargar: 1. Conectate a internet para completarlos.', 'L · sin conexión e incompleta aparece el aviso: «' + cartel.txt + '»');
+        ok(cartel.act === 'none' && cartel.no === 'Cerrar', 'L · no invita a recargar (sin «Actualizar») y se cierra con «Cerrar»');
+        await p.screenshot({ path: shots('sw-aviso') + 'aviso-sin-conexion.png' });
+        await p.click('#sw-aviso-no'); await p.waitForTimeout(300);
+        await p.evaluate(() => window.dispatchEvent(new Event('offline'))); await p.waitForTimeout(300);
+        ok(await p.evaluate(() => getComputedStyle(document.getElementById('sw-aviso')).display === 'none'), 'L · cerrado, no vuelve a salir (aunque se repita el evento sin conexión)');
+        await p.reload(); await p.waitForTimeout(2000);
+        ok(await p.evaluate(() => { const e = document.getElementById('sw-aviso'); return !e || getComputedStyle(e).display === 'none'; }), 'L · cerrado, tampoco vuelve al RECARGAR la pestaña (una vez por sesión)');
+        const pn = await ctx.newPage(); await pn.goto(URL); await pn.waitForTimeout(2500);
+        ok(await pn.evaluate(() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; }), 'L · en una pestaña NUEVA (sesión nueva) sí vuelve a avisar');
+        await pn.close();
+        await irAjustes(p);
+        const f = await fila(p);
+        ok(f.fila && f.falta && f.lista.length === 1, 'L · y Yo → Ajustes sigue mostrando la lista sin conexión (' + f.txt + ')');
+        ok(f.btn && f.btnDis, 'L · sin conexión «Reintentar» está deshabilitado (no hay nada que bajar)');
+        // al volver la conexión no hay aviso
+        await ctx.setOffline(false); await p.evaluate(() => window.dispatchEvent(new Event('online'))); await p.waitForTimeout(500);
+        ok(await p.evaluate(() => getComputedStyle(document.getElementById('sw-aviso')).display === 'none'), 'L · con la conexión de vuelta no hay aviso');
+        ok(!(await fila(p)).btnDis, 'L · y «Reintentar» se habilita de nuevo');
+        await ctx.close();
+        cfg.bloquear = new Set();
+        // instalación completa y sin conexión: ningún aviso
+        const { ctx: c2, p: p2 } = await abrir(b, { url: URL });
+        await p2.waitForTimeout(1200); await c2.setOffline(true);
+        await p2.reload(); await p2.waitForTimeout(2000);
+        ok(await p2.evaluate(() => { const e = document.getElementById('sw-aviso'); return !e || getComputedStyle(e).display === 'none'; }), 'L · instalación completa y sin conexión: ningún aviso');
+        await c2.close();
+    }
+
+    // ---- M. cn-es: fila y aviso en chino (PENDIENTE de revisión) ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL, modo: 'cn-es' });
+        await p.waitForTimeout(2000); await irAjustes(p);
+        const f = await fila(p);
+        ok(f.etiqueta === '离线模式' && f.txt === '不完整 · 未下载的文件：1' && f.btnTxt === '重试', 'M · cn-es: la fila dice «' + f.etiqueta + '» · «' + f.txt + '» · «' + f.btnTxt + '»');
+        await ctx.setOffline(true); await p.reload(); await p.waitForTimeout(2000);
+        const t = await p.evaluate(() => [document.getElementById('sw-aviso-txt').textContent, document.getElementById('sw-aviso-no').textContent]);
+        ok(t[0] === '离线模式不完整 · 未下载的文件：1。请联网后补全。' && t[1] === '关闭', 'M · cn-es: el aviso sin conexión dice «' + t[0] + '» · «' + t[1] + '»');
+        await ctx.close();
+        cfg.bloquear = new Set();
+    }
+
+    // ---- N. la lista se RECALCULA contra el caché real (el SW guardó el archivo después, al pedirlo) ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500);
+        cfg.bloquear = new Set();
+        await p.evaluate(async () => { await fetch('./pinyin-tocfl.js'); });  // pedido sin ?v= (como el respaldo del SW por nombre): el SW lo guarda al pedirlo (cacheFirstShell)
+        await p.waitForTimeout(800);
+        const e = await estadoSW(p);
+        ok(e.estado && e.estado.faltan.length === 1, 'N · el estado de la instalación sigue listando el archivo (' + JSON.stringify(e.estado && e.estado.faltan) + ')');
+        const p2 = await ctx.newPage(); await p2.goto(URL); await esperarControl(p2); await p2.waitForTimeout(800); await irAjustes(p2);
+        const f = await fila(p2);
+        ok(f.txt === 'Completo' && !f.btn, 'N · pero la fila dice «' + f.txt + '»: ya está en el caché real');
+        await ctx.close();
+    }
+
+    // ---- O. contraste de la fila en los tres temas (incompleta) ----
+    for (const tema of ['light', 'dark', 'paper']) {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL, tema });
+        await p.waitForTimeout(1800); await irAjustes(p);
+        // contraste sobre píxeles reales (el fondo puede ser un degradado): fondo = el color más repetido del recorte; texto = el píxel más lejano en luminancia
+        for (const [k, sel] of [['txt', '#sw-estado-txt'], ['lista', '#sw-estado-lista'], ['btn', '#btn-sw-reintentar']]) {
+            const buf = await (await p.$(sel)).screenshot();
+            const cr = await p.evaluate(async (b64) => {
+                const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
+                const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+                const d = g.getImageData(0, 0, c.width, c.height).data;
+                const L = (r, gg, bb) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(gg) + 0.0722 * f(bb); };
+                const cnt = new Map(); for (let i = 0; i < d.length; i += 4) { const key = d[i] + ',' + d[i + 1] + ',' + d[i + 2]; cnt.set(key, (cnt.get(key) || 0) + 1); }
+                const bg = [...cnt.entries()].sort((x, y) => y[1] - x[1])[0][0].split(',').map(Number); const lb = L(...bg); let best = 1;
+                for (let i = 0; i < d.length; i += 4) { const l = L(d[i], d[i + 1], d[i + 2]); const r = (Math.max(l, lb) + 0.05) / (Math.min(l, lb) + 0.05); if (r > best) best = r; }
+                return { bg, ratio: Math.round(best * 100) / 100 };
+            }, buf.toString('base64'));
+            ok(cr.ratio >= 4.5, 'O · ' + tema + ' · ' + k + ' (' + sel + '): texto sobre rgb(' + cr.bg + ') = ' + cr.ratio + ':1 (≥ 4,5)');
+        }
+        await ctx.close();
+        cfg.bloquear = new Set();
+    }
+
+    // ---- P. una versión nueva reescribe el estado: la fila lo refleja sin recargar ----
+    {
+        cfg.bloquear = new Set(['/pinyin-tocfl.js']);
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1500);
+        cfg.bloquear = new Set(); cfg.version = 'v-lab-E';
+        await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); await r.update(); });
+        await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; }, null, { timeout: 15000 });
+        await p.waitForTimeout(500); await irAjustes(p);
+        const f = await fila(p);
+        ok(f.txt === 'Completo', 'P · la versión nueva se instaló completa: la fila pasa a «' + f.txt + '» sin recargar');
+        await ctx.close();
+        cfg.version = null;
+    }
+
+    // ---- Q. sin service worker (serviceWorkers: 'block'): la fila de Ajustes queda oculta y no hay avisos ----
+    {
+        const { ctx, p } = await abrir(b, { url: URL, sw: 'block' });
+        await p.waitForTimeout(1500); await irAjustes(p);
+        const f = await fila(p);
+        ok(!f.fila && !f.cartel, 'Q · sin SW: la fila «Modo sin conexión» queda oculta y no hay cartel (' + JSON.stringify({ fila: f.fila, cartel: f.cartel }) + ')');
+        ok(p._errs.length === 0, 'Q · sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+    }
+
+    // ---- R. versión nueva INCOMPLETA: sin conexión «Actualizar» NO se ofrece (la recarga arrancaría sin un archivo); con conexión vuelve ----
+    {
+        const { ctx, p } = await abrir(b, { url: URL });
+        cfg.version = 'v-lab-F'; cfg.bloquear = new Set(['/karaoke.js']);
+        await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); await r.update(); });
+        await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; }, null, { timeout: 15000 });
+        await p.waitForFunction(() => { const x = window.swAvisoEstado(); return x.faltan && x.faltan.length === 1; }, null, { timeout: 15000 }); // la relectura al quedar «activated»
+        const vista = () => p.evaluate(() => { const e = document.getElementById('sw-aviso'); return { vis: !!e && getComputedStyle(e).display !== 'none', txt: document.getElementById('sw-aviso-txt').textContent, act: getComputedStyle(document.getElementById('sw-aviso-act')).display !== 'none', no: document.getElementById('sw-aviso-no').textContent }; });
+        const e = await estadoSW(p);
+        ok(e.estado && JSON.stringify(e.estado.faltan) === '["./karaoke.js"]', 'R · la versión nueva quedó incompleta (falta ./karaoke.js): ' + JSON.stringify(e.estado && e.estado.faltan));
+        const v1 = await vista();
+        ok(v1.vis && v1.act && v1.txt === 'Hay una versión nueva de la app.', 'R · con conexión: «Hay una versión nueva» con «Actualizar» (' + JSON.stringify(v1) + ')');
+        await ctx.setOffline(true); await p.evaluate(() => window.dispatchEvent(new Event('offline')));
+        await p.waitForFunction(() => /archivos sin descargar/.test(document.getElementById('sw-aviso-txt').textContent), null, { timeout: 10000 }).catch(() => { });
+        const v2 = await vista();
+        ok(v2.vis && !v2.act && /archivos sin descargar: 1/.test(v2.txt) && v2.no === 'Cerrar', 'R · sin conexión: NO se ofrece «Actualizar»; solo informa «' + v2.txt + '»');
+        await ctx.setOffline(false); await p.evaluate(() => window.dispatchEvent(new Event('online')));
+        await p.waitForFunction(() => document.getElementById('sw-aviso-txt').textContent === 'Hay una versión nueva de la app.' && getComputedStyle(document.getElementById('sw-aviso-act')).display !== 'none', null, { timeout: 10000 }).catch(() => { });
+        const v3 = await vista();
+        ok(v3.vis && v3.act && v3.txt === 'Hay una versión nueva de la app.', 'R · al volver la conexión vuelve «Actualizar»');
+        await p.click('#sw-aviso-no'); await p.waitForTimeout(300);
+        ok(!(await vista()).vis, 'R · «Después» lo oculta y no reaparece solo');
+        await ctx.close();
+        cfg.version = null; cfg.bloquear = new Set();
     }
 
     await b.close(); server.close();

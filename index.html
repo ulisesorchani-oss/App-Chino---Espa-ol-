@@ -591,6 +591,15 @@
                         <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
                     </div>
                 </div>
+                <!-- sw-aviso.js: estado del precache (qué archivos del modo sin conexión faltan). Oculta si no hay service worker. -->
+                <div class="set-row hidden" id="row-sw-estado">
+                    <span class="set-label" data-i18n="setOffline">Modo sin conexión</span>
+                    <div class="set-ctrl sw-estado">
+                        <span id="sw-estado-txt" class="sw-estado-txt" role="status"></span>
+                        <ul id="sw-estado-lista" class="sw-estado-lista hidden"></ul>
+                        <button id="btn-sw-reintentar" class="speed-btn hidden" type="button"></button>
+                    </div>
+                </div>
             </div>
 
             <div class="danger-zone">

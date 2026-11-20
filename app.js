@@ -775,7 +775,9 @@ const UI_STRINGS = {
     libraryOpt: '📚 Biblioteca de lecturas…', libraryLoad: 'Cargar',
     readerClear: '🗑️ Limpiar', readerPlay: '🔊 Leer',
     btnReset: '🗑️ Borrar progreso', installApp: '📲 Instalar app',
-    swNuevaTxt: 'Hay una versión nueva de la app.', swActualizar: 'Actualizar', swDespues: 'Después',
+    swNuevaTxt: 'Hay una versión nueva de la app.', swActualizar: 'Actualizar', swDespues: 'Después', swCerrar: 'Cerrar',
+    setOffline: 'Modo sin conexión', swEstadoOk: 'Completo', swEstadoFaltan: 'Incompleto · archivos sin descargar: {n}', swReintentar: 'Reintentar', swReintentando: 'Descargando…',
+    swOfflineTxt: 'Modo sin conexión incompleto · archivos sin descargar: {n}. Conectate a internet para completarlos.',
     // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
     placementTest: '🎯 Test de colocación — descubrí tu nivel',
     saveProgress: '💾 Guardar progreso', savedOk: '✅ Progreso guardado en este dispositivo',
@@ -859,8 +861,10 @@ const UI_STRINGS = {
     libraryOpt: '📚 朗读文库…', libraryLoad: '载入',
     readerClear: '🗑️ 清空', readerPlay: '🔊 朗读',
     btnReset: '🗑️ 清除学习记录', installApp: '📲 安装应用',
-    // PENDIENTE DE REVISIÓN (docs/revision-aviso-sw.md): aviso de versión nueva
-    swNuevaTxt: '应用有新版本。', swActualizar: '更新', swDespues: '稍后',
+    // PENDIENTE DE REVISIÓN (docs/revision-aviso-sw.md): aviso de versión nueva, fila «Modo sin conexión» de Ajustes y aviso sin conexión
+    swNuevaTxt: '应用有新版本。', swActualizar: '更新', swDespues: '稍后', swCerrar: '关闭',
+    setOffline: '离线模式', swEstadoOk: '完整', swEstadoFaltan: '不完整 · 未下载的文件：{n}', swReintentar: '重试', swReintentando: '下载中…',
+    swOfflineTxt: '离线模式不完整 · 未下载的文件：{n}。请联网后补全。',
     // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
     placementTest: '🎯 分级测试 —— 测测你的水平',
     saveProgress: '💾 保存进度', savedOk: '✅ 进度已保存在本设备',

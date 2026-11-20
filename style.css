@@ -7226,3 +7226,11 @@ body.dark-mode .sw-aviso { background: #020617; }
 .sw-aviso-x { background: transparent; color: #e2e8f0; border: 1px solid rgba(226, 232, 240, 0.55); }
 /* el cartel es SIEMPRE oscuro: el anillo de foco es blanco en los tres temas (el azul noche del modo claro no se vería) */
 body .sw-aviso :focus-visible { outline-color: #fff !important; box-shadow: none !important; }
+
+/* ===== Yo → Ajustes → «Modo sin conexión» (sw-aviso.js) ===== */
+.sw-estado { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; font-size: 0.88rem; }
+.sw-estado-txt.falta { color: var(--warning); font-weight: 700; }
+body.dark-mode .sw-estado-txt.falta { color: #fbbf24; }
+.sw-estado-lista { margin: 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--text-secondary); word-break: break-all; }
+body.paper-mode .sw-estado-lista { color: #4a3f2e; } /* el gris de papel daba 4,06:1 sobre el crema */
+.sw-estado-lista.hidden, .sw-estado .hidden, #row-sw-estado.hidden { display: none; }
