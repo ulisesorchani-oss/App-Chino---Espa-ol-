@@ -471,6 +471,8 @@ const VERSION = 'v243'; // — Foco: el halo blanco del anillo de modo claro ya 
 //        de oración sin audio (solo botón parlante).
 const SHELL_CACHE = `huayu-diario-shell-${VERSION}`;
 const TTS_CACHE = 'chino-es-tts-v2';     // v2: descarta audios femeninos viejos guardados para ar-m/tw-m
+const ESTADO_CACHE = 'huayu-diario-estado-v1'; // estado PROPIO del SW (qué archivos del precache faltaron). NUNCA responde pedidos y activate no lo borra
+const ESTADO_URL = '/__estado__/precache';     // clave sintética: la app no pide esta ruta (solo se lee con caches.open desde la página)
 const MODEL_CACHE = 'chino-es-models-v1'; // v7.7: modelos IA — NUNCA se borra
 const DATA_CACHE = 'chino-es-hanzi-v1';  // v7.13: datos de trazos Hanzi Writer — NUNCA se borra
 const TTS_MAX_ENTRIES = 300;   // medido: 14-28 kB por audio (promedio 20 kB; el JSON en base64 pesa ~1,33x) → ~8 MB como máximo; alcanza para ~12 lecciones largas (24 líneas) en una misma voz y velocidad
@@ -545,13 +547,22 @@ const PRECACHE = [
   //       así el ensurePitchScript() del modo chino funciona offline.
 ];
 
-/* ---------- Install: precache tolerante (un 404 no rompe el SW) ---------- */
+/* ---------- Install: precache tolerante (un 404 no rompe el SW) ----------
+   La tolerancia sigue igual (nada aborta la instalación), pero los archivos que fallaron YA NO se pierden en
+   un console.warn: se guardan en ESTADO_CACHE para que la página avise (Yo → Ajustes y, sin conexión, un aviso). */
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
+    const faltan = [];
     await Promise.all(PRECACHE.map((url) =>
-      cache.add(url).catch((err) => console.warn('[SW] precache falló (no crítico):', url, err.message))
+      cache.add(url).catch((err) => { faltan.push(url); console.warn('[SW] precache falló (no crítico):', url, err.message); })
     ));
+    try {
+      const estado = await caches.open(ESTADO_CACHE);
+      await estado.put(self.location.origin + ESTADO_URL, new Response(
+        JSON.stringify({ v: VERSION, shell: SHELL_CACHE, total: PRECACHE.length, faltan: faltan.slice().sort() }),
+        { headers: { 'content-type': 'application/json' } }));
+    } catch (err) { console.warn('[SW] no se pudo guardar el estado del precache:', err && err.message); }
     await self.skipWaiting();
   })());
 });
@@ -561,7 +572,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys
-      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE && k !== MODEL_CACHE && k !== DATA_CACHE)
+      .filter((k) => k !== SHELL_CACHE && k !== TTS_CACHE && k !== MODEL_CACHE && k !== DATA_CACHE && k !== ESTADO_CACHE)
       .map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
