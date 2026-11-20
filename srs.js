@@ -976,6 +976,7 @@
                 finish(doAdd('')); // alta clásica v7.21, sin ctx propio
             });
             inp.addEventListener('keydown', (ev) => {
+                if (ev.isComposing || ev.keyCode === 229) return; // IME: Enter confirma el candidato, no guarda (misma guarda que prodCheck/recallCheck)
                 if (ev.key === 'Enter') { ev.preventDefault(); finish(doAdd(String(inp.value || '').trim())); }
             });
         });
