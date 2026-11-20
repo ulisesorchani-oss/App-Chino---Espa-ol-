@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Huayu Diario">
-    <link rel="stylesheet" href="style.css?v=20261120b">
+    <link rel="stylesheet" href="style.css?v=20261120c">
 </head>
 <body>
     <!-- v10 UX: skip link — primer elemento focusable del body -->
@@ -591,6 +591,15 @@
                         <button id="btn-install" class="speed-btn install-btn hidden" type="button" title="Instalar como app en tu celular o PC" data-i18n="installApp">📲 Instalar app</button>
                     </div>
                 </div>
+                <!-- sw-aviso.js: estado del precache (qué archivos del modo sin conexión faltan). Oculta si no hay service worker. -->
+                <div class="set-row hidden" id="row-sw-estado">
+                    <span class="set-label" data-i18n="setOffline">Modo sin conexión</span>
+                    <div class="set-ctrl sw-estado">
+                        <span id="sw-estado-txt" class="sw-estado-txt" role="status"></span>
+                        <ul id="sw-estado-lista" class="sw-estado-lista hidden"></ul>
+                        <button id="btn-sw-reintentar" class="speed-btn hidden" type="button"></button>
+                    </div>
+                </div>
             </div>
 
             <div class="danger-zone">
@@ -912,7 +921,7 @@
     <script src="audio-tts.js?v=20261120b"></script>
     <script src="data-embedded.js?v=20261002a"></script>
     <script src="feature-tips.js?v=20261009b"></script>
-    <script src="app.js?v=20261120c"></script>
+    <script src="app.js?v=20261120d"></script>
     <script src="module-sheet.js?v=20261015b"></script>
     <script src="exam-items.js?v=20261018b"></script>
     <script src="exam-practice.js?v=20261029b"></script>
@@ -940,6 +949,7 @@
     <script src="free-talk.js?v=20261009a"></script>
     <script src="personal-lessons.js?v=20260928a"></script>
     <script src="nav.js?v=20261016b"></script>
+    <script src="sw-aviso.js?v=20261120b"></script>
     <script>
     // Registro del Service Worker (PWA offline)
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
