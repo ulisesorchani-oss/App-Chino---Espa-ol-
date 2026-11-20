@@ -512,6 +512,7 @@ const PRECACHE = [
   './lessons-familia.js',  // fichas de familia (datos generados por tools/build-familia.js; material del Instituto Guó Fēng)
   './familia-ui.js',       // visor de las fichas de familia (piezas de LQ_UI; lista en lessons-graduated.js)
   './nav.js',              // v9.7x: botón Atrás — cierra la capa de arriba (observador, sin tocar módulos)
+  './sw-aviso.js',         // cartel «Hay una versión nueva» (no recarga solo; la 1.ª instalación no avisa)
   './VoiceRecorder.js',    // v7.5/7.7/7.8: captura + UI de pronunciación (por modo)
   './config.js',           // v7.8: constantes calibrables (umbral de confianza, tolerancia léxica)
   './text-utils.js',       // v7.8: normalizeText por idioma + Levenshtein por palabra

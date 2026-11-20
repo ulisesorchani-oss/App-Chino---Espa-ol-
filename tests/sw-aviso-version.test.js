@@ -1,16 +1,21 @@
 // feat/sw-aviso-version · laboratorio del service worker (servidor propio, el sw.js real de la repo).
 // Cubre: (1) el SW guarda en un caché PROPIO (huayu-diario-estado-v1) qué archivos del precache faltaron, sin abortar la
 // instalación y sin que activate lo borre; el modo sin conexión (primera carga tras instalar, con la instalación completa
-// o incompleta) sigue funcionando. Las secciones de la página (aviso de versión nueva, Yo → Ajustes) se suman en sus commits.
+// o incompleta) sigue funcionando. (2) La página avisa de una versión nueva SIN recargarse sola (solo al tocar «Actualizar»),
+// en español y en chino (cn-es); la primera instalación no avisa. Yo → Ajustes se suma en su commit.
 // Un «404 a propósito» se simula con el servidor (bloquear = rutas que devuelven 404), sin tocar sw.js.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { chromium, LAUNCH } = require('./lib/env');
+const { chromium, LAUNCH, shots } = require('./lib/env');
 
 const ROOT = path.resolve(__dirname, '..');
 let n = 0, fails = 0;
 const ok = (c, m) => { n++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
+const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return Math.round((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) * 100) / 100; };
+const rgb = (s) => (String(s).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
 // ---- servidor del laboratorio ----
@@ -24,6 +29,8 @@ const server = http.createServer((req, res) => {
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end('no'); }
     let body = fs.readFileSync(f);
     if (u === '/sw.js' && cfg.version) body = Buffer.from(SW_ORIG.replace(/const VERSION = '[^']*'/, "const VERSION = '" + cfg.version + "'"));
+    // cada «versión» marca un script precacheado: así se distingue el JS viejo del nuevo (si no, todas serían archivos idénticos)
+    if (u === '/nav.js') body = Buffer.concat([body, Buffer.from("\n;window.__cod = '" + (cfg.version || 'orig') + "';\n")]);
     res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' });
     res.end(body);
 });
@@ -125,6 +132,117 @@ const estadoSW = (p) => p.evaluate(async () => {
         const off = await p.evaluate(async () => { const o = {}; for (const v of ['aprender', 'hoy', 'entrenar', 'yo']) { showView(v); await new Promise((r) => setTimeout(r, 150)); o[v] = !document.getElementById('view-' + v).classList.contains('hidden'); } return o; });
         ok(Object.values(off).every(Boolean), 'C · sin conexión tras la actualización: la app arranca y abre las 4 vistas (' + JSON.stringify(off) + ')');
         ok(p._errs.length === 0, 'C · sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+        cfg.version = null;
+    }
+
+    // ---- D. la 1.ª instalación NO avisa de «versión nueva»; sw-aviso.js está en el precache ----
+    {
+        ok(PRECACHE.indexOf('./sw-aviso.js') !== -1, 'D · sw-aviso.js está en el PRECACHE (funciona sin conexión)');
+        const { ctx, p } = await abrir(b, { url: URL });
+        await p.waitForTimeout(1200);
+        const v = await p.evaluate(() => { const e = document.getElementById('sw-aviso'); return { existe: !!e, oculto: !e || e.classList.contains('hidden') || getComputedStyle(e).display === 'none' }; });
+        ok(v.oculto, 'D · tras la 1.ª instalación (el SW toma la página por 1.ª vez) no hay cartel (' + JSON.stringify(v) + ')');
+        await ctx.close();
+    }
+
+    // ---- E/F. versión nueva con la pestaña abierta: cartel, sin recarga sola, «Después» y «Actualizar» ----
+    for (const [modo, txt, act, des] of [['es-cn', 'Hay una versión nueva de la app.', 'Actualizar', 'Después'], ['cn-es', '应用有新版本。', '更新', '稍后']]) {
+        const T = modo + ' · ';
+        const { ctx, p } = await abrir(b, { url: URL, modo });
+        await p.evaluate(() => { window.__marca = 'pestaña-vieja'; });
+        ok(await p.evaluate(() => window.__cod === 'orig'), T + 'partida: la pestaña corre el código «orig»');
+        cfg.version = 'v-lab-A';
+        await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); await r.update(); });
+        const aparecio = await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && !e.classList.contains('hidden'); }, null, { timeout: 15000 }).then(() => true, () => false);
+        ok(aparecio, T + 'llega una versión nueva con la pestaña abierta: aparece el cartel');
+        await p.waitForTimeout(2500);
+        const c = await p.evaluate(() => {
+            const e = document.getElementById('sw-aviso'), nav = document.getElementById('app-nav').getBoundingClientRect(), r = e.getBoundingClientRect();
+            return { marca: window.__marca, txt: document.getElementById('sw-aviso-txt').textContent, act: document.getElementById('sw-aviso-act').textContent, no: document.getElementById('sw-aviso-no').textContent, role: e.getAttribute('role'),
+                     visible: r.width > 0 && getComputedStyle(e).display !== 'none', sobreNav: r.bottom > nav.top, dentro: r.left >= 0 && r.right <= innerWidth && r.top >= 0, lang: document.documentElement.lang };
+        });
+        ok(c.marca === 'pestaña-vieja', T + 'la pestaña NO se recargó sola (2,5 s después sigue la marca «' + c.marca + '»)');
+        ok(await p.evaluate(() => window.__cod === 'orig'), T + 'mientras el cartel está visible, la pestaña sigue corriendo el JS VIEJO («orig»)');
+        ok(c.txt === txt && c.act === act && c.no === des, T + 'textos: «' + c.txt + '» · «' + c.act + '» · «' + c.no + '»');
+        ok(c.visible && !c.sobreNav && c.dentro && c.role === 'status', T + 'el cartel se ve entero, no tapa la barra inferior y es role=status (' + JSON.stringify({ visible: c.visible, sobreNav: c.sobreNav, dentro: c.dentro }) + ')');
+        // no tapa la acción principal: en Hoy ni el campo de respuesta ni «Verificar»; y queda ARRIBA, debajo de los paneles a pantalla completa
+        const tapa = await p.evaluate(async () => {
+            showView('hoy'); await new Promise((r) => setTimeout(r, 300));
+            const c = document.getElementById('sw-aviso').getBoundingClientRect();
+            const ix = (id) => { const e = document.getElementById(id); if (!e || !e.offsetParent) return 0; const r = e.getBoundingClientRect(); return Math.max(0, Math.min(r.right, c.right) - Math.max(r.left, c.left)) * Math.max(0, Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top)); };
+            const z = +getComputedStyle(document.getElementById('sw-aviso')).zIndex, zPop = +getComputedStyle(document.getElementById('lesson-pop')).zIndex, zWp = +getComputedStyle(document.getElementById('writer-practice-banner')).zIndex;
+            const out = { input: ix('answer-input'), verificar: ix('btn-check'), top: Math.round(c.top), z, zPop, zWp };
+            showView('aprender'); return out;
+        });
+        ok(tapa.input === 0 && tapa.verificar === 0 && tapa.top < 100, T + 'en Hoy el cartel no tapa el campo de respuesta ni «Verificar» y está arriba (' + JSON.stringify(tapa) + ')');
+        ok(tapa.z < tapa.zPop && tapa.z < tapa.zWp, T + 'queda DEBAJO de los paneles a pantalla completa (z ' + tapa.z + ' < lección ' + tapa.zPop + ', escritura ' + tapa.zWp + '): no tapa sus acciones');
+        await p.screenshot({ path: shots('sw-aviso') + 'cartel-' + modo + '.png' });
+        // contraste medido con el cartel visible (texto, botones) y anillo de foco con Tab real
+        const col = await p.evaluate(() => { const g = (id) => { const e = document.getElementById(id), cs = getComputedStyle(e); return { c: cs.color, b: cs.backgroundColor }; }; return { fondo: getComputedStyle(document.getElementById('sw-aviso')).backgroundColor, txt: g('sw-aviso-txt'), act: g('sw-aviso-act'), no: g('sw-aviso-no') }; });
+        ok(ratio(rgb(col.txt.c), rgb(col.fondo)) >= 4.5, T + 'texto del cartel ' + col.txt.c + ' sobre ' + col.fondo + ' = ' + ratio(rgb(col.txt.c), rgb(col.fondo)) + ':1 (≥ 4,5)');
+        ok(ratio(rgb(col.act.c), rgb(col.act.b)) >= 4.5, T + 'botón «Actualizar» ' + col.act.c + ' sobre ' + col.act.b + ' = ' + ratio(rgb(col.act.c), rgb(col.act.b)) + ':1 (≥ 4,5)');
+        ok(ratio(rgb(col.no.c), rgb(col.fondo)) >= 4.5, T + 'botón «Después» ' + col.no.c + ' sobre ' + col.fondo + ' = ' + ratio(rgb(col.no.c), rgb(col.fondo)) + ':1 (≥ 4,5)');
+        await p.evaluate(() => document.body.focus());
+        let llegoAct = false; for (let i = 0; i < 120 && !llegoAct; i++) { await p.keyboard.press('Tab'); llegoAct = await p.evaluate(() => document.activeElement && document.activeElement.id === 'sw-aviso-act'); }
+        await p.waitForTimeout(450);
+        const f = await p.evaluate(() => { const cs = getComputedStyle(document.activeElement); return { fv: document.activeElement.matches(':focus-visible'), color: cs.outlineColor, estilo: cs.outlineStyle, ancho: parseFloat(cs.outlineWidth), sombra: cs.boxShadow }; });
+        ok(llegoAct && f.fv && f.estilo === 'solid' && f.ancho >= 2 && ratio(rgb(f.color), rgb(col.fondo)) >= 3, T + 'Tab real llega a «Actualizar» y su anillo ' + f.color + ' sobre el cartel = ' + ratio(rgb(f.color), rgb(col.fondo)) + ':1 (≥ 3)');
+        // «Después» lo oculta y NO recarga
+        await p.click('#sw-aviso-no'); await p.waitForTimeout(300);
+        const oculto = await p.evaluate(() => ({ oculto: getComputedStyle(document.getElementById('sw-aviso')).display === 'none', marca: window.__marca }));
+        ok(oculto.oculto && oculto.marca === 'pestaña-vieja', T + '«Después» oculta el cartel y la pestaña sigue sin recargar');
+        // otra versión: vuelve a avisar; «Actualizar» recarga SOLO al tocarlo
+        cfg.version = 'v-lab-B';
+        await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); await r.update(); });
+        const otra = await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; }, null, { timeout: 15000 }).then(() => true, () => false);
+        ok(otra, T + 'otra versión: el cartel vuelve a aparecer');
+        await p.waitForTimeout(800);
+        ok(await p.evaluate(() => window.__marca === 'pestaña-vieja' && window.__cod === 'orig'), T + 'sigue sin recargar (y con el JS viejo) mientras no se toca «Actualizar»');
+        // «Actualizar» tocado SIN conexión: la recarga no puede romper una pestaña que andaba
+        if (modo === 'es-cn') await ctx.setOffline(true);
+        await Promise.all([p.waitForNavigation({ waitUntil: 'load', timeout: 15000 }), p.click('#sw-aviso-act')]);
+        await esperarControl(p);
+        if (modo === 'es-cn') {
+            const off = await p.evaluate(async () => { const o = {}; for (const v of ['aprender', 'hoy', 'entrenar', 'yo']) { showView(v); await new Promise((r) => setTimeout(r, 150)); o[v] = !document.getElementById('view-' + v).classList.contains('hidden'); } return o; });
+            ok(Object.values(off).every(Boolean), T + '«Actualizar» sin conexión: la app recarga, arranca y abre las 4 vistas (' + JSON.stringify(off) + ')');
+            await ctx.setOffline(false);
+        }
+        const r = await p.evaluate(async () => ({ marca: window.__marca || null, ctrl: !!navigator.serviceWorker.controller, aviso: (() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; })() }));
+        const e2 = await estadoSW(p);
+        ok(r.marca === null && r.ctrl, T + 'al tocar «Actualizar» la página se recarga y queda controlada por el SW nuevo');
+        ok(e2.estado && e2.estado.v === 'v-lab-B', T + 'la página recargada corre con la versión nueva (estado v ' + (e2.estado && e2.estado.v) + ')');
+        ok(await p.evaluate(() => window.__cod === 'v-lab-B'), T + 'tras «Actualizar» la pestaña corre el JS NUEVO («v-lab-B»)');
+        ok(!r.aviso, T + 'tras recargar no queda el cartel');
+        ok(p._errs.length === 0, T + 'sin errores JS ' + p._errs.join(' / '));
+        await ctx.close();
+        cfg.version = null;
+    }
+
+    // ---- H. camino real tras un deploy: una pestaña ya controlada se recarga con normalidad (sin r.update()) ----
+    {
+        const { ctx, p } = await abrir(b, { url: URL });
+        cfg.version = 'v-lab-D';
+        await p.reload(); await p.waitForTimeout(1200);
+        const codPrimera = await p.evaluate(() => window.__cod);
+        const sale = await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && getComputedStyle(e).display !== 'none'; }, null, { timeout: 12000 }).then(() => true, () => false);
+        // se registra lo observado: el SW nuevo se instala DESPUÉS de que carga esta visita (sirvió el shell viejo), toma la página y el cartel avisa en esa MISMA visita
+        ok(codPrimera === 'orig', 'H · la visita tras el deploy sirve el shell viejo («' + codPrimera + '»): el SW nuevo todavía no tomó la página');
+        ok(sale, 'H · y en ESA MISMA visita el cartel avisa de la versión nueva (recarga normal, sin r.update()): ' + sale);
+        const cod2 = await p.evaluate(() => window.__cod);
+        ok(cod2 === 'orig', 'H · y hasta tocar «Actualizar» la pestaña corre el JS viejo («' + cod2 + '»)');
+        await ctx.close();
+        cfg.version = null;
+    }
+
+    // ---- G. cambiar de idioma con el cartel visible lo traduce ----
+    {
+        const { ctx, p } = await abrir(b, { url: URL });
+        cfg.version = 'v-lab-C';
+        await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); await r.update(); });
+        await p.waitForFunction(() => { const e = document.getElementById('sw-aviso'); return !!e && !e.classList.contains('hidden'); }, null, { timeout: 15000 });
+        const t = await p.evaluate(async () => { const a = document.getElementById('sw-aviso-txt').textContent; await setMode('cn-es'); return [a, document.getElementById('sw-aviso-txt').textContent, document.getElementById('sw-aviso-act').textContent]; });
+        ok(t[0] === 'Hay una versión nueva de la app.' && t[1] === '应用有新版本。' && t[2] === '更新', 'G · al pasar a cn-es con el cartel visible se traduce («' + t.join('» · «') + '»)');
         await ctx.close();
         cfg.version = null;
     }

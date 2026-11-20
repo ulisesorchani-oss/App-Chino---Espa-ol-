@@ -775,6 +775,7 @@ const UI_STRINGS = {
     libraryOpt: '📚 Biblioteca de lecturas…', libraryLoad: 'Cargar',
     readerClear: '🗑️ Limpiar', readerPlay: '🔊 Leer',
     btnReset: '🗑️ Borrar progreso', installApp: '📲 Instalar app',
+    swNuevaTxt: 'Hay una versión nueva de la app.', swActualizar: 'Actualizar', swDespues: 'Después',
     // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
     placementTest: '🎯 Test de colocación — descubrí tu nivel',
     saveProgress: '💾 Guardar progreso', savedOk: '✅ Progreso guardado en este dispositivo',
@@ -858,6 +859,8 @@ const UI_STRINGS = {
     libraryOpt: '📚 朗读文库…', libraryLoad: '载入',
     readerClear: '🗑️ 清空', readerPlay: '🔊 朗读',
     btnReset: '🗑️ 清除学习记录', installApp: '📲 安装应用',
+    // PENDIENTE DE REVISIÓN (docs/revision-aviso-sw.md): aviso de versión nueva
+    swNuevaTxt: '应用有新版本。', swActualizar: '更新', swDespues: '稍后',
     // v9.14: exámenes reordenados + guardar progreso + fuente de estudio
     placementTest: '🎯 分级测试 —— 测测你的水平',
     saveProgress: '💾 保存进度', savedOk: '✅ 进度已保存在本设备',
@@ -931,6 +934,7 @@ function updateUILanguage(mode) {
     if (typeof applyInterleaveUI === 'function') applyInterleaveUI(); // v9.15: re-etiquetar según idioma
     if (typeof applyListenUI === 'function') applyListenUI(); // v9.19: re-etiquetar solo oído
     if (typeof applyLeniencyUI === 'function') applyLeniencyUI(); // v9.48: re-etiquetar tolerancia de trazos
+    if (typeof window.swAvisoRefrescar === 'function') window.swAvisoRefrescar(); // sw-aviso.js: cartel de versión nueva
 
     // 4) Lógica condicional estricta: exámenes según el sentido del estudio
     const show = (id, yes) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden-force', !yes); };
