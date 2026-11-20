@@ -5918,6 +5918,10 @@ body {
 
 ::selection { background: rgba(102, 126, 234, 0.30); }
 :focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; border-radius: 4px; }
+/* a11y: en CLARO el anillo blanco era invisible sobre las tarjetas blancas (1,00:1). Anillo de DOS tonos: trazo azul
+   noche (≥ 15:1 sobre blanco) + halo blanco en el hueco del offset (≥ 3,4:1 sobre el violeta de la página). Oscuro y
+   papel tienen su propio color (más abajo) y quedan fuera de esta regla. */
+body:not(.dark-mode):not(.paper-mode) :focus-visible { outline-color: #1b2230; box-shadow: 0 0 0 2px #fff; }
 
 button, .card, .vocabulary-panel, .module-status, .reader-banner,
 .train-card, .vocab-pop, .app-nav, .control-panel, #answer-input, .reader-input {
@@ -6169,7 +6173,7 @@ body.paper-mode {
 }
 
 body.paper-mode ::selection { background: rgba(192, 138, 62, 0.30); }
-body.paper-mode :focus-visible { outline-color: rgba(139, 94, 52, 0.85); }
+body.paper-mode :focus-visible { outline-color: #8b5e34; } /* a11y: opaco (con alfa .85 daba 2,74:1 sobre el crema) */
 body.paper-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
 body.paper-mode ::-webkit-scrollbar-thumb {
     background: #cbb58a;
