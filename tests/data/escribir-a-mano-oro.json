@@ -1,0 +1,42 @@
+{
+ "T0": 1800000000000,
+ "nota": "salida de window.acSrsDueWords() con el código de main, ANTES de sumar el campo m",
+ "salida": [
+  {
+   "zh": "朋友",
+   "zt": "",
+   "es": "",
+   "py": ""
+  },
+  {
+   "zh": "夜市",
+   "zt": "夜市",
+   "es": "mercado nocturno",
+   "py": ""
+  },
+  {
+   "zh": "银行",
+   "zt": "銀行",
+   "es": "banco",
+   "py": "yínháng"
+  },
+  {
+   "zh": "图书馆",
+   "zt": "圖書館",
+   "es": "biblioteca",
+   "py": "túshūguǎn"
+  },
+  {
+   "zh": "苹果",
+   "zt": "蘋果",
+   "es": "manzana",
+   "py": "píngguǒ"
+  },
+  {
+   "zh": "学习",
+   "zt": "學習",
+   "es": "estudiar",
+   "py": ""
+  }
+ ]
+}

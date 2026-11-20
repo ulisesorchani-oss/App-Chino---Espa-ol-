@@ -72,6 +72,18 @@ Con Gboard, (a) y (b) se pueden mirar ahí desde ya; si ahí el Enter falla igua
 > **Si en (a) el Enter no envía, o en (b) el segundo Enter no envía, hay que acotar la guarda antes de mergear** (por ejemplo, tomar `keyCode 229` solo cuando `isComposing` es `true`).
 > Ojo: ese recorte equivale a dejar solo `isComposing`, así que **no arregla** el caso en que el teléfono marque `isComposing: true` en el Enter de una respuesta normal. Decidirlo con lo que se observe.
 
+## «Escribir a mano» con 繁 y con TOCFL (`fix/escribir-a-mano-escritura`)
+
+Cada palabra de la lista de **Entrenar → «Escribir a mano»** se ve y se traza con la escritura de **su familia** (como el Repaso): las tarjetas de **TOCFL**, con la de TOCFL (tradicional por defecto); el resto, con la de «HSK y el resto» (simplificado por defecto). Al tocar una fila, el quiz recibe la forma que se ve. La suite (`tests/escribir-a-mano-escritura.test.js`) prueba la **lista** y lo que recibe `openHandwriteAnswer`, pero **no** el trazo con datos de caracteres tradicionales: Hanzi Writer los baja de un CDN (`jsdelivr`) y la batería no sale a la red. **Estos casos necesitan conexión la primera vez** (los datos de cada carácter quedan cacheados).
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| e | **Con un módulo de HSK activo en Hoy (p. ej. HSK 1)**: **Yo → Ajustes → Escritura → 繁 繁體** (ese botón guarda la elección de la familia del módulo activo: con HSK, la de «HSK y el resto»; con un módulo TOCFL, la de TOCFL), y en el Repaso una palabra que se vea como **謝謝** | **Entrenar → «Escribir a mano»**, tocá **謝謝** | La fila dice **謝謝** y el quiz se abre con el carácter **謝** (tradicional, no 谢) y carga el trazo |
+| f | Palabras de **TOCFL** en el Repaso (p. ej. **爺爺**), con la escritura de TOCFL en el valor por defecto | **«Escribir a mano»**, tocá **爺爺** | La fila dice **爺爺** (en tradicional aunque «HSK y el resto» esté en simplificado) y el quiz trae **爺** |
+| g | **Sin conexión** y sin haber trazado nunca ese carácter | Tocá **謝謝** o **爺爺** | Aparece el aviso «⚠ No pude cargar los datos del carácter (¿sin conexión la primera vez?)» **sin trabar** la pantalla; con conexión, el trazo carga |
+
+**Qué mirar especialmente en (e) y (f):** si algún carácter tradicional **no tiene datos** en Hanzi Writer, el aviso de (g) aparece **con conexión**: antes ese usuario trazaba el simplificado y ahora vería el error. Anotá el carácter exacto y el aviso tal cual.
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -80,7 +92,7 @@ Con Gboard, (a) y (b) se pueden mirar ahí desde ya; si ahí el Enter falla igua
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar» o de «Enter con el teclado predictivo» (a–d) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d) o de «Escribir a mano» (e–g) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |

@@ -315,6 +315,14 @@ function closeWriterPractice() {
 // closeHandwrite() (más abajo) vuelve acá cuando corresponde, vía
 // hwAns.returnToWrite.
 // ============================================================
+// Escritura con la que se muestra y se traza cada palabra de la lista: la MISMA regla del Repaso (srs.js ckFor/scriptForCard):
+// las tarjetas de TOCFL (según su etiqueta m), la de su familia; el resto, la de «HSK y el resto». No usa scriptForCard
+// para ese resto: con #srs-pop cerrado seguiría al módulo activo de Hoy (ck()), y acá el Repaso no está abierto.
+function wrWordFor(w) {
+    const fam = (typeof cardFamily === 'function' && cardFamily(w.m) === 'tocfl') ? 'tocfl' : 'hsk';
+    const sc = (typeof scriptFor === 'function') ? scriptFor(fam) : ((typeof ck === 'function') ? ck() : 'simp');
+    return sc === 'trad' ? (w.zt || w.zh) : w.zh;
+}
 function wrRenderBody() {
     const body = document.getElementById('write-body');
     if (!body) return;
@@ -325,11 +333,11 @@ function wrRenderBody() {
             '<p class="wr-empty">📭 No tenés palabras para repasar hoy — volvé mañana, o sumá alguna desde el diccionario con 🔁 "Sumar a mi repaso".</p>';
         return;
     }
-    const trad = ((typeof scriptFor === 'function') ? scriptFor('hsk') : (typeof ck === 'function') ? ck() : 'simp') === 'trad'; // v9.7x: repaso = "HSK y el resto"
     const rows = words.map(function (w) {
-        const show = trad ? (w.zt || w.zh) : w.zh;
+        const show = wrWordFor(w);
         const py = w.py || (typeof wordPinyin === 'function' ? wordPinyin(w.zh) : '') || '';
-        return '<button type="button" class="wr-row" data-zh="' + escHtml(w.zh) + '">' +
+        // data-zh lleva la forma que se VE (la misma que recibe el quiz de trazos al tocar la fila: openWriteWord(row.dataset.zh)).
+        return '<button type="button" class="wr-row" data-zh="' + escHtml(show) + '">' +
             '<span class="wr-hanzi" lang="zh">' + escHtml(show) + '</span>' +
             '<span class="wr-meta">' +
                 (py ? '<span class="wr-py">' + escHtml(py) + '</span>' : '') +
