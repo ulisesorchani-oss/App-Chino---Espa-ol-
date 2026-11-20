@@ -1018,6 +1018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function applySavedUI() {
+    pzSyncModuleName(); // planilla: el módulo guardado (loadProgress corre después de armar la planilla)
     const btnEsCn = document.getElementById('btn-es-cn');
     if (btnEsCn) btnEsCn.classList.toggle('active', state.mode === 'es-cn');
 
@@ -1873,6 +1874,7 @@ function setModule(mod, opts) {
     updateClassicsBtnLabel();
     updateClassicsScript();
     paintScriptButtons(ck()); // v9.7x: otra familia puede tener otra escritura
+    pzSyncModuleName();       // planilla: «📋 Usar módulo: <nombre>»
     
     saveProgress();
     loadSentences().then(() => {
@@ -2161,11 +2163,11 @@ function renderSentenceText(s) {
                             if (charPos === zone.start) html += fill ? fillSpan(fillTxt) : '___';
                         } else {
                             const toneNum = it.num || 5;
-                            html += `<span class="tone-${toneNum}">${it.origin}</span>`;
+                            html += `<span class="tone-${toneNum}">${escHtml(it.origin)}</span>`;
                         }
                         charPos++;
                     } else {
-                        html += it.origin;
+                        html += escHtml(it.origin);
                     }
                 }
                 sentenceTextEl.innerHTML = html;
@@ -3506,6 +3508,20 @@ function resetProgress() {
     localStorage.removeItem(ATTEMPTS_KEY);   // v9.47: el contador de intentos también se borra
     localStorage.removeItem(HANZI_STATS_KEY); // v9.47: la estadística de trazos también se borra
     if (typeof window.acSrsReset === 'function') window.acSrsReset(); // v7.21: el mazo de repaso también se borra
+    // La sesión del día (anillo) y la racha también son progreso: se borran en disco y en memoria, sin recargar.
+    // La META diaria (5/10/20) es una preferencia, no progreso: se conserva. Vive dentro de ac_session_v1, así que
+    // se reescribe la clave con las hechas en 0 y la misma meta (el «hoy quiero más» de la meta también se descarta).
+    if (window.HuayuStats && typeof HuayuStats.reset === 'function') HuayuStats.reset();
+    state.sessionDone = 0;
+    state.sessionTarget = state.sessionGoal;
+    state.sessionDate = sessionToday();
+    saveSession();
+    const sesionCompleta = document.getElementById('session-done');   // si el panel «sesión completa» estaba abierto,
+    const tarjeta = document.getElementById('sentence-card');          // vuelve la tarjeta (sin pasar por saveSession)
+    if (sesionCompleta && !sesionCompleta.classList.contains('hidden')) {
+        sesionCompleta.classList.add('hidden');
+        if (tarjeta) tarjeta.classList.remove('hidden'); // solo showSessionDone() oculta la tarjeta: se restaura solo en ese caso
+    }
     state.knownWords = new Set();
     state.newWords = new Set();
     state.wordContexts = {}; // v7.13
@@ -3514,6 +3530,9 @@ function resetProgress() {
     showToneColors = false;
     updateStats();
     updateVocabularyPanel();
+    updateSessionUI();    // anillo en 0/<meta>
+    updateHeaderStreak(); // chip 🔥 de la cabecera
+    if (typeof renderLastSessionNote === 'function') renderLastSessionNote();
     renderCurrentSentence();
     applySavedUI();
 }
@@ -4713,8 +4732,10 @@ function pzPrint() {
 function pzUseModule() {
     const seen = new Set();
     let out = '';
+    // Escritura por familia: TOCFL (o 繁體 elegido) carga caracteres tradicionales; el resto, simplificados (como siempre).
+    const k = ck();
     for (const s of getFiltered()) {
-        for (const ch of String(s.chinese_simp_answer || '')) {
+        for (const ch of String(s['chinese_' + k + '_answer'] || s.chinese_simp_answer || '')) {
             if (!pzIsHan(ch) || seen.has(ch)) continue;
             seen.add(ch);
             out += ch;
@@ -4732,6 +4753,13 @@ function pzUseModule() {
     }
 }
 
+// La etiqueta del botón «Usar módulo» sigue al módulo activo. Función aparte (y no pzUpdateControls) porque
+// setModule/applySavedUI la llaman antes de que existan los `let` de la planilla (pzTrazos, pzCells…).
+function pzSyncModuleName() {
+    const nm = document.getElementById('pz-module-name');
+    if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+}
+
 function pzUpdateControls() {
     const bt = document.getElementById('btn-pz-trazos');
     if (bt) {
@@ -4742,8 +4770,7 @@ function pzUpdateControls() {
     if (sel) sel.value = String(pzCells);
     const stl = document.getElementById('select-pz-style');
     if (stl) stl.value = pzStyle;
-    const nm = document.getElementById('pz-module-name');
-    if (nm) nm.textContent = MODULE_LABELS[state.activeModule] || state.activeModule;
+    pzSyncModuleName();
     // v9.7x: los ajustes del encabezado (mismo patrón de arriba) — v9.11x:
     // Composición se unificó con Trazos (ver pzUpdateControls/btn-pz-trazos).
     const br = document.getElementById('btn-pz-radical');
@@ -4949,6 +4976,7 @@ function pzCounterUpdate() {
         pzRadical = !pzRadical;
         localStorage.setItem('ac_pz_radical', pzRadical ? '1' : '0');
         pzUpdateControls();
+        pzCounterUpdate(); // la línea de radical agrega alto a cada carácter: cambia cuántos entran
     });
     safe('btn-pz-significado', 'click', () => {
         pzSignificado = !pzSignificado;
@@ -4960,6 +4988,7 @@ function pzCounterUpdate() {
         const v = e.target.value;
         pzPron = (v === 'none' || v === 'zhuyin') ? v : 'pinyin';
         localStorage.setItem('ac_pz_pron', pzPron);
+        pzCounterUpdate(); // pinyin/zhuyin agregan la línea de info: cambia cuántos entran (ninguna la quita)
     });
     safe('pz-input', 'input', pzCounterUpdate); // v9.2: contador en vivo
     window.addEventListener('resize', () => {
