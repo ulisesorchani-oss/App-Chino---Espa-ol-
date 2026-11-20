@@ -78,6 +78,13 @@ async function abrir(b, theme, w, h) {
         }
         await p.evaluate(() => showView('aprender')); await p.waitForTimeout(350);
 
+        // --- 7: pestaña activa de Aprender ---
+        const m = await p.evaluate(() => { const e = document.querySelector('.mtab.active'); const cs = getComputedStyle(e); return { color: cs.color, bg: cs.backgroundColor, img: cs.backgroundImage }; });
+        const mc = parse(m.color), mb = parse(m.bg);
+        ok(m.img === 'none' && mb && mb.a === 1, th + ' · .mtab.active tiene fondo plano y opaco (' + m.bg + ')');
+        const cm = ratio(mc.rgb, mb.rgb);
+        ok(cm >= 4.5, th + ' · .mtab.active: texto ' + m.color + ' sobre ' + m.bg + ' = ' + r2(cm) + ':1 (≥ 4,5)');
+        await p.screenshot({ path: OUT + 'mtab-' + th + '.png', clip: await p.evaluate(() => { const r = document.querySelector('.mtab.active').parentElement.getBoundingClientRect(); return { x: 0, y: Math.max(0, r.y), width: 360, height: r.height }; }) });
         ok(p._errs.length === 0, th + ' · sin errores JS ' + p._errs.join(' / '));
         await ctx.close();
     }

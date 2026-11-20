@@ -6455,7 +6455,7 @@ body.dark-mode .cr-card:hover { background: #2b3546; } }
 body.dark-mode .btn-secondary { background: #2b3546; }
 @media (hover: hover) { body.dark-mode .btn-secondary:hover { background: #343f53; } }
 body.dark-mode .mtab { background: #232b38; border-color: #364052; }
-body.dark-mode .mtab.active { background: #2f3a4e; }
+body.dark-mode .mtab.active { background: #2f3a4e; color: #93c5fd; } /* a11y: el azul de marca daba 2,21:1 sobre #2f3a4e */
 body.dark-mode .control-panel { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
 body.dark-mode #answer-input,
 body.dark-mode .reader-input { background-color: #141a23; border-color: #3a4558; }
