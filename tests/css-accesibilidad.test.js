@@ -88,6 +88,25 @@ async function abrir(b, theme, w, h) {
         ok(p._errs.length === 0, th + ' · sin errores JS ' + p._errs.join(' / '));
         await ctx.close();
     }
+
+    // --- 8: píldora «Sin conexión» contra la barra inferior ---
+    for (const [w, h] of [[360, 740], [412, 915], [768, 900], [1000, 800]]) {
+        const { ctx, p } = await abrir(b, 'light', w, h);
+        await ctx.setOffline(true); await p.waitForTimeout(500);
+        const r = await p.evaluate(() => {
+            const pill = document.getElementById('offline-pill'), nav = document.getElementById('app-nav');
+            const a = pill.getBoundingClientRect(), c = nav.getBoundingClientRect();
+            const inter = Math.max(0, Math.min(a.right, c.right) - Math.max(a.left, c.left)) * Math.max(0, Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top));
+            const botones = [...nav.querySelectorAll('.nav-btn')].map((x) => { const q = x.getBoundingClientRect(); return Math.max(0, Math.min(a.right, q.right) - Math.max(a.left, q.left)) * Math.max(0, Math.min(a.bottom, q.bottom) - Math.max(a.top, q.top)); });
+            return { visible: !pill.classList.contains('hidden') && a.width > 0, pill: [a.left, a.top, a.right, a.bottom].map(Math.round), nav: [c.left, c.top, c.right, c.bottom].map(Math.round), inter, botones, dentro: a.left >= 0 && a.right <= innerWidth && a.top >= 0 && a.bottom <= innerHeight };
+        });
+        ok(r.visible, w + 'px · sin conexión la píldora se ve');
+        ok(r.inter === 0 && r.botones.every((x) => x === 0), w + 'px · la píldora no se superpone con #app-nav (píldora ' + r.pill + ' · barra ' + r.nav + ' · área ' + r.inter + ')');
+        ok(r.dentro, w + 'px · la píldora entra completa en la pantalla');
+        await p.screenshot({ path: OUT + 'pildora-' + w + '.png' });
+        await ctx.close();
+    }
+
     await b.close();
     console.log('comprobaciones ' + n + ' · FAILS ' + fails + (fails ? '' : ' · TODO OK'));
     process.exit(fails ? 1 : 0);

@@ -1014,7 +1014,7 @@ body.dark-mode .reader-word:active {
 
 .offline-pill {
     position: fixed;
-    bottom: 18px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)); /* a11y: por encima de #app-nav (57 px + zona segura); antes (18px) la tapaba */
     left: 50%;
     transform: translateX(-50%);
     background: #1e293b;
