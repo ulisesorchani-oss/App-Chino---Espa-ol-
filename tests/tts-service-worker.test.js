@@ -25,7 +25,8 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
         req.on('end', () => {
             let text = u.searchParams.get('text') || '';
             if (!text) { try { text = JSON.parse(cuerpo || '{}').text || ''; } catch (e) { /* sin cuerpo */ } }
-            hits.push({ m: req.method, text });
+            let speed = u.searchParams.get('speed'); if (speed === null) { try { speed = String(JSON.parse(cuerpo || '{}').speed); } catch (e) { /* sin cuerpo */ } }
+            hits.push({ m: req.method, text, speed });
             const json = (obj, h) => { res.writeHead(obj.__status || 200, Object.assign({ 'content-type': 'application/json' }, CORS, h)); delete obj.__status; res.end(JSON.stringify(obj)); };
             if (/^FALLBACK/.test(text)) return json({ audio: AUDIO, mime: 'audio/mpeg', voice: 'zh-CN-YunjianNeural', speed: 0.85, fallback: true, cached: false }, { 'cache-control': 'no-store', 'x-tts-fallback': '1', 'x-tts-audio': '1' });
             if (/^SOLO-NOSTORE/.test(text)) return json({ audio: AUDIO, mime: 'audio/mpeg', voice: 'x', speed: 0.85, cached: false }, { 'cache-control': 'no-store', 'x-tts-audio': '1' }); // sin el encabezado propio
@@ -86,6 +87,22 @@ const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     hits.length = 0;
     const g = await get('NORMAL-GET');
     ok(g.voice === 'zh-TW-YunJheNeural' && hits.length === 0, 'lo guardado se sigue sirviendo desde la caché sin tocar la red');
+
+    // ── 7. VELOCIDAD 0.5: la clave del SW incluye la velocidad → 0.5 y 0.7 de la MISMA frase son entradas distintas ──
+    hits.length = 0;
+    const base = await cacheKeys();
+    const getV = (text, v) => page.evaluate(async ([api, text, v]) => { const r = await fetch(api + '?text=' + encodeURIComponent(text) + '&lang=zh-CN&voice=f&speed=' + v + '&cv=2'); return r.status; }, [API, text, v]);
+    const postV = (text, v) => page.evaluate(async ([api, text, v]) => { const r = await fetch(api, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, lang: 'zh-CN', voice: 'f', speed: v }) }); return r.status; }, [API, text, v]);
+    await getV('VEL-GET', 0.5); await sleep(600); await getV('VEL-GET', 0.7); await sleep(600); await getV('VEL-GET', 0.5); await sleep(400);
+    const hv = hits.filter(h => h.text === 'VEL-GET');
+    ok(hv.length === 2 && hv[0].speed === '0.5' && hv[1].speed === '0.7', 'GET: 0.5 y 0.7 de la misma frase van los dos a la red (speed literal «' + hv.map(h => h.speed) + '»), y el 0.5 repetido sale de la caché');
+    ok(await cacheKeys() === base + 2, 'GET: 0.5 y 0.7 guardan 2 claves distintas (' + (await cacheKeys() - base) + ' nuevas)');
+    await postV('VEL-POST', 0.5); await sleep(600); await postV('VEL-POST', 0.7); await sleep(600); await postV('VEL-POST', 0.5); await sleep(400);
+    const hp = hits.filter(h => h.text === 'VEL-POST');
+    ok(hp.length === 2 && hp[0].speed === '0.5' && hp[1].speed === '0.7', 'POST: 0.5 y 0.7 van los dos a la red (speed literal «' + hp.map(h => h.speed) + '»), y el 0.5 repetido sale de la caché');
+    ok(await cacheKeys() === base + 4, 'POST: otras 2 claves distintas (' + (await cacheKeys() - base) + ' nuevas en total)');
+    hits.length = 0; await getV('VEL-POST', 0.5); await sleep(300);
+    ok(hits.length === 0, 'el 0.5 guardado por POST lo sirve también el GET equivalente (misma clave, 0 pedidos a la red)');
 
     ok(errs.length === 0, 'sin errores JS: ' + errs.join(' | '));
     await b.close(); srv.close();

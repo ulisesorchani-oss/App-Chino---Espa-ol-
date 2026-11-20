@@ -23,13 +23,13 @@ for(const lang of ['es','zh'])for(const theme of ['light','dark','paper']){const
  await p.evaluate(()=>{showView('hoy');window.scrollTo(0,0);});await p.click('#btn-tools-toggle');await p.waitForTimeout(400);
  await p.screenshot({path:OUT+'impl-'+lang+'-'+theme+'-hoy.png'});
  await p.click('#btn-simplified');s=await st();ok(s.hS&&s.aS&&s.ct==='simp',T+'Hoy 简 → Ajustes 简, guardado charType=simp');
- await p.click('#btn-speed-hoy');s=await st();ok(s.spA===s.spH&&s.sp==='0.7',T+'velocidad desde Hoy → Ajustes ('+s.spH+', ac_speed='+s.sp+')');
+ await p.click('#btn-speed-hoy');s=await st();ok(s.spA===s.spH&&s.spA==='🐢 0.85x'&&s.sp==='0.85',T+'velocidad desde Hoy (1 → 0.85) → Ajustes ('+s.spH+', ac_speed='+s.sp+')');
  const hoyChip=await p.evaluate(()=>{const e=document.getElementById('btn-speed-hoy'),cs=getComputedStyle(e),r=e.getBoundingClientRect();return {fg:cs.color,bg:cs.backgroundColor,r:{l:r.left,t:r.top,w:r.width,h:r.height}};});
  await p.screenshot({path:OUT+'m-'+lang+'-'+theme+'-hoy.png'});meas.push({lang,theme,what:'⚡ Hoy',png:'m-'+lang+'-'+theme+'-hoy.png',e:hoyChip});
  // Ajustes
  await p.evaluate(()=>{showView('yo');document.querySelector('.yo-settings').scrollIntoView({block:'start'});});await p.waitForTimeout(300);
  await p.click('#btn-traditional-set');s=await st();ok(s.hT&&s.aT&&s.ct==='trad',T+'Ajustes 繁 → Hoy 繁, guardado charType=trad');
- await p.click('#btn-speed');s=await st();ok(s.spA===s.spH&&s.sp==='0.85',T+'velocidad desde Ajustes → Hoy ('+s.spA+')');
+ await p.click('#btn-speed');s=await st();ok(s.spA===s.spH&&s.spA==='🐌 0.7x'&&s.sp==='0.7',T+'velocidad desde Ajustes (0.85 → 0.7) → Hoy ('+s.spA+')');
  await p.click('#btn-grand');await p.click('#btn-font-mode');await p.waitForTimeout(300);s=await st();
  ok(s.grand&&s.gk==='1'&&s.gl.includes('ON')&&s.kaiti&&s.fk==='kaiti'&&s.fl==='楷体',T+'Grande y 楷体 desde Ajustes: aplicados y guardados (ac_grand, ac_font_mode)');
  await p.evaluate(()=>document.querySelector('.yo-settings').scrollIntoView({block:'start'}));await p.waitForTimeout(400);
@@ -37,10 +37,10 @@ for(const lang of ['es','zh'])for(const theme of ['light','dark','paper']){const
  await p.screenshot({path:OUT+'impl-'+lang+'-'+theme+'-ajustes.png'});seg.forEach(e=>meas.push({lang,theme,what:e.id.includes('trad')?'繁 activo (Ajustes)':'简 inactivo (Ajustes)',png:'impl-'+lang+'-'+theme+'-ajustes.png',e}));
  // recarga
  await p.reload();await p.waitForTimeout(1400);s=await st();
- ok(s.hT&&s.aT&&s.spA===s.spH&&s.spA.includes('0.85')&&s.grand&&s.kaiti,T+'recarga: 繁, 0.85x, Grande ON y 楷体 se conservan');
+ ok(s.hT&&s.aT&&s.spA===s.spH&&s.spA==='🐌 0.7x'&&s.sp==='0.7'&&s.grand&&s.kaiti,T+'recarga: 繁, 0.7x, Grande ON y 楷体 se conservan');
  // chip de velocidad de lecciones: sin cambios, comparte el valor
  if(lang==='es'){await p.evaluate(()=>showView('aprender'));await p.click('#tab-lessons');await p.click('#lesson-list .lq-btn[data-act="read"]');await p.waitForTimeout(300);
   await p.click('#lq-gloss-continue').catch(()=>{});await p.waitForTimeout(200);const lc=await p.textContent('#lq-story-speed');
-  await p.click('#lq-close');ok(lc.includes('0.85'),T+'chip de velocidad de la lección muestra el mismo valor ('+lc.trim()+')');}
+  await p.click('#lq-close');ok(lc.trim()==='⚡ 0.7x',T+'chip de velocidad de la lección muestra el mismo valor ('+lc.trim()+')');}
  ok(errs.length===0,T+'sin errores JS '+errs.join(' / '));await ctx.close();}
 fs.writeFileSync(OUT+'meas.json',JSON.stringify(meas));console.log(fails?'FALLAS: '+fails:'TODO OK');await b.close();})();

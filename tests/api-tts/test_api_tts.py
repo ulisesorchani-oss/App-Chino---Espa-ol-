@@ -146,12 +146,20 @@ class DivergenciaTest(unittest.TestCase):
 
 
 class VelocidadTest(Base):
-    def test_rate_de_las_tres_velocidades_de_la_app(self):
-        self.assertEqual([self.M.speed_to_rate(s) for s in (0.85, 1, 0.7)], ["-15%", "+0%", "-30%"])
+    def test_rate_de_las_cuatro_velocidades_de_la_app(self):
+        self.assertEqual([self.M.speed_to_rate(s) for s in (0.85, 1, 0.7, 0.5)], ["-15%", "+0%", "-30%", "-50%"])
 
     async def test_el_rate_llega_a_edge_tts(self):
         r, _ = await self.pedir(speed=0.7)
         self.assertEqual(r.status_code, 200); self.assertEqual(LLAMADAS[-1], ("zh-CN-YunjianNeural", "-30%"))
+
+    async def test_velocidad_05_llega_a_edge_tts_como_menos_50_y_vuelve_en_la_respuesta(self):
+        # 0.5 es justo el mínimo del clamp (0.5–1.5): no se recorta, el rate es «-50%» y el cliente recibe speed 0.5 (rate de reproducción = 0.5/0.5 = 1, sin doble efecto)
+        r, _ = await self.pedir(speed=0.5)
+        self.assertEqual(r.status_code, 200); self.assertEqual(LLAMADAS[-1], ("zh-CN-YunjianNeural", "-50%"))
+        self.assertEqual(cuerpo(r)["speed"], 0.5)
+        r2, _ = await self.pedir("謝謝", speed=0.3)   # otro texto (no pega en la caché); por debajo del mínimo: el clamp lo sube a 0.5 (no a -70%)
+        self.assertEqual(LLAMADAS[-1][1], "-50%"); self.assertEqual(cuerpo(r2)["speed"], 0.5)
 
 
 class ExitoTest(Base):
