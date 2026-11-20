@@ -48,6 +48,30 @@ Las tres están en el Podcast con la voz del sistema (`podcast.js`) y **solo se 
 - **Por qué no está verificada.** En Chrome de escritorio y en Chrome de Android `onstart` llega siempre cuando la voz arranca, pero hay motores (según la voz instalada) que no lo disparan. Con una frase de hasta 150 caracteres (varios segundos de voz), un motor así sonaría y, a los 5 s, el Podcast cortaría la frase y diría «No pude reproducir el audio». «Escuchar todo» lo oculta porque sus líneas son cortas.
 - **Qué mirar.** Con la voz china instalada, el Podcast tiene que **llegar a «Listo»** en una lección larga (la de 4–5 frases) sin cortarse a los 5 s. Si se corta, anotá la voz instalada (nombre y motor).
 
+## Enter con el teclado predictivo o un IME (`fix/enter-ime`)
+
+Con la guarda nueva, **Enter mientras se compone texto** (`isComposing` o `keyCode === 229`) ya no envía la respuesta de Hoy (`#answer-input`, `app.js`)
+ni guarda la oración de «Tu propia oración» (`srs.js:979`). La suite (`tests/enter-ime.test.js`) prueba eventos sintéticos y una composición real de
+**Chromium** (CDP, donde el Enter llegó con `isComposing: true` y `keyCode 13`); la mitad `keyCode 229` solo está cubierta con eventos sintéticos. **No** se probó un
+IME de verdad ni un teclado de teléfono. **Estos casos no necesitan modo avión.**
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| a | **Android + Gboard con sugerencias activas**, en Hoy con el campo **«Escribe en español (conjugado)… 用西班牙语写»** (modo «aprendo español») | Escribí la respuesta **en español** con las sugerencias visibles y tocá **Enter** | **Envía al primer Enter** (la respuesta se corrige). Si hace falta tocar Enter dos veces o «Verificar», la guarda es demasiado ancha |
+| b | **Android + Gboard con el teclado de pinyin**, en Hoy con el campo **«Escribe en chino (simplificado)…»** (modo «aprendo chino») | Escribí en pinyin y elegí un candidato. Tocá **Enter** mientras el texto sigue subrayado, y después otra vez | El primer Enter **confirma el candidato y no envía**; el segundo, con el texto ya confirmado, **envía**. Es un problema si el primer Enter ya envía (la guarda no alcanza) o si el segundo no envía (la guarda es demasiado ancha) |
+| c | **iPhone** (si hay uno a mano) | Los mismos dos casos: teclado en español con predicción (a) y teclado de pinyin (b) | Igual que (a) y (b) |
+| d | **PC con un IME de pinyin real** (Windows o macOS) | Escribí en pinyin en «Escribe en chino…», elegí un candidato y tocá **Enter** | El Enter que **confirma el candidato no envía**; el **siguiente** Enter sí envía |
+
+Repetí (a) y (b) en **«Tu propia oración»** (el campo que aparece al tocar «🔁 Sumar a mi repaso» en el popup de una palabra): el Enter que confirma el candidato no tiene que guardar la tarjeta.
+
+**Dónde probar antes del merge.** Hace falta abrir la rama en el teléfono: una URL con `fix/enter-ime` desplegada (no pude verificar si Vercel genera una vista previa del PR) o la rama servida
+en tu PC (`python3 -m http.server`) y abierta desde el teléfono en la misma red (sin HTTPS no hay service worker, pero para esto no hace falta).
+**Probar hoy, sin desplegar nada:** los campos del Repaso ya llevan esta misma guarda en producción (`srs.js:577` y `:586`): **«Pinyin o significado…»** (acepta pinyin o el significado en español) y **«Escribí el hanzi…»**.
+Con Gboard, (a) y (b) se pueden mirar ahí desde ya; si ahí el Enter falla igual, el problema no es de esta rama.
+
+> **Si en (a) el Enter no envía, o en (b) el segundo Enter no envía, hay que acotar la guarda antes de mergear** (por ejemplo, tomar `keyCode 229` solo cuando `isComposing` es `true`).
+> Ojo: ese recorte equivale a dejar solo `isComposing`, así que **no arregla** el caso en que el teléfono marque `isComposing: true` en el Enter de una respuesta normal. Decidirlo con lo que se observe.
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -56,6 +80,8 @@ Las tres están en el Podcast con la voz del sistema (`podcast.js`) y **solo se 
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6) o de «Tres cosas sin verificar» | 3 |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar» o de «Enter con el teclado predictivo» (a–d) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
+| Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
+| ¿Cuántos Enter hicieron falta para enviar? | 1 (envía) · 2 (el primero solo confirmó) |

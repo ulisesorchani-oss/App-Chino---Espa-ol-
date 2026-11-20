@@ -10,13 +10,13 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 61 suites de `tests/` y las 12 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 62 suites de `tests/` y las 12 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
 ajustes-velocidad     69              🟢 VERDE
 …
-73 suites · 7699 comprobaciones · 67 verdes · 4 parciales · 2 omitidas · 0 rojas
+74 suites · 7749 comprobaciones · 68 verdes · 4 parciales · 2 omitidas · 0 rojas
 ```
 
 **Sin falsos verdes.** Una suite es verde solo si terminó con código 0, informó su cantidad de

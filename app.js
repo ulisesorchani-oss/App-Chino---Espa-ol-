@@ -1598,6 +1598,7 @@ function setupEventListeners() {
     const input = document.getElementById('answer-input');
     if (input) {
         input.addEventListener('keydown', e => {
+            if (e.isComposing || e.keyCode === 229) return; // IME: Enter confirma el candidato, no envía (misma guarda que srs.js)
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (state.answered) confirmDefaultGrade(); else checkAnswer();
