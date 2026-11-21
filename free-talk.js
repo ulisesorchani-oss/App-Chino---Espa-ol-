@@ -102,8 +102,15 @@
     // a UNA sola pasada en el idioma que se está practicando (igual que
     // el resto de la app: es-cn → zh, cn-es → es).
     function pinyinOf(zhText) {
+        if (!zhText) return '';
+        // Mismo mecanismo que el Lector y las lecciones (pinyinFor, pinyin-familias.js; convención HSK = lecturas del continente). El motor de voz
+        // transcribe en TRADICIONAL y pinyin-pro lo lee carácter por carácter (什麼 → «shén mó», 還是 → «huán shì», 長大 → «cháng dà»); pinyinFor
+        // pasa cada carácter a simplificado SOLO para generar el pinyin (el texto que se ve no cambia). Sin pinyinFor, o si falla, pinyin-pro solo.
         try {
-            if (typeof pinyinPro === 'undefined' || !zhText) return '';
+            if (typeof pinyinFor === 'function') return pinyinFor(zhText, 'hsk');
+        } catch (e) { /* cae a pinyin-pro */ }
+        try {
+            if (typeof pinyinPro === 'undefined') return '';
             return pinyinPro.pinyin(zhText, { toneType: 'mark' });
         } catch (e) { return ''; }
     }

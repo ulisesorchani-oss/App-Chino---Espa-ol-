@@ -122,6 +122,12 @@ Dos cambios: en la **escena de la Diaria** (Aprender → Diaria → una situaci�
 | w | **Pronunciación libre**, con una burbuja sonando | Tocá 🎤 para **empezar a grabar** (repetí con el 🔊 de una tarjeta o el Lector sonando) | Todo se **corta** antes de grabar (no queda sonando con el micrófono abierto); **anotá si en el celular el sonido igual se cuela** en la grabación |
 | x | **Pronunciación libre** (modo avión, modelo local ya descargado) | Grabá, esperá la transcripción, tocá ▶, y **repetí grabar y transcribir** | Aparece la transcripción en cada burbuja, igual que antes del cambio; si el micrófono o el motor fallan, anotá el texto del aviso |
 
+## Pinyin de Pronunciación libre (`fix/pinyin-libre`)
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| y | **Pronunciación libre** (🎤 de Entrenar), modo es→zh | Grabá en voz alta «你什麼東西？我才問你，你還是問我» (o «為什麼», «銀行», «睡覺») | El pinyin de la burbuja sale **«nǐ shén me dōng xi ? wǒ cái wèn nǐ , nǐ hái shì wèn wǒ»** (con «shén **me**», «**hái** shì»; antes «shén mó», «huán shì»). Anotá **qué texto escribió la IA** (tradicional o simplificado) y cualquier palabra cuyo pinyin te suene mal |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -130,7 +136,7 @@ Dos cambios: en la **escena de la Diaria** (Aprender → Diaria → una situaci�
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |

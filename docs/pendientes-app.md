@@ -70,3 +70,14 @@ las ve Ulises antes de tocar código de la app.
 - **Medido** (Chromium, con voz del sistema simulada que avisa `onerror` en el turno siguiente, y con el audio del servidor simulado): después de tocar el renglón 0 y luego el 1, el botón del renglón 0 queda «⏳» y deshabilitado, **igual en `main` (`ed2d19e`) que con el bloque 3**. No lo causa ni lo arregla el bloque 3. En el celular puede variar según cuándo dispare el motor el evento de la voz cancelada (**sin verificar** en un dispositivo real).
 - **Qué falta:** restaurar el botón anterior al cortarlo (guardar `{btn, texto}` junto al audio/la voz en curso y devolverlo en `dsStop()`), con su prueba.
 - **Estado:** pendiente. No se corrigió.
+
+## Pinyin de «Pronunciación libre»: lecturas que siguen mal y pinyin por palabra
+
+- **Hecho en `fix/pinyin-libre`:** las burbujas usan `pinyinFor(texto, 'hsk')` (como el Lector); 什麼, 還是, 長大, 銀行, 睡覺, 覺得, 音樂… salen bien.
+- **Sin arreglar (mismo mecanismo que el Lector y las lecciones, medido en el navegador):**
+  - Polifonías que dependen de la oración: 他長得很高 sale «cháng dé» (es «zhǎng de»), 一行人 «yì xíng rén» (es «yì háng rén»), 得去 «dé qù» (es «děi qù»).
+  - El tono de la sílaba neutra: 還是 sale «hái shì» (los diccionarios escriben «háishi»).
+  - Texto con letras latinas dentro de la transcripción: sale letra por letra, y `pinyinFor` pega una «r» suelta a la letra anterior (la regla del 兒: `/ r(?= |$)/`), así que «world» sale «w or l d» (antes «w o r l d»).
+- **Pinyin agrupado por palabra** («shénme», «dōngxi», «háishi»): **no** se hizo. Las tarjetas lo muestran desde los datos de vocabulario por palabra (con `háishi` en HSK y `háishì` en TOCFL), pero ningún mecanismo de oraciones de la app agrupa; el espacio entre sílabas es la convención de la app. Sería una función nueva (segmentar por palabra y consultar los datos), no un arreglo.
+- **Estado:** pendiente, sin investigar más.
+- **Regresiones medidas en este cambio (43 de 7 816 formas tradicionales de los datos de la app; 578 mejoran).** `pinyinFor` pasa cada carácter a simplificado y varios tradicionales distintos caen en un simplificado polífono, así que algunas palabras que pinyin-pro leía bien en tradicional ahora salen mal, **igual que en el Lector** (es el mismo mecanismo): 為 como «wèi» en 變為, 列為, 視為, 定為, 尤為, 為人, 身為, 有為, 為師, 孝為先 (es «wéi»); 臟 en 心臟, 肝臟 (es «zàng», sale «zāng»); 髮 en 理髮, 千鈞一髮 (es «fà»); 幹 en 幹嘛, 說幹就幹 (es «gàn»); 載體, 轉動, 處在, 盡可能, 還款 («huán kuǎn»); y varios caracteres sueltos (調, 應, 夾, 桿, 鋪, 鑽, 縫, 捲, 擰, 嗆, 囂, 蔭). Arreglo posible: sumarlas a `PINYIN_ERRORES` (`pinyin-familias.js`), pero eso cambia el pinyin de toda la app, no solo de free-talk: **PR aparte, con tu OK**.
