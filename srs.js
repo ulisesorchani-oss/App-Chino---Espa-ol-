@@ -239,32 +239,50 @@
     }
 
     // ---- TTS de la tarjeta (mismo pipeline que la app: Vercel → voz sistema) ----
+    // Un solo audio de la tarjeta a la vez (docs/matriz-de-audio.md, A07/A08): se guarda el Audio y la utterance PROPIOS y un token que
+    // invalida el pedido en vuelo, para cortarlos al pedir otro, al calificar y al cerrar o cambiar de vista. El corte llama a
+    // speechSynthesis.cancel() SOLO cuando el Repaso tiene su propia utterance activa (cancel() es global: uno de más haría avanzar al Lector,
+    // a «Escuchar todo» y al Podcast). srsSpeak sigue llamando a stopReader() y al cancel() previo a hablar con la voz del sistema, como antes.
+    let srsAudio = null, srsUrl = null, srsUtt = null, srsAudioTok = 0;
+    function srsStopAudio() {
+        srsAudioTok++; // una respuesta del TTS que llegue después ya no suena
+        if (srsAudio) { try { srsAudio.pause(); } catch (e) { /* noop */ } srsAudio = null; }
+        if (srsUrl) { try { URL.revokeObjectURL(srsUrl); } catch (e) { /* noop */ } srsUrl = null; }
+        if (srsUtt) { srsUtt = null; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* noop */ } }
+    }
     function srsSpeak(text) {
         const t = String(text || '').trim();
         if (!t) return;
+        srsStopAudio(); // el audio anterior de la tarjeta (dos toques seguidos ya no suenan a la vez)
+        const myTok = srsAudioTok;
         try {
             if (globalAudioPlayer && !globalAudioPlayer.paused) { globalAudioPlayer.pause(); }
             if (typeof stopReader === 'function') stopReader();
         } catch (e) { /* silencioso */ }
         const speakFallback = () => {
+            if (myTok !== srsAudioTok) return; // ya se calificó, se cerró o se pidió otro
             if (!('speechSynthesis' in window)) return;
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t);
             u.lang = ttsLangFor('zh', voiceZh); u.rate = playbackSpeed; // v9.49: 🇹🇼 → zh-TW
+            srsUtt = u;
+            u.onend = u.onerror = () => { if (srsUtt === u) srsUtt = null; };
             speechSynthesis.speak(u);
         };
         fetchTTS(ttsBody(t, ttsLangFor('zh', voiceZh), voiceZh)) // v9.40: +speed · v9.49: 🇹🇼 → zh-TW
             .then(r => r.ok ? r.json() : null)
             .then(d => {
+                if (myTok !== srsAudioTok) return; // la respuesta llegó tarde: la tarjeta ya cambió o el Repaso se cerró
                 if (!d || !d.audio) return speakFallback();
                 const bin = atob(d.audio);
                 const bytes = new Uint8Array(bin.length);
                 for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
                 const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
                 const a = new Audio(url);
+                srsAudio = a; srsUrl = url;
                 applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
-                a.onended = () => URL.revokeObjectURL(url);
-                a.play().catch(() => { speakFallback(); });
+                a.onended = () => { URL.revokeObjectURL(url); if (srsAudio === a) { srsAudio = null; srsUrl = null; } };
+                a.play().catch(() => { if (srsAudio === a) { srsAudio = null; srsUrl = null; } speakFallback(); });
             })
             .catch(speakFallback);
     }
@@ -678,6 +696,7 @@
     }
 
     function doGrade(kind) {
+        srsStopAudio(); // el audio de la tarjeta que se califica no sigue sonando sobre la siguiente
         if (!SR.cur) return;
         const item = SR.cur;
         grade(item.zh, kind);
@@ -719,6 +738,7 @@
     }
 
     function renderStats() {
+        srsStopAudio(); // (defensivo: hoy no se llega acá con audio desde la interfaz)
         SR.phase = 'stats'; SR.cur = null;
         const body = document.getElementById('srs-body');
         if (!body) return;
@@ -750,6 +770,7 @@
     }
 
     function renderIntro() {
+        srsStopAudio(); // (defensivo: hoy no se llega acá con audio desde la interfaz)
         SR.phase = 'intro'; SR.cur = null;
         const body = document.getElementById('srs-body');
         if (!body) return;
@@ -822,6 +843,7 @@
         if (pop) pop.classList.remove('hidden');
     }
     function srsClose() {
+        srsStopAudio(); // ✕, Escape, clic afuera y Atrás: cerrar el Repaso corta el audio de la tarjeta
         const pop = document.getElementById('srs-pop');
         if (pop) pop.classList.add('hidden');
         SR.phase = 'idle'; SR.cur = null;
