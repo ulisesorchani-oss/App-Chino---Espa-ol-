@@ -673,6 +673,7 @@ const VR = {
         if (window.VE && typeof window.VE.setScript === 'function') window.VE.setScript(this.script);
         this.targetZh = String(zhText || '');
         this._releaseUrl();
+        try { this._player.pause(); } catch (e) {} // un solo audio (A25): quitarle el src NO detiene lo que suena
         this._player.removeAttribute('src');
         // v7.7: pauso y suelto la referencia (sin revoke: el cache de VE la reuse)
         if (this._refPlayer) { try { this._refPlayer.pause(); } catch (e) {} }
@@ -733,6 +734,7 @@ const VR = {
             this.result.innerHTML = '';
             this.rowActions.classList.add('hidden');
             this._releaseUrl();
+            this._cortarAudios(); // un solo audio (A25/A26): nada suena con el micrófono abierto
             try {
                 await window.VE.startRecording({
                     maxSeconds: EVAL_CONFIG.maxSeconds,
@@ -761,6 +763,7 @@ const VR = {
         this.result.classList.add('hidden');
         this.rowActions.classList.add('hidden');
         this._releaseUrl();
+        this._cortarAudios(); // un solo audio (A25/A26): nada suena con el micrófono abierto
 
         // FASE 1: el reconocimiento arranca JUNTO con la grabación
         this._recognizer = new LiveRecognizer();
@@ -1147,6 +1150,7 @@ const VR = {
     _toggleRef() {
         if (!this._refUrl || !this._refPlayer || !this.refBtn) return;
         if (this._refPlayer.paused) {
+            this._cortarAudios({ salvo: this._refPlayer }); // un solo audio (A26): corta mi grabación, el audio compartido y el Lector
             // misma URL del blob cacheado en VE (no descarga de nuevo)
             if (this._refPlayer.src !== this._refUrl) this._refPlayer.src = this._refUrl;
             this._refPlayer.play().then(() => { this.refBtn.textContent = T.refBtnStop; }).catch(() => {});
@@ -1269,11 +1273,22 @@ const VR = {
     _togglePlay() {
         if (!this._recUrl) return;
         if (this._player.paused) {
+            this._cortarAudios({ salvo: this._player }); // un solo audio (A25): corta la referencia, el audio compartido y el Lector
             this._player.play().then(() => { this.playBtn.textContent = T.stopBtn; }).catch(() => {});
         } else {
             this._player.pause();
             this.playBtn.textContent = T.playBtn;
         }
+    },
+
+    /* ---------- un solo audio a la vez (docs/matriz-de-audio.md, A25/A26) ----------
+       Pausa los dos reproductores de VR (menos `salvo`) y corta el audio compartido (stopGlobalAudio) y el Lector (stopReader). NO toca los
+       Audio propios de otros módulos (eso queda para una función única de «cortar todo») ni el flujo de grabar y evaluar de VR. */
+    _cortarAudios(opt) {
+        const salvo = opt && opt.salvo;
+        [this._player, this._refPlayer].forEach((a) => { if (a && a !== salvo) { try { a.pause(); } catch (e) {} } });
+        try { if (typeof stopGlobalAudio === 'function') stopGlobalAudio(); } catch (e) {}
+        try { if (typeof stopReader === 'function') stopReader(); } catch (e) {}
     },
 
     _releaseUrl() {
