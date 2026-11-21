@@ -156,12 +156,19 @@ const DAILY_STORIES = {
 };
 
 let dsPlayer = null; // Audio en curso (una sola voz a la vez)
+let dsUtt = null;     // voz del sistema EN CURSO de la Diaria (la de reserva); null si no habla ninguna propia
 let dsTok = 0;        // token: invalida reproducciones en vuelo si el popup se cierra
 
 function dsStop() {
     dsTok++;
     if (dsPlayer) { try { dsPlayer.pause(); } catch (e) {} }
     dsPlayer = null;
+    // speechSynthesis.cancel() es GLOBAL (corta también al Lector, a «Escuchar todo», al Podcast…): solo se llama si HABLA una voz PROPIA de la
+    // Diaria. Si no hay (nunca habló, ya terminó o la cortó otro módulo) no se toca nada: una voz ajena no se cancela.
+    if (dsUtt) {
+        dsUtt = null;
+        try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+    }
 }
 
 // Reproduce UNA línea del diálogo (🔊 por renglón) reusando el mismo
@@ -199,7 +206,11 @@ async function dsPlayLine(zh, btn) {
         if ('speechSynthesis' in window) {
             const u = new SpeechSynthesisUtterance(zh);
             u.lang = 'zh-CN';
-            u.onend = () => { if (myTok === dsTok && btn) { btn.textContent = original; btn.disabled = false; } };
+            dsUtt = u;
+            u.onend = () => {
+                if (dsUtt === u) dsUtt = null; // terminó (o la cortó otro): ya no hay voz propia que cancelar
+                if (myTok === dsTok && btn) { btn.textContent = original; btn.disabled = false; }
+            };
             u.onerror = u.onend;
             speechSynthesis.speak(u);
         } else if (btn) {

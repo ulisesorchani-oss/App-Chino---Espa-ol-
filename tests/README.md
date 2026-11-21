@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 65 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 66 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -106,7 +106,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `tools/check-datong.js` | no | no | no | solo Node (regenera `classics-datong.js` y `docs/revision-datong.md`; compara el zhuyin y la traducción con la transcripción del PDF; el simplificado se verifica con `pip install opencc`, sin eso queda PARCIAL) |
 | `tools/check-ninos.js` | no | no | no | solo Node |
 | `tools/check-maquinas.js` | no | no | no | solo Node: máquinas de estado (`state-machine.js` + las tablas de `lessons-listen.js` —«Escuchar todo»—, `reader.js` —el Lector— y `podcast.js` —el Podcast—): sin asignaciones directas a `L.state`/`L.waiting`/`L.tripped` ni a `readerPlayState`/`readerActiveEngine`/`pState`, cada `go()` (y cada `stopAll()` en «Escuchar todo») con su fila/corte declarado, cada fila emitida, y `docs/maquinas-de-estado.md` (de `tools/gen-maquinas.js`) al día |
-| `tools/check-audio-matriz.js` | no | no | no | solo Node: `docs/matriz-de-audio.md` al día con el código (26 fuentes `new Audio` / `speechSynthesis.speak`, sus cortes `stopGlobalAudio` / `stopReader`) + autoprueba con 4 mutaciones que tienen que dar rojo |
+| `tools/check-audio-matriz.js` | no | no | no | solo Node: `docs/matriz-de-audio.md` al día con el código (26 fuentes `new Audio` / `speechSynthesis.speak`, sus cortes `stopGlobalAudio` / `stopReader`) + la regla de «corte externo» fila por fila + autoprueba con 19 mutaciones que tienen que dar rojo (cada una por la regla que prueba) |
 | `tools/check-undef.js` | no | no | no | ESLint (`npx`) |
 | `tools/check-readings.js` | lo levanta | sí | no | Python con `pip install opencc` (opcional `OPENCC_PYTHONPATH`) |
 | `tools/medir-tts.js` | — | — | **sí** (llama al API real) | no es una suite: mide, no verifica; `run-all` no la corre |
@@ -138,6 +138,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `escribir-a-mano-escritura` | «Escribir a mano» (Entrenar): cada palabra con la escritura de su familia, como el Repaso (oráculo = `scriptForCard` con `#srs-pop` abierto; 4 combinaciones de elección × módulo activo de HSK y de TOCFL), el quiz recibe la forma que se ve, y prueba de oro de `acSrsDueWords` (solo suma `m`; `tests/data/escribir-a-mano-oro.json`, grabada con el código de main con `GOLDEN_RECORD=1`) |
 | `un-solo-audio-srs` | un solo audio de la tarjeta del Repaso (`srsSpeak`): dos 🔊 seguidos suenan uno, calificar y cerrar (✕, Escape, clic afuera, Atrás) cortan, una respuesta del TTS que llega tarde no suena, el corte solo cancela la voz del sistema si hay una utterance propia activa; con TTS y voz del sistema simulados |
 | `un-solo-audio-voicerecorder` | un solo audio en VoiceRecorder (▶ mi grabación, ▶ referencia, `setTarget`, empezar a grabar): se pausan entre sí y cortan el audio compartido y el Lector, y el flujo de grabar y evaluar no se corta; Chromium con micrófono falso (`--use-fake-device-for-media-stream`) y voz del sistema simulada |
+| `un-solo-audio-diaria-freetalk` | un solo audio en la Diaria (la voz del sistema se cancela al cerrar la escena, solo si es la propia: una voz ajena no se cancela ni hay `cancel()` global de más) y en Pronunciación libre (▶ de una burbuja y empezar a grabar cortan el audio compartido y el Lector; cerrar, «Borrar historial» y reabrir pausan la burbuja; el flujo grabar → transcribir → ▶ sigue igual). Chromium con micrófono falso y voz del sistema simulada; 10 mutaciones, cada una en rojo |
 | `glosario-tocfl` | glosario de las 8 lecciones TOCFL A2–C1 = keywords elegidas (简/繁, escritorio/Android, 320/360 px) y pinyin por escritura (`py`/`pyT`, sin copiar el de la otra escritura; casos 盐酥鸡/鹹酥雞 y 屏幕/螢幕) |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `hover-tactil` | :hover pegado en el celular: todas las reglas :hover (style.css y los CSS inyectados de stats.js y onboarding.js) van dentro de `@media (hover: hover)` y ningún `:focus` queda dentro (CSSOM + fuente); contexto TÁCTIL de Playwright en los 3 temas: tras un toque el estilo calculado vuelve al base; con mouse el estilo al pasar el mouse es idéntico al del código anterior (oro grabado en `tests/data/hover-oro.json`, `GOLDEN_RECORD=1` lo regraba) |

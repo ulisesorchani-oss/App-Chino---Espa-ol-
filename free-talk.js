@@ -129,6 +129,15 @@
         pop.classList.add('hidden');
         try { if (typeof syncBodyScroll === 'function') syncBodyScroll(); else document.body.style.overflow = ''; } catch (e) { }
     }
+    // Un solo audio a la vez en toda la app: el audio compartido y el Lector (con su voz del sistema) se cortan con los cortes compartidos.
+    // NO se corta nada más (un Audio propio de otro módulo queda para un futuro stopAllAudio).
+    function cortarAjenos() {
+        if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
+        if (typeof stopReader === 'function') stopReader();
+    }
+    function pausarPlayer() {
+        if (player) { try { player.pause(); } catch (e) { } }
+    }
     function stopAll() {
         S.tok++;
         cancelWave();
@@ -136,6 +145,9 @@
         S.state = 'idle';
     }
     function releaseBubbles() {
+        // Cerrar el popup, reabrirlo y «Borrar historial» pasan todos por acá: las URLs de las burbujas se liberan y el reproductor no puede
+        // seguir sonando de una que ya no existe.
+        pausarPlayer();
         S.bubbles.forEach((b) => { if (b.url) { try { URL.revokeObjectURL(b.url); } catch (e) { } } });
     }
 
@@ -237,6 +249,7 @@
         }
         S.errorMsg = '';
         S.state = 'recording';
+        pausarPlayer(); cortarAjenos(); // nada suena mientras el micrófono está abierto
         S.tickLabel = '🔴 00:00';
         updateStatus(); updateBtn();
         try {
@@ -322,6 +335,7 @@
     function playBubble(i) {
         const b = S.bubbles[i];
         if (!b || !b.url) return;
+        cortarAjenos();
         if (!player) player = new Audio();
         if (player.src !== b.url) player.src = b.url;
         try { player.currentTime = 0; } catch (e) { }
