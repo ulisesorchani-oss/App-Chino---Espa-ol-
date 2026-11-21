@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 63 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 64 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -136,6 +136,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `escritura-tradicional` | 6 pantallas de lección × escrituras 简/繁 |
 | `repaso-escritura` | escritura del Repaso por tarjeta: prueba de oro (cajas y fechas iguales a las de main, grabadas en `tests/data/repaso-oro.json` con `GOLDEN_RECORD=1` sobre el código viejo), respuesta tecleada en 简 o 繁, TOCFL en tradicional y HSK en simplificado con la elección explícita ganando, tarjetas sin módulo sin convertir |
 | `escribir-a-mano-escritura` | «Escribir a mano» (Entrenar): cada palabra con la escritura de su familia, como el Repaso (oráculo = `scriptForCard` con `#srs-pop` abierto; 4 combinaciones de elección × módulo activo de HSK y de TOCFL), el quiz recibe la forma que se ve, y prueba de oro de `acSrsDueWords` (solo suma `m`; `tests/data/escribir-a-mano-oro.json`, grabada con el código de main con `GOLDEN_RECORD=1`) |
+| `un-solo-audio-srs` | un solo audio de la tarjeta del Repaso (`srsSpeak`): dos 🔊 seguidos suenan uno, calificar y cerrar (✕, Escape, clic afuera, Atrás) cortan, una respuesta del TTS que llega tarde no suena, el corte solo cancela la voz del sistema si hay una utterance propia activa; con TTS y voz del sistema simulados |
 | `glosario-tocfl` | glosario de las 8 lecciones TOCFL A2–C1 = keywords elegidas (简/繁, escritorio/Android, 320/360 px) y pinyin por escritura (`py`/`pyT`, sin copiar el de la otra escritura; casos 盐酥鸡/鹹酥雞 y 屏幕/螢幕) |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `hover-tactil` | :hover pegado en el celular: todas las reglas :hover (style.css y los CSS inyectados de stats.js y onboarding.js) van dentro de `@media (hover: hover)` y ningún `:focus` queda dentro (CSSOM + fuente); contexto TÁCTIL de Playwright en los 3 temas: tras un toque el estilo calculado vuelve al base; con mouse el estilo al pasar el mouse es idéntico al del código anterior (oro grabado en `tests/data/hover-oro.json`, `GOLDEN_RECORD=1` lo regraba) |
