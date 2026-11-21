@@ -84,6 +84,18 @@ Cada palabra de la lista de **Entrenar → «Escribir a mano»** se ve y se traz
 
 **Qué mirar especialmente en (e) y (f):** si algún carácter tradicional **no tiene datos** en Hanzi Writer, el aviso de (g) aparece **con conexión**: antes ese usuario trazaba el simplificado y ahora vería el error. Anotá el carácter exacto y el aviso tal cual.
 
+## Repaso: un solo audio de la tarjeta (`fix/un-solo-audio-srs`)
+
+El 🔊 de la tarjeta del Repaso (`srsSpeak`) ahora guarda su audio: pedirlo dos veces seguidas ya no suena doble, y **calificar** o **cerrar** el Repaso (✕, Atrás o tocar afuera) corta el audio (con el servidor y con la voz del sistema). La suite (`tests/un-solo-audio-srs.test.js`) lo prueba con un TTS y una voz del sistema **simulados** en Chromium; **no** prueba el audio real ni la voz real del teléfono.
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| h | **Repaso** con conexión | Tocá 🔊 dos veces seguidas (rápido) | Suena **un solo** audio: el segundo corta al primero |
+| i | **Repaso** con conexión | Tocá 🔊 y, con el audio sonando, calificá (😵 / 🙂 / 😎) | El audio **se corta** y la tarjeta siguiente queda sin sonido; su 🔊 vuelve a sonar normal |
+| j | **Repaso** con conexión | Tocá 🔊 y, sonando, cerrá con ✕ (después repetí con Atrás y tocando afuera) | El audio **se corta** al cerrar |
+| k | **Repaso en modo avión** (con una voz china instalada) | Tocá 🔊 (habla la voz del sistema) y calificá; repetí cerrando | La voz **se corta** al calificar y al cerrar. Anotá si la voz del teléfono se corta de verdad o termina la frase |
+| l | **Repaso**, internet lento | Tocá 🔊 en una conexión muy lenta y cerrá el Repaso **antes** de que suene | Después de cerrar **no** aparece ningún sonido tardío |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -92,7 +104,7 @@ Cada palabra de la lista de **Entrenar → «Escribir a mano»** se ve y se traz
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d) o de «Escribir a mano» (e–g) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g) o de «Repaso: un solo audio» (h–l) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
