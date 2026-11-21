@@ -96,6 +96,19 @@ El 🔊 de la tarjeta del Repaso (`srsSpeak`) ahora guarda su audio: pedirlo dos
 | k | **Repaso en modo avión** (con una voz china instalada) | Tocá 🔊 (habla la voz del sistema) y calificá; repetí cerrando | La voz **se corta** al calificar y al cerrar. Anotá si la voz del teléfono se corta de verdad o termina la frase |
 | l | **Repaso**, internet lento | Tocá 🔊 en una conexión muy lenta y cerrá el Repaso **antes** de que suene | Después de cerrar **no** aparece ningún sonido tardío |
 
+## Grabar y evaluar la pronunciación: un solo audio (`fix/un-solo-audio-voicerecorder`)
+
+En el panel de grabación (🎤), ▶ **mi grabación** y ▶ **referencia** ahora se pausan entre sí y cortan el audio compartido (el 🔊 de una tarjeta) y el Lector; **empezar a grabar** corta los dos y todo lo demás que suene; y cambiar de oración pausa mi grabación. La suite (`tests/un-solo-audio-voicerecorder.test.js`) lo prueba en Chromium con un **micrófono falso** y la voz del sistema simulada, y simula el motor local (consentimiento y grabación): **no** prueba el micrófono real, el motor Whisper real, ni que el sonido «se cuele» acústicamente al micrófono (solo mide que no siga sonando nada cuando empieza la grabación).
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| m | **Grabar y evaluar** (repetí la prueba que hiciste en modo avión) | Grabá la oración, esperá el resultado y mirá: el **score**, el **feedback por carácter** y el **contorno de tono** | Aparecen los tres, igual que antes del cambio |
+| n | Después de evaluar, con la referencia disponible | Tocá ▶ **referencia** y, sonando, tocá ▶ **mi grabación** (y al revés) | Suena **uno solo**: el segundo corta al primero; un segundo toque sobre el que suena lo pausa |
+| o | Con el audio de una tarjeta sonando (🔊) o el **Lector** leyendo | Tocá ▶ mi grabación o ▶ referencia | Se **corta** el 🔊 / el Lector y suena solo el ▶ |
+| p | Con la referencia (o mi grabación) sonando | Tocá 🎤 para **empezar a grabar** | El audio se **corta** antes de grabar (no queda sonando con el micrófono abierto); **anotá si en el celular el sonido igual se cuela** en la grabación |
+| q | Con mi grabación sonando | Pasá a **otra oración** (siguiente tarjeta) | Mi grabación **se corta** al cambiar de oración |
+| r | Sin conexión (modo avión), con el modelo local ya descargado | Repetí m y p | Igual que con conexión; si el micrófono o la evaluación fallan, anotá el texto del aviso |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -104,7 +117,7 @@ El 🔊 de la tarjeta del Repaso (`srsSpeak`) ahora guarda su audio: pedirlo dos
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g) o de «Repaso: un solo audio» (h–l) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
