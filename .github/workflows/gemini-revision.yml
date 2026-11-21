@@ -214,7 +214,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           # Versión exacta (no «latest»): el aviso GHSA-wpqr-6v78-jr5g afecta al CLI < 0.39.1 (npm audit); 0.70.0 es la que se leyó y probó.
           gemini_cli_version: '0.70.0'
-          gemini_debug: 'true'
+          gemini_debug: 'false'
           upload_artifacts: 'false'
           use_vertex_ai: 'false'
           use_gemini_code_assist: 'false'
