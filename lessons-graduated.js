@@ -177,6 +177,9 @@
         const vz = (typeof voiceZhFor === 'function') ? voiceZhFor(S.lesson) : voiceZh;
         try {
             if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
+            // un solo audio a la vez: si el Lector está leyendo (o en pausa) se corta, con su audio y su voz del sistema. Solo entonces: stopReader hace un
+            // speechSynthesis.cancel() GLOBAL, y con el Lector en reposo sería un cancel() de más (cambiaría la traza de «Escuchar todo», que no debe cambiar)
+            if (typeof stopReader === 'function' && typeof READER_REPRO !== 'undefined' && !READER_REPRO.is('idle')) stopReader();
             if (lqAudio) { lqAudio.pause(); lqAudio = null; }
             lqTtsU = null;
             if (lqPlay.btn && lqPlay.btn !== btn) setSayIcon(lqPlay.btn, 'idle'); // apaga el ícono del botón anterior
