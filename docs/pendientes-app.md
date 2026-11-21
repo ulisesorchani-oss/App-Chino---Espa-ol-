@@ -47,3 +47,26 @@ las ve Ulises antes de tocar código de la app.
 ## Dominio de producción
 
 - Revisar GitHub Pages y cuál es el dominio de producción: `app.js:256` menciona `github.io ↔ vercel.app`, y el dominio de Vercel que aparece en el código es la URL de la API de voz.
+
+## Diaria: la URL del audio del servidor no se libera al cortarlo (`daily-stories.js`)
+
+- **Dónde:** `dsPlayLine` crea `URL.createObjectURL(...)` para el audio del servidor y la libera **solo** en `audio.onended`. `dsStop()` (cerrar la escena, ✕, Escape, «Practicar», Atrás, o tocar otro 🔊) pausa `dsPlayer` y lo suelta, pero **no hace `URL.revokeObjectURL`**: un audio cortado antes de terminar deja su blob en memoria hasta cerrar la pestaña.
+- **Cómo se encontró:** lectura del código al arreglar el bloque 3 de `fix/un-solo-audio` (A11/A12). **No se midió.**
+- **Magnitud esperada:** una frase corta de TTS por cada corte (decenas de KB); no es un problema de uso normal, pero se acumula si se cortan muchas líneas seguidas.
+- **Qué falta:** guardar la URL junto a `dsPlayer` y revocarla en `dsStop()` (con cuidado de no revocarla dos veces: `onended` también lo hace). Prueba: una suite que cuente `createObjectURL` / `revokeObjectURL` con un 🔊 cortado.
+- **Estado:** pendiente. No se corrigió en el bloque 3 (el pedido era el audio, no la memoria).
+
+## «Escuchar todo» (lecciones TOCFL): resaltado de la línea activa con rayas verticales oscuras
+
+- **Qué se vio (observación visual, sin investigar):** en «Escuchar todo» de lecciones TOCFL con texto largo, el resaltado de la línea activa (`.lq-line.is-playing`, `lessons-listen.js`) se ve con **rayas verticales oscuras** y un **bloque suelto al inicio del segundo renglón** (el texto largo se parte en dos líneas).
+- **Dónde se vio:** celular (Android, Brave), en la prueba de los casos h–l (modo avión, con la voz del sistema). **No** se probó en otro navegador ni con la voz del servidor.
+- **Cómo se encontró:** a ojo, mientras se probaba el audio en el celular (aviso del usuario).
+- **Qué falta:** una Fase 1 de **solo lectura** (reproducir en el navegador con un texto largo y 320/360 px, ver el CSS de `.lq-line.is-playing` y el marcado de la línea), antes de cambiar nada.
+- **Estado:** pendiente, sin investigar. No se tocó.
+
+## Diaria: el 🔊 del renglón anterior queda en ⏳ deshabilitado al tocar otro
+
+- **Dónde:** `dsPlayLine`: el botón pasa a «⏳» y `disabled` y solo vuelve en `audio.onended` / `u.onend` (con la guarda `myTok === dsTok`). Al tocar OTRO renglón, `dsStop()` sube el token y corta el audio/la voz del anterior: su restauración no corre (un audio pausado no dispara `ended`; la voz cancelada dispara su evento ya con el token nuevo).
+- **Medido** (Chromium, con voz del sistema simulada que avisa `onerror` en el turno siguiente, y con el audio del servidor simulado): después de tocar el renglón 0 y luego el 1, el botón del renglón 0 queda «⏳» y deshabilitado, **igual en `main` (`ed2d19e`) que con el bloque 3**. No lo causa ni lo arregla el bloque 3. En el celular puede variar según cuándo dispare el motor el evento de la voz cancelada (**sin verificar** en un dispositivo real).
+- **Qué falta:** restaurar el botón anterior al cortarlo (guardar `{btn, texto}` junto al audio/la voz en curso y devolverlo en `dsStop()`), con su prueba.
+- **Estado:** pendiente. No se corrigió.

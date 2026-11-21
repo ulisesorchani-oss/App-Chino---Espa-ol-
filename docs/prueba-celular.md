@@ -109,6 +109,19 @@ En el panel de grabación (🎤), ▶ **mi grabación** y ▶ **referencia** aho
 | q | Con mi grabación sonando | Pasá a **otra oración** (siguiente tarjeta) | Mi grabación **se corta** al cambiar de oración |
 | r | Sin conexión (modo avión), con el modelo local ya descargado | Repetí m y p | Igual que con conexión; si el micrófono o la evaluación fallan, anotá el texto del aviso |
 
+## Diaria y Pronunciación libre: un solo audio (`fix/un-solo-audio-diaria-freetalk`)
+
+Dos cambios: en la **escena de la Diaria** (Aprender → Diaria → una situación con escena), cerrar la escena (✕, Escape, «Practicar» o Atrás) ahora corta **su** voz del sistema (la de reserva cuando el servidor no responde) y **solo esa**: si habla otro módulo, no se toca. En **Pronunciación libre** (🎤 de Entrenar), ▶ de una burbuja corta el audio compartido y el Lector; cerrar el popup, «Borrar historial» o reabrirlo pausan la burbuja; y **empezar a grabar** corta la burbuja, el audio compartido y el Lector. La suite (`tests/un-solo-audio-diaria-freetalk.test.js`) lo prueba en Chromium con un **micrófono falso** y la voz del sistema **simulada**; **no** prueba el micrófono real, el motor Whisper ni el audio o la voz reales del teléfono, ni que el sonido «se cuele» a la grabación.
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| s | **Diaria en modo avión** (con una voz china instalada) | Abrí una situación con escena, tocá 🔊 de un renglón (habla la voz del sistema) y, hablando, cerrá con ✕ (repetí con Atrás y con «Practicar») | La voz **se corta** al cerrar. Anotá si la voz del teléfono se corta de verdad o termina la frase |
+| t | **Diaria** con conexión | Tocá 🔊 de un renglón y, sonando, cerrá la escena; después tocá otro 🔊 mientras suena el primero | Al cerrar el audio **se corta**; el segundo 🔊 corta al primero (suena **uno solo**). **Anotá si el botón 🔊 del primero queda en ⏳ y sin respuesta**: es un fallo **anterior** a este cambio (medido igual en `main`, ver `docs/pendientes-app.md`), no se arregló acá |
+| u | **Pronunciación libre**, con una burbuja ya grabada | Con el 🔊 de una tarjeta o el **Lector** sonando, tocá ▶ de la burbuja | Se **corta** el 🔊 / el Lector y suena solo la burbuja |
+| v | **Pronunciación libre** | Con una burbuja sonando, cerrá el popup (✕, Atrás, tocar afuera), después repetí con «Borrar historial» | La burbuja **se corta** al cerrar y al borrar (antes seguía sonando) |
+| w | **Pronunciación libre**, con una burbuja sonando | Tocá 🎤 para **empezar a grabar** (repetí con el 🔊 de una tarjeta o el Lector sonando) | Todo se **corta** antes de grabar (no queda sonando con el micrófono abierto); **anotá si en el celular el sonido igual se cuela** en la grabación |
+| x | **Pronunciación libre** (modo avión, modelo local ya descargado) | Grabá, esperá la transcripción, tocá ▶, y **repetí grabar y transcribir** | Aparece la transcripción en cada burbuja, igual que antes del cambio; si el micrófono o el motor fallan, anotá el texto del aviso |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -117,7 +130,7 @@ En el panel de grabación (🎤), ▶ **mi grabación** y ▶ **referencia** aho
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
