@@ -142,6 +142,12 @@ function instrumentar(cfg) {
     }
 
     // ───────── escenarios ─────────
+    // Disparadores: un `delay` (ms) corre en el reloj de la página y compite con las respuestas simuladas de /api/tts, que pasan por page.route (otro proceso): con la máquina cargada una
+    // respuesta que tarda más que el delay cambia el ORDEN de la traza. Donde el oro marca el evento que va justo antes de la acción se dispara con ESE evento (`when`/`re`, sin delay):
+    // R2-pausa-sin-voz usaba «primer ⏳ + 20 ms» y fallaba (en el evento 7: `> pausa` antes de `resp L0 503`) con una respuesta lenta (medido con una latencia inyectada de 150 ms).
+    // PENDIENTES (misma carrera contra la red, sin tocar hasta decidirlo): R2-pausa-en-carga-con-voz (20 ms tras el 2.º ⏳; el oro pone `resp L1 503` y después `> pausa`) y
+    // R2-pausa-voz-ignora-pausa-y-sigue (100 ms tras `voz.end L1`; el oro pone `resp L2 503` y después `> seguir`). Los de 30 y 50 ms compiten, según el análisis (no medido), con los
+    // temporizadores de la voz simulada de la propia página. Las demás esperas (200-2500 ms) son pausas en las que no se espera ningún evento.
     const FIN_IDLE = { re: '^btn 🔊 Leer', n: 2, do: 'fin', delay: 200 }; // el botón vuelve al reposo (la 1.ª vez es el stopReader() con el que arranca toggleReaderPlay)
     const ESC = [
         { id: 'sano', triggers: [FIN_IDLE] },
@@ -152,7 +158,7 @@ function instrumentar(cfg) {
         { id: 'fallo-bache', policy: ({ idx }, intento) => (idx === 0 && intento === 0 ? { status: 503 } : {}), triggers: [FIN_IDLE] },
         { id: 'fallo-voz', policy: () => ({ status: 503 }), triggers: [FIN_IDLE] },
         { id: 'pausa-en-voz-del-sistema', policy: () => ({ status: 503 }), triggers: [{ when: 'speak L0', do: 'pausa', delay: 50 }, { when: 'voz.pause', do: 'seguir', delay: 200 }, FIN_IDLE] },
-        { id: 'R2-pausa-sin-voz', sinVoz: true, policy: () => ({ status: 503 }), triggers: [{ re: '^btn ⏳', n: 1, do: 'pausa', delay: 20 }, { when: '> pausa', do: 'seguir', delay: 2500, cond: 'pausado' }, FIN_IDLE] },
+        { id: 'R2-pausa-sin-voz', sinVoz: true, policy: () => ({ status: 503 }), triggers: [{ when: 'resp L0 503', n: 1, do: 'pausa' }, { when: '> pausa', do: 'seguir', delay: 2500, cond: 'pausado' }, FIN_IDLE] },
         { id: 'mixto-un-trozo-falla', policy: ({ idx }) => (idx === 1 ? { status: 503 } : {}), triggers: [FIN_IDLE] },
         { id: 'corte-en-carga-y-nueva-lectura', policy: ({ idx }, intento) => (idx === 0 && intento === 0 ? { hold: true } : {}), liberar: { tras: '> leer', idx: 0, espera: 400 }, triggers: [{ when: 'fetch GET L0', n: 1, do: 'parar', delay: 30 }, { when: '> parar', do: 'leer', delay: 50 }, { re: '^btn 🔊 Leer', n: 4, do: 'fin', delay: 200 }] }, // el 4.º «🔊 Leer»: arranque, corte, arranque de la nueva y fin de la nueva
         { id: 'R2-pausa-en-carga-con-voz', policy: () => ({ status: 503 }), triggers: [{ re: '^btn ⏳', n: 2, do: 'pausa', delay: 20 }, { when: '> pausa', do: 'seguir', delay: 700, cond: 'pausado' }, FIN_IDLE] },
