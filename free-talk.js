@@ -233,6 +233,12 @@
         btn.setAttribute('aria-label', S.state === 'recording' ? 'Terminar grabación' : 'Grabar');
         const wave = $('tk-wave');
         if (wave) wave.classList.toggle('is-on', S.state === 'recording');
+        updatePlayBtns();
+    }
+    // Con el micrófono abierto ('recording') el ▶ de las burbujas se ignora (playBubble) y se marca aria-disabled; en 'asking' y 'processing' sigue andando.
+    function updatePlayBtns() {
+        const grabando = S.state === 'recording';
+        document.querySelectorAll('#tk-chat .tk-play').forEach((el) => { if (grabando) el.setAttribute('aria-disabled', 'true'); else el.removeAttribute('aria-disabled'); });
     }
 
     // ── flujo principal ──
@@ -342,6 +348,7 @@
     function playBubble(i) {
         const b = S.bubbles[i];
         if (!b || !b.url) return;
+        if (S.state === 'recording') return; // el micrófono está abierto: nada suena (ni se corta lo que suene) por un toque en ▶
         cortarAjenos();
         if (!player) player = new Audio();
         if (player.src !== b.url) player.src = b.url;

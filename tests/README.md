@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 69 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 70 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -138,6 +138,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `escribir-a-mano-escritura` | «Escribir a mano» (Entrenar): cada palabra con la escritura de su familia, como el Repaso (oráculo = `scriptForCard` con `#srs-pop` abierto; 4 combinaciones de elección × módulo activo de HSK y de TOCFL), el quiz recibe la forma que se ve, y prueba de oro de `acSrsDueWords` (solo suma `m`; `tests/data/escribir-a-mano-oro.json`, grabada con el código de main con `GOLDEN_RECORD=1`) |
 | `un-solo-audio-srs` | un solo audio de la tarjeta del Repaso (`srsSpeak`): dos 🔊 seguidos suenan uno, calificar y cerrar (✕, Escape, clic afuera, Atrás) cortan, una respuesta del TTS que llega tarde no suena, el corte solo cancela la voz del sistema si hay una utterance propia activa; con TTS y voz del sistema simulados |
 | `un-solo-audio-voicerecorder` | un solo audio en VoiceRecorder (▶ mi grabación, ▶ referencia, `setTarget`, empezar a grabar): se pausan entre sí y cortan el audio compartido y el Lector, y el flujo de grabar y evaluar no se corta; Chromium con micrófono falso (`--use-fake-device-for-media-stream`) y voz del sistema simulada |
+| `freetalk-play-grabando` | ▶ de una burbuja de Pronunciación libre mientras se graba: se ignora (no arranca la burbuja, no corta lo ajeno, `aria-disabled`, sin cambiar el icono) y sigue andando en `asking` y `processing`; 6 mutaciones en rojo |
 | `un-solo-audio-diaria-freetalk` | un solo audio en la Diaria (la voz del sistema se cancela al cerrar la escena, solo si es la propia: una voz ajena no se cancela ni hay `cancel()` global de más) y en Pronunciación libre (▶ de una burbuja y empezar a grabar cortan el audio compartido y el Lector; cerrar, «Borrar historial» y reabrir pausan la burbuja; el flujo grabar → transcribir → ▶ sigue igual). Chromium con micrófono falso y voz del sistema simulada; 10 mutaciones, cada una en rojo |
 | `un-solo-audio-clasicos-lecciones-examen` | un solo audio con el Lector real: el 🔊 de Clásicos, el 🔊 por línea de las lecciones y ▶ de la práctica tipo examen cortan al Lector (su audio y su voz del sistema), con el servidor y con la voz de reserva (12 combinaciones); no cortan un `Audio` de otro módulo; el flujo propio (2.º toque pausa, 3.º reanuda, el Lector arranca después) no cambia; con el Lector en reposo no hay ningún `cancel()` de más; el Lector en pausa también se corta; sin `state-machine.js` todo sigue valiendo. 6 mutaciones en rojo |
 | `pinyin-libre` | el pinyin de las burbujas de «Pronunciación libre»: texto transcripto en tradicional (什麼, 還是, 長大, 銀行, 睡覺…) con la lectura por palabra de `pinyinFor` (como el Lector), convención HSK, respaldo a pinyin-pro; sin pinyin en cn-es. Chromium con micrófono falso y motor de voz simulado; 3 mutaciones en rojo |
