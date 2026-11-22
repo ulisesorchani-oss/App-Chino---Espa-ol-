@@ -190,6 +190,9 @@
         const myTok = ++crTok;
         try {
             if (typeof stopGlobalAudio === 'function') stopGlobalAudio();
+            // un solo audio a la vez: si el Lector está leyendo (o en pausa) se corta, con su audio y su voz del sistema. Solo entonces: stopReader hace un
+            // speechSynthesis.cancel() GLOBAL, y con el Lector en reposo sería un cancel() de más (cambiaría la traza de «Escuchar todo», que no debe cambiar)
+            if (typeof stopReader === 'function' && typeof READER_REPRO !== 'undefined' && !READER_REPRO.is('idle')) stopReader();
             if (crAudio) { crAudio.pause(); crAudio = null; }
             crTtsU = null;
             if (crPlay.btn && crPlay.btn !== el) {

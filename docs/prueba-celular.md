@@ -128,6 +128,18 @@ Dos cambios: en la **escena de la Diaria** (Aprender → Diaria → una situaci�
 |---|---|---|---|
 | y | **Pronunciación libre** (🎤 de Entrenar), modo es→zh | Grabá en voz alta «你什麼東西？我才問你，你還是問我» (o «為什麼», «銀行», «睡覺») | El pinyin de la burbuja sale **«nǐ shén me dōng xi ? wǒ cái wèn nǐ , nǐ hái shì wèn wǒ»** (con «shén **me**», «**hái** shì»; antes «shén mó», «huán shì»). Anotá **qué texto escribió la IA** (tradicional o simplificado) y cualquier palabra cuyo pinyin te suene mal |
 
+## Clásicos, lecciones y práctica tipo examen cortan al Lector (`fix/un-solo-audio-clasicos-lecciones-examen`)
+
+El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la **práctica tipo examen** ahora cortan al **Lector** (su audio y su voz del sistema) al arrancar; antes el Lector seguía leyendo encima. La suite (`tests/un-solo-audio-clasicos-lecciones-examen.test.js`) lo prueba en Chromium con el TTS y la voz del sistema **simulados**; **no** prueba el audio ni la voz reales del teléfono (allí `cancel()` avisa de forma asíncrona).
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| z | **Lector** con conexión + **un Clásico** (Aprender → Clásicos → Leer) | Pegá un texto en el Lector y tocá 🔊 Leer; con el Lector sonando abrí un Clásico y tocá el 🔊 de una frase | El Lector **se corta** (su botón vuelve a «🔊 Leer») y suena solo la frase |
+| aa | **Lector** + **una lección** | Igual que z, con el 🔊 de una línea de una lección | Igual que z |
+| ab | **Lector** + **práctica tipo examen** (Entrenar) | Igual que z, con ▶ de una práctica con audio | Igual que z |
+| ac | **Modo avión** (con una voz china instalada) | Repetí z–ab: el Lector habla con la voz del sistema y el módulo también | Habla **una sola voz**; anotá si la del Lector se corta de verdad o termina la frase, y si el botón del Lector queda bien |
+| ad | Cualquiera de los anteriores | Tocá dos veces el mismo 🔊 de una frase (Clásicos o lección) | El 2.º toque **pausa** y el 3.º **reanuda**, igual que antes |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -136,7 +148,7 @@ Dos cambios: en la **escena de la Diaria** (Aprender → Diaria → una situaci�
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) o de «Clásicos, lecciones y práctica tipo examen cortan al Lector» (z–ad) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
