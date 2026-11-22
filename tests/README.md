@@ -10,7 +10,7 @@ está en `.vercelignore`.
 node tests/run-all.js
 ```
 
-Corre las 68 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
+Corre las 69 suites de `tests/` y las 13 de `tools/`, una por una, y al final muestra una tabla:
 
 ```
 SUITE                 COMPROBACIONES  RESULTADO
@@ -141,6 +141,7 @@ BASE_URL=http://localhost:8960 node tests/ninos-sonidos.test.js
 | `un-solo-audio-diaria-freetalk` | un solo audio en la Diaria (la voz del sistema se cancela al cerrar la escena, solo si es la propia: una voz ajena no se cancela ni hay `cancel()` global de más) y en Pronunciación libre (▶ de una burbuja y empezar a grabar cortan el audio compartido y el Lector; cerrar, «Borrar historial» y reabrir pausan la burbuja; el flujo grabar → transcribir → ▶ sigue igual). Chromium con micrófono falso y voz del sistema simulada; 10 mutaciones, cada una en rojo |
 | `un-solo-audio-clasicos-lecciones-examen` | un solo audio con el Lector real: el 🔊 de Clásicos, el 🔊 por línea de las lecciones y ▶ de la práctica tipo examen cortan al Lector (su audio y su voz del sistema), con el servidor y con la voz de reserva (12 combinaciones); no cortan un `Audio` de otro módulo; el flujo propio (2.º toque pausa, 3.º reanuda, el Lector arranca después) no cambia; con el Lector en reposo no hay ningún `cancel()` de más; el Lector en pausa también se corta; sin `state-machine.js` todo sigue valiendo. 6 mutaciones en rojo |
 | `pinyin-libre` | el pinyin de las burbujas de «Pronunciación libre»: texto transcripto en tradicional (什麼, 還是, 長大, 銀行, 睡覺…) con la lectura por palabra de `pinyinFor` (como el Lector), convención HSK, respaldo a pinyin-pro; sin pinyin en cn-es. Chromium con micrófono falso y motor de voz simulado; 3 mutaciones en rojo |
+| `pinyin-correcciones` | correcciones de pinyin dentro de `pinyinFor` (la regla por carácter 髮/臟/幹 sobre el tradicional y la tabla por palabra con clave simplificada, con exclusiones «什么» y «了»): cada palabra en simplificado y en tradicional, los casos que no cambian (頭髮, 打發, 一乾二淨, 好處在於…), la familia TOCFL que manda, y sin regresión sobre los textos de la app sin ninguna clave; incluye el «no precedida de» de 定为, la convención de 髮 en TOCFL (fǎ) y la guarda de 乾. 11 mutaciones en rojo |
 | `glosario-tocfl` | glosario de las 8 lecciones TOCFL A2–C1 = keywords elegidas (简/繁, escritorio/Android, 320/360 px) y pinyin por escritura (`py`/`pyT`, sin copiar el de la otra escritura; casos 盐酥鸡/鹹酥雞 y 屏幕/螢幕) |
 | `hoja-modulos`, `hoja-ninos` | hoja de módulos (tabla módulo → botón, es-cn, Atrás) y pista Niños |
 | `hover-tactil` | :hover pegado en el celular: todas las reglas :hover (style.css y los CSS inyectados de stats.js y onboarding.js) van dentro de `@media (hover: hover)` y ningún `:focus` queda dentro (CSSOM + fuente); contexto TÁCTIL de Playwright en los 3 temas: tras un toque el estilo calculado vuelve al base; con mouse el estilo al pasar el mouse es idéntico al del código anterior (oro grabado en `tests/data/hover-oro.json`, `GOLDEN_RECORD=1` lo regraba) |

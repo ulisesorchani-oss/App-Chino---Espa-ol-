@@ -121,6 +121,28 @@ function pinyinToneNum(syl) {
     return 5;
 }
 
+// ── correcciones de lecturas que pinyin-pro lee mal (medido sobre los datos de la app: también en simplificado). SOLO dentro de pinyinFor: no tocan
+//    pinyinPro ni a quien lo llama directo (app.js, dict.js, VoiceRecorder…), a diferencia de PINYIN_ERRORES (customPinyin, global). ──
+// A. por CARÁCTER, sobre el texto ORIGINAL (tradicional) antes de la conversión: 髮/臟/幹 se funden en 发/脏/干 y se pierde cuál era. No pisa una sílaba que
+//    ya sale neutra (頭髮 sigue «tóu fa»), ni toca 發 / 乾 / 髒 / 干. 髮 sigue la convención de cada familia: HSK «fà» (continente), TOCFL «fǎ» (la lista
+//    TOCFL dice 头发 «tóu fǎ», 发型 «fǎ xíng»). Límite conocido: en texto informal se escribe 臟 por 髒 («sucio», zāng) y ahí daría «zàng».
+const PINYIN_CARACTERES_TRAD = { hsk: { '髮': 'fà', '臟': 'zàng', '幹': 'gàn' }, tocfl: { '髮': 'fǎ', '臟': 'zàng', '幹': 'gàn' } };
+// B. por PALABRA, clave en SIMPLIFICADO, aplicada al texto ya convertido (cubre al que escribe en simplificado y al que escribe en tradicional).
+//    [palabra, sílabas, «no seguida de», «no precedida de», sílabas de TOCFL]: si lo que viene después empieza con alguno de los primeros, o lo de antes termina con
+//    alguno de los segundos, la entrada NO se aplica (queda la lectura de pinyin-pro): 不确定为什么 (wèishénme) y 决定为了你留下 (wèile) no son 定为 «wéi»; ni
+//    一定为你加油 / 决定为她做饭 / 肯定为他高兴 / 确定为啥 (为 = «por, para»: wèi). Límite: 确定为目标 («wéi») tampoco se corrige por eso. Coincidencia más larga, de
+//    izquierda a derecha. Se salta si en el texto ORIGINAL hay un 乾 (乾嗎 «¿está seco?» convierte a 干吗, pero 乾 es gān). La familia TOCFL manda después.
+//    Fuera a propósito (dudosas, las revisa el docente): 为人 有为 为师 转动 尽可能 处在 (好处在于 / 到处在找 se leen distinto).
+const PINYIN_NO_WEI = ['什么', '了'];
+const PINYIN_PALABRAS = [
+    ['理发', 'lǐ fà', null, null, 'lǐ fǎ'], ['心脏', 'xīn zàng'], ['肝脏', 'gān zàng'], ['说干就干', 'shuō gàn jiù gàn'], ['干嘛', 'gàn ma'], ['干吗', 'gàn ma'],
+    ['变为', 'biàn wéi', PINYIN_NO_WEI], ['列为', 'liè wéi', PINYIN_NO_WEI], ['视为', 'shì wéi', PINYIN_NO_WEI], ['定为', 'dìng wéi', PINYIN_NO_WEI, ['一', '决', '肯', '确']],
+    ['尤为', 'yóu wéi', PINYIN_NO_WEI], ['身为', 'shēn wéi', PINYIN_NO_WEI],
+    ['还款', 'huán kuǎn'], ['载体', 'zài tǐ'], ['卷入', 'juǎn rù'], ['钻空子', 'zuān kòng zi']
+];
+const _pinyinPalabrasMax = PINYIN_PALABRAS.reduce((m, e) => Math.max(m, Array.from(e[0]).length), 0);
+const _pinyinPalabrasMapa = new Map(PINYIN_PALABRAS.map((e) => [e[0], e]));
+
 // Sílabas 1:1 con los caracteres de `text` (mismo formato que
 // pinyinPro.pinyin(text, {type:'array'})), en la convención de la familia
 // de `ref` (lección, id de módulo, 'tocfl' o 'hsk'; ver familyOf en app.js).
@@ -132,6 +154,33 @@ function pinyinArrayFor(text, ref) {
     const fam = (typeof familyOf === 'function') ? familyOf(ref) : 'hsk';
     const T = (fam === 'tocfl') ? window.PINYIN_TOCFL : null;
     const chars = Array.from(src);
+    if (arr.length === chars.length) {
+        const orig = Array.from(String(text || ''));
+        // A. por carácter, sobre el texto original (misma cantidad de caracteres que `src`: la conversión es 1:1)
+        if (orig.length === chars.length) {
+            const porCar = PINYIN_CARACTERES_TRAD[fam === 'tocfl' ? 'tocfl' : 'hsk'];
+            orig.forEach((c, i) => { if (porCar[c] && pinyinToneNum(arr[i]) !== 5) arr[i] = porCar[c]; });
+        }
+        // B. por palabra (clave simplificada), la más larga primero, de izquierda a derecha, con «no seguida de»
+        for (let i = 0; i < chars.length;) {
+            let hit = 0;
+            for (let L = Math.min(_pinyinPalabrasMax, chars.length - i); L >= 2; L--) {
+                const e = _pinyinPalabrasMapa.get(chars.slice(i, i + L).join(''));
+                if (!e) continue;
+                const sig = chars.slice(i + L, i + L + 3).join('');
+                if (e[2] && e[2].some((x) => sig.indexOf(x) === 0)) continue;
+                const ant = chars.slice(Math.max(0, i - 2), i).join('');
+                if (e[3] && e[3].some((x) => ant.length >= x.length && ant.slice(ant.length - x.length) === x)) continue;
+                if (orig.length === chars.length && orig.slice(i, i + L).indexOf('乾') !== -1) continue;
+                const syl = (fam === 'tocfl' && e[4] ? e[4] : e[1]).split(' ');
+                if (syl.length !== L) continue;
+                for (let j = 0; j < L; j++) arr[i + j] = syl[j];
+                hit = L;
+                break;
+            }
+            i += hit || 1;
+        }
+    }
     if (T && arr.length === chars.length) {
         const max = tocflPyMax();
         for (let i = 0; i < chars.length;) {

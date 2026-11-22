@@ -140,6 +140,13 @@ El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la *
 | ac | **Modo avión** (con una voz china instalada) | Repetí z–ab: el Lector habla con la voz del sistema y el módulo también | Habla **una sola voz**; anotá si la del Lector se corta de verdad o termina la frase, y si el botón del Lector queda bien |
 | ad | Cualquiera de los anteriores | Tocá dos veces el mismo 🔊 de una frase (Clásicos o lección) | El 2.º toque **pausa** y el 3.º **reanuda**, igual que antes |
 
+## Pinyin: correcciones de lecturas (`fix/pinyin-correcciones`)
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| ae | **Lector** (Leer), con «Pinyin» activado | Pegá «他被視為英雄,說幹就幹。理髮店在哪裡?我決定為了你留下。不確定為什麼。» y mirá el pinyin | «shì **wéi**», «shuō **gàn** jiù **gàn**», «lǐ **fà**», «wèi le» (no «wéi le») y «wèi shén me» (no «wéi shén me»). Anotá cualquier palabra cuyo pinyin te suene mal |
+| af | **Pronunciación libre** (modo es→zh) | Decí «變為», «還款», «心臟» | El pinyin de la burbuja sale «biàn wéi», «huán kuǎn», «xīn zàng» (anotá qué texto escribió la IA) |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -148,7 +155,7 @@ El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la *
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) o de «Clásicos, lecciones y práctica tipo examen cortan al Lector» (z–ad) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) o de «Clásicos, lecciones y práctica tipo examen cortan al Lector» (z–ad) o de «Pinyin: correcciones de lecturas» (ae–af) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |
