@@ -128,15 +128,15 @@ function pinyinToneNum(syl) {
 //    TOCFL dice 头发 «tóu fǎ», 发型 «fǎ xíng»). Límite conocido: en texto informal se escribe 臟 por 髒 («sucio», zāng) y ahí daría «zàng».
 const PINYIN_CARACTERES_TRAD = { hsk: { '髮': 'fà', '臟': 'zàng', '幹': 'gàn' }, tocfl: { '髮': 'fǎ', '臟': 'zàng', '幹': 'gàn' } };
 // B. por PALABRA, clave en SIMPLIFICADO, aplicada al texto ya convertido (cubre al que escribe en simplificado y al que escribe en tradicional).
-//    [palabra, sílabas, «no seguida de», «no precedida de», sílabas de TOCFL]: si lo que viene después empieza con alguno de los primeros, o lo de antes termina con
-//    alguno de los segundos, la entrada NO se aplica (queda la lectura de pinyin-pro): 不确定为什么 (wèishénme) y 决定为了你留下 (wèile) no son 定为 «wéi»; ni
-//    一定为你加油 / 决定为她做饭 / 肯定为他高兴 / 确定为啥 (为 = «por, para»: wèi). Límite: 确定为目标 («wéi») tampoco se corrige por eso. Coincidencia más larga, de
-//    izquierda a derecha. Se salta si en el texto ORIGINAL hay un 乾 (乾嗎 «¿está seco?» convierte a 干吗, pero 乾 es gān). La familia TOCFL manda después.
-//    Fuera a propósito (dudosas, las revisa el docente): 为人 有为 为师 转动 尽可能 处在 (好处在于 / 到处在找 se leen distinto).
+//    [palabra, sílabas, «no seguida de», sílabas de TOCFL]: si lo que viene después empieza con alguno de los terceros, la entrada NO se aplica (queda la lectura
+//    de pinyin-pro): 不确定为什么 (wèishénme) y 决定为了你留下 (wèile) no son 为 «wéi». Coincidencia más larga, de izquierda a derecha. Se salta si en el texto
+//    ORIGINAL hay un 乾 (乾嗎 «¿está seco?» convierte a 干吗, pero 乾 es gān). La familia TOCFL manda después.
+//    Fuera a propósito (dudosas, las revisa el docente): 为人 有为 为师 转动 尽可能 处在 (好处在于 / 到处在找 se leen distinto) y 定为: 一定为你 / 决定为你 / 肯定为你
+//    son «wèi» (por, para) y 被定为 / 认定为 son «wéi»; con la palabra sola no se distingue, así que 定为 queda como pinyin-pro («wèi»).
 const PINYIN_NO_WEI = ['什么', '了'];
 const PINYIN_PALABRAS = [
-    ['理发', 'lǐ fà', null, null, 'lǐ fǎ'], ['心脏', 'xīn zàng'], ['肝脏', 'gān zàng'], ['说干就干', 'shuō gàn jiù gàn'], ['干嘛', 'gàn ma'], ['干吗', 'gàn ma'],
-    ['变为', 'biàn wéi', PINYIN_NO_WEI], ['列为', 'liè wéi', PINYIN_NO_WEI], ['视为', 'shì wéi', PINYIN_NO_WEI], ['定为', 'dìng wéi', PINYIN_NO_WEI, ['一', '决', '肯', '确']],
+    ['理发', 'lǐ fà', null, 'lǐ fǎ'], ['心脏', 'xīn zàng'], ['肝脏', 'gān zàng'], ['说干就干', 'shuō gàn jiù gàn'], ['干嘛', 'gàn ma'], ['干吗', 'gàn ma'],
+    ['变为', 'biàn wéi', PINYIN_NO_WEI], ['列为', 'liè wéi', PINYIN_NO_WEI], ['视为', 'shì wéi', PINYIN_NO_WEI],
     ['尤为', 'yóu wéi', PINYIN_NO_WEI], ['身为', 'shēn wéi', PINYIN_NO_WEI],
     ['还款', 'huán kuǎn'], ['载体', 'zài tǐ'], ['卷入', 'juǎn rù'], ['钻空子', 'zuān kòng zi']
 ];
@@ -169,10 +169,8 @@ function pinyinArrayFor(text, ref) {
                 if (!e) continue;
                 const sig = chars.slice(i + L, i + L + 3).join('');
                 if (e[2] && e[2].some((x) => sig.indexOf(x) === 0)) continue;
-                const ant = chars.slice(Math.max(0, i - 2), i).join('');
-                if (e[3] && e[3].some((x) => ant.length >= x.length && ant.slice(ant.length - x.length) === x)) continue;
                 if (orig.length === chars.length && orig.slice(i, i + L).indexOf('乾') !== -1) continue;
-                const syl = (fam === 'tocfl' && e[4] ? e[4] : e[1]).split(' ');
+                const syl = (fam === 'tocfl' && e[3] ? e[3] : e[1]).split(' ');
                 if (syl.length !== L) continue;
                 for (let j = 0; j < L; j++) arr[i + j] = syl[j];
                 hit = L;

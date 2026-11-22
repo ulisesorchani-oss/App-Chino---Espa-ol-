@@ -144,7 +144,7 @@ El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la *
 
 | # | Dónde | Qué hacer | Tiene que pasar |
 |---|---|---|---|
-| ae | **Lector** (Leer), con «Pinyin» activado | Pegá «他被視為英雄,說幹就幹。理髮店在哪裡?我決定為了你留下。不確定為什麼。» y mirá el pinyin | «shì **wéi**», «shuō **gàn** jiù **gàn**», «lǐ **fà**», «wèi le» (no «wéi le») y «wèi shén me» (no «wéi shén me»). Anotá cualquier palabra cuyo pinyin te suene mal |
+| ae | **Lector** (Leer), con «Pinyin» activado | Pegá «他被視為英雄,說幹就幹。理髮店在哪裡?我決定為了你留下。不確定為什麼。他一定為你高興。» y mirá el pinyin | «shì **wéi**», «shuō **gàn** jiù **gàn**», «lǐ **fà**», «wèi le» (no «wéi le») «wèi shén me» (no «wéi shén me») y «yí dìng **wèi** nǐ» (no «wéi»). Anotá cualquier palabra cuyo pinyin te suene mal |
 | af | **Pronunciación libre** (modo es→zh) | Decí «變為», «還款», «心臟» | El pinyin de la burbuja sale «biàn wéi», «huán kuǎn», «xīn zàng» (anotá qué texto escribió la IA) |
 
 ## Qué anotar
