@@ -154,6 +154,16 @@ El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la *
 | ag | **Pronunciación libre**, con una burbuja ya grabada | Tocá 🎤 (graba) y, **sin terminar**, tocá ▶ de la burbuja vieja (dos veces) | ▶ **no suena** (ni se corta nada) mientras graba; el ▶ no cambia de icono |
 | ah | Igual | Terminá la grabación y esperá a que aparezca la burbuja nueva; tocá ▶ de las dos | Las dos suenan; ▶ **sí** anda mientras «Transcribiendo…» |
 
+## Muestra de voz: un solo audio (`fix/muestra-de-voz`)
+
+| # | Dónde | Qué hacer | Tiene que pasar |
+|---|---|---|---|
+| ai | **Leer** (Lector) → **Yo → Ajustes** | Pegá un texto largo en el Lector y tocá 🔊 Leer; mientras habla, andá a **Yo → Ajustes** y tocá 🇨🇳 (y después 🇦🇷) | El Lector **se corta** y suena **solo la muestra** (nunca las dos voces a la vez); el Lector no sigue con el trozo siguiente. Anotá si queda el botón en «⏳ ...» |
+| aj | Igual, con el celular en **modo avión** (voz del sistema) | Repetí ai | Igual: queda solo la muestra, y el Lector no avanza |
+| ak | **Hoy** → 🔊 de una tarjeta | Con la tarjeta sonando, andá a **Yo → Ajustes** y tocá 🇨🇳 | La tarjeta se corta y suena solo la muestra; al volver a Hoy el 🔊 no queda en «...» |
+| al | **Yo → Ajustes** | Tocá 🇨🇳, 🇨🇳 y 🇦🇷 lo más rápido que puedas | Suena **una sola** muestra (la última), no tres |
+| am | Igual | Tocá 🇨🇳 y, **mientras suena**, andá a Leer y tocá 🔊 Leer | **Límite conocido:** el Lector no corta la muestra (~2 s) y se superponen un momento. Anotá cuánto dura el solapamiento |
+
 ## Qué anotar
 
 | Dato | Ejemplo |
@@ -162,7 +172,7 @@ El 🔊 de un **Clásico**, el 🔊 por línea de una **lección** y ▶ de la *
 | **¿APK instalado (TWA) o Chrome?** y navegador predeterminado | APK `com.huayudiario.app`; predeterminado: Chrome |
 | Navegador y versión | Chrome 130 |
 | ¿Voz china instalada? | Sí, «中文 (中国)» |
-| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) o de «Clásicos, lecciones y práctica tipo examen cortan al Lector» (z–ad) o de «Pinyin: correcciones de lecturas» (ae–af) o de «Pronunciación libre: ▶ mientras se graba» (ag–ah) | 3 · b |
+| Ítem de la lista (1–6), de «Tres cosas sin verificar», de «Enter con el teclado predictivo» (a–d), de «Escribir a mano» (e–g), de «Repaso: un solo audio» (h–l) o de «Grabar y evaluar: un solo audio» (m–r) o de «Diaria y Pronunciación libre: un solo audio» (s–x) o de «Pinyin de Pronunciación libre» (y) o de «Clásicos, lecciones y práctica tipo examen cortan al Lector» (z–ad) o de «Pinyin: correcciones de lecturas» (ae–af) o de «Pronunciación libre: ▶ mientras se graba» (ag–ah) o de «Muestra de voz: un solo audio» (ai–am) | 3 · b |
 | Texto del estado / del aviso, tal cual | «⚠️ No pude reproducir el audio — tocá ▶️ para reintentar» |
 | ¿Se oyó la voz? ¿Cuánto tardó el aviso? | No se oyó; el aviso salió a los 5 s |
 | Teclado y versión (para los casos a–d de Enter) | Gboard 14.3, sugerencias activas · IME de pinyin de Windows 11 |

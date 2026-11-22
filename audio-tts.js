@@ -485,12 +485,31 @@ function warnStaleVoice(key, data) {
 // (notifyTtsFallback) sale SOLO si de verdad se cae a la voz del sistema por una caída del servidor (error de red o timeout, o una respuesta !ok que no sea 413/429).
 // 413/429 (límites propios) y un 200 sin audio (o con cuerpo ilegible) caen a la voz del sistema SIN aviso. Sin reintento: un pedido fallido va directo a la voz del sistema.
 // fetchTTS no cambia: se usa su opción `silent` (el aviso lo decide esta función). Un fallo al decodificar o al reproducir una respuesta buena sigue siendo silencioso.
-let voiceSampleTok = 0; // solo el ÚLTIMO toque puede caer a la voz del sistema (tres toques rápidos → una sola voz, la de la última elección)
+// Un solo audio a la vez (bloque 5, filas A03/A04 de docs/matriz-de-audio.md): al SONAR, la muestra corta el audio compartido (stopGlobalAudio) y el Lector (stopReader, SOLO si el
+// Lector no está en 'idle': así no hay un speechSynthesis.cancel() global de más; es la misma condición de Clásicos, lecciones y examen). Un toque nuevo pausa y libera la muestra
+// anterior (voiceSampleAudio / voiceSampleUtt, propias). LÍMITE CONOCIDO: un módulo que arranca MIENTRAS suena la muestra (~2 s) no la corta, y la Diaria (A11) sigue
+// superponiéndose: quedan para el diseño de stopAllAudio().
+let voiceSampleTok = 0; // solo el ÚLTIMO toque suena: ni cae a la voz del sistema ni toca el audio del servidor un pedido viejo (tres toques rápidos → una sola muestra)
+let voiceSampleAudio = null, voiceSampleUrl = null; // A04: la muestra con audio del servidor (una sola; un Audio sin referencia no se podía cortar)
+let voiceSampleUtt = null; // A03: la utterance propia mientras habla (null al terminar o al cancelarse)
+function cortarParaMuestra() {
+    stopGlobalAudio();
+    if (typeof stopReader === 'function' && typeof READER_REPRO !== 'undefined' && !READER_REPRO.is('idle')) stopReader();
+}
+function soltarMuestra() { // un toque nuevo: pausa y libera la muestra anterior (propia); un cancel() solo si su voz del sistema sigue hablando
+    if (voiceSampleAudio) { try { voiceSampleAudio.pause(); } catch (e) { /* ya parada */ } }
+    if (voiceSampleUrl) { try { URL.revokeObjectURL(voiceSampleUrl); } catch (e) { /* ya liberada */ } }
+    voiceSampleAudio = null; voiceSampleUrl = null;
+    if (voiceSampleUtt) { voiceSampleUtt = null; try { speechSynthesis.cancel(); } catch (e) { /* sin voz */ } }
+}
 function speakVoiceSampleSystem(text, langCode, gender) {
     try {
         if (!('speechSynthesis' in window)) return;
-        speechSynthesis.cancel();
+        cortarParaMuestra();
+        speechSynthesis.cancel(); // global a propósito: los navegadores ENCOLAN speak(); sin esto la muestra esperaría detrás de la otra voz
         const u = new SpeechSynthesisUtterance(text);
+        voiceSampleUtt = u;
+        u.onend = u.onerror = () => { if (voiceSampleUtt === u) voiceSampleUtt = null; };
         u.lang = langCode; u.rate = (typeof playbackSpeed === 'number') ? playbackSpeed : 1;
         try { const sv = sysVoiceFor(langCode, gender); if (sv) u.voice = sv; } catch (e) { /* sin voz acorde: la del sistema por defecto */ } // v9.4: voz del sistema acorde a la elegida
         speechSynthesis.speak(u);
@@ -502,6 +521,7 @@ async function playVoiceSample(lang) {
         const gender = lang === 'es' ? voiceEs : voiceZh;
         const langCode = ttsLangFor(lang, gender); // v9.49: la voz manda (🇦🇷 es-AR · 🇹🇼 zh-TW)
         const myTok = ++voiceSampleTok;
+        soltarMuestra();
         let res = null, caida = false;
         try {
             res = await fetchTTS(ttsBody(text, langCode, gender), undefined, { silent: true }); // v9.41: choke point único (timeout); `silent`: el aviso se decide abajo
@@ -519,14 +539,17 @@ async function playVoiceSample(lang) {
             speakVoiceSampleSystem(text, langCode, gender);
             return;
         }
+        if (myTok !== voiceSampleTok) return; // la respuesta tardía de un toque viejo no suena: la última manda
         try {
+            cortarParaMuestra();
             const bin = atob(d.audio);
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             const url = URL.createObjectURL(new Blob([bytes], { type: d.mime || 'audio/wav' }));
             const a = new Audio(url);
+            voiceSampleAudio = a; voiceSampleUrl = url;
             applyTtsSpeed(a, d); // v9.40: velocidad en el server → sin eco
-            a.onended = () => URL.revokeObjectURL(url);
+            a.onended = () => { URL.revokeObjectURL(url); if (voiceSampleAudio === a) { voiceSampleAudio = null; voiceSampleUrl = null; } };
             a.play().catch(() => { /* autoplay bloqueado */ });
         } catch (e) { /* sin muestra de audio */ }
     } catch (e) { /* silencioso */ }
