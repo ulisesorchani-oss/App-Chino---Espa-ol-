@@ -1,7 +1,9 @@
 # Pendientes de la app · encontrados por las pruebas
 
-Escrito a mano. Cosas de la **app** (no de las pruebas) que una prueba dejó a la vista y que todavía no se corrigen:
+Escrito a mano. Cosas de la **app** (y, al final, de las pruebas y del CI) que una prueba dejó a la vista y que todavía no se corrigen:
 las ve Ulises antes de tocar código de la app.
+
+**Índice rápido de lo consolidado el 2026-11-23** (secciones al final del archivo): [Para el docente (pinyin)](#para-el-docente-pinyin-lista-de-preguntas) · [Observaciones de Gemini en #166](#observaciones-de-gemini-en-166-muestra-de-voz-y-su-veredicto) · [`lector-oro`](#lector-oro-intermitencia-qué-se-hizo-y-qué-queda) · [Observaciones visuales](#observaciones-visuales-sin-investigar) · [Diferido](#diferido-nada-de-esto-está-aprobado-todavía).
 
 ## Entrenar: el subtítulo de «Planillas de escritura» desborda a 320 px con una fuente del sistema más ancha que Inter
 
@@ -97,3 +99,57 @@ las ve Ulises antes de tocar código de la app.
 - **乾嗎** («¿está seco?») no se corrige a «gàn ma» (la guarda de 乾 lo salta); queda como pinyin-pro («gàn má», que también está mal: debería ser «gān ma»).
 - **Con 了 y 什么 después de una entrada con 为** se deja la lectura de pinyin-pro: «變為了現實» (biànwéi le) sale «biàn wèi le».
 - **Sin mutación propia:** la regla «coincidencia más larga primero» (no hay claves que se contengan entre sí hoy).
+
+## Para el docente (pinyin): lista de preguntas
+
+Todo esto sale de `fix/pinyin-correcciones` (#164); el detalle y los ejemplos están arriba, en «Pinyin: lo que `fix/pinyin-correcciones` NO corrige». Ninguna de estas palabras está en la tabla (leen como pinyin-pro) salvo la nota de 髮:
+
+1. **為人 / 有為 / 為師:** ¿«wéi» (conducta, «ser maestro»)? Ojo: 為人民 es «wèi rénmín»; una entrada 為人 necesitaría una exclusión («民»).
+2. **轉動:** ¿«zhuǎndòng» o «zhuàndòng»? Los datos dicen «zhuǎn»; pinyin-pro dice «zhuàn».
+3. **盡可能:** los datos de HSK5 dicen «jìn kěnéng»; pinyin-pro dice «jǐn kěnéng», que es lo estándar. **Probable error en los datos de HSK5.**
+4. **處在:** «chǔ zài» en 處在困境, pero 好處在於 y 到處在找 se leen distinto (¿se puede decidir por contexto?).
+5. **定為:** «wèi» (por, para) en 一定為你 / 決定為你 / 肯定為你, y «wéi» (como) en 被定為國家公園, 被認定為英雄, 設定為預設. Con la palabra sola no se distingue; hoy sale «wèi» siempre y los «wéi» siguen mal. ¿Hay una regla simple (qué sigue a 為)?
+6. **髮 en TOCFL: «fǎ» frente a «fà».** Hoy TOCFL usa «fǎ» (lista TOCFL y estándar de Taiwán) y HSK «fà»; cambia 理髮, 千鈞一髮 y 銀髮族 en TOCFL. Si el docente prefiere «fà» también en TOCFL, hay que sacar `'髮': 'fǎ'` de `PINYIN_CARACTERES_TRAD.tocfl` y el «lǐ fǎ» de 理发 (los dos tienen mutación en `tests/pinyin-correcciones.test.js`).
+
+## Observaciones de Gemini en #166 (muestra de voz) y su veredicto
+
+La revisión informativa de Gemini en #166 dejó dos observaciones menores (no bloqueantes):
+
+1. **«`READER_REPRO` sin guarda: posible `ReferenceError` si se invoca antes de que cargue el lector» → falsa alarma.** Verificado (solo lectura, sobre `main` con #166 y medido en el navegador):
+   - `audio-tts.js` y `reader.js` son `<script>` comunes, sin `defer` (líneas 921 y 933 de `index.html`); `reader.js` carga después, pero `cortarParaMuestra` solo corre al tocar un botón.
+   - `cortarParaMuestra` mira `typeof stopReader === 'function' && typeof READER_REPRO !== 'undefined'` **antes** de usar la variable (la misma condición que Clásicos, lecciones y examen).
+   - Medido: sesión nueva sin abrir el Lector, Yo → Ajustes, tres toques en 🇨🇳/🇦🇷 (zh, es, zh): **sin errores JS** con el servidor sano, con el servidor caído y con `state-machine.js` bloqueado. Con `reader.js` bloqueado y llamando a `playVoiceSample` directo: sin errores de ese código y la muestra habló con la voz del sistema.
+   - Nota: con `reader.js` bloqueado el botón no responde porque `app.js` falla al cargar (`readCurrentLesson is not defined`); pasa igual en `main` y es un caso artificial.
+2. **«El `speechSynthesis.cancel()` global de `speakVoiceSampleSystem` puede cortar la voz de otros componentes» → diseño aprobado.** Se conserva a propósito: los navegadores encolan `speak()` y sin el cancel la muestra esperaría detrás de la otra voz; es el mismo criterio de `srsSpeak`. Sin cambios. Queda sin verificar el timing con motores de voz reales.
+
+## `lector-oro`: intermitencia, qué se hizo y qué queda
+
+**La suite** (`tests/lector-oro.test.js`): 17 escenarios que comparan la traza completa de eventos, en orden exacto, contra `tests/data/lector-oro.json` (con el `<audio>` real, TTS simulado por `page.route` y voz del sistema simulada). El oro se grabó con el código **anterior** a las máquinas de estado y prueba que la formalización da la misma traza: **no se puede regrabar desde `main`**; cualquier cambio debe dejar el oro idéntico (`git diff --exit-code -- tests/data/lector-oro.json`) y `tests/lector-mutaciones.test.js` en rojo.
+
+**Frecuencia (lo que se pudo mostrar; muestras chicas):**
+- CI, hasta el 2026-11-22 (antes de #167): 1 falla de `lector-oro` en unas 28 corridas completas de la batería (en #160; es un mínimo: la API solo muestra el último intento). Firma: `[sin-maquina · sano]`, evento 21, el oro espera `audio.ended` y salió `audio.playing`.
+- Local sobre `main` (4 núcleos): 0 de 3 en serie; 1 de 16 con 8 en paralelo (firma distinta, abajo). El hardware de CI no se conoce.
+
+**Mecanismos:**
+- **(a) Carrera entre un `delay` fijo y la respuesta simulada de `/api/tts`** (medido). **Hecho en #167:** `R2-pausa-sin-voz` dispara con `resp L0 503` en vez de «⏳ + 20 ms»; con una latencia inyectada de 150 ms el disparador viejo falla (evento 7) y el nuevo pasa; oro idéntico, `lector-mutaciones` en rojo, 0 de 16 rojas en paralelo después (1 de 16 antes).
+  - **Queda (misma carrera, sin tocar; esperan el OK):** `R2-pausa-en-carga-con-voz` (20 ms tras el 2.º ⏳; propuesta `{ when: 'resp L1 503', n: 1, do: 'pausa' }`) y `R2-pausa-voz-ignora-pausa-y-sigue` (100 ms tras `voz.end L1`; propuesta `when: 'resp L2 503'`).
+  - **Se propone dejarlos** los de 30 y 50 ms (`pausa-en-voz-del-sistema`, `pausa-voz-ignora-pausa` y el de 30 del otro): compiten, según el análisis (**no medido**), con los temporizadores de 15/90 ms de la voz simulada de la propia página.
+- **(b) La firma de CI: no reproducida (no refutada).** 240 corridas de `sano` (con y sin `state-machine.js`) con 8 procesos y 4 quemadores de CPU, registrando `waiting`/`stalled`/`suspend`/…: ningún `audio.playing` repetido. Sin cambios en la instrumentación. Si algún día se confirma un `playing` repetido por buffering, la dedupe debe dejar visible un doble `play()` real (quedaría un `audio.play` repetido).
+- **(c) Hallazgo nuevo (sin tocar):** 5 de esas 240 corridas (2 %) difirieron del oro porque un `cancel` se movió respecto de `resp L0/L1 200`. Ese `cancel` viene de `lessons-dele.js` (`applyMode` → `stopSpeak`, también desde un `MutationObserver`). Ver «Diferido».
+
+**Riesgo latente, sin evidencia de falla:** los `sleep(1300)` tras `goto` y `sleep(300)` al final (se podrían cambiar por esperas de condición); no se tocaron.
+
+## Observaciones visuales (sin investigar)
+
+- **«Escuchar todo» en TOCFL con texto largo** que se parte en dos renglones: el resaltado de la línea activa se ve con rayas verticales oscuras y un bloque suelto al inicio del segundo renglón. Detalle y lo que falta (Fase 1 de solo lectura): ver «“Escuchar todo” (lecciones TOCFL)…», arriba. Visto en el celular (Android, Brave); no probado en otro navegador.
+- **Fuente monoespaciada en el título de la tarjeta, en Windows** (reportado por el usuario). **A confirmar en Chrome y en Edge** (qué pantalla y qué título exactos, y con qué fuente se dibuja). **Sin investigar.** Dato de lectura (no la causa): un `grep` de `monospace`/`Consolas`/`Courier` en todos los `*.css`, `*.js` y `*.html` del repo (sin `tests/`) solo da `diag-voz.html` (una página de diagnóstico) y la librería `jspdf`; ni `style.css` ni el CSS inyectado desde JS lo declaran. Antes de cambiar nada: Fase 1 de solo lectura con captura en Windows.
+
+## Diferido (nada de esto está aprobado todavía)
+
+Cada punto empieza con una Fase 1 de solo lectura y el OK del usuario antes de implementar.
+
+1. **`speechSynthesis.cancel()` global de `lessons-dele.js` (mecanismo (c) de `lector-oro`).** `applyMode` → `stopSpeak` (líneas ~1061 y ~1661, llamado desde `injectPanel` y desde un `MutationObserver`). **Hipótesis (no medida):** fuera del modo cn-es esa ruta hace un cancel global ante mutaciones del DOM; con el Lector hablando con la voz del sistema es el tipo de cancel global que el bloque 5 midió haciendo avanzar al Lector. No se identificó qué mutación lo dispara; además queda grabado en el oro de `lector-oro`.
+2. **`stopAllAudio()`** (diseño de una función única que cada fuente llame al arrancar). Es el hueco que dejan los bloques «un solo audio a la vez»: otro módulo que arranca **mientras suena la muestra de voz** (~2 s) no la corta; la **Diaria (A11)** sigue superponiéndose con ella; y hay **8 `Audio` sin corte externo** (A04, A07, A09, A11, A13, A15, A20, A23; ver `docs/matriz-de-audio.md`). La muestra que llega **tarde** (servidor lento) corta al Lector que arrancó **después** (medido en #166; antes se superponían): decisión pendiente de si debe ganar el Lector.
+3. **Retoques del workflow de Gemini** (el detalle y las pruebas están en `docs/prueba-gemini-revision.md`, sección «Pendientes del workflow»; el punto de la cuota 429 se agregó ahí en este PR): aviso «probable timeout del paso» cuando `ERROR_GEMINI` venga vacío y el paso llegue a su timeout; `tools.exclude` está deprecado pero **no quitarlo** sin una prueba de que `tools.core` solo ya deniega `run_shell_command`; el detalle del error se recorta a 1500 bytes y los avisos de arranque del CLI lo pueden tapar; y un fallo por cuota (429) trae `ERROR_GEMINI` no vacío, distinto de un timeout.
+4. **Atenuado visual de ▶ mientras se graba** (Pronunciación libre, #165): hoy solo `aria-disabled="true"`, sin ninguna señal visual (no hay CSS para `[aria-disabled]`); sería un cambio en `style.css` con bump de `sw.js`.
+5. **`lector-oro`:** aplicar las dos propuestas pendientes de arriba (cuando el usuario escriba «seguí con lector-oro»).
