@@ -145,9 +145,10 @@ function instrumentar(cfg) {
     // Disparadores: un `delay` (ms) corre en el reloj de la página y compite con las respuestas simuladas de /api/tts, que pasan por page.route (otro proceso): con la máquina cargada una
     // respuesta que tarda más que el delay cambia el ORDEN de la traza. Donde el oro marca el evento que va justo antes de la acción se dispara con ESE evento (`when`/`re`, sin delay):
     // R2-pausa-sin-voz usaba «primer ⏳ + 20 ms» y fallaba (en el evento 7: `> pausa` antes de `resp L0 503`) con una respuesta lenta (medido con una latencia inyectada de 150 ms).
-    // PENDIENTES (misma carrera contra la red, sin tocar hasta decidirlo): R2-pausa-en-carga-con-voz (20 ms tras el 2.º ⏳; el oro pone `resp L1 503` y después `> pausa`) y
-    // R2-pausa-voz-ignora-pausa-y-sigue (100 ms tras `voz.end L1`; el oro pone `resp L2 503` y después `> seguir`). Los de 30 y 50 ms compiten, según el análisis (no medido), con los
-    // temporizadores de la voz simulada de la propia página. Las demás esperas (200-2500 ms) son pausas en las que no se espera ningún evento.
+    // También con evento (el oro lo respalda, medido): R2-pausa-en-carga-con-voz (antes «2.º ⏳ + 20 ms»; ahora `resp L1 503`, el 1.º, que el oro pone justo antes de `> pausa`) y
+    // R2-pausa-voz-ignora-pausa-y-sigue (antes `voz.end L1` + 100 ms; ahora `resp L2 503`, el 1.º, que el oro pone justo antes de `> seguir`). Los de 30 y 50 ms (`pausa-en-voz-del-sistema`,
+    // `pausa-voz-ignora-pausa` y el 30 del escenario anterior) compiten, según el análisis (no medido), con los temporizadores de 15/90 ms de la voz simulada de la propia página, y se dejan.
+    // Las demás esperas (200-2500 ms) son pausas en las que no se espera ningún evento.
     const FIN_IDLE = { re: '^btn 🔊 Leer', n: 2, do: 'fin', delay: 200 }; // el botón vuelve al reposo (la 1.ª vez es el stopReader() con el que arranca toggleReaderPlay)
     const ESC = [
         { id: 'sano', triggers: [FIN_IDLE] },
@@ -161,9 +162,9 @@ function instrumentar(cfg) {
         { id: 'R2-pausa-sin-voz', sinVoz: true, policy: () => ({ status: 503 }), triggers: [{ when: 'resp L0 503', n: 1, do: 'pausa' }, { when: '> pausa', do: 'seguir', delay: 2500, cond: 'pausado' }, FIN_IDLE] },
         { id: 'mixto-un-trozo-falla', policy: ({ idx }) => (idx === 1 ? { status: 503 } : {}), triggers: [FIN_IDLE] },
         { id: 'corte-en-carga-y-nueva-lectura', policy: ({ idx }, intento) => (idx === 0 && intento === 0 ? { hold: true } : {}), liberar: { tras: '> leer', idx: 0, espera: 400 }, triggers: [{ when: 'fetch GET L0', n: 1, do: 'parar', delay: 30 }, { when: '> parar', do: 'leer', delay: 50 }, { re: '^btn 🔊 Leer', n: 4, do: 'fin', delay: 200 }] }, // el 4.º «🔊 Leer»: arranque, corte, arranque de la nueva y fin de la nueva
-        { id: 'R2-pausa-en-carga-con-voz', policy: () => ({ status: 503 }), triggers: [{ re: '^btn ⏳', n: 2, do: 'pausa', delay: 20 }, { when: '> pausa', do: 'seguir', delay: 700, cond: 'pausado' }, FIN_IDLE] },
+        { id: 'R2-pausa-en-carga-con-voz', policy: () => ({ status: 503 }), triggers: [{ when: 'resp L1 503', n: 1, do: 'pausa' }, { when: '> pausa', do: 'seguir', delay: 700, cond: 'pausado' }, FIN_IDLE] },
         { id: 'pausa-voz-ignora-pausa', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L3', do: 'pausa', delay: 30 }, FIN_IDLE] },
-        { id: 'R2-pausa-voz-ignora-pausa-y-sigue', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L1', do: 'pausa', delay: 30 }, { when: 'voz.end L1', do: 'seguir', delay: 100 }, FIN_IDLE] },
+        { id: 'R2-pausa-voz-ignora-pausa-y-sigue', vozIgnoraPausa: true, policy: () => ({ status: 503 }), triggers: [{ when: 'speak L1', do: 'pausa', delay: 30 }, { when: 'resp L2 503', n: 1, do: 'seguir' }, FIN_IDLE] },
         { id: 'corte-limpiar', triggers: [{ when: 'audio.playing', n: 2, do: 'limpiar' }, FIN_IDLE] },
         { id: 'corte-stopReader', triggers: [{ when: 'audio.playing', n: 2, do: 'parar' }, FIN_IDLE] },
         { id: 'corte-global', triggers: [{ when: 'audio.playing', n: 2, do: 'global' }, FIN_IDLE] }
